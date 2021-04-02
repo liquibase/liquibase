@@ -8,11 +8,9 @@ CommandTest.define {
                 changeLogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed validate",
                 statusCode   : 0
-        ])
+        ]
     }
 }

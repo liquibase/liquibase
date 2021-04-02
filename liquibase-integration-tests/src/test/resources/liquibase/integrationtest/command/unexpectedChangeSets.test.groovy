@@ -13,11 +13,9 @@ CommandTest.define {
             syncChangelog "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
         }
 
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed unexpectedChangeSets",
                 statusCode   : 0
-        ])
+        ]
     }
 }

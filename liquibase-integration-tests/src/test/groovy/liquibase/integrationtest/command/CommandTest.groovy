@@ -52,10 +52,10 @@ class CommandTest extends Specification {
         database.dropDatabaseObjects(catalogAndSchemas[0])
 
         List expectedOutputChecks = new ArrayList()
-        if (spec._expectedOutput instanceof List) {
-            expectedOutputChecks.addAll(spec._expectedOutput)
+        if (spec.expectedOutput instanceof List) {
+            expectedOutputChecks.addAll(spec.expectedOutput)
         } else {
-            expectedOutputChecks.add(spec._expectedOutput)
+            expectedOutputChecks.add(spec.expectedOutput)
         }
 
         when:
@@ -64,8 +64,8 @@ class CommandTest extends Specification {
             commandScope = new CommandScope(spec.testSetup.command as String[])
         }
         catch (Throwable e) {
-            if (spec._expectedException != null) {
-                assert e.class == spec._expectedException
+            if (spec.expectedException != null) {
+                assert e.class == spec.expectedException
             }
             throw new RuntimeException(e)
         }
@@ -106,11 +106,11 @@ class CommandTest extends Specification {
 
         def fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(outputStream.toString()))
 
-        if (spec._expectedResults.size() > 0 && results.getResults().isEmpty()) {
+        if (spec.expectedResults.size() > 0 && results.getResults().isEmpty()) {
             throw new RuntimeException("Results were expected but none were found for " + spec._command)
         }
         for (def returnedResult : results.getResults().entrySet()) {
-            def expectedValue = String.valueOf(spec._expectedResults.get(returnedResult.getKey()))
+            def expectedValue = String.valueOf(spec.expectedResults.get(returnedResult.getKey()))
             def seenValue = String.valueOf(returnedResult.getValue())
 
             assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
@@ -122,6 +122,10 @@ class CommandTest extends Specification {
 //        def e = thrown(spec.expectedException)
 
         for (def expectedOutputCheck : expectedOutputChecks) {
+            if (expectedOutputCheck == null) {
+                continue
+            }
+
             if (expectedOutputCheck instanceof String) {
                 assert fullOutput.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck))): """
 Command output:
@@ -308,13 +312,13 @@ ${expectedOutputCheck.toString()}
         /**
          * Arguments to command as key/value pairs
          */
-        Map<String, Object> arguments = new HashMap<>()
+        Map<String, ?> arguments = new HashMap<>()
 
         private List<TestSetup> setup
 
-        private List<Object> _expectedOutput
-        private Map<String, Object> _expectedResults = new HashMap<>()
-        private Class<Throwable> _expectedException
+        private List<Object> expectedOutput
+        private Map<String, ?> expectedResults = new HashMap<>()
+        private Class<Throwable> expectedException
 
         String createTempResource(String prefix, String suffix) {
             File f = File.createTempFile(prefix, suffix, new File("target/test-classes"))
@@ -338,20 +342,17 @@ ${expectedOutputCheck.toString()}
          * <li>If a string, assert that the output CONTAINS the string.
          * <li>If a regexp, assert that the regexp FINDs the string.
          */
-        Spec expectedOutput(Object... output) {
-            this._expectedOutput = output
-            this
+        def setExpectedOutput(List<Object> output) {
+            this.expectedOutput = output
         }
 
 
-        Spec expectedResults(Map<String, Object> results) {
-            this._expectedResults = results
-            this
+        def setExpectedResults(Map<String, ?> results) {
+            this.expectedResults = results
         }
 
-        Spec expectedException(Class<Throwable> exception) {
-            this._expectedException = exception
-            this
+        def setExpectedException(Class<Throwable> exception) {
+            this.expectedException = exception
         }
 
         void validate() {

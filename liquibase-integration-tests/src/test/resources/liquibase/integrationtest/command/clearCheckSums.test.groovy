@@ -26,12 +26,10 @@ CommandTest.define {
             ]
         }
 
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed clearCheckSums",
                 statusCode   : 0
-        ])
+        ]
 
     }
 }

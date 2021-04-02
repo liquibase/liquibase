@@ -33,7 +33,7 @@ CommandTest.define {
             ]
         }
 
-        expectedOutput(
+        expectedOutput = [
                 Pattern.compile("""
 - Database updated at \\d+/\\d+.+. Applied 4 changeSet\\(s\\) in \\d+.\\d+s, DeploymentId: \\d+
   db/changelog/db.changelog-master.xml::1::nvoxland
@@ -41,12 +41,12 @@ CommandTest.define {
   db/changelog/sql/create_test3.sql::raw::includeAll
   db/changelog/changelog-x.xml::1571079854679-2::nathan \\(generated\\)
 """.replace("\r", "").trim())
-        )
+        ]
 
-        expectedResults([
+        expectedResults = [
                 deployments: "1 past deployments",
                 statusCode : 0
-        ])
+        ]
     }
 }
 

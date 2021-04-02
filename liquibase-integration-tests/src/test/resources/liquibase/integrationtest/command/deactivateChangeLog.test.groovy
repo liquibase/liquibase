@@ -8,11 +8,9 @@ CommandTest.define {
                 changeLogFile: "changelogs/hsqldb/complete/simple.changelog.with.id.xml",
         ]
 
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed deactivateChangeLog",
                 statusCode   : 0
-        ])
+        ]
     }
 }
