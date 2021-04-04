@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.sql.Driver;
 import java.util.*;
@@ -12,7 +11,7 @@ import java.util.*;
 public class ConnectionServiceFactory {
     private static ConnectionServiceFactory instance;
 
-    private List<DatabaseConnection> databaseConnections = new ArrayList<>();
+    private final List<DatabaseConnection> databaseConnections = new ArrayList<>();
 
     public static synchronized void reset() {
         instance = new ConnectionServiceFactory();
@@ -28,7 +27,7 @@ public class ConnectionServiceFactory {
 
     public DatabaseConnection create(String url, Driver driverObject, Properties driverProperties)
                throws DatabaseException {
-        DatabaseConnection databaseConnection = getDatabaseConnection();
+        DatabaseConnection databaseConnection = getDatabaseConnection(driverObject);
         try {
             databaseConnection.open(url, driverObject, driverProperties);
         }
@@ -38,15 +37,13 @@ public class ConnectionServiceFactory {
         return databaseConnection;
     }
 
-    public DatabaseConnection getDatabaseConnection() {
-        SortedSet<DatabaseConnection> sortedConnections = new TreeSet<>(new Comparator<DatabaseConnection>() {
-            @Override
-            public int compare(DatabaseConnection o1, DatabaseConnection o2) {
-                return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
-            }
-        });
+    public DatabaseConnection getDatabaseConnection(final Driver driverObject) {
+        final SortedSet<DatabaseConnection> sortedConnections = new TreeSet<>(
+                (o1, o2) -> -1 * Integer.compare(o1.getPriority(), o2.getPriority()));
 
-        sortedConnections.addAll(databaseConnections);
+        databaseConnections.stream().filter(c -> c.supports(driverObject))
+                .forEach(sortedConnections::add);
+
         try {
             DatabaseConnection exampleService = sortedConnections.iterator().next();
             Class<? extends DatabaseConnection> aClass = exampleService.getClass();
@@ -80,6 +77,6 @@ public class ConnectionServiceFactory {
 
     public void register(DatabaseConnection databaseConnection) {
         databaseConnections.add(databaseConnection);
-        Collections.sort(databaseConnections, PrioritizedService.COMPARATOR);
+        databaseConnections.sort(PrioritizedService.COMPARATOR);
     }
 }
