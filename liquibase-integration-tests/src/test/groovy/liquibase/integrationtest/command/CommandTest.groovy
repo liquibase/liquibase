@@ -6,6 +6,7 @@ import liquibase.change.Change
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandArgumentDefinition
+import liquibase.command.CommandFactory
 import liquibase.command.CommandScope
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
@@ -15,12 +16,7 @@ import liquibase.hub.core.MockHubService
 import liquibase.integrationtest.TestDatabaseConnections
 import liquibase.integrationtest.TestFilter
 import liquibase.integrationtest.TestSetup
-import liquibase.integrationtest.setup.HistoryEntry
-import liquibase.integrationtest.setup.SetupChangeLogSync
-import liquibase.integrationtest.setup.SetupChangelogHistory
-import liquibase.integrationtest.setup.SetupDatabaseStructure
-import liquibase.integrationtest.setup.SetupRollbackCount
-import liquibase.integrationtest.setup.SetupRunChangelog
+import liquibase.integrationtest.setup.*
 import liquibase.parser.ChangeLogParser
 import liquibase.parser.ChangeLogParserFactory
 import liquibase.test.JUnitResourceAccessor
@@ -37,14 +33,81 @@ import static org.spockframework.util.Assert.fail
 
 class CommandTest extends Specification {
 
-    @Unroll("Run {db:#specPermutation.databaseName,command:#specPermutation.spec.joinedCommand} #specPermutation.spec.description")
-    def "run spec"() {
+    private static List<CommandTestDefinition> commandTestDefinitions
+
+    @Unroll("#featureName: #commandTestDefinition.testFile.name")
+    def "check CommandTest definition"() {
+        expect:
+        def commandDefinition = Scope.currentScope.getSingleton(CommandFactory).getCommand(commandTestDefinition.getCommand() as String[])
+        assert commandDefinition != null: "Cannot find specified command ${commandTestDefinition.getCommand()}"
+
+        assert commandTestDefinition.testFile.name == commandTestDefinition.getCommand().join("") + ".test.groovy": "Incorrect test file name"
+
+        for (def runTest : commandTestDefinition.runTests) {
+            for (def arg : runTest.arguments.keySet()) {
+                assert commandDefinition.arguments.containsKey(arg): "Unknown argument '${arg}' in run ${runTest.description}"
+            }
+        }
+
+        where:
+        commandTestDefinition << getCommandTestDefinitions()
+    }
+
+    @Unroll("#featureName: #commandTestDefinition.testFile.name")
+    def "check command signature"() {
+        expect:
+        def commandDefinition = Scope.currentScope.getSingleton(CommandFactory).getCommand(commandTestDefinition.getCommand() as String[])
+        assert commandDefinition != null: "Cannot find specified command ${commandTestDefinition.getCommand()}"
+
+        StringWriter signature = new StringWriter()
+        signature.print """
+Short Description: ${commandDefinition.getShortDescription() ?: "MISSING"}
+Long Description: ${commandDefinition.getShortDescription() ?: "MISSING"}
+"""
+        signature.println "Required Args:"
+        def foundRequired = false
+        for (def argDef : commandDefinition.arguments.values()) {
+            if (!argDef.required) {
+                continue
+            }
+            foundRequired = true
+            signature.println "  ${argDef.name} (${argDef.dataType.simpleName}) ${argDef.description ?: "MISSING DESCRIPTION"}"
+        }
+        if (!foundRequired) {
+            signature.println "  NONE"
+        }
+
+
+        signature.println "Optional Args:"
+        def foundOptional = false
+        for (def argDef : commandDefinition.arguments.values()) {
+            if (argDef.required) {
+                continue
+            }
+            foundOptional = true
+            signature.println "  ${argDef.name} (${argDef.dataType.simpleName}) ${argDef.description ?:  "MISSING DESCRIPTION"}"
+            signature.println "    Default: ${argDef.defaultValueDescription}"
+        }
+        if (!foundOptional) {
+            signature.println "  NONE"
+        }
+
+
+        assert StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(commandTestDefinition.signature)) == StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(signature.toString()))
+
+        where:
+        commandTestDefinition << getCommandTestDefinitions()
+    }
+
+
+    @Unroll("Run {db:#permutation.databaseName,command:#permutation.definition.commandTestDefinition.joinedCommand} #permutation.definition.description")
+    def "run"() {
         setup:
-        assumeTrue("Skipping test: " + specPermutation.connectionStatus.errorMessage, specPermutation.connectionStatus.connection != null)
+        assumeTrue("Skipping test: " + permutation.connectionStatus.errorMessage, permutation.connectionStatus.connection != null)
 
-        def spec = specPermutation.spec
+        def testDef = permutation.definition
 
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(specPermutation.connectionStatus.connection))
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.connectionStatus.connection))
 
         String defaultSchemaName = database.getDefaultSchemaName()
         CatalogAndSchema[] catalogAndSchemas = new CatalogAndSchema[1]
@@ -52,20 +115,20 @@ class CommandTest extends Specification {
         database.dropDatabaseObjects(catalogAndSchemas[0])
 
         List expectedOutputChecks = new ArrayList()
-        if (spec.expectedOutput instanceof List) {
-            expectedOutputChecks.addAll(spec.expectedOutput)
+        if (testDef.expectedOutput instanceof List) {
+            expectedOutputChecks.addAll(testDef.expectedOutput)
         } else {
-            expectedOutputChecks.add(spec.expectedOutput)
+            expectedOutputChecks.add(testDef.expectedOutput)
         }
 
         when:
         def commandScope
         try {
-            commandScope = new CommandScope(spec.testSetup.command as String[])
+            commandScope = new CommandScope(testDef.commandTestDefinition.command as String[])
         }
         catch (Throwable e) {
-            if (spec.expectedException != null) {
-                assert e.class == spec.expectedException
+            if (testDef.expectedException != null) {
+                assert e.class == testDef.expectedException
             }
             throw new RuntimeException(e)
         }
@@ -78,18 +141,18 @@ class CommandTest extends Specification {
         commandScope.addArgumentValue("logLevel", "FINE")
         commandScope.setOutput(outputStream)
 
-        if (spec.setup != null) {
-            for (def setup : spec.setup) {
-                setup.setup(specPermutation.connectionStatus)
+        if (testDef.setup != null) {
+            for (def setup : testDef.setup) {
+                setup.setup(permutation.connectionStatus)
             }
         }
 
-        if (spec.arguments != null) {
-            spec.arguments.each { name, value ->
+        if (testDef.arguments != null) {
+            testDef.arguments.each { name, value ->
                 String key;
                 if (name instanceof CommandArgumentDefinition) {
                     key = name.getName()
-                }  else {
+                } else {
                     key = (String) name
                 }
                 Object objValue = (Object) value
@@ -113,11 +176,11 @@ class CommandTest extends Specification {
 
         def fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(outputStream.toString()))
 
-        if (spec.expectedResults.size() > 0 && results.getResults().isEmpty()) {
-            throw new RuntimeException("Results were expected but none were found for " + spec._command)
+        if (testDef.expectedResults.size() > 0 && results.getResults().isEmpty()) {
+            throw new RuntimeException("Results were expected but none were found for " + testDef._command)
         }
         for (def returnedResult : results.getResults().entrySet()) {
-            def expectedValue = String.valueOf(spec.expectedResults.get(returnedResult.getKey()))
+            def expectedValue = String.valueOf(testDef.expectedResults.get(returnedResult.getKey()))
             def seenValue = String.valueOf(returnedResult.getValue())
 
             assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
@@ -125,9 +188,6 @@ class CommandTest extends Specification {
         }
 
         then:
-
-//        def e = thrown(spec.expectedException)
-
         for (def expectedOutputCheck : expectedOutputChecks) {
             if (expectedOutputCheck == null) {
                 continue
@@ -162,7 +222,7 @@ ${expectedOutputCheck.toString()}
 
 
         where:
-        specPermutation << collectSpecPermutations()
+        permutation << getAllRunTestPermutations()
     }
 
     static void createTemporaryChangeLogFile(String changeLogFile, CommandScope commandScope) {
@@ -178,128 +238,119 @@ ${expectedOutputCheck.toString()}
         commandScope.addArgumentValue("changeLogFile", changeLogFile)
     }
 
-    static List<File> collectSpecFiles() {
-        def returnFiles = new ArrayList<File>()
+    static List<CommandTestDefinition> getCommandTestDefinitions() {
+        if (commandTestDefinitions == null) {
+            commandTestDefinitions = new ArrayList<>()
+            def config = new CompilerConfiguration()
+            def shell = new GroovyShell(this.class.classLoader, config)
 
-        ("src/test/resources/liquibase/integrationtest/command/" as File).eachFileRecurse {
-            if (it.name.endsWith("test.groovy")) {
-                returnFiles.add(it)
+            ("src/test/resources/liquibase/integrationtest/command/" as File).eachFileRecurse {
+                if (!it.name.endsWith("test.groovy")) {
+                    return
+                }
+
+                try {
+                    def returnValue = shell.evaluate(it)
+
+                    if (!returnValue instanceof CommandTestDefinition) {
+                        fail("${it} is not a CommandTest definition")
+                    }
+
+                    def definition = (CommandTestDefinition) returnValue
+                    definition.testFile = it
+                    commandTestDefinitions.add(definition)
+
+                } catch (Throwable e) {
+                    throw new RuntimeException("Error parsing ${it}: ${e.message}", e)
+                }
             }
         }
 
-        return returnFiles
+        return commandTestDefinitions
     }
 
-    static List<Spec> collectSpecs() {
-        def config = new CompilerConfiguration()
-        def shell = new GroovyShell(this.class.classLoader, config)
+    static List<RunTestPermutation> getAllRunTestPermutations() {
+        def returnList = new ArrayList<RunTestPermutation>()
 
-        def returnList = new ArrayList<Spec>()
 
-        for (def specFile : collectSpecFiles()) {
-            Class specClass
+        for (def commandTestDef : getCommandTestDefinitions()) {
+            for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
+                for (RunTestDefinition runTest : commandTestDef.runTests) {
+                    def permutation = new RunTestPermutation(
+                            definition: runTest,
+                            databaseName: database.shortName,
+                    )
 
-            try {
-                def returnValue = shell.evaluate(specFile)
-
-                if (!returnValue instanceof CommandTestSetup) {
-                    fail("${specFile} is not a CommandTest specification")
-                }
-
-                def commandTestSetup = (CommandTestSetup) returnValue
-
-                for (def specObj : commandTestSetup.specs) {
-                    if (!specObj instanceof Spec) {
-                        fail "$specFile must contain an array of LiquibaseCommandTest.Spec objects"
+                    if (!permutation.shouldRun()) {
+                        continue
                     }
 
-                    def spec = (Spec) specObj
-
-                    spec.joinedCommand = StringUtil.join(spec.testSetup.command, "")
-
-                    if (spec.description == null) {
-                        spec.description = StringUtil.join((Collection) spec.testSetup.command, " ")
-                    }
-
-                    spec.validate()
-
-                    returnList.add(spec)
+                    permutation.connectionStatus = TestDatabaseConnections.getInstance().getConnection(database.shortName)
+                    returnList.add(permutation)
                 }
-            } catch (Throwable e) {
-                throw new RuntimeException("Error parsing ${specFile}: ${e.message}", e)
             }
         }
 
         return returnList
     }
 
-    static List<SpecPermutation> collectSpecPermutations() {
-        def returnList = new ArrayList<SpecPermutation>()
-        def allSpecs = collectSpecs()
+    static define(@DelegatesTo(CommandTestDefinition) Closure closure) {
+        CommandTestDefinition commandTestDefinition = new CommandTestDefinition()
 
-        for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-            for (Spec spec : allSpecs) {
-                def permutation = new SpecPermutation(
-                        spec: spec,
-                        databaseName: database.shortName,
-                )
-
-                if (!permutation.shouldRun()) {
-                    continue
-                }
-
-                permutation.connectionStatus = TestDatabaseConnections.getInstance().getConnection(database.shortName)
-                returnList.add(permutation)
-            }
-        }
-
-        return returnList
-    }
-
-    static define(@DelegatesTo(CommandTestSetup) Closure closure) {
-        CommandTestSetup setup = new CommandTestSetup()
-
-        def code = closure.rehydrate(setup, this, setup)
+        def code = closure.rehydrate(commandTestDefinition, this, commandTestDefinition)
         code.resolveStrategy = Closure.DELEGATE_ONLY
         code()
 
-        setup.validate()
+        commandTestDefinition.joinedCommand = StringUtil.join(commandTestDefinition.command, "")
 
-        return setup
+        commandTestDefinition.validate()
+
+        return commandTestDefinition
     }
 
-    static class CommandTestSetup {
+    static class CommandTestDefinition {
 
         /**
          * Command to test
          */
         List<String> command
 
-        List<Spec> specs = new ArrayList<>()
+        private String joinedCommand
 
-        void run(@DelegatesTo(Spec) Closure cl) {
-            def spec = new Spec()
-            def code = cl.rehydrate(spec, this, this)
+        File testFile;
+
+        List<RunTestDefinition> runTests = new ArrayList<>()
+
+        String signature
+
+        void run(@DelegatesTo(RunTestDefinition) Closure cl) {
+            def runTest = new RunTestDefinition()
+            def code = cl.rehydrate(runTest, this, this)
             code.resolveStrategy = Closure.DELEGATE_ONLY
             code()
 
-            spec.testSetup = this;
-            this.specs.add(spec)
+            runTest.commandTestDefinition = this;
+
+            if (runTest.description == null) {
+                runTest.description = StringUtil.join((Collection) this.command, " ")
+            }
+
+            runTest.validate()
+
+            this.runTests.add(runTest)
         }
 
         void validate() throws IllegalArgumentException {
             if (command == null || command.size() == 0) {
                 throw new IllegalArgumentException("'command' is required")
             }
-
         }
 
     }
 
-    static class Spec {
+    static class RunTestDefinition {
 
-        private String joinedCommand
-        private CommandTestSetup testSetup
+        CommandTestDefinition commandTestDefinition
 
         /**
          * Description of this test for reporting purposes.
@@ -357,8 +408,8 @@ ${expectedOutputCheck.toString()}
         }
     }
 
-    private static class SpecPermutation {
-        Spec spec
+    private static class RunTestPermutation {
+        RunTestDefinition definition
         String databaseName
         TestDatabaseConnections.ConnectionStatus connectionStatus
 
@@ -366,7 +417,7 @@ ${expectedOutputCheck.toString()}
             def filter = TestFilter.getInstance()
 
             return filter.shouldRun(TestFilter.DB, databaseName) &&
-                    filter.shouldRun("command", spec.joinedCommand)
+                    filter.shouldRun("command", definition.commandTestDefinition.joinedCommand)
         }
     }
 

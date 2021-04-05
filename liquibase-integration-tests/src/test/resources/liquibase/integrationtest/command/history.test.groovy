@@ -6,6 +6,15 @@ import java.util.regex.Pattern
 
 CommandTest.define {
     command = ["history"]
+    signature = """
+Short Description: MISSING
+Long Description: MISSING
+Required Args:
+  database (Database) MISSING DESCRIPTION
+Optional Args:
+  dateFormat (DateFormat) MISSING DESCRIPTION
+    Default: Platform specific 'short' format
+"""
 
     run {
         setup {

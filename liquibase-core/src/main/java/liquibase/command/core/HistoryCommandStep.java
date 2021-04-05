@@ -22,7 +22,9 @@ public class HistoryCommandStep extends AbstractCommandStep {
     static {
         final CommandStepBuilder builder = new CommandStepBuilder(HistoryCommandStep.class);
         DATABASE_ARG = builder.argument("database", Database.class).required().build();
-        DATE_FORMAT_ARG = builder.argument("dateFormat", DateFormat.class).defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)).build();
+        DATE_FORMAT_ARG = builder.argument("dateFormat", DateFormat.class)
+                .defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT), "Platform specific 'short' format")
+                .build();
 
         DEPLOYMENTS_RESULT = builder.result("deployments", DeploymentHistory.class).build();
     }

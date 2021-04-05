@@ -7,6 +7,18 @@ import liquibase.change.core.TagDatabaseChange
 CommandTest.define {
     command = ["changeLogSync"]
 
+    signature = """
+Short Description: MISSING
+Long Description: MISSING
+Required Args:
+  changeLogFile (String) MISSING DESCRIPTION
+  url (String) MISSING DESCRIPTION
+Optional Args:
+  contexts (String) MISSING DESCRIPTION
+    Default: null
+  labels (String) MISSING DESCRIPTION
+    Default: null
+"""
     run {
         arguments = [
                 changeLogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"

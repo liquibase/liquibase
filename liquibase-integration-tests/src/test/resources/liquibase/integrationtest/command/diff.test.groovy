@@ -6,11 +6,23 @@ import liquibase.change.core.TagDatabaseChange
 
 CommandTest.define {
     command = ["diff"]
+    signature = """
+Short Description: MISSING
+Long Description: MISSING
+Required Args:
+  compareControl (CompareControl) MISSING DESCRIPTION
+  objectChangeFilter (ObjectChangeFilter) MISSING DESCRIPTION
+  outputStream (PrintStream) MISSING DESCRIPTION
+  referenceDatabase (Database) MISSING DESCRIPTION
+  referenceSnapshotControl (SnapshotControl) MISSING DESCRIPTION
+  snapshotListener (SnapshotListener) MISSING DESCRIPTION
+  snapshotTypes (Class[]) MISSING DESCRIPTION
+  targetDatabase (Database) MISSING DESCRIPTION
+  targetSnapshotControl (SnapshotControl) MISSING DESCRIPTION
+Optional Args:
+  NONE
+"""
     run {
-        arguments = [
-                tag: "version_2.0"
-        ]
-
         setup {
             database = [
                     new CreateTableChange(

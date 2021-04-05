@@ -27,6 +27,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private String description;
     private boolean required;
     private DataType defaultValue;
+    private String defaultValueDescription;
     private ConfigurationValueConverter<DataType> valueHandler;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
 
@@ -70,6 +71,14 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      */
     public DataType getDefaultValue() {
         return defaultValue;
+    }
+
+    /**
+     * A description of the default value. Defaults to {@link String#valueOf(Object)} of {@link #getDefaultValue()} but
+     * can be explicitly with {@link Building#defaultValueDescriptionHandler(ConfigurationValueConverter)}.
+     */
+    public String getDefaultValueDescription() {
+        return defaultValueDescription;
     }
 
     /**
@@ -170,12 +179,24 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         }
 
         /**
-         * Set the default value for this argument.
+         * Set the default value for this argument as well as the description of the default value.
          */
-        public Building<DataType> defaultValue(DataType defaultValue) {
+        public Building<DataType> defaultValue(DataType defaultValue, String description) {
             newCommandArgument.defaultValue = defaultValue;
+            newCommandArgument.defaultValueDescription = description;
 
             return this;
+        }
+
+        /**
+         * Convenience version of {@link #defaultValue(Object, String)} but using {@link String#valueOf(Object)} for the description.
+         */
+        public Building<DataType> defaultValue(DataType defaultValue) {
+            String description = null;
+            if (defaultValue != null) {
+                description = String.valueOf(defaultValue);
+            }
+            return this.defaultValue(defaultValue, description);
         }
 
         /**
