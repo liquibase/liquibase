@@ -1,15 +1,24 @@
 package liquibase.integrationtest.command
 
-import liquibase.command.core.CalculateCheckSumCommandStep
-
 CommandTest.define {
 
     command = ["calculateCheckSum"]
 
+    signature = """
+Short Description: MISSING
+Long Description: MISSING
+Required Args:
+  changeLogFile (String) MISSING DESCRIPTION
+  changeSetIdentifier (String) MISSING DESCRIPTION
+  url (String) MISSING DESCRIPTION
+Optional Args:
+  NONE
+"""
+
     run {
         arguments = [
-                (CalculateCheckSumCommandStep.CHANGESET_IDENTIFIER_ARG): "changelogs/hsqldb/complete/rollback.tag.changelog.xml::1::nvoxland",
-                (CalculateCheckSumCommandStep.CHANGELOG_FILE_ARG)      : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changeSetIdentifier: "changelogs/hsqldb/complete/rollback.tag.changelog.xml::1::nvoxland",
+                "changeLogFile"    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
         ]
 
         expectedResults = [

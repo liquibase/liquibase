@@ -2,6 +2,15 @@ package liquibase.integrationtest.command
 
 CommandTest.define {
     command = ["validate"]
+    signature = """
+Short Description: MISSING
+Long Description: MISSING
+Required Args:
+  changeLogFile (String) MISSING DESCRIPTION
+  url (String) MISSING DESCRIPTION
+Optional Args:
+  NONE
+"""
 
     run {
         arguments = [

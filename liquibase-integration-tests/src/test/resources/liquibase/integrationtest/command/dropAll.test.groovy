@@ -6,12 +6,23 @@ import liquibase.change.core.TagDatabaseChange
 
 CommandTest.define {
     command = ["dropAll"]
+    signature = """
+Short Description: MISSING
+Long Description: MISSING
+Required Args:
+  database (Database) MISSING DESCRIPTION
+Optional Args:
+  changelog (DatabaseChangeLog) MISSING DESCRIPTION
+    Default: null
+  changelogFile (String) MISSING DESCRIPTION
+    Default: null
+  hubConnectionId (UUID) MISSING DESCRIPTION
+    Default: null
+  schemas (CatalogAndSchema[]) MISSING DESCRIPTION
+    Default: null
+"""
 
     run {
-        arguments = [
-                tag: "version_2.0"
-        ]
-
         setup {
             database = [
                     new CreateTableChange(

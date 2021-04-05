@@ -5,12 +5,16 @@ import liquibase.integrationtest.setup.HistoryEntry
 CommandTest.define {
     command = ["clearCheckSums"]
 
-    run {
-        arguments = [
-                tag            : "version_2.0",
-                "changeLogFile": "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
-        ]
+    signature = """
+Short Description: MISSING
+Long Description: MISSING
+Required Args:
+  url (String) MISSING DESCRIPTION
+Optional Args:
+  NONE
+"""
 
+    run {
         setup {
             history = [
                     new HistoryEntry(

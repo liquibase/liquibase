@@ -6,13 +6,19 @@ import liquibase.change.core.TagDatabaseChange
 
 CommandTest.define {
     command = ["generateChangeLog"]
+    signature = """
+Short Description: MISSING
+Long Description: MISSING
+Required Args:
+  NONE
+Optional Args:
+  author (String) MISSING DESCRIPTION
+    Default: null
+  context (String) MISSING DESCRIPTION
+    Default: null
+"""
 
     run {
-        arguments = [
-                tag              : "version_2.0",
-                changelogFileName: createTempResource("changeLog-", ".xml")
-        ]
-
         setup {
             database = [
                     new CreateTableChange(

@@ -6,11 +6,17 @@ import liquibase.change.core.TagDatabaseChange
 
 CommandTest.define {
     command = ["diffChangeLog"]
-    run {
-        arguments = [
-                tag: "version_2.0"
-        ]
+    signature = """
+Short Description: MISSING
+Long Description: MISSING
+Required Args:
+  changeLogFile (String) MISSING DESCRIPTION
+  diffOutputControl (DiffOutputControl) MISSING DESCRIPTION
+Optional Args:
+  NONE
+"""
 
+    run {
         setup {
             database = [
                     new CreateTableChange(
