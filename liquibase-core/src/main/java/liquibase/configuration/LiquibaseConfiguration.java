@@ -114,11 +114,11 @@ public class LiquibaseConfiguration implements SingletonObject {
         }
 
         final String foundValue = String.valueOf(details.getValue());
-        if (!foundValue.equals(lastLoggedKeyValues.get(key))) {
-            lastLoggedKeyValues.put(key, foundValue);
+        if (!foundValue.equals(lastLoggedKeyValues.get(keyAndAliases[0]))) {
+            lastLoggedKeyValues.put(keyAndAliases[0], foundValue);
 
             //avoid infinite loop when logging is getting set up
-            StringBuilder logMessage = new StringBuilder("Found '" + key + "' configuration of '"+foundValue+"'");
+            StringBuilder logMessage = new StringBuilder("Found '" + keyAndAliases[0] + "' configuration of '"+foundValue+"'");
             boolean foundFirstValue = false;
             for (ProvidedValue providedValue : details.getProvidedValues()) {
                 logMessage.append("\n    ");
