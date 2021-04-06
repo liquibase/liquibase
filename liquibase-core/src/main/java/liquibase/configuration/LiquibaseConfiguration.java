@@ -23,6 +23,13 @@ public class LiquibaseConfiguration implements SingletonObject {
     private final SortedSet<ConfigurationValueProvider> configurationValueProviders;
     private final SortedSet<ConfigurationDefinition> definitions = new TreeSet<>();
 
+    /**
+     * Track looked up values we have logged to avoid infinite loops between this and the log system using configurations
+     * and to limit logged messages.
+     * Only re-log when values changed from the last time they were logged.
+     */
+    private final Map<String, String> lastLoggedKeyValues = new HashMap<>();
+
     protected LiquibaseConfiguration() {
         configurationValueProviders = new TreeSet<>((o1, o2) -> {
             if (o1.getPrecedence() < o2.getPrecedence()) {
@@ -91,12 +98,12 @@ public class LiquibaseConfiguration implements SingletonObject {
      *
      * @return the value for the key, or null if not configured.
      */
-    public ConfiguredValue getCurrentConfiguredValue(String... keyAndAliases) {
+    public ConfiguredValue<?> getCurrentConfiguredValue(String... keyAndAliases) {
         if (keyAndAliases == null || keyAndAliases.length == 0) {
             throw new IllegalArgumentException("Must specify at least one key");
         }
 
-        ConfiguredValue details = new ConfiguredValue(keyAndAliases[0]);
+        ConfiguredValue<?> details = new ConfiguredValue<>(keyAndAliases[0]);
 
         for (ConfigurationValueProvider provider : configurationValueProviders) {
             final ProvidedValue providerValue = provider.getProvidedValue(keyAndAliases);
@@ -104,6 +111,29 @@ public class LiquibaseConfiguration implements SingletonObject {
             if (providerValue != null) {
                 details.override(providerValue);
             }
+        }
+
+        final String foundValue = String.valueOf(details.getValue());
+        if (!foundValue.equals(lastLoggedKeyValues.get(key))) {
+            lastLoggedKeyValues.put(key, foundValue);
+
+            //avoid infinite loop when logging is getting set up
+            StringBuilder logMessage = new StringBuilder("Found '" + key + "' configuration of '"+foundValue+"'");
+            boolean foundFirstValue = false;
+            for (ProvidedValue providedValue : details.getProvidedValues()) {
+                logMessage.append("\n    ");
+                if (foundFirstValue) {
+                    logMessage.append("Overrides ");
+                }
+                logMessage.append(providedValue.describe());
+                final Object value = providedValue.getValue();
+                if (value != null) {
+                    logMessage.append(" of '").append(providedValue.getValue()).append("'");
+                }
+                foundFirstValue = true;
+            }
+
+            Scope.getCurrentScope().getLog(getClass()).fine(logMessage.toString());
         }
 
         return details;

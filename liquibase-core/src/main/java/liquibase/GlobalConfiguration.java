@@ -38,22 +38,26 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .addAliasKey("should.run")
                 .build();
 
-        DATABASECHANGELOG_TABLE_NAME = builder.define("databaseChangeLogTableName", String.class)
+        DATABASECHANGELOG_TABLE_NAME = builder.define("databaseChangelogTableName", String.class)
+                .addAliasKey("liquibase.databaseChangeLogTableName")
                 .setDescription("Name of table to use for tracking change history")
                 .setDefaultValue("DATABASECHANGELOG")
                 .build();
 
-        DATABASECHANGELOGLOCK_TABLE_NAME = builder.define("databaseChangeLogLockTableName", String.class)
+        DATABASECHANGELOGLOCK_TABLE_NAME = builder.define("databaseChangelogLockTableName", String.class)
+                .addAliasKey("liquibase.databaseChangeLogLockTableName")
                 .setDescription("Name of table to use for tracking concurrent Liquibase usage")
                 .setDefaultValue("DATABASECHANGELOGLOCK")
                 .build();
 
-        CHANGELOGLOCK_WAIT_TIME = builder.define("changeLogLockWaitTimeInMinutes", Long.class)
+        CHANGELOGLOCK_WAIT_TIME = builder.define("changelogLockWaitTimeInMinutes", Long.class)
+                .addAliasKey("liquibase.changeLogLockWaitTimeInMinutes")
                 .setDescription("Number of minutes to wait for the changelog lock to be available before giving up")
                 .setDefaultValue(5L)
                 .build();
 
-        CHANGELOGLOCK_POLL_RATE = builder.define("changeLogLockPollRate", Long.class)
+        CHANGELOGLOCK_POLL_RATE = builder.define("changelogLockPollRate", Long.class)
+                .addAliasKey("liquibase.changeLogLockPollRate")
                 .setDescription("Number of seconds wait between checks to the changelog lock when it is locked")
                 .setDefaultValue(10L)
                 .build();
@@ -88,8 +92,9 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(true)
                 .build();
 
-        GENERATE_CHANGESET_CREATED_VALUES = builder.define("generateChangeSetCreatedValues", Boolean.class)
-                .setDescription("Should Liquibase include a 'created' attribute in diff/generateChangeLog changeSets with" +
+        GENERATE_CHANGESET_CREATED_VALUES = builder.define("generateChangesetCreatedValues", Boolean.class)
+                .addAliasKey("liquibase.generateChangeSetCreatedValues")
+                .setDescription("Should Liquibase include a 'created' attribute in diff/generateChangelog changesets with" +
                         " the current datetime")
                 .setDefaultValue(false)
                 .build();
@@ -110,8 +115,9 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
 
-        GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = builder.define("generatedChangeSetIdsContainsDescription", Boolean.class)
-                .setDescription("Should Liquibase include the change description in the id when generating changeSets?")
+        GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = builder.define("generatedChangesetIdsContainsDescription", Boolean.class)
+                .addAliasKey("liquibase.generatedChangeSetIdsContainsDescription")
+                .setDescription("Should Liquibase include the change description in the id when generating changesets?")
                 .setDefaultValue(false)
                 .build();
 

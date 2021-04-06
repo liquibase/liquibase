@@ -183,6 +183,27 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     }
 
     /**
+     * Return true if the given key matches this definition.
+     */
+    public boolean equalsKey(String key) {
+        if (key == null) {
+            return false;
+        }
+
+        if (getKey().equalsIgnoreCase(key)) {
+            return true;
+        }
+
+        for (String alias : getAliasKeys()) {
+            if (alias.equalsIgnoreCase(key)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Used to construct new {@link ConfigurationDefinition} instances.
      */
     public static class Builder {
