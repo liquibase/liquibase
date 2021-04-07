@@ -98,7 +98,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         keyList.add(this.getKey());
         keyList.addAll(this.getAliasKeys());
 
-        ConfiguredValue<DataType> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(keyList.toArray(new String[0]));
+        ConfiguredValue<?> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(keyList.toArray(new String[0]));
 
         if (!configurationValue.found()) {
             defaultValue = this.getDefaultValue();
@@ -114,7 +114,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
             configurationValue.override(new ConvertedValueProvider<DataType>(finalValue, providedValue).getProvidedValue(key));
         }
 
-        return configurationValue;
+        return (ConfiguredValue<DataType>) configurationValue;
     }
 
     /**
@@ -180,6 +180,27 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     @Override
     public int hashCode() {
         return Objects.hash(key);
+    }
+
+    /**
+     * Return true if the given key matches this definition.
+     */
+    public boolean equalsKey(String key) {
+        if (key == null) {
+            return false;
+        }
+
+        if (getKey().equalsIgnoreCase(key)) {
+            return true;
+        }
+
+        for (String alias : getAliasKeys()) {
+            if (alias.equalsIgnoreCase(key)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -24,7 +24,7 @@ class ConfigurationDefinitionTest extends Specification {
         "test"           | "invalid-key" | "valid"         | "Invalid key format: test.invalid-key"
         "invalid-prefix" | "invalid-key" | "valid"         | "Invalid prefix format: invalid-prefix"
         "invalid-prefix" | "validValue"  | "valid"         | "Invalid prefix format: invalid-prefix"
-        "validPrefix"     | "validValue"  | "invalid-alias" | "Invalid alias format: invalid-alias"
+        "validPrefix"    | "validValue"  | "invalid-alias" | "Invalid alias format: invalid-alias"
     }
 
     def "Can build and register"() {
@@ -66,8 +66,8 @@ class ConfigurationDefinitionTest extends Specification {
         ConfigurationDefinition.wasDefaultValueUsed(currentValue) == defaultValueUsed
 
         where:
-        key             | defaultValue         | expectedValue        | expectedSource                                                   | defaultValueUsed
-        "currentValue" | "Default Value"      | "From scope"         | "Scoped value 'test.currentValue'"                              | false
+        key            | defaultValue         | expectedValue        | expectedSource                                              | defaultValueUsed
+        "currentValue" | "Default Value"      | "From scope"         | "Scoped value 'test.currentValue'"                          | false
         "unsetValue"   | "Configured Default" | "Configured Default" | "Default value 'test.unsetValue'"                           | true
         "unsetValue"   | null                 | null                 | "No configuration or default value found 'test.unsetValue'" | false
 
@@ -177,5 +177,20 @@ class ConfigurationDefinitionTest extends Specification {
         definition1.equals(dupeDefinition1)
         definition1.hashCode() == dupeDefinition1.hashCode()
 
+    }
+
+    @Unroll
+    def equalsKey() {
+        expect:
+        liquibase.GlobalConfiguration.SHOULD_RUN.equalsKey(input) == expected
+
+        where:
+        input                  | expected
+        "liquibase.shouldRun"  | true
+        "liquibase.otherValue" | false
+        "liquibase.SHOULDRUN"  | true
+        "should.run"           | true
+        "SHOULD.RUN"           | true
+        null                   | false
     }
 }
