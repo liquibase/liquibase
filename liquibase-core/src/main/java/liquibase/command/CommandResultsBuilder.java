@@ -64,7 +64,6 @@ public class CommandResultsBuilder {
      */
     CommandResults build() {
         output.flush();
-        output.close();
         try {
             outputStream.flush();
         } catch (IOException e) {

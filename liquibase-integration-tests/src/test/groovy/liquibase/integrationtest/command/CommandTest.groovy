@@ -3,8 +3,6 @@ package liquibase.integrationtest.command
 import liquibase.CatalogAndSchema
 import liquibase.Scope
 import liquibase.change.Change
-import liquibase.changelog.ChangeLogParameters
-import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandArgumentDefinition
 import liquibase.command.CommandFactory
 import liquibase.command.CommandScope
@@ -17,9 +15,6 @@ import liquibase.integrationtest.TestDatabaseConnections
 import liquibase.integrationtest.TestFilter
 import liquibase.integrationtest.TestSetup
 import liquibase.integrationtest.setup.*
-import liquibase.parser.ChangeLogParser
-import liquibase.parser.ChangeLogParserFactory
-import liquibase.test.JUnitResourceAccessor
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
 import org.codehaus.groovy.control.CompilerConfiguration
@@ -159,12 +154,6 @@ Long Description: ${commandDefinition.getShortDescription() ?: "MISSING"}
                 commandScope.addArgumentValue(key, objValue)
             }
         }
-        if (changeLogFile != null) {
-            commandScope.addArgumentValue("changeLogFile", changeLogFile)
-            if (spec._needDatabaseChangeLog) {
-               createTemporaryChangeLogFile(changeLogFile, commandScope)
-            }
-        }
 
         def setupScopeId = Scope.enter([
                 ("liquibase.plugin." + HubService.name): MockHubService,
@@ -174,11 +163,11 @@ Long Description: ${commandDefinition.getShortDescription() ?: "MISSING"}
 
         Scope.exit(setupScopeId)
 
-        def fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(outputStream.toString()))
-
         if (testDef.expectedResults.size() > 0 && results.getResults().isEmpty()) {
-            throw new RuntimeException("Results were expected but none were found for " + testDef._command)
+            throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
         }
+
+        then:
         for (def returnedResult : results.getResults().entrySet()) {
             def expectedValue = String.valueOf(testDef.expectedResults.get(returnedResult.getKey()))
             def seenValue = String.valueOf(returnedResult.getValue())
@@ -187,7 +176,8 @@ Long Description: ${commandDefinition.getShortDescription() ?: "MISSING"}
             assert seenValue == expectedValue
         }
 
-        then:
+        def fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(outputStream.toString()))
+
         for (def expectedOutputCheck : expectedOutputChecks) {
             if (expectedOutputCheck == null) {
                 continue
@@ -223,19 +213,6 @@ ${expectedOutputCheck.toString()}
 
         where:
         permutation << getAllRunTestPermutations()
-    }
-
-    static void createTemporaryChangeLogFile(String changeLogFile, CommandScope commandScope) {
-        //
-        // Create a temporary changelog file
-        //
-        URL url = Thread.currentThread().getContextClassLoader().getResource(changeLogFile)
-        File f = new File(url.toURI())
-        String contents = FileUtil.getContents(f)
-        File outputFile = new File(createTempResource("changeLog-", ".xml"))
-        FileUtil.write(contents, outputFile)
-        changeLogFile = outputFile.getName()
-        commandScope.addArgumentValue("changeLogFile", changeLogFile)
     }
 
     static List<CommandTestDefinition> getCommandTestDefinitions() {
@@ -369,11 +346,6 @@ ${expectedOutputCheck.toString()}
         private Map<String, ?> expectedResults = new HashMap<>()
         private Class<Throwable> expectedException
 
-        String createTempResource(String prefix, String suffix) {
-            File f = File.createTempFile(prefix, suffix, new File("target/test-classes"))
-            return "target/test-classes/" + f.getName();
-        }
-
         def setup(@DelegatesTo(TestSetupDefinition) Closure closure) {
             def setupDef = new TestSetupDefinition()
 
@@ -448,6 +420,40 @@ ${expectedOutputCheck.toString()}
          */
         void runChangelog(String changeLogPath) {
             this.setups.add(new SetupRunChangelog(changeLogPath))
+        }
+
+        /**
+         *
+         * Create a specified file with the contents from a source
+         *
+         * @param originalFile
+         * @param newFile
+         *
+         */
+        void createTempResource(String originalFile, String newFile) {
+            URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
+            File f = new File(url.toURI())
+            String contents = FileUtil.getContents(f)
+            File outputFile = new File("target/test-classes", newFile)
+            FileUtil.write(contents, outputFile)
+        }
+
+        /**
+         *
+         * Delete the specified resource
+         *
+         * @param fileToDelete
+         *
+         */
+        void cleanTempResource(String fileToDelete) {
+            URL url = Thread.currentThread().getContextClassLoader().getResource(fileToDelete)
+            if (url == null) {
+                return
+            }
+            File f = new File(url.toURI())
+            if (f.exists()) {
+                f.delete()
+            }
         }
 
         /**

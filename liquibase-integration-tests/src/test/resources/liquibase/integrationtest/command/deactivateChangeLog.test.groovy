@@ -6,7 +6,6 @@ CommandTest.define {
 Short Description: MISSING
 Long Description: MISSING
 Required Args:
-  changeLog (DatabaseChangeLog) MISSING DESCRIPTION
   changeLogFile (String) MISSING DESCRIPTION
 Optional Args:
   NONE
@@ -15,9 +14,11 @@ Optional Args:
     run {
 
         arguments = [
-                changeLogFile: "changelogs/hsqldb/complete/simple.changelog.with.id.xml",
+                changeLogFile: "changelogs/hsqldb/complete/simple.changelog.with.id-test.xml",
         ]
-
+        setup {
+            createTempResource "changelogs/hsqldb/complete/simple.changelog.with.id.xml", "changelogs/hsqldb/complete/simple.changelog.with.id-test.xml"
+        }
         expectedResults = [
                 statusMessage: "Successfully executed deactivateChangeLog",
                 statusCode   : 0

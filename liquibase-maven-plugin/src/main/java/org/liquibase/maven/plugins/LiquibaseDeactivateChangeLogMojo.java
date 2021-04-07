@@ -24,8 +24,7 @@ public class LiquibaseDeactivateChangeLogMojo extends AbstractLiquibaseChangeLog
 
         CommandScope liquibaseCommand = new CommandScope("deactivateChangeLog");
         liquibaseCommand
-                .addArgumentValue(DeactivateChangeLogCommandStep.CHANGE_LOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(DeactivateChangeLogCommandStep.CHANGE_LOG_ARG, liquibase.getDatabaseChangeLog());
+                .addArgumentValue(DeactivateChangeLogCommandStep.CHANGE_LOG_FILE_ARG, changeLogFile);
         liquibaseCommand.execute();
     }
 }

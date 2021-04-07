@@ -14,7 +14,7 @@ import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 
-public class DiffToChangeLogCommandStep extends DiffCommandStep {
+public class DiffToChangeLogCommandStep extends InternalDiffCommandStep {
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILENAME_ARG;
     public static final CommandArgumentDefinition<DiffOutputControl> DIFF_OUTPUT_CONTROL_ARG;

@@ -7,10 +7,12 @@ liquibase.command.core.ClearCheckSumsCommandStep
 liquibase.command.core.DbDocCommandStep
 liquibase.command.core.DeactivateChangeLogCommandStep
 liquibase.command.core.DiffCommandStep
+liquibase.command.core.InternalDiffCommandStep
 liquibase.command.core.DiffToChangeLogCommandStep
 liquibase.command.core.DropAllCommandStep
 liquibase.command.core.ExecuteSqlCommandStep
 liquibase.command.core.GenerateChangeLogCommandStep
+liquibase.command.core.InternalGenerateChangeLogCommandStep
 liquibase.command.core.HistoryCommandStep
 liquibase.command.core.ListLocksCommandStep
 liquibase.command.core.MarkNextChangeSetRanCommandStep
