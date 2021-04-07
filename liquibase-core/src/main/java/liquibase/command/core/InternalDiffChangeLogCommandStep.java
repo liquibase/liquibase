@@ -14,13 +14,13 @@ import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 
-public class DiffToChangeLogCommandStep extends InternalDiffCommandStep {
+public class InternalDiffChangeLogCommandStep extends InternalDiffCommandStep {
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILENAME_ARG;
     public static final CommandArgumentDefinition<DiffOutputControl> DIFF_OUTPUT_CONTROL_ARG;
 
     static {
-        final CommandStepBuilder builder = new CommandStepBuilder(DiffToChangeLogCommandStep.class);
+        final CommandStepBuilder builder = new CommandStepBuilder(InternalDiffChangeLogCommandStep.class);
 
         CHANGELOG_FILENAME_ARG = builder.argument("changeLogFile", String.class).required().build();
         DIFF_OUTPUT_CONTROL_ARG = builder.argument("diffOutputControl", DiffOutputControl.class).required().build();
@@ -29,7 +29,7 @@ public class DiffToChangeLogCommandStep extends InternalDiffCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[]{"diffChangeLog"};
+        return new String[]{"internalDiffChangeLog"};
     }
 
     @Override

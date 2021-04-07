@@ -5,21 +5,16 @@ import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
 
 CommandTest.define {
-    command = ["diffChangeLog"]
+    command = ["generateChangeLog"]
     signature = """
 Short Description: MISSING
 Long Description: MISSING
 Required Args:
-  referenceUrl (String) MISSING DESCRIPTION
   url (String) MISSING DESCRIPTION
 Optional Args:
   changeLogFile (String) MISSING DESCRIPTION
     Default: null
   password (String) MISSING DESCRIPTION
-    Default: null
-  referencePassword (String) MISSING DESCRIPTION
-    Default: null
-  referenceUsername (String) MISSING DESCRIPTION
     Default: null
   username (String) MISSING DESCRIPTION
     Default: null
@@ -27,12 +22,10 @@ Optional Args:
 
     run {
         arguments = [
-            referenceUrl: "offline:postgresql?snapshot=snapshot1.json",
-            url: "offline:postgresql?snapshot=snapshot1.json",
-            changeLogFile: "diffChangeLog-test.xml"
+            changeLogFile: "target/test-classes/changeLog-test.xml"
         ]
         setup {
-            cleanTempResource("target/test-classes/diffChangeLog-test.xml")
+            cleanTempResource("changeLog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -62,7 +55,7 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed diffChangeLog",
+                statusMessage: "Successfully executed generateChangeLog",
                 statusCode   : 0
         ]
     }

@@ -46,7 +46,7 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[]{"internalDiffCommandStep"};
+        return new String[]{"internalDiff"};
     }
 
     public static Class<? extends DatabaseObject>[] parseSnapshotTypes(String... snapshotTypes) {
