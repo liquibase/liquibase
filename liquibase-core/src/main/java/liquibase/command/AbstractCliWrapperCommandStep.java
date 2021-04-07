@@ -1,5 +1,8 @@
 package liquibase.command;
 
+import liquibase.Scope;
+import liquibase.configuration.ConfiguredValue;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.CommandExecutionException;
 
 import java.util.ArrayList;
@@ -9,6 +12,8 @@ import java.util.Map;
 
 /**
  * Convenience base class for {@link CommandStep}s that simply wrap calls to {@link liquibase.integration.commandline.Main}
+ *
+ * @deprecated
  */
 public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep {
 
@@ -25,7 +30,7 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
     protected String[] createArgs(CommandScope commandScope, List<String> rhsArgs) throws CommandExecutionException {
         List<String> argsList = new ArrayList<>();
         Map<String, CommandArgumentDefinition<?>> arguments = commandScope.getCommand().getArguments();
-        arguments.entrySet().forEach( arg -> {
+        arguments.entrySet().forEach(arg -> {
             if (rhsArgs.contains(arg.getKey())) {
                 return;
             }
@@ -37,8 +42,15 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
         if (commandScope.getArgumentValue(LOG_LEVEL) != null) {
             argsList.add("--logLevel=" + commandScope.getArgumentValue(LOG_LEVEL));
         }
+
+        final ConfiguredValue<?> classpathArg = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue("liquibase.classpath");
+        if (classpathArg.found()) {
+            argsList.add("--classpath=" + classpathArg.getProvidedValue().getValue());
+        }
+
         argsList.add(commandScope.getCommand().getName()[0]);
-        if (! rhsArgs.isEmpty()) {
+
+        if (!rhsArgs.isEmpty()) {
             arguments.entrySet().forEach(arg -> {
                 if (!rhsArgs.contains(arg.getKey())) {
                     return;
@@ -54,7 +66,7 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
         return args;
     }
 
-    protected String[] createParametersFromArgs(String[] args, String ... params) {
+    protected String[] createParametersFromArgs(String[] args, String... params) {
         List<String> argsList = new ArrayList(Arrays.asList(args));
         List<String> toRemove = new ArrayList<>();
         String matchingArg = null;
@@ -76,7 +88,7 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
         if (matchingArg != null) {
             argsList.removeAll(toRemove);
             args = new String[argsList.size() + 1];
-            for (int i=0; i < argsList.size(); i++) {
+            for (int i = 0; i < argsList.size(); i++) {
                 args[i] = argsList.get(i);
             }
             args[args.length - 1] = matchingArg;
@@ -87,8 +99,7 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
     protected void addStatusMessage(CommandResultsBuilder resultsBuilder, int statusCode) {
         if (statusCode == 0) {
             resultsBuilder.addResult("statusMessage", "Successfully executed " + getName()[0]);
-        }
-        else {
+        } else {
             resultsBuilder.addResult("statusMessage", "Unsuccessfully executed " + getName()[0]);
         }
     }

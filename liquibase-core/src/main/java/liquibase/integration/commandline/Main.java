@@ -55,6 +55,8 @@ import static java.util.ResourceBundle.getBundle;
 
 /**
  * Class for executing Liquibase via the command line.
+ *
+ * @deprecated use liquibase.integration.commandline.LiquibaseCommandLine.
  */
 public class Main {
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";

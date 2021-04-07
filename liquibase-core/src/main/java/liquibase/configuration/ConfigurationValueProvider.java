@@ -1,5 +1,7 @@
 package liquibase.configuration;
 
+import liquibase.configuration.core.DefaultsFileValueProvider;
+
 /**
  * Defines a way for {@link LiquibaseConfiguration} to find configured values.
  */
@@ -17,7 +19,7 @@ public interface ConfigurationValueProvider {
      *     <li>200 {@link liquibase.configuration.core.SystemPropertyValueProvider}</li>
      *     <li>150 EnvironmentValueProvider</li>
      *     <li>100: TODO profile/context specific properties files</li>
-     *     <li>50: TODO default properties files</li>
+     *     <li>50: {@link DefaultsFileValueProvider}</li>
      * </ul>
      */
     int getPrecedence();

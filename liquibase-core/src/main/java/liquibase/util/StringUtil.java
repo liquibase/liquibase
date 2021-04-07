@@ -510,6 +510,25 @@ public class StringUtil {
         return string.replaceAll("([A-Z])", "-$1").toLowerCase();
     }
 
+    /**
+     * Converts a kabob-case or underscore_case string to a camel-case one
+     */
+    public static String toCamelCase(String string) {
+        if (string == null) {
+            return null;
+        }
+
+        final String[] splitString = string.split("[-_]");
+        if (splitString.length == 1) {
+            return string;
+        }
+        for (int i=1; i<splitString.length; i++) {
+            splitString[i] = upperCaseFirst(splitString[i]);
+        }
+
+        return join(splitString, "");
+    }
+
     public interface StringUtilFormatter<Type> {
         String toString(Type obj);
     }

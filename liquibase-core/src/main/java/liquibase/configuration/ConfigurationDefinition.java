@@ -1,6 +1,7 @@
 package liquibase.configuration;
 
 import liquibase.Scope;
+import liquibase.command.CommandArgumentDefinition;
 import liquibase.util.ObjectUtil;
 
 import java.util.*;
@@ -26,6 +27,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     private final Class<DataType> type;
     private String description;
     private DataType defaultValue;
+    private String defaultValueDescription;
     private boolean commonlyUsed;
     private ConfigurationValueConverter<DataType> valueHandler;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
@@ -157,6 +159,14 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     }
 
     /**
+     * A description of the default value. Defaults to {@link String#valueOf(Object)} of {@link #getDefaultValue()} but
+     * can be explicitly with {@link CommandArgumentDefinition.Building#defaultValue(Object, String)}.
+     */
+    public String getDefaultValueDescription() {
+        return defaultValueDescription;
+    }
+
+    /**
      * Returns true if this is configuration users are often interested in setting.
      * Used to simplify generated help by hiding less commonly used settings.
      */
@@ -251,6 +261,17 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         public Building<DataType> setDescription(String description) {
             definition.description = description;
             return this;
+        }
+
+        public Building<DataType> setDefaultValue(DataType defaultValue, String defaultValueDescription) {
+            definition.defaultValue = defaultValue;
+            definition.defaultValueDescription = defaultValueDescription;
+
+            if (defaultValue != null && defaultValueDescription == null) {
+                definition.defaultValueDescription = String.valueOf(defaultValue);
+            }
+            return this;
+
         }
 
         public Building<DataType> setDefaultValue(DataType defaultValue) {

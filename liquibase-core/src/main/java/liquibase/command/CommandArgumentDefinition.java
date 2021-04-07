@@ -75,7 +75,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
 
     /**
      * A description of the default value. Defaults to {@link String#valueOf(Object)} of {@link #getDefaultValue()} but
-     * can be explicitly with {@link Building#defaultValueDescriptionHandler(ConfigurationValueConverter)}.
+     * can be explicitly with {@link Building#defaultValue(Object, String)}.
      */
     public String getDefaultValueDescription() {
         return defaultValueDescription;
