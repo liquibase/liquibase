@@ -7,16 +7,16 @@ import liquibase.change.core.TagDatabaseChange
 CommandTest.define {
     command = ["generateChangeLog"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: generate a changelog
+Long Description: Writes Change Log XML to copy the current state of the database to standard out or a file
 Required Args:
-  url (String) MISSING DESCRIPTION
+  url (String) Database URL to generate a changelog for 
 Optional Args:
-  changeLogFile (String) MISSING DESCRIPTION
+  changeLogFile (String) File to write changelog to 
     Default: null
-  password (String) MISSING DESCRIPTION
+  password (String) Password to use to connect to the database
     Default: null
-  username (String) MISSING DESCRIPTION
+  username (String) Username to use to connect to the database 
     Default: null
 """
 
