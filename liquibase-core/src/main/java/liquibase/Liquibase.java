@@ -257,7 +257,6 @@ public class Liquibase implements AutoCloseable {
                 }
 
                 //
-                // Only set up the listener if we are not generating SQL
                 // Make sure we don't already have a listener
                 //
                 if (connection != null) {
@@ -266,7 +265,6 @@ public class Liquibase implements AutoCloseable {
 
                 //
                 // Create another iterator to run
-                // We set the databaseChangeLog variable to null
                 //
                 ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
                 CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
@@ -529,7 +527,7 @@ public class Liquibase implements AutoCloseable {
                     }
 
                     //
-                    // Check for an already existing Listener
+                    // If we are doing Hub then set up a HubChangeExecListener
                     //
                     if (connection != null) {
                         changeExecListener = new HubChangeExecListener(updateOperation, changeExecListener);
@@ -891,7 +889,7 @@ public class Liquibase implements AutoCloseable {
                     }
 
                     //
-                    // Check for an already existing Listener
+                    // If we are doing Hub then set up a HubChangeExecListener
                     //
                     if (connection != null) {
                         changeExecListener = new HubChangeExecListener(rollbackOperation, changeExecListener);
@@ -1156,7 +1154,7 @@ public class Liquibase implements AutoCloseable {
                     }
 
                     //
-                    // Check for an already existing Listener
+                    // If we are doing Hub then set up a HubChangeExecListener
                     //
                     if (connection != null) {
                         changeExecListener = new HubChangeExecListener(rollbackOperation, changeExecListener);
@@ -1314,7 +1312,7 @@ public class Liquibase implements AutoCloseable {
                     }
 
                     //
-                    // Check for an already existing Listener
+                    // If we are doing Hub then set up a HubChangeExecListener
                     //
                     if (connection != null) {
                         changeExecListener = new HubChangeExecListener(rollbackOperation, changeExecListener);
@@ -1456,15 +1454,16 @@ public class Liquibase implements AutoCloseable {
                     }
 
                     //
-                    // Check for an already existing Listener
+                    // If we are doing Hub then set up a HubChangeExecListener
                     //
                     if (connection != null) {
                         changeLogSyncListener = new HubChangeExecListener(changeLogSyncOperation, changeExecListener);
                     }
 
+                    ChangeLogIterator runChangeLogIterator = buildChangeLogIterator(tag, changeLog, contexts, labelExpression);
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                        listLogIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
+                        runChangeLogIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
                                 new RuntimeEnvironment(database, contexts, labelExpression));
                     });
                     hubUpdater.postUpdateHub(changeLogSyncOperation, bufferLog);
