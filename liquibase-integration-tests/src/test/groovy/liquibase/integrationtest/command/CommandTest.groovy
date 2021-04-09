@@ -5,12 +5,14 @@ import liquibase.Scope
 import liquibase.change.Change
 import liquibase.command.CommandArgumentDefinition
 import liquibase.command.CommandFactory
+import liquibase.command.CommandResults
 import liquibase.command.CommandScope
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
+import liquibase.integration.IntegrationConfiguration
 import liquibase.integrationtest.TestDatabaseConnections
 import liquibase.integrationtest.TestFilter
 import liquibase.integrationtest.TestSetup
@@ -21,6 +23,7 @@ import org.codehaus.groovy.control.CompilerConfiguration
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.util.logging.Level
 import java.util.regex.Pattern
 
 import static org.junit.Assume.assumeTrue
@@ -117,7 +120,7 @@ Long Description: ${commandDefinition.getShortDescription() ?: "MISSING"}
         }
 
         when:
-        def commandScope
+        final commandScope
         try {
             commandScope = new CommandScope(testDef.commandTestDefinition.command as String[])
         }
@@ -133,7 +136,6 @@ Long Description: ${commandDefinition.getShortDescription() ?: "MISSING"}
         commandScope.addArgumentValue("database", database)
         commandScope.addArgumentValue("url", database.getConnection().getURL())
         commandScope.addArgumentValue("schemas", catalogAndSchemas)
-        commandScope.addArgumentValue("logLevel", "FINE")
         commandScope.setOutput(outputStream)
 
         if (testDef.setup != null) {
@@ -155,13 +157,12 @@ Long Description: ${commandDefinition.getShortDescription() ?: "MISSING"}
             }
         }
 
-        def setupScopeId = Scope.enter([
-                ("liquibase.plugin." + HubService.name): MockHubService,
-        ])
-
-        def results = commandScope.execute()
-
-        Scope.exit(setupScopeId)
+        def results = Scope.child([
+                (IntegrationConfiguration.LOG_LEVEL.getKey()): Level.FINE,
+                ("liquibase.plugin." + HubService.name): MockHubService
+        ], {
+                return commandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<CommandResults>)
 
         if (testDef.expectedResults.size() > 0 && results.getResults().isEmpty()) {
             throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
