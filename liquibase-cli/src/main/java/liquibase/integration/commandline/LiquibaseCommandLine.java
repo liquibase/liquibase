@@ -17,6 +17,8 @@ public class LiquibaseCommandLine {
     private final CommandLine commandLine;
 
     public static void main(String[] args) {
+        final LiquibaseCommandLine cli = new LiquibaseCommandLine();
+        cli.execute(args);
     }
 
     public LiquibaseCommandLine() {
