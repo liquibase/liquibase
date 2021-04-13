@@ -10,19 +10,24 @@ CommandTest.define {
 Short Description: MISSING
 Long Description: MISSING
 Required Args:
-  compareControl (CompareControl) MISSING DESCRIPTION
-  objectChangeFilter (ObjectChangeFilter) MISSING DESCRIPTION
-  outputStream (PrintStream) MISSING DESCRIPTION
-  referenceDatabase (Database) MISSING DESCRIPTION
-  referenceSnapshotControl (SnapshotControl) MISSING DESCRIPTION
-  snapshotListener (SnapshotListener) MISSING DESCRIPTION
-  snapshotTypes (Class[]) MISSING DESCRIPTION
-  targetDatabase (Database) MISSING DESCRIPTION
-  targetSnapshotControl (SnapshotControl) MISSING DESCRIPTION
+  referenceUrl (String) MISSING DESCRIPTION
+  url (String) MISSING DESCRIPTION
 Optional Args:
-  NONE
+  password (String) MISSING DESCRIPTION
+    Default: null
+  referencePassword (String) MISSING DESCRIPTION
+    Default: null
+  referenceUsername (String) MISSING DESCRIPTION
+    Default: null
+  username (String) MISSING DESCRIPTION
+    Default: null
 """
     run {
+        arguments = [
+            referenceUrl: "offline:postgresql?snapshot=snapshot1.json",
+            url: "offline:postgresql?snapshot=snapshot1.json"
+        ]
+
         setup {
             database = [
                     new CreateTableChange(

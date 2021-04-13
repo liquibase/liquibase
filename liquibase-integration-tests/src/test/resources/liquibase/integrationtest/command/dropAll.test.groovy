@@ -39,20 +39,6 @@ Optional Args:
                                             .setType("VARCHAR(255)")
                             ]
                     ),
-                    new CreateTableChange(
-                            tableName: "FirstTable",
-                            columns: [
-                                    ColumnConfig.fromName("FirstColumn")
-                                            .setType("VARCHAR(255)")
-                            ]
-                    ),
-                    new CreateTableChange(
-                            tableName: "SecondTable",
-                            columns: [
-                                    ColumnConfig.fromName("SecondColumn")
-                                            .setType("VARCHAR(255)")
-                            ]
-                    ),
                     new TagDatabaseChange(
                             tag: "version_2.0"
                     ),

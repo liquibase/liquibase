@@ -10,16 +10,22 @@ CommandTest.define {
 Short Description: MISSING
 Long Description: MISSING
 Required Args:
-  NONE
+  url (String) MISSING DESCRIPTION
 Optional Args:
-  author (String) MISSING DESCRIPTION
+  changeLogFile (String) MISSING DESCRIPTION
     Default: null
-  context (String) MISSING DESCRIPTION
+  password (String) MISSING DESCRIPTION
+    Default: null
+  username (String) MISSING DESCRIPTION
     Default: null
 """
 
     run {
+        arguments = [
+            changeLogFile: "target/test-classes/changeLog-test.xml"
+        ]
         setup {
+            cleanTempResource("changeLog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",

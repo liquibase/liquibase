@@ -511,7 +511,6 @@ public class HubUpdater {
 
         CommandScope registerChangeLogCommand = new CommandScope("registerChangeLog");
         registerChangeLogCommand
-                .addArgumentValue(RegisterChangeLogCommandStep.CHANGELOG_ARG, changeLog)
                 .addArgumentValue(RegisterChangeLogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
         try {

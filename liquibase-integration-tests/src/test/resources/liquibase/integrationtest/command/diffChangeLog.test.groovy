@@ -10,14 +10,29 @@ CommandTest.define {
 Short Description: MISSING
 Long Description: MISSING
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  diffOutputControl (DiffOutputControl) MISSING DESCRIPTION
+  referenceUrl (String) MISSING DESCRIPTION
+  url (String) MISSING DESCRIPTION
 Optional Args:
-  NONE
+  changeLogFile (String) MISSING DESCRIPTION
+    Default: null
+  password (String) MISSING DESCRIPTION
+    Default: null
+  referencePassword (String) MISSING DESCRIPTION
+    Default: null
+  referenceUsername (String) MISSING DESCRIPTION
+    Default: null
+  username (String) MISSING DESCRIPTION
+    Default: null
 """
 
     run {
+        arguments = [
+            referenceUrl: "offline:postgresql?snapshot=snapshot1.json",
+            url: "offline:postgresql?snapshot=snapshot1.json",
+            changeLogFile: "diffChangeLog-test.xml"
+        ]
         setup {
+            cleanTempResource("target/test-classes/diffChangeLog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
