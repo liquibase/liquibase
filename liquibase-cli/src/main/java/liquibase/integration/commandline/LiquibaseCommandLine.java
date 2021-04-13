@@ -6,8 +6,6 @@ import liquibase.command.CommandDefinition;
 import liquibase.command.CommandFactory;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.database.Database;
-import liquibase.exception.DatabaseException;
 import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
@@ -16,58 +14,31 @@ import java.util.SortedSet;
 
 public class LiquibaseCommandLine {
 
+    private final CommandLine commandLine;
+
     public static void main(String[] args) {
-//        commandLine.addSubcommand(CommandLine.HelpCommand.class);
+    }
+
+    public LiquibaseCommandLine() {
+
         final CommandLine.Model.CommandSpec rootCommandSpec = CommandLine.Model.CommandSpec.create();
         rootCommandSpec.name("liquibase");
-        rootCommandSpec.mixinStandardHelpOptions(true);
+        configureHelp(rootCommandSpec);
 
-        final CommandLine commandLine = new CommandLine(rootCommandSpec);
+        commandLine = new CommandLine(rootCommandSpec);
 
-        final SortedSet<ConfigurationDefinition> globalConfigurations = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getRegisteredDefinitions();
-        for (ConfigurationDefinition def : globalConfigurations) {
-            final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(toArgName(def))
-                    .required(false)
-                    .defaultValue(def.getDefaultValueDescription())
-                    .type(def.getType());
+        addGlobalArguments();
 
-            if (def.getDescription() != null) {
-                optionBuilder.description(def.getDescription());
-            }
-
-            final CommandLine.Model.OptionSpec optionSpec = optionBuilder.build();
-            rootCommandSpec.addOption(optionSpec);
+        for (CommandDefinition commandDefinition : getCommands()) {
+            addSubcommand(commandDefinition);
         }
+    }
 
-        final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
-        for (CommandDefinition commandDefinition : commandFactory.getCommands()) {
-            final CommandRunner commandRunner = new CommandRunner();
-            final CommandLine.Model.CommandSpec subCommandSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(commandRunner);
-            commandRunner.setSpec(subCommandSpec);
-
-            subCommandSpec.mixinStandardHelpOptions(true);
-
-            for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
-                final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder(toArgName(def))
-                        .required(false) //.required(def.isRequired())
-                        .type(def.getDataType());
-
-                if (def.getDescription() != null) {
-                    builder.description(def.getDescription());
-                }
-
-                if (def.getDefaultValueDescription() != null) {
-                    builder.defaultValue(def.getDefaultValueDescription());
-                }
-
-                subCommandSpec.addOption(builder.build());
-            }
-
-            rootCommandSpec.addSubcommand(commandDefinition.getName()[0], subCommandSpec);
-        }
-
-
+    public void execute(String[] args) {
         commandLine.execute(args);
+    }
+
+
 //
 //        Map<String, String> passedArgs = new HashMap<>();
 //        passedArgs.put("url", "jdbc:mysql://127.0.0.1:33062/lbcat");
@@ -104,6 +75,64 @@ public class LiquibaseCommandLine {
 //            e.printStackTrace();
 //        }
 
+
+    private void addSubcommand(CommandDefinition commandDefinition) {
+        final CommandRunner commandRunner = new CommandRunner();
+        final CommandLine.Model.CommandSpec subCommandSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(commandRunner);
+        commandRunner.setSpec(subCommandSpec);
+
+        configureHelp(subCommandSpec);
+
+        for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
+            final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder(toArgName(def))
+                    .required(false) //.required(def.isRequired())
+                    .type(def.getDataType());
+
+            if (def.getDescription() != null) {
+                builder.description(def.getDescription());
+            }
+
+            if (def.getDefaultValueDescription() != null) {
+                builder.defaultValue(def.getDefaultValueDescription());
+            }
+
+            subCommandSpec.addOption(builder.build());
+        }
+
+        commandLine.getCommandSpec().addSubcommand(StringUtil.toKabobCase(commandDefinition.getName()[0]), subCommandSpec);
+    }
+
+    private SortedSet<CommandDefinition> getCommands() {
+        final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
+        return commandFactory.getCommands();
+    }
+
+    private void addGlobalArguments() {
+        final CommandLine.Model.CommandSpec rootCommandSpec = commandLine.getCommandSpec();
+
+        final SortedSet<ConfigurationDefinition<?>> globalConfigurations = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getRegisteredDefinitions();
+        for (ConfigurationDefinition<?> def : globalConfigurations) {
+            final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(toArgName(def))
+                    .required(false)
+                    .defaultValue(def.getDefaultValueDescription())
+                    .type(def.getType());
+
+            if (def.getDescription() != null) {
+                optionBuilder.description(def.getDescription());
+            }
+
+            final CommandLine.Model.OptionSpec optionSpec = optionBuilder.build();
+            rootCommandSpec.addOption(optionSpec);
+        }
+    }
+
+    private void configureHelp(CommandLine.Model.CommandSpec commandSpec) {
+        commandSpec.mixinStandardHelpOptions(true);
+        commandSpec.usageMessage()
+                .showDefaultValues(true)
+                .sortOptions(true)
+                .abbreviateSynopsis(true)
+        ;
     }
 
     private static String toArgName(CommandArgumentDefinition<?> def) {
@@ -112,17 +141,5 @@ public class LiquibaseCommandLine {
 
     private static String toArgName(ConfigurationDefinition<?> def) {
         return "--" + StringUtil.toKabobCase(def.getKey()).replace(".", "-");
-    }
-
-    private static Database createDatabase(String url, String username, String password) throws DatabaseException {
-        return CommandLineUtils.createDatabaseObject(Scope.getCurrentScope().getResourceAccessor(), url, username, password,
-                null, null, null, false, false, null, null, null, null, null, null, null);
-    }
-
-    private static String prefixArg(String prefix, String name) {
-        if (prefix == null || prefix.equals("")) {
-            return name;
-        }
-        return prefix + StringUtil.upperCaseFirst(name);
     }
 }

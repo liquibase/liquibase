@@ -21,7 +21,7 @@ import java.util.*;
 public class LiquibaseConfiguration implements SingletonObject {
 
     private final SortedSet<ConfigurationValueProvider> configurationValueProviders;
-    private final SortedSet<ConfigurationDefinition> definitions = new TreeSet<>();
+    private final SortedSet<ConfigurationDefinition<?>> definitions = new TreeSet<>();
 
     /**
      * Track looked up values we have logged to avoid infinite loops between this and the log system using configurations
@@ -142,26 +142,26 @@ public class LiquibaseConfiguration implements SingletonObject {
     /**
      * Registers a {@link ConfigurationDefinition} so it will be returned by {@link #getRegisteredDefinitions()}
      */
-    public void registerDefinition(ConfigurationDefinition definition) {
+    public void registerDefinition(ConfigurationDefinition<?> definition) {
         this.definitions.add(definition);
     }
 
     /**
      * Returns all registered {@link ConfigurationDefinition}s. Registered definitions are used for generated help documentation.
      */
-    public SortedSet<ConfigurationDefinition> getRegisteredDefinitions() {
+    public SortedSet<ConfigurationDefinition<?>> getRegisteredDefinitions() {
         return Collections.unmodifiableSortedSet(this.definitions);
     }
 
     /**
      * @return the registered {@link ConfigurationDefinition} asssociated with this key. Null if none match.
      */
-    public ConfigurationDefinition getRegisteredDefinition(String key) {
-        for (ConfigurationDefinition def : getRegisteredDefinitions()) {
+    public ConfigurationDefinition<?> getRegisteredDefinition(String key) {
+        for (ConfigurationDefinition<?> def : getRegisteredDefinitions()) {
             if (def.getKey().equalsIgnoreCase(key)) {
                 return def;
             }
-            final Set aliasKeys = def.getAliasKeys();
+            final Set<String> aliasKeys = def.getAliasKeys();
             if (aliasKeys != null && aliasKeys.contains(def.getKey())) {
                 return def;
             }

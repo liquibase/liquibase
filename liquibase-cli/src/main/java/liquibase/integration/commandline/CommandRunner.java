@@ -62,7 +62,11 @@ class CommandRunner implements Runnable {
 
                 Scope.child(finalScopeValues, () -> {
                     try {
-                        final CommandScope commandScope = new CommandScope(command.toArray(new String[0]));
+                        String[] commandName = new String[command.size()];
+                        for (int i=0; i<command.size(); i++) {
+                            commandName[i] = StringUtil.toCamelCase(command.get(i));
+                        }
+                        final CommandScope commandScope = new CommandScope(commandName);
 
                         for (CommandLine.Model.OptionSpec option : spec.commandLine().getParseResult().matchedOptions()) {
                             commandScope.addArgumentValue(toCommandArgumentDefinition(option), option.getValue());
