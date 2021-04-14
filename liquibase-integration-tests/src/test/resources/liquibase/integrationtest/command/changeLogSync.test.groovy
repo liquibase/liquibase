@@ -8,15 +8,17 @@ CommandTest.define {
     command = ["changeLogSync"]
 
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Marks all changes as executed in the database
+Long Description: Marks all changes as executed in the database
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  changeLogFile (String) The root changelog file
+  url (String) The JDBC database connection URL
 Optional Args:
-  contexts (String) MISSING DESCRIPTION
+  contexts (String) Context string to use for filtering which changes to mark as executed
     Default: null
-  labels (String) MISSING DESCRIPTION
+  labels (String) Label expression to use for filtering which changes to mark as executed
+    Default: null
+  username (String) The database username
     Default: null
 """
     run {

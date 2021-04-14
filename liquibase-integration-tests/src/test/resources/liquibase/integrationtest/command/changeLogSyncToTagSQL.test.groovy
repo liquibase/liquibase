@@ -7,17 +7,21 @@ import liquibase.change.core.TagDatabaseChange
 CommandTest.define {
     command = ["changeLogSyncToTagSQL"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Output the raw SQL used by Liquibase when running changeLogSyncToTag
+Long Description: Output the raw SQL used by Liquibase when running changeLogSyncToTag
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  changeLogFile (String) The root changelog file
+  url (String) The JDBC database connection URL
 Optional Args:
-  contexts (String) MISSING DESCRIPTION
+  contexts (String) Changeset contexts to match
     Default: null
-  labels (String) MISSING DESCRIPTION
+  labels (String) Changeset labels to match
     Default: null
-  tag (String) MISSING DESCRIPTION
+  outputFile (String) File for writing the SQL
+    Default: null
+  tag (String) Tag ID to execute changeLogSync to
+    Default: null
+  username (String) The database username
     Default: null
 """
 

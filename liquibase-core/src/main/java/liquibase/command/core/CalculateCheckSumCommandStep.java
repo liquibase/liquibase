@@ -7,12 +7,21 @@ public class CalculateCheckSumCommandStep extends AbstractCliWrapperCommandStep 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> CHANGESET_IDENTIFIER_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
+    public static final CommandArgumentDefinition<String> USERNAME_ARG;
+    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(CalculateCheckSumCommandStep.class);
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required().build();
-        URL_ARG = builder.argument("url", String.class).required().build();
-        CHANGESET_IDENTIFIER_ARG = builder.argument("changeSetIdentifier", String.class).required().build();
+        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required()
+            .description("The root changelog file").build();
+        URL_ARG = builder.argument("url", String.class).required()
+            .description("The JDBC database connection URL").build();
+        USERNAME_ARG = builder.argument("username", String.class)
+            .description("The database username").build();
+        PASSWORD_ARG = builder.argument("username", String.class)
+            .description("The database password").build();
+        CHANGESET_IDENTIFIER_ARG = builder.argument("changeSetIdentifier", String.class).required()
+            .description("Change set ID identifier of form filepath::id::author").build();
     }
 
     @Override
@@ -28,5 +37,11 @@ public class CalculateCheckSumCommandStep extends AbstractCliWrapperCommandStep 
         int statusCode = Main.run(args);
         addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
+    }
+
+    @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        commandDefinition.setShortDescription("Calculates and prints a checksum for the changeset");
+        commandDefinition.setLongDescription("Calculates and prints a checksum for the changeset with the given id in the format filepath::id::author");
     }
 }

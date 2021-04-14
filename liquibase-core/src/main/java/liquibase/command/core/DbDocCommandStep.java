@@ -6,13 +6,22 @@ import liquibase.integration.commandline.Main;
 public class DbDocCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
+    public static final CommandArgumentDefinition<String> USERNAME_ARG;
+    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> OUTPUT_DIRECTORY_ARG;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(DbDocCommandStep.class);
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required().build();
-        URL_ARG = builder.argument("url", String.class).required().build();
-        OUTPUT_DIRECTORY_ARG = builder.argument("outputDirectory", String.class).required().build();
+        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
+            .description("The root changelog").required().build();
+        URL_ARG = builder.argument("url", String.class).required()
+            .description("The JDBC database connection URL").build();
+        USERNAME_ARG = builder.argument("username", String.class)
+            .description("The database username").build();
+        PASSWORD_ARG = builder.argument("password", String.class)
+            .description("The database password").build();
+        OUTPUT_DIRECTORY_ARG = builder.argument("outputDirectory", String.class).required()
+            .description("The directory where the documentation is generated").build();
     }
 
     @Override
@@ -28,5 +37,11 @@ public class DbDocCommandStep extends AbstractCliWrapperCommandStep {
         int statusCode = Main.run(args);
         addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
+    }
+
+    @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        commandDefinition.setShortDescription("Generates JavaDoc documentation for the existing database and changelogs");
+        commandDefinition.setLongDescription("Generates JavaDoc documentation for the existing database and changelogs");
     }
 }

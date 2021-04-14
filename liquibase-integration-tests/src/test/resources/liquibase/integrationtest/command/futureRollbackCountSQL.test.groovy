@@ -3,16 +3,20 @@ package liquibase.integrationtest.command
 CommandTest.define {
     command = ["futureRollbackCountSQL"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Generates SQL to sequentially revert <count> number of changes
+Long Description: Generates SQL to sequentially revert <count> number of changes
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  count (Integer) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  changeLogFile (String) The root changelog
+  count (Integer) Number of change sets to generate rollback SQL for
+  url (String) The JDBC database connection URL
 Optional Args:
-  contexts (String) MISSING DESCRIPTION
+  contexts (String) Changeset contexts to match
     Default: null
-  labels (String) MISSING DESCRIPTION
+  labels (String) Changeset labels to match
+    Default: null
+  outputFile (String) File for writing the SQL
+    Default: null
+  username (String) The database username
     Default: null
 """
 

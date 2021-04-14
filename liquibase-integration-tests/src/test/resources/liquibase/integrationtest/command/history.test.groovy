@@ -7,13 +7,17 @@ import java.util.regex.Pattern
 CommandTest.define {
     command = ["history"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: List all deployed changesets and their deployment ID
+Long Description: List all deployed changesets and their deployment ID
 Required Args:
-  database (Database) MISSING DESCRIPTION
+  url (String) Database URL to generate a changelog for
 Optional Args:
-  dateFormat (DateFormat) MISSING DESCRIPTION
-    Default: Platform specific 'short' format
+  changeLogFile (String) File to write changelog to
+    Default: null
+  password (String) Password to use to connect to the database
+    Default: null
+  username (String) Username to use to connect to the database
+    Default: null
 """
 
     run {
@@ -53,6 +57,7 @@ Optional Args:
         ]
 
         expectedResults = [
+                statusMessage: "Successfully executed history",
                 deployments: "1 past deployments",
                 statusCode : 0
         ]

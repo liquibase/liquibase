@@ -70,7 +70,7 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
 
-        SnapshotCommandStep.logUnsupportedDatabase(commandScope.getArgumentValue(REFERENCE_DATABASE_ARG), this.getClass());
+        InternalSnapshotCommandStep.logUnsupportedDatabase(commandScope.getArgumentValue(REFERENCE_DATABASE_ARG), this.getClass());
 
         DiffResult diffResult = createDiffResult(commandScope);
 

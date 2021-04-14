@@ -3,15 +3,18 @@ package liquibase.integrationtest.command
 CommandTest.define {
     command = ["markNextChangeSetRanSQL"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Writes the SQL used to mark the next change you apply as executed in your database
+Long Description: Marks the SQL used to mark the next change you apply as executed in your database
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  url (String) Database URL to generate a changelog for
 Optional Args:
-  contexts (String) MISSING DESCRIPTION
+  changeLogFile (String) File to write changelog to
     Default: null
-  labels (String) MISSING DESCRIPTION
+  outputFile (String) File for writing the SQL
+    Default: null
+  password (String) Password to use to connect to the database
+    Default: null
+  username (String) Username to use to connect to the database
     Default: null
 """
 

@@ -7,19 +7,15 @@ import liquibase.change.core.TagDatabaseChange
 CommandTest.define {
     command = ["diff"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Compare two databases
+Long Description: Compare two databases
 Required Args:
-  referenceUrl (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  referenceUrl (String) The JDBC reference database connection URL
+  url (String) The JDBC target database connection URL
 Optional Args:
-  password (String) MISSING DESCRIPTION
+  outputFile (String) File for writing the diff report
     Default: null
-  referencePassword (String) MISSING DESCRIPTION
-    Default: null
-  referenceUsername (String) MISSING DESCRIPTION
-    Default: null
-  username (String) MISSING DESCRIPTION
+  username (String) The reference database username
     Default: null
 """
     run {

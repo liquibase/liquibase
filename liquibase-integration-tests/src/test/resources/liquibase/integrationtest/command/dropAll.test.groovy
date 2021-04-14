@@ -7,18 +7,18 @@ import liquibase.change.core.TagDatabaseChange
 CommandTest.define {
     command = ["dropAll"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Drop all database objects owned by the user
+Long Description: Drop all database objects owned by the user
 Required Args:
-  database (Database) MISSING DESCRIPTION
+  url (String) Database URL to generate a changelog for
 Optional Args:
-  changelog (DatabaseChangeLog) MISSING DESCRIPTION
+  changeLogFile (String) File to write changelog to
     Default: null
-  changelogFile (String) MISSING DESCRIPTION
+  hubConnectionId (String) The Hub connection ID
     Default: null
-  hubConnectionId (UUID) MISSING DESCRIPTION
+  password (String) Password to use to connect to the database
     Default: null
-  schemas (CatalogAndSchema[]) MISSING DESCRIPTION
+  username (String) Username to use to connect to the database
     Default: null
 """
 

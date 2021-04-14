@@ -3,18 +3,23 @@ package liquibase.integrationtest.command
 CommandTest.define {
     command = ["rollback"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Rollback changes made to the database based on the specific tag
+Long Description: Rollback changes made to the database based on the specific tag
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
   tag (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  url (String) The JDBC database connection URL
 Optional Args:
-  contexts (String) MISSING DESCRIPTION
+  changeLogFile (String) File to write changelog to
     Default: null
-  labels (String) MISSING DESCRIPTION
+  contexts (String) Changeset contexts to match
+    Default: null
+  labels (String) Changeset labels to match
+    Default: null
+  password (String) Password to use to connect to the database
     Default: null
   rollbackScript (String) MISSING DESCRIPTION
+    Default: null
+  username (String) Username to use to connect to the database
     Default: null
 """
 

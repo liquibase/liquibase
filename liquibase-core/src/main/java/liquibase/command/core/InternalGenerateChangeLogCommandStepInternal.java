@@ -55,7 +55,7 @@ public class InternalGenerateChangeLogCommandStepInternal extends InternalDiffCh
 
         final Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
 
-        SnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
+        InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
 
         DiffResult diffResult = createDiffResult(commandScope);
 

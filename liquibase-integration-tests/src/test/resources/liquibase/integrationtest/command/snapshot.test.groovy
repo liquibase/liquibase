@@ -5,27 +5,31 @@ import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
 
 CommandTest.define {
-    command = ["diffChangeLog"]
+    command = ["snapshot"]
     signature = """
-Short Description: Compare two databases to produce changesets and write them to a changelog file
-Long Description: Compare two databases to produce changesets and write them to a changelog file
+Short Description: Capture the current state of the database
+Long Description: Capture the current state of the database
 Required Args:
-  changeLogFile (String) Changelog file to write results
-  referenceUrl (String) The JDBC reference database connection URL
-  url (String) The JDBC target database connection URL
+  url (String) Database URL to generate a changelog for
 Optional Args:
-  username (String) The reference database username
+  changeLogFile (String) File to write changelog to
+    Default: null
+  outputFile (String) The snapshot file to write
+    Default: null
+  password (String) Password to use to connect to the database
+    Default: null
+  snapshotFormat (String) Output format to use (JSON or YAML
+    Default: null
+  username (String) Username to use to connect to the database
     Default: null
 """
 
     run {
         arguments = [
-            referenceUrl: "offline:postgresql?snapshot=snapshot1.json",
-            url: "offline:postgresql?snapshot=snapshot2.json",
-            changeLogFile: "target/test-classes/diffChangeLog-test.xml"
+            changeLogFile: "target/test-classes/changeLog-test.xml"
         ]
         setup {
-            cleanTempResource("diffChangeLog-test.xml")
+            cleanTempResource("changeLog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -55,7 +59,7 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed diffChangeLog",
+                statusMessage: "Successfully executed snapshot",
                 statusCode   : 0
         ]
     }

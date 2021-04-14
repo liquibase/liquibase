@@ -5,14 +5,15 @@ CommandTest.define {
     command = ["calculateCheckSum"]
 
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Calculates and prints a checksum for the changeset
+Long Description: Calculates and prints a checksum for the changeset with the given id in the format filepath::id::author
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  changeSetIdentifier (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  changeLogFile (String) The root changelog file
+  changeSetIdentifier (String) Change set ID identifier of form filepath::id::author
+  url (String) The JDBC database connection URL
 Optional Args:
-  NONE
+  username (String) The database username
+    Default: null
 """
 
     run {

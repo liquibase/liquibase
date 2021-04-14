@@ -10,6 +10,7 @@ import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.SortedMap;
@@ -140,7 +141,7 @@ public class CommandScope {
         } finally {
             try {
                 this.outputStream.flush();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
             }
         }

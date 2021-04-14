@@ -218,22 +218,6 @@
         },
         {
           "column": {
-            "name": "date9",
-            "nullable": true,
-            "order": "12!{java.lang.Integer}",
-            "relation": "liquibase.structure.core.Table#a7c8124",
-            "snapshotId": "a7c8137",
-            "type": {
-              "characterOctetLength": "29!{java.lang.Integer}",
-              "columnSizeUnit": "BYTE!{liquibase.structure.core.DataType$ColumnSizeUnit}",
-              "dataTypeId": "93!{java.lang.Integer}",
-              "radix": "10!{java.lang.Integer}",
-              "typeName": "timestamp"
-            }
-          }
-        },
-        {
-          "column": {
             "name": "dateexecuted",
             "nullable": false,
             "order": "4!{java.lang.Integer}",
@@ -631,9 +615,7 @@
               "liquibase.structure.core.Column#a7c8133",
               "liquibase.structure.core.Column#a7c8134",
               "liquibase.structure.core.Column#a7c8135",
-              "liquibase.structure.core.Column#a7c8136",
-              "liquibase.structure.core.Column#a7c8137"]
-            ,
+              "liquibase.structure.core.Column#a7c8136"],
             "default_tablespace": false,
             "indexes": [
               "liquibase.structure.core.Index#a7c8125"]

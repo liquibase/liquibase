@@ -4,14 +4,14 @@ package liquibase.integrationtest.command
 CommandTest.define {
     command = ["registerChangeLog"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Register the changelog with a Liquibase Hub project
+Long Description: Register the changelog with a Liquibase Hub project
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
+  changeLogFile (String) The root changelog
 Optional Args:
-  hubProjectId (UUID) MISSING DESCRIPTION
+  hubProjectId (UUID) The Hub project ID
     Default: null
-  hubProjectName (String) MISSING DESCRIPTION
+  hubProjectName (String) The Hub project name
     Default: null
 """
     run {

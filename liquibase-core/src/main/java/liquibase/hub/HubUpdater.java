@@ -9,7 +9,7 @@ import liquibase.changelog.visitor.RollbackListVisitor;
 import liquibase.exception.CommandExecutionException;
 import liquibase.command.CommandScope;
 import liquibase.command.core.RegisterChangeLogCommandStep;
-import liquibase.command.core.SyncHubCommandStep;
+import liquibase.command.core.InternalSyncHubCommandStep;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
@@ -313,11 +313,11 @@ public class HubUpdater {
 
     public void syncHub(String changeLogFile, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) throws CommandExecutionException {
         final CommandScope syncHub = new CommandScope("syncHub")
-                .addArgumentValue(SyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(SyncHubCommandStep.URL_ARG, database.getConnection().getURL())
-                .addArgumentValue(SyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId != null ? Objects.toString(hubConnectionId) : null)
-                .addArgumentValue(SyncHubCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(SyncHubCommandStep.FAIL_IF_ONLINE_ARG, false);
+                .addArgumentValue(InternalSyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, database.getConnection().getURL())
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId != null ? Objects.toString(hubConnectionId) : null)
+                .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_ONLINE_ARG, false);
 
         try {
             syncHub.execute();

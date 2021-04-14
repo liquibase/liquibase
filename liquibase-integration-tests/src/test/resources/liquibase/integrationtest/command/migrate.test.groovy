@@ -3,15 +3,20 @@ package liquibase.integrationtest.command
 CommandTest.define {
     command = ["migrate"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Deploys changes from the changelog file that have not yet been deployed
+Long Description: Deploys changes from the changelog file that have not yet been deployed
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  url (String) The JDBC database connection URL
 Optional Args:
-  contexts (String) MISSING DESCRIPTION
+  changeLogFile (String) File to write changelog to
     Default: null
-  labels (String) MISSING DESCRIPTION
+  contexts (String) Context string to use for filtering which changes to migrate
+    Default: null
+  labels (String) Label expression to use for filtering which changes to migrate
+    Default: null
+  password (String) Password to use to connect to the database
+    Default: null
+  username (String) Username to use to connect to the database
     Default: null
 """
 

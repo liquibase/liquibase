@@ -4,14 +4,17 @@ CommandTest.define {
     command = ["dbDoc"]
 
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Generates JavaDoc documentation for the existing database and changelogs
+Long Description: Generates JavaDoc documentation for the existing database and changelogs
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  outputDirectory (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  changeLogFile (String) The root changelog
+  outputDirectory (String) The directory where the documentation is generated
+  url (String) The JDBC database connection URL
 Optional Args:
-  NONE
+  password (String) The database password
+    Default: null
+  username (String) The database username
+    Default: null
 """
 
     run {
