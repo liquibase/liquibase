@@ -59,7 +59,7 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
     - name: Build With Maven
-      run: mvn -B package -DskipTests --file pom.xml
+      run: mvn -B package -DskipTests -Dliquibase.version.qualifier=${{ github.head_ref }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ github.sha }} --file pom.xml
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
