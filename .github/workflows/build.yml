@@ -10,6 +10,7 @@ jobs:
     name: Java ${{ matrix.java }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         java: [8, 11, 16]
     steps:
@@ -32,6 +33,12 @@ jobs:
       run: mvn -B test --file pom.xml
     - name: Stop Docker Databases
       run: docker-compose -f ./liquibase-integration-tests/docker/docker-compose.yml down
+    - name: Archive Test Results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-reports-jdk${{ matrix.java }}
+        path: ./**/target/surefire-reports
       
   build:
     needs: [test]
