@@ -25,7 +25,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
-import liquibase.structure.core.Table;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtil;
 
@@ -33,8 +32,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 public class DiffToChangeLog {
 
@@ -135,7 +132,7 @@ public class DiffToChangeLog {
                             //print changeLog only if there are available changeSets to print instead of printing it always
                             printNew(changeLogSerializer, file);
                         } else {
-            Scope.getCurrentScope().getLog(getClass()).info(file + " exists, appending");
+                            Scope.getCurrentScope().getLog(getClass()).info(file + " exists, appending");
                             ByteArrayOutputStream out = new ByteArrayOutputStream();
                             print(new PrintStream(out, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
 
@@ -145,7 +142,7 @@ public class DiffToChangeLog {
                             innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
                             innerXml = innerXml.trim();
                             if ("".equals(innerXml)) {
-                Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
+                                Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
                                 return;
                             }
 
@@ -180,7 +177,7 @@ public class DiffToChangeLog {
                                     randomAccessFile.seek(length);
                                     randomAccessFile.write(
                                             xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
-                                            (GlobalConfiguration.class).getOutputEncoding()));
+                                                    (GlobalConfiguration.class).getOutputEncoding()));
                                 }
                             }
 
@@ -440,49 +437,7 @@ public class DiffToChangeLog {
                         }
                     });
 
-                    //
-                    // Find the last Table position
-                    // If there are no tables then the
-                    // insertion position is 0
-                    //
-                    AtomicInteger i = new AtomicInteger(); // any mutable integer wrapper
-                    int lastTableIndex = toSort.stream()
-                                      .peek(v -> i.incrementAndGet())
-                                      .anyMatch(item -> item instanceof Table) ? i.get() - 1 : -1;
-                    if (lastTableIndex == -1) {
-                        lastTableIndex = 0;
-                    }
-
-                    //
-                    // Iterate the list of objects which were not sorted
-                    // If there are dependencies on the Columns where were not sorted
-                    // then we will insert these columns in the list after the last Table
-                    // otherwise they just get inserted at the end
-                    //
-                    for (DatabaseObject notSort : toNotSort) {
-                        DatabaseObject objectWithDependency =
-                          objects.stream()
-                                 .filter(obj -> ! (obj instanceof Table))
-                                 .filter(obj -> {
-                                     Set<String> attributes = obj.getAttributes();
-                                     String matched =
-                                         attributes.stream()
-                                                   .filter(sa -> {
-                                                       return columnDependencyExists(notSort, obj, sa);
-                                                   })
-                                                   .findFirst()
-                                                   .orElse(null);
-                                     return matched != null;
-                                 })
-                                 .findFirst()
-                                 .orElse(null);
-                        if (objectWithDependency != null) {
-                            toSort.add(lastTableIndex, notSort);
-                        } else {
-                            toSort.add(notSort);
-                        }
-                    }
-
+                    toSort.addAll(toNotSort);
                     return toSort;
                 }
             } catch (DatabaseException e) {
@@ -491,24 +446,6 @@ public class DiffToChangeLog {
         }
 
         return new ArrayList<>(objects);
-    }
-
-    //
-    // Check each attribute to see if it contains a reference to the Column
-    // Return true if there if the reference exists and false if not
-    //
-    private boolean columnDependencyExists(final DatabaseObject column, DatabaseObject obj, String sa) {
-        Object attrValueObj = obj.getAttribute(sa, Object.class);
-        if (attrValueObj instanceof ArrayList) {
-            List<Object> values = (List<Object>) attrValueObj;
-            return
-                values.stream()
-                      .filter(item -> item instanceof Column)
-                      .anyMatch(item -> item == column);
-        } else if (attrValueObj instanceof Column) {
-            return attrValueObj == column;
-        }
-        return false;
     }
 
     private List<Map<String, ?>> queryForDependenciesOracle(Executor executor, List<String> schemas)
@@ -557,7 +494,7 @@ public class DiffToChangeLog {
      */
     protected boolean supportsSortingObjects(Database database) {
         return (database instanceof AbstractDb2Database) || (database instanceof MSSQLDatabase) || (database instanceof
-            OracleDatabase) || database instanceof PostgresDatabase;
+                OracleDatabase) || database instanceof PostgresDatabase;
     }
 
     /**
@@ -722,8 +659,8 @@ public class DiffToChangeLog {
                         "." + StringUtil.trimToEmpty((String)row.get("REFERENCED_NAME"));
 
                 if (!(tabName.isEmpty() || bName.isEmpty())) {
-                  graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
-                  graph.add(bName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*",""),
+                    graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
+                    graph.add(bName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*",""),
                             tabName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*", ""));
                 }
             }
@@ -928,8 +865,8 @@ public class DiffToChangeLog {
                 this.overriddenIdRoot = true;
             }
 
-             if ((changes != null) && (changes.length > 0)) {
-                 desc = " ("+ StringUtil.join(changes, " :: ", new StringUtil.StringUtilFormatter<Change>() {
+            if ((changes != null) && (changes.length > 0)) {
+                desc = " ("+ StringUtil.join(changes, " :: ", new StringUtil.StringUtilFormatter<Change>() {
                     @Override
                     public String toString(Change obj) {
                         return obj.getDescription();
