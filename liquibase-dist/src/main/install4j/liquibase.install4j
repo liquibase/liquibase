@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="8.0.3" transformSequenceNumber="8">
+<install4j version="8.0.4" transformSequenceNumber="8">
   <directoryPresets config="../../../target/liquibase-${compiler:liquibaseVersion}/examples/start-h2" />
   <application name="Liquibase" applicationId="3799-9228-0984-2853" mediaDir="../../../target" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-installer-${compiler:sys.version}" shortName="liquibase" publisher="Datical" publisherWeb="http://liquibase.org" version="${liquibase.version}" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="3059500009ae915e" javaMinVersion="1.8">
     <languages>
@@ -33,6 +33,14 @@
   <installerGui>
     <applications>
       <application id="installer" beanClass="com.install4j.runtime.beans.applications.InstallerApplication">
+        <variables>
+          <variable name="liquibase.platformType" valueClass="string" registerForResponseFile="true" responseFileComment="" hidden="false" />
+          <variable name="liquibase.hostname" valueClass="string" registerForResponseFile="true" responseFileComment="" hidden="false" />
+          <variable name="liquibase.portnumber" valueClass="undefined" registerForResponseFile="true" responseFileComment="" hidden="false" />
+          <variable name="liquibase.username" valueClass="string" registerForResponseFile="true" responseFileComment="" hidden="false" />
+          <variable name="liquibase.password" valueClass="undefined" registerForResponseFile="false" responseFileComment="" hidden="false" />
+          <variable name="liquibase.database" valueClass="string" registerForResponseFile="true" responseFileComment="" hidden="false" />
+        </variables>
         <startup>
           <screen id="1" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
             <actions>
@@ -141,6 +149,47 @@ return console.askOkCancel(message, true);
                   <property name="checkboxText" type="string">Add Liquibase to PATH</property>
                   <property name="initiallySelected" type="boolean" value="true" />
                   <property name="variableName" type="string">liquibase.addToPath</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent name="PlatformType" id="513" beanClass="com.install4j.runtime.beans.formcomponents.DropdownListComponent" useExternalParametrization="true" externalParametrizationName="Initial Project">
+                <serializedBean>
+                  <property name="labelText" type="string">Platform Type</property>
+                  <property name="listEntries" type="array" elementType="string" length="2">
+                    <element index="0">Oracle</element>
+                    <element index="1">Postgres</element>
+                  </property>
+                  <property name="variableName" type="string">liquibase.platformType</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent name="Hostname" id="514" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
+                <serializedBean>
+                  <property name="labelText" type="string">Hostname</property>
+                  <property name="variableName" type="string">liquibase.hostname</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent name="Portnumber" id="515" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
+                <serializedBean>
+                  <property name="initialText" type="string">1532</property>
+                  <property name="labelText" type="string">Port Number</property>
+                  <property name="variableName" type="string">liquibase.hostname</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent name="Username" id="516" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
+                <serializedBean>
+                  <property name="labelText" type="string">Username</property>
+                  <property name="variableName" type="string">liquibase.username</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent id="517" beanClass="com.install4j.runtime.beans.formcomponents.PasswordComponent">
+                <serializedBean>
+                  <property name="labelText" type="string">Password</property>
+                  <property name="variableName" type="string">liquibase.password</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent name="Database" id="518" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
+                <serializedBean>
+                  <property name="labelText" type="string">Database</property>
+                  <property name="variableName" type="string">liquibase.database</property>
                 </serializedBean>
               </formComponent>
             </formComponents>
