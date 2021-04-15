@@ -445,12 +445,11 @@ public class DiffToChangeLog {
                     // If there are no tables then the
                     // insertion position is 0
                     //
-                    AtomicInteger i = new AtomicInteger(); // any mutable integer wrapper
-                    int lastTableIndex = toSort.stream()
-                                      .peek(v -> i.incrementAndGet())
-                                      .anyMatch(item -> item instanceof Table) ? i.get() - 1 : -1;
-                    if (lastTableIndex == -1) {
-                        lastTableIndex = 0;
+                    int lastTableIndex = 0;
+                    for (int i=0; i < toSort.size(); i++) {
+                        if (toSort.get(i) instanceof Table) {
+                            lastTableIndex=i;
+                        }
                     }
 
                     //
