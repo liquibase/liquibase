@@ -41,7 +41,6 @@ jobs:
         path: ./**/target/surefire-reports
       
   build:
-    needs: [test]
     name: Build Artifacts
     runs-on: ubuntu-latest
     steps:
