@@ -25,7 +25,6 @@
         </exclude>
       </dirEntry>
       <fileEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}/liquibase" fileMode="755" overrideFileMode="true" />
-      <fileEntry mountPoint="58" file="../../../../../../test.sh" />
     </entries>
   </files>
   <launchers>
@@ -44,6 +43,7 @@
           <variable name="liquibase.database" valueClass="string" registerForResponseFile="true" responseFileComment="" hidden="false" />
           <variable name="liquibase.serviceName" valueClass="string" registerForResponseFile="false" responseFileComment="" hidden="false" />
           <variable name="liquibase.projectError" valueClass="string" registerForResponseFile="false" responseFileComment="" hidden="false" />
+          <variable name="liquibase.projectName" valueClass="string" registerForResponseFile="false" responseFileComment="" hidden="false" />
         </variables>
         <startup>
           <screen id="1" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
@@ -243,8 +243,14 @@ context.getBooleanVariable("liquibase.addToPath")</condition>
             <actions>
               <action id="780" beanClass="com.install4j.runtime.beans.actions.misc.RunExecutableAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
-                  <property name="arguments" type="array" elementType="string" length="1">
-                    <element index="0">context.getVariable("liquibase.platformType")</element>
+                  <property name="arguments" type="array" elementType="string" length="7">
+                    <element index="0">${installer:liquibase.platformType}</element>
+                    <element index="1">${installer:liquibase.hostname}</element>
+                    <element index="2">${installer:liquibase.portnumber}</element>
+                    <element index="3">${installer:liquibase.serviceName}</element>
+                    <element index="4">${installer:liquibase.username}</element>
+                    <element index="5">${installer:liquibase.password}</element>
+                    <element index="6">${installer:liquibase.database}</element>
                   </property>
                   <property name="executable">
                     <object class="java.io.File">
@@ -332,6 +338,12 @@ formEnvironment.getFormComponentById("605").setVisible(selectedItem.equals("Orac
                 <serializedBean>
                   <property name="labelText" type="string">Database</property>
                   <property name="variableName" type="string">liquibase.database</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent id="884" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
+                <serializedBean>
+                  <property name="labelText" type="string">Project Name</property>
+                  <property name="variableName" type="string">liquibase.projectName</property>
                 </serializedBean>
               </formComponent>
             </formComponents>
@@ -661,5 +673,5 @@ return console.askYesNo(message, true);
   <buildIds buildAll="false">
     <mediaSet refId="153" />
   </buildIds>
-  <buildOptions verbose="true" debug="true" />
+  <buildOptions verbose="true" />
 </install4j>
