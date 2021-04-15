@@ -1,4 +1,4 @@
-# Liquibase
+# Liquibase [![Build and Test](https://github.com/liquibase/liquibase/actions/workflows/build.yml/badge.svg)](https://github.com/liquibase/liquibase/actions/workflows/build.yml)
 
 Liquibase helps millions of teams track, version, and deploy database schema changes.
 
