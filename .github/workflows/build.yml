@@ -64,4 +64,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: liquibase
-        path: target/*.jar
+        path: |
+          liquibase-dist/target/*.jar
+          liquibase-dist/target/*.zip
+          liquibase-dist/target/*.tar.gz
