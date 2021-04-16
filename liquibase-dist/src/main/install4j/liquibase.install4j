@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="8.0.4" transformSequenceNumber="8">
-  <directoryPresets config="../../../../../../testlocal.sh" />
+<install4j version="9.0.1" transformSequenceNumber="9">
+  <directoryPresets config="../icons" />
   <application name="Liquibase" applicationId="3799-9228-0984-2853" mediaDir="../../../target" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-installer-${compiler:sys.version}" shortName="liquibase" publisher="Datical" publisherWeb="http://liquibase.org" version="${compiler:liquibaseVersion}" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="3059500009ae915e" javaMinVersion="1.8">
     <languages>
       <principalLanguage id="en" customLocalizationFile="./messages.properties" />
@@ -11,7 +11,7 @@
     </variables>
     <codeSigning macEnabled="true" macPkcs12File="../../../../../build-logic/certs/code-signing/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../../../build-logic/certs/code-signing/datical_windows.pfx" />
   </application>
-  <files>
+  <files preserveSymlinks="false">
     <mountPoints>
       <mountPoint id="411" location="examples" />
       <mountPoint id="58" />
@@ -25,7 +25,6 @@
         </exclude>
       </dirEntry>
       <fileEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}/liquibase" fileMode="755" overrideFileMode="true" />
-      <fileEntry mountPoint="58" file="../../../../../../testlocal.sh" />
     </entries>
   </files>
   <launchers>
@@ -35,16 +34,19 @@
   <installerGui>
     <applications>
       <application id="installer" beanClass="com.install4j.runtime.beans.applications.InstallerApplication">
+        <serializedBean>
+          <property name="frameHeight" type="int" value="420" />
+        </serializedBean>
         <variables>
-          <variable name="liquibase.platformType" valueClass="string" registerForResponseFile="true" responseFileComment="" hidden="false" />
-          <variable name="liquibase.hostname" valueClass="string" registerForResponseFile="true" responseFileComment="" hidden="false" />
-          <variable name="liquibase.portnumber" valueClass="undefined" registerForResponseFile="true" responseFileComment="" hidden="false" />
-          <variable name="liquibase.username" valueClass="string" registerForResponseFile="true" responseFileComment="" hidden="false" />
-          <variable name="liquibase.password" valueClass="undefined" registerForResponseFile="false" responseFileComment="" hidden="false" />
-          <variable name="liquibase.database" valueClass="string" registerForResponseFile="true" responseFileComment="" hidden="false" />
-          <variable name="liquibase.serviceName" valueClass="string" registerForResponseFile="false" responseFileComment="" hidden="false" />
-          <variable name="liquibase.projectError" valueClass="string" registerForResponseFile="false" responseFileComment="" hidden="false" />
-          <variable name="liquibase.projectName" valueClass="string" registerForResponseFile="false" responseFileComment="" hidden="false" />
+          <variable name="liquibase.platformType" valueClass="string" registerForResponseFile="true" />
+          <variable name="liquibase.hostname" valueClass="string" registerForResponseFile="true" />
+          <variable name="liquibase.portnumber" registerForResponseFile="true" />
+          <variable name="liquibase.username" valueClass="string" registerForResponseFile="true" />
+          <variable name="liquibase.password" />
+          <variable name="liquibase.database" valueClass="string" registerForResponseFile="true" />
+          <variable name="liquibase.serviceName" valueClass="string" />
+          <variable name="liquibase.projectError" valueClass="string" />
+          <variable name="liquibase.projectName" valueClass="string" />
         </variables>
         <startup>
           <screen id="1" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
@@ -70,7 +72,12 @@
 </property>
                     </object>
                   </property>
-                  <property name="buttonText" type="string"> Install/Update Liquibase</property>
+                  <property name="buttonText" type="string">Install/Update Liquibase</property>
+                  <property name="labelIconFile">
+                    <object class="com.install4j.api.beans.ExternalFile">
+                      <string>../icons/install_icon.png</string>
+                    </object>
+                  </property>
                 </serializedBean>
               </formComponent>
               <formComponent name="Create Liquibase Project Template" id="779" beanClass="com.install4j.runtime.beans.formcomponents.ButtonComponent">
@@ -81,7 +88,12 @@
 </property>
                     </object>
                   </property>
-                  <property name="buttonText" type="string">Create Liquibase Project Template</property>
+                  <property name="buttonText" type="string">Setup Liquibase Project</property>
+                  <property name="labelIconFile">
+                    <object class="com.install4j.api.beans.ExternalFile">
+                      <string>../icons/configure_icon.png</string>
+                    </object>
+                  </property>
                 </serializedBean>
               </formComponent>
             </formComponents>
@@ -235,10 +247,10 @@ context.getBooleanVariable("liquibase.addToPath")</condition>
               </formComponent>
             </formComponents>
           </screen>
-          <screen name="Initial Project Setup" id="602" beanClass="com.install4j.runtime.beans.screens.FormScreen" rollbackBarrierExitCode="0">
+          <screen name="Setup Liquibase Project" id="602" beanClass="com.install4j.runtime.beans.screens.FormScreen" rollbackBarrierExitCode="0">
             <serializedBean>
-              <property name="subTitle" type="string">Creates a Liquibase Project that corresponds to application project</property>
-              <property name="title" type="string">Initial Project Setup</property>
+              <property name="subTitle" type="string">Create a Liquibase project that corresponds to your application</property>
+              <property name="title" type="string">Setup Liquibase Project</property>
               <property name="visibilityForNavigationDirection" type="enum" class="com.install4j.runtime.beans.screens.VisibilityForNavigationDirection" value="NEXT_ONLY" />
             </serializedBean>
             <actions>
@@ -256,7 +268,7 @@ context.getBooleanVariable("liquibase.addToPath")</condition>
                   </property>
                   <property name="executable">
                     <object class="java.io.File">
-                      <string>test.sh</string>
+                      <string>project_setup.sh</string>
                     </object>
                   </property>
                   <property name="stderrRedirectionMode" type="enum" class="com.install4j.runtime.installer.helper.launching.OutputRedirectionMode" value="INHERIT" />
@@ -273,7 +285,7 @@ context.getBooleanVariable("liquibase.addToPath")</condition>
               </action>
             </actions>
             <formComponents>
-              <formComponent id="604" beanClass="com.install4j.runtime.beans.formcomponents.DropdownListComponent">
+              <formComponent name="Database Platform" id="604" beanClass="com.install4j.runtime.beans.formcomponents.DropdownListComponent">
                 <serializedBean>
                   <property name="labelText" type="string">Platform Type</property>
                   <property name="listEntries" type="array" elementType="string" length="13">
@@ -293,23 +305,7 @@ context.getBooleanVariable("liquibase.addToPath")</condition>
                   </property>
                   <property name="selectionChangedScript">
                     <object class="com.install4j.api.beans.ScriptProperty">
-                      <property name="value" type="string">// Every form component has a unique ID, you can look up the ID in the install4j IDE by clicking
-// on the "Show IDs" button next to the list of form components.
-
-// If the other form component is on the same form, it can be retrieved from the form environment parameter.
-
-
-
-
-formEnvironment.getFormComponentById("605").setVisible(selectedItem.equals("Oracle"));
-formEnvironment.getFormComponentById("611").setVisible(selectedItem.equals("Postgres"));
-
-//if(platformType.equalsIgnoreCase("postgres")) {
-   // FormComponent component1 = formEnvironment.getFormComponentById("605");
-    //component1.setVisible(false);
-//}
-
-</property>
+                      <property name="value" type="string">formEnvironment.getFormComponentById("605").setVisible(selectedItem.equals("Oracle"))</property>
                     </object>
                   </property>
                   <property name="variableName" type="string">liquibase.platformType</property>
@@ -318,51 +314,65 @@ formEnvironment.getFormComponentById("611").setVisible(selectedItem.equals("Post
               <formComponent name="Hostname" id="603" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
                 <serializedBean>
                   <property name="checkIfEmpty" type="boolean" value="true" />
+                  <property name="helpText" type="string">The hostname for your database</property>
                   <property name="labelText" type="string">Hostname</property>
                   <property name="variableName" type="string">liquibase.hostname</property>
                 </serializedBean>
               </formComponent>
               <formComponent name="PortNumber" id="610" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
                 <serializedBean>
+                  <property name="helpText" type="string">The database port number for the database connection</property>
                   <property name="labelText" type="string">Port Number</property>
                   <property name="variableName" type="string">liquibase.portnumber</property>
                 </serializedBean>
               </formComponent>
               <formComponent name="Service Name" id="605" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
                 <serializedBean>
+                  <property name="helpText" type="string">The Oracle Service Name or SID</property>
                   <property name="labelText" type="string">Service Name</property>
                   <property name="variableName" type="string">liquibase.serviceName</property>
                 </serializedBean>
               </formComponent>
               <formComponent name="Username" id="607" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
                 <serializedBean>
+                  <property name="helpText" type="string">The username required to connect to your database</property>
                   <property name="labelText" type="string">Username</property>
                   <property name="variableName" type="string">liquibase.username</property>
                 </serializedBean>
               </formComponent>
               <formComponent id="609" beanClass="com.install4j.runtime.beans.formcomponents.PasswordComponent">
                 <serializedBean>
+                  <property name="helpText" type="string">The password required to connect to your database</property>
                   <property name="labelText" type="string">Password</property>
                   <property name="variableName" type="string">liquibase.password</property>
                 </serializedBean>
               </formComponent>
               <formComponent name="Database" id="611" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
                 <serializedBean>
+                  <property name="helpText" type="string">The database name</property>
                   <property name="labelText" type="string">Database</property>
                   <property name="variableName" type="string">liquibase.database</property>
                 </serializedBean>
               </formComponent>
-              <formComponent id="884" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
+              <formComponent id="887" beanClass="com.install4j.runtime.beans.formcomponents.SeparatorComponent" />
+              <formComponent name="Project Name" id="884" beanClass="com.install4j.runtime.beans.formcomponents.TextfieldComponent">
                 <serializedBean>
+                  <property name="helpText" type="string">Name the Liquibase project the same as the corresponding application</property>
                   <property name="labelText" type="string">Project Name</property>
                   <property name="variableName" type="string">liquibase.projectName</property>
                 </serializedBean>
               </formComponent>
             </formComponents>
           </screen>
-          <screen id="20" beanClass="com.install4j.runtime.beans.screens.FinishedScreen" styleId="41" rollbackBarrierExitCode="0">
+          <screen id="20" beanClass="com.install4j.runtime.beans.screens.FinishedScreen" styleId="41" rollbackBarrierExitCode="0" finishScreen="true">
             <actions>
-              <action name="Open Install Directory" id="336" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" rollbackBarrierExitCode="0">
+              <action id="885" beanClass="com.install4j.runtime.beans.actions.finish.ShowURLAction" actionElevationType="none" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="urlSpec" type="string">file://${installer:sys.installationDir}/examples/LiquibaseProjectCreatorRunningYourFirstUpdate.html</property>
+                </serializedBean>
+                <condition>return !context.isUnattended() &amp;&amp; context.getBooleanVariable("liquibase.openGettingStarted");</condition>
+              </action>
+              <action name="Open Install Directory" id="336" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" enabled="false" rollbackBarrierExitCode="0">
                 <serializedBean>
                   <property name="script">
                     <object class="com.install4j.api.beans.ScriptProperty">
@@ -380,7 +390,14 @@ return true;</property>
                   <property name="labelText" type="string">${form:finishedMessage}</property>
                 </serializedBean>
               </formComponent>
-              <formComponent name="Show Installed Dir" id="335" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+              <formComponent name="Show Getting Started" id="886" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+                <serializedBean>
+                  <property name="checkboxText" type="string">Open Getting Started Instructions</property>
+                  <property name="initiallySelected" type="boolean" value="true" />
+                  <property name="variableName" type="string">liquibase.openGettingStarted</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent name="Show Installed Dir" id="335" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent" enabled="false">
                 <serializedBean>
                   <property name="checkboxText" type="string">Open Installed Location</property>
                   <property name="initiallySelected" type="boolean" value="true" />
@@ -485,11 +502,19 @@ return console.askYesNo(message, true);
           <group id="42" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize banner image" externalParametrizationMode="include">
             <serializedBean>
               <property name="backgroundColor">
-                <object class="java.awt.Color">
-                  <int>255</int>
-                  <int>255</int>
-                  <int>255</int>
-                  <int>255</int>
+                <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                  <object class="java.awt.Color">
+                    <int>255</int>
+                    <int>255</int>
+                    <int>255</int>
+                    <int>255</int>
+                  </object>
+                  <object class="java.awt.Color">
+                    <int>49</int>
+                    <int>52</int>
+                    <int>53</int>
+                    <int>255</int>
+                  </object>
                 </object>
               </property>
               <property name="borderSides">
@@ -498,11 +523,19 @@ return console.askYesNo(message, true);
                 </object>
               </property>
               <property name="imageEdgeBackgroundColor">
-                <object class="java.awt.Color">
-                  <int>25</int>
-                  <int>143</int>
-                  <int>220</int>
-                  <int>255</int>
+                <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                  <object class="java.awt.Color">
+                    <int>25</int>
+                    <int>143</int>
+                    <int>220</int>
+                    <int>255</int>
+                  </object>
+                  <object class="java.awt.Color">
+                    <int>0</int>
+                    <int>74</int>
+                    <int>151</int>
+                    <int>255</int>
+                  </object>
                 </object>
               </property>
               <property name="imageEdgeBorder" type="boolean" value="true" />
@@ -556,11 +589,19 @@ return console.askYesNo(message, true);
               <group id="49" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize title bar" externalParametrizationMode="include">
                 <serializedBean>
                   <property name="backgroundColor">
-                    <object class="java.awt.Color">
-                      <int>255</int>
-                      <int>255</int>
-                      <int>255</int>
-                      <int>255</int>
+                    <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                      <object class="java.awt.Color">
+                        <int>255</int>
+                        <int>255</int>
+                        <int>255</int>
+                        <int>255</int>
+                      </object>
+                      <object class="java.awt.Color">
+                        <int>49</int>
+                        <int>52</int>
+                        <int>53</int>
+                        <int>255</int>
+                      </object>
                     </object>
                   </property>
                   <property name="borderSides">
@@ -683,7 +724,7 @@ return console.askYesNo(message, true);
     </macosFolder>
   </mediaSets>
   <buildIds buildAll="false">
-    <mediaSet refId="153" />
+    <mediaSet refId="154" />
   </buildIds>
-  <buildOptions verbose="true" />
+  <buildOptions verbose="true" disableJreBundling="true" />
 </install4j>
