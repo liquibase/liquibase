@@ -724,7 +724,7 @@ return console.askYesNo(message, true);
     </macosFolder>
   </mediaSets>
   <buildIds buildAll="false">
-    <mediaSet refId="154" />
+    <mediaSet refId="153" />
   </buildIds>
-  <buildOptions verbose="true" disableJreBundling="true" />
+  <buildOptions verbose="true" />
 </install4j>
