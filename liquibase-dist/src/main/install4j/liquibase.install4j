@@ -276,10 +276,20 @@ context.getBooleanVariable("liquibase.addToPath")</condition>
               <formComponent id="604" beanClass="com.install4j.runtime.beans.formcomponents.DropdownListComponent">
                 <serializedBean>
                   <property name="labelText" type="string">Platform Type</property>
-                  <property name="listEntries" type="array" elementType="string" length="3">
+                  <property name="listEntries" type="array" elementType="string" length="13">
                     <element index="0">Oracle</element>
                     <element index="1">Postgres</element>
-                    <element index="2">MongoDB</element>
+                    <element index="2">SqlServer</element>
+                    <element index="3">DB2</element>
+                    <element index="4">MySql</element>
+                    <element index="5">Sybase</element>
+                    <element index="6">MongoDB</element>
+                    <element index="7">MariaDB</element>
+                    <element index="8">Snowflake</element>
+                    <element index="9">Redshift</element>
+                    <element index="10">Sqlite</element>
+                    <element index="11">Cassandra</element>
+                    <element index="12">CockroachDB</element>
                   </property>
                   <property name="selectionChangedScript">
                     <object class="com.install4j.api.beans.ScriptProperty">
@@ -292,7 +302,7 @@ context.getBooleanVariable("liquibase.addToPath")</condition>
 
 
 formEnvironment.getFormComponentById("605").setVisible(selectedItem.equals("Oracle"));
-
+formEnvironment.getFormComponentById("611").setVisible(selectedItem.equals("Postgres"));
 
 //if(platformType.equalsIgnoreCase("postgres")) {
    // FormComponent component1 = formEnvironment.getFormComponentById("605");
