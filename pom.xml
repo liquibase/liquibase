@@ -22,6 +22,7 @@
         <module>liquibase-integration-tests</module>
         <module>liquibase-dist</module>
         <module>liquibase-extension-examples</module>
+        <module>liquibase-extension-testing</module>
     </modules>
 
     <ciManagement>
