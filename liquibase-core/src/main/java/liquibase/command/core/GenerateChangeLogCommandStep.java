@@ -11,10 +11,14 @@ public class GenerateChangeLogCommandStep extends AbstractCliWrapperCommandStep 
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(GenerateChangeLogCommandStep.class);
-        USERNAME_ARG = builder.argument("username", String.class).build();
-        PASSWORD_ARG = builder.argument("password", String.class).build();
-        URL_ARG = builder.argument("url", String.class).required().build();
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).build();
+        URL_ARG = builder.argument("url", String.class).required()
+            .description("The JDBC database connection URL").build();
+        USERNAME_ARG = builder.argument("username", String.class)
+            .description("Username to use to connect to the database").build();
+        PASSWORD_ARG = builder.argument("password", String.class)
+            .description("Password to use to connect to the database").build();
+        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
+            .description("File to write changelog to").build();
     }
 
     @Override
@@ -30,5 +34,11 @@ public class GenerateChangeLogCommandStep extends AbstractCliWrapperCommandStep 
         int statusCode = Main.run(args);
         addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
+    }
+
+    @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        commandDefinition.setShortDescription("Generate a changelog");
+        commandDefinition.setLongDescription("Writes Change Log XML to copy the current state of the database to standard out or a file");
     }
 }

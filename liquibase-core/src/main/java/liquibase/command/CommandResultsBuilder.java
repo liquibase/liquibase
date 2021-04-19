@@ -66,7 +66,7 @@ public class CommandResultsBuilder {
         output.flush();
         try {
             outputStream.flush();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Error flushing " + StringUtil.join(commandScope.getCommand().getName(), " ") + " output: " + e.getMessage(), e);
         }
 

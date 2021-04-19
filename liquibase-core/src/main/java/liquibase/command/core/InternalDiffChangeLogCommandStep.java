@@ -39,7 +39,7 @@ public class InternalDiffChangeLogCommandStep extends InternalDiffCommandStep {
         Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
         String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILENAME_ARG);
 
-        SnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
+        InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
 
         DiffResult diffResult = createDiffResult(commandScope);
 

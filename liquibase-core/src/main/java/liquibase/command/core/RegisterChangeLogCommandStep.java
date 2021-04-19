@@ -1,6 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangelogRewriter;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
@@ -13,13 +14,16 @@ import liquibase.hub.HubServiceFactory;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Project;
+import liquibase.parser.ChangeLogParser;
+import liquibase.parser.ChangeLogParserFactory;
+import liquibase.resource.ResourceAccessor;
 import liquibase.ui.UIService;
 import liquibase.util.StringUtil;
 
 import java.io.PrintWriter;
 import java.util.*;
 
-public class RegisterChangeLogCommandStep extends AbstractConfigurableCommandStep {
+public class RegisterChangeLogCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
@@ -27,9 +31,12 @@ public class RegisterChangeLogCommandStep extends AbstractConfigurableCommandSte
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(RegisterChangeLogCommandStep.class);
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required().build();
-        HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", UUID.class).optional().build();
-        HUB_PROJECT_NAME_ARG = builder.argument("hubProjectName", String.class).optional().build();
+        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required()
+            .description("The root changelog").build();
+        HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", UUID.class).optional()
+            .description("The Hub project ID").build();
+        HUB_PROJECT_NAME_ARG = builder.argument("hubProjectName", String.class).optional()
+            .description("The Hub project name").build();
     }
 
     @Override
@@ -230,5 +237,18 @@ public class RegisterChangeLogCommandStep extends AbstractConfigurableCommandSte
                 " Learn more at https://hub.liquibase.com.\n?");
 
         return StringUtil.trimToEmpty(ui.prompt(prompt.toString(), "N", null, String.class));
+    }
+
+    @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        commandDefinition.setShortDescription("Register the changelog with a Liquibase Hub project");
+        commandDefinition.setLongDescription("Register the changelog with a Liquibase Hub project");
+    }
+
+    private DatabaseChangeLog parseChangeLogFile(String changeLogFile) throws LiquibaseException {
+        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+        return parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
     }
 }

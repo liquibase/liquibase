@@ -14,13 +14,20 @@ public class DiffChangeLogCommandStep extends AbstractCliWrapperCommandStep {
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(DiffChangeLogCommandStep.class);
-        REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class).build();
-        REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class).build();
-        REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required().build();
-        USERNAME_ARG = builder.argument("username", String.class).build();
-        PASSWORD_ARG = builder.argument("password", String.class).build();
-        URL_ARG = builder.argument("url", String.class).required().build();
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).build();
+        REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required()
+            .description("The JDBC reference database connection URL").build();
+        REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class)
+            .description("The reference database username").build();
+        REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class)
+            .description("The reference database password").build();
+        URL_ARG = builder.argument("url", String.class).required()
+            .description("The JDBC target database connection URL").build();
+        USERNAME_ARG = builder.argument("username", String.class)
+            .description("The target database username").build();
+        PASSWORD_ARG = builder.argument("username", String.class)
+            .description("The target database password").build();
+        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required()
+            .description("Changelog file to write results").build();
     }
 
     @Override
@@ -36,5 +43,11 @@ public class DiffChangeLogCommandStep extends AbstractCliWrapperCommandStep {
         int statusCode = Main.run(args);
         addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
+    }
+
+    @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        commandDefinition.setShortDescription("Compare two databases to produce changesets and write them to a changelog file");
+        commandDefinition.setLongDescription("Compare two databases to produce changesets and write them to a changelog file");
     }
 }

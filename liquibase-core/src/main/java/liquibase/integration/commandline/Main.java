@@ -1522,17 +1522,16 @@ public class Main {
                         diffOutputControl);
                 return;
             } else if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {
-                CommandScope snapshotCommand = new CommandScope(COMMANDS.SNAPSHOT);
+                CommandScope snapshotCommand = new CommandScope("internalSnapshot");
                 snapshotCommand
-                        .addArgumentValue(SnapshotCommandStep.DATABASE_ARG, database)
-                        .addArgumentValue(SnapshotCommandStep.SCHEMAS_ARG, SnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
-                        .addArgumentValue(SnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
+                        .addArgumentValue(InternalSnapshotCommandStep.DATABASE_ARG, database)
+                        .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
+                        .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
 
                 Writer outputWriter = getOutputWriter();
-                String result = SnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute());
+                String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute());
                 outputWriter.write(result);
                 outputWriter.flush();
-                outputWriter.close();
                 return;
             } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
                 CommandScope executeSqlCommand = new CommandScope(COMMANDS.EXECUTE_SQL)
@@ -1545,20 +1544,18 @@ public class Main {
                 String output = (String)results.getResult("output");
                 outputWriter.write(output);
                 outputWriter.flush();
-                outputWriter.close();
                 return;
             } else if (COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(command)) {
                 CommandScope snapshotCommand = new CommandScope(COMMANDS.SNAPSHOT);
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
                 snapshotCommand
-                        .addArgumentValue(SnapshotCommandStep.DATABASE_ARG, referenceDatabase)
-                        .addArgumentValue(SnapshotCommandStep.SCHEMAS_ARG, SnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
-                        .addArgumentValue(SnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
+                        .addArgumentValue(InternalSnapshotCommandStep.DATABASE_ARG, referenceDatabase)
+                        .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
+                        .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
 
                 Writer outputWriter = getOutputWriter();
-                outputWriter.write(SnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute()));
+                outputWriter.write(InternalSnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute()));
                 outputWriter.flush();
-                outputWriter.close();
 
                 return;
             }
@@ -1716,14 +1713,14 @@ public class Main {
                         LOG.warning("\n" + warningMessage);
                     }
                 }
-                CommandScope dropAllCommand = new CommandScope(COMMANDS.DROP_ALL);
+                CommandScope dropAllCommand = new CommandScope("internalDropAll");
                 if (hubConnectionId != null) {
-                    dropAllCommand.addArgumentValue(DropAllCommandStep.HUB_CONNECTION_ID, UUID.fromString(hubConnectionId));
+                    dropAllCommand.addArgumentValue(InternalDropAllCommandStep.HUB_CONNECTION_ID_ARG, UUID.fromString(hubConnectionId));
                 }
                 dropAllCommand
-                        .addArgumentValue(DropAllCommandStep.DATABASE_ARG, liquibase.getDatabase())
-                        .addArgumentValue(DropAllCommandStep.SCHEMAS_ARG, SnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
-                        .addArgumentValue(DropAllCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+                        .addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, liquibase.getDatabase())
+                        .addArgumentValue(InternalDropAllCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
+                        .addArgumentValue(InternalDropAllCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
                 dropAllCommand.execute();
                 return;
@@ -1899,8 +1896,8 @@ public class Main {
                 } else if (COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(command)) {
                     liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(labels));
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
-                    CommandScope historyCommand = new CommandScope("history");
-                    historyCommand.addArgumentValue(HistoryCommandStep.DATABASE_ARG, database);
+                    CommandScope historyCommand = new CommandScope("internalHistory");
+                    historyCommand.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, database);
                     historyCommand.setOutput(getOutputStream());
 
                     historyCommand.execute();
@@ -1927,14 +1924,14 @@ public class Main {
 
     private void executeSyncHub(Database database, Liquibase liquibase) throws CommandLineParsingException, LiquibaseException, CommandExecutionException {
         Map<String, Object> argsMap = new HashMap<>();
-        CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.SYNC_HUB, argsMap);
+        CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalSyncHub", argsMap);
 
         liquibaseCommand
-                .addArgumentValue(SyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
-                .addArgumentValue(SyncHubCommandStep.URL_ARG, url)
-                .addArgumentValue(SyncHubCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(SyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(SyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
+                .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, url)
+                .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(InternalSyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
 
         liquibaseCommand.execute();
     }

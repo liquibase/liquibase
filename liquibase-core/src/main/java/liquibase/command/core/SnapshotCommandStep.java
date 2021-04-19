@@ -1,126 +1,50 @@
 package liquibase.command.core;
 
-import liquibase.CatalogAndSchema;
-import liquibase.Scope;
 import liquibase.command.*;
-import liquibase.database.Database;
-import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.core.*;
-import liquibase.exception.LiquibaseException;
-import liquibase.license.LicenseServiceUtils;
-import liquibase.serializer.SnapshotSerializerFactory;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.snapshot.SnapshotListener;
-import liquibase.util.StringUtil;
+import liquibase.integration.commandline.Main;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-public class SnapshotCommandStep extends AbstractCommandStep {
-
-    public static final CommandArgumentDefinition<Database> DATABASE_ARG;
-    public static final CommandArgumentDefinition<CatalogAndSchema[]> SCHEMAS_ARG;
-    public static final CommandArgumentDefinition<String> SERIALIZER_FORMAT_ARG;
-    public static final CommandArgumentDefinition<SnapshotListener> SNAPSHOT_LISTENER_ARG;
-
-    private Map<String, Object> snapshotMetadata;
+public class SnapshotCommandStep extends AbstractCliWrapperCommandStep {
+    public static final CommandArgumentDefinition<String> USERNAME_ARG;
+    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
+    public static final CommandArgumentDefinition<String> URL_ARG;
+    public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
+    public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
+    public static final CommandArgumentDefinition<String> SNAPSHOT_FORMAT_ARG;
 
     static {
-        final CommandStepBuilder builder = new CommandStepBuilder(SnapshotCommandStep.class);
-
-        DATABASE_ARG = builder.argument("database", Database.class).required().build();
-        SCHEMAS_ARG = builder.argument("schemas", CatalogAndSchema[].class).required().build();
-        SERIALIZER_FORMAT_ARG = builder.argument("serializerFormat", String.class).required().build();
-        SNAPSHOT_LISTENER_ARG = builder.argument("snapshotListener", SnapshotListener.class).required().build();
+        CommandStepBuilder builder = new CommandStepBuilder(SnapshotCommandStep.class);
+        URL_ARG = builder.argument("url", String.class).required()
+            .description("The JDBC database connection URL").build();
+        USERNAME_ARG = builder.argument("username", String.class)
+            .description("Username to use to connect to the database").build();
+        PASSWORD_ARG = builder.argument("password", String.class)
+            .description("Password to use to connect to the database").build();
+        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
+            .description("The root changelog").build();
+        OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
+            .description("The snapshot file to write").build();
+        SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)
+            .description("Output format to use (JSON or YAML").build();
     }
 
     @Override
     public String[] getName() {
-        return new String[]{"snapshot"};
-    }
-
-
-    public static CatalogAndSchema[] parseSchemas(Database database, String... schemas) {
-        if ((schemas == null) || (schemas.length == 0) || (schemas[0] == null)) {
-            return null;
-        }
-
-        schemas = StringUtil.join(schemas, ",").split("\\s*,\\s*");
-        List<CatalogAndSchema> finalList = new ArrayList<>();
-        for (String schema : schemas) {
-            finalList.add(new CatalogAndSchema(null, schema).customize(database));
-        }
-
-        return finalList.toArray(new CatalogAndSchema[finalList.size()]);
-    }
-
-    public Map<String, Object> getSnapshotMetadata() {
-        return snapshotMetadata;
-    }
-
-    public void setSnapshotMetadata(Map<String, Object> snapshotMetadata) {
-        this.snapshotMetadata = snapshotMetadata;
+        return new String[] {"snapshot"};
     }
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
 
-        Database database = commandScope.getArgumentValue(DATABASE_ARG);
-        SnapshotListener snapshotListener = commandScope.getArgumentValue(SNAPSHOT_LISTENER_ARG);
-        CatalogAndSchema[] schemas = commandScope.getArgumentValue(SCHEMAS_ARG);
-
-        SnapshotCommandStep.logUnsupportedDatabase(database, this.getClass());
-        SnapshotControl snapshotControl = new SnapshotControl(database);
-        snapshotControl.setSnapshotListener(snapshotListener);
-
-        if (schemas == null) {
-            schemas = new CatalogAndSchema[]{database.getDefaultSchema()};
-        }
-
-        ObjectQuotingStrategy originalQuotingStrategy = database.getObjectQuotingStrategy();
-
-        database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
-        DatabaseSnapshot snapshot;
-        try {
-            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
-        } finally {
-            database.setObjectQuotingStrategy(originalQuotingStrategy);
-        }
-
-        snapshot.setMetadata(this.getSnapshotMetadata());
-
-        resultsBuilder.addResult("snapshot", snapshot);
+        String[] args = createArgs(commandScope);
+        int statusCode = Main.run(args);
+        addStatusMessage(resultsBuilder, statusCode);
+        resultsBuilder.addResult("statusCode", statusCode);
     }
 
-    public static String printSnapshot(CommandScope commandScope, CommandResults snapshotResults) throws LiquibaseException {
-        String format = commandScope.getArgumentValue(SnapshotCommandStep.SERIALIZER_FORMAT_ARG);
-        if (format == null) {
-            format = "txt";
-        }
-
-        return SnapshotSerializerFactory.getInstance().getSerializer(format.toLowerCase(Locale.US)).serialize((DatabaseSnapshot) snapshotResults.getResult("snapshot"), true);
+    @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        commandDefinition.setShortDescription("Capture the current state of the database");
+        commandDefinition.setLongDescription("Capture the current state of the database");
     }
-//
-//        public void merge(SnapshotCommandResult resultToMerge) {
-//            this.snapshot.merge(resultToMerge.snapshot);
-//        }
-//    }
-
-    public static void logUnsupportedDatabase(Database database, Class callingClass) {
-        if (LicenseServiceUtils.checkForValidLicense("Liquibase Pro")) {
-            if (!(database instanceof MSSQLDatabase
-                    || database instanceof OracleDatabase
-                    || database instanceof MySQLDatabase
-                    || database instanceof DB2Database
-                    || database instanceof PostgresDatabase)) {
-                Scope.getCurrentScope().getUI().sendMessage("INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
-            }
-        }
-    }
-
 }
