@@ -15,9 +15,12 @@ Required Args:
 Optional Args:
   outputFile (String) File for writing the diff report
     Default: null
+  password (String) The reference database password
+    Default: null
   username (String) The reference database username
     Default: null
 """
+
     run {
         arguments = [
             referenceUrl: "offline:postgresql?snapshot=snapshot1.json",

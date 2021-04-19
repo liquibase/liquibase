@@ -3,15 +3,19 @@ package liquibase.integrationtest.command
 CommandTest.define {
     command = ["unexpectedChangeSets"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Generate a list of changesets that have been executed but are not in the current changelog
+Long Description: Generate a list of changesets that have been executed but are not in the current changelog
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  url (String) The JDBC database connection URL
+  verbose (String) Verbose flag
 Optional Args:
-  contexts (String) MISSING DESCRIPTION
+  changeLogFile (String) The root changelog
     Default: null
-  verbose (String) MISSING DESCRIPTION
+  contexts (String) Changeset contexts to match
+    Default: null
+  password (String) Password to use to connect to the database
+    Default: null
+  username (String) Username to use to connect to the database
     Default: null
 """
 

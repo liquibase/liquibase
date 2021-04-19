@@ -3,12 +3,15 @@ package liquibase.integrationtest.command
 CommandTest.define {
     command = ["tag"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Mark the current database state with the specified tag
+Long Description: Mark the current database state with the specified tag
 Required Args:
-  url (String) MISSING DESCRIPTION
+  tag (String) Tag to add to the database changelog table
+  url (String) The JDBC database connection URL
 Optional Args:
-  tag (String) MISSING DESCRIPTION
+  password (String) Password to use to connect to the database
+    Default: null
+  username (String) Username to use to connect to the database
     Default: null
 """
 

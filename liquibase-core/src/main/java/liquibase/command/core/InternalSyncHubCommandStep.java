@@ -40,7 +40,7 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[]{"syncHub"};
+        return new String[]{"internalSyncHub"};
     }
 
     @Override

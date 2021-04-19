@@ -6,10 +6,10 @@ CommandTest.define {
 Short Description: Rollback changes made to the database based on the specific tag
 Long Description: Rollback changes made to the database based on the specific tag
 Required Args:
-  tag (String) MISSING DESCRIPTION
+  tag (String) Tag to rollback to
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) File to write changelog to
+  changeLogFile (String) The root changelog
     Default: null
   contexts (String) Changeset contexts to match
     Default: null
@@ -17,7 +17,7 @@ Optional Args:
     Default: null
   password (String) Password to use to connect to the database
     Default: null
-  rollbackScript (String) MISSING DESCRIPTION
+  rollbackScript (String) Rollback script to execute
     Default: null
   username (String) Username to use to connect to the database
     Default: null

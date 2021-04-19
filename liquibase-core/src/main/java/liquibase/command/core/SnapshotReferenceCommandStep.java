@@ -20,7 +20,7 @@ public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep 
         REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class)
             .description("Reference password to use to connect to the database").build();
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
-            .description("File to write changelog to").build();
+            .description("The root changelog").build();
         OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
             .description("The snapshot file to write").build();
         SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)

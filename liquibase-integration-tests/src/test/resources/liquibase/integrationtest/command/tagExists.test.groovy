@@ -6,9 +6,12 @@ CommandTest.define {
 Short Description: MISSING
 Long Description: MISSING
 Required Args:
-  url (String) MISSING DESCRIPTION
+  tag (String) Tag to check
+  url (String) The JDBC database connection URL
 Optional Args:
-  tag (String) MISSING DESCRIPTION
+  password (String) Password to use to connect to the database
+    Default: null
+  username (String) Username to use to connect to the database
     Default: null
 """
 

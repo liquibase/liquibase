@@ -10,9 +10,9 @@ CommandTest.define {
 Short Description: Drop all database objects owned by the user
 Long Description: Drop all database objects owned by the user
 Required Args:
-  url (String) Database URL to generate a changelog for
+  url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) File to write changelog to
+  changeLogFile (String) The root changelog
     Default: null
   hubConnectionId (String) The Hub connection ID
     Default: null
@@ -21,7 +21,6 @@ Optional Args:
   username (String) Username to use to connect to the database
     Default: null
 """
-
     run {
         setup {
             database = [

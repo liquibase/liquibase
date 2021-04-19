@@ -3,15 +3,22 @@ package liquibase.integrationtest.command
 CommandTest.define {
     command = ["updateSQL"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Generate the SQL to deploy changes in the changelog which have not been deployed
+Long Description: Generate the SQL to deploy changes in the changelog which have not been deployed
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  url (String) The JDBC database connection URL
 Optional Args:
-  contexts (String) MISSING DESCRIPTION
+  changeLogFile (String) The root changelog
     Default: null
-  labels (String) MISSING DESCRIPTION
+  contexts (String) Changeset contexts to match
+    Default: null
+  labels (String) Changeset labels to match
+    Default: null
+  outputFile (String) File for writing the SQL
+    Default: null
+  password (String) Password to use to connect to the database
+    Default: null
+  username (String) Username to use to connect to the database
     Default: null
 """
 

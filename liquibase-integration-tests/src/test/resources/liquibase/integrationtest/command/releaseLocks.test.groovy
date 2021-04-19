@@ -8,7 +8,7 @@ Long Description: Remove the Liquibase lock record from the DATABASECHANGELOG ta
 Required Args:
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) File to write changelog to
+  changeLogFile (String) The root changelog
     Default: null
   password (String) Password to use to connect to the database
     Default: null

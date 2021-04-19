@@ -30,7 +30,7 @@ public class FutureRollbackFromTagSQLCommandStep extends AbstractCliWrapperComma
         OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
             .description("File for writing the SQL").build();
         TAG_ARG = builder.argument("tag", String.class).required()
-            .description("Tag ID to execute changeLogSync to").build();
+            .description("Tag ID to rollback from").build();
     }
 
     @Override

@@ -6,9 +6,9 @@ CommandTest.define {
 Short Description: Marks the next change you apply as executed in your database
 Long Description: Marks the next change you apply as executed in your database
 Required Args:
-  url (String) Database URL to generate a changelog for
+  url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) File to write changelog to
+  changeLogFile (String) The root changelog
     Default: null
   password (String) Password to use to connect to the database
     Default: null

@@ -3,17 +3,21 @@ package liquibase.integrationtest.command
 CommandTest.define {
     command = ["updateToTag"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Deploy changes from the changelog file to the specified tag
+Long Description: Deploy changes from the changelog file to the specified tag
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  tag (String) The tag to update to
+  url (String) The JDBC database connection URL
 Optional Args:
-  contexts (String) MISSING DESCRIPTION
+  changeLogFile (String) The root changelog
     Default: null
-  labels (String) MISSING DESCRIPTION
+  contexts (String) Changeset contexts to match
     Default: null
-  tag (String) MISSING DESCRIPTION
+  labels (String) Changeset labels to match
+    Default: null
+  password (String) Password to use to connect to the database
+    Default: null
+  username (String) Username to use to connect to the database
     Default: null
 """
 

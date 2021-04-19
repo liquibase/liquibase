@@ -20,7 +20,7 @@ public class MigrateCommandStep extends AbstractCliWrapperCommandStep {
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("Password to use to connect to the database").build();
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
-            .description("File to write changelog to").build();
+            .description("The root changelog").build();
         LABELS_ARG = builder.argument("labels", String.class)
             .description("Label expression to use for filtering which changes to migrate").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)

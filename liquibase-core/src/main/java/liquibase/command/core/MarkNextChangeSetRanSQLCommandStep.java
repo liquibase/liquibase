@@ -19,7 +19,7 @@ public class MarkNextChangeSetRanSQLCommandStep extends AbstractCliWrapperComman
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("Password to use to connect to the database").build();
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
-            .description("File to write changelog to").build();
+            .description("The root changelog").build();
         OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
             .description("File for writing the SQL").build();
     }

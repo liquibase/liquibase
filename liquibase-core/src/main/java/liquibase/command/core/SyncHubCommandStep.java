@@ -4,11 +4,11 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
+    public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
+    public static final CommandArgumentDefinition<String> LIQUIBASE_HUB_API_KEY_ARG;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(SyncHubCommandStep.class);
@@ -19,9 +19,9 @@ public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("Password to use to connect to the database").build();
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
-            .description("File to write changelog to").build();
-        OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
-            .description("The snapshot file to write").build();
+            .description("The root changelog").build();
+        LIQUIBASE_HUB_API_KEY_ARG = builder.argument("liquibaseHubApiKey", String.class)
+            .description("Liquibase Hub API key for connecting to Liquibase Hub").build();
     }
 
     @Override
@@ -41,7 +41,7 @@ public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        commandDefinition.setShortDescription("Drop all database objects owned by the user");
-        commandDefinition.setLongDescription("Drop all database objects owned by the user");
+        commandDefinition.setShortDescription("Synchronize the local DatabaseChangeLog table with Liquibase Hub");
+        commandDefinition.setLongDescription("Synchronize the local DatabaseChangeLog table with Liquibase Hub");
     }
 }

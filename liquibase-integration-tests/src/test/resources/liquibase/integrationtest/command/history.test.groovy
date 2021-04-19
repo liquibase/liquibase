@@ -10,16 +10,15 @@ CommandTest.define {
 Short Description: List all deployed changesets and their deployment ID
 Long Description: List all deployed changesets and their deployment ID
 Required Args:
-  url (String) Database URL to generate a changelog for
+  url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) File to write changelog to
+  changeLogFile (String) The root changelog
     Default: null
   password (String) Password to use to connect to the database
     Default: null
   username (String) Username to use to connect to the database
     Default: null
 """
-
     run {
         setup {
             history = [

@@ -1,39 +1,42 @@
 package liquibase.integrationtest.command
 
 CommandTest.define {
-    command = ["futureRollbackCountSQL"]
+    command = ["rollbackToDateSQL"]
     signature = """
-Short Description: Generates SQL to sequentially revert <count> number of changes
-Long Description: Generates SQL to sequentially revert <count> number of changes
+Short Description: Generate the SQL to rollback changes made to the database based on the specific date
+Long Description: Generate the SQL to rollback changes made to the database based on the specific date
 Required Args:
-  changeLogFile (String) The root changelog
-  count (Integer) Number of change sets to generate rollback SQL for
+  date (LocalDateTime) Date to rollback changes to
   url (String) The JDBC database connection URL
 Optional Args:
+  changeLogFile (String) The root changelog
+    Default: null
   contexts (String) Changeset contexts to match
     Default: null
   labels (String) Changeset labels to match
     Default: null
   outputFile (String) File for writing the SQL
     Default: null
-  password (String) The database password
+  password (String) Password to use to connect to the database
     Default: null
-  username (String) The database username
+  rollbackScript (String) Rollback script to execute
+    Default: null
+  username (String) Username to use to connect to the database
     Default: null
 """
+
     run {
         arguments = [
-                count        : 1,
+                date         : "2021-03-25T09:00:00",
                 changeLogFile: "changelogs/hsqldb/complete/rollback.changelog.xml",
         ]
 
         setup {
             runChangelog "changelogs/hsqldb/complete/rollback.changelog.xml"
-            rollback 5, "changelogs/hsqldb/complete/rollback.changelog.xml"
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed futureRollbackCountSQL",
+                statusMessage: "Successfully executed rollbackToDateSQL",
                 statusCode   : 0
         ]
     }

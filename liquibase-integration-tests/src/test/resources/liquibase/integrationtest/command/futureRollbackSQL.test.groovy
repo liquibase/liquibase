@@ -6,7 +6,7 @@ CommandTest.define {
 Short Description: Generate the raw SQL needed to rollback undeployed changes
 Long Description: Generate the raw SQL needed to rollback undeployed changes
 Required Args:
-  url (String) Database URL to generate a changelog for
+  url (String) The JDBC Database connection URL
 Optional Args:
   changeLogFile (String) The root changelog
     Default: null

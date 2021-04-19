@@ -8,7 +8,7 @@ Long Description: Deploys changes from the changelog file that have not yet been
 Required Args:
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) File to write changelog to
+  changeLogFile (String) The root changelog
     Default: null
   contexts (String) Context string to use for filtering which changes to migrate
     Default: null
@@ -19,7 +19,6 @@ Optional Args:
   username (String) Username to use to connect to the database
     Default: null
 """
-
     run {
         arguments = [
                 changeLogFile: "changelogs/hsqldb/complete/simple.changelog.xml",

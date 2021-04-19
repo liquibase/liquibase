@@ -14,9 +14,14 @@ Required Args:
   referenceUrl (String) The JDBC reference database connection URL
   url (String) The JDBC target database connection URL
 Optional Args:
-  username (String) The reference database username
+  referencePassword (String) The reference database password
+    Default: null
+  referenceUsername (String) The reference database username
+    Default: null
+  username (String) The target database username
     Default: null
 """
+
 
     run {
         arguments = [

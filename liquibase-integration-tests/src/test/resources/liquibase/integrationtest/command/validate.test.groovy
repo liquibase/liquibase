@@ -3,13 +3,17 @@ package liquibase.integrationtest.command
 CommandTest.define {
     command = ["validate"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Validate the changelog for errors
+Long Description: Validate the changelog for errors
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  url (String) The JDBC database connection URL
 Optional Args:
-  NONE
+  changeLogFile (String) The root changelog
+    Default: null
+  password (String) Password to use to connect to the database
+    Default: null
+  username (String) Username to use to connect to the database
+    Default: null
 """
 
     run {

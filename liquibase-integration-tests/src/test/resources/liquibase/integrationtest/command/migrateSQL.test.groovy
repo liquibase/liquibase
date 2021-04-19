@@ -6,9 +6,9 @@ CommandTest.define {
 Short Description: Write the SQL to deploy changes from the changelog file that have not yet been deployed
 Long Description: Write the SQL deploy changes from the changelog file that have not yet been deployed
 Required Args:
-  url (String) Database URL to generate a changelog for
+  url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) File to write changelog to
+  changeLogFile (String) The root changelog
     Default: null
   contexts (String) Context string to use for filtering which changes to migrate
     Default: null

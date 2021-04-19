@@ -3,17 +3,21 @@ package liquibase.integrationtest.command
 CommandTest.define {
     command = ["updateCount"]
     signature = """
-Short Description: MISSING
-Long Description: MISSING
+Short Description: Deploy the specified number of changes from the changelog file
+Long Description: Deploy the specified number of changes from the changelog file
 Required Args:
-  changeLogFile (String) MISSING DESCRIPTION
-  url (String) MISSING DESCRIPTION
+  count (Integer) The number of changes in the changelog to deploy
+  url (String) The JDBC database connection URL
 Optional Args:
-  contexts (String) MISSING DESCRIPTION
+  changeLogFile (String) The root changelog
     Default: null
-  count (Integer) MISSING DESCRIPTION
+  contexts (String) Changeset contexts to match
     Default: null
-  labels (String) MISSING DESCRIPTION
+  labels (String) Changeset labels to match
+    Default: null
+  password (String) Password to use to connect to the database
+    Default: null
+  username (String) Username to use to connect to the database
     Default: null
 """
 

@@ -10,9 +10,9 @@ CommandTest.define {
 Short Description: Capture the current state of the database
 Long Description: Capture the current state of the database
 Required Args:
-  url (String) Database URL to generate a changelog for
+  url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) File to write changelog to
+  changeLogFile (String) The root changelog
     Default: null
   outputFile (String) The snapshot file to write
     Default: null
