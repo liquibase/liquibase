@@ -7,6 +7,9 @@ import liquibase.command.CommandArgumentDefinition
 import liquibase.command.CommandFactory
 import liquibase.command.CommandResults
 import liquibase.command.CommandScope
+import liquibase.configuration.AbstractMapConfigurationValueProvider
+import liquibase.configuration.ConfigurationValueProvider
+import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
@@ -28,6 +31,41 @@ import java.util.regex.Pattern
 class CommandTests extends Specification {
 
     private static List<CommandTestDefinition> commandTestDefinitions
+
+    private ConfigurationValueProvider propertiesProvider
+
+    def setup() {
+        def properties = new Properties()
+
+        getClass().getClassLoader().getResources("liquibase.test.local.properties").each {
+            it.withReader {
+                properties.load(it)
+            }
+        }
+
+        propertiesProvider = new AbstractMapConfigurationValueProvider() {
+            @Override
+            protected Map<?, ?> getMap() {
+                return properties
+            }
+
+            @Override
+            protected String getSourceDescription() {
+                return "liquibase.test.local.properties"
+            }
+
+            @Override
+            int getPrecedence() {
+                return 1
+            }
+        }
+
+        Scope.currentScope.getSingleton(LiquibaseConfiguration).registerProvider(propertiesProvider)
+    }
+
+    def cleanup() {
+        Scope.currentScope.getSingleton(LiquibaseConfiguration).unregisterProvider(propertiesProvider)
+    }
 
     @Unroll("#featureName: #commandTestDefinition.testFile.name")
     def "check CommandTest definition"() {

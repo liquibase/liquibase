@@ -72,6 +72,15 @@ public class LiquibaseConfiguration implements SingletonObject {
     }
 
     /**
+     * Removes the given {@link ConfigurationValueProvider} from the active collection of providers.
+     *
+     * @return true if the given provider was previously registered.
+     */
+    public boolean unregisterProvider(ConfigurationValueProvider valueProvider) {
+        return this.configurationValueProviders.remove(valueProvider);
+    }
+
+    /**
      * Removes a specific {@link ConfigurationValueProvider} from the active collection of providers.
      *
      * @return true if the provider was removed.
