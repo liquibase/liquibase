@@ -92,6 +92,12 @@ public abstract class AbstractMapConfigurationValueProvider extends AbstractConf
             return true;
         }
 
+        //check for everythingSmashedTogether case insensitively
+        wantedKey = wantedKey.replace("-", "");
+        if (storedKey.equalsIgnoreCase(wantedKey)) {
+            return true;
+        }
+
         return false;
     }
 

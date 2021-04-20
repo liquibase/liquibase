@@ -271,12 +271,6 @@
                     <artifactId>liquibase-pro</artifactId>
                     <version>${liquibase.version}</version>
                 </dependency>
-
-                <dependency>
-                    <groupId>com.datical.lb</groupId>
-                    <artifactId>licensing-keymgr</artifactId>
-                    <version>${liquibase.version}</version>
-                </dependency>
             </dependencies>
         </profile>
 

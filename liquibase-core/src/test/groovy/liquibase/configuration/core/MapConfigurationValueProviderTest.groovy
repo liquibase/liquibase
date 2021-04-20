@@ -32,6 +32,8 @@ class MapConfigurationValueProviderTest extends Specification {
         "parent.child"        | "parent.child"         | true
         "parent.child"        | "PARENT.Child"         | true
         "parent.child"        | "PARENT-Child"         | true
+        "parent.child"        | "ParentChild"          | true
+        "parent.child"        | "PARENTCHILD"          | true
         "parent.child"        | "PARENT_Child"         | false
         "parent.bothChildren" | "Parent.BothChildren"  | true
         "parent.bothChildren" | "parent.both-children" | true
