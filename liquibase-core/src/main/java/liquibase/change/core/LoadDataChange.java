@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeSet;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
@@ -20,6 +21,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.io.EmptyLineAndCommentSkippingInputStream;
 import liquibase.logging.Logger;
+import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -764,7 +766,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     protected String getRelativeTo() {
         String relativeTo = null;
-        if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
+        Boolean isRelative = isRelativeToChangelogFile();
+        if (isRelative == null) {
+            isRelative = LiquibaseConfiguration.getInstance().getConfiguration(ChangeLogParserCofiguration.class).getRelativeToChangelogFile();
+        }
+        if (isRelative) {
             relativeTo = getChangeSet().getFilePath();
         }
         return relativeTo;

@@ -10,6 +10,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -166,7 +167,11 @@ public class CreateViewChange extends AbstractChange {
         try {
             String path = getPath();
             String relativeTo = null;
-            if (ObjectUtil.defaultIfNull(getRelativeToChangelogFile(), false)) {
+            Boolean isRelative = getRelativeToChangelogFile();
+            if (isRelative == null) {
+                isRelative = LiquibaseConfiguration.getInstance().getConfiguration(ChangeLogParserCofiguration.class).getRelativeToChangelogFile();
+            }
+            if (isRelative) {
                 relativeTo = getChangeSet().getFilePath();
             }
             return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);

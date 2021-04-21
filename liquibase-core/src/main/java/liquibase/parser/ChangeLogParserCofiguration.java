@@ -9,6 +9,7 @@ public class ChangeLogParserCofiguration extends AbstractConfigurationContainer 
 
     public static final String SUPPORT_PROPERTY_ESCAPING = "supportPropertyEscaping";
     public static final String USE_PROCEDURE_SCHEMA = "useProcedureSchema";
+    public static final String RELATIVE_TO_CHANGELOG_FILE = "relativeToChangelogFile";
 
     public ChangeLogParserCofiguration() {
         super("liquibase");
@@ -21,6 +22,10 @@ public class ChangeLogParserCofiguration extends AbstractConfigurationContainer 
         getContainer().addProperty(USE_PROCEDURE_SCHEMA, Boolean.class)
                 .setDescription("If set to true (default value), createProcedure tags with a set schemaName will modify the procedure body with the given schema name.")
                 .setDefaultValue(true);
+
+        getContainer().addProperty(RELATIVE_TO_CHANGELOG_FILE, Boolean.class)
+                .setDescription("Default value of relativeToChangelogFile for tags: <include>, <includeAll>, <sqlFile> etc.")
+                .setDefaultValue(false);
     }
 
     public boolean getSupportPropertyEscaping() {
@@ -41,5 +46,13 @@ public class ChangeLogParserCofiguration extends AbstractConfigurationContainer 
         return this;
     }
 
+    public boolean getRelativeToChangelogFile() {
+        return getContainer().getValue(RELATIVE_TO_CHANGELOG_FILE, Boolean.class);
+    }
+
+    public ChangeLogParserCofiguration setRelativeToChangelogFile(boolean relativeToChangelogFile) {
+        getContainer().setValue(RELATIVE_TO_CHANGELOG_FILE, relativeToChangelogFile);
+        return this;
+    }
 
 }

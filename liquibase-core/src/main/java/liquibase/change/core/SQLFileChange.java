@@ -6,10 +6,12 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
@@ -117,7 +119,11 @@ public class SQLFileChange extends AbstractSQLChange {
         InputStream inputStream = null;
         try {
             String relativeTo = null;
-            if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
+            Boolean isRelative = isRelativeToChangelogFile();
+            if (isRelative == null) {
+                isRelative = LiquibaseConfiguration.getInstance().getConfiguration(ChangeLogParserCofiguration.class).getRelativeToChangelogFile();
+            }
+            if (isRelative) {
                 relativeTo = getChangeSet().getFilePath();
             }
             inputStream = Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
