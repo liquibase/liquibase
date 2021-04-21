@@ -53,7 +53,9 @@ Optional Args:
                     ),
             ]
         }
-
+        expectedOutput = [
+                "asdf"
+        ]
         expectedResults = [
                 statusMessage: "Successfully executed generateChangeLog",
                 statusCode   : 0

@@ -171,7 +171,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         commandScope.addArgumentValue("database", database)
         commandScope.addArgumentValue("url", database.getConnection().getURL())
         commandScope.addArgumentValue("schemas", catalogAndSchemas)
-        commandScope.addArgumentValue("logLevel", "INFO")
+        //commandScope.addArgumentValue("logLevel", "INFO")
         commandScope.setOutput(outputStream)
 
         if (testDef.setup != null) {
@@ -194,7 +194,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         }
 
         def results = Scope.child([
-                (IntegrationConfiguration.LOG_LEVEL.getKey()): Level.FINE,
+                (IntegrationConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name): MockHubService
         ], {
                 return commandScope.execute()

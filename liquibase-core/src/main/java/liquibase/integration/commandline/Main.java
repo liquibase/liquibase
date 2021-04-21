@@ -199,7 +199,7 @@ public class Main {
                 try {
                     if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                         main.printHelp(System.out);
-                        return 0;
+                        return Integer.valueOf(0);
                     } else if (("--" + OPTIONS.VERSION).equals(args[0])) {
                         main.command = "";
                         main.parseDefaultPropertyFiles();
@@ -225,7 +225,7 @@ public class Main {
                                 System.getProperties().getProperty("java.home"),
                                 System.getProperty("java.version")
                         ));
-                        return 0;
+                        return Integer.valueOf(0);
                     }
 
                     //
@@ -248,7 +248,7 @@ public class Main {
                         main.parseOptions(args);
                         if (main.command == null) {
                             main.printHelp(System.out);
-                            return 0;
+                            return Integer.valueOf(0);
                         }
                     } catch (CommandLineParsingException e) {
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
@@ -326,14 +326,14 @@ public class Main {
                         Scope.getCurrentScope().getUI().sendErrorMessage((
                                 String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
                                         GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
-                        return 0;
+                        return Integer.valueOf(0);
                     }
 
                     if (setupNeeded(main)) {
                         List<String> setupMessages = main.checkSetup();
                         if (!setupMessages.isEmpty()) {
                             main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
-                            return 1;
+                            return Integer.valueOf(1);
                         }
                     }
 
@@ -402,7 +402,7 @@ public class Main {
                     ui.sendMessage("WARNING: The command " + main.command + " operations were not synced with your Liquibase Hub account because: " + StringUtil.lowerCaseFirst(Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason()));
                 }
 
-                return 0;
+                return Integer.valueOf(0);
             }
         });
     }
@@ -1249,13 +1249,13 @@ public class Main {
             this.defaultsFile = "liquibase.properties";
         }
         if (this.includeSchema == null) {
-            this.includeSchema = false;
+            this.includeSchema = Boolean.FALSE;
         }
         if (this.includeCatalog == null) {
-            this.includeCatalog = false;
+            this.includeCatalog =  Boolean.FALSE;
         }
         if (this.includeTablespace == null) {
-            this.includeTablespace = false;
+            this.includeTablespace = Boolean.FALSE;
         }
 
     }
@@ -1472,6 +1472,7 @@ public class Main {
 
                     liquibaseCommand.addArgumentValue("format", getCommandParam(OPTIONS.FORMAT, "JSON"));
                     liquibaseCommand.addArgumentValue("diffCommand", "JSON");
+                    liquibaseCommand.addArgumentValue("outputStream", new PrintStream(getOutputStream()));
 
                     liquibaseCommand.execute();
                 } else {
@@ -1624,28 +1625,25 @@ public class Main {
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
-                CommandScope liquibaseCommand = new CommandScope(COMMANDS.ROLLBACK_ONE_CHANGE_SET);
-                for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
-                    liquibaseCommand.addArgumentValue(entry.getKey(), entry.getValue());
-                }
-
+                argsMap.put("changeLogFile", changeLogFile);
+                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneChangeSet", argsMap);
                 liquibaseCommand.execute();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command)) {
                 Writer outputWriter = getOutputWriter();
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
+                argsMap.put("changeLogFile", changeLogFile);
                 argsMap.put("outputWriter", outputWriter);
-                argsMap.put("force", true);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_CHANGE_SET, argsMap);
+                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneChangeSet", argsMap);
                 liquibaseCommand.execute();
                 outputWriter.flush();
-                outputWriter.close();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equals(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
+                argsMap.put("changeLogFile", changeLogFile);
                 argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_UPDATE, argsMap);
+                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneUpdate", argsMap);
                 liquibaseCommand.execute();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command)) {
@@ -1653,11 +1651,10 @@ public class Main {
                 Map<String, Object> argsMap = new HashMap<>();
                 argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
                 argsMap.put("outputWriter", outputWriter);
-                argsMap.put("force", true);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_UPDATE, argsMap);
+                argsMap.put("force", Boolean.TRUE);
+                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneUpdate", argsMap);
                 liquibaseCommand.execute();
                 outputWriter.flush();
-                outputWriter.close();
                 return;
             } else if (COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
@@ -1880,7 +1877,7 @@ public class Main {
                                         COMMANDS.FUTURE_ROLLBACK_COUNT_SQL));
                     }
 
-                    liquibase.futureRollbackSQL(Integer.parseInt(getCommandArgument()), new Contexts(contexts), new
+                    liquibase.futureRollbackSQL(Integer.valueOf(getCommandArgument()), new Contexts(contexts), new
                             LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.FUTURE_ROLLBACK_FROM_TAG_SQL.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
@@ -1982,10 +1979,13 @@ public class Main {
         argsMap.put("changeLogParameters", clp);
 
         if (this.commandParams.contains("--force")) {
-            argsMap.put("force", true);
+            argsMap.put("force", Boolean.TRUE);
         }
         if (this.commandParams.contains("--help")) {
-            argsMap.put("help", true);
+            argsMap.put("help", Boolean.TRUE);
+        }
+        if (liquibaseProLicenseKey != null) {
+            argsMap.put("liquibaseProLicenseKey", liquibaseProLicenseKey);
         }
         CommandScope liquibaseCommand = new CommandScope(commandName);
         for (Map.Entry<String, Object> entry : argsMap.entrySet()) {

@@ -176,5 +176,6 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);
         }
     }
+
 }
 
