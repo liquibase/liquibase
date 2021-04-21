@@ -14,6 +14,7 @@ public interface ConfigurationValueProvider {
      * <ul>
      *     <li>400 {@link liquibase.configuration.core.ScopeValueProvider}</li>
      *     <li>350 {@link liquibase.configuration.core.DeprecatedConfigurationValueProvider}</li>
+     *     <li>250 Integration specific providers</li>
      *     <li>300: TODO JNDI attributes</li>
      *     <li>250: TODO Servlet Context</li>
      *     <li>200 {@link liquibase.configuration.core.SystemPropertyValueProvider}</li>

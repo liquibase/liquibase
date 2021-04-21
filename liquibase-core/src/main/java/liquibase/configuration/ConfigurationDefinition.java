@@ -74,6 +74,10 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         }
     }
 
+    public ConfigurationValueConverter<DataType> getValueHandler() {
+        return valueHandler;
+    }
+
     /**
      * Convenience method around {@link #getCurrentConfiguredValue()} to return the obfuscated version of the value.
      *

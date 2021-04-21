@@ -4,25 +4,39 @@ import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandDefinition;
 import liquibase.command.CommandFactory;
-import liquibase.configuration.ConfigurationDefinition;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.*;
 import liquibase.configuration.core.DefaultsFileValueProvider;
+import liquibase.exception.CommandLineParsingException;
+import liquibase.hub.HubConfiguration;
+import liquibase.integration.IntegrationConfiguration;
 import liquibase.license.LicenseServiceFactory;
-import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.logging.LogMessageFilter;
+import liquibase.logging.LogService;
+import liquibase.logging.core.JavaLogService;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.SystemUtil;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Paths;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
+import java.util.logging.*;
+
+import static liquibase.util.SystemUtil.isWindows;
 
 
 public class LiquibaseCommandLine {
 
     private final CommandLine commandLine;
+    private FileHandler fileHandler;
 
     public static void main(String[] args) {
         final LiquibaseCommandLine cli = new LiquibaseCommandLine();
@@ -31,6 +45,15 @@ public class LiquibaseCommandLine {
             cli.execute(args);
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            cli.cleanup();
+        }
+    }
+
+    private void cleanup() {
+        if (fileHandler != null) {
+            fileHandler.flush();
+            fileHandler.close();
         }
     }
 
@@ -55,123 +78,187 @@ public class LiquibaseCommandLine {
     }
 
     public void execute(String[] args) throws Exception {
-        final CommandLine.ParseResult parseResult = commandLine.parseArgs(args);
+        configureLogging(Level.OFF, null);
 
-        String classpath = getBootstrapSetting(parseResult, CommandLineConfiguration.CLASSPATH);
-        if (StringUtil.trimToNull(classpath) == null) {
-            classpath = ".";
-        }
-        final String bootstrapClasspath = classpath;
+        Main.runningFromNewCli = true;
 
-        final CompositeResourceAccessor createResourceAccessor = createResourceAccessor(bootstrapClasspath);
-
-        Scope.child(Scope.Attr.resourceAccessor, createResourceAccessor, () -> {
-            String defaultsFile = getBootstrapSetting(parseResult, CommandLineConfiguration.DEFAULTS_FILE);
-
-            if (defaultsFile != null) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Using defaults file " + defaultsFile);
-                Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).registerProvider(new DefaultsFileValueProvider(defaultsFile));
-            }
-
-            Map<String, Object> finalScopeValues = new HashMap<>();
-            //check if classpath changed from defaultsFile
-            String newClasspath = CommandLineConfiguration.CLASSPATH.getCurrentValue();
-            if (newClasspath != null && !newClasspath.equals(bootstrapClasspath)) {
-                finalScopeValues.put(Scope.Attr.resourceAccessor.name(), createResourceAccessor(newClasspath));
-            }
-
-            Scope.child(finalScopeValues, () -> {
-                getRootCommand().getCommandSpec().version(
-                        CommandLineUtils.getBanner(),
-                        String.format("Running Java under %s (Version %s)",
-                                System.getProperties().getProperty("java.home"),
-                                System.getProperty("java.version")
-                        ),
-                        "",
-                        "Liquibase Version: " + LiquibaseUtil.getBuildVersion(),
-                        Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService().getLicenseInfo()
-                );
+        final List<ConfigurationValueProvider> valueProviders = registerValueProviders(args);
+        try {
+            Scope.child(configureScope(), () -> {
+                configureVersionInfo();
 
                 commandLine.execute(args);
             });
-        });
+        } finally {
+            final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+
+            for (ConfigurationValueProvider provider : valueProviders) {
+                liquibaseConfiguration.unregisterProvider(provider);
+            }
+        }
     }
 
-    private CommandLine getRootCommand() {
-        CommandLine commandLine = this.commandLine;
+    private List<ConfigurationValueProvider> registerValueProviders(String[] args) {
+        final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+
+        final CommandLineArgumentValueProvider argumentProvider = new CommandLineArgumentValueProvider(commandLine.parseArgs(args));
+        liquibaseConfiguration.registerProvider(argumentProvider);
+
+        final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(new File(IntegrationConfiguration.DEFAULTS_FILE.getCurrentValue()));
+        liquibaseConfiguration.registerProvider(fileProvider);
+
+
+        return Arrays.asList(argumentProvider, fileProvider);
+    }
+
+    /**
+     * Configures the system, and returns values to add to Scope.
+     *
+     * @return values to set in the scope
+     */
+    private Map<String, Object> configureScope() throws Exception {
+        Map<String, Object> returnMap = new HashMap<>();
+
+        final ClassLoader classLoader = configureClassLoader();
+
+        returnMap.putAll(configureLogging());
+        returnMap.putAll(configureResourceAccessor(classLoader));
+
+        return returnMap;
+    }
+
+    private void configureVersionInfo() {
+        getRootCommand(this.commandLine).getCommandSpec().version(
+                CommandLineUtils.getBanner(),
+                String.format("Running Java under %s (Version %s)",
+                        System.getProperties().getProperty("java.home"),
+                        System.getProperty("java.version")
+                ),
+                "",
+                "Liquibase Version: " + LiquibaseUtil.getBuildVersion(),
+                Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService().getLicenseInfo()
+        );
+    }
+
+    protected Map<String, Object> configureLogging() throws IOException {
+        Map<String, Object> returnMap = new HashMap<>();
+        final ConfiguredValue<Level> currentConfiguredValue = IntegrationConfiguration.LOG_LEVEL.getCurrentConfiguredValue();
+        final File logFile = IntegrationConfiguration.LOG_FILE.getCurrentValue();
+
+        Level logLevel = Level.OFF;
+        if (!ConfigurationDefinition.wasDefaultValueUsed(currentConfiguredValue)) {
+            logLevel = currentConfiguredValue.getValue();
+        }
+
+        configureLogging(logLevel, logFile);
+
+        //
+        // Set the Liquibase Hub log level if logging is not OFF
+        //
+        if (logLevel != Level.OFF) {
+            returnMap.put(HubConfiguration.LIQUIBASE_HUB_LOGLEVEL.getKey(), logLevel);
+        }
+
+        return returnMap;
+    }
+
+    private void configureLogging(Level logLevel, File logFile) throws IOException {
+
+        System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
+
+        java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
+
+        final JavaLogService logService = (JavaLogService) Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
+        logService.setParent(liquibaseLogger);
+
+
+        java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
+
+        Level cliLogLevel = logLevel;
+
+        if (logFile != null) {
+            if (fileHandler == null) {
+                fileHandler = new FileHandler(logFile.getAbsolutePath(), true);
+                fileHandler.setFormatter(new SimpleFormatter());
+                rootLogger.addHandler(fileHandler);
+            }
+
+            fileHandler.setLevel(logLevel);
+            if (logLevel == Level.OFF) {
+                fileHandler.setLevel(Level.FINE);
+            }
+
+            cliLogLevel = Level.OFF;
+        }
+
+        rootLogger.setLevel(logLevel);
+        liquibaseLogger.setLevel(logLevel);
+
+        for (Handler handler : rootLogger.getHandlers()) {
+            if (handler instanceof ConsoleHandler) {
+                handler.setLevel(cliLogLevel);
+            }
+
+            handler.setFilter(new SecureLogFilter(logService.getFilter()));
+        }
+    }
+
+    private CommandLine getRootCommand(CommandLine commandLine) {
         while (commandLine.getParent() != null) {
             commandLine = commandLine.getParent();
         }
         return commandLine;
     }
 
-    private <T> T getBootstrapSetting(CommandLine.ParseResult parseResult, ConfigurationDefinition<T> config) {
-        final CommandLine.Model.OptionSpec matchedOption = parseResult.matchedOption(StringUtil.toKabobCase(config.getKey().replace(".", "-")));
-        if (matchedOption != null) {
-            return matchedOption.getValue();
-        }
+    private Map<String, Object> configureResourceAccessor(ClassLoader classLoader) {
+        Map<String, Object> returnMap = new HashMap<>();
 
-        return config.getCurrentValue();
+        returnMap.put(Scope.Attr.resourceAccessor.name(), new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader)));
+
+        return returnMap;
     }
 
+    protected ClassLoader configureClassLoader() throws CommandLineParsingException {
+        final String classpath = IntegrationConfiguration.CLASSPATH.getCurrentValue();
 
-    private CompositeResourceAccessor createResourceAccessor(String classpath) {
-        List<File> classpathFiles = splitClasspath(classpath);
-        return new CompositeResourceAccessor(new FileSystemResourceAccessor(classpathFiles.toArray(new File[0])), new ClassLoaderResourceAccessor());
-    }
-
-    private List<File> splitClasspath(String bootstrapClasspath) {
-        List<File> classpathFiles = new ArrayList<>();
-        if (StringUtil.trimToNull(bootstrapClasspath) != null) {
-            String[] splitClasspath;
-            if (SystemUtil.isWindows()) {
-                splitClasspath = bootstrapClasspath.split(";");
+        final List<URL> urls = new ArrayList<>();
+        if (classpath != null) {
+            String[] classpathSoFar;
+            if (isWindows()) {
+                classpathSoFar = classpath.split(";");
             } else {
-                splitClasspath = bootstrapClasspath.split(":");
+                classpathSoFar = classpath.split(":");
             }
-            for (String entry : splitClasspath) {
-                classpathFiles.add(new File(".", entry));
+
+            for (String classpathEntry : classpathSoFar) {
+                File classPathFile = new File(classpathEntry);
+                if (!classPathFile.exists()) {
+                    throw new CommandLineParsingException(classPathFile.getAbsolutePath() + " does.not.exist");
+                }
+
+                try {
+                    URL newUrl = new File(classpathEntry).toURI().toURL();
+                    Scope.getCurrentScope().getLog(getClass()).fine(newUrl.toExternalForm() + " added to class loader");
+                    urls.add(newUrl);
+                } catch (MalformedURLException e) {
+                    throw new CommandLineParsingException(e);
+                }
             }
         }
-        return classpathFiles;
+
+        final ClassLoader classLoader;
+        if (IntegrationConfiguration.INCLUDE_SYSTEM_CLASSPATH.getCurrentValue()) {
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
+                    .getContextClassLoader()));
+
+        } else {
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), null));
+        }
+
+        Thread.currentThread().setContextClassLoader(classLoader);
+
+        return classLoader;
     }
-
-//
-//        Map<String, String> passedArgs = new HashMap<>();
-//        passedArgs.put("url", "jdbc:mysql://127.0.0.1:33062/lbcat");
-//        passedArgs.put("username", "lbuser");
-//        passedArgs.put("password", "LiquibasePass1");
-//
-//        passedArgs.put("output", "/tmp/out.txt");
-//
-//
-//        try {
-//            CommandScope commandScope = new CommandScope("history");
-//
-//            for (CommandArgumentDefinition<Database> argument : commandScope.getCommand().getArguments(Database.class)) {
-//                String prefix = argument.getName().replaceFirst("[dD]atabase", "");
-//
-//                Database database = createDatabase(passedArgs.get(prefixArg(prefix, "url")), passedArgs.get(prefixArg(prefix, "username")), passedArgs.get(prefixArg(prefix, "password")));
-//
-//                commandScope.addArgumentValue(argument, database);
-//            }
-//
-//            FileOutputStream outputStream = null;
-//            if (passedArgs.containsKey("output")) {
-//                outputStream = new FileOutputStream(passedArgs.get("output"));
-//                commandScope.setOutput(outputStream);
-//            }
-//
-//            commandScope.execute();
-//
-//            if (outputStream != null) {
-//                outputStream.close();
-//            }
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
 
     private void addSubcommand(CommandDefinition commandDefinition, CommandLine commandLine) {
         final CommandRunner commandRunner = new CommandRunner();
@@ -218,6 +305,11 @@ public class LiquibaseCommandLine {
                 optionBuilder.description(def.getDescription());
             }
 
+            final ConfigurationValueConverter<?> valueHandler = def.getValueHandler();
+            if (valueHandler != null) {
+                optionBuilder.converters(valueHandler::convert);
+            }
+
             final CommandLine.Model.OptionSpec optionSpec = optionBuilder.build();
             rootCommandSpec.addOption(optionSpec);
         }
@@ -238,5 +330,22 @@ public class LiquibaseCommandLine {
 
     private static String toArgName(ConfigurationDefinition<?> def) {
         return "--" + StringUtil.toKabobCase(def.getKey()).replace(".", "-");
+    }
+
+    public static class SecureLogFilter implements Filter {
+
+        private LogMessageFilter filter;
+
+        public SecureLogFilter(LogMessageFilter filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        public boolean isLoggable(LogRecord record) {
+            final String filteredMessage = filter.filterMessage(record.getMessage());
+
+            final boolean equals = filteredMessage.equals(record.getMessage());
+            return equals;
+        }
     }
 }

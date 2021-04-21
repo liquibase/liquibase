@@ -5,6 +5,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -346,6 +347,8 @@ public class ObjectUtil {
                 } catch (ClassNotFoundException e) {
                     throw new IllegalArgumentException(e);
                 }
+            } else if (targetClass.isAssignableFrom(File.class)) {
+                return (T) new File(object.toString());
             }
             return (T) object;
         } catch (NumberFormatException e) {

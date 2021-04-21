@@ -4,13 +4,11 @@ import liquibase.Scope;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.CommandExecutionException;
-import liquibase.integration.IntegrationConfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 /**
  * Convenience base class for {@link CommandStep}s that simply wrap calls to {@link liquibase.integration.commandline.Main}
@@ -35,17 +33,6 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
                 argsList.add("--" + arg.getKey() + "=" + commandScope.getArgumentValue(arg.getValue()).toString());
             }
         });
-
-
-        final Level logLevel = IntegrationConfiguration.LOG_LEVEL.getCurrentValue();
-        if (logLevel != null) {
-            argsList.add("--logLevel=" + logLevel);
-        }
-
-        final ConfiguredValue<?> classpathArg = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue("liquibase.classpath");
-        if (classpathArg.found()) {
-            argsList.add("--classpath=" + classpathArg.getProvidedValue().getValue());
-        }
 
         argsList.add(commandScope.getCommand().getName()[0]);
 

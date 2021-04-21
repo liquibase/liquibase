@@ -1,5 +1,6 @@
 package liquibase.integration;
 
+import liquibase.Scope;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 
@@ -36,9 +37,33 @@ public class IntegrationConfiguration implements AutoloadedConfigurations {
         DRIVER_PROPERTIES_FILE = builder.define("driverPropertiesFile", String.class).build();
         PROPERTY_PROVIDER_CLASS = builder.define("propertyProviderClass", Class.class).build();
         PROMPT_FOR_NON_LOCAL_DATABASE = builder.define("promptForNonLocalDatabase", Boolean.class).build();
-        INCLUDE_SYSTEM_CLASSPATH = builder.define("includeSystemClasspath", Boolean.class).build();
-        DEFAULTS_FILE = builder.define("defaultsFile", String.class).build();
-        LOG_LEVEL = builder.define("logLevel", Level.class).build();
+        INCLUDE_SYSTEM_CLASSPATH = builder.define("includeSystemClasspath", Boolean.class).setDefaultValue(true).build();
+        DEFAULTS_FILE = builder.define("defaultsFile", String.class).setDefaultValue("liquibase.properties").build();
+
+        LOG_LEVEL = builder.define("logLevel", Level.class)
+                .setDefaultValue(Level.INFO)
+                .setValueHandler(value -> {
+                    if (value instanceof Level) {
+                        return (Level) value;
+                    }
+                    String stringLevel = String.valueOf(value).toUpperCase();
+                    if (stringLevel.equals("DEBUG")) {
+                        return Level.FINE;
+                    } else if (stringLevel.equals("WARN")) {
+                        return Level.WARNING;
+                    } else if (stringLevel.equals("ERROR")) {
+                        return Level.SEVERE;
+                    }
+
+                    try {
+                        return Level.parse(stringLevel);
+                    } catch (IllegalArgumentException e) {
+                        Scope.getCurrentScope().getUI().sendErrorMessage("Unknown log level " + stringLevel);
+                        return Level.INFO;
+                    }
+                })
+                .build();
+
         LOG_FILE = builder.define("logFile", File.class).build();
         OUTPUT_FILE = builder.define("outputFile", File.class).build();
     }

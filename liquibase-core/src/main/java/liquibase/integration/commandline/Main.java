@@ -59,6 +59,10 @@ import static java.util.ResourceBundle.getBundle;
  * @deprecated use liquibase.integration.commandline.LiquibaseCommandLine.
  */
 public class Main {
+
+    //set by new CLI to signify it is handling some of the configuration
+    public static boolean runningFromNewCli;
+
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
     private static final Logger LOG = Scope.getCurrentScope().getLog(Main.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -356,7 +360,9 @@ public class Main {
                     main.applyDefaults();
                     Map<String, Object> innerScopeObjects = new HashMap<>();
                     innerScopeObjects.put("defaultsFile", main.defaultsFile);
-                    innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
+                    if (!Main.runningFromNewCli) {
+                        innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
+                    }
                     Scope.child(innerScopeObjects, () -> {
                         main.doMigration();
 
@@ -423,6 +429,11 @@ public class Main {
     }
 
     protected static void setLogLevel(LogService logService, java.util.logging.Logger rootLogger, java.util.logging.Logger liquibaseLogger, Level level) {
+        if (Main.runningFromNewCli) {
+            //new CLI configures logging
+            return;
+        }
+
         if (level.intValue() < Level.INFO.intValue()) {
             //limit non-liquibase logging to INFO at a minimum to avoid too much logs
             rootLogger.setLevel(Level.INFO);
@@ -1398,10 +1409,15 @@ public class Main {
             throw new CommandLineParsingException(e.getMessage(), e);
         }
 
-        CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(
-                new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
-                new CommandLineResourceAccessor(classLoader)
-        );
+        final ResourceAccessor fileOpener;
+        if (Main.runningFromNewCli) {
+            fileOpener = Scope.getCurrentScope().getResourceAccessor();
+        }else {
+            fileOpener = new CompositeResourceAccessor(
+                    new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
+                    new CommandLineResourceAccessor(classLoader)
+            );
+        }
 
         Database database = null;
         if (dbConnectionNeeded(command) && this.url != null) {
