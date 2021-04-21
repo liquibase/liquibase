@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
 
-import com.example.liquibase.change.UniqueConstraintConfig;
-import liquibase.change.ConstraintsConfig;
 import liquibase.database.MockDatabaseConnection;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.*;

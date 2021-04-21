@@ -20,7 +20,6 @@ import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.CompoundStatement;
 import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.DropTableStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtil;
 

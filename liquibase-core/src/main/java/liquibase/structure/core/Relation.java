@@ -2,7 +2,6 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;

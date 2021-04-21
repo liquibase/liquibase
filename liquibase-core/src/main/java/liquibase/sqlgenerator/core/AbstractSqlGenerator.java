@@ -1,15 +1,10 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.Warnings;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.SqlStatement;
-
-import java.util.List;
 
 /**
  * Generic template class for an SQL generator able to generate SQL for an object-form

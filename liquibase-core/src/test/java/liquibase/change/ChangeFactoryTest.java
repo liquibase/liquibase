@@ -1,19 +1,12 @@
 package liquibase.change;
 
 import liquibase.Scope;
-import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.change.core.CreateTableChange;
-import liquibase.change.core.DropTableChange;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.CreateSequenceStatement;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-
-import java.util.TreeSet;
 
 import static org.junit.Assert.*;
 

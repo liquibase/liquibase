@@ -23,7 +23,6 @@ import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.io.Reader;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**

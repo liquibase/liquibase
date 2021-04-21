@@ -9,7 +9,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;

@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.exception.DatabaseException;
 import liquibase.listener.SqlListener;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.JdbcUtils;
 
 import java.sql.Connection;

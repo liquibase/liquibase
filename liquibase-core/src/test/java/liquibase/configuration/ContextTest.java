@@ -1,7 +1,6 @@
 package liquibase.configuration;
 
 import junit.framework.TestCase;
-import liquibase.exception.UnexpectedLiquibaseException;
 import org.junit.Before;
 import org.junit.Test;
 

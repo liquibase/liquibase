@@ -4,7 +4,6 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.InputStreamList;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.SortedSet;
 
 /**

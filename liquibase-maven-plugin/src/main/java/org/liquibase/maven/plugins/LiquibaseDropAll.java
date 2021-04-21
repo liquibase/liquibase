@@ -5,7 +5,6 @@ import liquibase.Liquibase;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
 
 import java.util.ArrayList;

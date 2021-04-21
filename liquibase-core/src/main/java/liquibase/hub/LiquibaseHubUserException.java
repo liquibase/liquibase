@@ -1,7 +1,5 @@
 package liquibase.hub;
 
-import liquibase.exception.LiquibaseException;
-
 public class LiquibaseHubUserException extends LiquibaseHubException {
 
     public LiquibaseHubUserException() {

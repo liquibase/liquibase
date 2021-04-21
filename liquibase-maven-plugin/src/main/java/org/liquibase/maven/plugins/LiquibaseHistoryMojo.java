@@ -4,7 +4,6 @@ import liquibase.Liquibase;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
 import liquibase.command.CommandResult;
-import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.HistoryCommand;
 import liquibase.exception.LiquibaseException;
 

@@ -3,7 +3,6 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.DropColumnChange;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;

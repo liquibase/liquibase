@@ -1,7 +1,6 @@
 package liquibase.database.core;
 
 import liquibase.database.*;
-import liquibase.test.JUnitResourceAccessor;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

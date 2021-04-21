@@ -1,12 +1,9 @@
 package liquibase.executor;
 
-import liquibase.Scope;
-import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

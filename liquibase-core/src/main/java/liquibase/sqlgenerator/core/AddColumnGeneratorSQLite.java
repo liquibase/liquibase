@@ -10,8 +10,6 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.structure.core.Index;
 
-import java.util.Set;
-
 /**
  * Workaround for adding column on existing table for SQLite.
  *
