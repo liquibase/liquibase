@@ -1,12 +1,19 @@
 package liquibase.integration.commandline;
 
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.CommandLineParsingException;
+import liquibase.logging.LogMessageFilter;
+import liquibase.logging.LogService;
+import liquibase.logging.Logger;
+import liquibase.logging.core.DefaultLogMessageFilter;
+import liquibase.logging.core.JavaLogger;
 import liquibase.util.StringUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.Properties;
 import java.util.Arrays;
 import java.util.List;
@@ -808,5 +815,39 @@ public class MainTest {
         assertEquals("Custom database change log table gets parsed correctly (as an option argument)",
                 "OPTSCHANGELOG", main.databaseChangeLogTableName);
         assertEquals("Custom database change log LOCK table gets parsed correctly (as an option argument)", "OPTSCHANGELOGLOCK", main.databaseChangeLogLockTableName);
+    }
+
+    @Test
+    public void testCustomLogServiceImplementation() throws Exception {
+        Scope.enter(Collections.singletonMap(Scope.Attr.logService.name(), new PseudoCustomLogService()));
+        Main.run(new String[]{"--changeLogFile=testFile", "history"});
+    }
+
+    /*
+     * Class to imitate custom LogService implementation
+     */
+    private static class PseudoCustomLogService implements LogService {
+
+        @Override
+        public int getPriority() {
+            return LogService.PRIORITY_DEFAULT;
+        }
+
+        @Override
+        public Logger getLog(Class clazz) {
+            java.util.logging.Logger global = java.util.logging.Logger.getGlobal();
+            return new JavaLogger(global, new DefaultLogMessageFilter());
+        }
+
+        @Override
+        public void close() {}
+
+        @Override
+        public LogMessageFilter getFilter() {
+            return new DefaultLogMessageFilter();
+        }
+
+        @Override
+        public void setFilter(LogMessageFilter filter) {}
     }
 }
