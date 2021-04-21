@@ -328,7 +328,7 @@ public interface Database extends PrioritizedService {
      */
     List<DatabaseFunction> getDateFunctions();
 
-    void resetInternalState();
+    void resetInternalState() throws DatabaseException;
 
     boolean supportsForeignKeyDisable();
 

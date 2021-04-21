@@ -29,7 +29,7 @@ public class DatabaseTestTemplate {
             JdbcExecutor writeExecutor = new JdbcExecutor();
             writeExecutor.setDatabase(database);
             Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, writeExecutor);
-            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+            LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
             lockService.reset();
             if (database.getConnection() != null) {
                 lockService.forceReleaseLock();

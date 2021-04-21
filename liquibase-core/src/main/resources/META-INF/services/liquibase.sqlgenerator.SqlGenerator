@@ -28,7 +28,6 @@ liquibase.sqlgenerator.core.BatchDmlExecutablePreparedStatementGenerator
 liquibase.sqlgenerator.core.ClearDatabaseChangeLogTableGenerator
 liquibase.sqlgenerator.core.CommentGenerator
 liquibase.sqlgenerator.core.CopyRowsGenerator
-liquibase.sqlgenerator.core.CreateDatabaseChangeLogLockTableGenerator
 liquibase.sqlgenerator.core.CreateDatabaseChangeLogTableGenerator
 liquibase.sqlgenerator.core.CreateDatabaseChangeLogTableGeneratorSybase
 liquibase.sqlgenerator.core.CreateIndexGenerator
@@ -63,7 +62,6 @@ liquibase.sqlgenerator.core.GetViewDefinitionGeneratorOracle
 liquibase.sqlgenerator.core.GetViewDefinitionGeneratorPostgres
 liquibase.sqlgenerator.core.GetViewDefinitionGeneratorSybase
 liquibase.sqlgenerator.core.GetViewDefinitionGeneratorSybaseASA
-liquibase.sqlgenerator.core.InitializeDatabaseChangeLogLockTableGenerator
 liquibase.sqlgenerator.core.InsertDataChangeGenerator
 liquibase.sqlgenerator.core.InsertGenerator
 liquibase.sqlgenerator.core.InsertOrUpdateGeneratorDB2

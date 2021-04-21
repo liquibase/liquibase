@@ -103,7 +103,6 @@ class LiquibaseTest extends Specification {
 //        verifyNoMoreInteractions(mockLockService, mockChangeLogParser, mockChangeLog, mockChangeLogIterator); //for no other interactions of normal use objects. Not automatically checking mockDatabase and the *Factory mocks
 //        Mockito.reset(mockDatabase, mockLockServiceFactory, mockLockService, mockChangeLogParserFactory, mockChangeLogParser, mockChangeLog, mockChangeLogIterator);
         mockHubService.reset()
-        LockServiceFactory.reset()
         ChangeLogParserFactory.reset()
         Scope.exit(setupScopeId)
         ChangeLogParserFactory.reset()

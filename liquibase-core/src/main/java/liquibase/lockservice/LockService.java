@@ -1,14 +1,13 @@
 package liquibase.lockservice;
 
+import liquibase.ExtensibleObject;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
+import liquibase.plugin.Plugin;
 import liquibase.servicelocator.PrioritizedService;
 
-/**
- * @author John Sanda
- */
-public interface LockService extends PrioritizedService {
+public interface LockService extends Plugin, ExtensibleObject, PrioritizedService {
 
     boolean supports(Database database);
 
@@ -17,8 +16,6 @@ public interface LockService extends PrioritizedService {
     void setChangeLogLockWaitTime(long changeLogLockWaitTime);
 
     void setChangeLogLockRecheckTime(long changeLogLocRecheckTime);
-
-    boolean hasChangeLogLock();
 
     void waitForLock() throws LockException;
 
@@ -34,11 +31,19 @@ public interface LockService extends PrioritizedService {
     void forceReleaseLock() throws LockException, DatabaseException;
 
     /**
+     * Performs any preparation needed prior to using this lock service.
+     */
+    void init() throws DatabaseException;
+
+    /**
      * Clears information the lock handler knows about the tables.  Should only be called by Liquibase internal calls
      */
     void reset();
 
-    void init() throws DatabaseException;
 
+    /**
+     * Destroys any resources used by this lock service.
+     * Used primarily by dropAll to clean up this table after releasing the lock.
+     */
     void destroy() throws DatabaseException;
 }
