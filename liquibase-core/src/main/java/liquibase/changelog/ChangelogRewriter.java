@@ -1,7 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.Scope;
-import liquibase.configuration.GlobalConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.InputStreamList;
@@ -38,7 +38,7 @@ public class ChangelogRewriter {
             list = resourceAccessor.openStreams("", changeLogFile);
             List<URI> uris = list.getURIs();
             InputStream is = list.iterator().next();
-            String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+            String encoding = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
             String changeLogString = StreamUtil.readStreamAsString(is, encoding);
             if (changeLogFile.toLowerCase().endsWith(".xml")) {
                 //
@@ -133,7 +133,7 @@ public class ChangelogRewriter {
             list = resourceAccessor.openStreams("", changeLogFile);
             List<URI> uris = list.getURIs();
             InputStream is = list.iterator().next();
-            String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+            String encoding = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
             String changeLogString = StreamUtil.readStreamAsString(is, encoding);
             if (changeLogFile.toLowerCase().endsWith(".xml")) {
                 String patternString = "(?ms).*<databaseChangeLog[^>]*>";

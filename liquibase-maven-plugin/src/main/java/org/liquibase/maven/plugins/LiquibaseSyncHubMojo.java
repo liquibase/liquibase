@@ -3,6 +3,7 @@ package org.liquibase.maven.plugins;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.*;
 import liquibase.command.core.SyncHubCommand;
@@ -53,7 +54,7 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
 			throws LiquibaseException {
 		    super.performLiquibaseTask(liquibase);
         Database database = liquibase.getDatabase();
-        SyncHubCommand syncHub = (SyncHubCommand) CommandFactory.getInstance().getCommand("syncHub");
+        SyncHubCommand syncHub = (SyncHubCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("syncHub");
         syncHub.setChangeLogFile(changeLogFile);
         syncHub.setUrl(database.getConnection().getURL());
         syncHub.setHubConnectionId(hubConnectionId);
@@ -61,7 +62,7 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
         syncHub.setDatabase(database);
         syncHub.setFailIfOnline(false);
         try {
-            CommandResult result = syncHub.execute();
+            CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(syncHub);
             if (!result.succeeded) {
                 throw new LiquibaseException(result.message);
             }

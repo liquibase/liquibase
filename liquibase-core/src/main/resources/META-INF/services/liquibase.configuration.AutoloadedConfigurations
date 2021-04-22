@@ -1,0 +1,4 @@
+liquibase.GlobalConfiguration
+liquibase.hub.HubConfiguration
+liquibase.logging.core.DefaultLoggerConfiguration
+liquibase.parser.ChangeLogParserConfiguration

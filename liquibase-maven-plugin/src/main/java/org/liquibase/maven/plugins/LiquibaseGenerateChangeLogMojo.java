@@ -1,8 +1,8 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.StandardObjectChangeFilter;
@@ -12,9 +12,6 @@ import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 
 /**
  * <p>Generates a changelog based on the current database schema. Typically used when
@@ -117,13 +114,12 @@ public class LiquibaseGenerateChangeLogMojo extends
             // Set the global configuration option based on presence of the dataOutputDirectory
             //
             boolean b = dataDir != null;
-            LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setShouldSnapshotData(b);
-
-            CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtil.trimToNull(diffTypes),
-                    StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl);
-            getLog().info("Output written to Change Log file, " + outputChangeLogFile);
-        }
-        catch (IOException | ParserConfigurationException e) {
+            Scope.child(GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getKey(), b, () -> {
+                CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtil.trimToNull(diffTypes),
+                        StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl);
+                getLog().info("Output written to Change Log file, " + outputChangeLogFile);
+            });
+        }  catch (Exception e) {
             throw new LiquibaseException(e);
         }
     }

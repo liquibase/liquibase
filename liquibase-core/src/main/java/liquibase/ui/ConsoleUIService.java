@@ -2,10 +2,9 @@ package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
 import liquibase.Scope;
-import liquibase.configuration.ConfigurationProperty;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.LiquibaseException;
+import liquibase.GlobalConfiguration;
+import liquibase.configuration.ConfigurationDefinition;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
@@ -114,9 +113,9 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
      */
     protected ConsoleWrapper getConsole() {
         if (console == null) {
-            final ConfigurationProperty headless = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.HEADLESS);
-            boolean headlessConfigValue = headless.getValue(Boolean.class);
-            boolean wasHeadlessOverridden = headless.getWasOverridden();
+            final ConfiguredValue<Boolean> headlessValue = GlobalConfiguration.HEADLESS.getCurrentConfiguredValue();
+            boolean headlessConfigValue = headlessValue.getValue();
+            boolean wasHeadlessOverridden = !ConfigurationDefinition.wasDefaultValueUsed(headlessValue);
 
             final Logger log = Scope.getCurrentScope().getLog(getClass());
 

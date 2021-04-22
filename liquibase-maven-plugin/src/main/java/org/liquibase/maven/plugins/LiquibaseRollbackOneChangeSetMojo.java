@@ -1,6 +1,7 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.*;
 import liquibase.database.Database;
@@ -97,7 +98,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
                     "The command 'rollbackOneChangeSet' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
         }
         Database database = liquibase.getDatabase();
-        LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand("rollbackOneChangeSet"));
+        LiquibaseCommand liquibaseCommand = (Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("rollbackOneChangeSet"));
         AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand)liquibaseCommand;
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         ChangeLogParameters clp = new ChangeLogParameters(database);
@@ -109,7 +110,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         argsMap.put("liquibase", liquibase);
         configuratingCommand.configure(argsMap);
         try {
-            final CommandResult execute = liquibaseCommand.execute();
+            final CommandResult execute = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
             if (!execute.succeeded) {
                 throw new LiquibaseException(execute.message);
             }

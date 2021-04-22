@@ -11,10 +11,9 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandResult;
 import liquibase.command.core.RegisterChangeLogCommand;
 import liquibase.command.core.SyncHubCommand;
-import liquibase.configuration.ConfigurationProperty;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.ConfigurationDefinition;
+import liquibase.configuration.ConfiguredValue;
+import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -198,8 +197,7 @@ public class HubUpdater {
             // Send the COMPLETE operation event
             // Capture the Liquibase Hub log level to use for filtering
             //
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-            Level currentLevel = Level.parse(hubConfiguration.getLiquibaseHubLogLevel());
+            Level currentLevel = HubConfiguration.LIQUIBASE_HUB_LOGLEVEL.getCurrentValue();
 
             hubService.sendOperationEvent(updateOperation, new OperationEvent()
                 .setEventType("COMPLETE")
@@ -260,8 +258,7 @@ public class HubUpdater {
             //
             // Capture the current log level to use for filtering
             //
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-            Level currentLevel = Level.parse(hubConfiguration.getLiquibaseHubLogLevel());
+            Level currentLevel = HubConfiguration.LIQUIBASE_HUB_LOGLEVEL.getCurrentValue();
 
             //
             // Check to see if the changelog has been deactivated
@@ -318,7 +315,7 @@ public class HubUpdater {
     }
 
     public void syncHub(String changeLogFile, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) {
-        final SyncHubCommand syncHub = (SyncHubCommand) CommandFactory.getInstance().getCommand("syncHub");
+    final SyncHubCommand syncHub = (SyncHubCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("syncHub");
         syncHub.setChangeLogFile(changeLogFile);
         syncHub.setUrl(database.getConnection().getURL());
         syncHub.setHubConnectionId(hubConnectionId != null ? Objects.toString(hubConnectionId) : null);
@@ -327,7 +324,7 @@ public class HubUpdater {
 
         try {
             syncHub.configure(Collections.singletonMap("changeLog", databaseChangeLog));
-            final CommandResult commandResult = syncHub.execute();
+      final CommandResult commandResult = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(syncHub);
             if (!commandResult.succeeded) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Liquibase Hub sync failed: " + commandResult.message);
             }
@@ -358,7 +355,6 @@ public class HubUpdater {
         //
         // Just return if Hub is off
         //
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         if (!hubService.isOnline()) {
             return;
@@ -369,7 +365,7 @@ public class HubUpdater {
         //   1.  We have a key already OR
         //   2.  We have a changeLogId already
         //
-        if (!StringUtil.isEmpty(hubConfiguration.getLiquibaseHubApiKey()) ||
+        if (!StringUtil.isEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) ||
             changeLog.getChangeLogId() != null) {
             return;
         }
@@ -462,15 +458,15 @@ public class HubUpdater {
                 // If there is no liquibase.hub.mode setting then add one with value 'all'
                 // Do not update liquibase.hub.mode if it is already set
                 //
-                ConfigurationProperty hubModeProperty = hubConfiguration.getProperty(HubConfiguration.LIQUIBASE_HUB_MODE);
-                if (! hubModeProperty.getWasOverridden()) {
+                ConfiguredValue<String> hubModeProperty = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentConfiguredValue();
+                if (ConfigurationDefinition.wasDefaultValueUsed(hubModeProperty)) {
                     writeToPropertiesFile(defaultsFile, "\nliquibase.hub.mode=all\n");
                     message = "* Updated properties file " + defaultsFile + " to set liquibase.hub properties";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getLog(getClass()).info(message);
                 } else {
                     message = "* Updated the liquibase.hub.apiKey property.";
-                    String message2 = "The liquibase.hub.mode is already set to " + hubConfiguration.getLiquibaseHubMode() + ". It will not be updated.";
+                    String message2 = "The liquibase.hub.mode is already set to " + hubModeProperty.getValue() + ". It will not be updated.";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getUI().sendMessage(message2);
                     Scope.getCurrentScope().getLog(getClass()).warning(message);
@@ -484,7 +480,7 @@ public class HubUpdater {
                 message = "* Registering changelog file " + changeLogFile + " with Hub";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).info(message);
-                hubConfiguration.setLiquibaseHubApiKey(registerResponse.getApiKey());
+                DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, registerResponse.getApiKey());
                 registerChangeLog(registerResponse.getProjectId(), changeLog, changeLogFile);
 
                 message = "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
@@ -500,7 +496,8 @@ public class HubUpdater {
                     "No operations will be reported.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).warning(message);
-                hubConfiguration.setLiquibaseHubApiKey(null);
+
+                System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), null);
             }
         }
     }
@@ -509,7 +506,7 @@ public class HubUpdater {
     // Write the string to a properties file
     //
     private void writeToPropertiesFile(File defaultsFile, String stringToWrite) throws IOException {
-        String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+        String encoding = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(defaultsFile, "rw")) {
             randomAccessFile.seek(defaultsFile.length());
             randomAccessFile.write(stringToWrite.getBytes(encoding));
@@ -543,7 +540,7 @@ public class HubUpdater {
         //
         // Execute registerChangeLog
         //
-        CommandResult result = registerChangeLogCommand.execute();
+        CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(registerChangeLogCommand);
         Scope.getCurrentScope().getUI().sendMessage(result.print());
     }
 

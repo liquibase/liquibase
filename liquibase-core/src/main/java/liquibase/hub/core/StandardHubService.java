@@ -3,8 +3,7 @@ package liquibase.hub.core;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.hub.HubConfiguration;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.*;
 import liquibase.hub.model.*;
@@ -46,7 +45,7 @@ public class StandardHubService implements HubService {
 
     @Override
     public boolean isOnline() {
-        return !LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("OFF");
+        return !HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("OFF");
     }
 
     public boolean isHubAvailable() {
@@ -54,7 +53,7 @@ public class StandardHubService implements HubService {
             final Logger log = Scope.getCurrentScope().getLog(getClass());
             final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
 
-            if (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("OFF")) {
+            if (HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("OFF")) {
                 hubServiceFactory.setOfflineReason("property liquibase.hub.mode is 'OFF'. To send data to Liquibase Hub, please set it to \"all\"");
                 this.available = false;
             } else if (getApiKey() == null) {
@@ -71,7 +70,7 @@ public class StandardHubService implements HubService {
                         this.organizationId = organization.getId();
                     }
 
-                    log.info("Connected to Liquibase Hub with an API Key '" + LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubApiKeySecureDescription() + "'");
+                    log.info("Connected to Liquibase Hub with an API Key '" + HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValueObfuscated() + "'");
                     this.available = true;
                 } catch (LiquibaseHubException e) {
                     if (e.getCause() instanceof ConnectException) {
@@ -96,8 +95,7 @@ public class StandardHubService implements HubService {
     }
 
     public String getApiKey() {
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        return StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
+        return StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
     }
 
     @Override
@@ -454,7 +452,7 @@ public class StandardHubService implements HubService {
         }
 
         if (operationEvent.getOperationEventLog() != null) {
-            if (!LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("meta")) {
+            if (!HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("meta")) {
                 requestParams.put("logs", operationEvent.getOperationEventLog().getLogMessage());
                 requestParams.put("logsTimestamp", operationEvent.getOperationEventLog().getTimestampLog());
             }
@@ -475,7 +473,7 @@ public class StandardHubService implements HubService {
         String[] generatedSql = null;
         String logs = null;
         Date logsTimestamp = operationChangeEvent.getLogsTimestamp();
-        if (!LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("meta")) {
+        if (!HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("meta")) {
             changesetBody = operationChangeEvent.getChangesetBody();
             generatedSql = operationChangeEvent.getGeneratedSql();
 

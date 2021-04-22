@@ -2,7 +2,7 @@ package liquibase.command.core
 
 import liquibase.Scope
 import liquibase.changelog.DatabaseChangeLog
-import liquibase.configuration.HubConfiguration
+import liquibase.hub.HubConfiguration
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.hub.HubService
 import liquibase.hub.HubServiceFactory
@@ -188,7 +188,6 @@ class RegisterChangeLogCommandTest extends Specification {
         when:
         def outputStream = new ByteArrayOutputStream()
 
-        def hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class)
         def command = new RegisterChangeLogCommand()
         command.setChangeLogFile("changelog.xml")
         DatabaseChangeLog changeLog = new DatabaseChangeLog(".")

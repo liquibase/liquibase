@@ -6,8 +6,8 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
+import liquibase.hub.HubConfiguration;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubService;
@@ -71,7 +71,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
     }
 
     @Override
-    protected CommandResult run() throws Exception {
+    public CommandResult run() throws Exception {
         //
         // Access the HubService
         // Stop if we do no have a key
@@ -212,8 +212,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
     private String readProjectNameFromConsole() throws CommandLineParsingException {
         final UIService ui = Scope.getCurrentScope().getUI();
 
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        String hubUrl = hubConfiguration.getLiquibaseHubUrl();
+        String hubUrl = HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue();
         String input = ui.prompt("Please enter your Project name and press [enter].  This is editable in your Liquibase Hub account at " + hubUrl, null, null, String.class);
         return StringUtil.trimToEmpty(input);
     }

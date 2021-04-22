@@ -7,8 +7,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.hub.HubConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -101,7 +100,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
     }
 
     @Override
-    protected CommandResult run() throws Exception {
+    public CommandResult run() throws Exception {
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         Logger log = Scope.getCurrentScope().getLog(getClass());
         HubUpdater hubUpdater = null;
@@ -159,9 +158,8 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
     // a LiquibaseHubException
     //
     private HubChangeLog getHubChangeLog(DatabaseChangeLog changeLog) throws LiquibaseHubException {
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        String apiKey = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
-        String hubMode = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubMode());
+        String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
+        String hubMode = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
         String changeLogId = changeLog.getChangeLogId();
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
         if (apiKey == null || hubMode.equals("off") || !hubServiceFactory.isOnline()) {

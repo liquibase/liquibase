@@ -7,8 +7,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.AbstractChangeExecListener;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.ChangeLogSyncListener;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.hub.HubConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.PreconditionErrorException;
@@ -192,10 +191,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                                       String operationStatusType,
                                       String statusMessage) {
         if (operation == null) {
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-            String apiKey = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
-            boolean hubOn =
-                    ! (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off"));
+            String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
+            boolean hubOn = !(HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("off"));
             if (apiKey != null && hubOn) {
                 String message =
                         "Hub communication failure.\n" +
@@ -316,8 +313,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         //
         // Capture the current log level to use for filtering
         //
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        Level currentLevel = Level.parse(hubConfiguration.getLiquibaseHubLogLevel());
+        Level currentLevel = HubConfiguration.LIQUIBASE_HUB_LOGLEVEL.getCurrentValue();
 
         BufferedLogService bufferedLogService =
            Scope.getCurrentScope().get(BufferedLogService.class.getName(), BufferedLogService.class);
@@ -340,10 +336,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         // If not connected to Hub but we are supposed to be then show message
         //
         if (operation == null) {
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-            String apiKey = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
-            boolean hubOn =
-                ! (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off"));
+            String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValueObfuscated());
+            boolean hubOn = ! (HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("off"));
             if (apiKey != null && hubOn) {
                 String message;
                 if (databaseChangeLog.getChangeLogId() == null) {

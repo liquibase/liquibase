@@ -48,7 +48,7 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
     }
 
     @Override
-    protected CommandResult run() throws Exception {
+    public CommandResult run() throws Exception {
         outputBestPracticeMessage();
 
         String changeLogFile = StringUtil.trimToNull(getChangeLogFile());

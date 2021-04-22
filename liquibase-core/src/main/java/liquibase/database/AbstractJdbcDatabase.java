@@ -9,9 +9,9 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.StandardChangeLogHistoryService;
-import liquibase.configuration.ConfigurationProperty;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
+import liquibase.configuration.ConfigurationDefinition;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SQLiteDatabase;
@@ -623,7 +623,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return databaseChangeLogTableName;
         }
 
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogTableName();
+        return GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue();
     }
 
     @Override
@@ -637,7 +637,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return databaseChangeLogLockTableName;
         }
 
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogLockTableName();
+        return GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue();
     }
 
     @Override
@@ -651,7 +651,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return liquibaseTablespaceName;
         }
 
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getLiquibaseTablespaceName();
+        return GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentValue();
     }
 
     @Override
@@ -674,9 +674,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             return liquibaseCatalogName;
         }
 
-        ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_CATALOG_NAME);
-        if (configuration.getWasOverridden()) {
-            return configuration.getValue(String.class);
+        final String configuredCatalogName = GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue();
+        if (configuredCatalogName != null) {
+            return configuredCatalogName;
         }
 
         return getDefaultCatalogName();
@@ -693,9 +693,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             return liquibaseSchemaName;
         }
 
-        ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_SCHEMA_NAME);
-        if (configuration.getWasOverridden()) {
-            return configuration.getValue(String.class);
+        final ConfiguredValue<String> configuredValue = GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentConfiguredValue();
+        if (!ConfigurationDefinition.wasDefaultValueUsed(configuredValue)) {
+            return configuredValue.getValue();
         }
 
         return getDefaultSchemaName();

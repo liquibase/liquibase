@@ -5,8 +5,7 @@ import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -25,7 +24,6 @@ import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -216,10 +214,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
             Thread.currentThread().interrupt();
         }
 
-        String errorStreamOut = errorStream.toString(LiquibaseConfiguration.getInstance().getConfiguration
-                (GlobalConfiguration.class).getOutputEncoding());
-        String infoStreamOut = inputStream.toString(LiquibaseConfiguration.getInstance().getConfiguration
-                (GlobalConfiguration.class).getOutputEncoding());
+        String errorStreamOut = errorStream.toString(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+        String infoStreamOut = inputStream.toString(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
 
         if (errorStreamOut != null && !errorStreamOut.isEmpty()) {
             Scope.getCurrentScope().getLog(getClass()).severe(errorStreamOut);

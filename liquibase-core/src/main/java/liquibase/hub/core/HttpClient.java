@@ -1,8 +1,8 @@
 package liquibase.hub.core;
 
 import liquibase.Scope;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
+import liquibase.hub.HubConfiguration;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.LiquibaseHubObjectNotFoundException;
 import liquibase.hub.LiquibaseHubRedirectException;
@@ -90,8 +90,7 @@ class HttpClient {
     }
 
     private URLConnection openConnection(String url) throws LiquibaseHubException {
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        String apiKey = hubConfiguration.getLiquibaseHubApiKey();
+        String apiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
 
         try {
             final URLConnection connection = new URL(getHubUrl() + url).openConnection();
@@ -182,8 +181,8 @@ class HttpClient {
                         String newHubUrl = connection.getHeaderField("Location");
                         newHubUrl = newHubUrl.replaceAll(url, "");
                         Scope.getCurrentScope().getLog(getClass()).info("Redirecting to URL: " + newHubUrl);
-                        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-                        hubConfiguration.setLiquibaseHubUrl(newHubUrl);
+
+                        DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_URL, newHubUrl);
                         throw new LiquibaseHubRedirectException();
                     }
                 }
@@ -233,8 +232,7 @@ class HttpClient {
     }
 
     public String getHubUrl() {
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        return hubConfiguration.getLiquibaseHubUrl();
+        return HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue();
     }
 
 

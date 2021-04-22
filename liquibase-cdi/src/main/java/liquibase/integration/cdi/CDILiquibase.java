@@ -4,8 +4,7 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -107,12 +106,10 @@ public class CDILiquibase implements Extension {
             return;
         }
 
-        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
-        if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
+        if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
             log.info(String.format("Liquibase did not run on %s because %s was set to false.",
                     hostName,
-                liquibaseConfiguration.describeValueLookupLogic(
-                    GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN)
+                GlobalConfiguration.SHOULD_RUN.getKey()
             ));
             return;
         }

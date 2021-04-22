@@ -4,6 +4,7 @@ package org.liquibase.maven.plugins;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.command.core.DiffCommand;
 import liquibase.database.Database;
@@ -249,7 +250,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         } else {
             PrintStream printStream = createPrintStream();
             if (isFormattedDiff()) {
-                LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand("formattedDiff");
+                LiquibaseCommand liquibaseCommand = Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("formattedDiff");
                 DiffCommand diffCommand =
                         CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtil.trimToNull(diffTypes),
                                 schemaComparisons, objectChangeFilter, printStream);
@@ -258,7 +259,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 argsMap.put("diffCommand", diffCommand);
                 ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
                 try {
-                    CommandResult result = liquibaseCommand.execute();
+                    CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
                     if (!result.succeeded) {
                         throw new LiquibaseException(result.message);
                     }

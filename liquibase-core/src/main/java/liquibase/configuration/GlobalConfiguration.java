@@ -1,219 +1,258 @@
 package liquibase.configuration;
 
-/**
- * Configuration container for global properties.
- */
-public class GlobalConfiguration extends AbstractConfigurationContainer {
+import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 
-    public static final String SHOULD_RUN = "shouldRun";
-    public static final String DATABASECHANGELOG_TABLE_NAME = "databaseChangeLogTableName";
-    public static final String DATABASECHANGELOGLOCK_TABLE_NAME = "databaseChangeLogLockTableName";
-    public static final String LIQUIBASE_TABLESPACE_NAME = "tablespaceName";
-    public static final String LIQUIBASE_CATALOG_NAME = "catalogName";
-    public static final String LIQUIBASE_SCHEMA_NAME = "schemaName";
-    public static final String OUTPUT_LINE_SEPARATOR = "outputLineSeparator";
-    public static final String OUTPUT_ENCODING = "outputFileEncoding";
-    public static final String CHANGELOGLOCK_WAIT_TIME = "changeLogLockWaitTimeInMinutes";
-    public static final String CHANGELOGLOCK_POLL_RATE = "changeLogLockPollRate";
-    public static final String CONVERT_DATA_TYPES = "convertDataTypes";
-    public static final String GENERATE_CHANGESET_CREATED_VALUES = "generateChangeSetCreatedValues";
-    public static final String AUTO_REORG = "autoReorg";
-    public static final String DIFF_COLUMN_ORDER = "diffColumnOrder";
-    public static final String ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA = "alwaysOverrideStoredLogicSchema";
-    public static final String GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = "generatedChangeSetIdsContainsDescription";
-    public static final String INCLUDE_CATALOG_IN_SPECIFICATION = "includeCatalogInSpecification";
-    public static final String SHOULD_SNAPSHOT_DATA = "shouldSnapshotData";
-    public static final String FILTER_LOG_MESSAGES = "filterLogMessages";
-    public static final String HEADLESS = "headless";
+import java.util.Set;
+
+/**
+ * @deprecated use {@link liquibase.GlobalConfiguration}
+ */
+public class GlobalConfiguration extends liquibase.GlobalConfiguration implements ConfigurationContainer {
+
+    /**
+     * @deprecated
+     */
+    public static final String SHOULD_RUN = liquibase.GlobalConfiguration.SHOULD_RUN.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String DATABASECHANGELOG_TABLE_NAME = liquibase.GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String DATABASECHANGELOGLOCK_TABLE_NAME = liquibase.GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String LIQUIBASE_TABLESPACE_NAME = liquibase.GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String LIQUIBASE_CATALOG_NAME = liquibase.GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String LIQUIBASE_SCHEMA_NAME = liquibase.GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String OUTPUT_LINE_SEPARATOR = liquibase.GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String OUTPUT_ENCODING = liquibase.GlobalConfiguration.OUTPUT_ENCODING.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String CHANGELOGLOCK_WAIT_TIME = liquibase.GlobalConfiguration.CHANGELOGLOCK_WAIT_TIME.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String CHANGELOGLOCK_POLL_RATE = liquibase.GlobalConfiguration.CHANGELOGLOCK_POLL_RATE.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String CONVERT_DATA_TYPES = liquibase.GlobalConfiguration.CONVERT_DATA_TYPES.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String GENERATE_CHANGESET_CREATED_VALUES = liquibase.GlobalConfiguration.GENERATE_CHANGESET_CREATED_VALUES.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String AUTO_REORG = liquibase.GlobalConfiguration.AUTO_REORG.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String DIFF_COLUMN_ORDER = liquibase.GlobalConfiguration.DIFF_COLUMN_ORDER.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA = liquibase.GlobalConfiguration.ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = liquibase.GlobalConfiguration.GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String INCLUDE_CATALOG_IN_SPECIFICATION = liquibase.GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String SHOULD_SNAPSHOT_DATA = liquibase.GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String FILTER_LOG_MESSAGES = liquibase.GlobalConfiguration.FILTER_LOG_MESSAGES.getKey();
+
+    /**
+     * @deprecated
+     */
+    public static final String HEADLESS = liquibase.GlobalConfiguration.HEADLESS.getKey();
+
+    private static final AbstractConfigurationContainer.DelegatedConfigurationContainer containerDelegate = new AbstractConfigurationContainer.DelegatedConfigurationContainer("liquibase");
 
     public GlobalConfiguration() {
-        super("liquibase");
-
-        getContainer().addProperty(SHOULD_RUN, Boolean.class)
-            .setDescription("Should Liquibase commands execute")
-                .setDefaultValue(true)
-                .addAlias("should.run");
-
-        getContainer().addProperty(DATABASECHANGELOG_TABLE_NAME, String.class)
-                .setDescription("Name of table to use for tracking change history")
-                .setDefaultValue("DATABASECHANGELOG");
-
-        getContainer().addProperty(DATABASECHANGELOGLOCK_TABLE_NAME, String.class)
-            .setDescription("Name of table to use for tracking concurrent Liquibase usage")
-                .setDefaultValue("DATABASECHANGELOGLOCK");
-
-        getContainer().addProperty(CHANGELOGLOCK_WAIT_TIME, Long.class)
-                .setDescription("Number of minutes to wait for the changelog lock to be available before giving up")
-                .setDefaultValue(5);
-
-        getContainer().addProperty(CHANGELOGLOCK_POLL_RATE, Long.class)
-                .setDescription("Number of seconds wait between checks to the changelog lock when it is locked")
-                .setDefaultValue(10);
-
-        getContainer().addProperty(LIQUIBASE_TABLESPACE_NAME, String.class)
-            .setDescription("Tablespace to use for Liquibase objects");
-
-        getContainer().addProperty(LIQUIBASE_CATALOG_NAME, String.class)
-            .setDescription("Catalog to use for Liquibase objects");
-
-        getContainer().addProperty(LIQUIBASE_SCHEMA_NAME, String.class)
-            .setDescription("Schema to use for Liquibase objects");
-
-        getContainer().addProperty(OUTPUT_LINE_SEPARATOR, String.class)
-                .setDescription("Line separator for output. Defaults to OS default")
-                .setDefaultValue(System.getProperty("line.separator"));
-
-        getContainer().addProperty(OUTPUT_ENCODING, String.class)
-                .setDescription("Encoding to output text in. Defaults to file.encoding system property or UTF-8")
-                .setDefaultValue("UTF-8")
-                .addAlias("file.encoding");
-
-        getContainer().addProperty(CONVERT_DATA_TYPES, Boolean.class)
-            .setDescription("Should Liquibase convert to/from STANDARD data types. Applies to both snapshot and " +
-                "update commands.")
-                .setDefaultValue(true);
-
-        getContainer().addProperty(GENERATE_CHANGESET_CREATED_VALUES, Boolean.class)
-            .setDescription("Should Liquibase include a 'created' attribute in diff/generateChangeLog changeSets with" +
-                " the current datetime")
-                .setDefaultValue(false);
-
-        getContainer().addProperty(AUTO_REORG, Boolean.class)
-            .setDescription("Should Liquibase automatically include REORG TABLE commands when needed?")
-                .setDefaultValue(true);
-
-        getContainer().addProperty(DIFF_COLUMN_ORDER, Boolean.class)
-            .setDescription("Should Liquibase compare column order in diff operation?")
-                .setDefaultValue(true);
-
-        getContainer().addProperty(ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA, Boolean.class)
-                .setDescription("When generating SQL for createProcedure, should the procedure schema be forced to the default schema if no schemaName attribute is set?")
-                .setDefaultValue(false);
-
-
-        getContainer().addProperty(GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION, Boolean.class)
-            .setDescription("Should Liquibase include the change description in the id when generating changeSets?")
-                .setDefaultValue(false);
-
-        getContainer().addProperty(INCLUDE_CATALOG_IN_SPECIFICATION, Boolean.class)
-                .setDescription("Should Liquibase include the catalog name when determining equality?")
-                .setDefaultValue(false);
-
-        getContainer().addProperty(SHOULD_SNAPSHOT_DATA, Boolean.class)
-                .setDescription("Should Liquibase snapshot data by default?")
-                .setDefaultValue(false);
-
-        getContainer().addProperty(FILTER_LOG_MESSAGES, Boolean.class)
-                .setDescription("Should Liquibase filter log messages for potentially insecure data?")
-                .setDefaultValue(true);
-
-        getContainer().addProperty(HEADLESS, Boolean.class)
-                .setDescription("Force liquibase think it has no access to a keyboard?")
-                .setDefaultValue(false);
-
     }
 
     /**
      * Should Liquibase execute
+     * @deprecated
      */
     public boolean getShouldRun() {
-        return getContainer().getValue(SHOULD_RUN, Boolean.class);
+        return liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setShouldRun(boolean shouldRun) {
-        getContainer().setValue(SHOULD_RUN, shouldRun);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.SHOULD_RUN, shouldRun);
         return this;
     }
 
     /**
      * Table name to use for DATABASECHANGELOG
+     * @deprecated
      */
     public String getDatabaseChangeLogTableName() {
-        return getContainer().getValue(DATABASECHANGELOG_TABLE_NAME, String.class);
+        return liquibase.GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setDatabaseChangeLogTableName(String name) {
-        getContainer().setValue(DATABASECHANGELOG_TABLE_NAME, name);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME, name);
         return this;
     }
 
     /**
      * Table name to use for DATABASECHANGELOGLOCK
+     * @deprecated
      */
     public String getDatabaseChangeLogLockTableName() {
-        return getContainer().getValue(DATABASECHANGELOGLOCK_TABLE_NAME, String.class);
+        return liquibase.GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setDatabaseChangeLogLockTableName(String name) {
-        getContainer().setValue(DATABASECHANGELOGLOCK_TABLE_NAME, name);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME, name);
         return this;
     }
 
     /**
      * Wait time (in minutes) to wait to receive the changelog lock before giving up.
+     * @deprecated
      */
     public Long getDatabaseChangeLogLockWaitTime() {
-        return getContainer().getValue(CHANGELOGLOCK_WAIT_TIME, Long.class);
+        return liquibase.GlobalConfiguration.CHANGELOGLOCK_WAIT_TIME.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setDatabaseChangeLogLockWaitTime(Long minutes) {
-        getContainer().setValue(CHANGELOGLOCK_WAIT_TIME, minutes);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.CHANGELOGLOCK_WAIT_TIME, minutes);
         return this;
     }
 
     /**
      * Wait time (in seconds) between polling requests to the changelog lock system.
+     * @deprecated
      */
     public Long getDatabaseChangeLogLockPollRate() {
-        return getContainer().getValue(CHANGELOGLOCK_POLL_RATE, Long.class);
+        return liquibase.GlobalConfiguration.CHANGELOGLOCK_POLL_RATE.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setDatabaseChangeLogLockPollRate(Long seconds) {
-        getContainer().setValue(CHANGELOGLOCK_POLL_RATE, seconds);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.CHANGELOGLOCK_POLL_RATE, seconds);
         return this;
     }
 
     /**
      * Name of the tablespace to use for liquibase database objects
+     * @deprecated
      */
     public String getLiquibaseTablespaceName() {
-        return getContainer().getValue(LIQUIBASE_TABLESPACE_NAME, String.class);
+        return liquibase.GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setLiquibaseTablespaceName(String name) {
-        getContainer().setValue(LIQUIBASE_TABLESPACE_NAME, name);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME, name);
         return this;
     }
 
     /**
-     *
      * Should Liquibase snapshot data for table by default
-     *
+     * @deprecated
      */
     public boolean getShouldSnapshotData() {
-        return getContainer().getValue(SHOULD_SNAPSHOT_DATA, Boolean.class);
+        return liquibase.GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setShouldSnapshotData(boolean shouldSnapshotData) {
-        getContainer().setValue(SHOULD_SNAPSHOT_DATA, shouldSnapshotData);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.SHOULD_SNAPSHOT_DATA, shouldSnapshotData);
         return this;
     }
 
+    /**
+     * @deprecated
+     */
     public boolean getShouldFilterLogMessages() {
-        return getContainer().getValue(FILTER_LOG_MESSAGES, Boolean.class);
+        return liquibase.GlobalConfiguration.FILTER_LOG_MESSAGES.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setShouldFilterLogMessages(boolean filter) {
-        getContainer().setValue(FILTER_LOG_MESSAGES, filter);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.FILTER_LOG_MESSAGES, filter);
         return this;
     }
 
+    /**
+     * @deprecated
+     */
     public boolean getHeadless() {
-        return getContainer().getValue(HEADLESS, Boolean.class);
+        return liquibase.GlobalConfiguration.HEADLESS.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setHeadless(boolean headless) {
-        getContainer().setValue(HEADLESS, headless);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.HEADLESS, headless);
         return this;
     }
 
@@ -221,11 +260,12 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
      * Name of the catalog to use for liquibase database objects
      */
     public String getLiquibaseCatalogName() {
-        return getContainer().getValue(LIQUIBASE_CATALOG_NAME, String.class);
+        return liquibase.GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue();
+
     }
 
     public GlobalConfiguration setLiquibaseCatalogName(String name) {
-        getContainer().setValue(LIQUIBASE_CATALOG_NAME, name);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.LIQUIBASE_CATALOG_NAME, name);
         return this;
     }
 
@@ -233,64 +273,119 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
      * Name of the schema to use for liquibase database objects
      */
     public String getLiquibaseSchemaName() {
-        return getContainer().getValue(LIQUIBASE_SCHEMA_NAME, String.class);
+        return liquibase.GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setLiquibaseSchemaName(String name) {
-        getContainer().setValue(LIQUIBASE_SCHEMA_NAME, name);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.LIQUIBASE_SCHEMA_NAME, name);
         return this;
     }
 
     /**
      * Line separator to use in output
+     * @deprecated
      */
     public String getOutputLineSeparator() {
-        return getContainer().getValue(OUTPUT_LINE_SEPARATOR, String.class);
+        return liquibase.GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setOutputLineSeparator(String name) {
-        getContainer().setValue(OUTPUT_LINE_SEPARATOR, name);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.OUTPUT_LINE_SEPARATOR, name);
         return this;
     }
 
     /**
      * String encoding to use in output.
+     * @deprecated
      */
     public String getOutputEncoding() {
-        return getContainer().getValue(OUTPUT_ENCODING, String.class);
+        return liquibase.GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setOutputEncoding(String name) {
-        getContainer().setValue(OUTPUT_ENCODING, name);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.OUTPUT_ENCODING, name);
         return this;
     }
 
+    /**
+     * @deprecated
+     */
     public Boolean getDiffColumnOrder() {
-        return getContainer().getValue(DIFF_COLUMN_ORDER, Boolean.class);
+        return liquibase.GlobalConfiguration.DIFF_COLUMN_ORDER.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setDiffColumnOrder(boolean diff) {
-        getContainer().setValue(DIFF_COLUMN_ORDER, diff);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.DIFF_COLUMN_ORDER, diff);
         return this;
     }
 
 
+    /**
+     * @deprecated
+     */
     public Boolean getAlwaysOverrideStoredLogicSchema() {
-        return getContainer().getValue(ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA, Boolean.class);
+        return liquibase.GlobalConfiguration.ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA.getCurrentValue();
+
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setAlwaysOverrideStoredLogicSchema(boolean override) {
-        getContainer().setValue(ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA, override);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA, override);
         return this;
     }
 
 
+    /**
+     * @deprecated
+     */
     public Boolean getGeneratedChangeSetIdsContainDescription() {
-        return getContainer().getValue(GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION, Boolean.class);
+        return liquibase.GlobalConfiguration.GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION.getCurrentValue();
     }
 
+    /**
+     * @deprecated
+     */
     public GlobalConfiguration setGeneratedChangeSetIdsContainDescription(boolean containDescription) {
-        getContainer().setValue(GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION, containDescription);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION, containDescription);
         return this;
+    }
+
+    @Override
+    public ConfigurationProperty getProperty(String propertyName) {
+        return containerDelegate.getProperty(propertyName);
+    }
+
+    @Override
+    public Set<ConfigurationProperty> getProperties() {
+        return containerDelegate.getProperties();
+    }
+
+    @Override
+    public <T> T getValue(String propertyName, Class<T> returnType) {
+        return containerDelegate.getValue(propertyName, returnType);
+    }
+
+    @Override
+    public void setValue(String propertyName, Object value) {
+        containerDelegate.setValue(propertyName, value);
+    }
+
+    @Override
+    public String getNamespace() {
+        return containerDelegate.getNamespace();
     }
 }

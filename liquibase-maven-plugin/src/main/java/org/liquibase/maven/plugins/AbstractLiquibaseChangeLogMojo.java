@@ -4,10 +4,10 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.hub.HubConfiguration;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -108,15 +108,14 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         //
         // Store the Hub API key and URL for later use
         //
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         if (StringUtil.isNotEmpty(hubApiKey)) {
-            hubConfiguration.setLiquibaseHubApiKey(hubApiKey);
+            DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, hubApiKey);
         }
         if (StringUtil.isNotEmpty(hubUrl)) {
-            hubConfiguration.setLiquibaseHubUrl(hubUrl);
+            DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_URL.getKey(), hubUrl);
         }
         if (StringUtil.isNotEmpty(hubMode)) {
-            hubConfiguration.setLiquibaseHubMode(hubMode);
+            DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_MODE.getKey(), hubMode);
         }
     }
 

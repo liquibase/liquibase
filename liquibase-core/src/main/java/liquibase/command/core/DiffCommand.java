@@ -130,7 +130,7 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
     }
 
     @Override
-    protected CommandResult run() throws Exception {
+    public CommandResult run() throws Exception {
         SnapshotCommand.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());
 
         DiffResult diffResult = createDiffResult();

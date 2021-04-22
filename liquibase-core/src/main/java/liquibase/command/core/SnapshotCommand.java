@@ -94,7 +94,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
     }
 
     @Override
-    protected SnapshotCommandResult run() throws Exception {
+    public SnapshotCommandResult run() throws Exception {
         SnapshotCommand.logUnsupportedDatabase(database, this.getClass());
         SnapshotControl snapshotControl = new SnapshotControl(database);
         snapshotControl.setSnapshotListener(snapshotListener);

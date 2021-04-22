@@ -59,7 +59,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         super.performLiquibaseTask(liquibase);
         Database database = liquibase.getDatabase();
         RegisterChangeLogCommand registerChangeLog =
-            (RegisterChangeLogCommand) CommandFactory.getInstance().getCommand("registerChangeLog");
+            (RegisterChangeLogCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("registerChangeLog");
         registerChangeLog.setChangeLogFile(changeLogFile);
         if (hubProjectId != null) {
             registerChangeLog.setHubProjectId(UUID.fromString(hubProjectId));
@@ -72,7 +72,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
         registerChangeLog.configure(argsMap);
         try {
-            CommandResult result = registerChangeLog.execute();
+            CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(registerChangeLog);
             if (result.succeeded) {
                 Scope.getCurrentScope().getUI().sendMessage(result.print());
             } else {

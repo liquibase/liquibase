@@ -1,5 +1,6 @@
 package liquibase;
 
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -66,6 +67,13 @@ public class Scope {
             Scope rootScope = new Scope();
             scopeManager.setCurrentScope(rootScope);
 
+            rootScope.values.put(Attr.logService.name(), new JavaLogService());
+            rootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
+            rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
+
+            rootScope.values.put(Attr.ui.name(), new ConsoleUIService());
+            rootScope.getSingleton(LiquibaseConfiguration.class).init(rootScope);
+
             LogService overrideLogService = rootScope.getSingleton(LogServiceFactory.class).getDefaultLogService();
             if (overrideLogService == null) {
                 throw new UnexpectedLiquibaseException("Cannot find default log service");
@@ -109,10 +117,6 @@ public class Scope {
      * Defaults serviceLocator to {@link StandardServiceLocator}
      */
     private Scope() {
-        values.put(Attr.logService.name(), new JavaLogService());
-        values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
-        values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
-        values.put(Attr.ui.name(), new ConsoleUIService());
     }
 
     protected Scope(Scope parent, Map<String, Object> scopeValues) {

@@ -90,14 +90,6 @@ select 1
             "select 1;"
 
 
-    def setup() {
-        LiquibaseConfiguration.getInstance().reset()
-    }
-
-    def cleanup() {
-        LiquibaseConfiguration.getInstance().reset()
-    }
-
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())

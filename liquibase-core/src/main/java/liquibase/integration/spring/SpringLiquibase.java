@@ -1,12 +1,7 @@
 package liquibase.integration.spring;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
-import liquibase.Scope;
-import liquibase.configuration.ConfigurationProperty;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.*;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -252,12 +247,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 */
 	@Override
     public void afterPropertiesSet() throws LiquibaseException {
-        ConfigurationProperty shouldRunProperty = LiquibaseConfiguration.getInstance()
-            .getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
+		final ConfiguredValue<Boolean> shouldRunProperty = GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
 
-		if (!shouldRunProperty.getValue(Boolean.class)) {
-            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " + LiquibaseConfiguration
-                .getInstance().describeValueLookupLogic(shouldRunProperty) + " was set to false");
+		if (!(Boolean) shouldRunProperty.getValue()) {
+            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " +shouldRunProperty.getProvidedValue().describe() + " was set to false");
             return;
 		}
 		if (!shouldRun) {
@@ -287,8 +280,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
             try (
                 FileOutputStream fileOutputStream = new FileOutputStream(rollbackFile);
-                Writer output = new OutputStreamWriter(fileOutputStream, LiquibaseConfiguration.getInstance()
-                    .getConfiguration(GlobalConfiguration.class).getOutputEncoding()) )
+                Writer output = new OutputStreamWriter(fileOutputStream, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()) )
 			{
 
                 if (tag != null) {

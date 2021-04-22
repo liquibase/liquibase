@@ -1,9 +1,7 @@
 package liquibase.util;
 
 import liquibase.Scope;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.resource.ResourceAccessor;
+import liquibase.GlobalConfiguration;
 
 import java.io.*;
 
@@ -66,7 +64,7 @@ public class FileUtil {
         try (
             FileOutputStream output = new FileOutputStream(file);
         ){
-            StreamUtil.copy(new ByteArrayInputStream(contents.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())), output);
+            StreamUtil.copy(new ByteArrayInputStream(contents.getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue())), output);
         }
     }
 

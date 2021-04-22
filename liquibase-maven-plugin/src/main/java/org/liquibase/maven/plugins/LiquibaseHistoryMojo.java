@@ -1,6 +1,7 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
 import liquibase.command.CommandResult;
@@ -17,11 +18,11 @@ public class LiquibaseHistoryMojo extends AbstractLiquibaseMojo {
 
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-      HistoryCommand historyCommand = (HistoryCommand) CommandFactory.getInstance().getCommand("history");
+      HistoryCommand historyCommand = (HistoryCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("history");
 
       historyCommand.setDatabase(getLiquibase().getDatabase());
       try {
-          CommandResult result = historyCommand.execute();
+          CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(historyCommand);
           if (!result.succeeded) {
               throw new LiquibaseException(result.message);
           }

@@ -21,7 +21,6 @@ public class CDILiquibaseTest {
     public void clearProperty() {
         System.clearProperty("liquibase.shouldRun");
         System.clearProperty("liquibase.config.shouldRun");
-        LiquibaseConfiguration.getInstance().reset();
     }
 
     private void validateRunningState(boolean shouldBeRunning) {

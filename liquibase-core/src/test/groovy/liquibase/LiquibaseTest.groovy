@@ -2,13 +2,12 @@ package liquibase
 
 import liquibase.changelog.ChangeLogIterator
 import liquibase.changelog.DatabaseChangeLog
-import liquibase.configuration.HubConfiguration
-import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.Database
 import liquibase.database.core.MockDatabase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.DatabaseException
 import liquibase.exception.LiquibaseException
+import liquibase.hub.HubConfiguration
 import liquibase.hub.HubService
 import liquibase.hub.HubServiceFactory
 import liquibase.hub.core.MockHubService
@@ -203,10 +202,12 @@ class LiquibaseTest extends Specification {
     def "update communicates with hub"() {
         given:
         Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
-        LiquibaseConfiguration.instance.getConfiguration(HubConfiguration.class).setLiquibaseHubApiKey("API_KEY")
 
         when:
-        liquibase.update("")
+        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "API_KEY", {
+            liquibase.update("")
+        })
+
 
         then:
         mockHubService.sentObjects.toString() ==
@@ -223,13 +224,17 @@ class LiquibaseTest extends Specification {
 
         when:
         Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
-        LiquibaseConfiguration.instance.getConfiguration(HubConfiguration.class).setLiquibaseHubApiKey(null)
-        DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
+        Connection connection = null;
+        String message = null;
         def changeLogId = UUID.randomUUID().toString()
-        changeLog.setChangeLogId(changeLogId)
-        Connection connection = liquibase.getConnection(changeLog)
-        List<String> messages = uiService.getMessages()
-        String message = messages.get(0)
+
+        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), null, {
+            DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
+            changeLog.setChangeLogId(changeLogId)
+            connection = liquibase.getConnection(changeLog)
+            List<String> messages = uiService.getMessages()
+            message = messages.get(0)
+        })
         Scope.exit(scopeId)
 
         then:
@@ -249,12 +254,15 @@ class LiquibaseTest extends Specification {
 
         when:
         Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
-        LiquibaseConfiguration.instance.getConfiguration(HubConfiguration.class).setLiquibaseHubApiKey("API_KEY")
-        DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
-        changeLog.setChangeLogId(null)
-        Connection connection = liquibase.getConnection(changeLog)
-        List<String> messages = uiService.getMessages()
-        String message = messages.get(0)
+        Connection connection = null
+        String message = null
+        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "API_KEY", {
+            DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
+            changeLog.setChangeLogId(null)
+            connection = liquibase.getConnection(changeLog)
+            List<String> messages = uiService.getMessages()
+            message = messages.get(0)
+        })
         Scope.exit(scopeId)
 
         then:

@@ -4,8 +4,7 @@ import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.*;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -75,7 +74,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
                     "The command 'rollbackOneUpdateSQL' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
         }
         Database database = liquibase.getDatabase();
-        LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand("rollbackOneUpdate"));
+        LiquibaseCommand liquibaseCommand = (Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("rollbackOneUpdate"));
         AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand)liquibaseCommand;
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         Writer outputWriter = null;
@@ -95,7 +94,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         argsMap.put("liquibase", liquibase);
         configuratingCommand.configure(argsMap);
         try {
-            CommandResult result = liquibaseCommand.execute();
+            CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
             if (!result.succeeded) {
                 throw new LiquibaseException(result.message);
             }        }
@@ -121,8 +120,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
     }
 
     private Writer createOutputWriter() throws IOException {
-        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .getOutputEncoding();
+        String charsetName = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
     }

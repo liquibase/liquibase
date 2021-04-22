@@ -2,8 +2,7 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -295,7 +294,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding == null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
-            return new OutputStreamWriter(new FileOutputStream(outputFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            return new OutputStreamWriter(new FileOutputStream(outputFile), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
         }
         getLog().debug("Writing output file with [" + outputFileEncoding + "] file encoding.");
         return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), outputFileEncoding));
@@ -318,11 +317,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 processSystemProperties();
 
-                LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
-
-                if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-                    getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic
-                        (GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
+                if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
+                    getLog().info("Liquibase did not run because " + GlobalConfiguration.SHOULD_RUN.getKey() + " was set to false");
                     return;
                 }
                 if (skip) {

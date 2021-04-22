@@ -1,6 +1,6 @@
 package liquibase.hub
 
-import liquibase.configuration.HubConfiguration
+import liquibase.Scope
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.hub.core.StandardHubService
 import liquibase.hub.model.Connection
@@ -17,6 +17,8 @@ class StandardHubServiceTest extends Specification {
     private UUID knownProjectId = UUID.fromString("ce1a237e-e005-4288-a243-4856823a25a6")
     private UUID knownConnectionId = UUID.fromString("d92e6505-cd0f-4e91-bb66-b12e6a285184")
 
+    private String testScopeId
+
     def setup() {
         if (integrationTestProperties == null) {
             integrationTestProperties = new Properties()
@@ -27,16 +29,19 @@ class StandardHubServiceTest extends Specification {
                 integrationTestProperties.load(localFileStream)
             }
 
-            def hubApiKey = integrationTestProperties.get("integration.test.hub.apikey")
-            def hubUrl = integrationTestProperties.get("integration.test.hub.url")
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class)
-            hubConfiguration.setLiquibaseHubApiKey(hubApiKey)
-            hubConfiguration.setLiquibaseHubUrl(hubUrl)
+            testScopeId = Scope.enter([
+                    (HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey()):integrationTestProperties.get("integration.test.hub.apikey"),
+                    (HubConfiguration.LIQUIBASE_HUB_URL.getKey()):integrationTestProperties.get("integration.test.hub.url"),
+            ])
 
         }
 
         hubService = new StandardHubService()
         assumeTrue("Liquibase Hub is not available for testing", hubService.isHubAvailable())
+    }
+
+    def cleanup() {
+        Scope.exit(testScopeId)
     }
 
     def getMe() {

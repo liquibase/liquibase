@@ -1,7 +1,7 @@
 package liquibase.hub.core
 
-import liquibase.configuration.HubConfiguration
-import liquibase.configuration.LiquibaseConfiguration
+import liquibase.Scope
+import liquibase.hub.HubConfiguration
 import liquibase.hub.model.Connection
 import liquibase.hub.model.OperationChangeEvent
 import liquibase.hub.model.Project
@@ -11,10 +11,6 @@ import spock.lang.Unroll
 class StandardHubServiceTest extends Specification {
 
     private static testUuid = UUID.fromString("3b8b6f80-1194-4a70-8cf2-30f33fd0433e")
-
-    def cleanup() {
-        LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).setLiquibaseHubMode("all")
-    }
 
     @Unroll
     def "toSearchString"() {
@@ -51,36 +47,39 @@ class StandardHubServiceTest extends Specification {
         def operationId = UUID.randomUUID()
 
         when:
-        LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).setLiquibaseHubMode(mode)
+        def seenRequestBody
 
-        def mockHttpClient = new MockHttpClient([
-                "GET /api/v1/organizations"                                                                              : MockHttpClient.createListResponse([
-                        id  : orgId.toString(),
-                        name: "Mock Org"
-                ]),
-                ("POST /api/v1/organizations/$orgId/projects/$projectId/operations/$operationId/change-events" as String): null,
-        ])
+        Scope.child([(HubConfiguration.LIQUIBASE_HUB_MODE.getKey()): mode], {
 
-        def service = new StandardHubService(
-                http: mockHttpClient
-        )
+            def mockHttpClient = new MockHttpClient([
+                    "GET /api/v1/organizations"                                                                              : MockHttpClient.createListResponse([
+                            id  : orgId.toString(),
+                            name: "Mock Org"
+                    ]),
+                    ("POST /api/v1/organizations/$orgId/projects/$projectId/operations/$operationId/change-events" as String): null,
+            ])
 
-        def event = new OperationChangeEvent(
-                eventType: "update",
-                changesetId: "1",
-                project: [
-                        id: projectId,
-                ],
-                operation: [
-                        id: operationId,
-                ],
-                changesetAuthor: "tester",
-                generatedSql: ["select sql here"],
-                changesetBody: "{ body }"
-        )
-        service.sendOperationChangeEvent(event)
+            def service = new StandardHubService(
+                    http: mockHttpClient
+            )
 
-        def seenRequestBody = mockHttpClient.getRequestBody("POST /api/v1/organizations/$orgId/projects/$projectId/operations/$operationId/change-events")
+            def event = new OperationChangeEvent(
+                    eventType: "update",
+                    changesetId: "1",
+                    project: [
+                            id: projectId,
+                    ],
+                    operation: [
+                            id: operationId,
+                    ],
+                    changesetAuthor: "tester",
+                    generatedSql: ["select sql here"],
+                    changesetBody: "{ body }"
+            )
+            service.sendOperationChangeEvent(event)
+
+            seenRequestBody = mockHttpClient.getRequestBody("POST /api/v1/organizations/$orgId/projects/$projectId/operations/$operationId/change-events")
+        } as Scope.ScopedRunner)
 
         then:
         seenRequestBody.changesetBody == (mode == "meta" ? null : "{ body }")
