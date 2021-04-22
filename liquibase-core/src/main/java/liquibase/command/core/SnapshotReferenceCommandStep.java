@@ -29,7 +29,7 @@ public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep 
 
     @Override
     public String[] getName() {
-        return new String[] {"snapshot"};
+        return new String[] {"snapshotReference"};
     }
 
     @Override
@@ -44,7 +44,7 @@ public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep 
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        commandDefinition.setShortDescription("Capture the current state of the database");
-        commandDefinition.setLongDescription("Capture the current state of the database");
+        commandDefinition.setShortDescription("Capture the current state of the reference database");
+        commandDefinition.setLongDescription("Capture the current state of the reference database");
     }
 }

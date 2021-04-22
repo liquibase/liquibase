@@ -170,8 +170,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
 
         commandScope.addArgumentValue("database", database)
         commandScope.addArgumentValue("url", database.getConnection().getURL())
+        commandScope.addArgumentValue("referenceUrl", database.getConnection().getURL())
         commandScope.addArgumentValue("schemas", catalogAndSchemas)
-        //commandScope.addArgumentValue("logLevel", "INFO")
         commandScope.setOutput(outputStream)
 
         if (testDef.setup != null) {

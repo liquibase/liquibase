@@ -796,7 +796,7 @@ public class Main {
         } else if (!isCommand(command)) {
             messages.add(String.format(coreBundle.getString("command.unknown"), command));
         } else {
-            if (StringUtil.trimToNull(url) == null) {
+            if (StringUtil.trimToNull(url) == null && StringUtil.trimToNull(referenceUrl) == null) {
                 messages.add(String.format(coreBundle.getString("option.required"), "--" + OPTIONS.URL));
             }
 
@@ -1545,11 +1545,11 @@ public class Main {
                 outputWriter.flush();
                 return;
             } else if (COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(command)) {
-                CommandScope snapshotCommand = new CommandScope(COMMANDS.SNAPSHOT);
+                CommandScope snapshotCommand = new CommandScope("internalSnapshot");
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
                 snapshotCommand
                         .addArgumentValue(InternalSnapshotCommandStep.DATABASE_ARG, referenceDatabase)
-                        .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
+                        .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(referenceDatabase, getSchemaParams(referenceDatabase)))
                         .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
 
                 Writer outputWriter = getOutputWriter();
