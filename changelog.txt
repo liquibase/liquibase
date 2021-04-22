@@ -1,6 +1,9 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.3.4 (2021.04.15)
+- Reverts changes from #1722 because they broke other diffChangeLog/generateChangeLog use cases.
+
 Changes in version 4.3.3 (2021.04.09)
 - Fixes an issue with changelogsync and hub
 - Fixes an issue with diff and NullPointerException (#1631)
