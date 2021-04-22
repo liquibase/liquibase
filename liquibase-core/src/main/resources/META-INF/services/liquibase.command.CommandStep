@@ -10,6 +10,7 @@ liquibase.command.core.DiffChangeLogCommandStep
 liquibase.command.core.DiffCommandStep
 liquibase.command.core.DropAllCommandStep
 liquibase.command.core.ExecuteSqlCommandStep
+liquibase.command.core.InternalExecuteSqlCommandStep
 liquibase.command.core.FutureRollbackCountSQLCommandStep
 liquibase.command.core.FutureRollbackFromTagSQLCommandStep
 liquibase.command.core.FutureRollbackSQLCommandStep

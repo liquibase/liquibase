@@ -1533,11 +1533,11 @@ public class Main {
                 outputWriter.flush();
                 return;
             } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
-                CommandScope executeSqlCommand = new CommandScope(COMMANDS.EXECUTE_SQL)
-                        .addArgumentValue(ExecuteSqlCommandStep.DATABASE_ARG, database)
-                        .addArgumentValue(ExecuteSqlCommandStep.SQL_ARG, getCommandParam("sql", null))
-                        .addArgumentValue(ExecuteSqlCommandStep.SQLFILE_ARG, getCommandParam("sqlFile", null))
-                        .addArgumentValue(ExecuteSqlCommandStep.DELIMTER_ARG, getCommandParam("delimiter", ";"));
+                CommandScope executeSqlCommand = new CommandScope("internalExecuteSql")
+                        .addArgumentValue(InternalExecuteSqlCommandStep.DATABASE_ARG, database)
+                        .addArgumentValue(InternalExecuteSqlCommandStep.SQL_ARG, getCommandParam("sql", null))
+                        .addArgumentValue(InternalExecuteSqlCommandStep.SQLFILE_ARG, getCommandParam("sqlFile", null))
+                        .addArgumentValue(InternalExecuteSqlCommandStep.DELIMITER_ARG, getCommandParam("delimiter", ";"));
                 CommandResults results = executeSqlCommand.execute();
                 Writer outputWriter = getOutputWriter();
                 String output = (String)results.getResult("output");
@@ -1986,6 +1986,10 @@ public class Main {
         }
         if (liquibaseProLicenseKey != null) {
             argsMap.put("liquibaseProLicenseKey", liquibaseProLicenseKey);
+        }
+        String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
+        if (liquibaseHubApiKey != null) {
+            argsMap.put("liquibaseHubApiKey", liquibaseHubApiKey);
         }
         CommandScope liquibaseCommand = new CommandScope(commandName);
         for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
