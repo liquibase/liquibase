@@ -1773,9 +1773,7 @@ public class Liquibase implements AutoCloseable {
 
         CatalogAndSchema[] finalSchemas = schemas;
         try {
-            final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
-
-            CommandScope dropAll = new CommandScope("dropAll")
+            CommandScope dropAll = new CommandScope("internalDropAll")
                     .addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
                     .addArgumentValue(InternalDropAllCommandStep.SCHEMAS_ARG, finalSchemas);
 
