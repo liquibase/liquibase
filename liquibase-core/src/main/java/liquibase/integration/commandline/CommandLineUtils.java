@@ -5,7 +5,7 @@ import liquibase.Scope;
 import liquibase.command.CommandScope;
 import liquibase.command.core.InternalDiffCommandStep;
 import liquibase.command.core.InternalDiffChangeLogCommandStep;
-import liquibase.command.core.InternalGenerateChangeLogCommandStepInternal;
+import liquibase.command.core.InternalGenerateChangeLogCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
@@ -230,14 +230,14 @@ public class CommandLineUtils {
 
         CommandScope command = new CommandScope("internalGenerateChangeLog");
         command
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.REFERENCE_DATABASE_ARG, originalDatabase)
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.SNAPSHOT_TYPES_ARG, InternalGenerateChangeLogCommandStepInternal.parseSnapshotTypes(snapshotTypes))
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.OUTPUT_STREAM_ARG, System.out)
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.COMPARE_CONTROL_ARG, compareControl)
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.CHANGELOG_FILENAME_ARG, changeLogFile)
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl)
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.AUTHOR_ARG, author)
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.CONTEXT_ARG, context);
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.REFERENCE_DATABASE_ARG, originalDatabase)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.SNAPSHOT_TYPES_ARG, InternalGenerateChangeLogCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.OUTPUT_STREAM_ARG, System.out)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.COMPARE_CONTROL_ARG, compareControl)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.CHANGELOG_FILENAME_ARG, changeLogFile)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.AUTHOR_ARG, author)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.CONTEXT_ARG, context);
 
         try {
             command.execute();
