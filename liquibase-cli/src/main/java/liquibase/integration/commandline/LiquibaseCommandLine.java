@@ -100,15 +100,21 @@ public class LiquibaseCommandLine {
 
     private List<ConfigurationValueProvider> registerValueProviders(String[] args) {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+        List<ConfigurationValueProvider> returnList = new ArrayList<>();
 
         final CommandLineArgumentValueProvider argumentProvider = new CommandLineArgumentValueProvider(commandLine.parseArgs(args));
         liquibaseConfiguration.registerProvider(argumentProvider);
+        returnList.add(argumentProvider);
 
-        final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(new File(IntegrationConfiguration.DEFAULTS_FILE.getCurrentValue()));
-        liquibaseConfiguration.registerProvider(fileProvider);
+        final File defaultsFile = new File(IntegrationConfiguration.DEFAULTS_FILE.getCurrentValue());
+        if (defaultsFile.exists()) {
+            final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsFile);
+            liquibaseConfiguration.registerProvider(fileProvider);
+            returnList.add(argumentProvider);
+        }
 
 
-        return Arrays.asList(argumentProvider, fileProvider);
+        return returnList;
     }
 
     /**
