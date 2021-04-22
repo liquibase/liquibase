@@ -512,6 +512,8 @@ public class HubUpdater {
         CommandScope registerChangeLogCommand = new CommandScope("registerChangeLog");
         registerChangeLogCommand
                 .addArgumentValue(RegisterChangeLogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+        registerChangeLogCommand
+                .addArgumentValue(RegisterChangeLogCommandStep.LIQUIBASE_HUB_API_KEY, HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
 
         try {
             if (hubProjectId != null) {
