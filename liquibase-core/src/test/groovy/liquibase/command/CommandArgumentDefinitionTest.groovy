@@ -7,6 +7,10 @@ import spock.lang.Specification
 
 class CommandArgumentDefinitionTest extends Specification {
 
+    def setup() {
+        Scope.currentScope.getSingleton(CommandFactory).unregister(MockCommandStep)
+    }
+
     def validate() {
         when:
         def definition = new CommandArgumentDefinition("testArg", String)
