@@ -36,6 +36,7 @@ liquibase.command.core.RollbackToDateSQLCommandStep
 liquibase.command.core.SnapshotCommandStep
 liquibase.command.core.InternalSnapshotCommandStep
 liquibase.command.core.SyncHubCommandStep
+liquibase.command.core.StatusCommandStep
 liquibase.command.core.InternalSyncHubCommandStep
 liquibase.command.core.TagCommandStep
 liquibase.command.core.TagExistsCommandStep

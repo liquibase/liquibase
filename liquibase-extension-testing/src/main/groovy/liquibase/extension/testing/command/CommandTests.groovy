@@ -460,7 +460,14 @@ ${expectedOutputCheck.toString()}
          * Run a changelog
          */
         void runChangelog(String changeLogPath) {
-            this.setups.add(new SetupRunChangelog(changeLogPath))
+            runChangelog(changeLogPath, null)
+        }
+
+        /**
+         * Run a changelog with labels
+         */
+        void runChangelog(String changeLogPath, String labels) {
+            this.setups.add(new SetupRunChangelog(changeLogPath, labels))
         }
 
         /**
@@ -477,6 +484,24 @@ ${expectedOutputCheck.toString()}
             String contents = FileUtil.getContents(f)
             File outputFile = new File("target/test-classes", newFile)
             FileUtil.write(contents, outputFile)
+        }
+
+        /**
+         *
+         * Copy a specified file to another path
+         *
+         * @param originalFile
+         * @param newFile
+         *
+         */
+        void copyResource(String originalFile, String newFile) {
+            URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
+            File f = new File(url.toURI())
+            String contents = FileUtil.getContents(f)
+            File outputFile = new File("target/test-classes", newFile)
+            FileUtil.write(contents, outputFile)
+            println "Copied file " + originalFile + " to file " + newFile
+
         }
 
         /**
