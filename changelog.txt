@@ -1,6 +1,16 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.3.4 (2021.04.15)
+- Reverts changes from #1722 because they broke other diffChangeLog/generateChangeLog use cases.
+
+Changes in version 4.3.3 (2021.04.09)
+- Fixes an issue with changelogsync and hub
+- Fixes an issue with diff and NullPointerException (#1631)
+- Fixes an issue with NullPointerException and DateTimeType (#1366)
+- Fixes an issue with maven resolving/using properties file (#1723)
+- Fixes an issue with diffChangeLog and addColumn -> addPrimaryKey ordering (#1722)
+
 Changes in version 4.3.2 (2021.03.25)
 
 - Added new changelogSyncToTag command #1133

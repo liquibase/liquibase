@@ -58,7 +58,6 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.enforcer.requireMavenVersion>3.6</maven.enforcer.requireMavenVersion>
-        <maven.enforcer.requireJavaVersion>${maven.compiler.source}</maven.enforcer.requireJavaVersion>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mmZ</maven.build.timestamp.format>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
         <build.number>0</build.number>
@@ -185,6 +184,12 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+            </plugin>
+
+            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.0.2</version>
                 <configuration>
@@ -207,9 +212,6 @@
                                     <version>${maven.enforcer.requireMavenVersion}</version>
                                     <message>This POM requires Maven ${maven.enforcer.requireMavenVersion}.</message>
                                 </requireMavenVersion>
-                                <requireJavaVersion>
-                                    <version>${maven.enforcer.requireJavaVersion}</version>
-                                </requireJavaVersion>
                             </rules>
                         </configuration>
                     </execution>
@@ -376,6 +378,15 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>non-jdk-8</id>
+            <activation>
+                <jdk>!1.8</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>8</maven.compiler.release>
+            </properties>
+        </profile>
         <profile>
             <id>gpg-sign</id>
             <activation>
