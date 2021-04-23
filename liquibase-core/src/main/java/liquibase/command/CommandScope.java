@@ -4,13 +4,10 @@ import liquibase.Scope;
 import liquibase.configuration.AbstractMapConfigurationValueProvider;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfiguredValue;
-import liquibase.configuration.ProvidedValue;
 import liquibase.exception.CommandExecutionException;
 import liquibase.util.StringUtil;
 
-import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.SortedMap;
@@ -44,7 +41,7 @@ public class CommandScope {
 
         final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
 
-        this.commandDefinition = commandFactory.getCommand(commandName);
+        this.commandDefinition = commandFactory.getCommandDefinition(commandName);
 
         completeConfigPrefix = "liquibase.command." + StringUtil.join(Arrays.asList(this.getCommand().getName()), ".");
         shortConfigPrefix = "liquibase.command";

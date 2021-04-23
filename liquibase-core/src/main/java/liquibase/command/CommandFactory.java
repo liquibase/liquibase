@@ -13,6 +13,13 @@ public class CommandFactory implements SingletonObject {
 
     private final Map<Class<? extends CommandStep>, Set<CommandArgumentDefinition<?>>> argumentDefinitions = new HashMap<>();
 
+    /**
+     * @deprecated. Use {@link Scope#getSingleton(Class)}
+     */
+    public static CommandFactory getInstance() {
+        return Scope.getCurrentScope().getSingleton(CommandFactory.class);
+    }
+
     protected CommandFactory() {
     }
 
@@ -21,7 +28,7 @@ public class CommandFactory implements SingletonObject {
      *
      * @throws IllegalArgumentException if the commandName is not known
      */
-    public CommandDefinition getCommand(String... commandName) throws IllegalArgumentException{
+    public CommandDefinition getCommandDefinition(String... commandName) throws IllegalArgumentException{
         CommandDefinition commandDefinition = new CommandDefinition(commandName);
 
         for (CommandStep step : Scope.getCurrentScope().getServiceLocator().findInstances(CommandStep.class)) {
@@ -66,7 +73,7 @@ public class CommandFactory implements SingletonObject {
         SortedSet<CommandDefinition> commands = new TreeSet<>();
         for (String[] commandName : commandNames.values()) {
             try {
-                commands.add(getCommand(commandName));
+                commands.add(getCommandDefinition(commandName));
             } catch (IllegalArgumentException e) {
                 //not a full command, like ConvertCommandStep
             }
@@ -96,4 +103,27 @@ public class CommandFactory implements SingletonObject {
         argumentDefinitions.remove(commandStepClass);
     }
 
+    /**
+     * @deprecated use {@link #getCommandDefinition(String...)}
+     */
+    public LiquibaseCommand getCommand(String commandName) {
+        return Scope.getCurrentScope().getSingleton(LiquibaseCommandFactory.class).getCommand(commandName);
+    }
+
+    /**
+     * @deprecated Use {@link CommandScope#execute()}
+     */
+    public <T extends CommandResult> T execute(LiquibaseCommand<T> command) throws CommandExecutionException {
+        command.validate();
+        try {
+            return command.run();
+        } catch (Exception e) {
+            if (e instanceof CommandExecutionException) {
+                throw (CommandExecutionException) e;
+            } else {
+                throw new CommandExecutionException(e);
+            }
+        }
+
+    }
 }

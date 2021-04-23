@@ -79,6 +79,6 @@ class CommandArgumentDefinitionTest extends Specification {
         e.message == "Invalid argument format: kabob-case"
 
         then:
-        Scope.currentScope.getSingleton(CommandFactory).getCommand("mock").getArguments().toString() == "{arg1=arg1, arg2=arg2 (required)}"
+        Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("mock").getArguments().toString() == "{arg1=arg1, arg2=arg2 (required)}"
     }
 }

@@ -7,7 +7,7 @@ class CommandFactoryTest extends Specification {
 
     def "getCommand for an existing command"() {
         when:
-        def command = Scope.currentScope.getSingleton(CommandFactory).getCommand("update")
+        def command = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("update")
 
         then:
         command.name*.toString() == ["update"]
@@ -17,7 +17,7 @@ class CommandFactoryTest extends Specification {
 
     def "getCommand for an invalid command"() {
         when:
-        Scope.currentScope.getSingleton(CommandFactory).getCommand("invalid")
+        Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("invalid")
 
         then:
         def e = thrown(IllegalArgumentException)

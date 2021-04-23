@@ -70,7 +70,7 @@ class CommandTests extends Specification {
     @Unroll("#featureName: #commandTestDefinition.testFile.name")
     def "check CommandTest definition"() {
         expect:
-        def commandDefinition = Scope.currentScope.getSingleton(CommandFactory).getCommand(commandTestDefinition.getCommand() as String[])
+        def commandDefinition = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition(commandTestDefinition.getCommand() as String[])
         assert commandDefinition != null: "Cannot find specified command ${commandTestDefinition.getCommand()}"
 
         assert commandTestDefinition.testFile.name == commandTestDefinition.getCommand().join("") + ".test.groovy": "Incorrect test file name"
@@ -88,7 +88,7 @@ class CommandTests extends Specification {
     @Unroll("#featureName: #commandTestDefinition.testFile.name")
     def "check command signature"() {
         expect:
-        def commandDefinition = Scope.currentScope.getSingleton(CommandFactory).getCommand(commandTestDefinition.getCommand() as String[])
+        def commandDefinition = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition(commandTestDefinition.getCommand() as String[])
         assert commandDefinition != null: "Cannot find specified command ${commandTestDefinition.getCommand()}"
 
         StringWriter signature = new StringWriter()
