@@ -1470,8 +1470,8 @@ public class Main {
                             database,
                             StringUtil.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
 
-                    liquibaseCommand.addArgumentValue("format", getCommandParam(OPTIONS.FORMAT, "JSON"));
-                    liquibaseCommand.addArgumentValue("diffCommand", "JSON");
+                    liquibaseCommand.addArgumentValue("format", getCommandParam(OPTIONS.FORMAT, "JSON").toUpperCase());
+                    liquibaseCommand.addArgumentValue("diffCommand", diffCommand);
                     liquibaseCommand.addArgumentValue("outputStream", new PrintStream(getOutputStream()));
 
                     liquibaseCommand.execute();

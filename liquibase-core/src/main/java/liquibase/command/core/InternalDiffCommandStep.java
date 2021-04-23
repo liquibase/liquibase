@@ -29,6 +29,7 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<ObjectChangeFilter> OBJECT_CHANGE_FILTER_ARG;
     public static final CommandArgumentDefinition<CompareControl> COMPARE_CONTROL_ARG;
     public static final CommandArgumentDefinition<PrintStream> OUTPUT_STREAM_ARG;
+    public static final CommandArgumentDefinition<Boolean> PRINT_RESULT;
 
     static {
         final CommandStepBuilder builder = new CommandStepBuilder(InternalDiffCommandStep.class);
@@ -41,6 +42,7 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
         OBJECT_CHANGE_FILTER_ARG = builder.argument("objectChangeFilter", ObjectChangeFilter.class).build();
         COMPARE_CONTROL_ARG = builder.argument("compareControl", CompareControl.class).required().build();
         OUTPUT_STREAM_ARG = builder.argument("outputStream", PrintStream.class).required().build();
+        PRINT_RESULT = builder.argument("printResult", Boolean.class).build();
     }
 
 
@@ -73,6 +75,12 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
         InternalSnapshotCommandStep.logUnsupportedDatabase(commandScope.getArgumentValue(REFERENCE_DATABASE_ARG), this.getClass());
 
         DiffResult diffResult = createDiffResult(commandScope);
+
+        resultsBuilder.addResult("diffResult", diffResult);
+        Boolean printResult = commandScope.getArgumentValue(PRINT_RESULT);
+        if (printResult == null || ! printResult) {
+            return;
+        }
 
         new DiffToReport(diffResult, commandScope.getArgumentValue(OUTPUT_STREAM_ARG)).print();
 

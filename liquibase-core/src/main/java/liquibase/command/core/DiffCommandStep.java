@@ -10,7 +10,9 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
+    public static final CommandArgumentDefinition<String> FORMAT_ARG;
     public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
+    public static final CommandArgumentDefinition<String> LIQUIBASE_PRO_LICENSE_KEY_ARG;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(DiffCommandStep.class);
@@ -26,8 +28,12 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
             .description("The target database username").build();
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("The target database password").build();
+        FORMAT_ARG = builder.argument("format", String.class)
+            .description("Option to create JSON output").build();
         OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
             .description("File for writing the diff report").build();
+        LIQUIBASE_PRO_LICENSE_KEY_ARG = builder.argument("liquibaseProLicenseKey", String.class)
+            .description("Your Liquibase Pro license key").build();
     }
 
     @Override
@@ -39,9 +45,14 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
 
-        String[] args = createArgs(commandScope);
+        String[] args = createParametersFromArgs(createArgs(commandScope), "--format");
         int statusCode = Main.run(args);
-        addStatusMessage(resultsBuilder, statusCode);
+        if (statusCode == 0) {
+            resultsBuilder.addResult("statusMessage", "Successfully executed formattedDiff");
+        }
+        else {
+            resultsBuilder.addResult("statusMessage", "Unsuccessfully executed formattedDiff");
+        }
         resultsBuilder.addResult("statusCode", statusCode);
     }
 
