@@ -13,6 +13,8 @@ Required Args:
   referenceUrl (String) The JDBC reference database connection URL
   url (String) The JDBC target database connection URL
 Optional Args:
+  format (String) Option to create JSON output
+    Default: null
   outputFile (String) File for writing the diff report
     Default: null
   password (String) The reference database password

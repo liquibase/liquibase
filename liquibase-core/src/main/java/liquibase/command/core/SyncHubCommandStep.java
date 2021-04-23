@@ -10,7 +10,6 @@ public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> HUB_CONNECTION_ID_ARG;
     public static final CommandArgumentDefinition<String> HUB_PROJECT_ID_ARG;
-    public static final CommandArgumentDefinition<String> LIQUIBASE_HUB_API_KEY_ARG;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(SyncHubCommandStep.class);
@@ -26,8 +25,6 @@ public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
             .description("Liquibase Hub Connection ID to sync").build();
         HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", String.class)
             .description("Liquibase Hub Project ID to sync").build();
-        LIQUIBASE_HUB_API_KEY_ARG = builder.argument("liquibaseHubApiKey", String.class).required()
-            .description("Liquibase Hub API key for connecting to Liquibase Hub").build();
     }
 
     @Override

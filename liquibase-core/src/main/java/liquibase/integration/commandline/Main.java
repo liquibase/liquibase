@@ -7,6 +7,7 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
@@ -29,6 +30,7 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.core.DataType;
 import liquibase.ui.ConsoleUIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
@@ -297,7 +299,6 @@ public class Main {
 
                     LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                     if (licenseService != null) {
-
                         if (main.liquibaseProLicenseKey == null) {
                             Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
                         } else {
@@ -1157,6 +1158,18 @@ public class Main {
         // Now apply default values from the default property files. We waited with this until this point
         // since command line parameters might have changed the location where we will look for them.
         parseDefaultPropertyFiles();
+
+        //
+        // Check the licensing keys to see if they are being set from properties
+        //
+        if (liquibaseProLicenseKey == null) {
+            String key = (String)Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue("liquibase.pro.licenseKey").getValue();
+            liquibaseProLicenseKey = key;
+        }
+        if (liquibaseHubApiKey == null) {
+            String key = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
+            liquibaseHubApiKey = key;
+        }
     }
 
     /**

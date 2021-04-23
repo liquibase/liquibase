@@ -197,9 +197,20 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
                 (IntegrationConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name): MockHubService
         ], {
+            try {
                 return commandScope.execute()
+            }
+            catch (Exception e) {
+                if (testDef.expectedException != null) {
+                    assert e.class == testDef.expectedException
+                    return
+                }
+            }
         } as Scope.ScopedRunnerWithReturn<CommandResults>)
 
+        if (results == null) {
+            return
+        }
         if (testDef.expectedResults.size() > 0 && results.getResults().isEmpty()) {
             throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
         }

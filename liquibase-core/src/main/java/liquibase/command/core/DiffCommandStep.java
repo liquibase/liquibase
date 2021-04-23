@@ -12,7 +12,6 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> FORMAT_ARG;
     public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
-    public static final CommandArgumentDefinition<String> LIQUIBASE_PRO_LICENSE_KEY_ARG;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(DiffCommandStep.class);
@@ -32,8 +31,6 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
             .description("Option to create JSON output").build();
         OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
             .description("File for writing the diff report").build();
-        LIQUIBASE_PRO_LICENSE_KEY_ARG = builder.argument("liquibaseProLicenseKey", String.class)
-            .description("Your Liquibase Pro license key").build();
     }
 
     @Override
@@ -48,10 +45,10 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
         String[] args = createParametersFromArgs(createArgs(commandScope), "--format");
         int statusCode = Main.run(args);
         if (statusCode == 0) {
-            resultsBuilder.addResult("statusMessage", "Successfully executed formattedDiff");
+            resultsBuilder.addResult("statusMessage", "Successfully executed diff");
         }
         else {
-            resultsBuilder.addResult("statusMessage", "Unsuccessfully executed formattedDiff");
+            resultsBuilder.addResult("statusMessage", "Unsuccessfully executed diff");
         }
         resultsBuilder.addResult("statusCode", statusCode);
     }

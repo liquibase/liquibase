@@ -19,7 +19,6 @@ Optional Args:
         arguments = [
                 hubProjectName   : "Project 1",
                 changeLogFile: "changelogs/hsqldb/complete/changelog-test.xml",
-                liquibaseHubApiKey: "${UUID.randomUUID().toString()}"
         ]
         setup {
             createTempResource "changelogs/hsqldb/complete/rollback.changelog.xml", "changelogs/hsqldb/complete/changelog-test.xml"

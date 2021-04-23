@@ -98,7 +98,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
                     "The command 'rollbackOneChangeSet' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
         }
         Database database = liquibase.getDatabase();
-        CommandScope liquibaseCommand = new CommandScope("rollbackOneChangeSet");
+        CommandScope liquibaseCommand = new CommandScope("internalRollbackOneChangeSet");
 
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         ChangeLogParameters clp = new ChangeLogParameters(database);
