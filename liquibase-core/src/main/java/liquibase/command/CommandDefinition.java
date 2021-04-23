@@ -5,7 +5,7 @@ import liquibase.util.StringUtil;
 import java.util.*;
 
 /**
- * Metadata about a particular command. Look up instances with {@link CommandFactory#getCommand(String...)}
+ * Metadata about a particular command. Look up instances with {@link CommandFactory#getCommandDefinition(String...)}
  */
 public class CommandDefinition implements Comparable<CommandDefinition> {
 
