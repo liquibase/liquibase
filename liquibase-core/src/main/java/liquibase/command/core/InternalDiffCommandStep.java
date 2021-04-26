@@ -28,7 +28,6 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<SnapshotControl> TARGET_SNAPSHOT_CONTROL_ARG;
     public static final CommandArgumentDefinition<ObjectChangeFilter> OBJECT_CHANGE_FILTER_ARG;
     public static final CommandArgumentDefinition<CompareControl> COMPARE_CONTROL_ARG;
-    public static final CommandArgumentDefinition<PrintStream> OUTPUT_STREAM_ARG;
     public static final CommandArgumentDefinition<Boolean> PRINT_RESULT;
 
     static {
@@ -41,8 +40,7 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
         TARGET_SNAPSHOT_CONTROL_ARG = builder.argument("targetSnapshotControl", SnapshotControl.class).build();
         OBJECT_CHANGE_FILTER_ARG = builder.argument("objectChangeFilter", ObjectChangeFilter.class).build();
         COMPARE_CONTROL_ARG = builder.argument("compareControl", CompareControl.class).required().build();
-        OUTPUT_STREAM_ARG = builder.argument("outputStream", PrintStream.class).required().build();
-        PRINT_RESULT = builder.argument("printResult", Boolean.class).build();
+        PRINT_RESULT = builder.argument("printResult", Boolean.class).defaultValue(true).build();
     }
 
 
@@ -82,7 +80,9 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
             return;
         }
 
-        new DiffToReport(diffResult, commandScope.getArgumentValue(OUTPUT_STREAM_ARG)).print();
+        final PrintStream printStream = new PrintStream(resultsBuilder.getOutputStream());
+        new DiffToReport(diffResult, printStream).print();
+        printStream.flush();
 
         resultsBuilder.addResult("statusCode", 0);
         resultsBuilder.addResult("statusMessage", "Successfully executed diff");

@@ -10,7 +10,6 @@ public class UpdateToTagSQLCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
-    public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
     public static final CommandArgumentDefinition<String> TAG_ARG;
 
     static {
@@ -27,8 +26,6 @@ public class UpdateToTagSQLCommandStep extends AbstractCliWrapperCommandStep {
             .description("Changeset labels to match").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
             .description("Changeset contexts to match").build();
-        OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
-            .description("File for writing the SQL").build();
         TAG_ARG = builder.argument("tag", String.class).required()
             .description("The tag to genenerate SQL up to").build();
     }

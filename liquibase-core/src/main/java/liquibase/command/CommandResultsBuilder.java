@@ -14,7 +14,6 @@ import java.util.TreeMap;
  */
 public class CommandResultsBuilder {
 
-    private final PrintWriter output;
     private final OutputStream outputStream;
     private final SortedMap<String, Object> resultValues = new TreeMap<>();
     private final CommandScope commandScope;
@@ -22,7 +21,6 @@ public class CommandResultsBuilder {
 
     CommandResultsBuilder(CommandScope commandScope, OutputStream outputStream) {
         this.outputStream = outputStream;
-        this.output = new PrintWriter(outputStream);
         this.commandScope = commandScope;
     }
 
@@ -63,7 +61,6 @@ public class CommandResultsBuilder {
      * Collects the results and flushes the output stream.
      */
     CommandResults build() {
-        output.flush();
         try {
             outputStream.flush();
         } catch (Exception e) {

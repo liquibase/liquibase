@@ -43,10 +43,7 @@ public class InternalDiffChangeLogCommandStep extends InternalDiffCommandStep {
 
         DiffResult diffResult = createDiffResult(commandScope);
 
-        PrintStream outputStream = commandScope.getArgumentValue(OUTPUT_STREAM_ARG);
-        if (outputStream == null) {
-            outputStream = System.out;
-        }
+        PrintStream outputStream = new PrintStream(resultsBuilder.getOutputStream());
 
         outputBestPracticeMessage();
 
@@ -61,6 +58,7 @@ public class InternalDiffChangeLogCommandStep extends InternalDiffCommandStep {
         }
         finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);
+            outputStream.flush();
         }
         resultsBuilder.addResult("statusCode", 0);
         resultsBuilder.addResult("statusMessage", "Successfully executed diffChangeLog");

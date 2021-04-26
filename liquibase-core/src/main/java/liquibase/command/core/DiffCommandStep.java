@@ -3,6 +3,8 @@ package liquibase.command.core;
 import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
+import java.io.PrintStream;
+
 public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_PASSWORD_ARG;
@@ -11,16 +13,14 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> FORMAT_ARG;
-    public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
-    public static final CommandArgumentDefinition<String> LIQUIBASE_PRO_LICENSE_KEY_ARG;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(DiffCommandStep.class);
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required()
             .description("The JDBC reference database connection URL").build();
-        REFERENCE_USERNAME_ARG = builder.argument("username", String.class)
+        REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class)
             .description("The reference database username").build();
-        REFERENCE_PASSWORD_ARG = builder.argument("password", String.class)
+        REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class)
             .description("The reference database password").build();
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC target database connection URL").build();
@@ -30,10 +30,6 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
             .description("The target database password").build();
         FORMAT_ARG = builder.argument("format", String.class)
             .description("Option to create JSON output").build();
-        OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
-            .description("File for writing the diff report").build();
-        LIQUIBASE_PRO_LICENSE_KEY_ARG = builder.argument("liquibaseProLicenseKey", String.class)
-            .description("Your Liquibase Pro license key").build();
     }
 
     @Override
@@ -43,6 +39,8 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        final PrintStream outputStream = Main.setOutputStream(new PrintStream(resultsBuilder.getOutputStream()));
+
         CommandScope commandScope = resultsBuilder.getCommandScope();
 
         String[] args = createParametersFromArgs(createArgs(commandScope), "--format");
@@ -54,6 +52,8 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
             resultsBuilder.addResult("statusMessage", "Unsuccessfully executed formattedDiff");
         }
         resultsBuilder.addResult("statusCode", statusCode);
+
+        outputStream.flush();
     }
 
     @Override

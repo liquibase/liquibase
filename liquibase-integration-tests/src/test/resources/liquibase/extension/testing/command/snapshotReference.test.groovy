@@ -14,8 +14,6 @@ Required Args:
 Optional Args:
   changeLogFile (String) The root changelog
     Default: null
-  outputFile (String) The snapshot file to write
-    Default: null
   referencePassword (String) Reference password to use to connect to the database
     Default: null
   referenceUsername (String) Reference username to use to connect to the database

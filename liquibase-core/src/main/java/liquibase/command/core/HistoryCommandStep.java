@@ -7,7 +7,7 @@ public class HistoryCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
+    public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(HistoryCommandStep.class);
@@ -17,7 +17,7 @@ public class HistoryCommandStep extends AbstractCliWrapperCommandStep {
             .description("Username to use to connect to the database").build();
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("Password to use to connect to the database").build();
-        OUTPUT_FILE_ARG = builder.argument("changeLogFile", String.class)
+        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
             .description("The root changelog").build();
     }
 

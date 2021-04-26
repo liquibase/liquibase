@@ -82,7 +82,7 @@ public class TestDatabaseConnections {
                 return openConnections.get(shortName);
             }
 
-            this.openConnections.put(shortName, new ConnectionStatus(connection));
+            this.openConnections.put(shortName, new ConnectionStatus(connection, url, username, password));
         }
 
         return openConnections.get(shortName);
@@ -90,16 +90,23 @@ public class TestDatabaseConnections {
 
     public static class ConnectionStatus {
 
-        public ConnectionStatus(Connection connection) {
+        public Connection connection;
+        public String errorMessage;
+        public String url;
+        public String username;
+        public String password;
+
+        public ConnectionStatus(Connection connection, String url, String username, String password) {
             this.connection = connection;
+            this.url = url;
+            this.username = username;
+            this.password = password;
         }
 
         public ConnectionStatus(String errorMessage) {
             this.errorMessage = errorMessage;
         }
 
-        public Connection connection;
-        public String errorMessage;
     }
 
 }

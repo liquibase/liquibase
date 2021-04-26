@@ -8,7 +8,6 @@ public class ChangeLogSyncToTagSQLCommandStep extends AbstractCliWrapperCommandS
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> TAG_ARG;
@@ -23,8 +22,6 @@ public class ChangeLogSyncToTagSQLCommandStep extends AbstractCliWrapperCommandS
             .description("The database username").build();
         PASSWORD_ARG = builder.argument("username", String.class)
             .description("The database password").build();
-        OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
-            .description("File for writing the SQL").build();
         LABELS_ARG = builder.argument("labels", String.class)
             .description("Changeset labels to match").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)

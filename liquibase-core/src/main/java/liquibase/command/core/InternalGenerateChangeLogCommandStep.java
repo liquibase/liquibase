@@ -71,11 +71,14 @@ public class InternalGenerateChangeLogCommandStep extends InternalDiffChangeLogC
             if (StringUtil.trimToNull(changeLogFile) != null) {
                 changeLogWriter.print(changeLogFile);
             } else {
-                PrintStream outputStream = commandScope.getArgumentValue(OUTPUT_STREAM_ARG);
-                if (outputStream == null) {
-                    outputStream = System.out;
+                PrintStream outputStream = new PrintStream(resultsBuilder.getOutputStream());
+
+                try {
+                    changeLogWriter.print(outputStream);
+                } finally {
+                    outputStream.flush();
                 }
-                changeLogWriter.print(outputStream);
+
             }
         } finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);

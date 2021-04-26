@@ -1,5 +1,6 @@
 package liquibase.extension.testing.command
 
+import liquibase.AbstractExtensibleObject
 import liquibase.CatalogAndSchema
 import liquibase.Scope
 import liquibase.change.Change
@@ -19,12 +20,19 @@ import liquibase.extension.testing.setup.*
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
 import liquibase.integration.IntegrationConfiguration
+import liquibase.integration.commandline.Main
+import liquibase.logging.core.BufferedLogService
+import liquibase.logging.core.BufferedLogger
+import liquibase.ui.InputHandler
+import liquibase.ui.UIService
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
 import org.codehaus.groovy.control.CompilerConfiguration
+import org.junit.Assert
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.util.function.Function
 import java.util.logging.Level
 import java.util.regex.Pattern
 
@@ -136,6 +144,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
     @Unroll("Run {db:#permutation.databaseName,command:#permutation.definition.commandTestDefinition.joinedCommand} #permutation.definition.description")
     def "run"() {
         setup:
+        Main.runningFromNewCli = true
         org.junit.Assume.assumeTrue("Skipping test: " + permutation.connectionStatus.errorMessage, permutation.connectionStatus.connection != null)
 
         def testDef = permutation.definition
@@ -146,13 +155,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         CatalogAndSchema[] catalogAndSchemas = new CatalogAndSchema[1]
         catalogAndSchemas[0] = new CatalogAndSchema(null, defaultSchemaName)
         database.dropDatabaseObjects(catalogAndSchemas[0])
-
-        List expectedOutputChecks = new ArrayList()
-        if (testDef.expectedOutput instanceof List) {
-            expectedOutputChecks.addAll(testDef.expectedOutput)
-        } else {
-            expectedOutputChecks.add(testDef.expectedOutput)
-        }
 
         when:
         final commandScope
@@ -166,7 +168,18 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
             throw new RuntimeException(e)
         }
         assert commandScope != null
+
+        def runScope = new RunSettings(
+                database: database,
+                url: permutation.connectionStatus.url,
+                username: permutation.connectionStatus.username,
+                password: permutation.connectionStatus.password,
+        )
+
         def outputStream = new ByteArrayOutputStream()
+        def uiOutputWriter = new StringWriter()
+        def uiErrorWriter = new StringWriter()
+        def logService = new BufferedLogService()
 
         commandScope.addArgumentValue("database", database)
         commandScope.addArgumentValue("url", database.getConnection().getURL())
@@ -189,13 +202,19 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
                     key = (String) name
                 }
                 Object objValue = (Object) value
+                if (value instanceof Closure) {
+                    objValue = ((Closure) objValue).call(runScope)
+                }
+
                 commandScope.addArgumentValue(key, objValue)
             }
         }
 
         def results = Scope.child([
                 (IntegrationConfiguration.LOG_LEVEL.getKey()): Level.INFO,
-                ("liquibase.plugin." + HubService.name): MockHubService
+                ("liquibase.plugin." + HubService.name): MockHubService,
+                (Scope.Attr.ui.name()): new TestUI(uiOutputWriter, uiErrorWriter),
+                (Scope.Attr.logService.name()): logService
         ], {
                 return commandScope.execute()
         } as Scope.ScopedRunnerWithReturn<CommandResults>)
@@ -205,6 +224,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         }
 
         then:
+        checkOutput("Command Output", outputStream.toString(), testDef.expectedOutput)
+        checkOutput("UI Output", uiOutputWriter.toString(), testDef.expectedUI)
+        checkOutput("UI Error Output", uiErrorWriter.toString(), testDef.expectedUIErrors)
+        checkOutput("Log Messages", logService.getLogAsString(Level.FINE), testDef.expectedLogs)
+
         for (def returnedResult : results.getResults().entrySet()) {
             def expectedValue = String.valueOf(testDef.expectedResults.get(returnedResult.getKey()))
             def seenValue = String.valueOf(returnedResult.getValue())
@@ -213,47 +237,30 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
             assert seenValue == expectedValue
         }
 
-        def fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(outputStream.toString()))
-        if (fullOutput.length() == 0) {
-            assert true
-        }
+        where:
+        permutation << getAllRunTestPermutations()
+    }
 
-        if (fullOutput.length() > 0) {
-            for (def expectedOutputCheck : expectedOutputChecks) {
+    static void checkOutput(String outputDescription, String fullOutput, List<Object> checks) {
+        fullOutput = fullOutput.trim()
+
+        if (fullOutput.length() == 0) {
+            assert checks == null || checks.size() == 0: "$outputDescription was empty but checks were defined"
+        } else {
+            for (def expectedOutputCheck : checks) {
                 if (expectedOutputCheck == null) {
                     continue
                 }
 
                 if (expectedOutputCheck instanceof String) {
-                    assert fullOutput.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck))): """
-Command output:
------------------------------------------
-${fullOutput}
------------------------------------------
-Did not contain:
------------------------------------------
-${expectedOutputCheck}
------------------------------------------
-""".trim()
+                    assert fullOutput.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck))): "$outputDescription does not contain: '$expectedOutputCheck'"
                 } else if (expectedOutputCheck instanceof Pattern) {
-                    assert expectedOutputCheck.matcher(fullOutput.replace("\r", "").trim()).find(): """
-Command output:
------------------------------------------
-${fullOutput}
------------------------------------------
-Did not match regexp:
------------------------------------------
-${expectedOutputCheck.toString()}
------------------------------------------
-""".trim()
+                    assert expectedOutputCheck.matcher(fullOutput.replace("\r", "").trim()).find(): "$outputDescription does not match regexp /$expectedOutputCheck/"
                 } else {
-                    org.spockframework.util.Assert.fail "Unknown expectedOutput check: ${expectedOutputCheck.class.name}"
+                    Assert.fail "Unknown $outputDescription check type: ${expectedOutputCheck.class.name}"
                 }
             }
         }
-
-        where:
-        permutation << getAllRunTestPermutations()
     }
 
     static List<CommandTestDefinition> getCommandTestDefinitions() {
@@ -379,11 +386,15 @@ ${expectedOutputCheck.toString()}
         /**
          * Arguments to command as key/value pairs
          */
-        Map<String, ?> arguments = new HashMap<>()
+        private Map<String, ?> arguments = new HashMap<>()
 
         private List<TestSetup> setup
 
-        private List<Object> expectedOutput
+        private List<Object> expectedOutput = new ArrayList<>()
+        private List<Object> expectedUI = new ArrayList<>()
+        private List<Object> expectedUIErrors = new ArrayList<>()
+        private List<Object> expectedLogs = new ArrayList<>()
+
         private Map<String, ?> expectedResults = new HashMap<>()
         private Class<Throwable> expectedException
 
@@ -400,12 +411,85 @@ ${expectedOutputCheck.toString()}
         }
 
         /**
+         * Sets the command arguments
+         * <li>If value is an object, use that as the value
+         * <li>If value is a closure, run it as a function with `it` being a {@link RunSettings} instance
+         */
+        def setArguments(Map<String, Object> args) {
+            this.arguments = args
+        }
+
+        /**
          * Checks for the command output.
          * <li>If a string, assert that the output CONTAINS the string.
          * <li>If a regexp, assert that the regexp FINDs the string.
          */
         def setExpectedOutput(List<Object> output) {
             this.expectedOutput = output
+        }
+
+        def setExpectedOutput(String output) {
+            this.expectedOutput.add(output)
+        }
+
+        def setExpectedOutput(Pattern output) {
+            this.expectedOutput.add(output)
+        }
+
+
+        /**
+         * Checks for the UI output.
+         * <li>If a string, assert that the output CONTAINS the string.
+         * <li>If a regexp, assert that the regexp FINDs the string.
+         */
+        def setExpectedUI(List<Object> output) {
+            this.expectedUI = output
+        }
+
+        def setExpectedUI(String output) {
+            this.expectedUI.add(output)
+        }
+
+        def setExpectedUI(Pattern output) {
+            this.expectedUI.add(output)
+        }
+
+        /**
+         * Checks for the UI error output.
+         * <li>If a string, assert that the output CONTAINS the string.
+         * <li>If a regexp, assert that the regexp FINDs the string.
+         */
+        def setExpectedUIErrors(List<Object> output) {
+            this.expectedUIErrors = output
+        }
+
+        def setExpectedUIErrors(String output) {
+            this.expectedUIErrors = new ArrayList<>()
+            this.expectedUIErrors.add(output)
+        }
+
+        def setExpectedUIErrors(Pattern output) {
+            this.expectedUIErrors = new ArrayList<>()
+            this.expectedUIErrors.add(output)
+        }
+
+        /**
+         * Checks for log output.
+         * <li>If a string, assert that the output CONTAINS the string.
+         * <li>If a regexp, assert that the regexp FINDs the string.
+         */
+        def setExpectedLogs(List<Object> output) {
+            this.expectedLogs = output
+        }
+
+        def setExpectedLogs(String output) {
+            this.expectedLogs = new ArrayList<>()
+            this.expectedLogs.add(output)
+        }
+
+        def setExpectedLogs(Pattern output) {
+            this.expectedLogs = new ArrayList<>()
+            this.expectedLogs.add(output)
         }
 
 
@@ -542,5 +626,61 @@ ${expectedOutputCheck.toString()}
             return setups
         }
 
+    }
+
+    static class RunSettings {
+        String url
+        String username
+        String password
+        Database database
+    }
+
+    static class TestUI extends AbstractExtensibleObject implements UIService {
+
+        private final Writer output;
+        private final Writer errorOutput;
+
+        TestUI(Writer output, Writer errorOutput) {
+            this.output = output
+            this.errorOutput = errorOutput
+        }
+
+        @Override
+        int getPriority() {
+            return -1;
+        }
+
+        @Override
+        void sendMessage(String message) {
+            output.println(message)
+        }
+
+        @Override
+        void sendErrorMessage(String message) {
+            errorOutput.println(message)
+        }
+
+        @Override
+        void sendErrorMessage(String message, Throwable exception) {
+            errorOutput.println(message)
+            exception.printStackTrace(errorOutput)
+        }
+
+        @Override
+        def <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
+            throw new RuntimeException("Cannot prompt in tests")
+        }
+
+        @Override
+        void setAllowPrompt(boolean allowPrompt) throws IllegalArgumentException {
+            if (allowPrompt) {
+                throw new RuntimeException("Cannot allow prompts in tests")
+            }
+        }
+
+        @Override
+        boolean getAllowPrompt() {
+            return false
+        }
     }
 }

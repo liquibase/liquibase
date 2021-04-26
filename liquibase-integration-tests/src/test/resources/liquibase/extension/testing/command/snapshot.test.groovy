@@ -14,8 +14,6 @@ Required Args:
 Optional Args:
   changeLogFile (String) The root changelog
     Default: null
-  outputFile (String) The snapshot file to write
-    Default: null
   password (String) Password to use to connect to the database
     Default: null
   snapshotFormat (String) Output format to use (JSON or YAML

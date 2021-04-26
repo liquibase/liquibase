@@ -8,7 +8,6 @@ public class FutureRollbackCountSQLCommandStep extends AbstractCliWrapperCommand
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<Integer> COUNT_ARG;
@@ -29,8 +28,6 @@ public class FutureRollbackCountSQLCommandStep extends AbstractCliWrapperCommand
             .description("Changeset contexts to match").build();
         COUNT_ARG = builder.argument("count", Integer.class).required()
             .description("Number of change sets to generate rollback SQL for").build();
-        OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
-            .description("File for writing the SQL").build();
     }
 
     @Override

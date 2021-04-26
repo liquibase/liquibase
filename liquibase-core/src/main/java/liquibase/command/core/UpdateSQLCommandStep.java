@@ -10,7 +10,6 @@ public class UpdateSQLCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
-    public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(UpdateSQLCommandStep.class);
@@ -26,8 +25,6 @@ public class UpdateSQLCommandStep extends AbstractCliWrapperCommandStep {
             .description("Changeset labels to match").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
             .description("Changeset contexts to match").build();
-        OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
-            .description("File for writing the SQL").build();
     }
 
     @Override

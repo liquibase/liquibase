@@ -11,7 +11,6 @@ public class FutureRollbackFromTagSQLCommandStep extends AbstractCliWrapperComma
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> TAG_ARG;
-    public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(FutureRollbackFromTagSQLCommandStep.class);
@@ -27,8 +26,6 @@ public class FutureRollbackFromTagSQLCommandStep extends AbstractCliWrapperComma
             .description("Changeset labels to match").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
             .description("Changeset contexts to match").build();
-        OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
-            .description("File for writing the SQL").build();
         TAG_ARG = builder.argument("tag", String.class).required()
             .description("Tag ID to rollback from").build();
     }

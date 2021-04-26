@@ -55,7 +55,6 @@ public class DiffToChangeLogCommand extends DiffCommand {
         commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.REFERENCE_DATABASE_ARG, getReferenceDatabase());
         commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.TARGET_DATABASE_ARG, getTargetDatabase());
         commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.SNAPSHOT_TYPES_ARG, getSnapshotTypes());
-        commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.OUTPUT_STREAM_ARG, getOutputStream());
         commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.SNAPSHOT_LISTENER_ARG, getSnapshotListener());
         commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, getReferenceSnapshotControl());
         commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.TARGET_SNAPSHOT_CONTROL_ARG, getTargetSnapshotControl());
@@ -65,6 +64,7 @@ public class DiffToChangeLogCommand extends DiffCommand {
         commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.CHANGELOG_FILENAME_ARG, getChangeLogFile());
         commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.DIFF_OUTPUT_CONTROL_ARG, getDiffOutputControl());
 
+        commandScope.setOutput(getOutputStream());
         commandScope.execute();
 
         return new CommandResult("OK");

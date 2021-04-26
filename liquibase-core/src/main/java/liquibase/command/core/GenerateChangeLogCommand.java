@@ -42,7 +42,6 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
         commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.REFERENCE_DATABASE_ARG, getReferenceDatabase());
         commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.TARGET_DATABASE_ARG, getTargetDatabase());
         commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.SNAPSHOT_TYPES_ARG, getSnapshotTypes());
-        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.OUTPUT_STREAM_ARG, getOutputStream());
         commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.SNAPSHOT_LISTENER_ARG, getSnapshotListener());
         commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, getReferenceSnapshotControl());
         commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.TARGET_SNAPSHOT_CONTROL_ARG, getTargetSnapshotControl());
@@ -55,6 +54,7 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
         commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.AUTHOR_ARG, getAuthor());
         commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.CONTEXT_ARG, getContext());
 
+        commandScope.setOutput(getOutputStream());
         commandScope.execute();
 
         return new CommandResult("OK");
