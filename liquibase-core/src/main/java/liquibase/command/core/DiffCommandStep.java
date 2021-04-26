@@ -46,10 +46,10 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
         String[] args = createParametersFromArgs(createArgs(commandScope), "--format");
         int statusCode = Main.run(args);
         if (statusCode == 0) {
-            resultsBuilder.addResult("statusMessage", "Successfully executed formattedDiff");
+            resultsBuilder.addResult("statusMessage", "Successfully executed diff");
         }
         else {
-            resultsBuilder.addResult("statusMessage", "Unsuccessfully executed formattedDiff");
+            resultsBuilder.addResult("statusMessage", "Unsuccessfully executed diff");
         }
         resultsBuilder.addResult("statusCode", statusCode);
 

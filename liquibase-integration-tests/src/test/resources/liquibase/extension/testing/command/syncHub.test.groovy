@@ -6,7 +6,6 @@ CommandTests.define {
 Short Description: Synchronize the local DatabaseChangeLog table with Liquibase Hub
 Long Description: Synchronize the local DatabaseChangeLog table with Liquibase Hub
 Required Args:
-  liquibaseHubApiKey (String) Liquibase Hub API key for connecting to Liquibase Hub
   url (String) The JDBC database connection URL
 Optional Args:
   changeLogFile (String) The root changelog
@@ -23,7 +22,6 @@ Optional Args:
     run {
         arguments = [
                 changeLogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
-                liquibaseHubApiKey: "${UUID.randomUUID().toString()}"
         ]
 
         setup {
