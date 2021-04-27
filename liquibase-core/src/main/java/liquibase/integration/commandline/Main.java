@@ -1488,7 +1488,7 @@ public class Main {
                     System.exit(0);
                 }
                 if (isFormattedDiff()) {
-                    CommandScope liquibaseCommand = new CommandScope(COMMANDS.FORMATTED_DIFF);
+                    CommandScope liquibaseCommand = new CommandScope("internalFormattedDiff");
 
                     CommandScope diffCommand = CommandLineUtils.createDiffCommand(
                             createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
@@ -1497,7 +1497,7 @@ public class Main {
 
                     liquibaseCommand.addArgumentValue("format", getCommandParam(OPTIONS.FORMAT, "JSON").toUpperCase());
                     liquibaseCommand.addArgumentValue("diffCommand", diffCommand);
-                    liquibaseCommand.addArgumentValue("outputStream", new PrintStream(getOutputStream()));
+                    liquibaseCommand.setOutput(getOutputStream());
 
                     liquibaseCommand.execute();
                 } else {

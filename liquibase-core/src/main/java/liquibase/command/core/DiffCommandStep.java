@@ -12,7 +12,6 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
-    public static final CommandArgumentDefinition<String> FORMAT_ARG;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(DiffCommandStep.class);
@@ -28,8 +27,6 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
             .description("The target database username").build();
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("The target database password").build();
-        FORMAT_ARG = builder.argument("format", String.class)
-            .description("Option to create JSON output").build();
     }
 
     @Override

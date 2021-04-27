@@ -14,8 +14,6 @@ Required Args:
   referenceUrl (String) The JDBC reference database connection URL
   url (String) The JDBC target database connection URL
 Optional Args:
-  format (String) Option to create JSON output
-    Default: null
   password (String) The target database password
     Default: null
   referencePassword (String) The reference database password

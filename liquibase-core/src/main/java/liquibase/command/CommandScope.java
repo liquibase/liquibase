@@ -95,10 +95,12 @@ public class CommandScope {
     }
 
     /**
-     * Convenience method for {@link #getConfiguredValue(CommandArgumentDefinition)}, returning {@link ConfiguredValue#getValue()}
+     * Convenience method for {@link #getConfiguredValue(CommandArgumentDefinition)}, returning {@link ConfiguredValue#getValue()} along with any
+     * {@link CommandArgumentDefinition#getValueHandler()} applied
      */
     public <T> T getArgumentValue(CommandArgumentDefinition<T> argument) {
-        return getConfiguredValue(argument).getValue();
+        final T value = getConfiguredValue(argument).getValue();
+        return argument.getValueHandler().convert(value);
     }
 
     /**

@@ -1,5 +1,6 @@
 package liquibase.extension.testing.command
 
+
 import liquibase.AbstractExtensibleObject
 import liquibase.CatalogAndSchema
 import liquibase.Scope
@@ -33,7 +34,6 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.util.logging.Level
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 class CommandTests extends Specification {
@@ -269,6 +269,24 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         permutation << getAllRunTestPermutations()
     }
 
+    static OutputCheck assertNotContains(String substring) {
+        return new OutputCheck() {
+            @Override
+            def check(String actual) throws AssertionError {
+                assert !actual.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))): "$actual does not contain: '$substring'"
+            }
+        }
+    }
+
+    static OutputCheck assertContains(String substring) {
+        return new OutputCheck() {
+            @Override
+            def check(String actual) throws AssertionError {
+                assert actual.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))): "$actual does not contain: '$substring'"
+            }
+        }
+    }
+
     static void checkOutput(String outputDescription, String fullOutput, List<Object> checks) {
         fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(fullOutput))
 
@@ -281,12 +299,18 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
                 }
 
                 if (expectedOutputCheck instanceof String) {
-                    assert fullOutput.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck))): "$outputDescription does not contain: '$expectedOutputCheck'"
+                    assert fullOutput.replaceAll(/\s+/," ").contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck)).replaceAll(/\s+/," ")): "$outputDescription does not contain: '$expectedOutputCheck'"
                 } else if (expectedOutputCheck instanceof Pattern) {
-                    expectedOutputCheck = Pattern.compile(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern())), Pattern.MULTILINE| Pattern.DOTALL)
+                    expectedOutputCheck = Pattern.compile(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern())), Pattern.MULTILINE | Pattern.DOTALL)
                     def matcher = expectedOutputCheck.matcher(fullOutput)
-                    assert matcher.groupCount() == 0 : "Unescaped parentheses in regexp /$expectedOutputCheck/"
+                    assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
                     assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
+                } else if (expectedOutputCheck instanceof OutputCheck) {
+                    try {
+                        ((OutputCheck) expectedOutputCheck).check(fullOutput)
+                    } catch (AssertionError e) {
+                        Assert.fail("$fullOutput : ${e.getMessage()}")
+                    }
                 } else {
                     Assert.fail "Unknown $outputDescription check type: ${expectedOutputCheck.class.name}"
                 }
@@ -683,6 +707,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         String altPassword
         Database altDatabase
 
+    }
+
+    interface OutputCheck {
+        def check(String actual) throws AssertionError
     }
 
     static class TestUI extends AbstractExtensibleObject implements UIService {
