@@ -8,7 +8,6 @@ Short Description: Register the changelog with a Liquibase Hub project
 Long Description: Register the changelog with a Liquibase Hub project
 Required Args:
   changeLogFile (String) The root changelog
-  liquibaseHubApiKey (String) The Liquibase Hub API key
 Optional Args:
   hubProjectId (UUID) The Hub project ID
     Default: null

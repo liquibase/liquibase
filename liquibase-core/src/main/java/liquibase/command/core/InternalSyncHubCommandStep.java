@@ -31,7 +31,7 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
     static {
         CommandStepBuilder builder = new CommandStepBuilder(InternalSyncHubCommandStep.class);
         URL_ARG = builder.argument("url", String.class).build();
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required().build();
+        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).build();
         HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", String.class).build();
         HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", String.class).build();
         DATABASE_ARG = builder.argument("database", Database.class).build();

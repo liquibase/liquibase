@@ -28,7 +28,6 @@ public class RegisterChangeLogCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
     public static final CommandArgumentDefinition<String> HUB_PROJECT_NAME_ARG;
-    public static final CommandArgumentDefinition<String> LIQUIBASE_HUB_API_KEY;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(RegisterChangeLogCommandStep.class);
@@ -38,8 +37,6 @@ public class RegisterChangeLogCommandStep extends AbstractCommandStep {
             .description("The Hub project ID").build();
         HUB_PROJECT_NAME_ARG = builder.argument("hubProjectName", String.class).optional()
             .description("The Hub project name").build();
-        LIQUIBASE_HUB_API_KEY = builder.argument("liquibaseHubApiKey", String.class).required()
-            .description("The Liquibase Hub API key").build();
     }
 
     @Override

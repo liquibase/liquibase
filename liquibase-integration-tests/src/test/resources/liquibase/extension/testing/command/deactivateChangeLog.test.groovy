@@ -7,7 +7,6 @@ Short Description: Removes the changelogID from your changelog so it stops sendi
 Long Description: Removes the changelogID from your changelog so it stops sending reports to Liquibase Hub
 Required Args:
   changeLogFile (String) The root changelog
-  liquibaseHubApiKey (String) The Liquibase Hub API key
 Optional Args:
   NONE
 """

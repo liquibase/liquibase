@@ -69,6 +69,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
         }
 
         resultsBuilder.addResult(DEPLOYMENTS_RESULT, deploymentHistory);
+        output.flush();
     }
 
     public static class DeploymentHistory {
