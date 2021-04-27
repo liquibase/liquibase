@@ -22,18 +22,18 @@ import liquibase.hub.core.MockHubService
 import liquibase.integration.IntegrationConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
-import liquibase.logging.core.BufferedLogger
 import liquibase.ui.InputHandler
 import liquibase.ui.UIService
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.Assert
+import org.junit.Assume
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.util.function.Function
 import java.util.logging.Level
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 class CommandTests extends Specification {
@@ -145,16 +145,27 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
     def "run"() {
         setup:
         Main.runningFromNewCli = true
-        org.junit.Assume.assumeTrue("Skipping test: " + permutation.connectionStatus.errorMessage, permutation.connectionStatus.connection != null)
+        Assume.assumeTrue("Skipping test: " + permutation.connectionStatus.errorMessage, permutation.connectionStatus.connection != null)
 
         def testDef = permutation.definition
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.connectionStatus.connection))
 
+        //clean regular database
         String defaultSchemaName = database.getDefaultSchemaName()
         CatalogAndSchema[] catalogAndSchemas = new CatalogAndSchema[1]
         catalogAndSchemas[0] = new CatalogAndSchema(null, defaultSchemaName)
         database.dropDatabaseObjects(catalogAndSchemas[0])
+
+        //clean alt database
+        Database altDatabase = null
+        if (permutation.connectionStatus.altConnection != null) {
+            altDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.connectionStatus.altConnection))
+            String altDefaultSchemaName = altDatabase.getDefaultSchemaName()
+            CatalogAndSchema[] altCatalogAndSchemas = new CatalogAndSchema[1]
+            altCatalogAndSchemas[0] = new CatalogAndSchema(null, altDefaultSchemaName)
+            altDatabase.dropDatabaseObjects(altCatalogAndSchemas[0])
+        }
 
         when:
         final commandScope
@@ -174,6 +185,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
                 url: permutation.connectionStatus.url,
                 username: permutation.connectionStatus.username,
                 password: permutation.connectionStatus.password,
+
+                altDatabase: altDatabase,
+                altUrl: permutation.connectionStatus.altUrl,
+                altUsername: permutation.connectionStatus.altUsername,
+                altPassword: permutation.connectionStatus.altPassword,
         )
 
         def outputStream = new ByteArrayOutputStream()
@@ -220,17 +236,16 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
                 return commandScope.execute()
             }
             catch (Exception e) {
-                if (testDef.expectedException != null) {
+                if (testDef.expectedException == null) {
+                    throw e
+                } else {
                     assert e.class == testDef.expectedException
                     return
                 }
             }
         } as Scope.ScopedRunnerWithReturn<CommandResults>)
 
-        if (results == null) {
-            return
-        }
-        if (testDef.expectedResults.size() > 0 && results.getResults().isEmpty()) {
+        if (testDef.expectedResults.size() > 0 && (results == null || results.getResults().isEmpty())) {
             throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
         }
 
@@ -240,12 +255,14 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         checkOutput("UI Error Output", uiErrorWriter.toString(), testDef.expectedUIErrors)
         checkOutput("Log Messages", logService.getLogAsString(Level.FINE), testDef.expectedLogs)
 
-        for (def returnedResult : results.getResults().entrySet()) {
-            def expectedValue = String.valueOf(testDef.expectedResults.get(returnedResult.getKey()))
-            def seenValue = String.valueOf(returnedResult.getValue())
+        if (!testDef.expectedResults.isEmpty()) {
+            for (def returnedResult : results.getResults().entrySet()) {
+                def expectedValue = String.valueOf(testDef.expectedResults.get(returnedResult.getKey()))
+                def seenValue = String.valueOf(returnedResult.getValue())
 
-            assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
-            assert seenValue == expectedValue
+                assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
+                assert seenValue == expectedValue
+            }
         }
 
         where:
@@ -253,7 +270,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
     }
 
     static void checkOutput(String outputDescription, String fullOutput, List<Object> checks) {
-        fullOutput = fullOutput.trim()
+        fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(fullOutput))
 
         if (fullOutput.length() == 0) {
             assert checks != null && checks.size() >= 0: "$outputDescription was empty but checks were defined"
@@ -266,7 +283,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
                 if (expectedOutputCheck instanceof String) {
                     assert fullOutput.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck))): "$outputDescription does not contain: '$expectedOutputCheck'"
                 } else if (expectedOutputCheck instanceof Pattern) {
-                    assert expectedOutputCheck.matcher(fullOutput.replace("\r", "").trim()).find(): "$outputDescription does not match regexp /$expectedOutputCheck/"
+                    expectedOutputCheck = Pattern.compile(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern())), Pattern.MULTILINE| Pattern.DOTALL)
+                    def matcher = expectedOutputCheck.matcher(fullOutput)
+                    assert matcher.groupCount() == 0 : "Unescaped parentheses in regexp /$expectedOutputCheck/"
+                    assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
                 } else {
                     Assert.fail "Unknown $outputDescription check type: ${expectedOutputCheck.class.name}"
                 }
@@ -359,14 +379,20 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
 
         String signature
 
-        void run(@DelegatesTo(RunTestDefinition) Closure cl) {
+        void run(@DelegatesTo(RunTestDefinition) Closure testClosure) {
+            run(null, testClosure)
+
+        }
+
+        void run(String description, @DelegatesTo(RunTestDefinition) Closure testClosure) {
             def runTest = new RunTestDefinition()
-            def code = cl.rehydrate(runTest, this, this)
+            def code = testClosure.rehydrate(runTest, this, this)
             code.resolveStrategy = Closure.DELEGATE_ONLY
             code()
 
             runTest.commandTestDefinition = this;
 
+            runTest.description = description
             if (runTest.description == null) {
                 runTest.description = StringUtil.join((Collection) this.command, " ")
             }
@@ -392,7 +418,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
          * Description of this test for reporting purposes.
          * If not set, one will be generated for you.
          */
-        String description
+        private String description
 
         /**
          * Arguments to command as key/value pairs
@@ -545,6 +571,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         }
 
         /**
+         * Set up the "alt" database structure
+         */
+        void setAltDatabase(List<Change> changes) {
+            this.setups.add(new SetupAltDatabaseStructure(changes))
+        }
+
+        /**
          * Set up the database changelog history
          */
         void setHistory(List<HistoryEntry> changes) {
@@ -644,6 +677,12 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         String username
         String password
         Database database
+
+        String altUrl
+        String altUsername
+        String altPassword
+        Database altDatabase
+
     }
 
     static class TestUI extends AbstractExtensibleObject implements UIService {
