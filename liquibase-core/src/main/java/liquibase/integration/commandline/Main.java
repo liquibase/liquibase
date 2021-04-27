@@ -1660,9 +1660,8 @@ public class Main {
                 loadChangeSetInfoToMap(argsMap);
                 argsMap.put("changeLogFile", changeLogFile);
                 argsMap.put("outputWriter", outputWriter);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneChangeSet", argsMap);
+                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneChangeSetSQL", argsMap);
                 liquibaseCommand.execute();
-                outputWriter.flush();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equals(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
@@ -1675,11 +1674,10 @@ public class Main {
                 Writer outputWriter = getOutputWriter();
                 Map<String, Object> argsMap = new HashMap<>();
                 argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
-                argsMap.put("outputWriter", outputWriter);
                 argsMap.put("force", Boolean.TRUE);
-                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneUpdate", argsMap);
+                argsMap.put("outputWriter", outputWriter);
+                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneUpdateSQL", argsMap);
                 liquibaseCommand.execute();
-                outputWriter.flush();
                 return;
             } else if (COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();

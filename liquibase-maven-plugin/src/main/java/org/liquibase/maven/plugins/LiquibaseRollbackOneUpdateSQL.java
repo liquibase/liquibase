@@ -67,7 +67,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
                     "The command 'rollbackOneUpdateSQL' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
         }
         Database database = liquibase.getDatabase();
-        CommandScope liquibaseCommand = new CommandScope("internalRollbackOneUpdate");
+        CommandScope liquibaseCommand = new CommandScope("internalRollbackOneUpdateSQL");
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         Writer outputWriter = null;
         try {
@@ -128,6 +128,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         argsMap.put("database", database);
         argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
         argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
+        argsMap.put("changeLogFile", changeLogFile);
         return argsMap;
     }
 
