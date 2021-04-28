@@ -24,7 +24,7 @@ public class DiffChangeLogCommandStep extends AbstractCliWrapperCommandStep {
             .description("The JDBC target database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
             .description("The target database username").build();
-        PASSWORD_ARG = builder.argument("username", String.class)
+        PASSWORD_ARG = builder.argument("password", String.class)
             .description("The target database password").build();
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required()
             .description("Changelog file to write results").build();
