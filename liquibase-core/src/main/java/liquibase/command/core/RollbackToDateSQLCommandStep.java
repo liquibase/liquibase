@@ -7,18 +7,20 @@ import liquibase.integration.commandline.Main;
 import java.time.LocalDateTime;
 
 public class RollbackToDateSQLCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"rollbackToDateSQL"};
+
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
-    public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
     public static final CommandArgumentDefinition<String> ROLLBACK_SCRIPT_ARG;
     public static final CommandArgumentDefinition<LocalDateTime> DATE_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(RollbackToDateSQLCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
@@ -31,8 +33,6 @@ public class RollbackToDateSQLCommandStep extends AbstractCliWrapperCommandStep 
             .description("Changeset labels to match").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
             .description("Changeset contexts to match").build();
-        OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
-            .description("File for writing the SQL").build();
         ROLLBACK_SCRIPT_ARG = builder.argument("rollbackScript", String.class)
             .description("Rollback script to execute").build();
         DATE_ARG = builder.argument("date", LocalDateTime.class).required()
@@ -41,7 +41,7 @@ public class RollbackToDateSQLCommandStep extends AbstractCliWrapperCommandStep 
 
     @Override
     public String[] getName() {
-        return new String[] {"rollbackToDateSQL"};
+        return COMMAND_NAME;
     }
 
     @Override

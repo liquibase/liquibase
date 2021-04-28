@@ -3,9 +3,10 @@ package liquibase.command.core;
 import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
-import java.util.UUID;
-
 public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"dropAll"};
+
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
@@ -13,7 +14,7 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> HUB_CONNECTION_ID_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(DropAllCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
@@ -28,7 +29,7 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[] {"dropAll"};
+        return COMMAND_NAME;
     }
 
     @Override

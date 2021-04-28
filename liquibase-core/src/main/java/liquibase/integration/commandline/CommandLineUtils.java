@@ -5,7 +5,7 @@ import liquibase.Scope;
 import liquibase.command.CommandScope;
 import liquibase.command.core.InternalDiffCommandStep;
 import liquibase.command.core.InternalDiffChangeLogCommandStep;
-import liquibase.command.core.InternalGenerateChangeLogCommandStepInternal;
+import liquibase.command.core.InternalGenerateChangeLogCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
@@ -151,7 +151,9 @@ public class CommandLineUtils {
                 .addArgumentValue(InternalDiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
                 .addArgumentValue(InternalDiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
                 .addArgumentValue(InternalDiffCommandStep.SNAPSHOT_TYPES_ARG, InternalDiffCommandStep.parseSnapshotTypes(snapshotTypes))
-                .addArgumentValue(InternalDiffCommandStep.OUTPUT_STREAM_ARG, output);
+        ;
+
+        diffCommand.setOutput(output);
 
         return diffCommand;
     }
@@ -196,10 +198,9 @@ public class CommandLineUtils {
                 .addArgumentValue(InternalDiffChangeLogCommandStep.SNAPSHOT_TYPES_ARG, InternalDiffChangeLogCommandStep.parseSnapshotTypes(snapshotTypes))
                 .addArgumentValue(InternalDiffChangeLogCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
                 .addArgumentValue(InternalDiffChangeLogCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
-                .addArgumentValue(InternalDiffChangeLogCommandStep.OUTPUT_STREAM_ARG, System.out)
                 .addArgumentValue(InternalDiffChangeLogCommandStep.CHANGELOG_FILENAME_ARG, changeLogFile)
                 .addArgumentValue(InternalDiffChangeLogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl);
-
+        command.setOutput(System.out);
         try {
             command.execute();
         } catch (CommandExecutionException e) {
@@ -230,15 +231,15 @@ public class CommandLineUtils {
 
         CommandScope command = new CommandScope("internalGenerateChangeLog");
         command
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.REFERENCE_DATABASE_ARG, originalDatabase)
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.SNAPSHOT_TYPES_ARG, InternalGenerateChangeLogCommandStepInternal.parseSnapshotTypes(snapshotTypes))
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.OUTPUT_STREAM_ARG, System.out)
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.COMPARE_CONTROL_ARG, compareControl)
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.CHANGELOG_FILENAME_ARG, changeLogFile)
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl)
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.AUTHOR_ARG, author)
-                .addArgumentValue(InternalGenerateChangeLogCommandStepInternal.CONTEXT_ARG, context);
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.REFERENCE_DATABASE_ARG, originalDatabase)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.SNAPSHOT_TYPES_ARG, InternalGenerateChangeLogCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.COMPARE_CONTROL_ARG, compareControl)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.CHANGELOG_FILENAME_ARG, changeLogFile)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.AUTHOR_ARG, author)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.CONTEXT_ARG, context);
 
+        command.setOutput(System.out);
         try {
             command.execute();
         } catch (CommandExecutionException e) {

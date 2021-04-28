@@ -4,16 +4,18 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class MigrateSQLCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"migrateSQL"};
+
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
-    public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(MigrateSQLCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
@@ -26,13 +28,11 @@ public class MigrateSQLCommandStep extends AbstractCliWrapperCommandStep {
             .description("Label expression to use for filtering which changes to migrate").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
             .description("Context string to use for filtering which changes to migrate").build();
-        OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
-            .description("File for writing the SQL").build();
     }
 
     @Override
     public String[] getName() {
-        return new String[] {"migrateSQL"};
+        return COMMAND_NAME;
     }
 
     @Override

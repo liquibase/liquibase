@@ -7,6 +7,10 @@ import spock.lang.Specification
 
 class CommandArgumentDefinitionTest extends Specification {
 
+    def setup() {
+        Scope.currentScope.getSingleton(CommandFactory).unregister(MockCommandStep)
+    }
+
     def validate() {
         when:
         def definition = new CommandArgumentDefinition("testArg", String)
@@ -52,7 +56,7 @@ class CommandArgumentDefinitionTest extends Specification {
     def "test builder"() {
         setup:
         MockCommandStep.reset()
-        def builder = new CommandStepBuilder(MockCommandStep)
+        def builder = new CommandBuilder(MockCommandStep)
 
         when:
         def arg1 = builder.argument("arg1", String).build()
@@ -75,6 +79,6 @@ class CommandArgumentDefinitionTest extends Specification {
         e.message == "Invalid argument format: kabob-case"
 
         then:
-        Scope.currentScope.getSingleton(CommandFactory).getCommand("mock").getArguments().toString() == "{arg1=arg1, arg2=arg2 (required)}"
+        Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("mock").getArguments().toString() == "{arg1=arg1, arg2=arg2 (required)}"
     }
 }

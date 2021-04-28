@@ -3,14 +3,20 @@ package liquibase.command.core;
 import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TagExistsCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"tagExists"};
+
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> TAG_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(TagExistsCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
@@ -23,14 +29,16 @@ public class TagExistsCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[] {"tagExists"};
+        return COMMAND_NAME;
     }
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-
-        String[] args = createParametersFromArgs(createArgs(commandScope), "tag");
+        List<String> rhs = new ArrayList<>();
+        rhs.add("tag");
+        String[] argsFromScope = createArgs(commandScope, rhs);
+        String[] args = createParametersFromArgs(argsFromScope, "tag");
         int statusCode = Main.run(args);
         addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);

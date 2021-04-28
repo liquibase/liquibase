@@ -12,6 +12,8 @@ Required Args:
   changeSetIdentifier (String) Change set ID identifier of form filepath::id::author
   url (String) The JDBC database connection URL
 Optional Args:
+  password (String) The database password
+    Default: null
   username (String) The database username
     Default: null
 """

@@ -14,8 +14,6 @@ Optional Args:
     Default: null
   labels (String) Changeset labels to match
     Default: null
-  outputFile (String) File for writing the SQL
-    Default: null
   password (String) The database password
     Default: null
   username (String) The database username

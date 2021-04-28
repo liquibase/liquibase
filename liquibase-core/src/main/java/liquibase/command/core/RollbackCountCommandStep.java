@@ -4,6 +4,9 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class RollbackCountCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"rollbackCount"};
+
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
@@ -14,7 +17,7 @@ public class RollbackCountCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<Integer> COUNT_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(RollbackCountCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
@@ -35,7 +38,7 @@ public class RollbackCountCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[] {"rollbackCount"};
+        return COMMAND_NAME;
     }
 
     @Override

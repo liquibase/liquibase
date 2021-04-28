@@ -11,6 +11,8 @@ Long Description: Clears all checksums and nullifies the MD5SUM column of the DA
 Required Args:
   url (String) The JDBC database connection URL
 Optional Args:
+  password (String) The database password
+    Default: null
   username (String) The database username
     Default: null
 """

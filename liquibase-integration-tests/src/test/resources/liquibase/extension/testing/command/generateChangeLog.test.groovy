@@ -53,7 +53,6 @@ Optional Args:
                     ),
             ]
         }
-
         expectedResults = [
                 statusMessage: "Successfully executed generateChangeLog",
                 statusCode   : 0

@@ -17,7 +17,7 @@ Optional Args:
     Default: null
   labels (String) Changeset labels to match
     Default: null
-  outputFile (String) File for writing the SQL
+  password (String) The database password
     Default: null
   tag (String) Tag ID to execute changeLogSync to
     Default: null

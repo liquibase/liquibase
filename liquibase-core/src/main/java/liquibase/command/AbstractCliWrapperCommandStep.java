@@ -4,11 +4,10 @@ import liquibase.Scope;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.CommandExecutionException;
+import liquibase.integration.IntegrationConfiguration;
+import liquibase.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Convenience base class for {@link CommandStep}s that simply wrap calls to {@link liquibase.integration.commandline.Main}
@@ -55,13 +54,23 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
     protected String[] createParametersFromArgs(String[] args, String... params) {
         List<String> argsList = new ArrayList(Arrays.asList(args));
         List<String> toRemove = new ArrayList<>();
-        String matchingArg = null;
+        List<String> matchingArgs = new ArrayList<>();
         for (String arg : argsList) {
             for (String paramName : params) {
-                if (arg.startsWith("--" + paramName)) {
-                    String[] parts = arg.split("=");
-                    if (parts.length == 2) {
-                        matchingArg = parts[1];
+                if (arg.startsWith(paramName) || arg.startsWith("--" + paramName)) {
+                    String trimmed = arg.trim();
+                    if (trimmed.charAt(trimmed.length()-1) == '=') {
+                        trimmed = trimmed.replaceAll("=","");
+                    }
+                    if (paramName.startsWith("--")) {
+                        matchingArgs.add(trimmed);
+                    } else {
+                        String[] parts = trimmed.split("=");
+                        if (parts.length > 1) {
+                            matchingArgs.add(parts[1]);
+                        } else {
+                            matchingArgs.add(trimmed);
+                        }
                     }
                     toRemove.add(arg);
                 }
@@ -69,15 +78,21 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
         }
 
         //
-        // Special handling for the count parameter
+        // Special handling for command parameters
         //
-        if (matchingArg != null) {
+        if (matchingArgs.size() > 0) {
             argsList.removeAll(toRemove);
-            args = new String[argsList.size() + 1];
+            argsList.remove(Collections.singleton(null));
+            args = new String[argsList.size() + matchingArgs.size()];
             for (int i = 0; i < argsList.size(); i++) {
                 args[i] = argsList.get(i);
             }
-            args[args.length - 1] = matchingArg;
+
+            int l = args.length - matchingArgs.size();
+            for (String matchingArg : matchingArgs) {
+                args[l] = matchingArg;
+                l++;
+            }
         }
         return args;
     }

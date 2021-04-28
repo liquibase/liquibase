@@ -4,6 +4,9 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class ChangeLogSyncCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"changeLogSync"};
+
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
@@ -12,14 +15,14 @@ public class ChangeLogSyncCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(ChangeLogSyncCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required()
             .description("The root changelog file").build();
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
             .description("The database username").build();
-        PASSWORD_ARG = builder.argument("username", String.class)
+        PASSWORD_ARG = builder.argument("password", String.class)
             .description("The database password").build();
         LABELS_ARG = builder.argument("labels", String.class)
             .description("Label expression to use for filtering which changes to mark as executed").build();
@@ -29,7 +32,7 @@ public class ChangeLogSyncCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[] {"changeLogSync"};
+        return COMMAND_NAME;
     }
 
     @Override

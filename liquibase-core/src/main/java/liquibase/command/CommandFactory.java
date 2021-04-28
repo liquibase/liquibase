@@ -11,7 +11,14 @@ import java.util.*;
  */
 public class CommandFactory implements SingletonObject {
 
-    private final Map<Class<? extends CommandStep>, Set<CommandArgumentDefinition<?>>> argumentDefinitions = new HashMap<>();
+    private final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new HashMap<>();
+
+    /**
+     * @deprecated. Use {@link Scope#getSingleton(Class)}
+     */
+    public static CommandFactory getInstance() {
+        return Scope.getCurrentScope().getSingleton(CommandFactory.class);
+    }
 
     protected CommandFactory() {
     }
@@ -21,7 +28,7 @@ public class CommandFactory implements SingletonObject {
      *
      * @throws IllegalArgumentException if the commandName is not known
      */
-    public CommandDefinition getCommand(String... commandName) throws IllegalArgumentException{
+    public CommandDefinition getCommandDefinition(String... commandName) throws IllegalArgumentException{
         CommandDefinition commandDefinition = new CommandDefinition(commandName);
 
         for (CommandStep step : Scope.getCurrentScope().getServiceLocator().findInstances(CommandStep.class)) {
@@ -35,13 +42,11 @@ public class CommandFactory implements SingletonObject {
             throw new IllegalArgumentException("Unknown command '" + StringUtil.join(commandName, " ") + "'");
         }
 
-        for (CommandStep step : pipeline) {
-            final Set<CommandArgumentDefinition<?>> stepArguments = this.argumentDefinitions.get(step.getClass());
+        final Set<CommandArgumentDefinition<?>> stepArguments = this.commandArgumentDefinitions.get(StringUtil.join(commandDefinition.getName(), " "));
 
-            if (stepArguments != null) {
-                for (CommandArgumentDefinition<?> commandArg : stepArguments) {
-                    commandDefinition.add(commandArg);
-                }
+        if (stepArguments != null) {
+            for (CommandArgumentDefinition<?> commandArg : stepArguments) {
+                commandDefinition.add(commandArg);
             }
         }
 
@@ -66,7 +71,7 @@ public class CommandFactory implements SingletonObject {
         SortedSet<CommandDefinition> commands = new TreeSet<>();
         for (String[] commandName : commandNames.values()) {
             try {
-                commands.add(getCommand(commandName));
+                commands.add(getCommandDefinition(commandName));
             } catch (IllegalArgumentException e) {
                 //not a full command, like ConvertCommandStep
             }
@@ -78,14 +83,46 @@ public class CommandFactory implements SingletonObject {
 
     /**
      * Called by {@link CommandArgumentDefinition.Building#build()} to
-     * register that a particular {@link CommandArgumentDefinition} is available for a step.
+     * register that a particular {@link CommandArgumentDefinition} is available for a command.
      */
-    protected void register(Class<? extends CommandStep> commandClass, CommandArgumentDefinition<?> definition) {
-        if (!argumentDefinitions.containsKey(commandClass)) {
-            argumentDefinitions.put(commandClass, new TreeSet<>());
+    protected void register(String[] commandName, CommandArgumentDefinition<?> definition) {
+        String commandNameKey = StringUtil.join(commandName, " ");
+        if (!commandArgumentDefinitions.containsKey(commandNameKey)) {
+            commandArgumentDefinitions.put(commandNameKey, new TreeSet<>());
         }
 
-        this.argumentDefinitions.get(commandClass).add(definition);
+        this.commandArgumentDefinitions.get(commandNameKey).add(definition);
     }
 
+    /**
+     * Unregisters all information about the given {@link CommandStep}.
+     * <bNOTE:</b> package-protected method used primarily for testing and may be removed or modified in the future.
+     */
+    protected void unregister(Class<? extends CommandStep> commandStepClass) {
+        commandArgumentDefinitions.remove(commandStepClass);
+    }
+
+    /**
+     * @deprecated use {@link #getCommandDefinition(String...)}
+     */
+    public LiquibaseCommand getCommand(String commandName) {
+        return Scope.getCurrentScope().getSingleton(LiquibaseCommandFactory.class).getCommand(commandName);
+    }
+
+    /**
+     * @deprecated Use {@link CommandScope#execute()}
+     */
+    public <T extends CommandResult> T execute(LiquibaseCommand<T> command) throws CommandExecutionException {
+        command.validate();
+        try {
+            return command.run();
+        } catch (Exception e) {
+            if (e instanceof CommandExecutionException) {
+                throw (CommandExecutionException) e;
+            } else {
+                throw new CommandExecutionException(e);
+            }
+        }
+
+    }
 }

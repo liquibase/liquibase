@@ -17,7 +17,7 @@ Optional Args:
 
     run {
         arguments = [
-                tag: "version_2.0",
+                tag: "version_2.0"
         ]
 
         expectedResults = [

@@ -10,7 +10,9 @@ Required Args:
 Optional Args:
   changeLogFile (String) The root changelog
     Default: null
-  liquibaseHubApiKey (String) Liquibase Hub API key for connecting to Liquibase Hub
+  hubConnectionId (String) Liquibase Hub Connection ID to sync
+    Default: null
+  hubProjectId (String) Liquibase Hub Project ID to sync
     Default: null
   password (String) Password to use to connect to the database
     Default: null

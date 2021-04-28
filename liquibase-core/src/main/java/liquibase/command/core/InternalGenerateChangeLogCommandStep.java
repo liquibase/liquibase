@@ -4,7 +4,7 @@ import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
-import liquibase.command.CommandStepBuilder;
+import liquibase.command.CommandBuilder;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
@@ -19,7 +19,10 @@ import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 
-public class InternalGenerateChangeLogCommandStepInternal extends InternalDiffChangeLogCommandStep {
+public class InternalGenerateChangeLogCommandStep extends InternalDiffChangeLogCommandStep {
+
+    public static final String[] COMMAND_NAME = {"internalGenerateChangeLog"};
+
     private static final String INFO_MESSAGE =
             "When generating formatted SQL changelogs, it is important to decide if batched statements\n" +
                     "should be split (splitStatements:true is the default behavior) or not (splitStatements:false).\n" +
@@ -29,7 +32,7 @@ public class InternalGenerateChangeLogCommandStepInternal extends InternalDiffCh
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;
 
     static {
-        final CommandStepBuilder builder = new CommandStepBuilder(InternalGenerateChangeLogCommandStepInternal.class);
+        final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
 
         AUTHOR_ARG = builder.argument("author", String.class).build();
         CONTEXT_ARG = builder.argument("context", String.class).build();
@@ -38,7 +41,7 @@ public class InternalGenerateChangeLogCommandStepInternal extends InternalDiffCh
 
     @Override
     public String[] getName() {
-        return new String[]{"internalGenerateChangeLog"};
+        return COMMAND_NAME;
     }
 
     @Override
@@ -71,11 +74,14 @@ public class InternalGenerateChangeLogCommandStepInternal extends InternalDiffCh
             if (StringUtil.trimToNull(changeLogFile) != null) {
                 changeLogWriter.print(changeLogFile);
             } else {
-                PrintStream outputStream = commandScope.getArgumentValue(OUTPUT_STREAM_ARG);
-                if (outputStream == null) {
-                    outputStream = System.out;
+                PrintStream outputStream = new PrintStream(resultsBuilder.getOutputStream());
+
+                try {
+                    changeLogWriter.print(outputStream);
+                } finally {
+                    outputStream.flush();
                 }
-                changeLogWriter.print(outputStream);
+
             }
         } finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);

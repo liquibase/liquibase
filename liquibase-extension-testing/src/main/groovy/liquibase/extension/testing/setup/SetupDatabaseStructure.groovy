@@ -22,7 +22,7 @@ class SetupDatabaseStructure extends TestSetup {
 
     @Override
     void setup(TestDatabaseConnections.ConnectionStatus connectionStatus) throws Exception {
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connectionStatus.connection))
+        Database database = getDatabase(connectionStatus)
 
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
         changeLogService.init()
@@ -38,5 +38,9 @@ class SetupDatabaseStructure extends TestSetup {
                 throw new RuntimeException(dbe)
             }
         }
+    }
+
+    protected Database getDatabase(TestDatabaseConnections.ConnectionStatus connectionStatus) {
+        return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connectionStatus.connection))
     }
 }

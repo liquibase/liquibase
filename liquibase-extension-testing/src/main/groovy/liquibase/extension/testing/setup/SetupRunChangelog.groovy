@@ -1,5 +1,7 @@
 package liquibase.extension.testing.setup
 
+import liquibase.Contexts
+import liquibase.LabelExpression
 import liquibase.Liquibase
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
@@ -16,10 +18,17 @@ import java.nio.file.Paths
 class SetupRunChangelog extends TestSetup {
 
     private final String changeLog
+    private final String labels
 
     SetupRunChangelog(String changeLog) {
         this.changeLog = changeLog
     }
+
+    SetupRunChangelog(String changeLog, String labels) {
+        this.changeLog = changeLog
+        this.labels = labels
+    }
+
 
     @Override
     void setup(TestDatabaseConnections.ConnectionStatus connectionStatus) throws Exception {
@@ -35,6 +44,7 @@ class SetupRunChangelog extends TestSetup {
                 new CommandLineResourceAccessor(getClass().getClassLoader())
         )
         Liquibase liquibase = new Liquibase(this.changeLog, fileOpener, database)
-        liquibase.update((String) null)
+        Contexts contexts = null
+        liquibase.update(contexts, new LabelExpression(labels))
     }
 }

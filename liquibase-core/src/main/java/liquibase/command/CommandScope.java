@@ -4,13 +4,10 @@ import liquibase.Scope;
 import liquibase.configuration.AbstractMapConfigurationValueProvider;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfiguredValue;
-import liquibase.configuration.ProvidedValue;
 import liquibase.exception.CommandExecutionException;
 import liquibase.util.StringUtil;
 
-import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.SortedMap;
@@ -44,7 +41,7 @@ public class CommandScope {
 
         final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
 
-        this.commandDefinition = commandFactory.getCommand(commandName);
+        this.commandDefinition = commandFactory.getCommandDefinition(commandName);
 
         completeConfigPrefix = "liquibase.command." + StringUtil.join(Arrays.asList(this.getCommand().getName()), ".");
         shortConfigPrefix = "liquibase.command";
@@ -98,10 +95,12 @@ public class CommandScope {
     }
 
     /**
-     * Convenience method for {@link #getConfiguredValue(CommandArgumentDefinition)}, returning {@link ConfiguredValue#getValue()}
+     * Convenience method for {@link #getConfiguredValue(CommandArgumentDefinition)}, returning {@link ConfiguredValue#getValue()} along with any
+     * {@link CommandArgumentDefinition#getValueHandler()} applied
      */
     public <T> T getArgumentValue(CommandArgumentDefinition<T> argument) {
-        return getConfiguredValue(argument).getValue();
+        final T value = getConfiguredValue(argument).getValue();
+        return argument.getValueHandler().convert(value);
     }
 
     /**

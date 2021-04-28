@@ -14,13 +14,15 @@ import java.util.Objects;
 
 public class InternalHistoryCommandStep extends AbstractCommandStep {
 
+    public static final String[] COMMAND_NAME = {"internalHistory"};
+
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<DateFormat> DATE_FORMAT_ARG;
 
     public static final CommandResultDefinition<DeploymentHistory> DEPLOYMENTS_RESULT;
 
     static {
-        final CommandStepBuilder builder = new CommandStepBuilder(InternalHistoryCommandStep.class);
+        final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         DATABASE_ARG = builder.argument("database", Database.class).required().build();
         DATE_FORMAT_ARG = builder.argument("dateFormat", DateFormat.class)
                 .defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT), "Platform specific 'short' format")
@@ -31,7 +33,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[]{"internalHistory"};
+        return COMMAND_NAME;
     }
 
     @Override
@@ -69,6 +71,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
         }
 
         resultsBuilder.addResult(DEPLOYMENTS_RESULT, deploymentHistory);
+        output.flush();
     }
 
     public static class DeploymentHistory {

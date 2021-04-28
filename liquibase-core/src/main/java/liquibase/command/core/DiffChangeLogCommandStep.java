@@ -4,6 +4,9 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class DiffChangeLogCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"diffChangeLog"};
+
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
@@ -13,7 +16,7 @@ public class DiffChangeLogCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(DiffChangeLogCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required()
             .description("The JDBC reference database connection URL").build();
         REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class)
@@ -24,7 +27,7 @@ public class DiffChangeLogCommandStep extends AbstractCliWrapperCommandStep {
             .description("The JDBC target database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
             .description("The target database username").build();
-        PASSWORD_ARG = builder.argument("username", String.class)
+        PASSWORD_ARG = builder.argument("password", String.class)
             .description("The target database password").build();
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required()
             .description("Changelog file to write results").build();
@@ -32,7 +35,7 @@ public class DiffChangeLogCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[] {"diffChangeLog"};
+        return COMMAND_NAME;
     }
 
     @Override

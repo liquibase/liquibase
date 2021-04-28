@@ -10,8 +10,6 @@ Required Args:
 Optional Args:
   changeLogFile (String) The root changelog
     Default: null
-  outputFile (String) File for writing the SQL
-    Default: null
   password (String) Password to use to connect to the database
     Default: null
   username (String) Username to use to connect to the database

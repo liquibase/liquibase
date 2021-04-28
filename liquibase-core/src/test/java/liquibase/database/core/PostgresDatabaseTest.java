@@ -5,6 +5,7 @@ import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.structure.core.Table;
+import liquibase.util.StringUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -115,12 +116,50 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         tableName = database.escapeObjectName("My Table", Table.class);
         assertTrue(tableName.matches("[\\[\\\"`]?My Table[\\]\\\"`]?"));
     }
+
     @Test
     public void test_getConcatSql() {
         assertEquals("", database.getConcatSql());
         assertEquals("foo", database.getConcatSql("foo"));
         assertEquals("foo || bar", database.getConcatSql("foo", "bar"));
         assertEquals("one || two || | three", database.getConcatSql("one", "two", "| three"));
+    }
+
+    @Test
+    public void generatePrimaryKeyName_tableSizeNameLessThan63Bytes_nameIsBuiltCorrectly() {
+        final String tableName = "name";
+        final String expectedPrimaryKeyName = "name_pkey";
+
+        assertPrimaryKeyName(expectedPrimaryKeyName, this.database.generatePrimaryKeyName(tableName));
+    }
+
+    @Test
+    public void generatePrimaryKeyName_tableSizeNameMoreThan63Bytes_nameIsBuiltCorrectly() {
+        final String tableName = "name_" + StringUtil.repeat("_", 100);
+        final String expectedPrimaryKeyName = "name______________________________________________________pkey";
+
+        assertPrimaryKeyName(expectedPrimaryKeyName, this.database.generatePrimaryKeyName(tableName));
+    }
+
+    @Test
+    public void generatePrimaryKeyName_tableSizeNameLessThan63BytesAndNonASCIISymbols_nameIsBuiltCorrectly() {
+        final String nameWith15NonAsciiSymbols = "name_" + StringUtil.repeat("\u03A9", 15);
+        final String expectedPrimaryKeyName = "name_ΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩ_pkey";
+
+        assertPrimaryKeyName(expectedPrimaryKeyName, this.database.generatePrimaryKeyName(nameWith15NonAsciiSymbols));
+    }
+
+    @Test
+    public void generatePrimaryKeyName_tableSizeNameMoreThan63BytesAndNonASCIISymbols_nameIsBuiltCorrectly() {
+        final String nameWith100NonAsciiSymbols = "name_" + StringUtil.repeat("\u03A9", 100);
+        final String expectedPrimaryKeyName = "name_ΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩ_pkey";
+
+        assertPrimaryKeyName(expectedPrimaryKeyName, this.database.generatePrimaryKeyName(nameWith100NonAsciiSymbols));
+    }
+
+    private void assertPrimaryKeyName(String expected, String actual) {
+        assertEquals(expected, actual);
+        assertTrue(expected.getBytes(PostgresDatabase.CHARSET).length <= PostgresDatabase.PGSQL_PK_BYTES_LIMIT);
     }
 
 }

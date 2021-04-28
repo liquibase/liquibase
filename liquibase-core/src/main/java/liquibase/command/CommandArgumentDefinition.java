@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  * <p>
  * Because this definition is tied to a specific step, multiple steps in a pipeline can define arguments of the same name.
  *
- * @see CommandStepBuilder#argument(String, Class) for constructing new instances.
+ * @see CommandBuilder#argument(String, Class) for constructing new instances.
  */
 public class CommandArgumentDefinition<DataType> implements Comparable<CommandArgumentDefinition<?>> {
 
@@ -138,14 +138,14 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     }
 
     /**
-     * A new {@link CommandArgumentDefinition} under construction from {@link CommandStepBuilder}
+     * A new {@link CommandArgumentDefinition} under construction from {@link CommandBuilder}
      */
     public static class Building<DataType> {
-        private final Class<? extends CommandStep> commandStepClass;
+        private final String[] commandName;
         private final CommandArgumentDefinition<DataType> newCommandArgument;
 
-        Building(Class<? extends CommandStep> commandStepClass, CommandArgumentDefinition<DataType> newCommandArgument) {
-            this.commandStepClass = commandStepClass;
+        Building(String[] commandName, CommandArgumentDefinition<DataType> newCommandArgument) {
+            this.commandName = commandName;
             this.newCommandArgument = newCommandArgument;
         }
 
@@ -225,7 +225,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
                 throw new IllegalArgumentException("Invalid argument format: " + newCommandArgument.name);
             }
 
-            Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandStepClass, newCommandArgument);
+            Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandName, newCommandArgument);
 
             return newCommandArgument;
         }

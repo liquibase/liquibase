@@ -4,7 +4,7 @@ import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
-import liquibase.command.CommandStepBuilder;
+import liquibase.command.CommandBuilder;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
@@ -16,11 +16,13 @@ import java.io.PrintStream;
 
 public class InternalDiffChangeLogCommandStep extends InternalDiffCommandStep {
 
+    public static final String[] COMMAND_NAME = {"internalDiffChangeLog"};
+
     public static final CommandArgumentDefinition<String> CHANGELOG_FILENAME_ARG;
     public static final CommandArgumentDefinition<DiffOutputControl> DIFF_OUTPUT_CONTROL_ARG;
 
     static {
-        final CommandStepBuilder builder = new CommandStepBuilder(InternalDiffChangeLogCommandStep.class);
+        final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
 
         CHANGELOG_FILENAME_ARG = builder.argument("changeLogFile", String.class).required().build();
         DIFF_OUTPUT_CONTROL_ARG = builder.argument("diffOutputControl", DiffOutputControl.class).required().build();
@@ -29,7 +31,7 @@ public class InternalDiffChangeLogCommandStep extends InternalDiffCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[]{"internalDiffChangeLog"};
+        return COMMAND_NAME;
     }
 
     @Override
@@ -43,10 +45,7 @@ public class InternalDiffChangeLogCommandStep extends InternalDiffCommandStep {
 
         DiffResult diffResult = createDiffResult(commandScope);
 
-        PrintStream outputStream = commandScope.getArgumentValue(OUTPUT_STREAM_ARG);
-        if (outputStream == null) {
-            outputStream = System.out;
-        }
+        PrintStream outputStream = new PrintStream(resultsBuilder.getOutputStream());
 
         outputBestPracticeMessage();
 
@@ -61,6 +60,7 @@ public class InternalDiffChangeLogCommandStep extends InternalDiffCommandStep {
         }
         finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);
+            outputStream.flush();
         }
         resultsBuilder.addResult("statusCode", 0);
         resultsBuilder.addResult("statusMessage", "Successfully executed diffChangeLog");

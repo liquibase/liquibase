@@ -132,7 +132,7 @@ public class DiffToChangeLog {
                             //print changeLog only if there are available changeSets to print instead of printing it always
                             printNew(changeLogSerializer, file);
                         } else {
-            Scope.getCurrentScope().getLog(getClass()).info(file + " exists, appending");
+                            Scope.getCurrentScope().getLog(getClass()).info(file + " exists, appending");
                             ByteArrayOutputStream out = new ByteArrayOutputStream();
                             print(new PrintStream(out, true, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()), changeLogSerializer);
 
@@ -142,7 +142,7 @@ public class DiffToChangeLog {
                             innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
                             innerXml = innerXml.trim();
                             if ("".equals(innerXml)) {
-                Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
+                                Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
                                 return;
                             }
 
@@ -490,7 +490,7 @@ public class DiffToChangeLog {
      */
     protected boolean supportsSortingObjects(Database database) {
         return (database instanceof AbstractDb2Database) || (database instanceof MSSQLDatabase) || (database instanceof
-            OracleDatabase) || database instanceof PostgresDatabase;
+                OracleDatabase) || database instanceof PostgresDatabase;
     }
 
     /**
@@ -655,8 +655,8 @@ public class DiffToChangeLog {
                         "." + StringUtil.trimToEmpty((String)row.get("REFERENCED_NAME"));
 
                 if (!(tabName.isEmpty() || bName.isEmpty())) {
-                  graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
-                  graph.add(bName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*",""),
+                    graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
+                    graph.add(bName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*",""),
                             tabName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*", ""));
                 }
             }
@@ -861,8 +861,8 @@ public class DiffToChangeLog {
                 this.overriddenIdRoot = true;
             }
 
-             if ((changes != null) && (changes.length > 0)) {
-                 desc = " ("+ StringUtil.join(changes, " :: ", new StringUtil.StringUtilFormatter<Change>() {
+            if ((changes != null) && (changes.length > 0)) {
+                desc = " ("+ StringUtil.join(changes, " :: ", new StringUtil.StringUtilFormatter<Change>() {
                     @Override
                     public String toString(Change obj) {
                         return obj.getDescription();

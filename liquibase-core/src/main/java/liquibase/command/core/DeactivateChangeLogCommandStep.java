@@ -18,20 +18,20 @@ import java.io.PrintWriter;
 import java.util.UUID;
 
 public class DeactivateChangeLogCommandStep extends AbstractCommandStep {
+
+    public static final String[] COMMAND_NAME = {"deactivateChangeLog"};
+
     public static final CommandArgumentDefinition<String> CHANGE_LOG_FILE_ARG;
-    public static final CommandArgumentDefinition<String> LIQUIBASE_HUB_API_KEY_ARG;
 
     static {
-        final CommandStepBuilder builder = new CommandStepBuilder(DeactivateChangeLogCommandStep.class);
+        final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGE_LOG_FILE_ARG = builder.argument("changeLogFile", String.class).required()
             .description("The root changelog").build();
-        LIQUIBASE_HUB_API_KEY_ARG = builder.argument("liquibaseHubApiKey", String.class).required()
-            .description("The Liquibase Hub API key").build();
     }
 
     @Override
     public String[] getName() {
-        return new String[]{"deactivateChangeLog"};
+        return COMMAND_NAME;
     }
 
     @Override

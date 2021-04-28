@@ -7,7 +7,7 @@ import java.util.Objects;
  * <p>
  * Because this definition is tied to a specific step, multiple steps in a pipeline can define results of the same name.
  *
- * @see CommandStepBuilder#result(String, Class) for constructing new instances.
+ * @see CommandBuilder#result(String, Class) for constructing new instances.
  */
 public class CommandResultDefinition<DataType> implements Comparable<CommandResultDefinition<?>> {
 

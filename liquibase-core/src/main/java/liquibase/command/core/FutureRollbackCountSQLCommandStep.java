@@ -4,17 +4,19 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class FutureRollbackCountSQLCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"futureRollbackCountSQL"};
+
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> OUTPUT_FILE_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<Integer> COUNT_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(FutureRollbackCountSQLCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required()
             .description("The root changelog").build();
         URL_ARG = builder.argument("url", String.class).required()
@@ -29,13 +31,11 @@ public class FutureRollbackCountSQLCommandStep extends AbstractCliWrapperCommand
             .description("Changeset contexts to match").build();
         COUNT_ARG = builder.argument("count", Integer.class).required()
             .description("Number of change sets to generate rollback SQL for").build();
-        OUTPUT_FILE_ARG = builder.argument("outputFile", String.class)
-            .description("File for writing the SQL").build();
     }
 
     @Override
     public String[] getName() {
-        return new String[] {"futureRollbackCountSQL"};
+        return COMMAND_NAME;
     }
 
     @Override

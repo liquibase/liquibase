@@ -4,14 +4,18 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"syncHub"};
+
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<String> LIQUIBASE_HUB_API_KEY_ARG;
+    public static final CommandArgumentDefinition<String> HUB_CONNECTION_ID_ARG;
+    public static final CommandArgumentDefinition<String> HUB_PROJECT_ID_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(SyncHubCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
@@ -20,13 +24,15 @@ public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
             .description("Password to use to connect to the database").build();
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
             .description("The root changelog").build();
-        LIQUIBASE_HUB_API_KEY_ARG = builder.argument("liquibaseHubApiKey", String.class)
-            .description("Liquibase Hub API key for connecting to Liquibase Hub").build();
+        HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", String.class)
+            .description("Liquibase Hub Connection ID to sync").build();
+        HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", String.class)
+            .description("Liquibase Hub Project ID to sync").build();
     }
 
     @Override
     public String[] getName() {
-        return new String[] {"syncHub"};
+        return COMMAND_NAME;
     }
 
     @Override
