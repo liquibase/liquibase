@@ -3,6 +3,7 @@ package liquibase.command
 import liquibase.Scope
 import liquibase.command.core.MockCommandStep
 import liquibase.exception.CommandValidationException
+import liquibase.util.StringUtil
 import spock.lang.Specification
 
 class CommandArgumentDefinitionTest extends Specification {
@@ -79,6 +80,6 @@ class CommandArgumentDefinitionTest extends Specification {
         e.message == "Invalid argument format: kabob-case"
 
         then:
-        Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("mock").getArguments().toString() == "{arg1=arg1, arg2=arg2 (required)}"
+        StringUtil.join(Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("mock").getArguments(), ", ") == "arg1=arg1, arg2=arg2 (required)"
     }
 }
