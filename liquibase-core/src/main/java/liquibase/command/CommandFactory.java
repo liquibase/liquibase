@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class CommandFactory implements SingletonObject {
 
-    private final Map<Class<? extends CommandStep>, Set<CommandArgumentDefinition<?>>> argumentDefinitions = new HashMap<>();
+    private final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new HashMap<>();
 
     /**
      * @deprecated. Use {@link Scope#getSingleton(Class)}
@@ -42,13 +42,11 @@ public class CommandFactory implements SingletonObject {
             throw new IllegalArgumentException("Unknown command '" + StringUtil.join(commandName, " ") + "'");
         }
 
-        for (CommandStep step : pipeline) {
-            final Set<CommandArgumentDefinition<?>> stepArguments = this.argumentDefinitions.get(step.getClass());
+        final Set<CommandArgumentDefinition<?>> stepArguments = this.commandArgumentDefinitions.get(StringUtil.join(commandDefinition.getName(), " "));
 
-            if (stepArguments != null) {
-                for (CommandArgumentDefinition<?> commandArg : stepArguments) {
-                    commandDefinition.add(commandArg);
-                }
+        if (stepArguments != null) {
+            for (CommandArgumentDefinition<?> commandArg : stepArguments) {
+                commandDefinition.add(commandArg);
             }
         }
 
@@ -85,14 +83,15 @@ public class CommandFactory implements SingletonObject {
 
     /**
      * Called by {@link CommandArgumentDefinition.Building#build()} to
-     * register that a particular {@link CommandArgumentDefinition} is available for a step.
+     * register that a particular {@link CommandArgumentDefinition} is available for a command.
      */
-    protected void register(Class<? extends CommandStep> commandClass, CommandArgumentDefinition<?> definition) {
-        if (!argumentDefinitions.containsKey(commandClass)) {
-            argumentDefinitions.put(commandClass, new TreeSet<>());
+    protected void register(String[] commandName, CommandArgumentDefinition<?> definition) {
+        String commandNameKey = StringUtil.join(commandName, " ");
+        if (!commandArgumentDefinitions.containsKey(commandNameKey)) {
+            commandArgumentDefinitions.put(commandNameKey, new TreeSet<>());
         }
 
-        this.argumentDefinitions.get(commandClass).add(definition);
+        this.commandArgumentDefinitions.get(commandNameKey).add(definition);
     }
 
     /**
@@ -100,7 +99,7 @@ public class CommandFactory implements SingletonObject {
      * <bNOTE:</b> package-protected method used primarily for testing and may be removed or modified in the future.
      */
     protected void unregister(Class<? extends CommandStep> commandStepClass) {
-        argumentDefinitions.remove(commandStepClass);
+        commandArgumentDefinitions.remove(commandStepClass);
     }
 
     /**

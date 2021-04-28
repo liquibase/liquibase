@@ -22,6 +22,8 @@ import java.util.Map;
 
 public class InternalSnapshotCommandStep extends AbstractCommandStep {
 
+    public static final String[] COMMAND_NAME = {"internalSnapshot"};
+
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<CatalogAndSchema[]> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> SERIALIZER_FORMAT_ARG;
@@ -30,7 +32,7 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
     private Map<String, Object> snapshotMetadata;
 
     static {
-        final CommandStepBuilder builder = new CommandStepBuilder(InternalSnapshotCommandStep.class);
+        final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
 
         DATABASE_ARG = builder.argument("database", Database.class).required().build();
         SCHEMAS_ARG = builder.argument("schemas", CatalogAndSchema[].class).build();
@@ -40,7 +42,7 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[]{"internalSnapshot"};
+        return COMMAND_NAME;
     }
 
 

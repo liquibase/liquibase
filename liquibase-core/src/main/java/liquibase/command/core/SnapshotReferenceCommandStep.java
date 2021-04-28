@@ -4,6 +4,9 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"snapshotReference"};
+
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
@@ -11,7 +14,7 @@ public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep 
     public static final CommandArgumentDefinition<String> SNAPSHOT_FORMAT_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(SnapshotReferenceCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required()
             .description("The JDBC reference database connection URL").build();
         REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class)
@@ -26,7 +29,7 @@ public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep 
 
     @Override
     public String[] getName() {
-        return new String[] {"snapshotReference"};
+        return COMMAND_NAME;
     }
 
     @Override

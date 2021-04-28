@@ -4,6 +4,9 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class FutureRollbackSQLCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"futureRollbackSQL"};
+
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
@@ -12,7 +15,7 @@ public class FutureRollbackSQLCommandStep extends AbstractCliWrapperCommandStep 
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(FutureRollbackSQLCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
             .description("The root changelog").build();
         URL_ARG = builder.argument("url", String.class).required()
@@ -29,7 +32,7 @@ public class FutureRollbackSQLCommandStep extends AbstractCliWrapperCommandStep 
 
     @Override
     public String[] getName() {
-        return new String[] {"futureRollbackSQL"};
+        return COMMAND_NAME;
     }
 
     @Override

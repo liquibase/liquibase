@@ -18,13 +18,15 @@ import java.util.TreeSet;
 
 public class InternalExecuteSqlCommandStep extends AbstractCommandStep {
 
+    public static final String[] COMMAND_NAME = {"internalExecuteSql"};
+
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<String> SQL_ARG;
     public static final CommandArgumentDefinition<String> SQLFILE_ARG;
     public static final CommandArgumentDefinition<String> DELIMITER_ARG;
 
     static {
-        final CommandStepBuilder builder = new CommandStepBuilder(InternalExecuteSqlCommandStep.class);
+        final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         DATABASE_ARG = builder.argument("database", Database.class).required().build();
         SQL_ARG = builder.argument("sql", String.class).build();
         SQLFILE_ARG = builder.argument("sqlFile", String.class).build();
@@ -33,7 +35,7 @@ public class InternalExecuteSqlCommandStep extends AbstractCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[]{"internalExecuteSql"};
+        return COMMAND_NAME;
     }
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {

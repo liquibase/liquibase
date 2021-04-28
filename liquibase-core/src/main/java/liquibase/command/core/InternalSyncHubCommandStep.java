@@ -21,6 +21,8 @@ import java.util.UUID;
 
 public class InternalSyncHubCommandStep extends AbstractCommandStep {
 
+    public static final String[] COMMAND_NAME = {"internalSyncHub"};
+
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> HUB_CONNECTION_ID_ARG;
@@ -29,7 +31,7 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<Boolean> FAIL_IF_ONLINE_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(InternalSyncHubCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).build();
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).build();
         HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", String.class).build();
@@ -40,7 +42,7 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[]{"internalSyncHub"};
+        return COMMAND_NAME;
     }
 
     @Override

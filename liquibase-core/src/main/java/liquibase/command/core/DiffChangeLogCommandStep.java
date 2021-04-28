@@ -4,6 +4,9 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class DiffChangeLogCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"diffChangeLog"};
+
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
@@ -13,7 +16,7 @@ public class DiffChangeLogCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(DiffChangeLogCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required()
             .description("The JDBC reference database connection URL").build();
         REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class)
@@ -32,7 +35,7 @@ public class DiffChangeLogCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[] {"diffChangeLog"};
+        return COMMAND_NAME;
     }
 
     @Override

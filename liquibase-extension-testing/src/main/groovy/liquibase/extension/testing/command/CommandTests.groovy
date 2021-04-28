@@ -19,6 +19,7 @@ import liquibase.extension.testing.TestDatabaseConnections
 import liquibase.extension.testing.TestFilter
 import liquibase.extension.testing.setup.*
 import liquibase.hub.HubService
+import liquibase.hub.HubServiceFactory
 import liquibase.hub.core.MockHubService
 import liquibase.integration.IntegrationConfiguration
 import liquibase.integration.commandline.Main
@@ -232,6 +233,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
                 (Scope.Attr.ui.name()): new TestUI(uiOutputWriter, uiErrorWriter),
                 (Scope.Attr.logService.name()): logService
         ], {
+            ((MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()).online = false
             try {
                 return commandScope.execute()
             }

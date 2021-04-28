@@ -6,6 +6,9 @@ import liquibase.integration.commandline.Main;
 import java.io.PrintStream;
 
 public class DiffCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"diff"};
+
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
@@ -14,7 +17,7 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> URL_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(DiffCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required()
             .description("The JDBC reference database connection URL").build();
         REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class)
@@ -31,7 +34,7 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[] {"diff"};
+        return COMMAND_NAME;
     }
 
     @Override

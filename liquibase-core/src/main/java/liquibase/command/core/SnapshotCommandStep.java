@@ -4,6 +4,9 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class SnapshotCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"snapshot"};
+
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
@@ -11,7 +14,7 @@ public class SnapshotCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> SNAPSHOT_FORMAT_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(SnapshotCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
@@ -26,7 +29,7 @@ public class SnapshotCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[] {"snapshot"};
+        return COMMAND_NAME;
     }
 
     @Override

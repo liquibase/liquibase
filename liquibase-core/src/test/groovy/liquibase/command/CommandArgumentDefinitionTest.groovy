@@ -56,7 +56,7 @@ class CommandArgumentDefinitionTest extends Specification {
     def "test builder"() {
         setup:
         MockCommandStep.reset()
-        def builder = new CommandStepBuilder(MockCommandStep)
+        def builder = new CommandBuilder(MockCommandStep)
 
         when:
         def arg1 = builder.argument("arg1", String).build()

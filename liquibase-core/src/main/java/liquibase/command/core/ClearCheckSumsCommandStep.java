@@ -4,12 +4,15 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class ClearCheckSumsCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"clearCheckSums"};
+
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(ClearCheckSumsCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
@@ -20,7 +23,7 @@ public class ClearCheckSumsCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[] {"clearCheckSums"};
+        return COMMAND_NAME;
     }
 
     @Override

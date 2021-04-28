@@ -4,6 +4,9 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class ChangeLogSyncToTagCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"changeLogSyncToTag"};
+
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
@@ -13,7 +16,7 @@ public class ChangeLogSyncToTagCommandStep extends AbstractCliWrapperCommandStep
     public static final CommandArgumentDefinition<String> TAG_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(ChangeLogSyncToTagCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required()
             .description("The root changelog file").build();
         URL_ARG = builder.argument("url", String.class).required()
@@ -32,7 +35,7 @@ public class ChangeLogSyncToTagCommandStep extends AbstractCliWrapperCommandStep
 
     @Override
     public String[] getName() {
-        return new String[] {"changeLogSyncToTag"};
+        return COMMAND_NAME;
     }
 
     @Override

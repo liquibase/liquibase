@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StatusCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"status"};
+
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
@@ -16,7 +19,7 @@ public class StatusCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> VERBOSE_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(StatusCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
@@ -35,7 +38,7 @@ public class StatusCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[] {"status"};
+        return COMMAND_NAME;
     }
 
     @Override

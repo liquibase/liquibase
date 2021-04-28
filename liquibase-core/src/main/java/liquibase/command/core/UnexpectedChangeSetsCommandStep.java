@@ -4,7 +4,6 @@ import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class UnexpectedChangeSetsCommandStep extends AbstractCliWrapperCommandStep {
@@ -14,9 +13,10 @@ public class UnexpectedChangeSetsCommandStep extends AbstractCliWrapperCommandSt
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> VERBOSE_ARG;
+    public static final String[] COMMAND_NAME = {"unexpectedChangeSets"};
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(UnexpectedChangeSetsCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
@@ -33,7 +33,7 @@ public class UnexpectedChangeSetsCommandStep extends AbstractCliWrapperCommandSt
 
     @Override
     public String[] getName() {
-        return new String[] {"unexpectedChangeSets"};
+        return COMMAND_NAME;
     }
 
     @Override

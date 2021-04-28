@@ -20,6 +20,8 @@ import java.util.Set;
 
 public class InternalDiffCommandStep extends AbstractCommandStep {
 
+    public static final String[] COMMAND_NAME = {"internalDiff"};
+
     public static final CommandArgumentDefinition<Database> REFERENCE_DATABASE_ARG;
     public static final CommandArgumentDefinition<Database> TARGET_DATABASE_ARG;
     public static final CommandArgumentDefinition<Class[]> SNAPSHOT_TYPES_ARG;
@@ -31,7 +33,7 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<Boolean> PRINT_RESULT;
 
     static {
-        final CommandStepBuilder builder = new CommandStepBuilder(InternalDiffCommandStep.class);
+        final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         REFERENCE_DATABASE_ARG = builder.argument("referenceDatabase", Database.class).required().build();
         TARGET_DATABASE_ARG = builder.argument("targetDatabase", Database.class).required().build();
         SNAPSHOT_TYPES_ARG = builder.argument("snapshotTypes", Class[].class).required().build();
@@ -46,7 +48,7 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[]{"internalDiff"};
+        return COMMAND_NAME;
     }
 
     public static Class<? extends DatabaseObject>[] parseSnapshotTypes(String... snapshotTypes) {

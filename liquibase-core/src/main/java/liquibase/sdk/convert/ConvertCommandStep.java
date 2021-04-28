@@ -27,7 +27,7 @@ public class ConvertCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> CLASSPATH_ARG;
 
     static {
-        final CommandStepBuilder builder = new CommandStepBuilder(ConvertCommandStep.class);
+        final CommandBuilder builder = new CommandBuilder(new String[] {"convert"});
         SRC_ARG = builder.argument("src", String.class).required().build();
         OUT_ARG = builder.argument("out", String.class).required().build();
         CLASSPATH_ARG = builder.argument("classpath", String.class).required().build();

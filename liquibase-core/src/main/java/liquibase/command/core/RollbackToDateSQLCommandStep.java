@@ -7,6 +7,9 @@ import liquibase.integration.commandline.Main;
 import java.time.LocalDateTime;
 
 public class RollbackToDateSQLCommandStep extends AbstractCliWrapperCommandStep {
+
+    public static final String[] COMMAND_NAME = {"rollbackToDateSQL"};
+
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
@@ -17,7 +20,7 @@ public class RollbackToDateSQLCommandStep extends AbstractCliWrapperCommandStep 
     public static final CommandArgumentDefinition<LocalDateTime> DATE_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(RollbackToDateSQLCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
@@ -38,7 +41,7 @@ public class RollbackToDateSQLCommandStep extends AbstractCliWrapperCommandStep 
 
     @Override
     public String[] getName() {
-        return new String[] {"rollbackToDateSQL"};
+        return COMMAND_NAME;
     }
 
     @Override

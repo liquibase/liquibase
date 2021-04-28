@@ -4,7 +4,7 @@ import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
-import liquibase.command.CommandStepBuilder;
+import liquibase.command.CommandBuilder;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
@@ -20,6 +20,9 @@ import liquibase.util.StringUtil;
 import java.io.PrintStream;
 
 public class InternalGenerateChangeLogCommandStep extends InternalDiffChangeLogCommandStep {
+
+    public static final String[] COMMAND_NAME = {"internalGenerateChangeLog"};
+
     private static final String INFO_MESSAGE =
             "When generating formatted SQL changelogs, it is important to decide if batched statements\n" +
                     "should be split (splitStatements:true is the default behavior) or not (splitStatements:false).\n" +
@@ -29,7 +32,7 @@ public class InternalGenerateChangeLogCommandStep extends InternalDiffChangeLogC
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;
 
     static {
-        final CommandStepBuilder builder = new CommandStepBuilder(InternalGenerateChangeLogCommandStep.class);
+        final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
 
         AUTHOR_ARG = builder.argument("author", String.class).build();
         CONTEXT_ARG = builder.argument("context", String.class).build();
@@ -38,7 +41,7 @@ public class InternalGenerateChangeLogCommandStep extends InternalDiffChangeLogC
 
     @Override
     public String[] getName() {
-        return new String[]{"internalGenerateChangeLog"};
+        return COMMAND_NAME;
     }
 
     @Override

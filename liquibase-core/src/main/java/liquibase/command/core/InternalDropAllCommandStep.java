@@ -29,6 +29,8 @@ import java.util.UUID;
 
 public class InternalDropAllCommandStep extends AbstractCommandStep {
 
+    public static final String[] COMMAND_NAME = {"internalDropAll"};
+
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGELOG_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
@@ -36,7 +38,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<UUID> HUB_CONNECTION_ID_ARG;
 
     static {
-        CommandStepBuilder builder = new CommandStepBuilder(InternalDropAllCommandStep.class);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
 
         DATABASE_ARG = builder.argument("database", Database.class).required()
             .description("Database to drop objects in").build();
@@ -51,7 +53,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
 
     @Override
     public String[] getName() {
-        return new String[]{"internalDropAll"};
+        return COMMAND_NAME;
     }
 
     @Override
