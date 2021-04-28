@@ -18,6 +18,8 @@ Optional Args:
     Default: null
   labels (String) Label expression to use for filtering which changes to mark as executed
     Default: null
+  password (String) The database password
+    Default: null
   username (String) The database username
     Default: null
 """
