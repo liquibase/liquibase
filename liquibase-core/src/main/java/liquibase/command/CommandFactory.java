@@ -98,8 +98,8 @@ public class CommandFactory implements SingletonObject {
      * Unregisters all information about the given {@link CommandStep}.
      * <bNOTE:</b> package-protected method used primarily for testing and may be removed or modified in the future.
      */
-    protected void unregister(Class<? extends CommandStep> commandStepClass) {
-        commandArgumentDefinitions.remove(commandStepClass);
+    protected void unregister(String[] commandName) {
+        commandArgumentDefinitions.remove(StringUtil.join(commandName, " "));
     }
 
     /**

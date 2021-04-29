@@ -9,7 +9,7 @@ import spock.lang.Specification
 class CommandArgumentDefinitionTest extends Specification {
 
     def setup() {
-        Scope.currentScope.getSingleton(CommandFactory).unregister(MockCommandStep)
+        Scope.currentScope.getSingleton(CommandFactory).unregister("mock")
     }
 
     def validate() {
