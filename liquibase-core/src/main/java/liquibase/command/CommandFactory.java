@@ -91,6 +91,9 @@ public class CommandFactory implements SingletonObject {
             commandArgumentDefinitions.put(commandNameKey, new TreeSet<>());
         }
 
+        if (commandArgumentDefinitions.get(commandNameKey).contains(definition)) {
+           throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
+        }
         this.commandArgumentDefinitions.get(commandNameKey).add(definition);
     }
 
