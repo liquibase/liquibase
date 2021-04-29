@@ -225,7 +225,14 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
                 throw new IllegalArgumentException("Invalid argument format: " + newCommandArgument.name);
             }
 
-            Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandName, newCommandArgument);
+            try {
+                Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandName, newCommandArgument);
+            }
+            catch (IllegalArgumentException iae) {
+                Scope.getCurrentScope().getLog(CommandArgumentDefinition.class).warning(
+                    "Unable to register command '" + commandName + "' argument '" + newCommandArgument.getName() + "': " + iae.getMessage());
+                throw iae;
+            }
 
             return newCommandArgument;
         }

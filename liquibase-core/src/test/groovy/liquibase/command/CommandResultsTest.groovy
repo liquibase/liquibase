@@ -1,6 +1,7 @@
 package liquibase.command
 
 import liquibase.command.core.InternalHistoryCommandStep
+import liquibase.util.StringUtil
 import spock.lang.Specification
 
 class CommandResultsTest extends Specification {
@@ -21,6 +22,6 @@ class CommandResultsTest extends Specification {
 
         commandResults.getResult(InternalHistoryCommandStep.DEPLOYMENTS_RESULT).toString() == "0 past deployments"
 
-        commandResults.getResults().toString() == "{a=value from a, bool=true, deployments=0 past deployments}"
+        StringUtil.join(commandResults.getResults(), ", ") == "a=value from a, bool=true, deployments=0 past deployments"
     }
 }

@@ -233,7 +233,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
                 (Scope.Attr.ui.name()): new TestUI(uiOutputWriter, uiErrorWriter),
                 (Scope.Attr.logService.name()): logService
         ], {
-            ((MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()).online = false
             try {
                 return commandScope.execute()
             }

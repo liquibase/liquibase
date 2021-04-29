@@ -1,8 +1,10 @@
 package liquibase.hub.core;
 
+import liquibase.Scope;
 import liquibase.changelog.RanChangeSet;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubService;
+import liquibase.hub.HubServiceFactory;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.*;
 
@@ -176,5 +178,8 @@ public class MockHubService implements HubService {
                         .setProject(this.returnProjects.get(0))
         ));
         this.sentObjects = new TreeMap<>();
+        final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
+        hubServiceFactory.setOfflineReason("Using MockHubService which is configured to be offline");
+        online = true;
     }
 }

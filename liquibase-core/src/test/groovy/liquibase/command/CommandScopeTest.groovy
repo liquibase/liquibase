@@ -17,7 +17,7 @@ class CommandScopeTest extends Specification {
         when:
         def scope = new CommandScope("mock")
 
-        def arg = new CommandBuilder(MockCommandStep).argument(argumentName, String).defaultValue(defaultValue).build()
+        def arg = new CommandBuilder("mock command").argument(argumentName, String).defaultValue(defaultValue).build()
 
         def scopeId = Scope.enter([
                 "liquibase.command.mock.argSetFromScope": "value from scope",
@@ -90,8 +90,8 @@ class CommandScopeTest extends Specification {
         when:
         def output = new ByteArrayOutputStream()
 
-        new CommandBuilder(MockCommandStep).argument("requiredArg", String).required().build()
-        new CommandBuilder(MockCommandStep).argument("optionalArg", String).optional().build()
+        new CommandBuilder("mock").argument("requiredArg", String).required().build()
+        new CommandBuilder("mock").argument("optionalArg", String).optional().build()
 
         def scope = new CommandScope("mock")
         scope.setOutput(output)

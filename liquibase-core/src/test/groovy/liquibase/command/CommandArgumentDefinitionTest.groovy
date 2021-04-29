@@ -3,12 +3,13 @@ package liquibase.command
 import liquibase.Scope
 import liquibase.command.core.MockCommandStep
 import liquibase.exception.CommandValidationException
+import liquibase.util.StringUtil
 import spock.lang.Specification
 
 class CommandArgumentDefinitionTest extends Specification {
 
     def setup() {
-        Scope.currentScope.getSingleton(CommandFactory).unregister(MockCommandStep)
+        Scope.currentScope.getSingleton(CommandFactory).unregister("mock")
     }
 
     def validate() {
@@ -56,7 +57,7 @@ class CommandArgumentDefinitionTest extends Specification {
     def "test builder"() {
         setup:
         MockCommandStep.reset()
-        def builder = new CommandBuilder(MockCommandStep)
+        def builder = new CommandBuilder("mock")
 
         when:
         def arg1 = builder.argument("arg1", String).build()
@@ -79,6 +80,6 @@ class CommandArgumentDefinitionTest extends Specification {
         e.message == "Invalid argument format: kabob-case"
 
         then:
-        Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("mock").getArguments().toString() == "{arg1=arg1, arg2=arg2 (required)}"
+        StringUtil.join(Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("mock").getArguments(), ", ") == "arg1=arg1, arg2=arg2 (required)"
     }
 }

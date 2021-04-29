@@ -75,7 +75,11 @@ public class RegisterChangeLogCommandStep extends AbstractCommandStep {
             // CHeck for existing changeLog file
             //
             DatabaseChangeLog databaseChangeLog = parseChangeLogFile(changeLogFile);
-            final String changeLogId = (databaseChangeLog != null ? databaseChangeLog.getChangeLogId() : null);
+            if (databaseChangeLog == null) {
+                throw new CommandExecutionException("Cannot parse "+changeLogFile);
+            }
+
+            final String changeLogId = databaseChangeLog.getChangeLogId();
             if (changeLogId != null) {
                 hubChangeLog = service.getHubChangeLog(UUID.fromString(changeLogId));
                 if (hubChangeLog != null) {

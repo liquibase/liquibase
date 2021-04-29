@@ -17,6 +17,8 @@ Optional Args:
     Default: null
   labels (String) Changeset labels to match
     Default: null
+  password (String) The database password
+    Default: null
   tag (String) Tag ID to execute changeLogSync to
     Default: null
   username (String) The database username
