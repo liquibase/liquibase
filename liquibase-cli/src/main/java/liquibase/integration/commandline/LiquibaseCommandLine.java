@@ -273,6 +273,10 @@ public class LiquibaseCommandLine {
 
         configureHelp(subCommandSpec);
 
+        subCommandSpec.usageMessage()
+                .description(StringUtil.trimToEmpty(commandDefinition.getShortDescription()))
+                .header(StringUtil.trimToEmpty(commandDefinition.getLongDescription()));
+
         for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
             final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder(toArgName(def))
                     .required(false) //.required(def.isRequired())
@@ -280,6 +284,10 @@ public class LiquibaseCommandLine {
 
             if (def.getDescription() != null) {
                 builder.description(def.getDescription());
+            }
+
+            if (def.isRequired()) {
+                builder.description(StringUtil.join(builder.description(), " "), "[REQUIRED]");
             }
 
             if (def.getDefaultValueDescription() != null) {

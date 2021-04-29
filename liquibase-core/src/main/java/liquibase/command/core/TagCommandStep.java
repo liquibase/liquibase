@@ -48,6 +48,5 @@ public class TagCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Mark the current database state with the specified tag");
-        commandDefinition.setLongDescription("Mark the current database state with the specified tag");
     }
 }

@@ -4,12 +4,12 @@ CommandTests.define {
     command = ["updateCount"]
     signature = """
 Short Description: Deploy the specified number of changes from the changelog file
-Long Description: Deploy the specified number of changes from the changelog file
+Long Description: NOT SET
 Required Args:
   count (Integer) The number of changes in the changelog to deploy
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) The root changelog
+  changelogFile (String) The root changelog
     Default: null
   contexts (String) Changeset contexts to match
     Default: null
@@ -24,7 +24,7 @@ Optional Args:
     run {
         arguments = [
                 count        : 1,
-                changeLogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
+                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
         ]
 
         expectedResults = [

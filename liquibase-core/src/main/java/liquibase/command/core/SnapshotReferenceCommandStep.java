@@ -21,7 +21,7 @@ public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep 
             .description("Reference username to use to connect to the database").build();
         REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class)
             .description("Reference password to use to connect to the database").build();
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
+        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
             .description("The root changelog").build();
         SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)
             .description("Output format to use (JSON or YAML").build();
@@ -45,6 +45,5 @@ public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Capture the current state of the reference database");
-        commandDefinition.setLongDescription("Capture the current state of the reference database");
     }
 }

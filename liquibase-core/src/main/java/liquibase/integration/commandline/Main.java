@@ -7,7 +7,6 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
-import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
@@ -30,9 +29,7 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.structure.core.DataType;
 import liquibase.ui.ConsoleUIService;
-import liquibase.ui.UIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
@@ -1697,7 +1694,7 @@ public class Main {
                 Map<String, Object> argsMap = new HashMap<>();
                 CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.DEACTIVATE_CHANGELOG, argsMap);
 
-                liquibaseCommand.addArgumentValue(DeactivateChangeLogCommandStep.CHANGE_LOG_FILE_ARG, changeLogFile);
+                liquibaseCommand.addArgumentValue(DeactivateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
                 liquibaseCommand.execute();
 
@@ -1711,7 +1708,7 @@ public class Main {
                 try {
                     if (hubProjectId != null) {
                         try {
-                            liquibaseCommand.addArgumentValue(RegisterChangeLogCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
+                            liquibaseCommand.addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
                         } catch (IllegalArgumentException e) {
                             throw new LiquibaseException("The command '" + command +
                                     "' failed because parameter 'hubProjectId' has invalid value '" + hubProjectId + "'. Learn more at https://hub.liquibase.com");
@@ -1721,7 +1718,7 @@ public class Main {
                     throw new LiquibaseException("Unexpected hubProjectId format: " + hubProjectId, e);
                 }
                 if (hubProjectName != null) {
-                    liquibaseCommand.addArgumentValue(RegisterChangeLogCommandStep.HUB_PROJECT_NAME_ARG.getName(), hubProjectName);
+                    liquibaseCommand.addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_NAME_ARG.getName(), hubProjectName);
                 }
                 liquibaseCommand.execute();
 

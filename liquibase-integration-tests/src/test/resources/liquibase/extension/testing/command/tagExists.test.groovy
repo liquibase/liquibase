@@ -4,7 +4,7 @@ CommandTests.define {
     command = ["tagExists"]
     signature = """
 Short Description: MISSING
-Long Description: MISSING
+Long Description: NOT SET
 Required Args:
   tag (String) Tag to check
   url (String) The JDBC database connection URL

@@ -15,7 +15,7 @@ public class DbDocCommandStep extends AbstractCliWrapperCommandStep {
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
+        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
             .description("The root changelog").required().build();
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();
@@ -45,6 +45,5 @@ public class DbDocCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Generates JavaDoc documentation for the existing database and changelogs");
-        commandDefinition.setLongDescription("Generates JavaDoc documentation for the existing database and changelogs");
     }
 }

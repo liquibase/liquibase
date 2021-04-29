@@ -4,11 +4,11 @@ CommandTests.define {
     command = ["migrate"]
     signature = """
 Short Description: Deploys changes from the changelog file that have not yet been deployed
-Long Description: Deploys changes from the changelog file that have not yet been deployed
+Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) The root changelog
+  changelogFile (String) The root changelog
     Default: null
   contexts (String) Context string to use for filtering which changes to migrate
     Default: null
@@ -21,7 +21,7 @@ Optional Args:
 """
     run {
         arguments = [
-                changeLogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
+                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
         ]
 
         expectedResults = [

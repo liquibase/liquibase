@@ -8,11 +8,11 @@ CommandTests.define {
     command = ["dropAll"]
     signature = """
 Short Description: Drop all database objects owned by the user
-Long Description: Drop all database objects owned by the user
+Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) The root changelog
+  changelogFile (String) The root changelog
     Default: null
   hubConnectionId (String) The Hub connection ID
     Default: null

@@ -48,6 +48,5 @@ public class ExecuteSqlCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Execute a SQL string or file");
-        commandDefinition.setLongDescription("Execute a SQL string or file");
     }
 }

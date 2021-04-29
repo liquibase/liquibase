@@ -4,12 +4,12 @@ CommandTests.define {
     command = ["status"]
     signature = """
 Short Description: Generate a list of pending changesets
-Long Description: Generate a list of pending changesets
+Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
   verbose (String) Verbose flag
 Optional Args:
-  changeLogFile (String) The root changelog
+  changelogFile (String) The root changelog
     Default: null
   contexts (String) Changeset contexts to match
     Default: null
@@ -24,7 +24,7 @@ Optional Args:
     run {
         arguments = [
                 verbose      : "true",
-                changeLogFile: "changelogs/hsqldb/complete/rollback.tag.plus.changelog.xml"
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.plus.changelog.xml"
         ]
 
         setup {

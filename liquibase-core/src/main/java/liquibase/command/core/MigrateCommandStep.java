@@ -22,7 +22,7 @@ public class MigrateCommandStep extends AbstractCliWrapperCommandStep {
             .description("Username to use to connect to the database").build();
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("Password to use to connect to the database").build();
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
+        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
             .description("The root changelog").build();
         LABELS_ARG = builder.argument("labels", String.class)
             .description("Label expression to use for filtering which changes to migrate").build();
@@ -48,6 +48,5 @@ public class MigrateCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Deploys changes from the changelog file that have not yet been deployed");
-        commandDefinition.setLongDescription("Deploys changes from the changelog file that have not yet been deployed");
     }
 }

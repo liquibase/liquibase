@@ -4,7 +4,7 @@ CommandTests.define {
     command = ["tag"]
     signature = """
 Short Description: Mark the current database state with the specified tag
-Long Description: Mark the current database state with the specified tag
+Long Description: NOT SET
 Required Args:
   tag (String) Tag to add to the database changelog table
   url (String) The JDBC database connection URL

@@ -4,12 +4,12 @@ CommandTests.define {
     command = ["rollbackCount"]
     signature = """
 Short Description: Rollback the specified number of changes made to the database
-Long Description: Rollback the specified number of changes made to the database
+Long Description: NOT SET
 Required Args:
   count (Integer) The number of changes to rollback
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) The root changelog
+  changelogFile (String) The root changelog
     Default: null
   contexts (String) Changeset contexts to match
     Default: null
@@ -26,7 +26,7 @@ Optional Args:
     run {
         arguments = [
                 count        : 1,
-                changeLogFile: "changelogs/hsqldb/complete/rollback.changelog.xml"
+                changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml"
         ]
 
         setup {

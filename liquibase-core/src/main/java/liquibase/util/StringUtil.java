@@ -183,6 +183,9 @@ public class StringUtil {
     }
 
     public static String join(String[] array, String delimiter) {
+        if (array == null) {
+            return null;
+        }
         return join(Arrays.asList(array), delimiter);
     }
 

@@ -5,9 +5,9 @@ CommandTests.define {
 
     signature = """
 Short Description: Generates JavaDoc documentation for the existing database and changelogs
-Long Description: Generates JavaDoc documentation for the existing database and changelogs
+Long Description: NOT SET
 Required Args:
-  changeLogFile (String) The root changelog
+  changelogFile (String) The root changelog
   outputDirectory (String) The directory where the documentation is generated
   url (String) The JDBC database connection URL
 Optional Args:
@@ -20,7 +20,7 @@ Optional Args:
     run {
         arguments = [
                 outputDirectory: "target/test-classes",
-                changeLogFile  : "changelogs/hsqldb/complete/simple.changelog.xml",
+                changelogFile  : "changelogs/hsqldb/complete/simple.changelog.xml",
         ]
 
         expectedResults = [

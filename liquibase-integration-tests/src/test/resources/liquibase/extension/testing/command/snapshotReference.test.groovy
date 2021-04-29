@@ -8,11 +8,11 @@ CommandTests.define {
     command = ["snapshotReference"]
     signature = """
 Short Description: Capture the current state of the reference database
-Long Description: Capture the current state of the reference database
+Long Description: NOT SET
 Required Args:
   referenceUrl (String) The JDBC reference database connection URL
 Optional Args:
-  changeLogFile (String) The root changelog
+  changelogFile (String) The root changelog
     Default: null
   referencePassword (String) Reference password to use to connect to the database
     Default: null
@@ -24,10 +24,10 @@ Optional Args:
 
     run {
         arguments = [
-            changeLogFile: "target/test-classes/changeLog-test.xml"
+            changelogFile: "target/test-classes/changeset-test.xml"
         ]
         setup {
-            cleanTempResource("changeLog-test.xml")
+            cleanTempResource("changeset-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",

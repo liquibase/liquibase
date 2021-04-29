@@ -4,12 +4,12 @@ CommandTests.define {
     command = ["rollback"]
     signature = """
 Short Description: Rollback changes made to the database based on the specific tag
-Long Description: Rollback changes made to the database based on the specific tag
+Long Description: NOT SET
 Required Args:
   tag (String) Tag to rollback to
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) The root changelog
+  changelogFile (String) The root changelog
     Default: null
   contexts (String) Changeset contexts to match
     Default: null
@@ -26,7 +26,7 @@ Optional Args:
     run {
         arguments = [
                 tag          : "version_2.0",
-                changeLogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
         ]
 
         setup {

@@ -4,12 +4,12 @@ CommandTests.define {
     command = ["rollbackToDate"]
     signature = """
 Short Description: Rollback changes made to the database based on the specific date
-Long Description: Rollback changes made to the database based on the specific date
+Long Description: NOT SET
 Required Args:
   date (LocalDateTime) Date to rollback changes to
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) File to write changelog to
+  changelogFile (String) File to write changelog to
     Default: null
   contexts (String) Changeset contexts to match
     Default: null
@@ -26,7 +26,7 @@ Optional Args:
     run {
         arguments = [
                 date         : "2021-03-25T09:00:00",
-                changeLogFile: "changelogs/hsqldb/complete/rollback.changelog.xml",
+                changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml",
         ]
 
         setup {

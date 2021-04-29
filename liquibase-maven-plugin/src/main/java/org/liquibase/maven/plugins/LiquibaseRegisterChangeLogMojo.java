@@ -2,7 +2,7 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.command.CommandScope;
-import liquibase.command.core.RegisterChangeLogCommandStep;
+import liquibase.command.core.RegisterChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -50,9 +50,9 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         Database database = liquibase.getDatabase();
         CommandScope registerChangeLog = new CommandScope("registerChangeLog");
         registerChangeLog
-                .addArgumentValue(RegisterChangeLogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(RegisterChangeLogCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId))
-                .addArgumentValue(RegisterChangeLogCommandStep.HUB_PROJECT_NAME_ARG, hubProjectName);
+                .addArgumentValue(RegisterChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId))
+                .addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_NAME_ARG, hubProjectName);
 
         registerChangeLog.addArgumentValue("changeLogFile", changeLogFile);
         registerChangeLog.addArgumentValue("database", database);

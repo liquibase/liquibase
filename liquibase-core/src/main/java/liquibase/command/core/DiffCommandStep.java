@@ -59,6 +59,5 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Compare two databases");
-        commandDefinition.setLongDescription("Compare two databases");
     }
 }

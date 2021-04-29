@@ -22,7 +22,7 @@ public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
             .description("Username to use to connect to the database").build();
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("Password to use to connect to the database").build();
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
+        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
             .description("The root changelog").build();
         HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", String.class)
             .description("Liquibase Hub Connection ID to sync").build();
@@ -48,6 +48,5 @@ public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Synchronize the local DatabaseChangeLog table with Liquibase Hub");
-        commandDefinition.setLongDescription("Synchronize the local DatabaseChangeLog table with Liquibase Hub");
     }
 }

@@ -4,11 +4,11 @@ CommandTests.define {
     command = ["syncHub"]
     signature = """
 Short Description: Synchronize the local DatabaseChangeLog table with Liquibase Hub
-Long Description: Synchronize the local DatabaseChangeLog table with Liquibase Hub
+Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) The root changelog
+  changelogFile (String) The root changelog
     Default: null
   hubConnectionId (String) Liquibase Hub Connection ID to sync
     Default: null
@@ -21,7 +21,7 @@ Optional Args:
 """
     run {
         arguments = [
-                changeLogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
         ]
 
         setup {

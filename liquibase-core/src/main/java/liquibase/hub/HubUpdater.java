@@ -8,7 +8,7 @@ import liquibase.changelog.visitor.ListVisitor;
 import liquibase.changelog.visitor.RollbackListVisitor;
 import liquibase.exception.CommandExecutionException;
 import liquibase.command.CommandScope;
-import liquibase.command.core.RegisterChangeLogCommandStep;
+import liquibase.command.core.RegisterChangelogCommandStep;
 import liquibase.command.core.InternalSyncHubCommandStep;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfiguredValue;
@@ -511,11 +511,11 @@ public class HubUpdater {
 
         CommandScope registerChangeLogCommand = new CommandScope("registerChangeLog");
         registerChangeLogCommand
-                .addArgumentValue(RegisterChangeLogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+                .addArgumentValue(RegisterChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
         try {
             if (hubProjectId != null) {
                 try {
-                    registerChangeLogCommand.addArgumentValue(RegisterChangeLogCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
+                    registerChangeLogCommand.addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
                 } catch (IllegalArgumentException e) {
                     throw new LiquibaseException("The command 'RegisterChangeLog' " +
                             " failed because parameter 'hubProjectId' has invalid value '" + hubProjectId +

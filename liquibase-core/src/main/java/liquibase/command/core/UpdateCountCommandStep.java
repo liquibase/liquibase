@@ -23,7 +23,7 @@ public class UpdateCountCommandStep extends AbstractCliWrapperCommandStep {
             .description("Username to use to connect to the database").build();
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("Password to use to connect to the database").build();
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
+        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
             .description("The root changelog").build();
         LABELS_ARG = builder.argument("labels", String.class)
             .description("Changeset labels to match").build();
@@ -51,6 +51,5 @@ public class UpdateCountCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Deploy the specified number of changes from the changelog file");
-        commandDefinition.setLongDescription("Deploy the specified number of changes from the changelog file");
     }
 }

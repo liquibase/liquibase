@@ -24,7 +24,7 @@ public class RollbackCommandStep extends AbstractCliWrapperCommandStep {
             .description("Username to use to connect to the database").build();
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("Password to use to connect to the database").build();
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
+        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
             .description("The root changelog").build();
         LABELS_ARG = builder.argument("labels", String.class)
             .description("Changeset labels to match").build();
@@ -54,6 +54,5 @@ public class RollbackCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Rollback changes made to the database based on the specific tag");
-        commandDefinition.setLongDescription("Rollback changes made to the database based on the specific tag");
     }
 }

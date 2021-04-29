@@ -21,7 +21,7 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
             .description("Username to use to connect to the database").build();
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("Password to use to connect to the database").build();
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
+        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
             .description("The root changelog").build();
         HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", String.class)
             .description("The Hub connection ID").build();
@@ -45,6 +45,5 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Drop all database objects owned by the user");
-        commandDefinition.setLongDescription("Drop all database objects owned by the user");
     }
 }

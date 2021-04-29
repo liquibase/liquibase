@@ -3,6 +3,7 @@ package liquibase.extension.testing.command
 
 import liquibase.AbstractExtensibleObject
 import liquibase.CatalogAndSchema
+import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.command.CommandArgumentDefinition
@@ -84,6 +85,8 @@ class CommandTests extends Specification {
 
         assert commandTestDefinition.testFile.name == commandTestDefinition.getCommand().join("") + ".test.groovy": "Incorrect test file name"
 
+        assert commandDefinition.getShortDescription() == null || commandDefinition.getShortDescription() != commandDefinition.getLongDescription() : "Short and long description should not be identical. If there is nothing more to say in the long description, return null"
+
         for (def runTest : commandTestDefinition.runTests) {
             for (def arg : runTest.arguments.keySet()) {
                 assert commandDefinition.arguments.containsKey(arg): "Unknown argument '${arg}' in run ${runTest.description}"
@@ -103,7 +106,7 @@ class CommandTests extends Specification {
         StringWriter signature = new StringWriter()
         signature.print """
 Short Description: ${commandDefinition.getShortDescription() ?: "MISSING"}
-Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
+Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 """
         signature.println "Required Args:"
         def foundRequired = false
@@ -231,7 +234,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
                 (IntegrationConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name): MockHubService,
                 (Scope.Attr.ui.name()): new TestUI(uiOutputWriter, uiErrorWriter),
-                (Scope.Attr.logService.name()): logService
+                (Scope.Attr.logService.name()): logService,
         ], {
             try {
                 return commandScope.execute()
@@ -747,7 +750,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
 
         @Override
         def <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
-            throw new RuntimeException("Cannot prompt in tests")
+            return defaultValue
         }
 
         @Override

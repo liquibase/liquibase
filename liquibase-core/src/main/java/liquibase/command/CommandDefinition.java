@@ -19,8 +19,8 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
 
     private final SortedMap<String, CommandArgumentDefinition<?>> arguments = new TreeMap<>();
 
-    private String longDescription = "";
-    private String shortDescription = "";
+    private String longDescription = null;
+    private String shortDescription = null;
 
     protected CommandDefinition(String[] name) {
         this.name = name;

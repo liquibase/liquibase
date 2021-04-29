@@ -4,11 +4,11 @@ CommandTests.define {
     command = ["update"]
     signature = """
 Short Description: Deploy any changes in the changelog file that have not been deployed
-Long Description: Deploy any changes in the changelog file that have not been deployed
+Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) The root changelog
+  changelogFile (String) The root changelog
     Default: null
   contexts (String) Changeset contexts to match
     Default: null
@@ -22,7 +22,7 @@ Optional Args:
 
     run {
         arguments = [
-                changeLogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 
         expectedResults = [

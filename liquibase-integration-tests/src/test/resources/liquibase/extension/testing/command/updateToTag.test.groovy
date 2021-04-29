@@ -4,12 +4,12 @@ CommandTests.define {
     command = ["updateToTag"]
     signature = """
 Short Description: Deploy changes from the changelog file to the specified tag
-Long Description: Deploy changes from the changelog file to the specified tag
+Long Description: NOT SET
 Required Args:
   tag (String) The tag to update to
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) The root changelog
+  changelogFile (String) The root changelog
     Default: null
   contexts (String) Changeset contexts to match
     Default: null
@@ -24,7 +24,7 @@ Optional Args:
     run {
         arguments = [
                 tag          : "version_2.0",
-                changeLogFile: "changelogs/hsqldb/complete/simple.tag.changelog.xml",
+                changelogFile: "changelogs/hsqldb/complete/simple.tag.changelog.xml",
         ]
 
 

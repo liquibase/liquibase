@@ -1,10 +1,6 @@
 package liquibase.command;
 
-import liquibase.Scope;
-import liquibase.configuration.ConfiguredValue;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.CommandExecutionException;
-import liquibase.integration.IntegrationConfiguration;
 import liquibase.util.StringUtil;
 
 import java.util.*;
@@ -99,9 +95,9 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
 
     protected void addStatusMessage(CommandResultsBuilder resultsBuilder, int statusCode) {
         if (statusCode == 0) {
-            resultsBuilder.addResult("statusMessage", "Successfully executed " + getName()[0]);
+            resultsBuilder.addResult("statusMessage", "Successfully executed " + StringUtil.join(getName(), " "));
         } else {
-            resultsBuilder.addResult("statusMessage", "Unsuccessfully executed " + getName()[0]);
+            resultsBuilder.addResult("statusMessage", "Unsuccessfully executed " + StringUtil.join(getName(), " "));
         }
     }
 }
