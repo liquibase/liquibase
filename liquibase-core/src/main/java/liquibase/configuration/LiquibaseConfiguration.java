@@ -100,6 +100,10 @@ public class LiquibaseConfiguration implements SingletonObject {
         }
     }
 
+    public SortedSet<ConfigurationValueProvider> getProviders() {
+        return Collections.unmodifiableSortedSet(this.configurationValueProviders);
+    }
+
 
     /**
      * Searches for the given keys in the current providers.

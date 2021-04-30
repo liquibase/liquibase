@@ -45,10 +45,6 @@ class CommandRunner implements Callable<CommandResults> {
 
 
     private String toCommandArgumentDefinition(CommandLine.Model.OptionSpec option) {
-        if (option.names().length > 1) {
-            throw new RuntimeException("Found too many names for " + option.toString());
-        }
-
         final String argName = option.names()[0];
         return StringUtil.toCamelCase(argName.replaceFirst("^--", ""));
     }

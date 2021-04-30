@@ -274,27 +274,37 @@ public class LiquibaseCommandLine {
         configureHelp(subCommandSpec);
 
         subCommandSpec.usageMessage()
-                .description(StringUtil.trimToEmpty(commandDefinition.getShortDescription()))
-                .header(StringUtil.trimToEmpty(commandDefinition.getLongDescription()));
+                .header(StringUtil.trimToEmpty(commandDefinition.getShortDescription()))
+                .description(StringUtil.trimToEmpty(commandDefinition.getLongDescription()));
 
         for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
-            final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder(toArgName(def))
-                    .required(false) //.required(def.isRequired())
-                    .type(def.getDataType());
+            final String[] argNames = toArgNames(def);
+            for (int i = 0; i < argNames.length; i++) {
+                final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder(argNames[i])
+                        .required(false)
+                        .type(def.getDataType());
 
-            if (def.getDescription() != null) {
-                builder.description(def.getDescription());
+
+                String description = "(liquibase.command." + def.getName() + ")";
+                if (def.getDescription() != null) {
+                    description = def.getDescription() + " " + description;
+                }
+
+                if (def.isRequired()) {
+                    description += " [REQUIRED]";
+                }
+                builder.description(description);
+
+                if (def.getDefaultValueDescription() != null) {
+                    builder.defaultValue(def.getDefaultValueDescription());
+                }
+
+                if (i > 0) {
+                    builder.hidden(true);
+                }
+
+                subCommandSpec.addOption(builder.build());
             }
-
-            if (def.isRequired()) {
-                builder.description(StringUtil.join(builder.description(), " "), "[REQUIRED]");
-            }
-
-            if (def.getDefaultValueDescription() != null) {
-                builder.defaultValue(def.getDefaultValueDescription());
-            }
-
-            subCommandSpec.addOption(builder.build());
         }
 
         commandLine.getCommandSpec().addSubcommand(StringUtil.toKabobCase(commandDefinition.getName()[0]), subCommandSpec);
@@ -310,40 +320,69 @@ public class LiquibaseCommandLine {
 
         final SortedSet<ConfigurationDefinition<?>> globalConfigurations = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getRegisteredDefinitions();
         for (ConfigurationDefinition<?> def : globalConfigurations) {
-            final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(toArgName(def))
-                    .required(false)
-                    .defaultValue(def.getDefaultValueDescription())
-                    .type(def.getType());
+            final String[] argNames = toArgNames(def);
+            for (int i = 0; i < argNames.length; i++) {
+                final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(argNames[i])
+                        .required(false)
+                        .defaultValue(def.getDefaultValueDescription())
+                        .type(def.getType());
 
-            if (def.getDescription() != null) {
-                optionBuilder.description(def.getDescription());
+                String description = "(" + def.getKey() + ")";
+
+                if (def.getDescription() != null) {
+                    description = def.getDescription() + " " + description;
+                }
+                optionBuilder.description(description);
+
+                final ConfigurationValueConverter<?> valueHandler = def.getValueHandler();
+                if (valueHandler != null) {
+                    optionBuilder.converters(valueHandler::convert);
+                }
+
+                if (i > 0) {
+                    optionBuilder.hidden(true);
+                }
+
+                final CommandLine.Model.OptionSpec optionSpec = optionBuilder.build();
+                rootCommandSpec.addOption(optionSpec);
             }
-
-            final ConfigurationValueConverter<?> valueHandler = def.getValueHandler();
-            if (valueHandler != null) {
-                optionBuilder.converters(valueHandler::convert);
-            }
-
-            final CommandLine.Model.OptionSpec optionSpec = optionBuilder.build();
-            rootCommandSpec.addOption(optionSpec);
         }
     }
 
     private void configureHelp(CommandLine.Model.CommandSpec commandSpec) {
+        String footer = "Each argument contains the corresponding 'configuration key' in parentheses. " +
+                "As an alternative to passing values on the command line, these keys can be used as a basis for configuration settings in other locations.\n\n" +
+                "Available configuration locations, in order of priority:\n" +
+                "- Command line arguments (argument name in --help)\n" +
+                "- Java system properties (configuration key as-is)\n" +
+                "- Environment values (replace configuration key '.'s with '_'s )\n" +
+                "- Defaults file (configuration key OR argument name)\n";
+
+
         commandSpec.mixinStandardHelpOptions(true);
         commandSpec.usageMessage()
                 .showDefaultValues(true)
                 .sortOptions(true)
                 .abbreviateSynopsis(true)
+                .footer("\n" + footer)
         ;
     }
 
-    private static String toArgName(CommandArgumentDefinition<?> def) {
-        return "--" + StringUtil.toKabobCase(def.getName()).replace(".", "-");
+    protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
+        LinkedHashSet<String> returnList = new LinkedHashSet<>();
+        returnList.add("--" + StringUtil.toKabobCase(def.getName()).replace(".", "-"));
+        returnList.add("--" + def.getName().replaceAll("\\.", ""));
+
+        return returnList.toArray(new String[0]);
     }
 
-    private static String toArgName(ConfigurationDefinition<?> def) {
-        return "--" + StringUtil.toKabobCase(def.getKey()).replace(".", "-");
+    protected static String[] toArgNames(ConfigurationDefinition<?> def) {
+        LinkedHashSet<String> returnList = new LinkedHashSet<>();
+        returnList.add("--" + StringUtil.toKabobCase(def.getKey().replaceFirst("^liquibase.", "")).replace(".", "-"));
+        returnList.add("--" + StringUtil.toKabobCase(def.getKey()).replace(".", "-"));
+        returnList.add("--" + def.getKey().replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
+
+        return returnList.toArray(new String[0]);
     }
 
     public static class SecureLogFilter implements Filter {

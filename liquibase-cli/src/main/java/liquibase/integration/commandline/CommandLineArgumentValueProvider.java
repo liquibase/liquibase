@@ -13,7 +13,7 @@ public class CommandLineArgumentValueProvider  extends AbstractMapConfigurationV
 
     public CommandLineArgumentValueProvider(CommandLine.ParseResult parseResult) {
         for (CommandLine.Model.OptionSpec option : parseResult.matchedOptions()) {
-            this.argumentValues.put(option.names()[0].replaceFirst("^--", ""), option.getValue());
+            this.argumentValues.put(option.names()[0], option.getValue());
         }
     }
 
@@ -25,6 +25,11 @@ public class CommandLineArgumentValueProvider  extends AbstractMapConfigurationV
     @Override
     protected Map<?, ?> getMap() {
         return argumentValues;
+    }
+
+    @Override
+    protected boolean keyMatches(String wantedKey, String storedKey) {
+        return super.keyMatches(wantedKey, storedKey.replaceFirst("^--", "")) || super.keyMatches(wantedKey, "liquibase."+storedKey.replaceFirst("^--", ""));
     }
 
     @Override
