@@ -12,7 +12,7 @@ class CommandFactoryTest extends Specification {
         then:
         command.name*.toString() == ["update"]
         command.pipeline*.class*.name == ["liquibase.command.core.UpdateCommandStep"]
-        command.arguments.keySet().contains("changeLogFile")
+        command.arguments.keySet().contains("changelogFile")
     }
 
     def "getCommand for an invalid command"() {
@@ -33,8 +33,8 @@ class CommandFactoryTest extends Specification {
         commands.size() > 5
         commands*.name*.toString().contains("[update]")
 
-        sampleCommand.name == ["calculateCheckSum"]
-        sampleCommand.arguments.keySet().contains("changeLogFile")
+        sampleCommand.name == ["calculateChecksum"]
+        sampleCommand.arguments.keySet().contains("changelogFile")
 
     }
 }

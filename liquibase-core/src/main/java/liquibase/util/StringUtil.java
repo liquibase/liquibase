@@ -510,6 +510,9 @@ public class StringUtil {
      * Converts a camelCase string to a kabob-case one
      */
     public static String toKabobCase(String string) {
+        if (string == null) {
+            return null;
+        }
         return string.replaceAll("([A-Z])", "-$1").toLowerCase();
     }
 
