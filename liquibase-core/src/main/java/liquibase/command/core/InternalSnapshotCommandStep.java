@@ -45,6 +45,11 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
         return COMMAND_NAME;
     }
 
+    @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        super.adjustCommandDefinition(commandDefinition);
+        commandDefinition.setHidden(true);
+    }
 
     public static CatalogAndSchema[] parseSchemas(Database database, String... schemas) {
         if ((schemas == null) || (schemas.length == 0) || (schemas[0] == null)) {

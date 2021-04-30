@@ -66,7 +66,10 @@ public class LiquibaseCommandLine {
         rootCommandSpec.name("liquibase");
         configureHelp(rootCommandSpec);
 
-        CommandLine commandLine = new CommandLine(rootCommandSpec);
+        CommandLine commandLine = new CommandLine(rootCommandSpec)
+                .setCaseInsensitiveEnumValuesAllowed(true)
+                .setOptionsCaseInsensitive(true)
+                .setUsageHelpAutoWidth(true);
 
         addGlobalArguments(commandLine);
 
@@ -277,6 +280,8 @@ public class LiquibaseCommandLine {
                 .header(StringUtil.trimToEmpty(commandDefinition.getShortDescription()))
                 .description(StringUtil.trimToEmpty(commandDefinition.getLongDescription()));
 
+        subCommandSpec.optionsCaseInsensitive(true);
+
         for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
             final String[] argNames = toArgNames(def);
             for (int i = 0; i < argNames.length; i++) {
@@ -356,7 +361,9 @@ public class LiquibaseCommandLine {
                 "- Command line arguments (argument name in --help)\n" +
                 "- Java system properties (configuration key as-is)\n" +
                 "- Environment values (replace configuration key '.'s with '_'s )\n" +
-                "- Defaults file (configuration key OR argument name)\n";
+                "- Defaults file (configuration key OR argument name)\n\n" +
+                "Full documentation is available at\n" +
+                "http://www.liquibase.org";
 
 
         commandSpec.mixinStandardHelpOptions(true);

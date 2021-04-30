@@ -59,9 +59,16 @@ public class CommandFactory implements SingletonObject {
     }
 
     /**
-     * Returns all known {@link CommandDefinition}s.
+     * Returns all non-hidden {@link CommandDefinition}s.
      */
     public SortedSet<CommandDefinition> getCommands() {
+        return getCommands(false);
+    }
+
+    /**
+     * Returns all known {@link CommandDefinition}s.
+     */
+    public SortedSet<CommandDefinition> getCommands(boolean includeHidden) {
         Map<String, String[]> commandNames = new HashMap<>();
         for (CommandStep step : Scope.getCurrentScope().getServiceLocator().findInstances(CommandStep.class)) {
             final String[] name = step.getName();
@@ -71,7 +78,10 @@ public class CommandFactory implements SingletonObject {
         SortedSet<CommandDefinition> commands = new TreeSet<>();
         for (String[] commandName : commandNames.values()) {
             try {
-                commands.add(getCommandDefinition(commandName));
+                final CommandDefinition definition = getCommandDefinition(commandName);
+                if (includeHidden || !definition.getHidden()) {
+                    commands.add(definition);
+                }
             } catch (IllegalArgumentException e) {
                 //not a full command, like ConvertCommandStep
             }

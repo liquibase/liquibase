@@ -183,7 +183,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        commandDefinition.setShortDescription("Drop all database objects owned by the user");
+        commandDefinition.setHidden(true);
     }
 
     private DatabaseChangeLog parseChangeLogFile(String changeLogFile) throws LiquibaseException {

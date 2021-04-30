@@ -37,6 +37,12 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
     }
 
     @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        super.adjustCommandDefinition(commandDefinition);
+        commandDefinition.setHidden(true);
+    }
+
+    @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         PrintWriter output = new PrintWriter(resultsBuilder.getOutputStream());
 

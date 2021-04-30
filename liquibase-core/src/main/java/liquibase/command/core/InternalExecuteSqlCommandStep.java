@@ -37,6 +37,13 @@ public class InternalExecuteSqlCommandStep extends AbstractCommandStep {
     public String[] getName() {
         return COMMAND_NAME;
     }
+
+    @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        super.adjustCommandDefinition(commandDefinition);
+        commandDefinition.setHidden(true);
+    }
+
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();

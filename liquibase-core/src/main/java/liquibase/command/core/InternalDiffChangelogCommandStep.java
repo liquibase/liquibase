@@ -1,10 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandResultsBuilder;
-import liquibase.command.CommandScope;
-import liquibase.command.CommandBuilder;
+import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
@@ -32,6 +29,12 @@ public class InternalDiffChangelogCommandStep extends InternalDiffCommandStep {
     @Override
     public String[] getName() {
         return COMMAND_NAME;
+    }
+
+    @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        super.adjustCommandDefinition(commandDefinition);
+        commandDefinition.setHidden(true);
     }
 
     @Override
