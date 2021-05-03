@@ -1,6 +1,9 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.3.5 (2021.04.29)
+- Better error handling in runWith=sqlplus when user doesn't have create/drop table permissions
+
 Changes in version 4.3.4 (2021.04.15)
 - Reverts changes from #1722 because they broke other diffChangeLog/generateChangeLog use cases.
 
