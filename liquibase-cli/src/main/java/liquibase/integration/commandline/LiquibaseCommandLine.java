@@ -7,6 +7,7 @@ import liquibase.command.CommandFactory;
 import liquibase.configuration.*;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
+import liquibase.exception.CommandValidationException;
 import liquibase.hub.HubConfiguration;
 import liquibase.integration.IntegrationConfiguration;
 import liquibase.license.LicenseServiceFactory;
@@ -35,6 +36,8 @@ import static liquibase.util.SystemUtil.isWindows;
 
 public class LiquibaseCommandLine {
 
+    private Level configuredLogLevel;
+
     private final CommandLine commandLine;
     private FileHandler fileHandler;
 
@@ -43,8 +46,8 @@ public class LiquibaseCommandLine {
 
         try {
             cli.execute(args);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable e) {
+            cli.handleException(e);
         } finally {
             cli.cleanup();
         }
@@ -84,7 +87,58 @@ public class LiquibaseCommandLine {
             addSubcommand(commandDefinition, commandLine);
         }
 
+        commandLine.setExecutionExceptionHandler((ex, commandLine1, parseResult) -> LiquibaseCommandLine.this.handleException(ex));
+
         return commandLine;
+    }
+
+    private int handleException(Throwable exception) {
+        Throwable cause = exception;
+
+        String bestMessage = exception.getMessage();
+        while (cause.getCause() != null) {
+            if (StringUtil.trimToNull(cause.getMessage()) != null) {
+                bestMessage = cause.getMessage();
+            }
+            cause = cause.getCause();
+        }
+
+        //clean up message
+        bestMessage = bestMessage.replaceFirst("^[\\w.]*exception[\\w.]*: ", "");
+        bestMessage = bestMessage.replace("Unexpected error running Liquibase: ", "");
+
+        boolean printUsage = false;
+        if (exception instanceof CommandLine.ParameterException) {
+            if (exception instanceof CommandLine.UnmatchedArgumentException) {
+                System.err.println("Unexpected argument(s): " + StringUtil.join(((CommandLine.UnmatchedArgumentException) exception).getUnmatched(), ", "));
+            } else {
+                System.err.println("Error parsing command line: " + bestMessage);
+            }
+            CommandLine.UnmatchedArgumentException.printSuggestions((CommandLine.ParameterException) exception, System.err);
+
+            printUsage = true;
+        } else if (exception instanceof IllegalArgumentException
+                || exception instanceof CommandValidationException
+                || exception instanceof CommandLineParsingException) {
+            System.err.println("Error parsing command line: " + bestMessage);
+            printUsage = true;
+        } else {
+            System.err.println("Unexpected error running Liquibase: " + bestMessage);
+            System.err.println();
+
+            if (Level.OFF.equals(this.configuredLogLevel)) {
+                System.err.println("For more information, please use the --log-level flag");
+            } else {
+                exception.printStackTrace(System.err);
+            }
+        }
+
+        if (printUsage) {
+            System.err.println();
+            this.commandLine.usage(System.err);
+        }
+
+        return -1;
     }
 
     public void execute(String[] args) throws Exception {
@@ -179,6 +233,7 @@ public class LiquibaseCommandLine {
     }
 
     private void configureLogging(Level logLevel, File logFile) throws IOException {
+        configuredLogLevel = logLevel;
 
         System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
 
@@ -234,7 +289,7 @@ public class LiquibaseCommandLine {
         return returnMap;
     }
 
-    protected ClassLoader configureClassLoader() throws CommandLineParsingException {
+    protected ClassLoader configureClassLoader() throws IllegalArgumentException {
         final String classpath = IntegrationConfiguration.CLASSPATH.getCurrentValue();
 
         final List<URL> urls = new ArrayList<>();
@@ -249,7 +304,7 @@ public class LiquibaseCommandLine {
             for (String classpathEntry : classpathSoFar) {
                 File classPathFile = new File(classpathEntry);
                 if (!classPathFile.exists()) {
-                    throw new CommandLineParsingException(classPathFile.getAbsolutePath() + " does.not.exist");
+                    throw new IllegalArgumentException(classPathFile.getAbsolutePath() + " does.not.exist");
                 }
 
                 try {
@@ -257,7 +312,7 @@ public class LiquibaseCommandLine {
                     Scope.getCurrentScope().getLog(getClass()).fine(newUrl.toExternalForm() + " added to class loader");
                     urls.add(newUrl);
                 } catch (MalformedURLException e) {
-                    throw new CommandLineParsingException(e);
+                    throw new IllegalArgumentException(e);
                 }
             }
         }
@@ -404,7 +459,7 @@ public class LiquibaseCommandLine {
 
         commandSpec.mixinStandardHelpOptions(true);
         commandSpec.usageMessage()
-                .showDefaultValues(true)
+                .showDefaultValues(false)
                 .sortOptions(true)
                 .abbreviateSynopsis(true)
                 .footer("\n" + footer)

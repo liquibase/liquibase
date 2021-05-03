@@ -394,17 +394,23 @@ public class Main {
                         if (e.getCause() instanceof ValidationFailedException) {
                             ((ValidationFailedException) e.getCause()).printDescriptiveError(outputStream);
                         } else {
-                            if (main.outputsLogMessages) {
-                                Scope.getCurrentScope().getUI().sendErrorMessage((String.format(coreBundle.getString("unexpected.error"), message)), e);
-                            } else {
-                                Scope.getCurrentScope().getUI().sendMessage((String.format(coreBundle.getString("unexpected.error"), message)));
-                                Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("for.more.information.use.loglevel.flag"));
+                            if (!Main.runningFromNewCli) {
+                                if (main.outputsLogMessages) {
+                                    Scope.getCurrentScope().getUI().sendErrorMessage((String.format(coreBundle.getString("unexpected.error"), message)), e);
+                                } else {
+                                    Scope.getCurrentScope().getUI().sendMessage((String.format(coreBundle.getString("unexpected.error"), message)));
+                                    Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("for.more.information.use.loglevel.flag"));
 
-                                //send it to the LOG in case we're using logFile
-                                Scope.getCurrentScope().getLog(getClass()).severe((String.format(coreBundle.getString("unexpected.error"), message)), e);
+                                    //send it to the LOG in case we're using logFile
+                                    Scope.getCurrentScope().getLog(getClass()).severe((String.format(coreBundle.getString("unexpected.error"), message)), e);
+                                }
                             }
                         }
                     } catch (IllegalFormatException e1) {
+                        if (Main.runningFromNewCli) {
+                            throw e1;
+                        }
+
                         e1.printStackTrace();
                     }
                     throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
