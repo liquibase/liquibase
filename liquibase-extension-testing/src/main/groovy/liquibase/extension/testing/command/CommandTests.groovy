@@ -1,9 +1,8 @@
 package liquibase.extension.testing.command
 
-import com.sun.org.apache.xml.internal.resolver.Catalog
+
 import liquibase.AbstractExtensibleObject
 import liquibase.CatalogAndSchema
-import liquibase.Liquibase
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.changelog.ChangeLogHistoryService
@@ -25,12 +24,8 @@ import liquibase.extension.testing.setup.*
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
 import liquibase.integration.IntegrationConfiguration
-import liquibase.integration.commandline.CommandLineResourceAccessor
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
-import liquibase.resource.CompositeResourceAccessor
-import liquibase.resource.FileSystemResourceAccessor
-import liquibase.resource.ResourceAccessor
 import liquibase.ui.InputHandler
 import liquibase.ui.UIService
 import liquibase.util.FileUtil
@@ -41,7 +36,6 @@ import org.junit.Assume
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.nio.file.Paths
 import java.util.logging.Level
 import java.util.regex.Pattern
 
