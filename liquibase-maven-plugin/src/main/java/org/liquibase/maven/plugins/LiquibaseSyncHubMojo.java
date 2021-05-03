@@ -41,7 +41,7 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
             throws LiquibaseException {
         super.performLiquibaseTask(liquibase);
         Database database = liquibase.getDatabase();
-        CommandScope syncHub = new CommandScope("syncHub");
+        CommandScope syncHub = new CommandScope(InternalSyncHubCommandStep.COMMAND_NAME);
         syncHub
                 .addArgumentValue(InternalSyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, database.getConnection().getURL())
