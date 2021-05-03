@@ -36,8 +36,8 @@ Optional Args:
         }
 
         expectedDatabaseContent = [
-                Pattern.compile(".*liquibase.structure.core.Table.*FIRSTTABLE.*", Pattern.MULTILINE|Pattern.DOTALL),
-                CommandTests.assertNotContains(".*liquibase.structure.core.Table.*SECONDTABLE.*")
+                "txt": [Pattern.compile(".*liquibase.structure.core.Table.*FIRSTTABLE.*", Pattern.MULTILINE|Pattern.DOTALL),
+                        CommandTests.assertNotContains(".*liquibase.structure.core.Table.*SECONDTABLE.*")]
         ]
 
         expectedResults = [

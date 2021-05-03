@@ -304,25 +304,28 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         }
     }
 
-    static void checkDatabaseContent(List<Object> expectedDatabaseContent, Database database, String outputDescription) {
+    static void checkDatabaseContent(Map<String, ?> expectedDatabaseContent, Database database, String outputDescription) {
         if (expectedDatabaseContent.size() == 0) {
             return
         }
-        File f = takeDatabaseSnapshot(database)
-        String contents = FileUtil.getContents(f)
-        contents = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(contents))
-        contents = contents.replaceAll(/\s+/, " ")
-
-        checkOutput(outputDescription, contents, expectedDatabaseContent)
+        for (def check : expectedDatabaseContent) {
+            File f = takeDatabaseSnapshot(database, check.key)
+            String contents = FileUtil.getContents(f)
+            contents = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(contents))
+            contents = contents.replaceAll(/\s+/, " ")
+            List<Object> checks = check.getValue()
+            checkOutput(outputDescription, contents, checks)
+        }
     }
 
-    private static File takeDatabaseSnapshot(Database database) {
+    private static File takeDatabaseSnapshot(Database database, String format) {
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
         changeLogService.init()
         changeLogService.reset()
 
         File destDir = new File("target/test-classes")
-        File tempFile = File.createTempFile("genChangeLog-", ".txt", destDir)
+        File tempFile = File.createTempFile("snapshot-", "." + format, destDir)
+        tempFile.deleteOnExit()
         CatalogAndSchema[] schemas = new CatalogAndSchema[1]
         schemas[0] = new CatalogAndSchema(null, database.getDefaultSchemaName())
         CommandScope snapshotCommand = new CommandScope("internalSnapshot")
@@ -513,7 +516,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
          */
         private Map<String, ?> arguments = new HashMap<>()
         private Map<String, ?> expectedFileContent = new HashMap<>()
-        private List<Object> expectedDatabaseContent = new ArrayList<>()
+        private Map<String, Object> expectedDatabaseContent = new HashMap<>()
 
         private List<TestSetup> setup
 
@@ -550,7 +553,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
             this.expectedFileContent = content
         }
 
-        def setExpectedDatabaseContent(List<Object> content) {
+        def setExpectedDatabaseContent(Map<String, Object> content) {
             this.expectedDatabaseContent = content
         }
 

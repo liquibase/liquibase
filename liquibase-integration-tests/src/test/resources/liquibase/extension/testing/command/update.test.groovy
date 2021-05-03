@@ -35,8 +35,8 @@ Optional Args:
         ]
 
         expectedDatabaseContent = [
-                Pattern.compile(".*liquibase.structure.core.Table.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL),
-                Pattern.compile(".*liquibase.structure.core.Table.*ADDRESS.*columns:.*CITY.*", Pattern.MULTILINE|Pattern.DOTALL)
+                "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL),
+                        Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*CITY.*", Pattern.MULTILINE|Pattern.DOTALL)]
         ]
     }
 
