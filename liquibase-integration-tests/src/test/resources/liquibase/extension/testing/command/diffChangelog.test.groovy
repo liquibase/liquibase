@@ -2,7 +2,9 @@ package liquibase.extension.testing.command
 
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
-import liquibase.change.core.TagDatabaseChange
+import liquibase.exception.CommandValidationException
+
+import java.util.regex.Pattern
 
 CommandTests.define {
     command = ["diffChangelog"]
@@ -24,15 +26,19 @@ Optional Args:
     Default: null
 """
 
-
-    run {
+    run "Running diffChangeLog against itself finds no differences", {
         arguments = [
-            referenceUrl: "offline:postgresql?snapshot=snapshot1.json",
-            url: "offline:postgresql?snapshot=snapshot2.json",
-            changelogFile: "target/test-classes/diffChangelog-test.xml"
+                url              : { it.url },
+                username         : { it.username },
+                password         : { it.password },
+                referenceUrl     : { it.url },
+                referenceUsername: { it.username },
+                referencePassword: { it.password },
+                changelogFile: "target/test-classes/diffChangelog-test.xml"
         ]
+
         setup {
-            cleanTempResource("diffChangelog-test.xml")
+            cleanResources("diffChangelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -48,22 +54,199 @@ Optional Args:
                                             .setType("VARCHAR(255)")
                             ]
                     ),
-                    new TagDatabaseChange(
-                            tag: "version_2.0"
+            ]
+
+        }
+
+        expectedFileContent = [
+                //
+                // Empty changelog contains no changeSet tags and an empty databaseChangeLog tag
+                //
+                "target/test-classes/diffChangeLog-test.xml" : [CommandTests.assertNotContains("<changeSet"),
+                                                                Pattern.compile("^.*<?xml.*databaseChangeLog.*xsd./>", Pattern.MULTILINE|Pattern.DOTALL)]
+        ]
+
+        expectedOutput = [
+                """
+"""
+        ]
+
+        expectedUI = "Liquibase command 'diffChangeLog' was executed successfully"
+    }
+
+    run "Running diffChangeLog should add change sets", {
+        arguments = [
+                url              : { it.url },
+                username         : { it.username },
+                password         : { it.password },
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+                changeLogFile: "target/test-classes/diffChangeLog-test.xml"
+        ]
+
+        setup {
+            cleanResources("diffChangeLog-test.xml")
+            database = [
+                    new CreateTableChange(
+                            tableName: "SharedTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)"),
+                                    ColumnConfig.fromName("Shared")
+                                            .setType("VARCHAR(255)")
+                            ]
                     ),
                     new CreateTableChange(
-                            tableName: "liquibaseRunInfo",
+                            tableName: "PrimaryTable",
                             columns: [
-                                    ColumnConfig.fromName("timesRan")
-                                            .setType("INT")
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)")
                             ]
                     ),
             ]
-        }
 
-        expectedResults = [
-                statusMessage: "Successfully executed diffChangelog",
-                statusCode   : 0
+            altDatabase = [
+                    new CreateTableChange(
+                            tableName: "SharedTable",
+                            columns: [
+                                    ColumnConfig.fromName("Name")
+                                            .setType("VARCHAR(255)"),
+                                    ColumnConfig.fromName("Shared")
+                                            .setType("VARCHAR(3)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondaryTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+            ]
+
+        }
+        expectedFileContent = [
+                "target/test-classes/diffChangeLog-test.xml" : [CommandTests.assertContains("<changeSet ", 5),
+                                                                CommandTests.assertContains("<dropTable ", 1)]
+        ]
+        expectedOutput = [
+                """
+"""
+        ]
+        expectedUI = "Liquibase command 'diffChangeLog' was executed successfully"
+    }
+
+    run "Running diff against differently structured databases finds changed objects", {
+        arguments = [
+                url              : { it.url },
+                username         : { it.username },
+                password         : { it.password },
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+                changeLogFile: "target/test-classes/diffChangeLog-test.xml"
+        ]
+
+        setup {
+            cleanResources("diffChangeLog-test.xml")
+            database = [
+                    new CreateTableChange(
+                            tableName: "SharedTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)"),
+                                    ColumnConfig.fromName("Shared")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "PrimaryTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+            ]
+
+            altDatabase = [
+                    new CreateTableChange(
+                            tableName: "SharedTable",
+                            columns: [
+                                    ColumnConfig.fromName("Name")
+                                            .setType("VARCHAR(255)"),
+                                    ColumnConfig.fromName("Shared")
+                                            .setType("VARCHAR(3)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondaryTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+            ]
+
+        }
+        expectedUI = "Liquibase command 'diffChangeLog' was executed successfully"
+    }
+
+    run "Running diffChangeLog without changeLogFile gives an error", {
+        arguments = [
+                url              : { it.url },
+                username         : { it.username },
+                password         : { it.password },
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+        ]
+
+        setup {
+            cleanResources("diffChangeLog-test.xml")
+            database = [
+                    new CreateTableChange(
+                            tableName: "SharedTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)"),
+                                    ColumnConfig.fromName("Shared")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "PrimaryTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+            ]
+
+            altDatabase = [
+                    new CreateTableChange(
+                            tableName: "SharedTable",
+                            columns: [
+                                    ColumnConfig.fromName("Name")
+                                            .setType("VARCHAR(255)"),
+                                    ColumnConfig.fromName("Shared")
+                                            .setType("VARCHAR(3)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondaryTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+            ]
+
+        }
+        expectedException = CommandValidationException.class
+        expectedOutput = [
+                """
+"""
         ]
     }
 }

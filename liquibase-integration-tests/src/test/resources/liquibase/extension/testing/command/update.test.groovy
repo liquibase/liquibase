@@ -1,5 +1,9 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
+
+import java.util.regex.Pattern
+
 CommandTests.define {
     command = ["update"]
     signature = """
@@ -20,7 +24,7 @@ Optional Args:
     Default: null
 """
 
-    run {
+    run "Happy path with a simple changelog", {
         arguments = [
                 changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
@@ -29,5 +33,19 @@ Optional Args:
                 statusMessage: "Successfully executed update",
                 statusCode   : 0
         ]
+
+        expectedDatabaseContent = [
+                Pattern.compile(".*liquibase.structure.core.Table.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL),
+                Pattern.compile(".*liquibase.structure.core.Table.*ADDRESS.*columns:.*CITY.*", Pattern.MULTILINE|Pattern.DOTALL)
+        ]
+    }
+
+    run "No changelog argument results in an exception", {
+        expectedResults = [
+                statusMessage: "Unsuccessfully executed update",
+                statusCode   : 1
+        ]
+
+        expectedException = CommandValidationException.class
     }
 }

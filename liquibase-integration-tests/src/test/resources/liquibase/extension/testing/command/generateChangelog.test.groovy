@@ -25,7 +25,7 @@ Optional Args:
             changelogFile: "target/test-classes/changelog-test.xml"
         ]
         setup {
-            cleanTempResource("changelog-test.xml")
+            cleanResources("changelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
