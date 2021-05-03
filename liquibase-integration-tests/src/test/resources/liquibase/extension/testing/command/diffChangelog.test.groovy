@@ -26,7 +26,7 @@ Optional Args:
     Default: null
 """
 
-    run "Running diffChangeLog against itself finds no differences", {
+    run "Running diffChangelog against itself finds no differences", {
         arguments = [
                 url              : { it.url },
                 username         : { it.username },
@@ -71,10 +71,10 @@ Optional Args:
 """
         ]
 
-        expectedUI = "Liquibase command 'diffChangeLog' was executed successfully"
+        expectedUI = "Liquibase command 'diffChangelog' was executed successfully"
     }
 
-    run "Running diffChangeLog should add change sets", {
+    run "Running diffChangelog should add change sets", {
         arguments = [
                 url              : { it.url },
                 username         : { it.username },
@@ -82,7 +82,7 @@ Optional Args:
                 referenceUrl     : { it.altUrl },
                 referenceUsername: { it.altUsername },
                 referencePassword: { it.altPassword },
-                changeLogFile: "target/test-classes/diffChangeLog-test.xml"
+                changelogFile: "target/test-classes/diffChangeLog-test.xml"
         ]
 
         setup {
@@ -134,7 +134,7 @@ Optional Args:
                 """
 """
         ]
-        expectedUI = "Liquibase command 'diffChangeLog' was executed successfully"
+        expectedUI = "Liquibase command 'diffChangelog' was executed successfully"
     }
 
     run "Running diff against differently structured databases finds changed objects", {
@@ -145,7 +145,7 @@ Optional Args:
                 referenceUrl     : { it.altUrl },
                 referenceUsername: { it.altUsername },
                 referencePassword: { it.altPassword },
-                changeLogFile: "target/test-classes/diffChangeLog-test.xml"
+                changelogFile: "target/test-classes/diffChangeLog-test.xml"
         ]
 
         setup {
@@ -189,10 +189,10 @@ Optional Args:
             ]
 
         }
-        expectedUI = "Liquibase command 'diffChangeLog' was executed successfully"
+        expectedUI = "Liquibase command 'diffChangelog' was executed successfully"
     }
 
-    run "Running diffChangeLog without changeLogFile gives an error", {
+    run "Running diffChangelog without changelogFile gives an error", {
         arguments = [
                 url              : { it.url },
                 username         : { it.username },
