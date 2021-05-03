@@ -34,7 +34,7 @@ public class InternalDiffChangelogCommandStep extends InternalDiffCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         super.adjustCommandDefinition(commandDefinition);
-        commandDefinition.setHidden(true);
+        commandDefinition.setInternal(true);
     }
 
     @Override

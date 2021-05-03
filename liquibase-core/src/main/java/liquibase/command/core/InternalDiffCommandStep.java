@@ -54,7 +54,7 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         super.adjustCommandDefinition(commandDefinition);
-        commandDefinition.setHidden(true);
+        commandDefinition.setInternal(true);
     }
 
     public static Class<? extends DatabaseObject>[] parseSnapshotTypes(String... snapshotTypes) {

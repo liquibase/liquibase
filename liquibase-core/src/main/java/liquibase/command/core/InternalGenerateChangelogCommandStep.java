@@ -44,7 +44,7 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         super.adjustCommandDefinition(commandDefinition);
-        commandDefinition.setHidden(true);
+        commandDefinition.setInternal(true);
     }
 
     @Override

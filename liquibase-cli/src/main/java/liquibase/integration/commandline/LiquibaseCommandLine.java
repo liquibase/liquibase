@@ -66,6 +66,13 @@ public class LiquibaseCommandLine {
         rootCommandSpec.name("liquibase");
         configureHelp(rootCommandSpec);
 
+        rootCommandSpec.usageMessage()
+                .customSynopsis("liquibase [GLOBAL OPTIONS] [COMMAND] [COMMAND OPTIONS]\nCommand-specific help: \"liquibase <command-name> --help\"")
+                .optionListHeading("\nGlobal Options\n")
+                .commandListHeading("\nCommands\n")
+        ;
+
+
         CommandLine commandLine = new CommandLine(rootCommandSpec)
                 .setCaseInsensitiveEnumValuesAllowed(true)
                 .setOptionsCaseInsensitive(true)
@@ -290,19 +297,31 @@ public class LiquibaseCommandLine {
                         .type(def.getDataType());
 
 
-                String description = "(liquibase.command." + def.getName() + ")";
+                String description = "(liquibase.command." + def.getName() + " OR liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
+                        "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " + toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName()) + ")";
+
+                if (def.getDefaultValue() != null) {
+                    if (def.getDefaultValueDescription() == null) {
+                        description = "DEFAULT: " + def.getDefaultValue() + "\n" + description;
+                    } else {
+                        description = "DEFAULT: " + def.getDefaultValueDescription() + "\n" + description;
+                    }
+                }
+
                 if (def.getDescription() != null) {
-                    description = def.getDescription() + " " + description;
+                    description = def.getDescription() + "\n" + description;
                 }
 
                 if (def.isRequired()) {
-                    description += " [REQUIRED]";
+                    description += "\n[REQUIRED]";
                 }
                 builder.description(description);
 
-                if (def.getDefaultValueDescription() != null) {
-                    builder.defaultValue(def.getDefaultValueDescription());
+
+                if (def.getDataType().equals(Boolean.class)) {
+                    builder.arity("1");
                 }
+
 
                 if (i > 0) {
                     builder.hidden(true);
@@ -315,9 +334,13 @@ public class LiquibaseCommandLine {
         commandLine.getCommandSpec().addSubcommand(StringUtil.toKabobCase(commandDefinition.getName()[0]), subCommandSpec);
     }
 
+    private String toEnvVariable(String property) {
+        return StringUtil.toKabobCase(property).replace(".", "_").replace("-", "_").toUpperCase();
+    }
+
     private SortedSet<CommandDefinition> getCommands() {
         final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
-        return commandFactory.getCommands();
+        return commandFactory.getCommands(false);
     }
 
     private void addGlobalArguments(CommandLine commandLine) {
@@ -329,13 +352,21 @@ public class LiquibaseCommandLine {
             for (int i = 0; i < argNames.length; i++) {
                 final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(argNames[i])
                         .required(false)
-                        .defaultValue(def.getDefaultValueDescription())
-                        .type(def.getType());
+                        .type(def.getDataType());
 
-                String description = "(" + def.getKey() + ")";
+                String description = "(" + def.getKey() + ")\n"
+                        + "(" + toEnvVariable(def.getKey()) + ")";
+
+                if (def.getDefaultValue() != null) {
+                    if (def.getDefaultValueDescription() == null) {
+                        description = "DEFAULT: " + def.getDefaultValue() + "\n" + description;
+                    } else {
+                        description = "DEFAULT: " + def.getDefaultValueDescription() + "\n" + description;
+                    }
+                }
 
                 if (def.getDescription() != null) {
-                    description = def.getDescription() + " " + description;
+                    description = def.getDescription() + "\n" + description;
                 }
                 optionBuilder.description(description);
 
@@ -344,6 +375,11 @@ public class LiquibaseCommandLine {
                     optionBuilder.converters(valueHandler::convert);
                 }
 
+                if (def.getDataType().equals(Boolean.class)) {
+                    optionBuilder.arity("1");
+                }
+
+                //only show the first/standard variation of a name
                 if (i > 0) {
                     optionBuilder.hidden(true);
                 }
@@ -359,8 +395,8 @@ public class LiquibaseCommandLine {
                 "As an alternative to passing values on the command line, these keys can be used as a basis for configuration settings in other locations.\n\n" +
                 "Available configuration locations, in order of priority:\n" +
                 "- Command line arguments (argument name in --help)\n" +
-                "- Java system properties (configuration key as-is)\n" +
-                "- Environment values (replace configuration key '.'s with '_'s )\n" +
+                "- Java system properties (configuration key listed above)\n" +
+                "- Environment values (env variable listed above)\n" +
                 "- Defaults file (configuration key OR argument name)\n\n" +
                 "Full documentation is available at\n" +
                 "http://www.liquibase.org";
@@ -373,6 +409,7 @@ public class LiquibaseCommandLine {
                 .abbreviateSynopsis(true)
                 .footer("\n" + footer)
         ;
+
     }
 
     protected static String[] toArgNames(CommandArgumentDefinition<?> def) {

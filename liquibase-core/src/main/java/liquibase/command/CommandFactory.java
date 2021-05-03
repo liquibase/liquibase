@@ -59,16 +59,11 @@ public class CommandFactory implements SingletonObject {
     }
 
     /**
-     * Returns all non-hidden {@link CommandDefinition}s.
-     */
-    public SortedSet<CommandDefinition> getCommands() {
-        return getCommands(false);
-    }
-
-    /**
      * Returns all known {@link CommandDefinition}s.
+     *
+     * @param includeInternal if true, also include commands marked as {@link CommandDefinition#getInternal()}
      */
-    public SortedSet<CommandDefinition> getCommands(boolean includeHidden) {
+    public SortedSet<CommandDefinition> getCommands(boolean includeInternal) {
         Map<String, String[]> commandNames = new HashMap<>();
         for (CommandStep step : Scope.getCurrentScope().getServiceLocator().findInstances(CommandStep.class)) {
             final String[] name = step.getName();
@@ -79,7 +74,7 @@ public class CommandFactory implements SingletonObject {
         for (String[] commandName : commandNames.values()) {
             try {
                 final CommandDefinition definition = getCommandDefinition(commandName);
-                if (includeHidden || !definition.getHidden()) {
+                if (includeInternal || !definition.getInternal()) {
                     commands.add(definition);
                 }
             } catch (IllegalArgumentException e) {

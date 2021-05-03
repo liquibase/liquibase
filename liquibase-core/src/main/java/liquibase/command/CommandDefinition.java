@@ -21,7 +21,7 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
 
     private String longDescription = null;
     private String shortDescription = null;
-    private boolean hidden;
+    private boolean internal;
 
     protected CommandDefinition(String[] name) {
         this.name = name;
@@ -126,12 +126,12 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     /**
      * Hidden commands are ones that can be called programmatically, but should not be exposed directly and automatically through integrations.
      */
-    public boolean getHidden() {
-        return hidden;
+    public boolean getInternal() {
+        return internal;
     }
 
-    public void setHidden(boolean hidden) {
-        this.hidden = hidden;
+    public void setInternal(boolean internal) {
+        this.internal = internal;
     }
 
 }

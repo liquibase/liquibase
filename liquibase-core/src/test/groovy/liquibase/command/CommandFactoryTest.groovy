@@ -26,12 +26,13 @@ class CommandFactoryTest extends Specification {
 
     def "getCommands"() {
         when:
-        def commands = Scope.currentScope.getSingleton(CommandFactory).getCommands()
+        def commands = Scope.currentScope.getSingleton(CommandFactory).getCommands(false)
         def sampleCommand = commands.iterator().next()
 
         then:
         commands.size() > 5
         commands*.name*.toString().contains("[update]")
+        !commands*.name*.toString().contains("[internalDiff]")
 
         sampleCommand.name == ["calculateChecksum"]
         sampleCommand.arguments.keySet().contains("changelogFile")

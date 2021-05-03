@@ -24,7 +24,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
 
     private final String key;
     private final Set<String> aliasKeys = new TreeSet<>();
-    private final Class<DataType> type;
+    private final Class<DataType> dataType;
     private String description;
     private DataType defaultValue;
     private String defaultValueDescription;
@@ -52,14 +52,14 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
      *
      * @throws IllegalArgumentException if an invalid key is specified.
      */
-    private ConfigurationDefinition(String key, Class<DataType> type) throws IllegalArgumentException {
+    private ConfigurationDefinition(String key, Class<DataType> dataType) throws IllegalArgumentException {
         if (!ALLOWED_KEY_PATTERN.matcher(key).matches()) {
             throw new IllegalArgumentException("Invalid key format: " + key);
         }
 
         this.key = key;
-        this.type = type;
-        this.valueHandler = value -> ObjectUtil.convert(value, type);
+        this.dataType = dataType;
+        this.valueHandler = value -> ObjectUtil.convert(value, dataType);
     }
 
     /**
@@ -140,8 +140,8 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     /**
      * @return the type of data this definition returns.
      */
-    public Class<DataType> getType() {
-        return type;
+    public Class<DataType> getDataType() {
+        return dataType;
     }
 
     /**

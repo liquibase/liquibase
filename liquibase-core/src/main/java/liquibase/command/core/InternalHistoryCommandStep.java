@@ -39,7 +39,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         super.adjustCommandDefinition(commandDefinition);
-        commandDefinition.setHidden(true);
+        commandDefinition.setInternal(true);
     }
 
     @Override

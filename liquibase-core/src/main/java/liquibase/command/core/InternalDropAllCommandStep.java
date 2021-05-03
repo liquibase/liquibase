@@ -183,7 +183,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        commandDefinition.setHidden(true);
+        commandDefinition.setInternal(true);
     }
 
     private DatabaseChangeLog parseChangeLogFile(String changeLogFile) throws LiquibaseException {
