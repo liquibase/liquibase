@@ -1,14 +1,18 @@
 package liquibase.extension.testing.command
 
-
+import com.sun.org.apache.xml.internal.resolver.Catalog
 import liquibase.AbstractExtensibleObject
 import liquibase.CatalogAndSchema
+import liquibase.Liquibase
 import liquibase.Scope
 import liquibase.change.Change
+import liquibase.changelog.ChangeLogHistoryService
+import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.command.CommandArgumentDefinition
 import liquibase.command.CommandFactory
 import liquibase.command.CommandResults
 import liquibase.command.CommandScope
+import liquibase.command.core.InternalSnapshotCommandStep
 import liquibase.configuration.AbstractMapConfigurationValueProvider
 import liquibase.configuration.ConfigurationValueProvider
 import liquibase.configuration.LiquibaseConfiguration
@@ -19,11 +23,14 @@ import liquibase.extension.testing.TestDatabaseConnections
 import liquibase.extension.testing.TestFilter
 import liquibase.extension.testing.setup.*
 import liquibase.hub.HubService
-import liquibase.hub.HubServiceFactory
 import liquibase.hub.core.MockHubService
 import liquibase.integration.IntegrationConfiguration
+import liquibase.integration.commandline.CommandLineResourceAccessor
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
+import liquibase.resource.CompositeResourceAccessor
+import liquibase.resource.FileSystemResourceAccessor
+import liquibase.resource.ResourceAccessor
 import liquibase.ui.InputHandler
 import liquibase.ui.UIService
 import liquibase.util.FileUtil
@@ -34,6 +41,7 @@ import org.junit.Assume
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.nio.file.Paths
 import java.util.logging.Level
 import java.util.regex.Pattern
 
@@ -256,6 +264,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         checkOutput("UI Error Output", uiErrorWriter.toString(), testDef.expectedUIErrors)
         checkOutput("Log Messages", logService.getLogAsString(Level.FINE), testDef.expectedLogs)
 
+        checkFileContent(testDef.expectedFileContent, "Command File Content")
+        checkDatabaseContent(testDef.expectedDatabaseContent, database, "Database snapshot content")
+
         if (!testDef.expectedResults.isEmpty()) {
             for (def returnedResult : results.getResults().entrySet()) {
                 def expectedValue = String.valueOf(testDef.expectedResults.get(returnedResult.getKey()))
@@ -280,11 +291,67 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
     }
 
     static OutputCheck assertContains(String substring) {
+        return assertContains(substring, null)
+    }
+
+    static OutputCheck assertContains(String substring, final Integer occurrences) {
         return new OutputCheck() {
             @Override
             def check(String actual) throws AssertionError {
-                assert actual.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))): "$actual does not contain: '$substring'"
+                String edited = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))
+                if (occurrences == null) {
+                    boolean b = actual.contains(edited)
+                    assert b: "$actual does not contain: '$substring'"
+                } else {
+                    int count = (actual.split(Pattern.quote(edited), -1).length) - 1
+                    assert count == occurrences: "$actual does not contain '$substring' $occurrences times.  It appears $count times"
+                }
             }
+        }
+    }
+
+    static void checkDatabaseContent(List<Object> expectedDatabaseContent, Database database, String outputDescription) {
+        if (expectedDatabaseContent.size() == 0) {
+            return
+        }
+        File f = takeDatabaseSnapshot(database)
+        String contents = FileUtil.getContents(f)
+        contents = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(contents))
+        contents = contents.replaceAll(/\s+/, " ")
+
+        checkOutput(outputDescription, contents, expectedDatabaseContent)
+    }
+
+    private static File takeDatabaseSnapshot(Database database) {
+        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
+        changeLogService.init()
+        changeLogService.reset()
+
+        File destDir = new File("target/test-classes")
+        File tempFile = File.createTempFile("genChangeLog-", ".txt", destDir)
+        CatalogAndSchema[] schemas = new CatalogAndSchema[1]
+        schemas[0] = new CatalogAndSchema(null, database.getDefaultSchemaName())
+        CommandScope snapshotCommand = new CommandScope("internalSnapshot")
+        snapshotCommand
+                .addArgumentValue(InternalSnapshotCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, schemas)
+                .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, "txt")
+
+        Writer outputWriter = new FileWriter(tempFile)
+        String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute())
+        outputWriter.write(result)
+        outputWriter.flush()
+        return tempFile
+    }
+
+    static void checkFileContent(Map<String, ?> expectedFileContent, String outputDescription) {
+        for (def check : expectedFileContent) {
+            String path = check.key
+            List<Object> checks = check.value
+            String contents = FileUtil.getContents(new File(path))
+            contents = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(contents))
+            contents = contents.replaceAll(/\s+/, " ")
+            checkOutput(outputDescription, contents, checks)
         }
     }
 
@@ -300,9 +367,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
                 }
 
                 if (expectedOutputCheck instanceof String) {
-                    assert fullOutput.replaceAll(/\s+/," ").contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck)).replaceAll(/\s+/," ")): "$outputDescription does not contain: '$expectedOutputCheck'"
+                    assert fullOutput.replaceAll(/\s+/," ")
+                            .contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck)).replaceAll(/\s+/," ")): "$outputDescription does not contain: '$expectedOutputCheck'"
                 } else if (expectedOutputCheck instanceof Pattern) {
-                    expectedOutputCheck = Pattern.compile(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern())), Pattern.MULTILINE | Pattern.DOTALL)
+                    String patternString = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern()))
+                    expectedOutputCheck = Pattern.compile(patternString, Pattern.MULTILINE | Pattern.DOTALL)
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
                     assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
@@ -449,6 +518,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
          * Arguments to command as key/value pairs
          */
         private Map<String, ?> arguments = new HashMap<>()
+        private Map<String, ?> expectedFileContent = new HashMap<>()
+        private List<Object> expectedDatabaseContent = new ArrayList<>()
 
         private List<TestSetup> setup
 
@@ -481,6 +552,14 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
             this.arguments = args
         }
 
+        def setExpectedFileContent(Map<String, Object> content) {
+            this.expectedFileContent = content
+        }
+
+        def setExpectedDatabaseContent(List<Object> content) {
+            this.expectedDatabaseContent = content
+        }
+
         /**
          * Checks for the command output.
          * <li>If a string, assert that the output CONTAINS the string.
@@ -498,6 +577,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
             this.expectedOutput.add(output)
         }
 
+        def setExpectedFileContent(List<Map<String, List<String>>> checks) {
+            this.expectedFileContent.addAll(checks)
+        }
 
         /**
          * Checks for the UI output.
@@ -580,6 +662,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         }
     }
 
+    static class FileContent {
+        String path
+        List<Object> strings
+    }
+
     static class TestSetupDefinition {
 
         private List<TestSetup> setups = new ArrayList<>();
@@ -659,20 +746,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
 
         /**
          *
-         * Delete the specified resource
+         * Delete the specified resources
          *
-         * @param fileToDelete
+         * @param fileToDeletes
          *
          */
-        void cleanTempResource(String fileToDelete) {
-            URL url = Thread.currentThread().getContextClassLoader().getResource(fileToDelete)
-            if (url == null) {
-                return
-            }
-            File f = new File(url.toURI())
-            if (f.exists()) {
-                f.delete()
-            }
+        void cleanResources(String... filesToDelete) {
+            this.setups.add(new SetupCleanResources(filesToDelete))
         }
 
         /**
@@ -712,6 +792,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
 
     interface OutputCheck {
         def check(String actual) throws AssertionError
+    }
+
+    interface FileContentCheck {
+        def check(String path) throws AssertionError
     }
 
     static class TestUI extends AbstractExtensibleObject implements UIService {

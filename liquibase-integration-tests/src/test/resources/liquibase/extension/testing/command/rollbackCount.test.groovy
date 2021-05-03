@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import java.util.regex.Pattern
+
 CommandTests.define {
     command = ["rollbackCount"]
     signature = """
@@ -32,6 +34,11 @@ Optional Args:
         setup {
             runChangelog "changelogs/hsqldb/complete/rollback.changelog.xml"
         }
+
+        expectedDatabaseContent = [
+                Pattern.compile(".*liquibase.structure.core.Table.*FIRSTTABLE.*", Pattern.MULTILINE|Pattern.DOTALL),
+                CommandTests.assertNotContains(".*liquibase.structure.core.Table.*SECONDTABLE.*")
+        ]
 
         expectedResults = [
                 statusMessage: "Successfully executed rollbackCount",
