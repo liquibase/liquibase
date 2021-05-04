@@ -32,8 +32,8 @@ public class StatusCommandStep extends AbstractCliWrapperCommandStep {
             .description("Changeset contexts to match").build();
         LABELS_ARG = builder.argument("labels", String.class)
             .description("Changeset labels to match").build();
-        VERBOSE_ARG = builder.argument("verbose", String.class).required()
-            .description("Verbose flag").build();
+        VERBOSE_ARG = builder.argument("verbose", String.class)
+                .description("Verbose flag").build();
     }
 
     @Override

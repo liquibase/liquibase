@@ -7,7 +7,6 @@ Short Description: Generate a list of pending changesets
 Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
-  verbose (String) Verbose flag
 Optional Args:
   changelogFile (String) The root changelog
     Default: null
@@ -18,6 +17,8 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
   username (String) Username to use to connect to the database
+    Default: null
+  verbose (String) Verbose flag
     Default: null
 """
 
