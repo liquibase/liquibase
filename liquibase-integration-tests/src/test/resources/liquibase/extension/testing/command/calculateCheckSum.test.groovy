@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
+
 CommandTests.define {
 
     command = ["calculateCheckSum"]
@@ -18,7 +20,7 @@ Optional Args:
     Default: null
 """
 
-    run {
+    run "Happy path", {
         arguments = [
                 changeSetIdentifier: "changelogs/hsqldb/complete/rollback.tag.changelog.xml::1::nvoxland",
                 "changeLogFile"    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
@@ -28,5 +30,30 @@ Optional Args:
                 statusMessage: "Successfully executed calculateCheckSum",
                 statusCode   : 0
         ]
+    }
+
+    run "Run without changeLogFile should throw an exception",  {
+        arguments = [
+                changeSetIdentifier: "changelogs/hsqldb/complete/rollback.tag.changelog.xml::1::nvoxland",
+        ]
+
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without changeSetIdentifier should throw an exception",  {
+        arguments = [
+                "changeLogFile"    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+        ]
+
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without URL should throw an exception",  {
+        arguments = [
+                "url": "",
+                "changeLogFile"    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+        ]
+
+        expectedException = CommandValidationException.class
     }
 }

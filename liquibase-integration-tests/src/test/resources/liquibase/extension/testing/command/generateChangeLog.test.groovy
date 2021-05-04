@@ -3,6 +3,7 @@ package liquibase.extension.testing.command
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
+import liquibase.exception.CommandValidationException
 
 CommandTests.define {
     command = ["generateChangeLog"]
@@ -19,9 +20,9 @@ Optional Args:
     Default: null
 """
 
-    run {
+    run "Happy path", {
         arguments = [
-            changeLogFile: "target/test-classes/changeLog-test.xml"
+                changeLogFile: "target/test-classes/changeLog-test.xml"
         ]
         setup {
             cleanResources("changeLog-test.xml")
@@ -52,9 +53,84 @@ Optional Args:
                     ),
             ]
         }
+        expectedFileContent = [
+                "target/test-classes/changeLog-test.xml" : [CommandTests.assertContains("<changeSet ", 3)]
+        ]
         expectedResults = [
                 statusMessage: "Successfully executed generateChangeLog",
                 statusCode   : 0
         ]
+    }
+
+    run "Run without changeLogFile throws exception", {
+        setup {
+            cleanResources("changeLog-test.xml")
+            database = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new TagDatabaseChange(
+                            tag: "version_2.0"
+                    ),
+                    new CreateTableChange(
+                            tableName: "liquibaseRunInfo",
+                            columns: [
+                                    ColumnConfig.fromName("timesRan")
+                                            .setType("INT")
+                            ]
+                    ),
+            ]
+        }
+
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without URL throws exception", {
+        arguments = [
+                url: "",
+                changeLogFile: "target/test-classes/changeLog-test.xml"
+        ]
+        setup {
+            cleanResources("changeLog-test.xml")
+            database = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new TagDatabaseChange(
+                            tag: "version_2.0"
+                    ),
+                    new CreateTableChange(
+                            tableName: "liquibaseRunInfo",
+                            columns: [
+                                    ColumnConfig.fromName("timesRan")
+                                            .setType("INT")
+                            ]
+                    ),
+            ]
+        }
+
+        expectedException = CommandValidationException.class
     }
 }

@@ -1999,7 +1999,7 @@ public class Main {
         }
         argsMap.put("changeLogParameters", clp);
 
-        if (this.commandParams.contains("--force")) {
+        if (this.commandParams.contains("--force") || this.commandParams.contains("--force=true")) {
             argsMap.put("force", Boolean.TRUE);
         }
         if (this.commandParams.contains("--help")) {
