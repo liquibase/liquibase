@@ -10,10 +10,9 @@ CommandTests.define {
 Short Description: Deploy any changes in the changelog file that have not been deployed
 Long Description: Deploy any changes in the changelog file that have not been deployed
 Required Args:
+  changeLogFile (String) The root changelog
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) The root changelog
-    Default: null
   contexts (String) Changeset contexts to match
     Default: null
   labels (String) Changeset labels to match
@@ -41,9 +40,13 @@ Optional Args:
     }
 
     run "No changelog argument results in an exception", {
-        expectedResults = [
-                statusMessage: "Unsuccessfully executed update",
-                statusCode   : 1
+        expectedException = CommandValidationException.class
+    }
+
+    run "Empty url argument results in an exception", {
+        arguments = [
+                url: "",
+                changeLogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 
         expectedException = CommandValidationException.class

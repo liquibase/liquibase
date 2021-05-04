@@ -6,11 +6,10 @@ CommandTests.define {
 Short Description: Generate a list of changesets that have been executed but are not in the current changelog
 Long Description: Generate a list of changesets that have been executed but are not in the current changelog
 Required Args:
+  changeLogFile (String) The root changelog
   url (String) The JDBC database connection URL
   verbose (String) Verbose flag
 Optional Args:
-  changeLogFile (String) The root changelog
-    Default: null
   contexts (String) Changeset contexts to match
     Default: null
   password (String) Password to use to connect to the database

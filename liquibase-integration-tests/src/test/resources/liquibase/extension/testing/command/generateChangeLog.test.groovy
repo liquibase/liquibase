@@ -10,10 +10,9 @@ CommandTests.define {
 Short Description: Generate a changelog
 Long Description: Writes Change Log XML to copy the current state of the database to standard out or a file
 Required Args:
+  changeLogFile (String) File to write changelog to
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) File to write changelog to
-    Default: null
   password (String) Password to use to connect to the database
     Default: null
   username (String) Username to use to connect to the database

@@ -23,7 +23,7 @@ public class UnexpectedChangeSetsCommandStep extends AbstractCliWrapperCommandSt
             .description("Username to use to connect to the database").build();
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("Password to use to connect to the database").build();
-        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class)
+        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required()
             .description("The root changelog").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
             .description("Changeset contexts to match").build();

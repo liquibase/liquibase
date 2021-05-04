@@ -6,10 +6,9 @@ CommandTests.define {
 Short Description: Validate the changelog for errors
 Long Description: Validate the changelog for errors
 Required Args:
+  changeLogFile (String) The root changelog
   url (String) The JDBC database connection URL
 Optional Args:
-  changeLogFile (String) The root changelog
-    Default: null
   password (String) Password to use to connect to the database
     Default: null
   username (String) Username to use to connect to the database
