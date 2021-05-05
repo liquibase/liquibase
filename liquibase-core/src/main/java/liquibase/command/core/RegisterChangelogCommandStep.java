@@ -31,6 +31,8 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
     public static final CommandArgumentDefinition<String> HUB_PROJECT_NAME_ARG;
 
+    public static final CommandResultDefinition<String> REGISTERED_CHANGELOG_ID;
+
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
@@ -39,6 +41,8 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
             .description("The Hub project ID").build();
         HUB_PROJECT_NAME_ARG = builder.argument("hubProjectName", String.class).optional()
             .description("The Hub project name").build();
+
+        REGISTERED_CHANGELOG_ID = builder.result("registeredChangeLogId", String.class).build();
     }
 
     @Override
@@ -132,10 +136,13 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
 
             ChangelogRewriter.ChangeLogRewriterResult changeLogRewriterResult =
                     ChangelogRewriter.addChangeLogId(changeLogFile, hubChangeLog.getId().toString(), databaseChangeLog);
-            Scope.getCurrentScope().getLog(RegisterChangelogCommandStep.class).info(changeLogRewriterResult.message);
-            output.println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been registered");
-            resultsBuilder.addResult("statusCode", 0);
-            resultsBuilder.addResult("statusMessage", "Successfully executed registerChangelog");
+            if (changeLogRewriterResult.success) {
+                Scope.getCurrentScope().getLog(RegisterChangelogCommandStep.class).info(changeLogRewriterResult.message);
+                output.println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been registered");
+                resultsBuilder.addResult("statusCode", 0);
+                resultsBuilder.addResult("statusMessage", "Successfully executed registerChangelog");
+                resultsBuilder.addResult(REGISTERED_CHANGELOG_ID, databaseChangeLog.getChangeLogId());
+            }
         }
     }
 

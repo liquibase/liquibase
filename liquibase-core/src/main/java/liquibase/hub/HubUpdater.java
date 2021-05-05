@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ListVisitor;
 import liquibase.changelog.visitor.RollbackListVisitor;
+import liquibase.command.CommandResults;
 import liquibase.exception.CommandExecutionException;
 import liquibase.command.CommandScope;
 import liquibase.command.core.RegisterChangelogCommandStep;
@@ -511,15 +512,15 @@ public class HubUpdater {
 
         CommandScope registerChangeLogCommand = new CommandScope("registerChangeLog");
         registerChangeLogCommand
-                .addArgumentValue(RegisterChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            .addArgumentValue(RegisterChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
         try {
             if (hubProjectId != null) {
                 try {
                     registerChangeLogCommand.addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
                 } catch (IllegalArgumentException e) {
                     throw new LiquibaseException("The command 'RegisterChangeLog' " +
-                            " failed because parameter 'hubProjectId' has invalid value '" + hubProjectId +
-                            "'. Learn more at https://hub.liquibase.com");
+                        " failed because parameter 'hubProjectId' has invalid value '" + hubProjectId +
+                        "'. Learn more at https://hub.liquibase.com");
                 }
             }
         } catch (IllegalArgumentException e) {
@@ -527,9 +528,13 @@ public class HubUpdater {
         }
 
         //
-        // Execute registerChangeLog
+        // Execute registerChangeLog and reset the changeLog ID
         //
-        registerChangeLogCommand.execute();
+        CommandResults results = registerChangeLogCommand.execute();
+        String registerChangeLogId = results.getResult(RegisterChangelogCommandStep.REGISTERED_CHANGELOG_ID);
+        if (registerChangeLogId != null) {
+            changeLog.setChangeLogId(registerChangeLogId);
+        }
     }
 
     //
