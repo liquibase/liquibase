@@ -108,6 +108,8 @@ public class LiquibaseCommandLine {
         bestMessage = bestMessage.replaceFirst("^[\\w.]*exception[\\w.]*: ", "");
         bestMessage = bestMessage.replace("Unexpected error running Liquibase: ", "");
 
+        Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
+
         boolean printUsage = false;
         if (exception instanceof CommandLine.ParameterException) {
             if (exception instanceof CommandLine.UnmatchedArgumentException) {
