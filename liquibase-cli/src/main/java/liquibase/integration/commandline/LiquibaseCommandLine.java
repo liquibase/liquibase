@@ -16,6 +16,7 @@ import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.ui.ConsoleUIService;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 import picocli.CommandLine;
@@ -193,6 +194,11 @@ public class LiquibaseCommandLine {
 
         returnMap.putAll(configureLogging());
         returnMap.putAll(configureResourceAccessor(classLoader));
+
+        ConsoleUIService ui = new ConsoleUIService();
+        ui.setAllowPrompt(true);
+        returnMap.put(Scope.Attr.ui.name(), ui);
+
 
         return returnMap;
     }
