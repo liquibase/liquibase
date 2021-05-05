@@ -134,7 +134,9 @@ public class LiquibaseCommandLine {
             if (Level.OFF.equals(this.configuredLogLevel)) {
                 System.err.println("For more information, please use the --log-level flag");
             } else {
-                exception.printStackTrace(System.err);
+                if (IntegrationConfiguration.LOG_FILE.getCurrentValue() == null) {
+                    exception.printStackTrace(System.err);
+                }
             }
         }
 
