@@ -280,7 +280,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
             try (
                 FileOutputStream fileOutputStream = new FileOutputStream(rollbackFile);
-                Writer output = new OutputStreamWriter(fileOutputStream, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()) )
+                Writer output = new OutputStreamWriter(fileOutputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()) )
 			{
 
                 if (tag != null) {

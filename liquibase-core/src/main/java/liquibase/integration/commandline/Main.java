@@ -2150,7 +2150,7 @@ public class Main {
     }
 
     private Writer getOutputWriter() throws IOException {
-        String charsetName = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
     }

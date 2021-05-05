@@ -198,7 +198,7 @@ public class CreateViewChange extends AbstractChange {
                 selectQuery = "";
             }
 
-            String encoding = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
             if (selectQuery != null) {
                 try {
                     stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
