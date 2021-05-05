@@ -111,22 +111,26 @@ public class LiquibaseCommandLine {
         Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
 
         boolean printUsage = false;
+        String errorMessage = null;
         if (exception instanceof CommandLine.ParameterException) {
             if (exception instanceof CommandLine.UnmatchedArgumentException) {
-                System.err.println("Unexpected argument(s): " + StringUtil.join(((CommandLine.UnmatchedArgumentException) exception).getUnmatched(), ", "));
+                errorMessage = "Unexpected argument(s): " + StringUtil.join(((CommandLine.UnmatchedArgumentException) exception).getUnmatched(), ", ");
             } else {
-                System.err.println("Error parsing command line: " + bestMessage);
+                errorMessage = "Error parsing command line: " + bestMessage;
             }
+            System.err.println(errorMessage);
             CommandLine.UnmatchedArgumentException.printSuggestions((CommandLine.ParameterException) exception, System.err);
 
             printUsage = true;
         } else if (exception instanceof IllegalArgumentException
                 || exception instanceof CommandValidationException
                 || exception instanceof CommandLineParsingException) {
-            System.err.println("Error parsing command line: " + bestMessage);
+            errorMessage = "Error parsing command line: " + bestMessage;
+            System.err.println(errorMessage);
             printUsage = true;
         } else {
-            System.err.println("Unexpected error running Liquibase: " + bestMessage);
+            errorMessage = "Unexpected error running Liquibase: " + bestMessage;
+            System.err.println(errorMessage);
             System.err.println();
 
             if (Level.OFF.equals(this.configuredLogLevel)) {
@@ -139,6 +143,8 @@ public class LiquibaseCommandLine {
         if (printUsage) {
             System.err.println();
             this.commandLine.usage(System.err);
+            System.err.println();
+            System.err.println(errorMessage);
         }
 
         return -1;
