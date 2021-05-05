@@ -69,6 +69,8 @@ public class LiquibaseCommandLine {
         final CommandLine.Model.CommandSpec rootCommandSpec = CommandLine.Model.CommandSpec.create();
         rootCommandSpec.name("liquibase");
         configureHelp(rootCommandSpec);
+        rootCommandSpec.subcommandsCaseInsensitive(true);
+
 
         rootCommandSpec.usageMessage()
                 .customSynopsis("liquibase [GLOBAL OPTIONS] [COMMAND] [COMMAND OPTIONS]\nCommand-specific help: \"liquibase <command-name> --help\"")
@@ -111,40 +113,36 @@ public class LiquibaseCommandLine {
         Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
 
         boolean printUsage = false;
-        String errorMessage = null;
         if (exception instanceof CommandLine.ParameterException) {
             if (exception instanceof CommandLine.UnmatchedArgumentException) {
-                errorMessage = "Unexpected argument(s): " + StringUtil.join(((CommandLine.UnmatchedArgumentException) exception).getUnmatched(), ", ");
+                System.err.println("Unexpected argument(s): " + StringUtil.join(((CommandLine.UnmatchedArgumentException) exception).getUnmatched(), ", "));
             } else {
-                errorMessage = "Error parsing command line: " + bestMessage;
+                System.err.println("Error parsing command line: " + bestMessage);
             }
-            System.err.println(errorMessage);
             CommandLine.UnmatchedArgumentException.printSuggestions((CommandLine.ParameterException) exception, System.err);
 
             printUsage = true;
         } else if (exception instanceof IllegalArgumentException
                 || exception instanceof CommandValidationException
                 || exception instanceof CommandLineParsingException) {
-            errorMessage = "Error parsing command line: " + bestMessage;
-            System.err.println(errorMessage);
+            System.err.println("Error parsing command line: " + bestMessage);
             printUsage = true;
         } else {
-            errorMessage = "Unexpected error running Liquibase: " + bestMessage;
-            System.err.println(errorMessage);
+            System.err.println("Unexpected error running Liquibase: " + bestMessage);
             System.err.println();
 
             if (Level.OFF.equals(this.configuredLogLevel)) {
                 System.err.println("For more information, please use the --log-level flag");
             } else {
-                exception.printStackTrace(System.err);
+                if (IntegrationConfiguration.LOG_FILE.getCurrentValue() == null) {
+                    exception.printStackTrace(System.err);
+                }
             }
         }
 
         if (printUsage) {
             System.err.println();
-            this.commandLine.usage(System.err);
-            System.err.println();
-            System.err.println(errorMessage);
+            System.err.println("For detailed help, try 'liquibase --help' or 'liquibase <command-name> --help'");
         }
 
         return -1;
@@ -353,10 +351,11 @@ public class LiquibaseCommandLine {
         configureHelp(subCommandSpec);
 
         subCommandSpec.usageMessage()
-                .header(StringUtil.trimToEmpty(commandDefinition.getShortDescription()))
+                .header(StringUtil.trimToEmpty(commandDefinition.getShortDescription())+"\n")
                 .description(StringUtil.trimToEmpty(commandDefinition.getLongDescription()));
 
         subCommandSpec.optionsCaseInsensitive(true);
+        subCommandSpec.subcommandsCaseInsensitive(true);
 
         for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
             final String[] argNames = toArgNames(def);
@@ -384,7 +383,7 @@ public class LiquibaseCommandLine {
                 if (def.isRequired()) {
                     description += "\n[REQUIRED]";
                 }
-                builder.description(description);
+                builder.description(description+"\n");
 
 
                 if (def.getDataType().equals(Boolean.class)) {
@@ -437,7 +436,7 @@ public class LiquibaseCommandLine {
                 if (def.getDescription() != null) {
                     description = def.getDescription() + "\n" + description;
                 }
-                optionBuilder.description(description);
+                optionBuilder.description(description + "\n");
 
                 final ConfigurationValueConverter<?> valueHandler = def.getValueHandler();
                 if (valueHandler != null) {
