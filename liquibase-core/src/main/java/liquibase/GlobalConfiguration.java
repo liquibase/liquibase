@@ -3,6 +3,8 @@ package liquibase;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.AutoloadedConfigurations;
 
+import java.nio.charset.Charset;
+
 /**
  * Configuration container for global properties.
  */
@@ -15,7 +17,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<String> LIQUIBASE_CATALOG_NAME;
     public static final ConfigurationDefinition<String> LIQUIBASE_SCHEMA_NAME;
     public static final ConfigurationDefinition<String> OUTPUT_LINE_SEPARATOR;
-    public static final ConfigurationDefinition<String> OUTPUT_ENCODING;
+    public static final ConfigurationDefinition<String> OUTPUT_FILE_ENCODING;
     public static final ConfigurationDefinition<Long> CHANGELOGLOCK_WAIT_TIME;
     public static final ConfigurationDefinition<Long> CHANGELOGLOCK_POLL_RATE;
     public static final ConfigurationDefinition<Boolean> CONVERT_DATA_TYPES;
@@ -79,10 +81,9 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(System.getProperty("line.separator"))
                 .build();
 
-        OUTPUT_ENCODING = builder.define("outputFileEncoding", String.class)
-                .setDescription("Encoding to output text in. Defaults to file.encoding system property or UTF-8")
+        OUTPUT_FILE_ENCODING = builder.define("outputFileEncoding", String.class)
+                .setDescription("Encoding to use when writing files")
                 .setDefaultValue("UTF-8")
-                .addAliasKey("file.encoding")
                 .setCommonlyUsed(true)
                 .build();
 

@@ -134,9 +134,9 @@ public class DiffToChangeLog {
                         } else {
                             Scope.getCurrentScope().getLog(getClass()).info(file + " exists, appending");
                             ByteArrayOutputStream out = new ByteArrayOutputStream();
-                            print(new PrintStream(out, true, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()), changeLogSerializer);
+                            print(new PrintStream(out, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()), changeLogSerializer);
 
-                            String xml = new String(out.toByteArray(), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+                            String xml = new String(out.toByteArray(), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
                             String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
 
                             innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
@@ -166,14 +166,14 @@ public class DiffToChangeLog {
                                 if (foundEndTag) {
                                     randomAccessFile.seek(offset);
                                     randomAccessFile.writeBytes("    ");
-                                    randomAccessFile.write(innerXml.getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
+                                    randomAccessFile.write(innerXml.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
                                     randomAccessFile.writeBytes(lineSeparator);
                                     randomAccessFile.writeBytes(DATABASE_CHANGE_LOG_CLOSING_XML_TAG + lineSeparator);
                                 } else {
                                     randomAccessFile.seek(0);
                                     long length = randomAccessFile.length();
                                     randomAccessFile.seek(length);
-                                    randomAccessFile.write(xml.getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
+                                    randomAccessFile.write(xml.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
                                 }
                             }
 
@@ -229,7 +229,7 @@ public class DiffToChangeLog {
         }
 
         try (FileOutputStream stream = new FileOutputStream(file);
-             PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue())) {
+             PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
             changeLogSerializer.write(changeSets, out);
         }
     }

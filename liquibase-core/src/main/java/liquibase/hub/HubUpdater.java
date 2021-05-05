@@ -496,7 +496,7 @@ public class HubUpdater {
     // Write the string to a properties file
     //
     private void writeToPropertiesFile(File defaultsFile, String stringToWrite) throws IOException {
-        String encoding = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+        String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(defaultsFile, "rw")) {
             randomAccessFile.seek(defaultsFile.length());
             randomAccessFile.write(stringToWrite.getBytes(encoding));

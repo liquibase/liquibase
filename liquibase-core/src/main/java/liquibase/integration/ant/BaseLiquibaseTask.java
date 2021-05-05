@@ -3,7 +3,6 @@ package liquibase.integration.ant;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.ant.type.ChangeLogParametersType;
@@ -143,7 +142,7 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     protected String getDefaultOutputEncoding() {
-        return GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+        return GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
     }
 
     /**

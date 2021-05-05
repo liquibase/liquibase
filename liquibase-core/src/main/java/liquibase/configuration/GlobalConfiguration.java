@@ -47,7 +47,7 @@ public class GlobalConfiguration extends liquibase.GlobalConfiguration implement
     /**
      * @deprecated
      */
-    public static final String OUTPUT_ENCODING = liquibase.GlobalConfiguration.OUTPUT_ENCODING.getKey();
+    public static final String OUTPUT_ENCODING = liquibase.GlobalConfiguration.OUTPUT_FILE_ENCODING.getKey();
 
     /**
      * @deprecated
@@ -305,14 +305,14 @@ public class GlobalConfiguration extends liquibase.GlobalConfiguration implement
      * @deprecated
      */
     public String getOutputEncoding() {
-        return liquibase.GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+        return liquibase.GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
     }
 
     /**
      * @deprecated
      */
     public GlobalConfiguration setOutputEncoding(String name) {
-        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.OUTPUT_ENCODING, name);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.OUTPUT_FILE_ENCODING, name);
         return this;
     }
 
