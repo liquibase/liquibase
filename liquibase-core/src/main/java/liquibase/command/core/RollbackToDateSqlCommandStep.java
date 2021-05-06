@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.command.*;
 import liquibase.command.AbstractCliWrapperCommandStep;
+import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
 
 import java.time.LocalDateTime;
@@ -45,13 +46,10 @@ public class RollbackToDateSqlCommandStep extends AbstractCliWrapperCommandStep 
     }
 
     @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
-
-        String[] args = createParametersFromArgs(createArgs(commandScope), "date");
-        int statusCode = Main.run(args);
-        resultsBuilder.addResult("statusCode", statusCode);
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return createParametersFromArgs(createArgs(commandScope), "date");
     }
+
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Generate the SQL to rollback changes made to the database based on the specific date");

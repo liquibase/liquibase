@@ -2126,6 +2126,10 @@ public class Main {
     }
 
     private OutputStream getOutputStream() throws IOException {
+        if (outputStream != null) {
+            return outputStream;
+        }
+
         if (outputFile != null) {
             FileOutputStream fileOut;
             try {

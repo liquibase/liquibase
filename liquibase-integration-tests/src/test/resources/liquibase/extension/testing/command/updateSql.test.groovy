@@ -25,6 +25,14 @@ Optional Args:
                 changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 
+        expectedOutput = [
+                """
+-- *********************************************************************
+-- Update Database Script
+-- *********************************************************************
+"""
+        ]
+
         expectedResults = [
                 statusCode   : 0
         ]

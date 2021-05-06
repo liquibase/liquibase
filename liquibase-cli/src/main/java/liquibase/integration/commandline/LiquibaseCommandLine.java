@@ -160,7 +160,7 @@ public class LiquibaseCommandLine {
 
                 commandLine.execute(args);
 
-                Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + StringUtil.join(getCommandNames(), " ") + "' was executed successfully.");
+                Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + StringUtil.join(getCommandNames(commandLine.getParseResult()), " ") + "' was executed successfully.");
             });
         } finally {
             final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
@@ -171,9 +171,9 @@ public class LiquibaseCommandLine {
         }
     }
 
-    private String[] getCommandNames() {
+    static String[] getCommandNames(CommandLine.ParseResult parseResult) {
         List<String> returnList = new ArrayList<>();
-        for (CommandLine command : commandLine.getParseResult().asCommandLineList()) {
+        for (CommandLine command : parseResult.asCommandLineList()) {
             final String commandName = command.getCommandName();
             if (commandName.equals("liquibase")) {
                 continue;

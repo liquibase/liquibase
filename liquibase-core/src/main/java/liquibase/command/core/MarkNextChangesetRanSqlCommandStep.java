@@ -31,15 +31,6 @@ public class MarkNextChangesetRanSqlCommandStep extends AbstractCliWrapperComman
     }
 
     @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
-
-        String[] args = createArgs(commandScope);
-        int statusCode = Main.run(args);
-        resultsBuilder.addResult("statusCode", statusCode);
-    }
-
-    @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Writes the SQL used to mark the next change you apply as executed in your database");
     }

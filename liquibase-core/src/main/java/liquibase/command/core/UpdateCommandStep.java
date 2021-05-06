@@ -37,15 +37,6 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
-
-        String[] args = createArgs(commandScope);
-        int statusCode = Main.run(args);
-        resultsBuilder.addResult("statusCode", statusCode);
-    }
-
-    @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Deploy any changes in the changelog file that have not been deployed");
     }

@@ -1,6 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
 
 public class FutureRollbackCountSqlCommandStep extends AbstractCliWrapperCommandStep {
@@ -39,12 +40,8 @@ public class FutureRollbackCountSqlCommandStep extends AbstractCliWrapperCommand
     }
 
     @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
-
-        String[] args = createParametersFromArgs(createArgs(commandScope), "count");
-        int statusCode = Main.run(args);
-        resultsBuilder.addResult("statusCode", statusCode);
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return createParametersFromArgs(createArgs(commandScope), "count");
     }
 
     @Override

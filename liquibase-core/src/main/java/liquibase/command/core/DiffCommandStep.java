@@ -1,6 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
 
 import java.io.PrintStream;
@@ -38,17 +39,10 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        final PrintStream outputStream = Main.setOutputStream(new PrintStream(resultsBuilder.getOutputStream()));
-
-        CommandScope commandScope = resultsBuilder.getCommandScope();
-
-        String[] args = createParametersFromArgs(createArgs(commandScope), "--format");
-        int statusCode = Main.run(args);
-        resultsBuilder.addResult("statusCode", statusCode);
-
-        outputStream.flush();
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return createParametersFromArgs(createArgs(commandScope), "--format");
     }
+
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {

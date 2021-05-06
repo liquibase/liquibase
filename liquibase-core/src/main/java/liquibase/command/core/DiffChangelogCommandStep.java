@@ -39,15 +39,6 @@ public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
-
-        String[] args = createArgs(commandScope);
-        int statusCode = Main.run(args);
-        resultsBuilder.addResult("statusCode", statusCode);
-    }
-
-    @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Compare two databases to produce changesets and write them to a changelog file");
     }

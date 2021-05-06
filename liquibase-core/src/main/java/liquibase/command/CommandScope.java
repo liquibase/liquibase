@@ -8,10 +8,7 @@ import liquibase.exception.CommandExecutionException;
 import liquibase.util.StringUtil;
 
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * The primary facade used for executing commands.
@@ -124,11 +121,13 @@ public class CommandScope {
             definition.validate(this);
         }
 
-        for (CommandStep step : commandDefinition.getPipeline()) {
+        final List<CommandStep> pipeline = commandDefinition.getPipeline();
+
+        for (CommandStep step : pipeline) {
             step.validate(this);
         }
         try {
-            for (CommandStep command : commandDefinition.getPipeline()) {
+            for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
             }
         } catch (Exception e) {

@@ -358,7 +358,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(fullOutput))
 
         if (fullOutput.length() == 0) {
-            assert checks != null && checks.size() >= 0: "$outputDescription was empty but checks were defined"
+            assert checks == null || checks.size() == 0: "$outputDescription was empty but checks were defined"
         } else {
             for (def expectedOutputCheck : checks) {
                 if (expectedOutputCheck == null) {

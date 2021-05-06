@@ -1,6 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
 
 import java.util.ArrayList;
@@ -33,14 +34,12 @@ public class TagExistsCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
         List<String> rhs = new ArrayList<>();
         rhs.add("tag");
         String[] argsFromScope = createArgs(commandScope, rhs);
         String[] args = createParametersFromArgs(argsFromScope, "tag");
-        int statusCode = Main.run(args);
-        resultsBuilder.addResult("statusCode", statusCode);
-    }
 
+        return args;
+    }
 }

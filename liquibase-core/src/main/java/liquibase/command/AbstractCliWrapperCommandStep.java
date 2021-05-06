@@ -1,8 +1,10 @@
 package liquibase.command;
 
 import liquibase.exception.CommandExecutionException;
-import liquibase.util.StringUtil;
+import liquibase.integration.commandline.Main;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.*;
 
 /**
@@ -11,6 +13,40 @@ import java.util.*;
  * @deprecated
  */
 public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep {
+
+    @Override
+    public final void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        preRunCheck(resultsBuilder);
+
+        final OutputStream outputStream = resultsBuilder.getOutputStream();
+        PrintStream printStream = null;
+
+        if (outputStream != null) {
+            printStream = new PrintStream(outputStream);
+            Main.setOutputStream(printStream);
+        }
+
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
+        String[] args = collectArguments(commandScope);
+        int statusCode = Main.run(args);
+        resultsBuilder.addResult("statusCode", statusCode);
+
+        if (printStream != null) {
+            printStream.close();
+        }
+    }
+
+    protected void preRunCheck(CommandResultsBuilder resultsBuilder) {
+
+    }
+
+    /**
+     * Called by {@link #run(CommandResultsBuilder)} to create the actual arguments passed to {@link Main#run(String[])}
+     */
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return createArgs(commandScope);
+    }
 
     protected String[] createArgs(CommandScope commandScope) throws CommandExecutionException {
         return createArgs(commandScope, new ArrayList<String>());

@@ -1,10 +1,15 @@
 package liquibase.integration.commandline;
 
+import liquibase.Scope;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
+import liquibase.integration.IntegrationConfiguration;
 import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -26,21 +31,39 @@ class CommandRunner implements Callable<CommandResults> {
         final CommandLine rootCommand = parentCommand;
 
 
-        String[] commandName = new String[command.size()];
-        for (int i = 0; i < command.size(); i++) {
-            commandName[i] = StringUtil.toCamelCase(command.get(i));
+        final String[] commandName = LiquibaseCommandLine.getCommandNames(spec.commandLine().getParseResult());
+        for (int i=0; i<commandName.length; i++) {
+            commandName[i] = StringUtil.toCamelCase(commandName[i]);
         }
+
         final CommandScope commandScope = new CommandScope(commandName);
+        final File outputFile = IntegrationConfiguration.OUTPUT_FILE.getCurrentValue();
+        OutputStream outputStream = null;
 
-        for (CommandLine.Model.OptionSpec option : spec.commandLine().getParseResult().matchedOptions()) {
-            commandScope.addArgumentValue(toCommandArgumentDefinition(option), option.getValue());
+        try {
+            if (outputFile != null) {
+                outputStream = new FileOutputStream(outputFile);
+                commandScope.setOutput(outputStream);
+            }
+
+            for (CommandLine.Model.OptionSpec option : spec.commandLine().getParseResult().matchedOptions()) {
+                commandScope.addArgumentValue(toCommandArgumentDefinition(option), option.getValue());
+            }
+
+            for (CommandLine.Model.OptionSpec option : rootCommand.getParseResult().matchedOptions()) {
+                commandScope.addArgumentValue(toCommandArgumentDefinition(option), option.getValue());
+            }
+
+            return commandScope.execute();
+        } finally {
+            if (outputStream != null) {
+                outputStream.flush();
+                outputStream.close();
+            }
+            if (outputFile != null) {
+                Scope.getCurrentScope().getUI().sendMessage("Output written to "+outputFile.getAbsolutePath());
+            }
         }
-
-        for (CommandLine.Model.OptionSpec option : rootCommand.getParseResult().matchedOptions()) {
-            commandScope.addArgumentValue(toCommandArgumentDefinition(option), option.getValue());
-        }
-
-        return commandScope.execute();
     }
 
 

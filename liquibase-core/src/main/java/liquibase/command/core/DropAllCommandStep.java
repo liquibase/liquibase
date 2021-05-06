@@ -33,15 +33,6 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
-
-        String[] args = createArgs(commandScope);
-        int statusCode = Main.run(args);
-        resultsBuilder.addResult("statusCode", statusCode);
-    }
-
-    @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Drop all database objects owned by the user");
     }

@@ -30,15 +30,6 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
     }
 
     @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
-
-        String[] args = createArgs(commandScope);
-        int statusCode = Main.run(args);
-        resultsBuilder.addResult("statusCode", statusCode);
-    }
-
-    @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Generate a changelog");
         commandDefinition.setLongDescription("Writes Change Log XML to copy the current state of the database to standard out or a file");

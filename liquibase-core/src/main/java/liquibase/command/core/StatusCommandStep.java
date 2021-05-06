@@ -1,6 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
 
 import java.util.ArrayList;
@@ -41,9 +42,9 @@ public class StatusCommandStep extends AbstractCliWrapperCommandStep {
         return COMMAND_NAME;
     }
 
+
     @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
         List<String> rhsArgs = new ArrayList<>();
         rhsArgs.add("verbose");
         String[] args = createArgs(commandScope, rhsArgs);
@@ -53,8 +54,8 @@ public class StatusCommandStep extends AbstractCliWrapperCommandStep {
                 break;
             }
         }
-        int statusCode = Main.run(args);
-        resultsBuilder.addResult("statusCode", statusCode);
+
+        return args;
     }
 
     @Override
