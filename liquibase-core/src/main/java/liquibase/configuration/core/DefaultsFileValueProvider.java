@@ -23,10 +23,25 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
         try (InputStream stream = new FileInputStream(path)) {
             this.properties = new Properties();
             this.properties.load(stream);
+            trimAllProperties();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
 
+    }
+
+    //
+    // Remove trailing spaces on the property file values
+    //
+    private void trimAllProperties() {
+        properties.forEach((k, v)  -> {
+            if (! (v instanceof String)) {
+                return;
+            }
+            String value = (String)v;
+            String newString = (value != null ? value.trim() : null);
+            properties.put(k, newString);
+        });
     }
 
     protected DefaultsFileValueProvider(Properties properties) {
