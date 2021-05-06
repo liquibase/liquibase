@@ -267,7 +267,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 def expectedResult = testDef.expectedResults.get(returnedResult.getKey())
                 def expectedValue = expectedResult instanceof Closure ? expectedResult.call() : String.valueOf(expectedResult)
                 def seenValue = String.valueOf(returnedResult.getValue())
-                
+
                 assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
                 assert seenValue == expectedValue
             }
