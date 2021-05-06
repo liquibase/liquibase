@@ -162,15 +162,30 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @Override
     public CheckSum generateCheckSum() {
+        InputStream stream = null;
+        try {
+            stream = openSqlStream();
+
             String statementSql = this.sql;
-            if (statementSql == null) {
+            if (stream == null && statementSql == null) {
                 statementSql = "";
             }
-            try (InputStream  stream = new ByteArrayInputStream(statementSql.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()))){
+
+            if (statementSql != null) {
+                stream = new ByteArrayInputStream(statementSql.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+            }
             return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
-        }
+        } finally {
+                if (stream != null) {
+                    try {
+                        stream.close();
+                    } catch (IOException e) {
+                        LogFactory.getLogger().debug("Error closing stream", e);
+                    }
+                }
+            }
     }
 
 
