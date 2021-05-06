@@ -1,9 +1,7 @@
 package liquibase.extension.testing.command
 
-
 import liquibase.AbstractExtensibleObject
 import liquibase.CatalogAndSchema
-import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.changelog.ChangeLogHistoryService
@@ -266,7 +264,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         if (!testDef.expectedResults.isEmpty()) {
             for (def returnedResult : results.getResults().entrySet()) {
-                def expectedValue = String.valueOf(testDef.expectedResults.get(returnedResult.getKey()))
+                def expectedResult = testDef.expectedResults.get(returnedResult.getKey())
+                def expectedValue = expectedResult instanceof Closure ? expectedResult.call() : String.valueOf(expectedResult)
                 def seenValue = String.valueOf(returnedResult.getValue())
 
                 assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
@@ -741,7 +740,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             File outputFile = new File("target/test-classes", newFile)
             FileUtil.write(contents, outputFile)
             println "Copied file " + originalFile + " to file " + newFile
-
         }
 
         /**
