@@ -2,6 +2,9 @@ package liquibase.command;
 
 import java.util.Objects;
 
+/**
+ * @deprecated Used by the old {@link LiquibaseCommand} style of command setup.
+ */
 public class CommandArgument implements Comparable {
 
     private String name;

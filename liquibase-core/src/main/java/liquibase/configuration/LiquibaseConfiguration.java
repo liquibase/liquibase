@@ -72,6 +72,15 @@ public class LiquibaseConfiguration implements SingletonObject {
     }
 
     /**
+     * Removes the given {@link ConfigurationValueProvider} from the active collection of providers.
+     *
+     * @return true if the given provider was previously registered.
+     */
+    public boolean unregisterProvider(ConfigurationValueProvider valueProvider) {
+        return this.configurationValueProviders.remove(valueProvider);
+    }
+
+    /**
      * Removes a specific {@link ConfigurationValueProvider} from the active collection of providers.
      *
      * @return true if the provider was removed.
@@ -93,15 +102,20 @@ public class LiquibaseConfiguration implements SingletonObject {
 
 
     /**
-     * Searches for the given key in the current providers.
+     * Searches for the given keys in the current providers.
+     * @param keyAndAliases The first element should be the canonical key name, with later elements being aliases. At least one element must be provided.
      *
      * @return the value for the key, or null if not configured.
      */
-    public ConfiguredValue<?> getCurrentConfiguredValue(String key) {
-        ConfiguredValue<?> details = new ConfiguredValue<>(key);
+    public ConfiguredValue<?> getCurrentConfiguredValue(String... keyAndAliases) {
+        if (keyAndAliases == null || keyAndAliases.length == 0) {
+            throw new IllegalArgumentException("Must specify at least one key");
+        }
+
+        ConfiguredValue<?> details = new ConfiguredValue<>(keyAndAliases[0]);
 
         for (ConfigurationValueProvider provider : configurationValueProviders) {
-            final ProvidedValue providerValue = provider.getProvidedValue(key);
+            final ProvidedValue providerValue = provider.getProvidedValue(keyAndAliases);
 
             if (providerValue != null) {
                 details.override(providerValue);
@@ -109,11 +123,11 @@ public class LiquibaseConfiguration implements SingletonObject {
         }
 
         final String foundValue = String.valueOf(details.getValue());
-        if (!foundValue.equals(lastLoggedKeyValues.get(key))) {
-            lastLoggedKeyValues.put(key, foundValue);
+        if (!foundValue.equals(lastLoggedKeyValues.get(keyAndAliases[0]))) {
+            lastLoggedKeyValues.put(keyAndAliases[0], foundValue);
 
             //avoid infinite loop when logging is getting set up
-            StringBuilder logMessage = new StringBuilder("Found '" + key + "' configuration of '"+foundValue+"'");
+            StringBuilder logMessage = new StringBuilder("Found '" + keyAndAliases[0] + "' configuration of '"+foundValue+"'");
             boolean foundFirstValue = false;
             for (ProvidedValue providedValue : details.getProvidedValues()) {
                 logMessage.append("\n    ");

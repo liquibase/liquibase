@@ -80,7 +80,7 @@ public abstract class AbstractConfigurationContainer implements ConfigurationCon
          */
         public ConfigurationProperty addProperty(String propertyName, Class type) {
             final ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder(namespace);
-            final ConfigurationDefinition.Builder.NewDefinition newDefinition = builder.define(propertyName, type);
+            final ConfigurationDefinition.Building newDefinition = builder.define(propertyName, type);
 
             final ConfigurationProperty property = new ConfigurationProperty(namespace, newDefinition);
 

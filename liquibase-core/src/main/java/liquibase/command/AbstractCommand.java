@@ -3,6 +3,9 @@ package liquibase.command;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+/**
+ * @deprecated Implement commands with {@link liquibase.command.CommandStep} and call them with {@link liquibase.command.CommandFactory#getCommandDefinition(String...)}.
+ */
 public abstract class AbstractCommand<T extends CommandResult> implements LiquibaseCommand<T> {
 
     @Override

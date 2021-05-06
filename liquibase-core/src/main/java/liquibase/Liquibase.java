@@ -5,10 +5,10 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
-import liquibase.command.CommandExecutionException;
+import liquibase.exception.CommandExecutionException;
 import liquibase.command.CommandFactory;
-import liquibase.command.core.DropAllCommand;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.command.CommandScope;
+import liquibase.command.core.InternalDropAllCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -245,7 +245,6 @@ public class Liquibase implements AutoCloseable {
                 //
                 ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
 
-                Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
                 Connection connection = getConnection(changeLog);
                 if (connection != null) {
                     updateOperation =
@@ -1743,8 +1742,7 @@ public class Liquibase implements AutoCloseable {
                     resetServices();
                 }
 
-                flushOutputWriter(
-                        output);
+                flushOutputWriter(output);
             }
         });
     }
@@ -1775,24 +1773,15 @@ public class Liquibase implements AutoCloseable {
 
         CatalogAndSchema[] finalSchemas = schemas;
         try {
-            runInScope(new Scope.ScopedRunner() {
-                @Override
-                public void run() throws Exception {
-                    final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
+            CommandScope dropAll = new CommandScope("internalDropAll")
+                    .addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                    .addArgumentValue(InternalDropAllCommandStep.SCHEMAS_ARG, finalSchemas);
 
-                    DropAllCommand dropAll = (DropAllCommand) commandFactory.getCommand("dropAll");
-                    dropAll.setDatabase(Liquibase.this.getDatabase());
-                    dropAll.setSchemas(finalSchemas);
-                    dropAll.setLiquibase(Liquibase.this);
-                    dropAll.setChangeLogFile(changeLogFile);
-
-                    try {
-                        commandFactory.execute(dropAll);
-                    } catch (CommandExecutionException e) {
-                        throw new DatabaseException(e);
-                    }
-                }
-            });
+            try {
+                dropAll.execute();
+            } catch (CommandExecutionException e) {
+                throw new DatabaseException(e);
+            }
         } catch (LiquibaseException e) {
             if (e instanceof DatabaseException) {
                 throw (DatabaseException) e;

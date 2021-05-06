@@ -235,4 +235,15 @@ class StringUtilTest extends Specification {
         "    "                    | null
         "\n\r\ttest string\r\n\t" | "test string"
     }
+
+    @Unroll
+    def "toKabobCase"() {
+        expect:
+        StringUtil.toKabobCase(input) == expected
+
+        where:
+        input       | expected
+        "a"         | "a"
+        "testValue" | "test-value"
+    }
 }
