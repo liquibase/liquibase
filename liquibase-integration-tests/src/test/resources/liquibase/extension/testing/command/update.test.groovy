@@ -10,10 +10,9 @@ CommandTests.define {
 Short Description: Deploy any changes in the changelog file that have not been deployed
 Long Description: NOT SET
 Required Args:
+  changelogFile (String) The root changelog
   url (String) The JDBC database connection URL
 Optional Args:
-  changelogFile (String) The root changelog
-    Default: null
   contexts (String) Changeset contexts to match
     Default: null
   labels (String) Changeset labels to match
@@ -35,15 +34,19 @@ Optional Args:
         ]
 
         expectedDatabaseContent = [
-                Pattern.compile(".*liquibase.structure.core.Table.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL),
-                Pattern.compile(".*liquibase.structure.core.Table.*ADDRESS.*columns:.*CITY.*", Pattern.MULTILINE|Pattern.DOTALL)
+                "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL),
+                        Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*CITY.*", Pattern.MULTILINE|Pattern.DOTALL)]
         ]
     }
 
     run "No changelog argument results in an exception", {
-        expectedResults = [
-                statusMessage: "Unsuccessfully executed update",
-                statusCode   : 1
+        expectedException = CommandValidationException.class
+    }
+
+    run "Empty url argument results in an exception", {
+        arguments = [
+                url: "",
+                changeLogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 
         expectedException = CommandValidationException.class

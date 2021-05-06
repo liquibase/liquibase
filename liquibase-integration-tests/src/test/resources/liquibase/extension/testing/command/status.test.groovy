@@ -6,10 +6,9 @@ CommandTests.define {
 Short Description: Generate a list of pending changesets
 Long Description: NOT SET
 Required Args:
+  changelogFile (String) The root changelog
   url (String) The JDBC database connection URL
 Optional Args:
-  changelogFile (String) The root changelog
-    Default: null
   contexts (String) Changeset contexts to match
     Default: null
   labels (String) Changeset labels to match
