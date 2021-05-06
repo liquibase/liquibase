@@ -26,7 +26,6 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusMessage: "Successfully executed updateSql",
                 statusCode   : 0
         ]
     }

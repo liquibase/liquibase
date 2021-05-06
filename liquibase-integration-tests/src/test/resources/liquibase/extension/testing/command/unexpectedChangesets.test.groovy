@@ -29,7 +29,6 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed unexpectedChangesets",
                 statusCode   : 0
         ]
     }

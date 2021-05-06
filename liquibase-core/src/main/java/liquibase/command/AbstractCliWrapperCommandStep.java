@@ -92,12 +92,4 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
         }
         return args;
     }
-
-    protected void addStatusMessage(CommandResultsBuilder resultsBuilder, int statusCode) {
-        if (statusCode == 0) {
-            resultsBuilder.addResult("statusMessage", "Successfully executed " + StringUtil.join(getName(), " "));
-        } else {
-            resultsBuilder.addResult("statusMessage", "Unsuccessfully executed " + StringUtil.join(getName(), " "));
-        }
-    }
 }

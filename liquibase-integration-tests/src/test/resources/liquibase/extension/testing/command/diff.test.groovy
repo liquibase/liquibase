@@ -65,8 +65,6 @@ Unexpected Column(s): NONE
 Changed Column(s): NONE
 """,
         ]
-
-        expectedUI = "Liquibase command 'diff' was executed successfully"
     }
 
     run "Running diff against an empty database finds things unexpected", {
@@ -116,8 +114,6 @@ Unexpected Column(s):
 Changed Column(s): NONE
 """,
         ]
-
-        expectedUI = "Liquibase command 'diff' was executed successfully"
     }
 
     run "Running diff against a full database finds things missing", {
@@ -167,8 +163,6 @@ Unexpected Column(s): NONE
 Changed Column(s): NONE
 """,
         ]
-
-        expectedUI = "Liquibase command 'diff' was executed successfully"
     }
 
     run "Running diff against two empty databases finds no differences", {
@@ -198,8 +192,6 @@ Unexpected Column(s): NONE
 Changed Column(s): NONE
 """,
         ]
-
-        expectedUI = "Liquibase command 'diff' was executed successfully"
     }
 
 
@@ -272,8 +264,6 @@ Changed Column\(s\):
      PUBLIC.SHAREDTABLE.SHARED
           type changed from 'VARCHAR\(3.*?\)' to 'VARCHAR\(255.*?\)'/),
         ]
-
-        expectedUI = "Liquibase command 'diff' was executed successfully"
     }
 
 }

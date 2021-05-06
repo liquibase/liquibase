@@ -24,7 +24,6 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusMessage: "Successfully executed dbDoc",
                 statusCode   : 0
         ]
     }

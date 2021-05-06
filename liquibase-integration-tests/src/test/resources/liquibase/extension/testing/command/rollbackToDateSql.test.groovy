@@ -34,7 +34,6 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed rollbackToDateSql",
                 statusCode   : 0
         ]
     }

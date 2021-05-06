@@ -28,7 +28,6 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusMessage: "Successfully executed updateCount",
                 statusCode   : 0
         ]
     }

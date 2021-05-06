@@ -70,8 +70,6 @@ Optional Args:
                 """
 """
         ]
-
-        expectedUI = "Liquibase command 'diffChangelog' was executed successfully"
     }
 
     run "Running diffChangelog should add change sets", {
@@ -134,7 +132,6 @@ Optional Args:
                 """
 """
         ]
-        expectedUI = "Liquibase command 'diffChangelog' was executed successfully"
     }
 
     run "Running diff against differently structured databases finds changed objects", {
@@ -189,7 +186,6 @@ Optional Args:
             ]
 
         }
-        expectedUI = "Liquibase command 'diffChangelog' was executed successfully"
     }
 
     run "Running diffChangelog without changelogFile gives an error", {

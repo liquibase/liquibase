@@ -53,7 +53,6 @@ Optional Args:
 
         expectedResults = [
                 statusCode   : 0,
-                statusMessage: "Successfully executed dropAll"
         ]
     }
 }

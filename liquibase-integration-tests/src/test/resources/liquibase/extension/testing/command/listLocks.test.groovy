@@ -18,7 +18,6 @@ Optional Args:
 
     run {
         expectedResults = [
-                statusMessage: "Successfully executed listLocks",
                 statusCode   : 0
         ]
     }

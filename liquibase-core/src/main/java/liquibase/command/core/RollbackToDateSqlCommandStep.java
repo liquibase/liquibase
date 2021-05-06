@@ -50,7 +50,6 @@ public class RollbackToDateSqlCommandStep extends AbstractCliWrapperCommandStep 
 
         String[] args = createParametersFromArgs(createArgs(commandScope), "date");
         int statusCode = Main.run(args);
-        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
     @Override

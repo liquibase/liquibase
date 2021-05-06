@@ -22,7 +22,6 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusMessage: "Successfully executed markNextChangesetRan",
                 statusCode   : 0
         ]
     }

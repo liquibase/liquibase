@@ -34,7 +34,6 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed futureRollbackFromTagSql",
                 statusCode   : 0
         ]
     }

@@ -61,7 +61,6 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed changelogSyncToTagSql",
                 statusCode   : 0
         ]
     }

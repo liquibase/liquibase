@@ -57,7 +57,6 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed snapshotReference",
                 statusCode   : 0
         ]
     }

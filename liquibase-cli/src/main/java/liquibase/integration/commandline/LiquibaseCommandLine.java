@@ -159,6 +159,8 @@ public class LiquibaseCommandLine {
                 configureVersionInfo();
 
                 commandLine.execute(args);
+
+                Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + StringUtil.join(getCommandNames(), " ") + "' was executed successfully.");
             });
         } finally {
             final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
@@ -167,6 +169,18 @@ public class LiquibaseCommandLine {
                 liquibaseConfiguration.unregisterProvider(provider);
             }
         }
+    }
+
+    private String[] getCommandNames() {
+        List<String> returnList = new ArrayList<>();
+        for (CommandLine command : commandLine.getParseResult().asCommandLineList()) {
+            final String commandName = command.getCommandName();
+            if (commandName.equals("liquibase")) {
+                continue;
+            }
+            returnList.add(commandName);
+        }
+        return returnList.toArray(new String[0]);
     }
 
     private List<ConfigurationValueProvider> registerValueProviders(String[] args) {
@@ -351,7 +365,7 @@ public class LiquibaseCommandLine {
         configureHelp(subCommandSpec);
 
         subCommandSpec.usageMessage()
-                .header(StringUtil.trimToEmpty(commandDefinition.getShortDescription())+"\n")
+                .header(StringUtil.trimToEmpty(commandDefinition.getShortDescription()) + "\n")
                 .description(StringUtil.trimToEmpty(commandDefinition.getLongDescription()));
 
         subCommandSpec.optionsCaseInsensitive(true);
@@ -383,7 +397,7 @@ public class LiquibaseCommandLine {
                 if (def.isRequired()) {
                     description += "\n[REQUIRED]";
                 }
-                builder.description(description+"\n");
+                builder.description(description + "\n");
 
 
                 if (def.getDataType().equals(Boolean.class)) {

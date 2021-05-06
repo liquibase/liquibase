@@ -93,7 +93,6 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
         printStream.flush();
 
         resultsBuilder.addResult("statusCode", 0);
-        resultsBuilder.addResult("statusMessage", "Successfully executed diff");
     }
 
     public DiffResult createDiffResult(CommandScope commandScope) throws DatabaseException, InvalidExampleException {

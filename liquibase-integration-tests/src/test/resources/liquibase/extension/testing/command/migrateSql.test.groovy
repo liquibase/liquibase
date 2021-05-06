@@ -26,7 +26,6 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusMessage: "Successfully executed migrateSql",
                 statusCode   : 0
         ]
     }

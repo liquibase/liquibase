@@ -62,7 +62,6 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed changelogSyncToTag",
                 statusCode   : 0
         ]
     }

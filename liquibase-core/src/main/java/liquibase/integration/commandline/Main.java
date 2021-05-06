@@ -372,12 +372,14 @@ public class Main {
                     Scope.child(innerScopeObjects, () -> {
                         main.doMigration();
 
-                        if (COMMANDS.UPDATE.equals(main.command)) {
-                            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
-                        } else if (main.command.startsWith(COMMANDS.ROLLBACK)) {
-                            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("rollback.successful"));
-                        } else {
-                            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("command.successful"), main.command));
+                        if (!Main.runningFromNewCli) {
+                            if (COMMANDS.UPDATE.equals(main.command)) {
+                                Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+                            } else if (main.command.startsWith(COMMANDS.ROLLBACK)) {
+                                Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("rollback.successful"));
+                            } else {
+                                Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("command.successful"), main.command));
+                            }
                         }
                     });
                 } catch (Throwable e) {

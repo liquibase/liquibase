@@ -140,8 +140,6 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
                 Scope.getCurrentScope().getLog(RegisterChangelogCommandStep.class).info(changeLogRewriterResult.message);
                 output.println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been registered");
                 resultsBuilder.addResult("statusCode", 0);
-                resultsBuilder.addResult("statusMessage", "Successfully executed registerChangelog");
-                resultsBuilder.addResult(REGISTERED_CHANGELOG_ID, databaseChangeLog.getChangeLogId());
             }
         }
     }

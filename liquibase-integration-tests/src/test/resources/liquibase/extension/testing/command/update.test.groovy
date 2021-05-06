@@ -29,7 +29,6 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusMessage: "Successfully executed update",
                 statusCode   : 0
         ]
 
@@ -46,7 +45,7 @@ Optional Args:
     run "Empty url argument results in an exception", {
         arguments = [
                 url: "",
-                changeLogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 
         expectedException = CommandValidationException.class

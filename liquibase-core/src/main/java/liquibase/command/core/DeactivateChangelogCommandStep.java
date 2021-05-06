@@ -89,7 +89,6 @@ public class DeactivateChangelogCommandStep extends AbstractCommandStep {
                 Scope.getCurrentScope().getLog(DeactivateChangelogCommandStep.class).info(message);
                 output.println(message);
                 resultsBuilder.addResult("statusCode", 0);
-                resultsBuilder.addResult("statusMessage", "Successfully executed deactivateChangelog");
                 return;
             }
             throw new CommandExecutionException(rewriterResult.message);

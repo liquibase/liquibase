@@ -56,7 +56,6 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusMessage: "Successfully executed history",
                 deployments: "1 past deployments",
                 statusCode : 0
         ]

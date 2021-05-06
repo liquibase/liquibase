@@ -38,7 +38,6 @@ public class DbDocCommandStep extends AbstractCliWrapperCommandStep {
 
         String[] args = createParametersFromArgs(createArgs(commandScope), "outputDirectory");
         int statusCode = Main.run(args);
-        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
 

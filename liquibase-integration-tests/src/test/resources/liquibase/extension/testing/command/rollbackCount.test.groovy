@@ -41,7 +41,6 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusMessage: "Successfully executed rollbackCount",
                 statusCode   : 0
         ]
     }

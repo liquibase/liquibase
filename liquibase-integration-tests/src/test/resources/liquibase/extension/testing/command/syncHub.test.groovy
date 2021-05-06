@@ -29,7 +29,6 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed syncHub",
                 statusCode   : 0
         ]
     }

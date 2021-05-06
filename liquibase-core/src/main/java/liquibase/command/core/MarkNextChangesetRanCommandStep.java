@@ -35,7 +35,6 @@ public class MarkNextChangesetRanCommandStep extends AbstractCliWrapperCommandSt
 
         String[] args = createArgs(commandScope);
         int statusCode = Main.run(args);
-        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
 

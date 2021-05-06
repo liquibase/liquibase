@@ -20,7 +20,6 @@ Optional Args:
             createTempResource "changelogs/hsqldb/complete/simple.changelog.with.id.xml", "changelogs/hsqldb/complete/simple.changelog.with.id-test.xml"
         }
         expectedResults = [
-                statusMessage: "Successfully executed deactivateChangelog",
                 statusCode   : 0
         ]
     }

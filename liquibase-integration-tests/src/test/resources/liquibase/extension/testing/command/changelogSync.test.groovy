@@ -58,7 +58,6 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed changelogSync",
                 statusCode   : 0
         ]
     }

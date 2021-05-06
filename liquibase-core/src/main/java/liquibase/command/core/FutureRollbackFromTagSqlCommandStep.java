@@ -44,7 +44,6 @@ public class FutureRollbackFromTagSqlCommandStep extends AbstractCliWrapperComma
 
         String[] args = createParametersFromArgs(createArgs(commandScope), "tag");
         int statusCode = Main.run(args);
-        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
 

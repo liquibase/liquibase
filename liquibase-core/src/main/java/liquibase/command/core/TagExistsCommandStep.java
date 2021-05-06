@@ -40,7 +40,6 @@ public class TagExistsCommandStep extends AbstractCliWrapperCommandStep {
         String[] argsFromScope = createArgs(commandScope, rhs);
         String[] args = createParametersFromArgs(argsFromScope, "tag");
         int statusCode = Main.run(args);
-        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
 

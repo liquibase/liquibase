@@ -44,7 +44,6 @@ public class ChangelogSyncToTagSqlCommandStep extends AbstractCliWrapperCommandS
 
         String[] args = createParametersFromArgs(createArgs(commandScope), "tag");
         int statusCode = Main.run(args);
-        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
 

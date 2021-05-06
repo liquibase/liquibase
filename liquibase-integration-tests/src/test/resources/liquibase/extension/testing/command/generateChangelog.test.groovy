@@ -57,12 +57,11 @@ Optional Args:
                 "target/test-classes/changeLog-test.xml" : [CommandTests.assertContains("<changeSet ", 3)]
         ]
         expectedResults = [
-                statusMessage: "Successfully executed generateChangelog",
                 statusCode   : 0
         ]
     }
 
-    run "Run without changeLogFile throws exception", {
+    run "Run without changelogFile throws exception", {
         setup {
             cleanResources("changeLog-test.xml")
             database = [
@@ -99,7 +98,7 @@ Optional Args:
     run "Run without URL throws exception", {
         arguments = [
                 url: "",
-                changeLogFile: "target/test-classes/changeLog-test.xml"
+                changelogFile: "target/test-classes/changeLog-test.xml"
         ]
         setup {
             cleanResources("changeLog-test.xml")

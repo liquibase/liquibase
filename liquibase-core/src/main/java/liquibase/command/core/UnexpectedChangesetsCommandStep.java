@@ -49,7 +49,6 @@ public class UnexpectedChangesetsCommandStep extends AbstractCliWrapperCommandSt
             }
         }
         int statusCode = Main.run(args);
-        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
 

@@ -54,7 +54,6 @@ public class StatusCommandStep extends AbstractCliWrapperCommandStep {
             }
         }
         int statusCode = Main.run(args);
-        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
 

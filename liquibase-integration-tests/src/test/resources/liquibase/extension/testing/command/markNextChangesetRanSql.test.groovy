@@ -23,7 +23,6 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusMessage: "Successfully executed markNextChangesetRanSql",
                 statusCode   : 0
         ]
     }

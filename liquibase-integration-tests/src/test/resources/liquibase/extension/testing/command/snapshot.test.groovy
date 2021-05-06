@@ -57,7 +57,6 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed snapshot",
                 statusCode   : 0
         ]
     }

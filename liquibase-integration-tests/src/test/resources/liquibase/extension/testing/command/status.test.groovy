@@ -32,7 +32,6 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed status",
                 statusCode   : 0
         ]
     }

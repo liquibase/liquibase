@@ -31,7 +31,6 @@ Optional Args:
         }
 
         expectedResults = [
-                statusMessage: "Successfully executed futureRollbackCountSql",
                 statusCode   : 0
         ]
     }

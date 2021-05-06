@@ -44,7 +44,6 @@ public class FutureRollbackCountSqlCommandStep extends AbstractCliWrapperCommand
 
         String[] args = createParametersFromArgs(createArgs(commandScope), "count");
         int statusCode = Main.run(args);
-        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
 

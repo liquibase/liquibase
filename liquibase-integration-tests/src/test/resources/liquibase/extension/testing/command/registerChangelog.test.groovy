@@ -23,7 +23,6 @@ Optional Args:
             createTempResource "changelogs/hsqldb/complete/rollback.changelog.xml", "changelogs/hsqldb/complete/changelog-test.xml"
         }
         expectedResults = [
-                statusMessage: "Successfully executed registerChangelog",
                 statusCode   : 0
         ]
     }

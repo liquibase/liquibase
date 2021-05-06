@@ -110,7 +110,6 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
 
         Scope.getCurrentScope().getUI().sendMessage("All objects dropped from " + commandScope.getArgumentValue(DATABASE_ARG).getConnection().getConnectionUserName() + "@" + commandScope.getArgumentValue(DATABASE_ARG).getConnection().getURL());
         resultsBuilder.addResult("statusCode", 0);
-        resultsBuilder.addResult("statusMessage", "Successfully executed dropAll");
     }
 
     //

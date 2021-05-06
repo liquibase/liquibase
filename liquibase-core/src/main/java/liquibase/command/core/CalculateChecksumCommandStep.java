@@ -38,7 +38,6 @@ public class CalculateChecksumCommandStep extends AbstractCliWrapperCommandStep 
 
         String[] args = createParametersFromArgs(createArgs(commandScope), "changesetIdentifier");
         int statusCode = Main.run(args);
-        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
 

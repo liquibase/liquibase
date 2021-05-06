@@ -38,7 +38,6 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
 
         String[] args = createArgs(commandScope);
         int statusCode = Main.run(args);
-        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
 

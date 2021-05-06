@@ -27,7 +27,6 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusMessage: "Successfully executed updateToTagSql",
                 statusCode   : 0
         ]
     }

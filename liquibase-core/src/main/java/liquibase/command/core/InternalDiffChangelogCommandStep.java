@@ -66,7 +66,6 @@ public class InternalDiffChangelogCommandStep extends InternalDiffCommandStep {
             outputStream.flush();
         }
         resultsBuilder.addResult("statusCode", 0);
-        resultsBuilder.addResult("statusMessage", "Successfully executed diffChangelog");
     }
 
     protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, CommandScope commandScope) {

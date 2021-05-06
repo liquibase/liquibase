@@ -21,7 +21,6 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusMessage: "Successfully executed tag",
                 statusCode   : 0
         ]
     }
