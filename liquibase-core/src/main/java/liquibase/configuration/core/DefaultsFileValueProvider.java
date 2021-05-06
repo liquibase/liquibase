@@ -34,13 +34,14 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
     // Remove trailing spaces on the property file values
     //
     private void trimAllProperties() {
-        properties.forEach((k, v)  -> {
-            if (! (v instanceof String)) {
+        properties.forEach((key, value)  -> {
+            if (value == null) {
                 return;
             }
-            String value = (String)v;
-            String newString = (value != null ? value.trim() : null);
-            properties.put(k, newString);
+            if (! (value instanceof String)) {
+                return;
+            }
+            properties.put(key, StringUtil.trimToEmpty((String) value));
         });
     }
 
