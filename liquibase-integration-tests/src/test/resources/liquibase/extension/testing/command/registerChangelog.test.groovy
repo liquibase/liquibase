@@ -1,5 +1,6 @@
 package liquibase.extension.testing.command
 
+import liquibase.hub.core.MockHubService
 
 CommandTests.define {
     command = ["registerChangelog"]
@@ -14,7 +15,7 @@ Optional Args:
   hubProjectName (String) The Hub project name
     Default: null
 """
-    run {
+    run "Happy path", {
         arguments = [
                 hubProjectName   : "Project 1",
                 changelogFile: "changelogs/hsqldb/complete/changelog-test.xml",
@@ -23,7 +24,8 @@ Optional Args:
             createTempResource "changelogs/hsqldb/complete/rollback.changelog.xml", "changelogs/hsqldb/complete/changelog-test.xml"
         }
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                registeredChangeLogId  : { MockHubService.randomUUID.toString() }
         ]
     }
 }
