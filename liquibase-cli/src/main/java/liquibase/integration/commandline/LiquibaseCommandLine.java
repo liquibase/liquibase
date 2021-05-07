@@ -58,13 +58,9 @@ public class LiquibaseCommandLine {
     public static void main(String[] args) {
         final LiquibaseCommandLine cli = new LiquibaseCommandLine();
 
-        try {
-            cli.execute(args);
-        } catch (Throwable e) {
-            cli.handleException(e);
-        } finally {
-            cli.cleanup();
-        }
+        int returnCode = cli.execute(args);
+
+        System.exit(returnCode);
     }
 
     private void cleanup() {
@@ -226,31 +222,46 @@ public class LiquibaseCommandLine {
             System.err.println("For detailed help, try 'liquibase --help' or 'liquibase <command-name> --help'");
         }
 
-        return -1;
+        return 1;
     }
 
-    public void execute(String[] args) throws Exception {
-        final String[] finalArgs = adjustLegacyArgs(args);
-
-        configureLogging(Level.OFF, null);
-
-        Main.runningFromNewCli = true;
-
-        final List<ConfigurationValueProvider> valueProviders = registerValueProviders(finalArgs);
+    public int execute(String[] args) {
         try {
-            Scope.child(configureScope(), () -> {
-                configureVersionInfo();
+            final String[] finalArgs = adjustLegacyArgs(args);
 
-                commandLine.execute(finalArgs);
+            configureLogging(Level.OFF, null);
 
-                Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + StringUtil.join(getCommandNames(commandLine.getParseResult()), " ") + "' was executed successfully.");
-            });
-        } finally {
-            final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+            Main.runningFromNewCli = true;
 
-            for (ConfigurationValueProvider provider : valueProviders) {
-                liquibaseConfiguration.unregisterProvider(provider);
+            final List<ConfigurationValueProvider> valueProviders = registerValueProviders(finalArgs);
+            try {
+                return Scope.child(configureScope(), () -> {
+                    configureVersionInfo();
+
+                    int response = commandLine.execute(finalArgs);
+
+                    if (response == 0) {
+                        final String commandName = StringUtil.join(getCommandNames(commandLine.getParseResult()), " ");
+                        if (!commandName.equals("")) {
+                            //don't include for --version, --help, etc.
+                            Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
+                        }
+                    }
+
+                    return response;
+                });
+            } finally {
+                final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+
+                for (ConfigurationValueProvider provider : valueProviders) {
+                    liquibaseConfiguration.unregisterProvider(provider);
+                }
             }
+        } catch (Throwable e) {
+            handleException(e);
+            return 1;
+        } finally {
+            cleanup();
         }
     }
 
@@ -473,6 +484,8 @@ public class LiquibaseCommandLine {
         final CommandLine.Model.CommandSpec subCommandSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(commandRunner);
         commandRunner.setSpec(subCommandSpec);
 
+        subCommandSpec.aliases(commandDefinition.getName()[0].replace("-", ""));
+
         configureHelp(subCommandSpec);
 
         subCommandSpec.usageMessage()
@@ -593,7 +606,7 @@ public class LiquibaseCommandLine {
         }
 
         for (String arg : legacyNoLongerGlobalArguments) {
-            final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder("--"+arg)
+            final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder("--" + arg)
                     .required(false)
                     .type(String.class)
                     .hidden(true)
