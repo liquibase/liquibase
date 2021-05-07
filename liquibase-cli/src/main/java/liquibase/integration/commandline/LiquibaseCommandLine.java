@@ -596,7 +596,7 @@ public class LiquibaseCommandLine {
             final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder("--"+arg)
                     .required(false)
                     .type(String.class)
-                    .hidden(false)
+                    .hidden(true)
                     .description("Legacy global argument");
 
             rootCommandSpec.addOption(optionBuilder.build());
