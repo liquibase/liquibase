@@ -597,10 +597,9 @@ public class MainTest {
         assertEquals(0, cli.checkSetup().size());
 
         String[] noArgCommand = { "migrate", "migrateSQL", "update", "updateSQL",
-                "futureRollbackSQL", "updateTestingRollback", "listLocks",
+                "updateTestingRollback", "listLocks",
                 "releaseLocks", "validate", "help",
-                "clearCheckSums", "changelogSync", "changelogSyncSQL",
-                "markNextChangeSetRan", "markNextChangeSetRanSQL"
+                "clearCheckSums", "changelogSync", "changelogSyncSQL"
         };
 
         cli.commandParams.clear();
