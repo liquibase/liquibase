@@ -3,6 +3,7 @@ package liquibase.extension.testing.command
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
+import liquibase.exception.CommandValidationException
 
 CommandTests.define {
     command = ["dropAll"]
@@ -21,7 +22,7 @@ Optional Args:
   username (String) Username to use to connect to the database
     Default: null
 """
-    run {
+    run "Happy path", {
         setup {
             database = [
                     new CreateTableChange(
@@ -54,5 +55,12 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0,
         ]
+    }
+
+    run "Run without a URL should throw an exception",  {
+        arguments = [
+                url          : "",
+        ]
+        expectedException = CommandValidationException.class
     }
 }

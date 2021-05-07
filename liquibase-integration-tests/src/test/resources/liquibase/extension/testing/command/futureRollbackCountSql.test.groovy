@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
+
 CommandTests.define {
     command = ["futureRollbackCountSql"]
     signature = """
@@ -19,7 +21,7 @@ Optional Args:
   username (String) The database username
     Default: null
 """
-    run {
+    run "Happy path", {
         arguments = [
                 count        : 1,
                 changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml",
@@ -33,5 +35,35 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without any arguments should throw an exception",  {
+        arguments = [
+                url: ""
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a changeLogFile should throw an exception",  {
+        arguments = [
+                count: 1
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a count should throw an exception",  {
+        arguments = [
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a URL should throw an exception",  {
+        arguments = [
+                url          : "",
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                count: 1
+        ]
+        expectedException = CommandValidationException.class
     }
 }

@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
+
 CommandTests.define {
     command = ["status"]
     signature = """
@@ -21,7 +23,7 @@ Optional Args:
     Default: null
 """
 
-    run {
+    run "Happy path", {
         arguments = [
                 verbose      : "true",
                 changelogFile: "changelogs/hsqldb/complete/rollback.tag.plus.changelog.xml"
@@ -34,5 +36,19 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without a changeLogFile should throw an exception",  {
+        arguments = [
+                verbose      : "true"
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without any arguments should throw an exception",  {
+        arguments = [
+                url: "",
+        ]
+        expectedException = CommandValidationException.class
     }
 }

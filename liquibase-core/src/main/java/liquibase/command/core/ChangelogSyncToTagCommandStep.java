@@ -30,7 +30,7 @@ public class ChangelogSyncToTagCommandStep extends AbstractCliWrapperCommandStep
             .description("Changeset labels to match").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
             .description("Changeset contexts to match").build();
-        TAG_ARG = builder.argument("tag", String.class)
+        TAG_ARG = builder.argument("tag", String.class).required()
             .description("Tag ID to execute changelogSync to").build();
     }
 

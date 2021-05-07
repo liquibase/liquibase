@@ -18,7 +18,7 @@ public class FutureRollbackFromTagSqlCommandStep extends AbstractCliWrapperComma
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
+        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
             .description("The root changelog").build();
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC database connection URL").build();

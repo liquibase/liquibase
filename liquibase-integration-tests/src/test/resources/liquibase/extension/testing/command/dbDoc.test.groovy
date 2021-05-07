@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
+
 CommandTests.define {
     command = ["dbDoc"]
 
@@ -17,7 +19,7 @@ Optional Args:
     Default: null
 """
 
-    run {
+    run "Happy path", {
         arguments = [
                 outputDirectory: "target/test-classes",
                 changelogFile  : "changelogs/hsqldb/complete/simple.changelog.xml",
@@ -26,5 +28,37 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without an outputDirectory should throw an exception",  {
+        arguments = [
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                outputDirectory: ""
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a changeLogFile should throw an exception",  {
+        arguments = [
+                outputDirectory: "target/test-classes"
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a URL should throw an exception",  {
+        arguments = [
+                url          : "",
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                outputDirectory: "version_2.0"
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without any arguments should throw an exception",  {
+        arguments = [
+                url:  ""
+        ]
+
+        expectedException = CommandValidationException.class
     }
 }

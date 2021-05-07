@@ -10,7 +10,6 @@ public class SnapshotCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
-    public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> SNAPSHOT_FORMAT_ARG;
 
     static {
@@ -21,8 +20,6 @@ public class SnapshotCommandStep extends AbstractCliWrapperCommandStep {
             .description("Username to use to connect to the database").build();
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("Password to use to connect to the database").build();
-        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
-            .description("The root changelog").build();
         SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)
             .description("Output format to use (JSON or YAML").build();
     }

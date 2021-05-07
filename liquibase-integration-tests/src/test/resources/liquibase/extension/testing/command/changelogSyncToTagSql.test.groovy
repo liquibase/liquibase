@@ -3,6 +3,7 @@ package liquibase.extension.testing.command
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
+import liquibase.exception.CommandValidationException
 
 CommandTests.define {
     command = ["changelogSyncToTagSql"]
@@ -11,6 +12,7 @@ Short Description: Output the raw SQL used by Liquibase when running changelogSy
 Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog file
+  tag (String) Tag ID to execute changelogSync to
   url (String) The JDBC database connection URL
 Optional Args:
   contexts (String) Changeset contexts to match
@@ -19,13 +21,11 @@ Optional Args:
     Default: null
   password (String) The database password
     Default: null
-  tag (String) Tag ID to execute changelogSync to
-    Default: null
   username (String) The database username
     Default: null
 """
 
-    run {
+    run "Happy path", {
         arguments = [
                 tag            : "version_2.0",
                 "changelogFile": "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
@@ -63,5 +63,35 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without any arguments should throw an exception",  {
+        arguments = [
+                url: ""
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a changeLogFile should throw an exception",  {
+        arguments = [
+                tag          : "version_2.0",
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a tag should throw an exception",  {
+        arguments = [
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a URL should throw an exception",  {
+        arguments = [
+                url          : "",
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                tag          : "version_2.0"
+        ]
+        expectedException = CommandValidationException.class
     }
 }

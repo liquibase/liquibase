@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
+
 CommandTests.define {
     command = ["syncHub"]
     signature = """
@@ -19,7 +21,7 @@ Optional Args:
   username (String) Username to use to connect to the database
     Default: null
 """
-    run {
+    run "Happy path", {
         arguments = [
                 changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
         ]
@@ -31,5 +33,12 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without any arguments should throw an exception",  {
+        arguments = [
+                url: ""
+        ]
+        expectedException = CommandValidationException.class
     }
 }

@@ -3,6 +3,7 @@ package liquibase.extension.testing.command
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
+import liquibase.exception.CommandValidationException
 
 CommandTests.define {
     command = ["changelogSyncSql"]
@@ -23,7 +24,7 @@ Optional Args:
     Default: null
 """
 
-    run {
+    run "Happy path", {
         arguments = [
                 changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
         ]
@@ -60,5 +61,29 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without URL should throw an exception",  {
+        arguments = [
+                url: "",
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+        ]
+
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without changeLogFile should throw an exception",  {
+        arguments = [
+                changelogFile: ""
+        ]
+
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without any arguments should throw an exception",  {
+        arguments = [
+                url: ""
+        ]
+        expectedException = CommandValidationException.class
     }
 }

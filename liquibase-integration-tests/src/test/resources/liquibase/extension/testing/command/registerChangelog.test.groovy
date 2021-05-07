@@ -1,5 +1,6 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
 import liquibase.hub.core.MockHubService
 
 CommandTests.define {
@@ -27,5 +28,12 @@ Optional Args:
                 statusCode   : 0,
                 registeredChangeLogId  : { MockHubService.randomUUID.toString() }
         ]
+    }
+
+    run "Run without a changeLogFile throws an exception", {
+        arguments = [
+                changelogFile: ""
+        ]
+        expectedException = CommandValidationException.class
     }
 }

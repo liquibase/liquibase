@@ -10,7 +10,6 @@ public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep 
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
-    public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> SNAPSHOT_FORMAT_ARG;
 
     static {
@@ -21,8 +20,6 @@ public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep 
             .description("Reference username to use to connect to the database").build();
         REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class)
             .description("Reference password to use to connect to the database").build();
-        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
-            .description("The root changelog").build();
         SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)
             .description("Output format to use (JSON or YAML").build();
     }

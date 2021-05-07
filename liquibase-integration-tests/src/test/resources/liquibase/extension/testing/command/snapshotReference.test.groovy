@@ -3,6 +3,7 @@ package liquibase.extension.testing.command
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
+import liquibase.exception.CommandValidationException
 
 CommandTests.define {
     command = ["snapshotReference"]
@@ -12,8 +13,6 @@ Long Description: NOT SET
 Required Args:
   referenceUrl (String) The JDBC reference database connection URL
 Optional Args:
-  changelogFile (String) The root changelog
-    Default: null
   referencePassword (String) Reference password to use to connect to the database
     Default: null
   referenceUsername (String) Reference username to use to connect to the database
@@ -22,10 +21,7 @@ Optional Args:
     Default: null
 """
 
-    run {
-        arguments = [
-            changelogFile: "target/test-classes/changeset-test.xml"
-        ]
+    run "Happy path", {
         setup {
             cleanResources("changeset-test.xml")
             database = [
@@ -59,5 +55,12 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without any arguments should throw an exception",  {
+        arguments = [
+                referenceUrl:   ""
+        ]
+        expectedException = CommandValidationException.class
     }
 }

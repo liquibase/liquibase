@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
+
 CommandTests.define {
     command = ["deactivateChangelog"]
     signature = """
@@ -11,7 +13,7 @@ Optional Args:
   NONE
 """
 
-    run {
+    run "Happy path", {
 
         arguments = [
                 changelogFile: "changelogs/hsqldb/complete/simple.changelog.with.id-test.xml",
@@ -22,5 +24,16 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without a changeLogFile should throw an exception",  {
+        arguments = [
+                changelogFile: ""
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without any arguments should throw an exception",  {
+        expectedException = CommandValidationException.class
     }
 }

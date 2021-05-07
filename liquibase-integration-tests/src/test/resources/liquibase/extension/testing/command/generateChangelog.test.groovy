@@ -62,36 +62,9 @@ Optional Args:
     }
 
     run "Run without changelogFile throws exception", {
-        setup {
-            cleanResources("changeLog-test.xml")
-            database = [
-                    new CreateTableChange(
-                            tableName: "FirstTable",
-                            columns: [
-                                    ColumnConfig.fromName("FirstColumn")
-                                            .setType("VARCHAR(255)")
-                            ]
-                    ),
-                    new CreateTableChange(
-                            tableName: "SecondTable",
-                            columns: [
-                                    ColumnConfig.fromName("SecondColumn")
-                                            .setType("VARCHAR(255)")
-                            ]
-                    ),
-                    new TagDatabaseChange(
-                            tag: "version_2.0"
-                    ),
-                    new CreateTableChange(
-                            tableName: "liquibaseRunInfo",
-                            columns: [
-                                    ColumnConfig.fromName("timesRan")
-                                            .setType("INT")
-                            ]
-                    ),
-            ]
-        }
-
+        arguments = [
+                changelogFile: ""
+        ]
         expectedException = CommandValidationException.class
     }
 
@@ -100,36 +73,6 @@ Optional Args:
                 url: "",
                 changelogFile: "target/test-classes/changeLog-test.xml"
         ]
-        setup {
-            cleanResources("changeLog-test.xml")
-            database = [
-                    new CreateTableChange(
-                            tableName: "FirstTable",
-                            columns: [
-                                    ColumnConfig.fromName("FirstColumn")
-                                            .setType("VARCHAR(255)")
-                            ]
-                    ),
-                    new CreateTableChange(
-                            tableName: "SecondTable",
-                            columns: [
-                                    ColumnConfig.fromName("SecondColumn")
-                                            .setType("VARCHAR(255)")
-                            ]
-                    ),
-                    new TagDatabaseChange(
-                            tag: "version_2.0"
-                    ),
-                    new CreateTableChange(
-                            tableName: "liquibaseRunInfo",
-                            columns: [
-                                    ColumnConfig.fromName("timesRan")
-                                            .setType("INT")
-                            ]
-                    ),
-            ]
-        }
-
         expectedException = CommandValidationException.class
     }
 }

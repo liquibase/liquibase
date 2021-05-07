@@ -1,5 +1,6 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
 import liquibase.extension.testing.setup.HistoryEntry
 
 import java.util.regex.Pattern
@@ -19,7 +20,7 @@ Optional Args:
   username (String) Username to use to connect to the database
     Default: null
 """
-    run {
+    run "Happy path", {
         setup {
             history = [
                     new HistoryEntry(
@@ -60,5 +61,11 @@ Optional Args:
                 statusCode : 0
         ]
     }
-}
 
+    run "Run without any arguments should throw an exception",  {
+        arguments = [
+                url: ""
+        ]
+        expectedException = CommandValidationException.class
+    }
+}

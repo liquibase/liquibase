@@ -188,7 +188,7 @@ Optional Args:
         }
     }
 
-    run "Running diffChangelog without changelogFile gives an error", {
+    run "Running without changelogFile gives an error", {
         arguments = [
                 url              : { it.url },
                 username         : { it.username },
@@ -244,5 +244,47 @@ Optional Args:
                 """
 """
         ]
+    }
+    run "Run without a URL throws an exception", {
+        arguments = [
+                url              : "",
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+        ]
+
+        setup {
+            database = []
+            altDatabase = []
+
+        }
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a referenceURL throws an exception", {
+        arguments = [
+                url              : "",
+                username         : { it.username },
+                password         : { it.password },
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+        ]
+
+        setup {
+            database = []
+            altDatabase = []
+
+        }
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without any arguments throws an exception", {
+        setup {
+            database = []
+            altDatabase = []
+
+        }
+        expectedException = CommandValidationException.class
     }
 }

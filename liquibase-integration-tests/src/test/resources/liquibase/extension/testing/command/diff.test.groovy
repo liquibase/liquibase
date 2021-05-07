@@ -2,6 +2,7 @@ package liquibase.extension.testing.command
 
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
+import liquibase.exception.CommandValidationException
 
 import java.util.regex.Pattern
 
@@ -194,7 +195,6 @@ Changed Column(s): NONE
         ]
     }
 
-
     run "Running diff against differently structured databases finds changed objects", {
         arguments = [
                 url              : { it.url },
@@ -264,6 +264,49 @@ Changed Column\(s\):
      PUBLIC.SHAREDTABLE.SHARED
           type changed from 'VARCHAR\(3.*?\)' to 'VARCHAR\(255.*?\)'/),
         ]
+    }
+
+    run "Run without a URL throws an exception", {
+        arguments = [
+                url              : "",
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+        ]
+
+        setup {
+            database = []
+            altDatabase = []
+
+        }
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a referenceURL throws an exception", {
+        arguments = [
+                url              : "",
+                username         : { it.username },
+                password         : { it.password },
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+        ]
+
+        setup {
+            database = []
+            altDatabase = []
+
+        }
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without any arguments throws an exception", {
+        setup {
+            database = []
+            altDatabase = []
+
+        }
+        expectedException = CommandValidationException.class
     }
 
 }

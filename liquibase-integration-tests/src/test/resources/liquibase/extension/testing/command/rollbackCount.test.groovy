@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
+
 import java.util.regex.Pattern
 
 CommandTests.define {
@@ -8,11 +10,10 @@ CommandTests.define {
 Short Description: Rollback the specified number of changes made to the database
 Long Description: NOT SET
 Required Args:
+  changelogFile (String) The root changelog
   count (Integer) The number of changes to rollback
   url (String) The JDBC database connection URL
 Optional Args:
-  changelogFile (String) The root changelog
-    Default: null
   contexts (String) Changeset contexts to match
     Default: null
   labels (String) Changeset labels to match
@@ -25,7 +26,7 @@ Optional Args:
     Default: null
 """
 
-    run {
+    run "Happy path", {
         arguments = [
                 count        : 1,
                 changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml"
@@ -43,5 +44,36 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without any arguments should throw an exception",  {
+        arguments = [
+                url:  ""
+        ]
+
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a count should throw an exception",  {
+        arguments = [
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a changeLogFile should throw an exception",  {
+        arguments = [
+                count:   1
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a URL should throw an exception",  {
+        arguments = [
+                url          : "",
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                count        : 1
+        ]
+        expectedException = CommandValidationException.class
     }
 }
