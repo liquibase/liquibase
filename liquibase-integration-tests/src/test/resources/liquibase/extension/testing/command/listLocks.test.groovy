@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
+
 CommandTests.define {
     command = ["listLocks"]
     signature = """
@@ -16,9 +18,16 @@ Optional Args:
     Default: null
 """
 
-    run {
+    run "Happy path", {
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without a URL throws an exception", {
+        arguments = [
+                url: ""
+        ]
+        expectedException = CommandValidationException.class
     }
 }

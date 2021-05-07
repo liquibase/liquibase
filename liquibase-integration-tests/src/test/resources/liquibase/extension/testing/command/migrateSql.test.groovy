@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
+
 CommandTests.define {
     command = ["migrateSql"]
     signature = """
@@ -20,7 +22,7 @@ Optional Args:
     Default: null
 """
 
-    run {
+    run "Happy path", {
         arguments = [
                 changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
         ]
@@ -28,5 +30,12 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without a URL throws an exception", {
+        arguments = [
+                url: ""
+        ]
+        expectedException = CommandValidationException.class
     }
 }

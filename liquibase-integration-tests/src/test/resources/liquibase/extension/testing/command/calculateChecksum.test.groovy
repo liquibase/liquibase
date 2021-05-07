@@ -23,7 +23,7 @@ Optional Args:
     run "Happy path", {
         arguments = [
                 changesetIdentifier: "changelogs/hsqldb/complete/rollback.tag.changelog.xml::1::nvoxland",
-                "changelogFile"    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changelogFile    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
         ]
 
         expectedResults = [
@@ -41,7 +41,7 @@ Optional Args:
 
     run "Run without changesetIdentifier should throw an exception",  {
         arguments = [
-                "changelogFile"    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changelogFile    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
         ]
 
         expectedException = CommandValidationException.class
@@ -49,8 +49,8 @@ Optional Args:
 
     run "Run without URL should throw an exception",  {
         arguments = [
-                "url": "",
-                "changelogFile"    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                url: "",
+                changelogFile    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
         ]
 
         expectedException = CommandValidationException.class

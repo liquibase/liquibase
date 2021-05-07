@@ -38,16 +38,25 @@ Optional Args:
         ]
     }
 
-    run "No changelog argument results in an exception", {
+    run "Run without a URL throws an exception", {
+        arguments = [
+                url: ""
+        ]
         expectedException = CommandValidationException.class
     }
 
-    run "Empty url argument results in an exception", {
+    run "Run without a changeLogFile throws an exception", {
+        arguments = [
+                changelogFile: ""
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without any argument throws an exception", {
         arguments = [
                 url: "",
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+                changelogFile: ""
         ]
-
         expectedException = CommandValidationException.class
     }
 }

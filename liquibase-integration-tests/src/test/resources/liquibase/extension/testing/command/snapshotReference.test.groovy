@@ -3,6 +3,7 @@ package liquibase.extension.testing.command
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
+import liquibase.exception.CommandValidationException
 
 CommandTests.define {
     command = ["snapshotReference"]
@@ -12,8 +13,6 @@ Long Description: NOT SET
 Required Args:
   referenceUrl (String) The JDBC reference database connection URL
 Optional Args:
-  changelogFile (String) The root changelog
-    Default: null
   referencePassword (String) Reference password to use to connect to the database
     Default: null
   referenceUsername (String) Reference username to use to connect to the database
@@ -22,10 +21,7 @@ Optional Args:
     Default: null
 """
 
-    run {
-        arguments = [
-            changelogFile: "target/test-classes/changeset-test.xml"
-        ]
+    run "Happy path", {
         setup {
             cleanResources("changeset-test.xml")
             database = [
@@ -59,5 +55,57 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Happy path with an output file", {
+        setup {
+            cleanResources("target/test-classes/snapshotReference.txt")
+            database = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new TagDatabaseChange(
+                            tag: "version_2.0"
+                    ),
+                    new CreateTableChange(
+                            tableName: "liquibaseRunInfo",
+                            columns: [
+                                    ColumnConfig.fromName("timesRan")
+                                            .setType("INT")
+                            ]
+                    ),
+            ]
+        }
+
+        outputFile = new File("target/test-classes/snapshotReference.txt")
+
+        expectedFileContent = [
+                //
+                // Find the " -- Release Database Lock" line
+                //
+                "target/test-classes/snapshotReference.txt" : [CommandTests.assertContains("Database snapshot for")]
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+    }
+
+    run "Run without any arguments should throw an exception",  {
+        arguments = [
+                referenceUrl:   ""
+        ]
+        expectedException = CommandValidationException.class
     }
 }

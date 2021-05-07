@@ -1,16 +1,17 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
+
 CommandTests.define {
     command = ["updateToTag"]
     signature = """
 Short Description: Deploy changes from the changelog file to the specified tag
 Long Description: NOT SET
 Required Args:
+  changelogFile (String) The root changelog
   tag (String) The tag to update to
   url (String) The JDBC database connection URL
 Optional Args:
-  changelogFile (String) The root changelog
-    Default: null
   contexts (String) Changeset contexts to match
     Default: null
   labels (String) Changeset labels to match
@@ -21,7 +22,7 @@ Optional Args:
     Default: null
 """
 
-    run {
+    run "Happy path", {
         arguments = [
                 tag          : "version_2.0",
                 changelogFile: "changelogs/hsqldb/complete/simple.tag.changelog.xml",
@@ -31,5 +32,37 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without a tag throws an exception", {
+        arguments = [
+                url          : "",
+                changelogFile: "changelogs/hsqldb/complete/simple.tag.changelog.xml",
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a changeLogFile throws an exception", {
+        arguments = [
+                url          : "",
+                tag          : "version_2.0",
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without URL throws an exception", {
+        arguments = [
+                url          : "",
+                tag          : "version_2.0",
+                changelogFile: "changelogs/hsqldb/complete/simple.tag.changelog.xml",
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without any arguments throws an exception", {
+        arguments = [
+                url          : "",
+        ]
+        expectedException = CommandValidationException.class
     }
 }

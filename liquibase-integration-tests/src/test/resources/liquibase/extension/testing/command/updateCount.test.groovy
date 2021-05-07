@@ -1,16 +1,17 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandValidationException
+
 CommandTests.define {
     command = ["updateCount"]
     signature = """
 Short Description: Deploy the specified number of changes from the changelog file
 Long Description: NOT SET
 Required Args:
+  changelogFile (String) The root changelog
   count (Integer) The number of changes in the changelog to deploy
   url (String) The JDBC database connection URL
 Optional Args:
-  changelogFile (String) The root changelog
-    Default: null
   contexts (String) Changeset contexts to match
     Default: null
   labels (String) Changeset labels to match
@@ -21,7 +22,7 @@ Optional Args:
     Default: null
 """
 
-    run {
+    run "Happy path", {
         arguments = [
                 count        : 1,
                 changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
@@ -30,5 +31,35 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run without a URL throws an exception", {
+        arguments = [
+                url: "",
+                count : 1
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a changeLogFile throws an exception", {
+        arguments = [
+                changelogFile: "",
+                count: 1
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without count throws an exception", {
+        arguments = [
+                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+        ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without any argument throws an exception", {
+        arguments = [
+                url: "",
+        ]
+        expectedException = CommandValidationException.class
     }
 }

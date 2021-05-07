@@ -2,6 +2,7 @@ package liquibase.extension.testing.command
 
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
+import liquibase.exception.CommandValidationException
 
 import java.util.regex.Pattern
 
@@ -164,6 +165,48 @@ Changed Column(s): NONE
 """,
         ]
     }
+    run "Running diff against a full database finds things missing and writes to an output file", {
+        arguments = [
+                url              : { it.url },
+                username         : { it.username },
+                password         : { it.password },
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+        ]
+
+        setup {
+            cleanResources("target/test-classes/diff.txt")
+            database = []
+
+            altDatabase = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+            ]
+
+        }
+
+        outputFile = new File("target/test-classes/diff.txt")
+
+        expectedFileContent = [
+                //
+                // Find the " -- Release Database Lock" line
+                //
+                "target/test-classes/diff.txt" : [CommandTests.assertContains("Changed Column(s): NONE")]
+        ]
+    }
 
     run "Running diff against two empty databases finds no differences", {
         arguments = [
@@ -193,7 +236,6 @@ Changed Column(s): NONE
 """,
         ]
     }
-
 
     run "Running diff against differently structured databases finds changed objects", {
         arguments = [
@@ -264,6 +306,49 @@ Changed Column\(s\):
      PUBLIC.SHAREDTABLE.SHARED
           type changed from 'VARCHAR\(3.*?\)' to 'VARCHAR\(255.*?\)'/),
         ]
+    }
+
+    run "Run without a URL throws an exception", {
+        arguments = [
+                url              : "",
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+        ]
+
+        setup {
+            database = []
+            altDatabase = []
+
+        }
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without a referenceURL throws an exception", {
+        arguments = [
+                url              : "",
+                username         : { it.username },
+                password         : { it.password },
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+        ]
+
+        setup {
+            database = []
+            altDatabase = []
+
+        }
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run without any arguments throws an exception", {
+        setup {
+            database = []
+            altDatabase = []
+
+        }
+        expectedException = CommandValidationException.class
     }
 
 }
