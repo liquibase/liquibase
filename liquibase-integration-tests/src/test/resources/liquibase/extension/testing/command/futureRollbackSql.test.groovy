@@ -37,6 +37,32 @@ Optional Args:
         ]
     }
 
+    run "Happy path with an output file", {
+        arguments = [
+                changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml",
+        ]
+
+        setup {
+            cleanResources("target/test-classes/futureRollback.sql")
+            runChangelog "changelogs/hsqldb/complete/rollback.changelog.xml"
+            rollback 5, "changelogs/hsqldb/complete/rollback.changelog.xml"
+
+        }
+
+        outputFile = new File("target/test-classes/futureRollback.sql")
+
+        expectedFileContent = [
+                //
+                // Find the " -- Release Database Lock" line
+                //
+                "target/test-classes/futureRollback.sql" : [CommandTests.assertContains("-- Release Database Lock")]
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+    }
+
     run "Run without any arguments should throw an exception",  {
         arguments = [
                 url: ""

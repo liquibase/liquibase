@@ -62,13 +62,8 @@ Optional Args:
                 //
                 // Empty changelog contains no changeSet tags and an empty databaseChangeLog tag
                 //
-                "target/test-classes/diffChangeLog-test.xml" : [CommandTests.assertNotContains("<changeSet"),
+                "target/test-classes/diffChangelog-test.xml" : [CommandTests.assertNotContains("<changeSet"),
                                                                 Pattern.compile("^.*<?xml.*databaseChangeLog.*xsd./>", Pattern.MULTILINE|Pattern.DOTALL)]
-        ]
-
-        expectedOutput = [
-                """
-"""
         ]
     }
 
@@ -127,10 +122,6 @@ Optional Args:
         expectedFileContent = [
                 "target/test-classes/diffChangeLog-test.xml" : [CommandTests.assertContains("<changeSet ", 5),
                                                                 CommandTests.assertContains("<dropTable ", 1)]
-        ]
-        expectedOutput = [
-                """
-"""
         ]
     }
 
@@ -240,10 +231,6 @@ Optional Args:
 
         }
         expectedException = CommandValidationException.class
-        expectedOutput = [
-                """
-"""
-        ]
     }
     run "Run without a URL throws an exception", {
         arguments = [

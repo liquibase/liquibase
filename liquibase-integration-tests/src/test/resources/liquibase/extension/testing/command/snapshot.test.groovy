@@ -23,7 +23,6 @@ Optional Args:
 
     run "Happy path", {
         setup {
-            cleanResources("changeset-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -51,6 +50,51 @@ Optional Args:
                     ),
             ]
         }
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+    }
+
+    run "Happy path with an output file", {
+        setup {
+            cleanResources("target/test-classes/snapshot.txt")
+            database = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new TagDatabaseChange(
+                            tag: "version_2.0"
+                    ),
+                    new CreateTableChange(
+                            tableName: "liquibaseRunInfo",
+                            columns: [
+                                    ColumnConfig.fromName("timesRan")
+                                            .setType("INT")
+                            ]
+                    ),
+            ]
+        }
+
+        outputFile = new File("target/test-classes/snapshot.txt")
+
+        expectedFileContent = [
+                //
+                // Find the " -- Release Database Lock" line
+                //
+                "target/test-classes/snapshot.txt" : [CommandTests.assertContains("Database snapshot for")]
+        ]
 
         expectedResults = [
                 statusCode   : 0

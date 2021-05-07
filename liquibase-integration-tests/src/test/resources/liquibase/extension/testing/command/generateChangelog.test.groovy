@@ -54,7 +54,7 @@ Optional Args:
             ]
         }
         expectedFileContent = [
-                "target/test-classes/changeLog-test.xml" : [CommandTests.assertContains("<changeSet ", 3)]
+                "target/test-classes/changelog-test.xml" : [CommandTests.assertContains("<changeSet ", 3)]
         ]
         expectedResults = [
                 statusCode   : 0

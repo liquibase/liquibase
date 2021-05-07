@@ -33,6 +33,30 @@ Optional Args:
         ]
     }
 
+    run "Happy path with an output file", {
+        arguments = [
+                count        : 1,
+                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
+        ]
+
+        setup {
+            cleanResources("target/test-classes/updateCount.sql")
+        }
+
+        outputFile = new File("target/test-classes/updateCount.sql")
+
+        expectedFileContent = [
+                //
+                // Find the " -- Release Database Lock" line
+                //
+                "target/test-classes/updateCount.sql" : [CommandTests.assertContains("-- Release Database Lock")]
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+    }
+
     run "Run without a URL throws an exception", {
         arguments = [
                 url: "",

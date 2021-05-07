@@ -165,6 +165,48 @@ Changed Column(s): NONE
 """,
         ]
     }
+    run "Running diff against a full database finds things missing and writes to an output file", {
+        arguments = [
+                url              : { it.url },
+                username         : { it.username },
+                password         : { it.password },
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+        ]
+
+        setup {
+            cleanResources("target/test-classes/diff.txt")
+            database = []
+
+            altDatabase = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+            ]
+
+        }
+
+        outputFile = new File("target/test-classes/diff.txt")
+
+        expectedFileContent = [
+                //
+                // Find the " -- Release Database Lock" line
+                //
+                "target/test-classes/diff.txt" : [CommandTests.assertContains("Changed Column(s): NONE")]
+        ]
+    }
 
     run "Running diff against two empty databases finds no differences", {
         arguments = [

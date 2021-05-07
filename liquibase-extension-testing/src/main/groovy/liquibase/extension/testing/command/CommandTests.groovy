@@ -196,10 +196,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 altPassword: permutation.connectionStatus.altPassword,
         )
 
-        def outputStream = new ByteArrayOutputStream()
         def uiOutputWriter = new StringWriter()
         def uiErrorWriter = new StringWriter()
         def logService = new BufferedLogService()
+        def outputStream = new ByteArrayOutputStream()
+        if (testDef.outputFile != null) {
+            outputStream = new FileOutputStream(testDef.outputFile)
+        }
 
         commandScope.addArgumentValue("database", database)
         commandScope.addArgumentValue("url", database.getConnection().getURL())
@@ -527,6 +530,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private List<Object> expectedUIErrors = new ArrayList<>()
         private List<Object> expectedLogs = new ArrayList<>()
 
+        private File outputFile
+
         private Map<String, ?> expectedResults = new HashMap<>()
         private Class<Throwable> expectedException
 
@@ -540,6 +545,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             setupDef.validate()
 
             this.setup = setupDef.build()
+        }
+
+        def setOutputFile(File outputFile) {
+            this.outputFile = outputFile
         }
 
         /**

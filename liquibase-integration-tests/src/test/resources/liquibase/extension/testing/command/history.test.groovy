@@ -62,6 +62,48 @@ Optional Args:
         ]
     }
 
+    run "Happy path with an output file", {
+        setup {
+            cleanResources("target/test-classes/history.sql")
+            history = [
+                    new HistoryEntry(
+                            id: "1",
+                            author: "nvoxland",
+                            path: "db/changelog/db.changelog-master.xml",
+                    ),
+                    new HistoryEntry(
+                            id: "raw",
+                            author: "includeAll",
+                            path: "db/changelog/sql/create_test2.sql",
+                    ),
+                    new HistoryEntry(
+                            id: "raw",
+                            author: "includeAll",
+                            path: "db/changelog/sql/create_test3.sql",
+                    ),
+                    new HistoryEntry(
+                            id: "1571079854679-2",
+                            author: "nathan (generated)",
+                            path: "db/changelog/changelog-x.xml",
+                    ),
+            ]
+        }
+
+        outputFile = new File("target/test-classes/history.sql")
+
+        expectedFileContent = [
+                //
+                // Find the " -- Release Database Lock" line
+                //
+                "target/test-classes/history.sql" : [CommandTests.assertContains("Database updated at")]
+        ]
+
+        expectedResults = [
+                deployments: "1 past deployments",
+                statusCode : 0
+        ]
+    }
+
     run "Run without any arguments should throw an exception",  {
         arguments = [
                 url: ""

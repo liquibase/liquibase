@@ -2,6 +2,8 @@ package liquibase.extension.testing.command
 
 import liquibase.exception.CommandValidationException
 
+import java.util.regex.Pattern
+
 CommandTests.define {
     command = ["updateSql"]
     signature = """
@@ -26,12 +28,27 @@ Optional Args:
                 changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 
-        expectedOutput = [
-                """
--- *********************************************************************
--- Update Database Script
--- *********************************************************************
-"""
+        expectedResults = [
+                statusCode   : 0
+        ]
+    }
+    
+    run "Happy path with output file", {
+        arguments = [
+                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+        ]
+
+        setup {
+                cleanResources("target/test-classes/update.sql")
+        }
+
+        outputFile = new File("target/test-classes/update.sql")
+
+        expectedFileContent = [
+                //
+                // Find the " -- Release Database Lock" line
+                //
+                "target/test-classes/update.sql" : [CommandTests.assertContains("-- Release Database Lock")]
         ]
 
         expectedResults = [

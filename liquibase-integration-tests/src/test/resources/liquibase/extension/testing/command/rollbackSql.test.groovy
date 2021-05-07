@@ -24,7 +24,7 @@ Optional Args:
     Default: null
 """
 
-    run {
+    run "Happy path", {
         arguments = [
                 tag          : "version_2.0",
                 changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
@@ -33,6 +33,31 @@ Optional Args:
         setup {
             runChangelog "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
         }
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+    }
+
+    run "Happy path with an output file", {
+        arguments = [
+                tag          : "version_2.0",
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+        ]
+
+        setup {
+            cleanResources("target/test-classes/rollback.sql")
+            runChangelog "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+        }
+
+        outputFile = new File("target/test-classes/rollback.sql")
+
+        expectedFileContent = [
+                //
+                // Find the " -- Release Database Lock" line
+                //
+                "target/test-classes/rollback.sql" : [CommandTests.assertContains("-- Release Database Lock")]
+        ]
 
         expectedResults = [
                 statusCode   : 0

@@ -63,6 +63,55 @@ Optional Args:
         ]
     }
 
+    run "Happy path with output SQL", {
+        arguments = [
+                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+        ]
+
+        setup {
+            cleanResources("target/test-classes/changelogSync.sql")
+            database = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new TagDatabaseChange(
+                            tag: "version_2.0"
+                    ),
+                    new CreateTableChange(
+                            tableName: "liquibaseRunInfo",
+                            columns: [
+                                    ColumnConfig.fromName("timesRan")
+                                            .setType("INT")
+                            ]
+                    ),
+            ]
+        }
+
+        outputFile = new File("target/test-classes/changelogSync.sql")
+
+        expectedFileContent = [
+                //
+                // Find the " -- Release Database Lock" line
+                //
+                "target/test-classes/changelogSync.sql" : [CommandTests.assertContains("-- Release Database Lock")]
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+    }
+
     run "Run without URL should throw an exception",  {
         arguments = [
                 url: "",

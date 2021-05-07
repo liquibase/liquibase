@@ -32,6 +32,30 @@ Optional Args:
         ]
     }
 
+    run "Happy path with output file", {
+        arguments = [
+                tag          : "version_2.0",
+                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+        ]
+
+        setup {
+            cleanResources("target/test-classes/updateToTag.sql")
+        }
+
+        outputFile = new File("target/test-classes/updateToTag.sql")
+
+        expectedFileContent = [
+                //
+                // Find the " -- Release Database Lock" line
+                //
+                "target/test-classes/updateToTag.sql" : [CommandTests.assertContains("-- Release Database Lock")]
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+    }
+
     run "Run without a tag throws an exception", {
         arguments = [
                 url          : "",
