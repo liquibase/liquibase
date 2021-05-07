@@ -51,10 +51,6 @@ class LiquibaseCommandLineTest extends Specification {
         ["future-rollback-count", "5"]         | ["future-rollback-count", "--count", "5"]
         ["future-rollback-from-tag", "my-tag"] | ["future-rollback-from-tag", "--tag", "my-tag"]
 
-        ["--url", "jdbc:url", "update"]        | ["update", "--url", "jdbc:url"]
-        ["--url=jdbc:url", "update"]           | ["update", "--url=jdbc:url"]
-        ["--logLevel", "debug", "update"]      | ["--logLevel", "debug", "update"]
-        ["update", "--logLevel", "debug"]      | ["--logLevel", "debug", "update"]
-        ["--url", "jdbc:url", "--REFERENCE-URL=myurl", "update", "--logLevel", "debug", "--LOG-FILE=x"]      | ["--logLevel", "debug", "--LOG-FILE=x", "update", "--url", "jdbc:url", "--REFERENCE-URL=myurl"]
+        ["--log-level","DEBUG","--log-file","06V21.txt","--defaultsFile=liquibase.h2-mem.properties","update","--changelog-file","postgres_lbpro_master_changelog.xml","--labels","setup"] | ["--log-level","DEBUG","--log-file","06V21.txt","--defaultsFile=liquibase.h2-mem.properties","update","--changelog-file","postgres_lbpro_master_changelog.xml","--labels","setup"]
     }
 }

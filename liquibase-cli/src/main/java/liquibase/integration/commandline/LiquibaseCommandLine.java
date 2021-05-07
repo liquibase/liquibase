@@ -40,8 +40,16 @@ import static liquibase.util.SystemUtil.isWindows;
 public class LiquibaseCommandLine {
 
     private final Map<String, String> legacyPositionalArguments;
-    private final Set<String> legacyGlobalArguments;
-    private final Set<String> legacyCommandArguments;
+
+    /**
+     * Arguments that used to be global arguments but are now command-level
+     */
+    private final Set<String> legacyNoLongerGlobalArguments;
+
+    /**
+     * Arguments that used to be command arguments but are now global
+     */
+    private final Set<String> legacyNoLongerCommandArguments;
     private Level configuredLogLevel;
 
     private final CommandLine commandLine;
@@ -67,7 +75,6 @@ public class LiquibaseCommandLine {
     }
 
     public LiquibaseCommandLine() {
-        this.commandLine = buildPicoCommandLine();
         this.legacyPositionalArguments = new HashMap<>();
         this.legacyPositionalArguments.put("tag", "tag");
         this.legacyPositionalArguments.put("rollback", "tag");
@@ -76,17 +83,16 @@ public class LiquibaseCommandLine {
         this.legacyPositionalArguments.put("futurerollbackcount", "count");
         this.legacyPositionalArguments.put("futurerollbackfromtag", "tag");
 
-        this.legacyGlobalArguments = Stream.of(
+        this.legacyNoLongerGlobalArguments = Stream.of(
                 "username",
                 "password",
                 "url",
-                "databaseClass",
                 "outputDefaultSchema",
                 "outputDefaultCatalog",
                 "changeLogFile",
+                "hubConnectionId",
                 "contexts",
                 "labels",
-                "driverPropertiesFile",
                 "diffTypes",
                 "changeSetAuthor",
                 "changeSetContext",
@@ -109,11 +115,10 @@ public class LiquibaseCommandLine {
                 "sqlFile",
                 "delimiter",
                 "rollbackScript"
-        ).map(String::toLowerCase).collect(Collectors.toSet());
+        ).collect(Collectors.toSet());
 
-        this.legacyCommandArguments = Stream.of(
+        this.legacyNoLongerCommandArguments = Stream.of(
                 "driver",
-                "hubConnectionId",
                 "databaseClass",
                 "liquibaseCatalogName",
                 "liquibaseSchemaName",
@@ -121,7 +126,6 @@ public class LiquibaseCommandLine {
                 "databaseChangeLogLockTableName",
                 "databaseChangeLogTablespaceName",
                 "defaultCatalogName",
-                "changeLogFile",
                 "overwriteOutputFile",
                 "classpath",
                 "driverPropertiesFile",
@@ -137,8 +141,9 @@ public class LiquibaseCommandLine {
                 "outputFile",
                 "liquibaseProLicenseKey",
                 "liquibaseHubApiKey"
-        ).map(String::toLowerCase).collect(Collectors.toSet());
+        ).collect(Collectors.toSet());
 
+        this.commandLine = buildPicoCommandLine();
     }
 
     private CommandLine buildPicoCommandLine() {
@@ -251,50 +256,19 @@ public class LiquibaseCommandLine {
 
     protected String[] adjustLegacyArgs(String[] args) {
         List<String> returnArgs = new ArrayList<>();
-        List<String> prefixArgs = new ArrayList<>();
-        List<String> suffixArgs = new ArrayList<>();
 
         String lookingForPositional = null;
-        boolean seenCommand = false;
 
-        final Iterator<String> it = Arrays.asList(args).iterator();
-        while (it.hasNext()) {
-            String arg = it.next();
+        for (String arg : args) {
             String argAsKey = arg.replace("-", "").toLowerCase();
-            String argValue = null;
-            if (arg.contains("=")) {
-                String[] splitArg = arg.split("=");
-                argAsKey = splitArg[0].replace("-", "").toLowerCase();
-                argValue = splitArg[1];
-            }
 
             if (arg.startsWith("-")) {
-                if (seenCommand) {
-                    if (legacyCommandArguments.contains(argAsKey)) {
-                        prefixArgs.add(arg);
-                        if (argValue == null) {
-                            prefixArgs.add(it.next());
-                        }
-                    } else {
-                        returnArgs.add(arg);
-                    }
-                } else {
-                    if (legacyGlobalArguments.contains(argAsKey)) {
-                        suffixArgs.add(arg);
-                        if (argValue == null) {
-                            suffixArgs.add(it.next());
-                        }
-                    } else {
-                        returnArgs.add(arg);
-                    }
-                }
+                returnArgs.add(arg);
             } else {
-                seenCommand = true;
                 if (lookingForPositional == null) {
                     final String legacyTag = this.legacyPositionalArguments.get(argAsKey);
                     if (legacyTag != null) {
                         lookingForPositional = legacyTag;
-
                     }
                     returnArgs.add(arg);
                 } else {
@@ -305,8 +279,6 @@ public class LiquibaseCommandLine {
             }
         }
 
-        returnArgs.addAll(0, prefixArgs);
-        returnArgs.addAll(suffixArgs);
         return returnArgs.toArray(new String[0]);
     }
 
@@ -326,7 +298,7 @@ public class LiquibaseCommandLine {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
         List<ConfigurationValueProvider> returnList = new ArrayList<>();
 
-        final CommandLineArgumentValueProvider argumentProvider = new CommandLineArgumentValueProvider(commandLine.parseArgs(args));
+        final CommandLineArgumentValueProvider argumentProvider = new CommandLineArgumentValueProvider(commandLine.parseArgs(args), legacyNoLongerCommandArguments);
         liquibaseConfiguration.registerProvider(argumentProvider);
         returnList.add(argumentProvider);
 
@@ -552,6 +524,15 @@ public class LiquibaseCommandLine {
             }
         }
 
+        for (String legacyArg : legacyNoLongerCommandArguments) {
+            final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder("--" + legacyArg)
+                    .required(false)
+                    .type(String.class)
+                    .description("Legacy CLI argument")
+                    .hidden(true);
+            subCommandSpec.addOption(builder.build());
+        }
+
 
         commandLine.getCommandSpec().addSubcommand(StringUtil.toKabobCase(commandDefinition.getName()[0]), subCommandSpec);
     }
@@ -609,6 +590,16 @@ public class LiquibaseCommandLine {
                 final CommandLine.Model.OptionSpec optionSpec = optionBuilder.build();
                 rootCommandSpec.addOption(optionSpec);
             }
+        }
+
+        for (String arg : legacyNoLongerGlobalArguments) {
+            final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder("--"+arg)
+                    .required(false)
+                    .type(String.class)
+                    .hidden(false)
+                    .description("Legacy global argument");
+
+            rootCommandSpec.addOption(optionBuilder.build());
         }
     }
 
