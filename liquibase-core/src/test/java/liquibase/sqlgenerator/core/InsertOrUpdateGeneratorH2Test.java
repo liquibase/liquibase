@@ -109,4 +109,31 @@ public class InsertOrUpdateGeneratorH2Test {
         assertEquals(String.format("MERGE INTO %s.%s (%s, %s) KEY(%s) VALUES ('%s', '%s');", SCHEMA_NAME, TABLE_NAME, "pk1", "col0", "pk1", "keyvalue1", "value0"), results[0].toSql());
 	}
 
+	/**
+	 * Test method for {@link InsertOrUpdateGenerator#generateSql(InsertOrUpdateStatement, Database, SqlGeneratorChain)}.
+	 * Verify that " values " in the column value works.
+	 */
+	@Test
+	public void testGenerateSql_notOnlyUpdate_valuesInColumnValue() {
+		final InsertOrUpdateGeneratorH2 generator = new InsertOrUpdateGeneratorH2();
+
+		final InsertOrUpdateStatement insertOrUpdateStatement = new InsertOrUpdateStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME, "pk1");
+		final Database database = new H2Database();
+		final SqlGeneratorChain sqlGeneratorChain = null;
+
+		ColumnConfig columnConfig;
+        columnConfig = new ColumnConfig();
+        columnConfig.setValue("keyvalue1");
+        columnConfig.setName("pk1");
+        insertOrUpdateStatement.addColumn(columnConfig);
+        columnConfig = new ColumnConfig();
+        columnConfig.setValue("scale values mean");
+        columnConfig.setName("col0");
+        insertOrUpdateStatement.addColumn(columnConfig);
+
+		Sql[] results = generator.generateSql(insertOrUpdateStatement, database, sqlGeneratorChain);
+		assertThat(results, is(arrayWithSize(1)));
+        assertEquals(String.format("MERGE INTO %s.%s (%s, %s) KEY(%s) VALUES ('%s', '%s');", SCHEMA_NAME, TABLE_NAME, "pk1", "col0", "pk1", "keyvalue1", "scale values mean"), results[0].toSql());
+	}
+
 }
