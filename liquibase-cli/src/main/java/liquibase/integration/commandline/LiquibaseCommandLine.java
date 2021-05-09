@@ -339,6 +339,7 @@ public class LiquibaseCommandLine {
 
         ConsoleUIService ui = new ConsoleUIService();
         ui.setAllowPrompt(true);
+        ui.setOutputStream(System.err);
         returnMap.put(Scope.Attr.ui.name(), ui);
 
 

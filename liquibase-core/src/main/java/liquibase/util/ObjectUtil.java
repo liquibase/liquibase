@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -349,9 +350,16 @@ public class ObjectUtil {
                 }
             } else if (targetClass.isAssignableFrom(File.class)) {
                 return (T) new File(object.toString());
+            } else if (targetClass.equals(UUID.class)) {
+                return (T) UUID.fromString(object.toString());
+            } else if (Date.class.isAssignableFrom(targetClass)) {
+                return (T) new ISODateFormat().parse(object.toString());
             }
+
             return (T) object;
         } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(e);
+        } catch (ParseException e) {
             throw new IllegalArgumentException(e);
         }
     }
