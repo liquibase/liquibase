@@ -74,7 +74,7 @@ public class LiquibaseCommandLine {
         this.legacyPositionalArguments = new HashMap<>();
         this.legacyPositionalArguments.put("tag", "tag");
         this.legacyPositionalArguments.put("rollback", "tag");
-        this.legacyPositionalArguments.put("rollbackdate", "date");
+        this.legacyPositionalArguments.put("rollbacktodate", "date");
         this.legacyPositionalArguments.put("rollbackcount", "count");
         this.legacyPositionalArguments.put("futurerollbackcount", "count");
         this.legacyPositionalArguments.put("futurerollbackfromtag", "tag");

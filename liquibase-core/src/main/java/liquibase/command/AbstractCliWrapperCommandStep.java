@@ -45,7 +45,7 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
      * Called by {@link #run(CommandResultsBuilder)} to create the actual arguments passed to {@link Main#run(String[])}
      */
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createArgs(commandScope);
+        return createArgs(commandScope, Collections.singletonList("sqlFile"));
     }
 
     protected String[] createArgs(CommandScope commandScope) throws CommandExecutionException {
