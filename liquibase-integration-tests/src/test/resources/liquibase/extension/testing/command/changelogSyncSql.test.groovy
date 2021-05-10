@@ -16,6 +16,10 @@ Required Args:
 Optional Args:
   contexts (String) Context string to use for filtering which changes to mark as executed
     Default: null
+  defaultCatalogName (String) The default catalog name to use for the database connection
+    Default: null
+  defaultSchemaName (String) The default schema name to use for the database connection
+    Default: null
   labels (String) Label expression to use for filtering which changes to mark as executed
     Default: null
   password (String) The database password

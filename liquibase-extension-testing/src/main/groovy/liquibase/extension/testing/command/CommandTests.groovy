@@ -206,8 +206,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         commandScope.addArgumentValue("database", database)
         commandScope.addArgumentValue("url", database.getConnection().getURL())
-        commandScope.addArgumentValue("referenceUrl", database.getConnection().getURL())
-        commandScope.addArgumentValue("schemas", catalogAndSchemas)
         commandScope.setOutput(outputStream)
 
         if (testDef.setup != null) {
