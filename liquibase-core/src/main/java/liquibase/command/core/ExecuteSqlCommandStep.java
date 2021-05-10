@@ -3,6 +3,8 @@ package liquibase.command.core;
 import liquibase.command.*;
 import liquibase.exception.CommandExecutionException;
 
+import java.util.Arrays;
+
 public class ExecuteSqlCommandStep extends AbstractCliWrapperCommandStep {
 
     public static final String[] COMMAND_NAME = {"executeSql"};
@@ -42,6 +44,6 @@ public class ExecuteSqlCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createParametersFromArgs(createArgs(commandScope), "sql", "sqlFile", "delimiter");
+        return createArgs(commandScope, Arrays.asList("delimiter", "sql", "sqlFile"));
     }
 }
