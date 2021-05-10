@@ -30,6 +30,9 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
 
         String[] args = collectArguments(commandScope);
         int statusCode = Main.run(args);
+        if (statusCode != 0) {
+            throw new CommandExecutionException("Unexpected error running liquibase");
+        }
         resultsBuilder.addResult("statusCode", statusCode);
 
         if (printStream != null) {

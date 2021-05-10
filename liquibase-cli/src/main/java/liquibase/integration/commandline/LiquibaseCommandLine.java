@@ -506,6 +506,14 @@ public class LiquibaseCommandLine {
             for (int i = 0; i < argNames.length; i++) {
                 final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder(argNames[i])
                         .required(false)
+                        .converters(value -> {
+                            if (def.getDataType().equals(Boolean.class)) {
+                                if (value.equals("")) {
+                                    return "true";
+                                }
+                            }
+                            return value;
+                        })
                         .type(String.class);
 
 
