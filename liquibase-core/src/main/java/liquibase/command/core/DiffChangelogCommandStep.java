@@ -14,6 +14,10 @@ public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
+    public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
+    public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
+    public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
+    public static final CommandArgumentDefinition<String> DIFF_TYPES_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -31,6 +35,14 @@ public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
             .description("The target database password").build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
             .description("Changelog file to write results").build();
+        EXCLUDE_OBJECTS_ARG = builder.argument("excludeObjects", String.class)
+                .description("Objects to exclude from diff").build();
+        INCLUDE_OBJECTS_ARG = builder.argument("includeObjects", String.class)
+                .description("Objects to include in diff").build();
+        SCHEMAS_ARG = builder.argument("schemas", String.class)
+                .description("Schemas to include in diff").build();
+        DIFF_TYPES_ARG = builder.argument("diffTypes", String.class)
+                .description("Types of objects to compare").build();
     }
 
     @Override

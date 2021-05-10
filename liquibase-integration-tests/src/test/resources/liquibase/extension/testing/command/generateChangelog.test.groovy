@@ -16,6 +16,10 @@ Required Args:
 Optional Args:
   dataOutputDirectory (String) Directory to write table data to
     Default: null
+  excludeObjects (String) Objects to exclude from diff
+    Default: null
+  includeObjects (String) Objects to include in diff
+    Default: null
   password (String) Password to use to connect to the database
     Default: null
   username (String) Username to use to connect to the database

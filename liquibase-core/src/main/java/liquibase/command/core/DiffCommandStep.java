@@ -19,6 +19,8 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
+    public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
+    public static final CommandArgumentDefinition<String> DIFF_TYPES_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -38,6 +40,11 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
                 .description("Objects to exclude from diff").build();
         INCLUDE_OBJECTS_ARG = builder.argument("includeObjects", String.class)
                 .description("Objects to include in diff").build();
+        SCHEMAS_ARG = builder.argument("schemas", String.class)
+                .description("Schemas to include in diff").build();
+        DIFF_TYPES_ARG = builder.argument("diffTypes", String.class)
+                .description("Types of objects to compare").build();
+
     }
 
     @Override
