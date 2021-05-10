@@ -1,7 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
-import liquibase.integration.commandline.Main;
+import liquibase.exception.CommandExecutionException;
 
 public class ExecuteSqlCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -38,5 +38,10 @@ public class ExecuteSqlCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Execute a SQL string or file");
+    }
+
+    @Override
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return createParametersFromArgs(createArgs(commandScope), "sql", "sqlFile", "delimiter");
     }
 }

@@ -74,10 +74,15 @@ public class LiquibaseCommandLine {
         this.legacyPositionalArguments = new HashMap<>();
         this.legacyPositionalArguments.put("tag", "tag");
         this.legacyPositionalArguments.put("rollback", "tag");
+        this.legacyPositionalArguments.put("rollbacksql", "tag");
         this.legacyPositionalArguments.put("rollbacktodate", "date");
+        this.legacyPositionalArguments.put("rollbacktodatesql", "date");
         this.legacyPositionalArguments.put("rollbackcount", "count");
+        this.legacyPositionalArguments.put("rollbackcountsql", "count");
         this.legacyPositionalArguments.put("futurerollbackcount", "count");
+        this.legacyPositionalArguments.put("futurerollbackcountsql", "count");
         this.legacyPositionalArguments.put("futurerollbackfromtag", "tag");
+        this.legacyPositionalArguments.put("futurerollbackfromtagsql", "tag");
 
         this.legacyNoLongerGlobalArguments = Stream.of(
                 "username",
@@ -501,7 +506,7 @@ public class LiquibaseCommandLine {
             for (int i = 0; i < argNames.length; i++) {
                 final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder(argNames[i])
                         .required(false)
-                        .type(def.getDataType());
+                        .type(String.class);
 
 
                 String description = "(liquibase.command." + def.getName() + " OR liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
@@ -526,7 +531,7 @@ public class LiquibaseCommandLine {
 
 
                 if (def.getDataType().equals(Boolean.class)) {
-                    builder.arity("1");
+                    builder.arity("0..1");
                 }
 
 
@@ -569,7 +574,7 @@ public class LiquibaseCommandLine {
             for (int i = 0; i < argNames.length; i++) {
                 final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(argNames[i])
                         .required(false)
-                        .type(def.getDataType());
+                        .type(String.class);
 
                 String description = "(" + def.getKey() + ")\n"
                         + "(" + toEnvVariable(def.getKey()) + ")";
