@@ -57,6 +57,47 @@ Optional Args:
         ]
     }
 
+    run "Happy path with an unregistered changelog file", {
+        arguments = [
+                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+        ]
+        setup {
+            database = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new TagDatabaseChange(
+                            tag: "version_2.0"
+                    ),
+                    new CreateTableChange(
+                            tableName: "liquibaseRunInfo",
+                            columns: [
+                                    ColumnConfig.fromName("timesRan")
+                                            .setType("INT")
+                            ]
+                    ),
+            ]
+        }
+
+        expectedUI = [
+            CommandTests.assertContains("WARNING: The changelog file specified is not registered with any Liquibase Hub project")
+        ]
+        expectedResults = [
+                statusCode   : 0,
+        ]
+    }
+
     run "Run without a URL should throw an exception",  {
         arguments = [
                 url          : "",

@@ -28,7 +28,7 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> HUB_CONNECTION_ID_ARG;
     public static final CommandArgumentDefinition<String> HUB_PROJECT_ID_ARG;
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
-    public static final CommandArgumentDefinition<Boolean> FAIL_IF_ONLINE_ARG;
+    public static final CommandArgumentDefinition<Boolean> FAIL_IF_OFFLINE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -37,7 +37,7 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
         HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", String.class).build();
         HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", String.class).build();
         DATABASE_ARG = builder.argument("database", Database.class).build();
-        FAIL_IF_ONLINE_ARG = builder.argument("failIfOnline", Boolean.class).defaultValue(true).build();
+        FAIL_IF_OFFLINE_ARG = builder.argument("failIfOffline", Boolean.class).defaultValue(true).build();
     }
 
     @Override
@@ -57,7 +57,7 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
 
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
         if (! hubServiceFactory.isOnline()) {
-            if (commandScope.getArgumentValue(FAIL_IF_ONLINE_ARG)) {
+            if (commandScope.getArgumentValue(FAIL_IF_OFFLINE_ARG)) {
                 throw new CommandExecutionException("The command syncHub requires access to Liquibase Hub: " +
                         hubServiceFactory.getOfflineReason() +".  Learn more at https://hub.liquibase.com");
             } else {

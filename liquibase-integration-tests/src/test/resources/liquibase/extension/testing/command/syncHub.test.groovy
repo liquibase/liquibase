@@ -1,6 +1,8 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
+import liquibase.hub.core.MockHubService
 
 CommandTests.define {
     command = ["syncHub"]
@@ -33,6 +35,42 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "Run with both Hub connection ID and Hub Project ID throws an exception", {
+        arguments = [
+            hubConnectionId: {UUID.randomUUID().toString()},
+            hubProjectId: {UUID.randomUUID().toString()}
+        ]
+
+        setup {
+            runChangelog "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+        }
+        expectedException = CommandExecutionException.class
+    }
+
+    run "Run with deleted changelog throws an exception", {
+        arguments = [
+            changelogFile: "simple.changelog.with.id.xml"
+        ]
+
+        setup {
+            copyResource("changelogs/hsqldb/complete/simple.changelog.xml", "simple.changelog.with.id.xml")
+            modifyChangeLogId("simple.changelog.with.id.xml", MockHubService.deletedUUID.toString())
+            runChangelog "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+        }
+        expectedException = CommandExecutionException.class
+    }
+
+    run "Run with unrecognized changelog ID throws an exception", {
+        arguments = [
+            changelogFile: "changelogs/hsqldb/complete/simple.changelog.with.id.xml"
+        ]
+
+        setup {
+            runChangelog "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+        }
+        expectedException = CommandExecutionException.class
     }
 
     run "Run without any arguments should throw an exception",  {

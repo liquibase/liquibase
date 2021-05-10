@@ -318,7 +318,7 @@ public class HubUpdater {
                 .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, database.getConnection().getURL())
                 .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId != null ? Objects.toString(hubConnectionId) : null)
                 .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_ONLINE_ARG, false);
+                .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_OFFLINE_ARG, false);
 
         try {
             syncHub.execute();

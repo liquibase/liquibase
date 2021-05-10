@@ -13,6 +13,7 @@ import java.util.*;
 public class MockHubService implements HubService {
 
     public static UUID randomUUID;
+    public static UUID deletedUUID = UUID.randomUUID();
     public static Date operationCreateDate;
 
     public List<Project> returnProjects = new ArrayList<>();
@@ -180,6 +181,13 @@ public class MockHubService implements HubService {
                         .setFileName("com/example/test.xml")
                         .setProject(this.returnProjects.get(0))
         ));
+        HubChangeLog deletedChangeLog = new HubChangeLog()
+                                           .setId(deletedUUID)
+                                           .setName("Deleted changelog")
+                                           .setFileName("com/example/deleted.xml")
+                                           .setProject(this.returnProjects.get(0));
+        deletedChangeLog.setStatus("deleted");
+        this.returnChangeLogs.add(deletedChangeLog);
         this.sentObjects = new TreeMap<>();
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
         hubServiceFactory.setOfflineReason("Using MockHubService which is configured to be offline");
