@@ -14,6 +14,8 @@ Required Args:
   changelogFile (String) File to write changelog to
   url (String) The JDBC database connection URL
 Optional Args:
+  dataOutputDirectory (String) Directory to write table data to
+    Default: null
   password (String) Password to use to connect to the database
     Default: null
   username (String) Username to use to connect to the database
