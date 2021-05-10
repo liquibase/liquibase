@@ -1,7 +1,10 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
+
+import java.util.Arrays;
 
 public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -11,6 +14,7 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
+    public static final CommandArgumentDefinition<String> DATA_OUTPUT_DIRECTORY;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -22,11 +26,18 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
             .description("Password to use to connect to the database").build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
             .description("File to write changelog to").build();
+        DATA_OUTPUT_DIRECTORY = builder.argument("dataOutputDirectory", String.class)
+                .description("Directory to write table data to").build();
     }
 
     @Override
     public String[] getName() {
         return COMMAND_NAME;
+    }
+
+    @Override
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return createArgs(commandScope, Arrays.asList("dataOutputDirectory"));
     }
 
     @Override

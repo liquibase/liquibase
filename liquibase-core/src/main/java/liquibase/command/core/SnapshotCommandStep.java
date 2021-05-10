@@ -1,7 +1,10 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
+
+import java.util.Arrays;
 
 public class SnapshotCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -27,6 +30,11 @@ public class SnapshotCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     public String[] getName() {
         return COMMAND_NAME;
+    }
+
+    @Override
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return createArgs(commandScope, Arrays.asList(SNAPSHOT_FORMAT_ARG.getName()));
     }
 
     @Override
