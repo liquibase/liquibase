@@ -1,8 +1,8 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
-import liquibase.integration.commandline.Main;
 
 public class FutureRollbackCountSqlCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -21,23 +21,25 @@ public class FutureRollbackCountSqlCommandStep extends AbstractCliWrapperCommand
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
-            .description("The root changelog").build();
+                .description("The root changelog").build();
         URL_ARG = builder.argument("url", String.class).required()
-            .description("The JDBC database connection URL").build();
+                .description("The JDBC database connection URL").build();
         DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-            .description("The default schema name to use for the database connection").build();
+                .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-            .description("The default catalog name to use for the database connection").build();
+                .description("The default catalog name to use for the database connection").build();
         USERNAME_ARG = builder.argument("username", String.class)
-            .description("The database username").build();
+                .description("The database username").build();
         PASSWORD_ARG = builder.argument("password", String.class)
-            .description("The database password").build();
+                .description("The database password")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         LABELS_ARG = builder.argument("labels", String.class)
-            .description("Changeset labels to match").build();
+                .description("Changeset labels to match").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
-            .description("Changeset contexts to match").build();
+                .description("Changeset contexts to match").build();
         COUNT_ARG = builder.argument("count", Integer.class).required()
-            .description("Number of change sets to generate rollback SQL for").build();
+                .description("Number of change sets to generate rollback SQL for").build();
     }
 
     @Override

@@ -23,8 +23,10 @@ Optional Args:
     Default: null
   password (String) The target database password
     Default: null
+    OBFUSCATED
   referencePassword (String) The reference database password
     Default: null
+    OBFUSCATED
   referenceUsername (String) The reference database username
     Default: null
   schemas (String) Schemas to include in diff

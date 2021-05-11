@@ -98,6 +98,21 @@ class CommandTests extends Specification {
     }
 
     @Unroll("#featureName: #commandTestDefinition.testFile.name")
+    def "check for secure configurations"() {
+        expect:
+        def commandDefinition = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition(commandTestDefinition.getCommand() as String[])
+        assert commandDefinition != null: "Cannot find specified command ${commandTestDefinition.getCommand()}"
+        for (def argDef : commandDefinition.arguments.values()) {
+            if (argDef.name.toLowerCase().contains("password")) {
+                assert argDef.valueObfuscator != null : "${argDef.name} should be obfuscated OR explicitly set an obfuscator of ConfigurationValueObfuscator.NONE"
+            }
+        }
+
+        where:
+        commandTestDefinition << getCommandTestDefinitions()
+    }
+
+    @Unroll("#featureName: #commandTestDefinition.testFile.name")
     def "check command signature"() {
         expect:
         def commandDefinition = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition(commandTestDefinition.getCommand() as String[])
@@ -116,6 +131,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
             foundRequired = true
             signature.println "  ${argDef.name} (${argDef.dataType.simpleName}) ${argDef.description ?: "MISSING DESCRIPTION"}"
+            if (argDef.valueObfuscator != null) {
+                signature.println("    OBFUSCATED")
+            }
         }
         if (!foundRequired) {
             signature.println "  NONE"
@@ -131,6 +149,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             foundOptional = true
             signature.println "  ${argDef.name} (${argDef.dataType.simpleName}) ${argDef.description ?:  "MISSING DESCRIPTION"}"
             signature.println "    Default: ${argDef.defaultValueDescription}"
+            if (argDef.valueObfuscator != null) {
+                signature.println("    OBFUSCATED")
+            }
         }
         if (!foundOptional) {
             signature.println "  NONE"

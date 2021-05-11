@@ -1,6 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
 
 import java.util.Arrays;
@@ -21,21 +22,23 @@ public class ExecuteSqlCommandStep extends AbstractCliWrapperCommandStep {
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
-            .description("The JDBC database connection URL").build();
+                .description("The JDBC database connection URL").build();
         DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-            .description("The default schema name to use for the database connection").build();
+                .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-            .description("The default catalog name to use for the database connection").build();
+                .description("The default catalog name to use for the database connection").build();
         USERNAME_ARG = builder.argument("username", String.class)
-            .description("Username to use to connect to the database").build();
+                .description("Username to use to connect to the database").build();
         PASSWORD_ARG = builder.argument("password", String.class)
-            .description("Password to use to connect to the database").build();
+                .description("Password to use to connect to the database")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         SQL_ARG = builder.argument("sql", String.class)
-            .description("SQL string to execute").build();
+                .description("SQL string to execute").build();
         SQLFILE_ARG = builder.argument("sqlFile", String.class)
-            .description("SQL script to execute").build();
+                .description("SQL script to execute").build();
         DELIMITER_ARG = builder.argument("delimiter", String.class)
-            .description("Delimiter to use when executing SQL script").build();
+                .description("Delimiter to use when executing SQL script").build();
     }
 
     @Override

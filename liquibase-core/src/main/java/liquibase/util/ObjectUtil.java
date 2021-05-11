@@ -256,7 +256,7 @@ public class ObjectUtil {
         try {
             if (Enum.class.isAssignableFrom(targetClass)) {
                 try {
-                    return (T) Enum.valueOf((Class<Enum>) targetClass, object.toString());
+                    return (T) Enum.valueOf((Class<Enum>) targetClass, object.toString().toUpperCase());
                 } catch (Exception e) {
                     SortedSet<String> values = new TreeSet<>();
                     for (Enum value : ((Class<Enum>) targetClass).getEnumConstants()) {

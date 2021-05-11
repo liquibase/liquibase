@@ -19,6 +19,7 @@ Optional Args:
     Default: null
   password (String) Password to use to connect to the database
     Default: null
+    OBFUSCATED
   snapshotFormat (String) Output format to use (JSON or YAML
     Default: null
   username (String) Username to use to connect to the database

@@ -107,16 +107,16 @@ public class LiquibaseConfiguration implements SingletonObject {
 
     /**
      * Searches for the given keys in the current providers.
-     * @param keyAndAliases The first element should be the canonical key name, with later elements being aliases. At least one element must be provided.
      *
+     * @param keyAndAliases The first element should be the canonical key name, with later elements being aliases. At least one element must be provided.
      * @return the value for the key, or null if not configured.
      */
-    public ConfiguredValue<?> getCurrentConfiguredValue(String... keyAndAliases) {
+    public <DataType> ConfiguredValue<DataType> getCurrentConfiguredValue(ConfigurationValueConverter<DataType> converter, ConfigurationValueObfuscator<DataType> obfuscator, String... keyAndAliases) {
         if (keyAndAliases == null || keyAndAliases.length == 0) {
             throw new IllegalArgumentException("Must specify at least one key");
         }
 
-        ConfiguredValue<?> details = new ConfiguredValue<>(keyAndAliases[0]);
+        ConfiguredValue<DataType> details = new ConfiguredValue<>(keyAndAliases[0], converter, obfuscator);
 
         for (ConfigurationValueProvider provider : configurationValueProviders) {
             final ProvidedValue providerValue = provider.getProvidedValue(keyAndAliases);
@@ -131,7 +131,7 @@ public class LiquibaseConfiguration implements SingletonObject {
             lastLoggedKeyValues.put(keyAndAliases[0], foundValue);
 
             //avoid infinite loop when logging is getting set up
-            StringBuilder logMessage = new StringBuilder("Found '" + keyAndAliases[0] + "' configuration of '"+foundValue+"'");
+            StringBuilder logMessage = new StringBuilder("Found '" + keyAndAliases[0] + "' configuration of '" + details.getValueObfuscated() + "'");
             boolean foundFirstValue = false;
             for (ProvidedValue providedValue : details.getProvidedValues()) {
                 logMessage.append("\n    ");
@@ -139,9 +139,19 @@ public class LiquibaseConfiguration implements SingletonObject {
                     logMessage.append("Overrides ");
                 }
                 logMessage.append(providedValue.describe());
-                final Object value = providedValue.getValue();
+                Object value = providedValue.getValue();
                 if (value != null) {
-                    logMessage.append(" of '").append(providedValue.getValue()).append("'");
+                    if (converter != null) {
+                        value = converter.convert(value);
+                    }
+                    if (obfuscator != null) {
+                        try {
+                            value = obfuscator.obfuscate((DataType) value);
+                        } catch (ClassCastException e) {
+                            value = "*****";
+                        }
+                    }
+                    logMessage.append(" of '").append(value).append("'");
                 }
                 foundFirstValue = true;
             }

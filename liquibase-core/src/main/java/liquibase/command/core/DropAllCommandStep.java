@@ -1,7 +1,10 @@
 package liquibase.command.core;
 
-import liquibase.command.*;
-import liquibase.integration.commandline.Main;
+import liquibase.command.AbstractCliWrapperCommandStep;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandBuilder;
+import liquibase.command.CommandDefinition;
+import liquibase.configuration.ConfigurationValueObfuscator;
 
 import java.util.UUID;
 
@@ -21,21 +24,23 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
-            .description("The JDBC database connection URL").build();
+                .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
-            .description("Username to use to connect to the database").build();
+                .description("Username to use to connect to the database").build();
         SCHEMAS_ARG = builder.argument("schemas", String.class)
-            .description("Schemas to include in drop").build();
+                .description("Schemas to include in drop").build();
         DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-            .description("The default schema name to use for the database connection").build();
+                .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-            .description("The default catalog name to use for the database connection").build();
+                .description("The default catalog name to use for the database connection").build();
         PASSWORD_ARG = builder.argument("password", String.class)
-            .description("Password to use to connect to the database").build();
+                .description("Password to use to connect to the database")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
-            .description("The root changelog").build();
+                .description("The root changelog").build();
         HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", UUID.class)
-            .description("Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.").build();
+                .description("Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.").build();
     }
 
     @Override

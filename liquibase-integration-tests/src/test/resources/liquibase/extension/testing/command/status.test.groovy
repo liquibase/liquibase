@@ -21,6 +21,7 @@ Optional Args:
     Default: null
   password (String) Password to use to connect to the database
     Default: null
+    OBFUSCATED
   username (String) Username to use to connect to the database
     Default: null
   verbose (String) Verbose flag

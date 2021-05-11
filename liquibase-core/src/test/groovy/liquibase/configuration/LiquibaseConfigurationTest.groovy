@@ -11,7 +11,7 @@ class LiquibaseConfigurationTest extends Specification {
         def currentValue = Scope.child(["test.currentValue": "From scope"], new Scope.ScopedRunnerWithReturn<ConfiguredValue>() {
             @Override
             ConfiguredValue run() throws Exception {
-                return Scope.currentScope.getSingleton(LiquibaseConfiguration).getCurrentConfiguredValue("test.currentValue")
+                return Scope.currentScope.getSingleton(LiquibaseConfiguration).getCurrentConfiguredValue(null, null, "test.currentValue")
             }
         })
 
@@ -22,7 +22,7 @@ class LiquibaseConfigurationTest extends Specification {
 
     def "getCurrentConfiguredValue with no value found"() {
         when:
-        def currentValue = Scope.currentScope.getSingleton(LiquibaseConfiguration).getCurrentConfiguredValue("test.unknownValue")
+        def currentValue = Scope.currentScope.getSingleton(LiquibaseConfiguration).getCurrentConfiguredValue(null, null, "test.unknownValue")
 
         then:
         currentValue != null

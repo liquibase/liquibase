@@ -19,6 +19,7 @@ Optional Args:
     Default: null
   referencePassword (String) Reference password to use to connect to the database
     Default: null
+    OBFUSCATED
   referenceUsername (String) Reference username to use to connect to the database
     Default: null
   snapshotFormat (String) Output format to use (JSON or YAML

@@ -1,7 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
-import liquibase.integration.commandline.Main;
+import liquibase.configuration.ConfigurationValueObfuscator;
 
 public class ChangelogSyncCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -29,7 +29,9 @@ public class ChangelogSyncCommandStep extends AbstractCliWrapperCommandStep {
         USERNAME_ARG = builder.argument("username", String.class)
             .description("The database username").build();
         PASSWORD_ARG = builder.argument("password", String.class)
-            .description("The database password").build();
+            .description("The database password")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         LABELS_ARG = builder.argument("labels", String.class)
             .description("Label expression to use for filtering which changes to mark as executed").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)

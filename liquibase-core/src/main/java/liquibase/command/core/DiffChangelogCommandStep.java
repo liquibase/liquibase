@@ -1,7 +1,10 @@
 package liquibase.command.core;
 
-import liquibase.command.*;
-import liquibase.integration.commandline.Main;
+import liquibase.command.AbstractCliWrapperCommandStep;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandBuilder;
+import liquibase.command.CommandDefinition;
+import liquibase.configuration.ConfigurationValueObfuscator;
 
 public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -26,27 +29,30 @@ public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required()
-            .description("The JDBC reference database connection URL").build();
+                .description("The JDBC reference database connection URL").build();
         REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class)
-            .description("The reference database username").build();
+                .description("The reference database username").build();
         REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class)
-            .description("The reference database password").build();
+                .description("The reference database password")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD).build();
         REFERENCE_DEFAULT_SCHEMA_NAME_ARG = builder.argument("referenceDefaultSchemaName", String.class)
-            .description("The reference default schema name to use for the database connection").build();
+                .description("The reference default schema name to use for the database connection").build();
         REFERENCE_DEFAULT_CATALOG_NAME_ARG = builder.argument("referenceDefaultCatalogName", String.class)
-            .description("The reference default catalog name to use for the database connection").build();
+                .description("The reference default catalog name to use for the database connection").build();
         URL_ARG = builder.argument("url", String.class).required()
-            .description("The JDBC target database connection URL").build();
+                .description("The JDBC target database connection URL").build();
         DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-            .description("The default schema name to use for the database connection").build();
+                .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-            .description("The default catalog name to use for the database connection").build();
+                .description("The default catalog name to use for the database connection").build();
         USERNAME_ARG = builder.argument("username", String.class)
-            .description("The target database username").build();
+                .description("The target database username").build();
         PASSWORD_ARG = builder.argument("password", String.class)
-            .description("The target database password").build();
+                .description("The target database password")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
-            .description("Changelog file to write results").build();
+                .description("Changelog file to write results").build();
         EXCLUDE_OBJECTS_ARG = builder.argument("excludeObjects", String.class)
                 .description("Objects to exclude from diff").build();
         INCLUDE_OBJECTS_ARG = builder.argument("includeObjects", String.class)
