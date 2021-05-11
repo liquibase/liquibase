@@ -729,6 +729,11 @@ public class Main {
      * @throws CommandLineParsingException if an error occurs during parsing
      */
     protected void parseDefaultPropertyFiles() throws CommandLineParsingException {
+        if (Main.runningFromNewCli) {
+            //properties file already handled and set earlier
+            return;
+        }
+
         File[] potentialPropertyFiles = new File[2];
 
         potentialPropertyFiles[0] = new File(defaultsFile);
