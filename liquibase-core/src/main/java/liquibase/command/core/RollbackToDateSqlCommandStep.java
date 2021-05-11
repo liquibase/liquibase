@@ -21,6 +21,8 @@ public class RollbackToDateSqlCommandStep extends AbstractCliWrapperCommandStep 
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> ROLLBACK_SCRIPT_ARG;
     public static final CommandArgumentDefinition<LocalDateTime> DATE_ARG;
+    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
+    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -44,6 +46,10 @@ public class RollbackToDateSqlCommandStep extends AbstractCliWrapperCommandStep 
             .description("Rollback script to execute").build();
         DATE_ARG = builder.argument("date", LocalDateTime.class).required()
             .description("Date to rollback changes to").build();
+        CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)
+            .description("Fully-qualified class which specifies a ChangeExecListener").build();
+        CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
+            .description("Path to a properties file for the ChangeExecListenerClass").build();
     }
 
     @Override
