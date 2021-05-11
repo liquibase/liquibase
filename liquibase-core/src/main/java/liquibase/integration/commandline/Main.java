@@ -1198,7 +1198,7 @@ public class Main {
         // Check the licensing keys to see if they are being set from properties
         //
         if (liquibaseProLicenseKey == null) {
-            String key = (String)Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue("liquibase.pro.licenseKey").getValue();
+            String key = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.pro.licenseKey").getValue();
             liquibaseProLicenseKey = key;
         }
         if (liquibaseHubApiKey == null) {
@@ -1407,9 +1407,7 @@ public class Main {
         if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue())) {
             LOG.fine("Liquibase Hub URL:      " + HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue());
         }
-        if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue())) {
-            LOG.fine("Liquibase Hub Mode:     " + HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
-        }
+        LOG.fine("Liquibase Hub Mode:     " + HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
 
         //
         // Check for a valid license to run PRO commands
@@ -1447,7 +1445,7 @@ public class Main {
         final ResourceAccessor fileOpener;
         if (Main.runningFromNewCli) {
             fileOpener = Scope.getCurrentScope().getResourceAccessor();
-        }else {
+        } else {
             fileOpener = new CompositeResourceAccessor(
                     new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
                     new CommandLineResourceAccessor(classLoader)
@@ -1745,8 +1743,8 @@ public class Main {
                 return;
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
                 String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
-                String hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
-                if (liquibaseHubApiKey != null && !hubMode.toLowerCase().equals("off")) {
+                HubConfiguration.HubMode hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
+                if (liquibaseHubApiKey != null && hubMode != HubConfiguration.HubMode.OFF) {
                     if (hubConnectionId == null && changeLogFile == null) {
                         String warningMessage =
                                 "The dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +
@@ -1972,10 +1970,10 @@ public class Main {
         CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalSyncHub", argsMap);
 
         liquibaseCommand
-                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId == null ? null : UUID.fromString(hubConnectionId))
                 .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, url)
                 .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId == null ? null : UUID.fromString(hubProjectId));
 
         liquibaseCommand.execute();
     }

@@ -1,8 +1,8 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
-import liquibase.integration.commandline.Main;
 
 public class RollbackCountCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -32,7 +32,9 @@ public class RollbackCountCommandStep extends AbstractCliWrapperCommandStep {
         USERNAME_ARG = builder.argument("username", String.class)
             .description("Username to use to connect to the database").build();
         PASSWORD_ARG = builder.argument("password", String.class)
-            .description("Password to use to connect to the database").build();
+            .description("Password to use to connect to the database")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
             .description("The root changelog").build();
         LABELS_ARG = builder.argument("labels", String.class)

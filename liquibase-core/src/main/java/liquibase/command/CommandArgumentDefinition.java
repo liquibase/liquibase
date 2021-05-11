@@ -28,13 +28,13 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private boolean required;
     private DataType defaultValue;
     private String defaultValueDescription;
-    private ConfigurationValueConverter<DataType> valueHandler;
+    private ConfigurationValueConverter<DataType> valueConverter;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
 
     protected CommandArgumentDefinition(String name, Class<DataType> type) {
         this.name = name;
         this.dataType = type;
-        this.valueHandler = value -> ObjectUtil.convert(value, type);
+        this.valueConverter = value -> ObjectUtil.convert(value, type);
     }
 
     /**
@@ -85,8 +85,8 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      * Function for converting values set in underlying {@link liquibase.configuration.ConfigurationValueProvider}s into the
      * type needed for this command.
      */
-    public ConfigurationValueConverter<DataType> getValueHandler() {
-        return valueHandler;
+    public ConfigurationValueConverter<DataType> getValueConverter() {
+        return valueConverter;
     }
 
     /**
@@ -200,10 +200,10 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         }
 
         /**
-         * Set the {@link #getValueHandler()} to use.
+         * Set the {@link #getValueConverter()} to use.
          */
         public Building<DataType> setValueHandler(ConfigurationValueConverter<DataType> valueHandler) {
-            newCommandArgument.valueHandler = valueHandler;
+            newCommandArgument.valueConverter = valueHandler;
             return this;
         }
 

@@ -14,8 +14,6 @@ public class IntegrationConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<Class> DRIVER;
     public static final ConfigurationDefinition<Class> DATABASE_CLASS;
-    public static final ConfigurationDefinition<String> DEFAULT_SCHEMA_NAME;
-    public static final ConfigurationDefinition<String> DEFAULT_CATALOG_NAME;
     public static final ConfigurationDefinition<String> CLASSPATH;
     public static final ConfigurationDefinition<String> DRIVER_PROPERTIES_FILE;
     public static final ConfigurationDefinition<Class> PROPERTY_PROVIDER_CLASS;
@@ -31,8 +29,6 @@ public class IntegrationConfiguration implements AutoloadedConfigurations {
 
         DRIVER = builder.define("driver", Class.class).build();
         DATABASE_CLASS = builder.define("databaseClass", Class.class).build();
-        DEFAULT_SCHEMA_NAME = builder.define("defaultSchemaName", String.class).build();
-        DEFAULT_CATALOG_NAME = builder.define("defaultCatalogName", String.class).build();
         CLASSPATH = builder.define("classpath", String.class).build();
         DRIVER_PROPERTIES_FILE = builder.define("driverPropertiesFile", String.class).build();
         PROPERTY_PROVIDER_CLASS = builder.define("propertyProviderClass", Class.class).build();

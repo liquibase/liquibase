@@ -1,7 +1,10 @@
 package liquibase.command.core;
 
-import liquibase.command.*;
-import liquibase.integration.commandline.Main;
+import liquibase.command.AbstractCliWrapperCommandStep;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandBuilder;
+import liquibase.command.CommandDefinition;
+import liquibase.configuration.ConfigurationValueObfuscator;
 
 public class ClearChecksumsCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -16,15 +19,16 @@ public class ClearChecksumsCommandStep extends AbstractCliWrapperCommandStep {
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
-            .description("The JDBC database connection URL").build();
+                .description("The JDBC database connection URL").build();
         DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-            .description("The default schema name to use for the database connection").build();
+                .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-            .description("The default catalog name to use for the database connection").build();
+                .description("The default catalog name to use for the database connection").build();
         USERNAME_ARG = builder.argument("username", String.class)
-            .description("The database username").build();
+                .description("The database username").build();
         PASSWORD_ARG = builder.argument("password", String.class)
-            .description("The database password").build();
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .description("The database password").build();
     }
 
     @Override
@@ -36,6 +40,6 @@ public class ClearChecksumsCommandStep extends AbstractCliWrapperCommandStep {
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Clears all checksums");
         commandDefinition.setLongDescription("Clears all checksums and nullifies the MD5SUM column of the " +
-            "DATABASECHANGELOG table so that they will be re-computed on the next database update");
+                "DATABASECHANGELOG table so that they will be re-computed on the next database update");
     }
 }

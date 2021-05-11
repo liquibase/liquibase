@@ -187,9 +187,13 @@ public class LiquibaseCommandLine {
             cause = cause.getCause();
         }
 
-        //clean up message
-        bestMessage = bestMessage.replaceFirst("^[\\w.]*exception[\\w.]*: ", "");
-        bestMessage = bestMessage.replace("Unexpected error running Liquibase: ", "");
+        if (bestMessage == null) {
+            bestMessage = exception.getClass().getName();
+        } else {
+            //clean up message
+            bestMessage = bestMessage.replaceFirst("^[\\w.]*exception[\\w.]*: ", "");
+            bestMessage = bestMessage.replace("Unexpected error running Liquibase: ", "");
+        }
 
         Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
 
@@ -246,8 +250,7 @@ public class LiquibaseCommandLine {
 
                     if (response == 0) {
                         final String commandName = StringUtil.join(getCommandNames(commandLine.getParseResult()), " ");
-                        if (!commandName.equals("")) {
-                            //don't include for --version, --help, etc.
+                        if (wasHelpOrVersionRequeted()) {
                             Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
                         }
                     }
@@ -267,6 +270,19 @@ public class LiquibaseCommandLine {
         } finally {
             cleanup();
         }
+    }
+
+    private boolean wasHelpOrVersionRequeted() {
+        CommandLine.ParseResult parseResult = commandLine.getParseResult();
+
+        while (parseResult != null) {
+            if (parseResult.isUsageHelpRequested() || parseResult.isVersionHelpRequested()) {
+                return true;
+            }
+            parseResult = parseResult.subcommand();
+        }
+
+        return false;
     }
 
     protected String[] adjustLegacyArgs(String[] args) {
@@ -529,23 +545,23 @@ public class LiquibaseCommandLine {
                         .type(String.class);
 
 
-                String description = "(liquibase.command." + def.getName() + " OR liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
+                String description = "\n(liquibase.command." + def.getName() + " OR liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
                         "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " + toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName()) + ")";
 
                 if (def.getDefaultValue() != null) {
                     if (def.getDefaultValueDescription() == null) {
-                        description = "DEFAULT: " + def.getDefaultValue() + "\n" + description;
+                        description = "\nDEFAULT: " + def.getDefaultValue() + "\n" + description;
                     } else {
-                        description = "DEFAULT: " + def.getDefaultValueDescription() + "\n" + description;
+                        description = "\nDEFAULT: " + def.getDefaultValueDescription() + "\n" + description;
                     }
                 }
 
                 if (def.getDescription() != null) {
-                    description = def.getDescription() + "\n" + description;
+                    description = def.getDescription() + description;
                 }
 
                 if (def.isRequired()) {
-                    description += "\n[REQUIRED]";
+                    description = "[REQUIRED] "+description;
                 }
                 builder.description(description + "\n");
 
@@ -611,11 +627,6 @@ public class LiquibaseCommandLine {
                     description = def.getDescription() + "\n" + description;
                 }
                 optionBuilder.description(description + "\n");
-
-                final ConfigurationValueConverter<?> valueHandler = def.getValueHandler();
-                if (valueHandler != null) {
-                    optionBuilder.converters(valueHandler::convert);
-                }
 
                 if (def.getDataType().equals(Boolean.class)) {
                     optionBuilder.arity("1");

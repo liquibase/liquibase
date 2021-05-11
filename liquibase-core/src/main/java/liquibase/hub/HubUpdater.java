@@ -316,7 +316,7 @@ public class HubUpdater {
         final CommandScope syncHub = new CommandScope("internalSyncHub")
                 .addArgumentValue(InternalSyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, database.getConnection().getURL())
-                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId != null ? Objects.toString(hubConnectionId) : null)
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
                 .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_OFFLINE_ARG, false);
 
@@ -449,7 +449,7 @@ public class HubUpdater {
                 // If there is no liquibase.hub.mode setting then add one with value 'all'
                 // Do not update liquibase.hub.mode if it is already set
                 //
-                ConfiguredValue<String> hubModeProperty = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentConfiguredValue();
+                ConfiguredValue<HubConfiguration.HubMode> hubModeProperty = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentConfiguredValue();
                 if (ConfigurationDefinition.wasDefaultValueUsed(hubModeProperty)) {
                     writeToPropertiesFile(defaultsFile, "\nliquibase.hub.mode=all\n");
                     message = "* Updated properties file " + defaultsFile + " to set liquibase.hub properties";

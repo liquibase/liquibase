@@ -1,8 +1,8 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
-import liquibase.integration.commandline.Main;
 
 public class DbDocCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -19,19 +19,21 @@ public class DbDocCommandStep extends AbstractCliWrapperCommandStep {
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
-            .description("The root changelog").required().build();
+                .description("The root changelog").required().build();
         URL_ARG = builder.argument("url", String.class).required()
-            .description("The JDBC database connection URL").build();
+                .description("The JDBC database connection URL").build();
         DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-            .description("The default schema name to use for the database connection").build();
+                .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-            .description("The default catalog name to use for the database connection").build();
+                .description("The default catalog name to use for the database connection").build();
         USERNAME_ARG = builder.argument("username", String.class)
-            .description("The database username").build();
+                .description("The database username").build();
         PASSWORD_ARG = builder.argument("password", String.class)
-            .description("The database password").build();
+                .description("The database password")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         OUTPUT_DIRECTORY_ARG = builder.argument("outputDirectory", String.class).required()
-            .description("The directory where the documentation is generated").build();
+                .description("The directory where the documentation is generated").build();
     }
 
     @Override

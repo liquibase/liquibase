@@ -1,8 +1,8 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
-import liquibase.integration.commandline.Main;
 
 public class RollbackSqlCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -24,23 +24,25 @@ public class RollbackSqlCommandStep extends AbstractCliWrapperCommandStep {
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
-            .description("The JDBC database connection URL").build();
+                .description("The JDBC database connection URL").build();
         DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-            .description("The default schema name to use for the database connection").build();
+                .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-            .description("The default catalog name to use for the database connection").build();
+                .description("The default catalog name to use for the database connection").build();
         USERNAME_ARG = builder.argument("username", String.class)
-            .description("Username to use to connect to the database").build();
+                .description("Username to use to connect to the database").build();
         PASSWORD_ARG = builder.argument("password", String.class)
-            .description("Password to use to connect to the database").build();
+                .description("Password to use to connect to the database")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
-            .description("File to write changelog to").build();
+                .description("File to write changelog to").build();
         LABELS_ARG = builder.argument("labels", String.class)
-            .description("Changeset labels to match").build();
+                .description("Changeset labels to match").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
-            .description("Changeset contexts to match").build();
+                .description("Changeset contexts to match").build();
         ROLLBACK_SCRIPT_ARG = builder.argument("rollbackScript", String.class)
-            .description("Rollback script to execute").build();
+                .description("Rollback script to execute").build();
         TAG_ARG = builder.argument("tag", String.class).required()
             .description("Tag to rollback to").build();
         CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)

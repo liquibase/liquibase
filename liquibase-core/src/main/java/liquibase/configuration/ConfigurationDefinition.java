@@ -3,6 +3,7 @@ package liquibase.configuration;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -29,7 +30,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     private DataType defaultValue;
     private String defaultValueDescription;
     private boolean commonlyUsed;
-    private ConfigurationValueConverter<DataType> valueHandler;
+    private ConfigurationValueConverter<DataType> valueConverter;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
 
     private static final Pattern ALLOWED_KEY_PATTERN = Pattern.compile("[a-zA-Z0-9.]+");
@@ -59,7 +60,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
 
         this.key = key;
         this.dataType = dataType;
-        this.valueHandler = value -> ObjectUtil.convert(value, dataType);
+        this.valueConverter = value -> ObjectUtil.convert(value, dataType);
     }
 
     /**
@@ -74,8 +75,8 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         }
     }
 
-    public ConfigurationValueConverter<DataType> getValueHandler() {
-        return valueHandler;
+    public ConfigurationValueConverter<DataType> getValueConverter() {
+        return valueConverter;
     }
 
     /**
@@ -84,13 +85,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
      * @return the obfuscated value, or the plain-text value if no obfuscator is defined for this definition.
      */
     public DataType getCurrentValueObfuscated() {
-        final DataType currentValue = getCurrentValue();
-
-        if (this.valueObfuscator == null) {
-            return currentValue;
-        }
-
-        return this.valueObfuscator.obfuscate(currentValue);
+        return getCurrentConfiguredValue().getValueObfuscated();
     }
 
     /**
@@ -104,7 +99,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         keyList.add(this.getKey());
         keyList.addAll(this.getAliasKeys());
 
-        ConfiguredValue<?> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(keyList.toArray(new String[0]));
+        ConfiguredValue<?> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(valueConverter, valueObfuscator, keyList.toArray(new String[0]));
 
         if (!configurationValue.found()) {
             defaultValue = this.getDefaultValue();
@@ -115,12 +110,16 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
 
         final ProvidedValue providedValue = configurationValue.getProvidedValue();
         final Object originalValue = providedValue.getValue();
-        final DataType finalValue = valueHandler.convert(originalValue);
-        if (originalValue != finalValue) {
-            configurationValue.override(new ConvertedValueProvider<DataType>(finalValue, providedValue).getProvidedValue(key));
-        }
+        try {
+            final DataType finalValue = valueConverter.convert(originalValue);
+            if (originalValue != finalValue) {
+                configurationValue.override(new ConvertedValueProvider<DataType>(finalValue, providedValue).getProvidedValue(key));
+            }
 
-        return (ConfiguredValue<DataType>) configurationValue;
+            return (ConfiguredValue<DataType>) configurationValue;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("An invalid " + (providedValue.getSourceDescription().toLowerCase() + " value " + providedValue.getActualKey() + " detected: " + StringUtil.lowerCaseFirst(e.getMessage())), e);
+        }
     }
 
     /**
@@ -284,7 +283,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         }
 
         public Building<DataType> setValueHandler(ConfigurationValueConverter<DataType> handler) {
-            definition.valueHandler = handler;
+            definition.valueConverter = handler;
 
             return this;
         }

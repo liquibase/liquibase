@@ -255,7 +255,15 @@ public class ObjectUtil {
 
         try {
             if (Enum.class.isAssignableFrom(targetClass)) {
-                return (T) Enum.valueOf((Class<Enum>) targetClass, object.toString());
+                try {
+                    return (T) Enum.valueOf((Class<Enum>) targetClass, object.toString().toUpperCase());
+                } catch (Exception e) {
+                    SortedSet<String> values = new TreeSet<>();
+                    for (Enum value : ((Class<Enum>) targetClass).getEnumConstants()) {
+                        values.add(value.name());
+                    }
+                    throw new IllegalArgumentException("Invalid value "+object+". Acceptable values are "+StringUtil.join(values, ", "));
+                }
             } else if (Number.class.isAssignableFrom(targetClass)) {
                 if (object instanceof Number) {
                     Number number = (Number) object;

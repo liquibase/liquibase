@@ -1,8 +1,8 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
-import liquibase.integration.commandline.Main;
 
 import java.util.Arrays;
 
@@ -23,13 +23,15 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).required()
-            .description("The JDBC database connection URL").build();
+                .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
-            .description("Username to use to connect to the database").build();
+                .description("Username to use to connect to the database").build();
         PASSWORD_ARG = builder.argument("password", String.class)
-            .description("Password to use to connect to the database").build();
+                .description("Password to use to connect to the database")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
-            .description("File to write changelog to").build();
+                .description("File to write changelog to").build();
         DATA_OUTPUT_DIRECTORY = builder.argument("dataOutputDirectory", String.class)
                 .description("Directory to write table data to").build();
         EXCLUDE_OBJECTS_ARG = builder.argument("excludeObjects", String.class)

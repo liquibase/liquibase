@@ -28,12 +28,14 @@ Optional Args:
     Default: null
   password (String) The target database password
     Default: null
+    OBFUSCATED
   referenceDefaultCatalogName (String) The reference default catalog name to use for the database connection
     Default: null
   referenceDefaultSchemaName (String) The reference default schema name to use for the database connection
     Default: null
   referencePassword (String) The reference database password
     Default: null
+    OBFUSCATED
   referenceUsername (String) The reference database username
     Default: null
   schemas (String) Schemas to include in diff

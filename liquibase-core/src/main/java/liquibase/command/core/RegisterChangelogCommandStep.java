@@ -38,7 +38,7 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
             .description("The root changelog").build();
         HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", UUID.class).optional()
-            .description("The Hub project ID").build();
+            .description("Used to identify the specific Project in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub account at https://hub.liquibase.com.").build();
         HUB_PROJECT_NAME_ARG = builder.argument("hubProjectName", String.class).optional()
             .description("The Hub project name").build();
 

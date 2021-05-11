@@ -19,6 +19,7 @@ Optional Args:
     Default: null
   password (String) The database password
     Default: null
+    OBFUSCATED
   username (String) The database username
     Default: null
 """

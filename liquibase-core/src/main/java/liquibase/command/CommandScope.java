@@ -93,11 +93,11 @@ public class CommandScope {
 
     /**
      * Convenience method for {@link #getConfiguredValue(CommandArgumentDefinition)}, returning {@link ConfiguredValue#getValue()} along with any
-     * {@link CommandArgumentDefinition#getValueHandler()} applied
+     * {@link CommandArgumentDefinition#getValueConverter()} applied
      */
     public <T> T getArgumentValue(CommandArgumentDefinition<T> argument) {
         final T value = getConfiguredValue(argument).getValue();
-        return argument.getValueHandler().convert(value);
+        return argument.getValueConverter().convert(value);
     }
 
     /**
@@ -153,7 +153,7 @@ public class CommandScope {
                 .addAliasKey(shortConfigPrefix + "." + argument.getName())
                 .setDefaultValue(argument.getDefaultValue())
                 .setDescription(argument.getDescription())
-                .setValueHandler(argument.getValueHandler())
+                .setValueHandler(argument.getValueConverter())
                 .setValueObfuscator(argument.getValueObfuscator())
                 .buildTemporary();
     }

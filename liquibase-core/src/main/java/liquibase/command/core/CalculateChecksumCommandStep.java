@@ -1,8 +1,8 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
-import liquibase.integration.commandline.Main;
 
 public class CalculateChecksumCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -29,7 +29,9 @@ public class CalculateChecksumCommandStep extends AbstractCliWrapperCommandStep 
         USERNAME_ARG = builder.argument("username", String.class)
                 .description("The database username").build();
         PASSWORD_ARG = builder.argument("password", String.class)
-                .description("The database password").build();
+                .description("The database password")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         CHANGESET_IDENTIFIER_ARG = builder.argument("changesetIdentifier", String.class).required()
                 .description("Change set ID identifier of form filepath::id::author").build();
     }

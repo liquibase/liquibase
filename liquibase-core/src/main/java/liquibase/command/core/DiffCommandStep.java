@@ -1,10 +1,9 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
-import liquibase.integration.commandline.Main;
 
-import java.io.PrintStream;
 import java.util.Arrays;
 
 public class DiffCommandStep extends AbstractCliWrapperCommandStep {
@@ -25,17 +24,21 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required()
-            .description("The JDBC reference database connection URL").build();
+                .description("The JDBC reference database connection URL").build();
         REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class)
-            .description("The reference database username").build();
+                .description("The reference database username").build();
         REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class)
-            .description("The reference database password").build();
+                .description("The reference database password")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         URL_ARG = builder.argument("url", String.class).required()
-            .description("The JDBC target database connection URL").build();
+                .description("The JDBC target database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
-            .description("The target database username").build();
+                .description("The target database username").build();
         PASSWORD_ARG = builder.argument("password", String.class)
-            .description("The target database password").build();
+                .description("The target database password")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         EXCLUDE_OBJECTS_ARG = builder.argument("excludeObjects", String.class)
                 .description("Objects to exclude from diff").build();
         INCLUDE_OBJECTS_ARG = builder.argument("includeObjects", String.class)
