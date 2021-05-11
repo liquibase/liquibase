@@ -612,11 +612,6 @@ public class LiquibaseCommandLine {
                 }
                 optionBuilder.description(description + "\n");
 
-                final ConfigurationValueConverter<?> valueHandler = def.getValueHandler();
-                if (valueHandler != null) {
-                    optionBuilder.converters(valueHandler::convert);
-                }
-
                 if (def.getDataType().equals(Boolean.class)) {
                     optionBuilder.arity("1");
                 }

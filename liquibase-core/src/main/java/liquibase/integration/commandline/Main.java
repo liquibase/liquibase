@@ -7,6 +7,7 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
+import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
@@ -1407,9 +1408,7 @@ public class Main {
         if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue())) {
             LOG.fine("Liquibase Hub URL:      " + HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue());
         }
-        if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue())) {
-            LOG.fine("Liquibase Hub Mode:     " + HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
-        }
+        LOG.fine("Liquibase Hub Mode:     " + HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
 
         //
         // Check for a valid license to run PRO commands
@@ -1745,8 +1744,8 @@ public class Main {
                 return;
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
                 String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
-                String hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
-                if (liquibaseHubApiKey != null && !hubMode.toLowerCase().equals("off")) {
+                HubConfiguration.HubMode hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
+                if (liquibaseHubApiKey != null && hubMode != HubConfiguration.HubMode.OFF) {
                     if (hubConnectionId == null && changeLogFile == null) {
                         String warningMessage =
                                 "The dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +

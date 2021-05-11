@@ -3,6 +3,7 @@ package liquibase.configuration;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -115,12 +116,16 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
 
         final ProvidedValue providedValue = configurationValue.getProvidedValue();
         final Object originalValue = providedValue.getValue();
-        final DataType finalValue = valueHandler.convert(originalValue);
-        if (originalValue != finalValue) {
-            configurationValue.override(new ConvertedValueProvider<DataType>(finalValue, providedValue).getProvidedValue(key));
-        }
+        try {
+            final DataType finalValue = valueHandler.convert(originalValue);
+            if (originalValue != finalValue) {
+                configurationValue.override(new ConvertedValueProvider<DataType>(finalValue, providedValue).getProvidedValue(key));
+            }
 
-        return (ConfiguredValue<DataType>) configurationValue;
+            return (ConfiguredValue<DataType>) configurationValue;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("An invalid " + (providedValue.getSourceDescription().toLowerCase() + " value " + providedValue.getActualKey() + " detected: " + StringUtil.lowerCaseFirst(e.getMessage())), e);
+        }
     }
 
     /**

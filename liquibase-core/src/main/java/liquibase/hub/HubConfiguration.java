@@ -16,7 +16,7 @@ public class HubConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<String> LIQUIBASE_HUB_API_KEY;
     public static final ConfigurationDefinition<String> LIQUIBASE_HUB_URL;
-    public static final ConfigurationDefinition<String> LIQUIBASE_HUB_MODE;
+    public static final ConfigurationDefinition<HubMode> LIQUIBASE_HUB_MODE;
     public static final ConfigurationDefinition<Level> LIQUIBASE_HUB_LOGLEVEL;
 
     static {
@@ -43,9 +43,9 @@ public class HubConfiguration implements AutoloadedConfigurations {
                     return value.toString().replaceFirst("(https?://[^/]+).*", "$1");
                 })
                 .build();
-        LIQUIBASE_HUB_MODE = builder.define("mode", String.class)
+        LIQUIBASE_HUB_MODE = builder.define("mode", HubMode.class)
                 .setDescription("Content to send to Liquibase Hub during operations. Values can be 'all', 'meta', or 'off'")
-                .setDefaultValue("all")
+                .setDefaultValue(HubMode.ALL)
                 .build();
 
         LIQUIBASE_HUB_LOGLEVEL = builder.define("logLevel", Level.class)
@@ -74,5 +74,11 @@ public class HubConfiguration implements AutoloadedConfigurations {
                     return Level.parse(value.toString());
                 })
                 .build();
+    }
+
+    public enum HubMode {
+        OFF,
+        META,
+        ALL,
     }
 }

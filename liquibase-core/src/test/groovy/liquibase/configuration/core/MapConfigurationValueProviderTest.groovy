@@ -41,6 +41,7 @@ class MapConfigurationValueProviderTest extends Specification {
         "single"              | "invalid"              | false
         "parent.child"        | "parent"               | false
         "upper.kabob"         | "UPPER-KABOB"          | true
+        "one.two.three"       | "one-two-three"        | true
     }
 
     static class MapConfigurationValueProvider extends AbstractMapConfigurationValueProvider {
