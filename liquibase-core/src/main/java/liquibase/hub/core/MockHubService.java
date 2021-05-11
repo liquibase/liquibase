@@ -14,6 +14,8 @@ public class MockHubService implements HubService {
 
     public static UUID randomUUID;
     public static UUID deletedUUID = UUID.randomUUID();
+    public static UUID failUUID = UUID.randomUUID();
+    public static UUID unknownProjectUUID = UUID.randomUUID();
     public static Date operationCreateDate;
 
     public List<Project> returnProjects = new ArrayList<>();
@@ -75,6 +77,9 @@ public class MockHubService implements HubService {
 
     @Override
     public Project getProject(UUID projectId) throws LiquibaseHubException {
+        if (projectId.equals(failUUID)) {
+            return null;
+        }
         Project project1 = new Project();
         project1.setId(projectId);
         project1.setName("Project 1");
