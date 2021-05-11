@@ -48,7 +48,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         CHANGELOG_FILE_ARG = builder.argument("changeFile", String.class)
             .description("The root changelog").build();
         HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", UUID.class)
-            .description("The Hub connection ID").build();
+            .description("Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.").build();
     }
 
     @Override

@@ -3,6 +3,8 @@ package liquibase.command.core;
 import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
+import java.util.UUID;
+
 public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
 
     public static final String[] COMMAND_NAME = {"dropAll"};
@@ -14,7 +16,7 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<String> HUB_CONNECTION_ID_ARG;
+    public static final CommandArgumentDefinition<UUID> HUB_CONNECTION_ID_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -32,8 +34,8 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
             .description("Password to use to connect to the database").build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
             .description("The root changelog").build();
-        HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", String.class)
-            .description("The Hub connection ID").build();
+        HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", UUID.class)
+            .description("Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.").build();
     }
 
     @Override

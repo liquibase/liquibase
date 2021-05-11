@@ -25,8 +25,8 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<String> HUB_CONNECTION_ID_ARG;
-    public static final CommandArgumentDefinition<String> HUB_PROJECT_ID_ARG;
+    public static final CommandArgumentDefinition<UUID> HUB_CONNECTION_ID_ARG;
+    public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<Boolean> FAIL_IF_ONLINE_ARG;
 
@@ -34,8 +34,8 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument("url", String.class).build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).build();
-        HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", String.class).build();
-        HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", String.class).build();
+        HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", UUID.class).build();
+        HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", UUID.class).build();
         DATABASE_ARG = builder.argument("database", Database.class).build();
         FAIL_IF_ONLINE_ARG = builder.argument("failIfOnline", Boolean.class).defaultValue(true).build();
     }
@@ -69,7 +69,7 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
         //
         // Check for both connection and project specified
         //
-        final String hubConnectionId = commandScope.getArgumentValue(HUB_CONNECTION_ID_ARG);
+        final UUID hubConnectionId = commandScope.getArgumentValue(HUB_CONNECTION_ID_ARG);
         if (hubConnectionId != null && commandScope.getArgumentValue(HUB_PROJECT_ID_ARG) != null) {
             String message = "The syncHub command requires only one valid hubConnectionId or hubProjectId or unique URL. Please remove extra values.";
             Scope.getCurrentScope().getLog(getClass()).severe(message);
@@ -108,7 +108,7 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
                 }
             }
             else if (commandScope.getArgumentValue(HUB_PROJECT_ID_ARG) != null) {
-                project = hubService.getProject(UUID.fromString(commandScope.getArgumentValue(HUB_PROJECT_ID_ARG)));
+                project = hubService.getProject(commandScope.getArgumentValue(HUB_PROJECT_ID_ARG));
                 if (project == null) {
                     throw new CommandExecutionException("Project Id '" + commandScope.getArgumentValue(HUB_PROJECT_ID_ARG) + "' does not exist or you do not have access to it");
                 }
@@ -140,7 +140,7 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
                 throw new CommandExecutionException("The url " + url + " is used by more than one connection. Please specify 'hubConnectionId=<hubConnectionId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.");
             }
         } else {
-            final List<Connection> connections = hubService.getConnections(new Connection().setId(UUID.fromString(hubConnectionId)));
+            final List<Connection> connections = hubService.getConnections(new Connection().setId(hubConnectionId));
             if (connections.size() == 0) {
                 throw new CommandExecutionException("Hub connection Id "+ hubConnectionId + " was either not found, or you do not have access");
             } else {

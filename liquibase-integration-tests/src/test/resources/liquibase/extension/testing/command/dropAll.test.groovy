@@ -19,7 +19,7 @@ Optional Args:
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
     Default: null
-  hubConnectionId (String) The Hub connection ID
+  hubConnectionId (UUID) Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.
     Default: null
   password (String) Password to use to connect to the database
     Default: null

@@ -1972,10 +1972,10 @@ public class Main {
         CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalSyncHub", argsMap);
 
         liquibaseCommand
-                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId == null ? null : UUID.fromString(hubConnectionId))
                 .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, url)
                 .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId == null ? null : UUID.fromString(hubProjectId));
 
         liquibaseCommand.execute();
     }

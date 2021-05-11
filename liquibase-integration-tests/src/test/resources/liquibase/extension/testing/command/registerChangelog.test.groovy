@@ -11,7 +11,7 @@ Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog
 Optional Args:
-  hubProjectId (UUID) The Hub project ID
+  hubProjectId (UUID) Used to identify the specific Project in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub account at https://hub.liquibase.com.
     Default: null
   hubProjectName (String) The Hub project name
     Default: null

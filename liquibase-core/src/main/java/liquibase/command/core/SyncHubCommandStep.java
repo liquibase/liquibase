@@ -3,6 +3,8 @@ package liquibase.command.core;
 import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
+import java.util.UUID;
+
 public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
 
     public static final String[] COMMAND_NAME = {"syncHub"};
@@ -13,8 +15,8 @@ public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<String> HUB_CONNECTION_ID_ARG;
-    public static final CommandArgumentDefinition<String> HUB_PROJECT_ID_ARG;
+    public static final CommandArgumentDefinition<UUID> HUB_CONNECTION_ID_ARG;
+    public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -30,10 +32,10 @@ public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
             .description("Password to use to connect to the database").build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
             .description("The root changelog").build();
-        HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", String.class)
-            .description("Liquibase Hub Connection ID to sync").build();
-        HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", String.class)
-            .description("Liquibase Hub Project ID to sync").build();
+        HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", UUID.class)
+            .description("Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.").build();
+        HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", UUID.class)
+            .description("Used to identify the specific Project in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub account at https://hub.liquibase.com.").build();
     }
 
     @Override
