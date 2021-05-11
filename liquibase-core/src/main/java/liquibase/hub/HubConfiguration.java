@@ -3,6 +3,7 @@ package liquibase.hub;
 import liquibase.Scope;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.AutoloadedConfigurations;
+import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
@@ -24,13 +25,7 @@ public class HubConfiguration implements AutoloadedConfigurations {
 
         LIQUIBASE_HUB_API_KEY = builder.define("apiKey", String.class)
                 .setDescription("Liquibase Hub API key for operations")
-                .setValueObfuscator(value -> {
-                    if (value == null) {
-                        return null;
-                    }
-                    return value.substring(0, 6) + "************";
-
-                })
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
 
         LIQUIBASE_HUB_URL = builder.define("url", String.class)
