@@ -126,7 +126,6 @@ public class LiquibaseCommandLine {
                 "databaseChangeLogTableName",
                 "databaseChangeLogLockTableName",
                 "databaseChangeLogTablespaceName",
-                "defaultCatalogName",
                 "overwriteOutputFile",
                 "classpath",
                 "driverPropertiesFile",
