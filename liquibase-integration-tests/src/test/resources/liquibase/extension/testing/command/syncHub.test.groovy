@@ -14,6 +14,10 @@ Required Args:
 Optional Args:
   changelogFile (String) The root changelog
     Default: null
+  defaultCatalogName (String) The default catalog name to use for the database connection
+    Default: null
+  defaultSchemaName (String) The default schema name to use for the database connection
+    Default: null
   hubConnectionId (String) Liquibase Hub Connection ID to sync
     Default: null
   hubProjectId (String) Liquibase Hub Project ID to sync

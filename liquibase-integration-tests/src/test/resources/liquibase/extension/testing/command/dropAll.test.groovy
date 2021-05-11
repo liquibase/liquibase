@@ -15,9 +15,15 @@ Required Args:
 Optional Args:
   changelogFile (String) The root changelog
     Default: null
+  defaultCatalogName (String) The default catalog name to use for the database connection
+    Default: null
+  defaultSchemaName (String) The default schema name to use for the database connection
+    Default: null
   hubConnectionId (String) The Hub connection ID
     Default: null
   password (String) Password to use to connect to the database
+    Default: null
+  schemas (String) Schemas to include in drop
     Default: null
   username (String) Username to use to connect to the database
     Default: null

@@ -15,11 +15,19 @@ Required Args:
   referenceUrl (String) The JDBC reference database connection URL
   url (String) The JDBC target database connection URL
 Optional Args:
+  diffTypes (String) Types of objects to compare
+    Default: null
+  excludeObjects (String) Objects to exclude from diff
+    Default: null
+  includeObjects (String) Objects to include in diff
+    Default: null
   password (String) The target database password
     Default: null
   referencePassword (String) The reference database password
     Default: null
   referenceUsername (String) The reference database username
+    Default: null
+  schemas (String) Schemas to include in diff
     Default: null
   username (String) The target database username
     Default: null
@@ -216,6 +224,7 @@ Changed Column(s): NONE
                 referenceUrl     : { it.altUrl },
                 referenceUsername: { it.altUsername },
                 referencePassword: { it.altPassword },
+                schemas          : { it.database.getDefaultSchemaName() }
         ]
 
         setup {

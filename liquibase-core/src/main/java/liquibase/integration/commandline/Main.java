@@ -868,27 +868,28 @@ public class Main {
                 || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
             if ((!commandParams.isEmpty())) {
                 for (String cmdParm : commandParams) {
-                    if (!cmdParm.startsWith("--" + OPTIONS.REFERENCE_USERNAME)
-                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_PASSWORD)
-                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_DRIVER)
-                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_DEFAULT_CATALOG_NAME)
-                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_DEFAULT_SCHEMA_NAME)
-                            && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
-                            && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
-                            && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
-                            && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
-                            && !cmdParm.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS)
-                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_SCHEMAS)
-                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_URL)
-                            && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
-                            && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
-                            && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)
-                            && !cmdParm.startsWith("--" + OPTIONS.FORMAT)
-                            && !cmdParm.startsWith("--" + OPTIONS.HELP)
-                            && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
+                    String caseInsensitiveCommandParam = cmdParm.toLowerCase();
+                    if (!caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_USERNAME.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_PASSWORD.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_DRIVER.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_DEFAULT_CATALOG_NAME.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_DEFAULT_SCHEMA_NAME.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_SCHEMA.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_CATALOG.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SCHEMAS.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_SCHEMAS.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_URL.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_OBJECTS.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.DIFF_TYPES.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORMAT.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT.toLowerCase())) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
-                    if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && cmdParm.startsWith("--" + OPTIONS.FORMAT)) {
+                    if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && cmdParm.toLowerCase().startsWith("--" + OPTIONS.FORMAT.toLowerCase())) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
@@ -897,51 +898,57 @@ public class Main {
                 || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command))
                 && (!commandParams.isEmpty())) {
             for (String cmdParm : commandParams) {
-                if (!cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
-                        && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
-                        && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
-                        && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
-                        && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)
-                        && !cmdParm.startsWith("--" + OPTIONS.DATA_OUTPUT_DIRECTORY)
-                        && !cmdParm.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS)) {
+                String caseInsensitiveCommandParam = cmdParm.toLowerCase();
+                if (!caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_SCHEMA.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_CATALOG.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SCHEMAS.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.DATA_OUTPUT_DIRECTORY.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS.toLowerCase())) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
         } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
-                if (!cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
-                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
-                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)
-                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
-                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
-                        && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)) {
+                String caseInsensitiveCommandParam = cmdParm.toLowerCase();
+                if (!caseInsensitiveCommandParam.startsWith("--" + OPTIONS.CHANGE_SET_ID.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORCE.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.CHANGE_SET_PATH.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT.toLowerCase())) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
         } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
-                if (!cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
-                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
-                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)
-                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
-                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
-                        && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)) {
+                String caseInsensitiveCommandParam = cmdParm.toLowerCase();
+                if (!caseInsensitiveCommandParam.startsWith("--" + OPTIONS.CHANGE_SET_ID.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORCE.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.CHANGE_SET_PATH.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT.toLowerCase())) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
         } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
-                if (!cmdParm.startsWith("--" + OPTIONS.DEPLOYMENT_ID)
-                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
-                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)) {
+                String caseInsensitiveCommandParam = cmdParm.toLowerCase();
+                if (!caseInsensitiveCommandParam.startsWith("--" + OPTIONS.DEPLOYMENT_ID.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORCE.toLowerCase())) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
         } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
-                if (!cmdParm.startsWith("--" + OPTIONS.DEPLOYMENT_ID)
-                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
-                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)) {
+                String caseInsensitiveCommandParam = cmdParm.toLowerCase();
+
+                if (!caseInsensitiveCommandParam.startsWith("--" + OPTIONS.DEPLOYMENT_ID.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORCE.toLowerCase())) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
@@ -1663,14 +1670,14 @@ public class Main {
                     );
                 }
                 return;
-            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command)) {
+            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
                 argsMap.put("changeLogFile", changeLogFile);
                 CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneChangeSet", argsMap);
                 liquibaseCommand.execute();
                 return;
-            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command)) {
+            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command)) {
                 Writer outputWriter = getOutputWriter();
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
@@ -1679,14 +1686,14 @@ public class Main {
                 CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneChangeSetSQL", argsMap);
                 liquibaseCommand.execute();
                 return;
-            } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equals(command)) {
+            } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
                 argsMap.put("changeLogFile", changeLogFile);
                 argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
                 CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneUpdate", argsMap);
                 liquibaseCommand.execute();
                 return;
-            } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command)) {
+            } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
                 Writer outputWriter = getOutputWriter();
                 Map<String, Object> argsMap = new HashMap<>();
                 argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
@@ -1731,7 +1738,7 @@ public class Main {
             } else if (COMMANDS.SYNC_HUB.equalsIgnoreCase(command)) {
                 executeSyncHub(database, liquibase);
                 return;
-            } else if (COMMANDS.DROP_ALL.equals(command)) {
+            } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
                 String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
                 String hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
                 if (liquibaseHubApiKey != null && !hubMode.toLowerCase().equals("off")) {

@@ -16,11 +16,27 @@ Required Args:
   referenceUrl (String) The JDBC reference database connection URL
   url (String) The JDBC target database connection URL
 Optional Args:
+  defaultCatalogName (String) The default catalog name to use for the database connection
+    Default: null
+  defaultSchemaName (String) The default schema name to use for the database connection
+    Default: null
+  diffTypes (String) Types of objects to compare
+    Default: null
+  excludeObjects (String) Objects to exclude from diff
+    Default: null
+  includeObjects (String) Objects to include in diff
+    Default: null
   password (String) The target database password
+    Default: null
+  referenceDefaultCatalogName (String) The reference default catalog name to use for the database connection
+    Default: null
+  referenceDefaultSchemaName (String) The reference default schema name to use for the database connection
     Default: null
   referencePassword (String) The reference database password
     Default: null
   referenceUsername (String) The reference database username
+    Default: null
+  schemas (String) Schemas to include in diff
     Default: null
   username (String) The target database username
     Default: null
@@ -34,7 +50,7 @@ Optional Args:
                 referenceUrl     : { it.url },
                 referenceUsername: { it.username },
                 referencePassword: { it.password },
-                changelogFile: "target/test-classes/diffChangelog-test.xml"
+                changelogFile: "target/test-classes/diffChangelog-test.xml",
         ]
 
         setup {
@@ -75,7 +91,7 @@ Optional Args:
                 referenceUrl     : { it.altUrl },
                 referenceUsername: { it.altUsername },
                 referencePassword: { it.altPassword },
-                changelogFile: "target/test-classes/diffChangeLog-test.xml"
+                changelogFile: "target/test-classes/diffChangeLog-test.xml",
         ]
 
         setup {
@@ -133,7 +149,7 @@ Optional Args:
                 referenceUrl     : { it.altUrl },
                 referenceUsername: { it.altUsername },
                 referencePassword: { it.altPassword },
-                changelogFile: "target/test-classes/diffChangeLog-test.xml"
+                changelogFile: "target/test-classes/diffChangeLog-test.xml",
         ]
 
         setup {
@@ -232,6 +248,7 @@ Optional Args:
         }
         expectedException = CommandValidationException.class
     }
+
     run "Run without a URL throws an exception", {
         arguments = [
                 url              : "",

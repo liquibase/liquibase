@@ -10,10 +10,18 @@ public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
+    public static final CommandArgumentDefinition<String> REFERENCE_DEFAULT_CATALOG_NAME_ARG;
+    public static final CommandArgumentDefinition<String> REFERENCE_DEFAULT_SCHEMA_NAME_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
+    public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
+    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
+    public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
+    public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
+    public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
+    public static final CommandArgumentDefinition<String> DIFF_TYPES_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -23,14 +31,30 @@ public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
             .description("The reference database username").build();
         REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class)
             .description("The reference database password").build();
+        REFERENCE_DEFAULT_SCHEMA_NAME_ARG = builder.argument("referenceDefaultSchemaName", String.class)
+            .description("The reference default schema name to use for the database connection").build();
+        REFERENCE_DEFAULT_CATALOG_NAME_ARG = builder.argument("referenceDefaultCatalogName", String.class)
+            .description("The reference default catalog name to use for the database connection").build();
         URL_ARG = builder.argument("url", String.class).required()
             .description("The JDBC target database connection URL").build();
+        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
+            .description("The default schema name to use for the database connection").build();
+        DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
+            .description("The default catalog name to use for the database connection").build();
         USERNAME_ARG = builder.argument("username", String.class)
             .description("The target database username").build();
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("The target database password").build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
             .description("Changelog file to write results").build();
+        EXCLUDE_OBJECTS_ARG = builder.argument("excludeObjects", String.class)
+                .description("Objects to exclude from diff").build();
+        INCLUDE_OBJECTS_ARG = builder.argument("includeObjects", String.class)
+                .description("Objects to include in diff").build();
+        SCHEMAS_ARG = builder.argument("schemas", String.class)
+                .description("Schemas to include in diff").build();
+        DIFF_TYPES_ARG = builder.argument("diffTypes", String.class)
+                .description("Types of objects to compare").build();
     }
 
     @Override

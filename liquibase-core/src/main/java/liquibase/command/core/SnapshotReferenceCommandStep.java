@@ -10,12 +10,18 @@ public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep 
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
+    public static final CommandArgumentDefinition<String> REFERENCE_DEFAULT_SCHEMA_NAME_ARG;
+    public static final CommandArgumentDefinition<String> REFERENCE_DEFAULT_CATALOG_NAME_ARG;
     public static final CommandArgumentDefinition<String> SNAPSHOT_FORMAT_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required()
             .description("The JDBC reference database connection URL").build();
+        REFERENCE_DEFAULT_SCHEMA_NAME_ARG = builder.argument("referenceDefaultSchemaName", String.class)
+            .description("The default schema name to use for the database connection").build();
+        REFERENCE_DEFAULT_CATALOG_NAME_ARG = builder.argument("referenceDefaultCatalogName", String.class)
+            .description("The default catalog name to use for the database connection").build();
         REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class)
             .description("Reference username to use to connect to the database").build();
         REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class)

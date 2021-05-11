@@ -40,8 +40,16 @@ import static liquibase.util.SystemUtil.isWindows;
 public class LiquibaseCommandLine {
 
     private final Map<String, String> legacyPositionalArguments;
-    private final Set<String> legacyGlobalArguments;
-    private final Set<String> legacyCommandArguments;
+
+    /**
+     * Arguments that used to be global arguments but are now command-level
+     */
+    private final Set<String> legacyNoLongerGlobalArguments;
+
+    /**
+     * Arguments that used to be command arguments but are now global
+     */
+    private final Set<String> legacyNoLongerCommandArguments;
     private Level configuredLogLevel;
 
     private final CommandLine commandLine;
@@ -50,13 +58,9 @@ public class LiquibaseCommandLine {
     public static void main(String[] args) {
         final LiquibaseCommandLine cli = new LiquibaseCommandLine();
 
-        try {
-            cli.execute(args);
-        } catch (Throwable e) {
-            cli.handleException(e);
-        } finally {
-            cli.cleanup();
-        }
+        int returnCode = cli.execute(args);
+
+        System.exit(returnCode);
     }
 
     private void cleanup() {
@@ -67,26 +71,29 @@ public class LiquibaseCommandLine {
     }
 
     public LiquibaseCommandLine() {
-        this.commandLine = buildPicoCommandLine();
         this.legacyPositionalArguments = new HashMap<>();
         this.legacyPositionalArguments.put("tag", "tag");
         this.legacyPositionalArguments.put("rollback", "tag");
-        this.legacyPositionalArguments.put("rollbackdate", "date");
+        this.legacyPositionalArguments.put("rollbacksql", "tag");
+        this.legacyPositionalArguments.put("rollbacktodate", "date");
+        this.legacyPositionalArguments.put("rollbacktodatesql", "date");
         this.legacyPositionalArguments.put("rollbackcount", "count");
+        this.legacyPositionalArguments.put("rollbackcountsql", "count");
         this.legacyPositionalArguments.put("futurerollbackcount", "count");
+        this.legacyPositionalArguments.put("futurerollbackcountsql", "count");
         this.legacyPositionalArguments.put("futurerollbackfromtag", "tag");
+        this.legacyPositionalArguments.put("futurerollbackfromtagsql", "tag");
 
-        this.legacyGlobalArguments = Stream.of(
+        this.legacyNoLongerGlobalArguments = Stream.of(
                 "username",
                 "password",
                 "url",
-                "databaseClass",
                 "outputDefaultSchema",
                 "outputDefaultCatalog",
                 "changeLogFile",
+                "hubConnectionId",
                 "contexts",
                 "labels",
-                "driverPropertiesFile",
                 "diffTypes",
                 "changeSetAuthor",
                 "changeSetContext",
@@ -109,19 +116,16 @@ public class LiquibaseCommandLine {
                 "sqlFile",
                 "delimiter",
                 "rollbackScript"
-        ).map(String::toLowerCase).collect(Collectors.toSet());
+        ).collect(Collectors.toSet());
 
-        this.legacyCommandArguments = Stream.of(
+        this.legacyNoLongerCommandArguments = Stream.of(
                 "driver",
-                "hubConnectionId",
                 "databaseClass",
                 "liquibaseCatalogName",
                 "liquibaseSchemaName",
                 "databaseChangeLogTableName",
                 "databaseChangeLogLockTableName",
                 "databaseChangeLogTablespaceName",
-                "defaultCatalogName",
-                "changeLogFile",
                 "overwriteOutputFile",
                 "classpath",
                 "driverPropertiesFile",
@@ -137,8 +141,9 @@ public class LiquibaseCommandLine {
                 "outputFile",
                 "liquibaseProLicenseKey",
                 "liquibaseHubApiKey"
-        ).map(String::toLowerCase).collect(Collectors.toSet());
+        ).collect(Collectors.toSet());
 
+        this.commandLine = buildPicoCommandLine();
     }
 
     private CommandLine buildPicoCommandLine() {
@@ -221,92 +226,87 @@ public class LiquibaseCommandLine {
             System.err.println("For detailed help, try 'liquibase --help' or 'liquibase <command-name> --help'");
         }
 
-        return -1;
+        return 1;
     }
 
-    public void execute(String[] args) throws Exception {
-        final String[] finalArgs = adjustLegacyArgs(args);
-
-        configureLogging(Level.OFF, null);
-
-        Main.runningFromNewCli = true;
-
-        final List<ConfigurationValueProvider> valueProviders = registerValueProviders(finalArgs);
+    public int execute(String[] args) {
         try {
-            Scope.child(configureScope(), () -> {
-                configureVersionInfo();
+            final String[] finalArgs = adjustLegacyArgs(args);
 
-                commandLine.execute(finalArgs);
+            configureLogging(Level.OFF, null);
 
-                Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + StringUtil.join(getCommandNames(commandLine.getParseResult()), " ") + "' was executed successfully.");
-            });
-        } finally {
-            final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+            Main.runningFromNewCli = true;
 
-            for (ConfigurationValueProvider provider : valueProviders) {
-                liquibaseConfiguration.unregisterProvider(provider);
+            final List<ConfigurationValueProvider> valueProviders = registerValueProviders(finalArgs);
+            try {
+                return Scope.child(configureScope(), () -> {
+                    configureVersionInfo();
+
+                    int response = commandLine.execute(finalArgs);
+
+                    if (response == 0) {
+                        final String commandName = StringUtil.join(getCommandNames(commandLine.getParseResult()), " ");
+                        if (!commandName.equals("")) {
+                            //don't include for --version, --help, etc.
+                            Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
+                        }
+                    }
+
+                    return response;
+                });
+            } finally {
+                final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+
+                for (ConfigurationValueProvider provider : valueProviders) {
+                    liquibaseConfiguration.unregisterProvider(provider);
+                }
             }
+        } catch (Throwable e) {
+            handleException(e);
+            return 1;
+        } finally {
+            cleanup();
         }
     }
 
     protected String[] adjustLegacyArgs(String[] args) {
         List<String> returnArgs = new ArrayList<>();
-        List<String> prefixArgs = new ArrayList<>();
-        List<String> suffixArgs = new ArrayList<>();
 
-        String lookingForPositional = null;
-        boolean seenCommand = false;
 
-        final Iterator<String> it = Arrays.asList(args).iterator();
-        while (it.hasNext()) {
-            String arg = it.next();
+        final ListIterator<String> iterator = Arrays.asList(args).listIterator();
+        while (iterator.hasNext()) {
+            String arg = iterator.next();
             String argAsKey = arg.replace("-", "").toLowerCase();
-            String argValue = null;
-            if (arg.contains("=")) {
-                String[] splitArg = arg.split("=");
-                argAsKey = splitArg[0].replace("-", "").toLowerCase();
-                argValue = splitArg[1];
-            }
 
             if (arg.startsWith("-")) {
-                if (seenCommand) {
-                    if (legacyCommandArguments.contains(argAsKey)) {
-                        prefixArgs.add(arg);
-                        if (argValue == null) {
-                            prefixArgs.add(it.next());
-                        }
-                    } else {
-                        returnArgs.add(arg);
-                    }
-                } else {
-                    if (legacyGlobalArguments.contains(argAsKey)) {
-                        suffixArgs.add(arg);
-                        if (argValue == null) {
-                            suffixArgs.add(it.next());
-                        }
-                    } else {
-                        returnArgs.add(arg);
-                    }
-                }
+                returnArgs.add(arg);
             } else {
-                seenCommand = true;
-                if (lookingForPositional == null) {
-                    final String legacyTag = this.legacyPositionalArguments.get(argAsKey);
-                    if (legacyTag != null) {
-                        lookingForPositional = legacyTag;
-
-                    }
+                final String legacyTag = this.legacyPositionalArguments.get(argAsKey);
+                if (legacyTag == null) {
                     returnArgs.add(arg);
                 } else {
-                    returnArgs.add("--" + lookingForPositional);
                     returnArgs.add(arg);
-                    lookingForPositional = null;
+
+                    String value = " ";
+                    while (iterator.hasNext()) {
+                        arg = iterator.next();
+                        if (arg.startsWith("-")) {
+                            iterator.previous();
+                            break;
+                        } else {
+                            value += arg + " ";
+                        }
+                    }
+
+                    value = StringUtil.trimToNull(value);
+                    if (value != null) {
+                        returnArgs.add("--"+legacyTag);
+                        returnArgs.add(value);
+                    }
                 }
             }
         }
 
-        returnArgs.addAll(0, prefixArgs);
-        returnArgs.addAll(suffixArgs);
         return returnArgs.toArray(new String[0]);
     }
 
@@ -326,7 +326,7 @@ public class LiquibaseCommandLine {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
         List<ConfigurationValueProvider> returnList = new ArrayList<>();
 
-        final CommandLineArgumentValueProvider argumentProvider = new CommandLineArgumentValueProvider(commandLine.parseArgs(args));
+        final CommandLineArgumentValueProvider argumentProvider = new CommandLineArgumentValueProvider(commandLine.parseArgs(args), legacyNoLongerCommandArguments);
         liquibaseConfiguration.registerProvider(argumentProvider);
         returnList.add(argumentProvider);
 
@@ -356,6 +356,7 @@ public class LiquibaseCommandLine {
 
         ConsoleUIService ui = new ConsoleUIService();
         ui.setAllowPrompt(true);
+        ui.setOutputStream(System.err);
         returnMap.put(Scope.Attr.ui.name(), ui);
 
 
@@ -501,6 +502,8 @@ public class LiquibaseCommandLine {
         final CommandLine.Model.CommandSpec subCommandSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(commandRunner);
         commandRunner.setSpec(subCommandSpec);
 
+        subCommandSpec.aliases(commandDefinition.getName()[0].replace("-", ""));
+
         configureHelp(subCommandSpec);
 
         subCommandSpec.usageMessage()
@@ -515,7 +518,15 @@ public class LiquibaseCommandLine {
             for (int i = 0; i < argNames.length; i++) {
                 final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder(argNames[i])
                         .required(false)
-                        .type(def.getDataType());
+                        .converters(value -> {
+                            if (def.getDataType().equals(Boolean.class)) {
+                                if (value.equals("")) {
+                                    return "true";
+                                }
+                            }
+                            return value;
+                        })
+                        .type(String.class);
 
 
                 String description = "(liquibase.command." + def.getName() + " OR liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
@@ -540,7 +551,7 @@ public class LiquibaseCommandLine {
 
 
                 if (def.getDataType().equals(Boolean.class)) {
-                    builder.arity("1");
+                    builder.arity("0..1");
                 }
 
 
@@ -550,6 +561,15 @@ public class LiquibaseCommandLine {
 
                 subCommandSpec.addOption(builder.build());
             }
+        }
+
+        for (String legacyArg : legacyNoLongerCommandArguments) {
+            final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder("--" + legacyArg)
+                    .required(false)
+                    .type(String.class)
+                    .description("Legacy CLI argument")
+                    .hidden(true);
+            subCommandSpec.addOption(builder.build());
         }
 
 
@@ -574,7 +594,7 @@ public class LiquibaseCommandLine {
             for (int i = 0; i < argNames.length; i++) {
                 final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(argNames[i])
                         .required(false)
-                        .type(def.getDataType());
+                        .type(String.class);
 
                 String description = "(" + def.getKey() + ")\n"
                         + "(" + toEnvVariable(def.getKey()) + ")";
@@ -609,6 +629,16 @@ public class LiquibaseCommandLine {
                 final CommandLine.Model.OptionSpec optionSpec = optionBuilder.build();
                 rootCommandSpec.addOption(optionSpec);
             }
+        }
+
+        for (String arg : legacyNoLongerGlobalArguments) {
+            final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder("--" + arg)
+                    .required(false)
+                    .type(String.class)
+                    .hidden(true)
+                    .description("Legacy global argument");
+
+            rootCommandSpec.addOption(optionBuilder.build());
         }
     }
 

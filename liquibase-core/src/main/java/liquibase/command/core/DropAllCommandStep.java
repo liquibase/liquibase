@@ -10,6 +10,9 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
+    public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
+    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
+    public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> HUB_CONNECTION_ID_ARG;
 
@@ -19,6 +22,12 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
             .description("The JDBC database connection URL").build();
         USERNAME_ARG = builder.argument("username", String.class)
             .description("Username to use to connect to the database").build();
+        SCHEMAS_ARG = builder.argument("schemas", String.class)
+            .description("Schemas to include in drop").build();
+        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
+            .description("The default schema name to use for the database connection").build();
+        DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
+            .description("The default catalog name to use for the database connection").build();
         PASSWORD_ARG = builder.argument("password", String.class)
             .description("Password to use to connect to the database").build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
