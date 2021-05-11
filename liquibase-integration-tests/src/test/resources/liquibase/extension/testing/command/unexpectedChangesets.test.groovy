@@ -14,6 +14,10 @@ Required Args:
 Optional Args:
   contexts (String) Changeset contexts to match
     Default: null
+  defaultCatalogName (String) The default catalog name to use for the database connection
+    Default: null
+  defaultSchemaName (String) The default schema name to use for the database connection
+    Default: null
   password (String) Password to use to connect to the database
     Default: null
   username (String) Username to use to connect to the database

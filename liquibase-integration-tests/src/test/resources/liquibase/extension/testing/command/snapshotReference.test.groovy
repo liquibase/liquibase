@@ -13,6 +13,10 @@ Long Description: NOT SET
 Required Args:
   referenceUrl (String) The JDBC reference database connection URL
 Optional Args:
+  referenceDefaultCatalogName (String) The default catalog name to use for the database connection
+    Default: null
+  referenceDefaultSchemaName (String) The default schema name to use for the database connection
+    Default: null
   referencePassword (String) Reference password to use to connect to the database
     Default: null
   referenceUsername (String) Reference username to use to connect to the database
@@ -22,6 +26,11 @@ Optional Args:
 """
 
     run "Happy path", {
+        arguments = [
+                referenceUrl     : { it.url },
+                referenceUsername: { it.username },
+                referencePassword: { it.password }
+        ]
         setup {
             cleanResources("changeset-test.xml")
             database = [
@@ -58,6 +67,11 @@ Optional Args:
     }
 
     run "Happy path with an output file", {
+        arguments = [
+                referenceUrl     : { it.url },
+                referenceUsername: { it.username },
+                referencePassword: { it.password }
+        ]
         setup {
             cleanResources("target/test-classes/snapshotReference.txt")
             database = [
