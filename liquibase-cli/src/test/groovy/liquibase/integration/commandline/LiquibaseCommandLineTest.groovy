@@ -47,6 +47,7 @@ class LiquibaseCommandLineTest extends Specification {
         ["rollback", "my-tag"]                 | ["rollback", "--tag", "my-tag"]
         ["rollbackToDate", "1/2/3"]              | ["rollbackToDate", "--date", "1/2/3"]
         ["rollback-to-date", "1/2/3"]             | ["rollback-to-date", "--date", "1/2/3"]
+        ["rollback-to-date", "1/2/3", "3:15:21"]             | ["rollback-to-date", "--date", "1/2/3 3:15:21"]
         ["rollback-count", "5"]                | ["rollback-count", "--count", "5"]
         ["future-rollback-count", "5"]         | ["future-rollback-count", "--count", "5"]
         ["future-rollback-from-tag", "my-tag"] | ["future-rollback-from-tag", "--tag", "my-tag"]

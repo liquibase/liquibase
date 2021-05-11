@@ -273,24 +273,37 @@ public class LiquibaseCommandLine {
     protected String[] adjustLegacyArgs(String[] args) {
         List<String> returnArgs = new ArrayList<>();
 
-        String lookingForPositional = null;
 
-        for (String arg : args) {
+        final ListIterator<String> iterator = Arrays.asList(args).listIterator();
+        while (iterator.hasNext()) {
+            String arg = iterator.next();
             String argAsKey = arg.replace("-", "").toLowerCase();
 
             if (arg.startsWith("-")) {
                 returnArgs.add(arg);
             } else {
-                if (lookingForPositional == null) {
-                    final String legacyTag = this.legacyPositionalArguments.get(argAsKey);
-                    if (legacyTag != null) {
-                        lookingForPositional = legacyTag;
-                    }
+                final String legacyTag = this.legacyPositionalArguments.get(argAsKey);
+                if (legacyTag == null) {
                     returnArgs.add(arg);
                 } else {
-                    returnArgs.add("--" + lookingForPositional);
                     returnArgs.add(arg);
-                    lookingForPositional = null;
+
+                    String value = " ";
+                    while (iterator.hasNext()) {
+                        arg = iterator.next();
+                        if (arg.startsWith("-")) {
+                            iterator.previous();
+                            break;
+                        } else {
+                            value += arg + " ";
+                        }
+                    }
+
+                    value = StringUtil.trimToNull(value);
+                    if (value != null) {
+                        returnArgs.add("--"+legacyTag);
+                        returnArgs.add(value);
+                    }
                 }
             }
         }
