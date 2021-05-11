@@ -56,6 +56,18 @@ Optional Args:
         expectedException = CommandExecutionException.class
     }
 
+    run "Run with unknown Hub connection ID throws an exception", {
+        arguments = [
+                hubConnectionId: {MockHubService.failUUID}
+        ]
+
+        setup {
+            runChangelog "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+        }
+        expectedException = CommandExecutionException.class
+        expectedExceptionMessage = Pattern.compile(".*was either not found, or you do not have access.*", Pattern.MULTILINE | Pattern.DOTALL)
+    }
+
     run "Run with deleted changelog throws an exception", {
         arguments = [
             changelogFile: "simple.changelog.with.deleted-id.xml"

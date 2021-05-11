@@ -15,7 +15,6 @@ public class MockHubService implements HubService {
     public static UUID randomUUID;
     public static UUID deletedUUID = UUID.randomUUID();
     public static UUID failUUID = UUID.randomUUID();
-    public static UUID unknownProjectUUID = UUID.randomUUID();
     public static Date operationCreateDate;
 
     public List<Project> returnProjects = new ArrayList<>();
@@ -105,6 +104,11 @@ public class MockHubService implements HubService {
 
     @Override
     public List<Connection> getConnections(Connection exampleConnection) {
+        if (exampleConnection != null &&
+            exampleConnection.getId() != null &&
+            exampleConnection.getId().equals(failUUID)) {
+            return new ArrayList<>();
+        }
         return returnConnections;
     }
 
