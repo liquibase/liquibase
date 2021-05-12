@@ -27,7 +27,7 @@
         
         <!-- Liquibase SDK sdk/lib-sdk required libraries versions -->
         <snakeyaml.version>1.17</snakeyaml.version>
-        <postgresql.version>42.2.5</postgresql.version>
+        <postgresql.version>42.2.13</postgresql.version>
         <commons-cli.version>1.2</commons-cli.version>
         <hamcrest-core.version>1.3</hamcrest-core.version>
         <javax.servlet.version>3.0.0.v201112011016</javax.servlet.version>
