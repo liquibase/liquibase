@@ -60,9 +60,6 @@ class CommandRunner implements Callable<CommandResults> {
                 outputStream.flush();
                 outputStream.close();
             }
-            if (outputFile != null) {
-                Scope.getCurrentScope().getUI().sendMessage("Output written to "+outputFile.getAbsolutePath());
-            }
         }
     }
 
