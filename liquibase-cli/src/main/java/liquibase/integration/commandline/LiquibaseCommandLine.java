@@ -130,8 +130,6 @@ public class LiquibaseCommandLine {
                 "classpath",
                 "driverPropertiesFile",
                 "propertyProviderClass",
-                "changeExecListenerClass",
-                "changeExecListenerPropertiesFile",
                 "promptForNonLocalDatabase",
                 "includeSystemClasspath",
                 "defaultsFile",
