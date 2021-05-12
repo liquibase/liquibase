@@ -1,6 +1,7 @@
 package liquibase.configuration
 
 import liquibase.Scope
+import liquibase.integration.IntegrationConfiguration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -182,7 +183,7 @@ class ConfigurationDefinitionTest extends Specification {
     @Unroll
     def equalsKey() {
         expect:
-        liquibase.GlobalConfiguration.SHOULD_RUN.equalsKey(input) == expected
+        IntegrationConfiguration.SHOULD_RUN.equalsKey(input) == expected
 
         where:
         input                  | expected
