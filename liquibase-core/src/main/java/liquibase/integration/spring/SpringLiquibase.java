@@ -9,6 +9,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.IntegrationConfiguration;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
@@ -247,7 +248,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 */
 	@Override
     public void afterPropertiesSet() throws LiquibaseException {
-		final ConfiguredValue<Boolean> shouldRunProperty = GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
+		final ConfiguredValue<Boolean> shouldRunProperty = IntegrationConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
 
 		if (!(Boolean) shouldRunProperty.getValue()) {
             Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " +shouldRunProperty.getProvidedValue().describe() + " was set to false");

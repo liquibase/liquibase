@@ -11,6 +11,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.IntegrationConfiguration;
 import liquibase.integration.cdi.annotations.LiquibaseType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
@@ -106,10 +107,10 @@ public class CDILiquibase implements Extension {
             return;
         }
 
-        if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
+        if (!IntegrationConfiguration.SHOULD_RUN.getCurrentValue()) {
             log.info(String.format("Liquibase did not run on %s because %s was set to false.",
                     hostName,
-                GlobalConfiguration.SHOULD_RUN.getKey()
+                IntegrationConfiguration.SHOULD_RUN.getKey()
             ));
             return;
         }

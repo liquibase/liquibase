@@ -37,6 +37,7 @@ import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.ResourceBundle.getBundle;
 import static liquibase.util.SystemUtil.isWindows;
 
 
@@ -57,6 +58,8 @@ public class LiquibaseCommandLine {
 
     private final CommandLine commandLine;
     private FileHandler fileHandler;
+
+    private final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     /**
      * Pico's defaultFactory does a lot of reflection, checking for classes we know we don't have.
@@ -259,7 +262,20 @@ public class LiquibaseCommandLine {
             final List<ConfigurationValueProvider> valueProviders = registerValueProviders(finalArgs);
             try {
                 return Scope.child(configureScope(), () -> {
+
+                    if (!IntegrationConfiguration.SHOULD_RUN.getCurrentValue()) {
+                        Scope.getCurrentScope().getUI().sendErrorMessage((
+                                String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
+                                        IntegrationConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
+                        return 0;
+                    }
+
                     configureVersionInfo();
+
+                    if (!wasHelpOrVersionRequeted()) {
+                        Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion()));
+                    }
 
                     int response = commandLine.execute(finalArgs);
 

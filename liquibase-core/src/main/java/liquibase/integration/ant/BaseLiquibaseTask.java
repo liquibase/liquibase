@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.integration.IntegrationConfiguration;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -134,8 +135,8 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     protected boolean shouldRun() {
-        if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
-            log("Liquibase did not run because " + GlobalConfiguration.SHOULD_RUN.getKey() + " was set to false", Project.MSG_INFO);
+        if (!IntegrationConfiguration.SHOULD_RUN.getCurrentValue()) {
+            log("Liquibase did not run because " + IntegrationConfiguration.SHOULD_RUN.getKey() + " was set to false", Project.MSG_INFO);
             return false;
         }
         return true;

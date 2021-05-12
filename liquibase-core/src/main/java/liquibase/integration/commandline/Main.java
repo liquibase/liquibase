@@ -17,6 +17,7 @@ import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
 import liquibase.hub.HubConfiguration;
 import liquibase.hub.HubServiceFactory;
+import liquibase.integration.IntegrationConfiguration;
 import liquibase.integration.IntegrationDetails;
 import liquibase.license.*;
 import liquibase.lockservice.LockService;
@@ -332,12 +333,14 @@ public class Main {
                         Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                     }
 
-                    Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                    if (!Main.runningFromNewCli) {
+                        Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                    }
 
-                    if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
+                    if (!IntegrationConfiguration.SHOULD_RUN.getCurrentValue()) {
                         Scope.getCurrentScope().getUI().sendErrorMessage((
                                 String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                                        GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
+                                        IntegrationConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
                         return Integer.valueOf(0);
                     }
 

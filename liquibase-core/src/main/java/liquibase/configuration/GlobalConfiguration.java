@@ -1,6 +1,7 @@
 package liquibase.configuration;
 
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
+import liquibase.integration.IntegrationConfiguration;
 
 import java.util.Set;
 
@@ -12,7 +13,7 @@ public class GlobalConfiguration extends liquibase.GlobalConfiguration implement
     /**
      * @deprecated
      */
-    public static final String SHOULD_RUN = liquibase.GlobalConfiguration.SHOULD_RUN.getKey();
+    public static final String SHOULD_RUN = IntegrationConfiguration.SHOULD_RUN.getKey();
 
     /**
      * @deprecated
@@ -119,14 +120,14 @@ public class GlobalConfiguration extends liquibase.GlobalConfiguration implement
      * @deprecated
      */
     public boolean getShouldRun() {
-        return liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentValue();
+        return IntegrationConfiguration.SHOULD_RUN.getCurrentValue();
     }
 
     /**
      * @deprecated
      */
     public GlobalConfiguration setShouldRun(boolean shouldRun) {
-        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.SHOULD_RUN, shouldRun);
+        DeprecatedConfigurationValueProvider.setData(IntegrationConfiguration.SHOULD_RUN, shouldRun);
         return this;
     }
 

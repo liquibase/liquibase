@@ -10,7 +10,6 @@ import java.nio.charset.Charset;
  */
 public class GlobalConfiguration implements AutoloadedConfigurations {
 
-    public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<String> DATABASECHANGELOG_TABLE_NAME;
     public static final ConfigurationDefinition<String> DATABASECHANGELOGLOCK_TABLE_NAME;
     public static final ConfigurationDefinition<String> LIQUIBASE_TABLESPACE_NAME;
@@ -33,12 +32,6 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
-
-        SHOULD_RUN = builder.define("shouldRun", Boolean.class)
-                .setDescription("Should Liquibase commands execute")
-                .setDefaultValue(true)
-                .addAliasKey("should.run")
-                .build();
 
         DATABASECHANGELOG_TABLE_NAME = builder.define("databaseChangelogTableName", String.class)
                 .addAliasKey("liquibase.databaseChangeLogTableName")

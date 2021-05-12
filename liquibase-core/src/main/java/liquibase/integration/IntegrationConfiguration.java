@@ -23,6 +23,7 @@ public class IntegrationConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
     public static final ConfigurationDefinition<File> LOG_FILE;
     public static final ConfigurationDefinition<File> OUTPUT_FILE;
+    public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -35,6 +36,12 @@ public class IntegrationConfiguration implements AutoloadedConfigurations {
         PROMPT_FOR_NON_LOCAL_DATABASE = builder.define("promptForNonLocalDatabase", Boolean.class).build();
         INCLUDE_SYSTEM_CLASSPATH = builder.define("includeSystemClasspath", Boolean.class).setDefaultValue(true).build();
         DEFAULTS_FILE = builder.define("defaultsFile", String.class).setDefaultValue("liquibase.properties").build();
+
+        SHOULD_RUN = builder.define("shouldRun", Boolean.class)
+                .setDescription("Should Liquibase commands execute")
+                .setDefaultValue(true)
+                .addAliasKey("should.run")
+                .build();
 
         LOG_LEVEL = builder.define("logLevel", Level.class)
                 .setDefaultValue(Level.INFO)

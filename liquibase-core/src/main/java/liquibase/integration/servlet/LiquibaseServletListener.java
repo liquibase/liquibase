@@ -7,6 +7,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.IntegrationConfiguration;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -141,9 +142,9 @@ public class LiquibaseServletListener implements ServletContextListener {
      * </ol>
      */
     private boolean checkPreconditions(ServletContext servletContext, InitialContext ic) {
-        if (!liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
+        if (!IntegrationConfiguration.SHOULD_RUN.getCurrentValue()) {
             Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run on " + hostName
-                    + " because " + liquibase.GlobalConfiguration.SHOULD_RUN.getKey()
+                    + " because " + IntegrationConfiguration.SHOULD_RUN.getKey()
                     + " was set to false");
             return false;
         }
@@ -173,8 +174,8 @@ public class LiquibaseServletListener implements ServletContextListener {
             }
         }
 
-        final ConfiguredValue<Boolean> shouldRunValue = liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
-        if (liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentValue() && !ConfigurationDefinition.wasDefaultValueUsed(shouldRunValue)) {
+        final ConfiguredValue<Boolean> shouldRunValue = IntegrationConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
+        if (IntegrationConfiguration.SHOULD_RUN.getCurrentValue() && !ConfigurationDefinition.wasDefaultValueUsed(shouldRunValue)) {
             shouldRun = true;
             servletContext.log("ignoring " + LIQUIBASE_HOST_INCLUDES + " and "
                     + LIQUIBASE_HOST_EXCLUDES + ", since " + shouldRunValue.getProvidedValue().describe()
