@@ -162,30 +162,27 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @Override
     public CheckSum generateCheckSum() {
-        InputStream stream = null;
+        InputStream stream;
+        CheckSum generatedChecksum;
+        String statementSql = this.sql;
         try {
             stream = openSqlStream();
-
-            String statementSql = this.sql;
-            if (stream == null && statementSql == null) {
-                statementSql = "";
+            try (InputStream openedInputStream = stream) {
+                if (openedInputStream == null && statementSql == null) {
+                    statementSql = "";
+                }
+                if (statementSql != null) {
+                    try (InputStream byteArrayInputStream = new ByteArrayInputStream(statementSql.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()))) {
+                           generatedChecksum = CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), byteArrayInputStream), false);
+                    }
+                } else {
+                    generatedChecksum = CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), openedInputStream), false);
+                }
+                return generatedChecksum;
             }
-
-            if (statementSql != null) {
-                stream = new ByteArrayInputStream(statementSql.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
-            }
-            return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
-        } finally {
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
-                        LogFactory.getLogger().debug("Error closing stream", e);
-                    }
-                }
-            }
+        }
     }
 
 
@@ -199,7 +196,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
-        List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
+        List<SqlStatement> returnStatements = new ArrayList<>();
 
         String statementSql = StringUtils.trimToNull(getSql());
         if (statementSql == null) {
@@ -255,7 +252,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         private PushbackInputStream stream;
 
         private byte[] quickBuffer = new byte[100];
-        private List<Byte> resizingBuffer = new ArrayList<Byte>();
+        private List<Byte> resizingBuffer = new ArrayList<>();
 
 
         private int lastChar = 'X';
