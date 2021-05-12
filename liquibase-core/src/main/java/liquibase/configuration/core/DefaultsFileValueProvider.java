@@ -66,7 +66,8 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
             return true;
         }
 
-        if (wantedKey.replaceFirst(".*\\.", "").equalsIgnoreCase(StringUtil.toCamelCase(storedKey))) {
+        if (wantedKey.replaceFirst("^liquibase\\.", "").equalsIgnoreCase(StringUtil.toCamelCase(storedKey))
+            || wantedKey.replaceFirst("^liquibase\\.command\\.", "").equalsIgnoreCase(StringUtil.toCamelCase(storedKey))) {
             //Stored the argument name without a prefix
             return true;
         }

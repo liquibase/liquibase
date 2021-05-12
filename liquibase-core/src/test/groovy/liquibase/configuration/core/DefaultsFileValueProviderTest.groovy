@@ -30,8 +30,10 @@ class DefaultsFileValueProviderTest extends Specification {
         "long.other.key"    | "Long other key"
         "shortKey"          | "Short Key"
         "word"              | "Word"
-        "actual.shortKey"   | "Short Key"
-        "actual.shortKabob" | "Short kabob"
+        "liquibase.shortKey"   | "Short Key"
+        "liquibase.command.shortKey"   | "Short Key"
+        "liquibase.shortKabob" | "Short kabob"
+        "liquibase.command.shortKabob" | "Short kabob"
         "invalid.key"       | null
         "upper.kabob"       | "UPPER KABOB"
     }

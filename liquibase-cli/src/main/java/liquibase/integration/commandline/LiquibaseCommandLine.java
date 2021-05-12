@@ -248,7 +248,7 @@ public class LiquibaseCommandLine {
 
                     if (response == 0) {
                         final String commandName = StringUtil.join(getCommandNames(commandLine.getParseResult()), " ");
-                        if (wasHelpOrVersionRequeted()) {
+                        if (!wasHelpOrVersionRequeted()) {
                             Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
                         }
                     }
