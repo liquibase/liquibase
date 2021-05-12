@@ -1689,6 +1689,7 @@ public class Main {
                 loadChangeSetInfoToMap(argsMap);
                 argsMap.put("changeLogFile", changeLogFile);
                 argsMap.put("outputWriter", outputWriter);
+                argsMap.put("force", Boolean.TRUE);
                 CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneChangeSetSQL", argsMap);
                 liquibaseCommand.execute();
                 return;
