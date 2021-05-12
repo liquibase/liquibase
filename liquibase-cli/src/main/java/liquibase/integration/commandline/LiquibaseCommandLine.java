@@ -4,7 +4,10 @@ import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandDefinition;
 import liquibase.command.CommandFactory;
-import liquibase.configuration.*;
+import liquibase.configuration.ConfigurationDefinition;
+import liquibase.configuration.ConfigurationValueProvider;
+import liquibase.configuration.ConfiguredValue;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
@@ -55,7 +58,21 @@ public class LiquibaseCommandLine {
     private final CommandLine commandLine;
     private FileHandler fileHandler;
 
+    /**
+     * Pico's defaultFactory does a lot of reflection, checking for classes we know we don't have.
+     * That is slow on older JVMs and impact initial startup time, so do our own factory for performance reasons.
+     * It is easy to configure pico to it's default factory, when profiling check for `CommandLine$DefaultFactory` usage
+     */
+    private CommandLine.IFactory defaultFactory = new CommandLine.IFactory() {
+        @Override
+        public <K> K create(Class<K> cls) throws Exception {
+            return cls.newInstance();
+        }
+    };
+
     public static void main(String[] args) {
+        //we don't ship jansi, so we know we can disable it without having to do the slow class checking
+        System.setProperty("org.fusesource.jansi.Ansi.disable", "true");
         final LiquibaseCommandLine cli = new LiquibaseCommandLine();
 
         int returnCode = cli.execute(args);
@@ -145,9 +162,9 @@ public class LiquibaseCommandLine {
     }
 
     private CommandLine buildPicoCommandLine() {
-        final CommandLine.Model.CommandSpec rootCommandSpec = CommandLine.Model.CommandSpec.create();
+        final CommandLine.Model.CommandSpec rootCommandSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(null, defaultFactory);
         rootCommandSpec.name("liquibase");
-        configureHelp(rootCommandSpec);
+        configureHelp(rootCommandSpec, true);
         rootCommandSpec.subcommandsCaseInsensitive(true);
 
 
@@ -158,7 +175,7 @@ public class LiquibaseCommandLine {
         ;
 
 
-        CommandLine commandLine = new CommandLine(rootCommandSpec)
+        CommandLine commandLine = new CommandLine(rootCommandSpec, defaultFactory)
                 .setCaseInsensitiveEnumValuesAllowed(true)
                 .setOptionsCaseInsensitive(true)
                 .setUsageHelpAutoWidth(true);
@@ -314,7 +331,7 @@ public class LiquibaseCommandLine {
 
                     value = StringUtil.trimToNull(value);
                     if (value != null) {
-                        returnArgs.add("--"+legacyTag);
+                        returnArgs.add("--" + legacyTag);
                         returnArgs.add(value);
                     }
                 }
@@ -512,82 +529,93 @@ public class LiquibaseCommandLine {
     }
 
     private void addSubcommand(CommandDefinition commandDefinition, CommandLine commandLine) {
-        final CommandRunner commandRunner = new CommandRunner();
-        final CommandLine.Model.CommandSpec subCommandSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(commandRunner);
-        commandRunner.setSpec(subCommandSpec);
+        Set<String> commandNames = new LinkedHashSet<String>();
+        commandNames.add(StringUtil.toKabobCase(commandDefinition.getName()[0]));
+        commandNames.add(commandDefinition.getName()[0]);
 
-        subCommandSpec.aliases(commandDefinition.getName()[0].replace("-", ""));
+        boolean documentedName = true;
+        for (String commandName : commandNames) {
 
-        configureHelp(subCommandSpec);
+            final CommandRunner commandRunner = new CommandRunner();
+            final CommandLine.Model.CommandSpec subCommandSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(commandRunner, defaultFactory);
+            commandRunner.setSpec(subCommandSpec);
 
-        subCommandSpec.usageMessage()
-                .header(StringUtil.trimToEmpty(commandDefinition.getShortDescription()) + "\n")
-                .description(StringUtil.trimToEmpty(commandDefinition.getLongDescription()));
+            configureHelp(subCommandSpec, false);
 
-        subCommandSpec.optionsCaseInsensitive(true);
-        subCommandSpec.subcommandsCaseInsensitive(true);
+            subCommandSpec.usageMessage()
+                    .header(StringUtil.trimToEmpty(commandDefinition.getShortDescription()) + "\n")
+                    .description(StringUtil.trimToEmpty(commandDefinition.getLongDescription()));
 
-        for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
-            final String[] argNames = toArgNames(def);
-            for (int i = 0; i < argNames.length; i++) {
-                final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder(argNames[i])
-                        .required(false)
-                        .converters(value -> {
-                            if (def.getDataType().equals(Boolean.class)) {
-                                if (value.equals("")) {
-                                    return "true";
+            subCommandSpec.optionsCaseInsensitive(true);
+            subCommandSpec.subcommandsCaseInsensitive(true);
+
+            subCommandSpec.usageMessage().hidden(!documentedName);
+
+            for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
+                final String[] argNames = toArgNames(def);
+                for (int i = 0; i < argNames.length; i++) {
+                    final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder(argNames[i])
+                            .required(false)
+                            .converters(value -> {
+                                if (def.getDataType().equals(Boolean.class)) {
+                                    if (value.equals("")) {
+                                        return "true";
+                                    }
                                 }
-                            }
-                            return value;
-                        })
-                        .type(String.class);
+                                return value;
+                            })
+                            .type(String.class);
 
 
-                String description = "\n(liquibase.command." + def.getName() + " OR liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
-                        "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " + toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName()) + ")";
+                    String description = "\n(liquibase.command." + def.getName() + " OR liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
+                            "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " + toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName()) + ")";
 
-                if (def.getDefaultValue() != null) {
-                    if (def.getDefaultValueDescription() == null) {
-                        description = "\nDEFAULT: " + def.getDefaultValue() + "\n" + description;
-                    } else {
-                        description = "\nDEFAULT: " + def.getDefaultValueDescription() + "\n" + description;
+                    if (def.getDefaultValue() != null) {
+                        if (def.getDefaultValueDescription() == null) {
+                            description = "\nDEFAULT: " + def.getDefaultValue() + "\n" + description;
+                        } else {
+                            description = "\nDEFAULT: " + def.getDefaultValueDescription() + "\n" + description;
+                        }
                     }
+
+                    if (def.getDescription() != null) {
+                        description = def.getDescription() + description;
+                    }
+
+                    if (def.isRequired()) {
+                        description = "[REQUIRED] " + description;
+                    }
+                    builder.description(description + "\n");
+
+
+                    if (def.getDataType().equals(Boolean.class)) {
+                        builder.arity("0..1");
+                    }
+
+
+                    if (i > 0) {
+                        builder.hidden(true);
+                    }
+
+                    subCommandSpec.addOption(builder.build());
                 }
+            }
 
-                if (def.getDescription() != null) {
-                    description = def.getDescription() + description;
-                }
-
-                if (def.isRequired()) {
-                    description = "[REQUIRED] "+description;
-                }
-                builder.description(description + "\n");
-
-
-                if (def.getDataType().equals(Boolean.class)) {
-                    builder.arity("0..1");
-                }
-
-
-                if (i > 0) {
-                    builder.hidden(true);
-                }
-
+            for (String legacyArg : legacyNoLongerCommandArguments) {
+                final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder("--" + legacyArg)
+                        .required(false)
+                        .type(String.class)
+                        .description("Legacy CLI argument")
+                        .hidden(true);
                 subCommandSpec.addOption(builder.build());
             }
+
+            commandLine.getCommandSpec().addSubcommand(commandName, new CommandLine(subCommandSpec, defaultFactory));
+
+            //rest of the iterations don't document the commandName
+            documentedName = false;
         }
 
-        for (String legacyArg : legacyNoLongerCommandArguments) {
-            final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder("--" + legacyArg)
-                    .required(false)
-                    .type(String.class)
-                    .description("Legacy CLI argument")
-                    .hidden(true);
-            subCommandSpec.addOption(builder.build());
-        }
-
-
-        commandLine.getCommandSpec().addSubcommand(StringUtil.toKabobCase(commandDefinition.getName()[0]), subCommandSpec);
     }
 
     private String toEnvVariable(String property) {
@@ -651,7 +679,7 @@ public class LiquibaseCommandLine {
         }
     }
 
-    private void configureHelp(CommandLine.Model.CommandSpec commandSpec) {
+    private void configureHelp(CommandLine.Model.CommandSpec commandSpec, boolean includeVersion) {
         String footer = "Each argument contains the corresponding 'configuration key' in parentheses. " +
                 "As an alternative to passing values on the command line, these keys can be used as a basis for configuration settings in other locations.\n\n" +
                 "Available configuration locations, in order of priority:\n" +
@@ -663,7 +691,19 @@ public class LiquibaseCommandLine {
                 "http://www.liquibase.org";
 
 
-        commandSpec.mixinStandardHelpOptions(true);
+        commandSpec.addOption(CommandLine.Model.OptionSpec.builder("--help", "-h")
+                .description("Show this help message and exit")
+                .usageHelp(true)
+                .build());
+
+        if (includeVersion) {
+            commandSpec.addOption(CommandLine.Model.OptionSpec.builder("--version", "-v")
+                    .description("Print version information and exit")
+                    .versionHelp(true)
+                    .build());
+        }
+
+
         commandSpec.usageMessage()
                 .showDefaultValues(false)
                 .sortOptions(true)

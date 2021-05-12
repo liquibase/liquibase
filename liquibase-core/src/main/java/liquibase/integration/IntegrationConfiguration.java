@@ -39,6 +39,9 @@ public class IntegrationConfiguration implements AutoloadedConfigurations {
         LOG_LEVEL = builder.define("logLevel", Level.class)
                 .setDefaultValue(Level.INFO)
                 .setValueHandler(value -> {
+                    if (value == null) {
+                        return null;
+                    }
                     if (value instanceof Level) {
                         return (Level) value;
                     }
