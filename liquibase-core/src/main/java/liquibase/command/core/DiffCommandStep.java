@@ -20,6 +20,8 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> DIFF_TYPES_ARG;
+    public static final CommandArgumentDefinition<String> DRIVER_ARG;
+    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -39,6 +41,10 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
                 .description("The target database password")
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
+        DRIVER_ARG = builder.argument("driver", String.class)
+                .description("The JDBC driver class").build();
+        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
+                .description("The JDBC driver properties file").build();
         EXCLUDE_OBJECTS_ARG = builder.argument("excludeObjects", String.class)
                 .description("Objects to exclude from diff").build();
         INCLUDE_OBJECTS_ARG = builder.argument("includeObjects", String.class)

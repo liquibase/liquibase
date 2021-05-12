@@ -13,6 +13,10 @@ Long Description: NOT SET
 Required Args:
   referenceUrl (String) The JDBC reference database connection URL
 Optional Args:
+  driver (String) The JDBC driver class
+    Default: null
+  driverPropertiesFile (String) The JDBC driver properties file
+    Default: null
   referenceDefaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
   referenceDefaultSchemaName (String) The default schema name to use for the database connection

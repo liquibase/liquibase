@@ -20,6 +20,8 @@ public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<UUID> HUB_CONNECTION_ID_ARG;
     public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
+    public static final CommandArgumentDefinition<String> DRIVER_ARG;
+    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -35,6 +37,10 @@ public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
                 .description("Password to use to connect to the database")
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
+        DRIVER_ARG = builder.argument("driver", String.class)
+                .description("The JDBC driver class").build();
+        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
+                .description("The JDBC driver properties file").build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
                 .description("The root changelog").build();
         HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", UUID.class)

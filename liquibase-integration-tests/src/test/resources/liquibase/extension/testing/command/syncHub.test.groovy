@@ -20,6 +20,10 @@ Optional Args:
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
     Default: null
+  driver (String) The JDBC driver class
+    Default: null
+  driverPropertiesFile (String) The JDBC driver properties file
+    Default: null
   hubConnectionId (UUID) Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.
     Default: null
   hubProjectId (UUID) Used to identify the specific Project in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub account at https://hub.liquibase.com.

@@ -15,6 +15,8 @@ public class ChangelogSyncCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
+    public static final CommandArgumentDefinition<String> DRIVER_ARG;
+    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -26,6 +28,10 @@ public class ChangelogSyncCommandStep extends AbstractCliWrapperCommandStep {
             .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
             .description("The default catalog name to use for the database connection").build();
+        DRIVER_ARG = builder.argument("driver", String.class)
+            .description("The JDBC driver class").build();
+        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
+            .description("The JDBC driver properties file").build();
         USERNAME_ARG = builder.argument("username", String.class)
             .description("The database username").build();
         PASSWORD_ARG = builder.argument("password", String.class)

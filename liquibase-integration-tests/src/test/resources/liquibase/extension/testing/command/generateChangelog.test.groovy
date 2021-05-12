@@ -18,6 +18,10 @@ Optional Args:
     Default: null
   diffTypes (String) Types of objects to compare
     Default: null
+  driver (String) The JDBC driver class
+    Default: null
+  driverPropertiesFile (String) The JDBC driver properties file
+    Default: null
   excludeObjects (String) Objects to exclude from diff
     Default: null
   includeObjects (String) Objects to include in diff

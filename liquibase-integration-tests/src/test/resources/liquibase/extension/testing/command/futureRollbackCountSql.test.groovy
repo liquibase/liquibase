@@ -18,6 +18,10 @@ Optional Args:
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
     Default: null
+  driver (String) The JDBC driver class
+    Default: null
+  driverPropertiesFile (String) The JDBC driver properties file
+    Default: null
   labels (String) Changeset labels to match
     Default: null
   password (String) The database password

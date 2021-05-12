@@ -19,6 +19,8 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> DIFF_TYPES_ARG;
+    public static final CommandArgumentDefinition<String> DRIVER_ARG;
+    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -30,6 +32,10 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
                 .description("Password to use to connect to the database")
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
+        DRIVER_ARG = builder.argument("driver", String.class)
+                .description("The JDBC driver class").build();
+        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
+                .description("The JDBC driver properties file").build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
                 .description("File to write changelog to").build();
         DATA_OUTPUT_DIRECTORY = builder.argument("dataOutputDirectory", String.class)
