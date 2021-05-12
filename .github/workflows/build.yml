@@ -9,7 +9,6 @@ jobs:
   test:
     name: Java ${{ matrix.java }}
     runs-on: ubuntu-latest
-    container: maven
     strategy:
       fail-fast: false
       matrix:
