@@ -13,6 +13,10 @@ Required Args:
   changelogFile (String) The root changelog
   url (String) The JDBC database connection URL
 Optional Args:
+  changeExecListenerClass (String) Fully-qualified class which specifies a ChangeExecListener
+    Default: null
+  changeExecListenerPropertiesFile (String) Path to a properties file for the ChangeExecListenerClass
+    Default: null
   contexts (String) Changeset contexts to match
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection

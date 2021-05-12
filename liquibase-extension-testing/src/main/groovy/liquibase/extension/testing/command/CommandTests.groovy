@@ -2,10 +2,13 @@ package liquibase.extension.testing.command
 
 import liquibase.AbstractExtensibleObject
 import liquibase.CatalogAndSchema
+import liquibase.Liquibase
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
+import liquibase.changelog.ChangelogRewriter
+import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandArgumentDefinition
 import liquibase.command.CommandFactory
 import liquibase.command.CommandResults
@@ -16,6 +19,7 @@ import liquibase.configuration.ConfigurationValueProvider
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
+import liquibase.database.core.HsqlDatabase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.extension.testing.TestDatabaseConnections
 import liquibase.extension.testing.TestFilter
@@ -25,6 +29,7 @@ import liquibase.hub.core.MockHubService
 import liquibase.integration.IntegrationConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
+import liquibase.resource.ResourceAccessor
 import liquibase.ui.InputHandler
 import liquibase.ui.UIService
 import liquibase.util.FileUtil
@@ -32,6 +37,7 @@ import liquibase.util.StringUtil
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.Assert
 import org.junit.Assume
+import org.w3c.dom.Attr
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -252,6 +258,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
 
+        boolean exceptionThrown = false
         def results = Scope.child([
                 (IntegrationConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name): MockHubService,
@@ -259,17 +266,27 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 (Scope.Attr.logService.name()): logService,
         ], {
             try {
-                return commandScope.execute()
+                def returnValue = commandScope.execute()
+                assert testDef.expectedException == null
+                return returnValue
             }
             catch (Exception e) {
+                exceptionThrown = true
                 if (testDef.expectedException == null) {
                     throw e
                 } else {
                     assert e.class == testDef.expectedException
+                    if (testDef.expectedExceptionMessage != null) {
+                        checkOutput("Exception message", e.getMessage(), Collections.singletonList(testDef.expectedExceptionMessage))
+                    }
                     return
                 }
             }
         } as Scope.ScopedRunnerWithReturn<CommandResults>)
+
+        //
+        // Check to see if there was supposed to be an exception
+        //
 
         if (testDef.expectedResults.size() > 0 && (results == null || results.getResults().isEmpty())) {
             throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
@@ -553,6 +570,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         private Map<String, ?> expectedResults = new HashMap<>()
         private Class<Throwable> expectedException
+        private Object expectedExceptionMessage
 
         def setup(@DelegatesTo(TestSetupDefinition) Closure closure) {
             def setupDef = new TestSetupDefinition()
@@ -672,6 +690,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.expectedException = exception
         }
 
+        def setExpectedExceptionMessage(Object expectedExceptionMessage) {
+            this.expectedExceptionMessage = expectedExceptionMessage
+        }
+
         void validate() {
         }
     }
@@ -768,6 +790,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             File outputFile = new File("target/test-classes", newFile)
             FileUtil.write(contents, outputFile)
             println "Copied file " + originalFile + " to file " + newFile
+        }
+
+        void modifyChangeLogId(String originalFile, String newChangeLogId) {
+            this.setups.add(new SetupModifyChangelog(originalFile, newChangeLogId))
         }
 
         /**

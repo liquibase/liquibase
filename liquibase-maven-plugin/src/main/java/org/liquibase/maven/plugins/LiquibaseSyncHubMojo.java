@@ -50,7 +50,7 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
                 .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, UUID.fromString(hubConnectionId))
                 .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId))
                 .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_ONLINE_ARG, false);
+                .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_OFFLINE_ARG, false);
 
         syncHub.execute();
     }

@@ -18,6 +18,8 @@ public class RollbackCountSqlCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> ROLLBACK_SCRIPT_ARG;
     public static final CommandArgumentDefinition<Integer> COUNT_ARG;
+    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
+    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -42,7 +44,11 @@ public class RollbackCountSqlCommandStep extends AbstractCliWrapperCommandStep {
         ROLLBACK_SCRIPT_ARG = builder.argument("rollbackScript", String.class)
                 .description("Rollback script to execute").build();
         COUNT_ARG = builder.argument("count", Integer.class).required()
-                .description("The number of changes to rollback").build();
+            .description("The number of changes to rollback").build();
+        CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)
+            .description("Fully-qualified class which specifies a ChangeExecListener").build();
+        CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
+            .description("Path to a properties file for the ChangeExecListenerClass").build();
     }
 
     @Override

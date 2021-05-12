@@ -39,13 +39,6 @@ Optional Args:
         expectedException = CommandValidationException.class
     }
 
-    run "Run without a changeLogFile should throw an exception",  {
-        arguments = [
-                tag          : "version_2.0"
-        ]
-        expectedException = CommandValidationException.class
-    }
-
     run "Run without a URL should throw an exception",  {
         arguments = [
                 url          : "",

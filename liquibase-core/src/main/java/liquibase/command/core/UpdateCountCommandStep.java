@@ -17,6 +17,8 @@ public class UpdateCountCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<Integer> COUNT_ARG;
+    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
+    public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -39,7 +41,11 @@ public class UpdateCountCommandStep extends AbstractCliWrapperCommandStep {
         CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Changeset contexts to match").build();
         COUNT_ARG = builder.argument("count", Integer.class).required()
-                .description("The number of changes in the changelog to deploy").build();
+            .description("The number of changes in the changelog to deploy").build();
+        CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)
+            .description("Fully-qualified class which specifies a ChangeExecListener").build();
+        CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
+            .description("Path to a properties file for the ChangeExecListenerClass").build();
     }
 
     @Override
