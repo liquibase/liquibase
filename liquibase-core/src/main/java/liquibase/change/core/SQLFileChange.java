@@ -97,6 +97,7 @@ public class SQLFileChange extends AbstractSQLChange {
         }
     }
 
+    @Override
     public InputStream openSqlStream() throws IOException {
         if (path == null) {
             return null;
