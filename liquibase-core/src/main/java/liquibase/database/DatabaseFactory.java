@@ -210,7 +210,7 @@ public class DatabaseFactory {
               driverProperties.put("useInformationSchema", "true");
             }
 
-            LOG.fine("Connecting to the URL:'" + JdbcConnection.sanitizeUrl(url) + "' using driver:'" + driverObject.getClass().getName() + "'");
+            LOG.fine("Connecting to the URL:'" + JdbcConnection.stripPasswordPropFromJdbcUrl(url) + "' using driver:'" + driverObject.getClass().getName() + "'");
             databaseConnection = ConnectionServiceFactory.getInstance().create(url, driverObject, driverProperties);
             LOG.fine("Connection has been created");
         } catch (Exception e) {

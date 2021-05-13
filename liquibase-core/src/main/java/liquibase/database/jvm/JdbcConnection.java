@@ -5,11 +5,12 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.sql.*;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -18,9 +19,30 @@ import java.util.regex.Pattern;
  */
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
+    private static final List<Pair<Pattern/*when it suits*/, Pattern/*then we apply*/>> PATTERN_JDBC = new LinkedList<>();
 
-    public static final Pattern PATTERN_JDBC_URL_PASSWORD_PROPERTY = Pattern.compile("(?i);password=[^;]*");
+    static {
+        /*
+         * Explanation of the regex:
+         * <ul>
+         *     <li><code>(?i)</code> - match ignore case</li>
+         *     <li><code>;password=</code> - match semicolon followed by "password=". Properties always
+         *     start with semicolon for the cases we want to support. Other cases that have
+         *     properties inside parenthesis are not supported.</li>
+         *     <li><code>[^;]*</code> - zero or more characters that is not a semicolon</li>
+         * </ul>
+         */
+        PATTERN_JDBC.add(Pair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i);password=[^;]*")));
 
+        /*
+         * Explanation of the regex:
+         * <ul>
+         *     <li><code>(?i)</code> - match ignore case</li>
+         *     <li>/(.*)((?=@)) - catch string starting from / and end with @ not including @ in match</li>
+         * </ul>
+         */
+        PATTERN_JDBC.add(Pair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+    }
     public JdbcConnection() {
 
     }
@@ -98,7 +120,7 @@ public class JdbcConnection implements DatabaseConnection {
     public String getURL() {
         try {
             String url = getConnectionUrl();
-            url = sanitizeUrl(url);
+            url = stripPasswordPropFromJdbcUrl(url);
             return url;
         } catch (SQLException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -106,13 +128,26 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     /**
-     * Remove any secure information from the URL. Used for logging purposes
+     * Strips off the <code>;password=</code> property from string.
+     * Note: it does not remove the password from the
+     * <code>user:password@host</code> section
+     *
+     * @param jdbcUrl string to remove password=xxx from
+     * @return modified string
      */
-    public static String sanitizeUrl(String url) {
-        if (url != null) {
-            url = PATTERN_JDBC_URL_PASSWORD_PROPERTY.matcher(url).replaceAll("");
+    public static String stripPasswordPropFromJdbcUrl(String jdbcUrl) {
+        if (StringUtils.isBlank(jdbcUrl)) {
+            return jdbcUrl;
         }
-        return url;
+        for (Pair<Pattern/*when it suits*/, Pattern/*then we apply*/> patternPair : PATTERN_JDBC) {
+            Pattern jdbcUrlPattern = patternPair.getLeft();
+            Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
+            if (matcher.matches()) {
+                Pattern passwordPattern = patternPair.getRight();
+                jdbcUrl = passwordPattern.matcher(jdbcUrl).replaceAll(StringUtils.EMPTY);
+            }
+        }
+        return jdbcUrl;
     }
 
     protected String getConnectionUrl() throws SQLException {
