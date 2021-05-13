@@ -220,12 +220,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (connection == null) {
             return null;
         }
-
-        try {
-            return connection.getDatabaseProductVersion();
-        } catch (DatabaseException e) {
-            throw new DatabaseException(e);
-        }
+        return connection.getDatabaseProductVersion();
     }
 
     @Override
@@ -233,11 +228,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (connection == null) {
             return 999;
         }
-        try {
-            return connection.getDatabaseMajorVersion();
-        } catch (DatabaseException e) {
-            throw new DatabaseException(e);
-        }
+        return connection.getDatabaseMajorVersion();
     }
 
     @Override
@@ -245,11 +236,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (connection == null) {
             return -1;
         }
-        try {
-            return connection.getDatabaseMinorVersion();
-        } catch (DatabaseException e) {
-            throw new DatabaseException(e);
-        }
+        return connection.getDatabaseMinorVersion();
     }
 
 
@@ -1150,20 +1137,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void commit() throws DatabaseException {
-        try {
-            getConnection().commit();
-        } catch (DatabaseException e) {
-            throw new DatabaseException(e);
-        }
+        getConnection().commit();
     }
 
     @Override
     public void rollback() throws DatabaseException {
-        try {
-            getConnection().rollback();
-        } catch (DatabaseException e) {
-            throw new DatabaseException(e);
-        }
+        getConnection().rollback();
     }
 
     @Override
@@ -1218,20 +1197,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean isAutoCommit() throws DatabaseException {
-        try {
-            return getConnection().getAutoCommit();
-        } catch (DatabaseException e) {
-            throw new DatabaseException(e);
-        }
+        return getConnection().getAutoCommit();
     }
 
     @Override
     public void setAutoCommit(final boolean b) throws DatabaseException {
-        try {
-            getConnection().setAutoCommit(b);
-        } catch (DatabaseException e) {
-            throw new DatabaseException(e);
-        }
+        getConnection().setAutoCommit(b);
     }
 
     /**
