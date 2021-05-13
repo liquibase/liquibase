@@ -312,13 +312,17 @@ public class Main {
                     LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                     if (licenseService != null) {
                         if (main.liquibaseProLicenseKey == null) {
-                            Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                            if (!Main.runningFromNewCli) {
+                                Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                            }
                         } else {
                             Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
                             LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                             if (result.code != 0) {
                                 String allMessages = String.join("\n", result.messages);
-                                Scope.getCurrentScope().getUI().sendMessage(allMessages);
+                                if (!Main.runningFromNewCli) {
+                                    Scope.getCurrentScope().getUI().sendMessage(allMessages);
+                                }
                             } else {
                                 main.liquibaseProLicenseValid = true;
                             }
@@ -330,7 +334,9 @@ public class Main {
                         if (licenseService.daysTilExpiration() < 0) {
                             main.liquibaseProLicenseValid = false;
                         }
-                        Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                        if (!Main.runningFromNewCli) {
+                            Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                        }
                     }
 
                     if (!Main.runningFromNewCli) {
