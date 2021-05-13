@@ -61,11 +61,13 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDescription("Tablespace to use for Liquibase objects")
                 .build();
 
-        LIQUIBASE_CATALOG_NAME = builder.define("catalogName", String.class)
+        LIQUIBASE_CATALOG_NAME = builder.define("liquibaseCatalogName", String.class)
+                .addAliasKey("liquibase.catalogName")
                 .setDescription("Catalog to use for Liquibase objects")
                 .build();
 
-        LIQUIBASE_SCHEMA_NAME = builder.define("schemaName", String.class)
+        LIQUIBASE_SCHEMA_NAME = builder.define("liquibaseSchemaName", String.class)
+                .addAliasKey("liquibase.schemaName")
                 .setDescription("Schema to use for Liquibase objects")
                 .build();
 
