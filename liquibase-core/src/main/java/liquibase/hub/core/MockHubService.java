@@ -14,7 +14,9 @@ public class MockHubService implements HubService {
 
     public static UUID randomUUID;
     public static UUID deletedUUID = UUID.randomUUID();
+    public static UUID alreadyRegisteredUUID = UUID.randomUUID();
     public static UUID failUUID = UUID.randomUUID();
+    public static UUID notFoundChangeLogUUID = UUID.randomUUID();
     public static Date operationCreateDate;
 
     public List<Project> returnProjects = new ArrayList<>();
@@ -197,6 +199,18 @@ public class MockHubService implements HubService {
                                            .setProject(this.returnProjects.get(0));
         deletedChangeLog.setStatus("deleted");
         this.returnChangeLogs.add(deletedChangeLog);
+        HubChangeLog alreadyRegisteredChangeLog = new HubChangeLog()
+            .setId(alreadyRegisteredUUID)
+            .setName("Already registered changelog")
+            .setFileName("com/example/registered.xml")
+            .setProject(this.returnProjects.get(0));
+        this.returnChangeLogs.add(alreadyRegisteredChangeLog);
+        HubChangeLog notFoundChangeLog = new HubChangeLog()
+            .setId(notFoundChangeLogUUID)
+            .setName("Already registered changelog")
+            .setFileName("com/example/registered.xml")
+            .setProject(this.returnProjects.get(0));
+        this.returnChangeLogs.add(notFoundChangeLog);
         this.sentObjects = new TreeMap<>();
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
         hubServiceFactory.setOfflineReason("Using MockHubService which is configured to be offline");

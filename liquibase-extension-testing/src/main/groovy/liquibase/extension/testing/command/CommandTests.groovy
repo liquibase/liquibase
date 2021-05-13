@@ -754,20 +754,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupRunChangelog(changeLogPath, labels))
         }
 
-        /**
-         *
-         * Create a specified file with the contents from a source
-         *
-         * @param originalFile
-         * @param newFile
-         *
-         */
         void createTempResource(String originalFile, String newFile) {
-            URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
-            File f = new File(url.toURI())
-            String contents = FileUtil.getContents(f)
-            File outputFile = new File("target/test-classes", newFile)
-            FileUtil.write(contents, outputFile)
+            this.setups.add(new SetupCreateTempResources(originalFile, newFile))
         }
 
         /**

@@ -30,7 +30,6 @@ class SetupModifyChangelog extends TestSetup {
         this.id = id
     }
 
-
     @Override
     void setup(TestDatabaseConnections.ConnectionStatus connectionStatus) throws Exception {
         ChangelogRewriter.addChangeLogId(changeLogFile, id, null)

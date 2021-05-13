@@ -1,6 +1,7 @@
 package liquibase.extension.testing.command
 
 import liquibase.change.ColumnConfig
+import liquibase.change.core.CreateSequenceChange
 import liquibase.change.core.CreateTableChange
 import liquibase.exception.CommandValidationException
 
@@ -259,7 +260,7 @@ Changed Column(s): NONE
                 password         : { it.password },
                 referenceUrl     : { it.altUrl },
                 referenceUsername: { it.altUsername },
-                referencePassword: { it.altPassword },
+                referencePassword: { it.altPassword }
         ]
 
         setup {
@@ -280,6 +281,12 @@ Changed Column(s): NONE
                                             .setType("VARCHAR(255)")
                             ]
                     ),
+                    new CreateSequenceChange(
+                            sequenceName: "seq1",
+                            dataType: "bigint",
+                            incrementBy: 1,
+                            startValue: 1
+                    )
             ]
 
             altDatabase = [
@@ -320,6 +327,68 @@ Unexpected Column\(s\):
 Changed Column\(s\): 
      PUBLIC.SHAREDTABLE.SHARED
           type changed from 'VARCHAR\(3.*?\)' to 'VARCHAR\(255.*?\)'/),
+        ]
+    }
+
+    run "Running diff against differently structured databases should not find non-included types", {
+        arguments = [
+                url              : { it.url },
+                username         : { it.username },
+                password         : { it.password },
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+                diffTypes        : "tables"
+        ]
+
+        setup {
+            database = [
+                    new CreateTableChange(
+                            tableName: "SharedTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)"),
+                                    ColumnConfig.fromName("Shared")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "PrimaryTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateSequenceChange(
+                            sequenceName: "seq1",
+                            dataType: "bigint",
+                            incrementBy: 1,
+                            startValue: 1
+                    )
+            ]
+
+            altDatabase = [
+                    new CreateTableChange(
+                            tableName: "SharedTable",
+                            columns: [
+                                    ColumnConfig.fromName("Name")
+                                            .setType("VARCHAR(255)"),
+                                    ColumnConfig.fromName("Shared")
+                                            .setType("VARCHAR(3)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondaryTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+            ]
+
+        }
+        expectedOutput = [
+                CommandTests.assertNotContains("Sequence")
         ]
     }
 

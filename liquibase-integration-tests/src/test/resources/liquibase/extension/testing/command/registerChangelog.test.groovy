@@ -1,7 +1,11 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
+import liquibase.extension.testing.setup.SetupCreateTempResources
 import liquibase.hub.core.MockHubService
+
+import java.util.regex.Pattern
 
 CommandTests.define {
     command = ["registerChangelog"]
@@ -19,15 +23,29 @@ Optional Args:
     run "Happy path", {
         arguments = [
                 hubProjectName   : "Project 1",
-                changelogFile: "changelogs/hsqldb/complete/changelog-test.xml",
+                changelogFile: "changelogs/hsqldb/complete/registered-changelog-test.xml",
         ]
         setup {
-            createTempResource "changelogs/hsqldb/complete/rollback.changelog.xml", "changelogs/hsqldb/complete/changelog-test.xml"
+            createTempResource "changelogs/hsqldb/complete/rollback.changelog.xml", "changelogs/hsqldb/complete/registered-changelog-test.xml"
         }
         expectedResults = [
                 statusCode   : 0,
                 registeredChangeLogId  : { MockHubService.randomUUID.toString() }
         ]
+    }
+
+    run "Run with already-registered changelog throws an exception", {
+        arguments = [
+                changelogFile: "simple.changelog.with.id.xml"
+        ]
+
+        setup {
+            copyResource "changelogs/hsqldb/complete/simple.changelog.xml", "simple.changelog.with.id.xml"
+            modifyChangeLogId "simple.changelog.with.id.xml", MockHubService.alreadyRegisteredUUID.toString()
+            runChangelog "changelogs/hsqldb/complete/simple.changelog.xml"
+        }
+        expectedException = CommandExecutionException.class
+        expectedExceptionMessage = Pattern.compile(".*is already registered with changeLogId*", Pattern.MULTILINE | Pattern.DOTALL)
     }
 
     run "Run without a changeLogFile throws an exception", {
