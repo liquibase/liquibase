@@ -26,6 +26,8 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -214,36 +216,48 @@ public class LiquibaseCommandLine {
         Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
 
         boolean printUsage = false;
-        if (exception instanceof CommandLine.ParameterException) {
-            if (exception instanceof CommandLine.UnmatchedArgumentException) {
-                System.err.println("Unexpected argument(s): " + StringUtil.join(((CommandLine.UnmatchedArgumentException) exception).getUnmatched(), ", "));
-            } else {
+        try (final StringWriter suggestionWriter = new StringWriter();
+             PrintWriter suggestionsPrintWriter = new PrintWriter(suggestionWriter)) {
+            if (exception instanceof CommandLine.ParameterException) {
+                if (exception instanceof CommandLine.UnmatchedArgumentException) {
+                    System.err.println("Unexpected argument(s): " + StringUtil.join(((CommandLine.UnmatchedArgumentException) exception).getUnmatched(), ", "));
+                } else {
+                    System.err.println("Error parsing command line: " + bestMessage);
+                }
+                CommandLine.UnmatchedArgumentException.printSuggestions((CommandLine.ParameterException) exception, suggestionsPrintWriter);
+
+                printUsage = true;
+            } else if (exception instanceof IllegalArgumentException
+                    || exception instanceof CommandValidationException
+                    || exception instanceof CommandLineParsingException) {
                 System.err.println("Error parsing command line: " + bestMessage);
-            }
-            CommandLine.UnmatchedArgumentException.printSuggestions((CommandLine.ParameterException) exception, System.err);
-
-            printUsage = true;
-        } else if (exception instanceof IllegalArgumentException
-                || exception instanceof CommandValidationException
-                || exception instanceof CommandLineParsingException) {
-            System.err.println("Error parsing command line: " + bestMessage);
-            printUsage = true;
-        } else {
-            System.err.println("Unexpected error running Liquibase: " + bestMessage);
-            System.err.println();
-
-            if (Level.OFF.equals(this.configuredLogLevel)) {
-                System.err.println("For more information, please use the --log-level flag");
+                printUsage = true;
             } else {
-                if (IntegrationConfiguration.LOG_FILE.getCurrentValue() == null) {
-                    exception.printStackTrace(System.err);
+                System.err.println("Unexpected error running Liquibase: " + bestMessage);
+                System.err.println();
+
+                if (Level.OFF.equals(this.configuredLogLevel)) {
+                    System.err.println("For more information, please use the --log-level flag");
+                } else {
+                    if (IntegrationConfiguration.LOG_FILE.getCurrentValue() == null) {
+                        exception.printStackTrace(System.err);
+                    }
                 }
             }
-        }
 
-        if (printUsage) {
-            System.err.println();
-            System.err.println("For detailed help, try 'liquibase --help' or 'liquibase <command-name> --help'");
+            if (printUsage) {
+                System.err.println();
+                System.err.println("For detailed help, try 'liquibase --help' or 'liquibase <command-name> --help'");
+            }
+
+            suggestionsPrintWriter.flush();
+            final String suggestions = suggestionWriter.toString();
+            if (suggestions.length() > 0) {
+                System.err.println();
+                System.err.println(suggestions);
+            }
+        } catch (IOException e) {
+            Scope.getCurrentScope().getLog(getClass()).warning("Error closing stream: " + e.getMessage(), e);
         }
 
         return 1;
