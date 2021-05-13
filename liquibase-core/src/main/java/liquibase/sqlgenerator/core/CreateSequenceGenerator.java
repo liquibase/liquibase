@@ -47,23 +47,27 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
     @Override
     public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuilder queryStringBuilder = new StringBuilder();
-        queryStringBuilder.append("CREATE SEQUENCE ");
-        if (database instanceof PostgresDatabase) {
-            // supported only for version >= 9.5 https://www.postgresql.org/docs/9.5/sql-createsequence.html
-            try {
+        queryStringBuilder.append("CREATE SEQUENCE");
+        try {
+            if (database instanceof PostgresDatabase) {
+                // supported only for version >= 9.5 https://www.postgresql.org/docs/9.5/sql-createsequence.html
                 if (database.getDatabaseMajorVersion() > 9
                         || (database.getDatabaseMajorVersion() == 9 && database.getDatabaseMinorVersion() >= 5)) {
                     queryStringBuilder.append(" IF NOT EXISTS ");
                 }
-            } catch (DatabaseException e) {
-                // we can not determinate the PostgreSQL version so we do not add this statement
             }
-        }
-        queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
-        if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
-            queryStringBuilder.append(" AS BIGINT ");
-        } else if (statement.getDataType() != null) {
-            queryStringBuilder.append(" AS " + statement.getDataType());
+
+            queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
+
+            if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
+                queryStringBuilder.append(" AS BIGINT ");
+            } else if (database instanceof PostgresDatabase && database.getDatabaseMajorVersion() <10) {
+                // "AS" statement is not supported by Postgres version prior to 10, so do nothing
+            } else if (statement.getDataType() != null) {
+                    queryStringBuilder.append(" AS ").append(statement.getDataType());
+                }
+        } catch (DatabaseException e) {
+            // we can not determinate the PostgreSQL version so we do not add "IF NOT EXISTS" or "AS" statements
         }
         if (!(database instanceof MariaDBDatabase) && statement.getStartValue() != null) {
             queryStringBuilder.append(" START WITH ").append(statement.getStartValue());

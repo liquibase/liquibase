@@ -68,6 +68,42 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
         Assertions.assertThat(sql[0].toSql()).contains("IF NOT EXISTS");
     }
 
+    @Test
+    public void postgresDatabaseSupportAsStructureByVersion() throws Exception {
+        DatabaseConnection dbConnection = mock(DatabaseConnection.class);
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(9);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(6);
+
+        PostgresDatabase postgresDatabase = spy(new PostgresDatabase());
+        postgresDatabase.setConnection(dbConnection);
+        doReturn(SEQUENCE_NAME).when(postgresDatabase).escapeSequenceName(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
+
+        CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
+        createSequenceStatement.setStartValue(new BigInteger("1"));
+        createSequenceStatement.setDataType("int");
+
+        // verify that for version < 10 no AS is not in the statement
+        Sql[] sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
+        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
+        Assertions.assertThat(sql[0].toSql()).doesNotContain("SEQUENCE_NAME AS");
+
+        // verify that if no version is available the optional AS is not in the statement
+        reset(dbConnection);
+        when(dbConnection.getDatabaseMajorVersion()).thenThrow(DatabaseException.class);
+
+        sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
+        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
+        Assertions.assertThat(sql[0].toSql()).doesNotContain("SEQUENCE_NAME AS");
+
+        reset(dbConnection);
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(10);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(0);
+
+        // verify that for version >= 10 AS is present in the statement
+        sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
+        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
+        Assertions.assertThat(sql[0].toSql()).contains("SEQUENCE_NAME AS");
+    }
 //    @Before
 //    public void setUpMocks() throws DatabaseException {
 //
