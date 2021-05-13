@@ -47,7 +47,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
     @Override
     public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuilder queryStringBuilder = new StringBuilder();
-        queryStringBuilder.append("CREATE SEQUENCE");
+        queryStringBuilder.append("CREATE SEQUENCE ");
         try {
             if (database instanceof PostgresDatabase) {
                 // supported only for version >= 9.5 https://www.postgresql.org/docs/9.5/sql-createsequence.html
