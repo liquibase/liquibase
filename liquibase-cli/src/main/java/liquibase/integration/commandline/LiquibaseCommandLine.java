@@ -139,7 +139,6 @@ public class LiquibaseCommandLine {
         ).collect(Collectors.toSet());
 
         this.legacyNoLongerCommandArguments = Stream.of(
-                "driver",
                 "databaseClass",
                 "liquibaseCatalogName",
                 "liquibaseSchemaName",
@@ -148,7 +147,6 @@ public class LiquibaseCommandLine {
                 "databaseChangeLogTablespaceName",
                 "overwriteOutputFile",
                 "classpath",
-                "driverPropertiesFile",
                 "propertyProviderClass",
                 "promptForNonLocalDatabase",
                 "includeSystemClasspath",
