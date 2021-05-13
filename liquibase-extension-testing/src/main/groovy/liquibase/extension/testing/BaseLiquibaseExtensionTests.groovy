@@ -6,5 +6,5 @@ import org.junit.runners.Suite
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses([CommandTests])
-abstract class BaseLiquibaseExtensionSuite {
+abstract class BaseLiquibaseExtensionTests {
 }
