@@ -63,7 +63,7 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createArgs(commandScope, Arrays.asList("format", EXCLUDE_OBJECTS_ARG.getName(), INCLUDE_OBJECTS_ARG.getName()));
+        return collectArguments(commandScope, Arrays.asList("format", EXCLUDE_OBJECTS_ARG.getName(), INCLUDE_OBJECTS_ARG.getName()), null);
     }
 
 

@@ -4,6 +4,8 @@ import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
 
+import java.util.Arrays;
+
 public class DbDocCommandStep extends AbstractCliWrapperCommandStep {
 
     public static final String[] COMMAND_NAME = {"dbDoc"};
@@ -49,7 +51,7 @@ public class DbDocCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createParametersFromArgs(createArgs(commandScope), "outputDirectory");
+        return collectArguments(commandScope, null, "outputDirectory");
     }
 
     @Override

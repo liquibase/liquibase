@@ -59,7 +59,7 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createArgs(commandScope, Arrays.asList("dataOutputDirectory"));
+        return collectArguments(commandScope, Arrays.asList("dataOutputDirectory"), null);
     }
 
     @Override

@@ -66,7 +66,7 @@ public class RollbackToDateCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createParametersFromArgs(createArgs(commandScope), "date");
+        return collectArguments(commandScope, null, "date");
     }
 
     @Override

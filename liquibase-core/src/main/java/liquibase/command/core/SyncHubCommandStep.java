@@ -1,10 +1,8 @@
 package liquibase.command.core;
 
-import liquibase.command.AbstractCliWrapperCommandStep;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandBuilder;
-import liquibase.command.CommandDefinition;
+import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
+import liquibase.exception.CommandExecutionException;
 
 import java.util.UUID;
 
@@ -57,5 +55,10 @@ public class SyncHubCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Synchronize the local DatabaseChangeLog table with Liquibase Hub");
+    }
+
+    @Override
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return collectArguments(commandScope, null, null);
     }
 }

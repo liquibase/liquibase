@@ -4,6 +4,8 @@ import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
 
+import java.util.Collections;
+
 public class ChangelogSyncToTagCommandStep extends AbstractCliWrapperCommandStep {
 
     public static final String[] COMMAND_NAME = {"changelogSyncToTag"};
@@ -54,7 +56,7 @@ public class ChangelogSyncToTagCommandStep extends AbstractCliWrapperCommandStep
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createParametersFromArgs(createArgs(commandScope), "tag");
+        return collectArguments(commandScope, null, "tag");
     }
 
     @Override

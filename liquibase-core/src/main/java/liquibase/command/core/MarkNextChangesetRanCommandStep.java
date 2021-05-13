@@ -1,10 +1,8 @@
 package liquibase.command.core;
 
-import liquibase.command.AbstractCliWrapperCommandStep;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandBuilder;
-import liquibase.command.CommandDefinition;
+import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
+import liquibase.exception.CommandExecutionException;
 
 public class MarkNextChangesetRanCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -49,5 +47,10 @@ public class MarkNextChangesetRanCommandStep extends AbstractCliWrapperCommandSt
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Marks the next change you apply as executed in your database");
+    }
+
+    @Override
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return collectArguments(commandScope, null, null);
     }
 }

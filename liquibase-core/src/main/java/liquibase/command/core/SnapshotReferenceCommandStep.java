@@ -1,10 +1,8 @@
 package liquibase.command.core;
 
-import liquibase.command.AbstractCliWrapperCommandStep;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandBuilder;
-import liquibase.command.CommandDefinition;
+import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
+import liquibase.exception.CommandExecutionException;
 
 public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -49,5 +47,10 @@ public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Capture the current state of the reference database");
+    }
+
+    @Override
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return collectArguments(commandScope, null, null);
     }
 }

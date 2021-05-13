@@ -55,7 +55,7 @@ public class FutureRollbackFromTagSqlCommandStep extends AbstractCliWrapperComma
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createParametersFromArgs(createArgs(commandScope), "tag");
+        return collectArguments(commandScope, null, "tag");
     }
 
     @Override

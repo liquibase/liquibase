@@ -1,10 +1,8 @@
 package liquibase.command.core;
 
-import liquibase.command.AbstractCliWrapperCommandStep;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandBuilder;
-import liquibase.command.CommandDefinition;
+import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
+import liquibase.exception.CommandExecutionException;
 
 public class FutureRollbackSqlCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -55,5 +53,10 @@ public class FutureRollbackSqlCommandStep extends AbstractCliWrapperCommandStep 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Generate the raw SQL needed to rollback undeployed changes");
+    }
+
+    @Override
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return collectArguments(commandScope, null, null);
     }
 }

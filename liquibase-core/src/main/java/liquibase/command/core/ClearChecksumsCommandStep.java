@@ -1,10 +1,8 @@
 package liquibase.command.core;
 
-import liquibase.command.AbstractCliWrapperCommandStep;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandBuilder;
-import liquibase.command.CommandDefinition;
+import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
+import liquibase.exception.CommandExecutionException;
 
 public class ClearChecksumsCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -47,5 +45,10 @@ public class ClearChecksumsCommandStep extends AbstractCliWrapperCommandStep {
         commandDefinition.setShortDescription("Clears all checksums");
         commandDefinition.setLongDescription("Clears all checksums and nullifies the MD5SUM column of the " +
                 "DATABASECHANGELOG table so that they will be re-computed on the next database update");
+    }
+
+    @Override
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return collectArguments(commandScope, null, null);
     }
 }

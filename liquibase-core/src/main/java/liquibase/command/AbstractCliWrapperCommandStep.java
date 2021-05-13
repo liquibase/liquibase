@@ -45,90 +45,85 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
     }
 
     /**
-     * Called by {@link #run(CommandResultsBuilder)} to create the actual arguments passed to {@link Main#run(String[])}
+     * Called by {@link #run(CommandResultsBuilder)} to create the actual arguments passed to {@link Main#run(String[])}.
+     *
+     * Implementations should generally call {@link #collectArguments(CommandScope, List, String)}
+     * and possibly {@link #removeArgumentValues(String[], String...)}
      */
-    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createArgs(commandScope, Collections.singletonList("sqlFile"));
-    }
 
-    protected String[] createArgs(CommandScope commandScope) throws CommandExecutionException {
-        return createArgs(commandScope, new ArrayList<String>());
-    }
+    protected abstract String[] collectArguments(CommandScope commandScope) throws CommandExecutionException;
 
-    protected String[] createArgs(CommandScope commandScope, List<String> rhsArgs) throws CommandExecutionException {
+    /**
+     * Collects the values from commandScope into an argument array to pass to {@link Main}.
+     * All arguments will values in commandScope will be passed as global arguments EXCEPT for ones listed in the commandArguments.
+     * If main takes a "positional argument" like `liquibase tag tagName`, specify the commandScope argument that should be converted to a positional argument in "positionalArgumentName".
+     *
+     * @see #removeArgumentValues(String[], String...) If any arguments should not have a value (like a --verbose flag), see
+     */
+    protected String[] collectArguments(CommandScope commandScope, List<String> commandArguments, String positionalArgumentName) throws CommandExecutionException {
+        if (commandArguments == null) {
+            commandArguments = Collections.emptyList();
+        }
+
+        final List<String> finalLegacyCommandArguments = commandArguments;
+
         List<String> argsList = new ArrayList<>();
         Map<String, CommandArgumentDefinition<?>> arguments = commandScope.getCommand().getArguments();
-        arguments.entrySet().forEach(arg -> {
-            if (rhsArgs.contains(arg.getKey())) {
+        arguments.forEach((key, value) -> {
+            if (finalLegacyCommandArguments.contains(key)) {
                 return;
             }
-            String argValue = (commandScope.getArgumentValue(arg.getValue()) != null ? commandScope.getArgumentValue(arg.getValue()).toString() : null);
+
+            if (positionalArgumentName != null && positionalArgumentName.equalsIgnoreCase(key)) {
+                return;
+            }
+
+            String argValue = (commandScope.getArgumentValue(value) != null ? commandScope.getArgumentValue(value).toString() : null);
             if (argValue != null) {
-                argsList.add("--" + arg.getKey() + "=" + commandScope.getArgumentValue(arg.getValue()).toString());
+                argsList.add("--" + key);
+                argsList.add(commandScope.getArgumentValue(value).toString());
             }
         });
 
         argsList.add(commandScope.getCommand().getName()[0]);
 
-        if (!rhsArgs.isEmpty()) {
-            arguments.entrySet().forEach(arg -> {
-                if (!rhsArgs.contains(arg.getKey())) {
-                    return;
-                }
-                String argValue = (commandScope.getArgumentValue(arg.getValue()) != null ? commandScope.getArgumentValue(arg.getValue()).toString() : null);
+        arguments.forEach((key, value) -> {
+            if (key.equalsIgnoreCase(positionalArgumentName)) {
+                String argValue = (commandScope.getArgumentValue(value) != null ? commandScope.getArgumentValue(value).toString() : null);
                 if (argValue != null) {
-                    argsList.add("--" + arg.getKey() + "=" + commandScope.getArgumentValue(arg.getValue()).toString());
+                    argsList.add(argValue);
                 }
-            });
-        }
+                return;
+            }
+
+            if (!finalLegacyCommandArguments.contains(key)) {
+                return;
+            }
+            String argValue = (commandScope.getArgumentValue(value) != null ? commandScope.getArgumentValue(value).toString() : null);
+            if (argValue != null) {
+                argsList.add("--" + key);
+                argsList.add(commandScope.getArgumentValue(value).toString());
+            }
+        });
         String[] args = new String[argsList.size()];
         argsList.toArray(args);
         return args;
     }
 
-    protected String[] createParametersFromArgs(String[] args, String... params) {
-        List<String> argsList = new ArrayList(Arrays.asList(args));
-        List<String> toRemove = new ArrayList<>();
-        List<String> matchingArgs = new ArrayList<>();
-        for (String arg : argsList) {
-            for (String paramName : params) {
-                if (arg.startsWith(paramName) || arg.startsWith("--" + paramName)) {
-                    String trimmed = arg.trim();
-                    if (trimmed.charAt(trimmed.length()-1) == '=') {
-                        trimmed = trimmed.replaceAll("=","");
-                    }
-                    if (paramName.startsWith("--")) {
-                        matchingArgs.add(trimmed);
-                    } else {
-                        String[] parts = trimmed.split("=");
-                        if (parts.length > 1) {
-                            matchingArgs.add(parts[1]);
-                        } else {
-                            matchingArgs.add(trimmed);
-                        }
-                    }
-                    toRemove.add(arg);
+    protected String[] removeArgumentValues(String[] allArguments, String... argumentsThatTakeNoValue) {
+        List<String> returnArgs = new ArrayList<>();
+        Set<String> argsToStrip = new HashSet<>(Arrays.asList(argumentsThatTakeNoValue));
+        final Iterator<String> iterator = Arrays.asList(allArguments).iterator();
+        while (iterator.hasNext()) {
+            final String arg = iterator.next();
+            returnArgs.add(arg);
+            if (argsToStrip.contains(arg.replace("--", ""))) {
+                if (iterator.hasNext()) {
+                    iterator.next();
                 }
             }
         }
 
-        //
-        // Special handling for command parameters
-        //
-        if (matchingArgs.size() > 0) {
-            argsList.removeAll(toRemove);
-            argsList.remove(Collections.singleton(null));
-            args = new String[argsList.size() + matchingArgs.size()];
-            for (int i = 0; i < argsList.size(); i++) {
-                args[i] = argsList.get(i);
-            }
-
-            int l = args.length - matchingArgs.size();
-            for (String matchingArg : matchingArgs) {
-                args[l] = matchingArg;
-                l++;
-            }
-        }
-        return args;
+        return returnArgs.toArray(new String[0]);
     }
 }

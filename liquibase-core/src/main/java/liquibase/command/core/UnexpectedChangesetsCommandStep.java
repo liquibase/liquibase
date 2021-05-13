@@ -4,8 +4,7 @@ import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class UnexpectedChangesetsCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> URL_ARG;
@@ -53,17 +52,7 @@ public class UnexpectedChangesetsCommandStep extends AbstractCliWrapperCommandSt
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        List<String> rhsArgs = new ArrayList<>();
-        rhsArgs.add("verbose");
-        String[] args = createArgs(commandScope, rhsArgs);
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].toLowerCase().startsWith("--verbose")) {
-                args[i] = "--verbose";
-                break;
-            }
-        }
-
-        return args;
+        return removeArgumentValues(collectArguments(commandScope, Arrays.asList("verbose"), null), "verbose");
     }
 
     @Override

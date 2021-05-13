@@ -48,7 +48,7 @@ public class SnapshotCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createArgs(commandScope, Arrays.asList(SNAPSHOT_FORMAT_ARG.getName()));
+        return collectArguments(commandScope, Arrays.asList(SNAPSHOT_FORMAT_ARG.getName()), null);
     }
 
     @Override

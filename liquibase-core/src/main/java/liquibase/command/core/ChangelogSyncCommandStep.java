@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
+import liquibase.exception.CommandExecutionException;
 
 public class ChangelogSyncCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -53,4 +54,10 @@ public class ChangelogSyncCommandStep extends AbstractCliWrapperCommandStep {
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Marks all changes as executed in the database");
     }
+
+    @Override
+    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+        return collectArguments(commandScope, null, null);
+    }
+
 }

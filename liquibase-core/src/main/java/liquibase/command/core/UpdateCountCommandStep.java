@@ -61,7 +61,7 @@ public class UpdateCountCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createParametersFromArgs(createArgs(commandScope), "count");
+        return collectArguments(commandScope, null, "count");
     }
 
     @Override

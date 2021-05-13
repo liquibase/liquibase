@@ -4,6 +4,8 @@ import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
 
+import java.util.Arrays;
+
 public class CalculateChecksumCommandStep extends AbstractCliWrapperCommandStep {
 
     public static String[] COMMAND_NAME = {"calculateChecksum"};
@@ -49,7 +51,7 @@ public class CalculateChecksumCommandStep extends AbstractCliWrapperCommandStep 
 
 
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createParametersFromArgs(createArgs(commandScope), "changesetIdentifier");
+        return collectArguments(commandScope, null, CHANGESET_IDENTIFIER_ARG.getName());
     }
 
     @Override

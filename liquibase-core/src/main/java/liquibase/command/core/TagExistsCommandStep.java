@@ -52,11 +52,6 @@ public class TagExistsCommandStep extends AbstractCliWrapperCommandStep {
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        List<String> rhs = new ArrayList<>();
-        rhs.add("tag");
-        String[] argsFromScope = createArgs(commandScope, rhs);
-        String[] args = createParametersFromArgs(argsFromScope, "tag");
-
-        return args;
+        return collectArguments(commandScope, null, "tag");
     }
 }

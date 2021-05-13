@@ -4,6 +4,8 @@ import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
 
+import java.util.Collections;
+
 public class FutureRollbackCountSqlCommandStep extends AbstractCliWrapperCommandStep {
 
     public static final String[] COMMAND_NAME = {"futureRollbackCountSql"};
@@ -55,7 +57,7 @@ public class FutureRollbackCountSqlCommandStep extends AbstractCliWrapperCommand
 
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return createParametersFromArgs(createArgs(commandScope), "count");
+        return collectArguments(commandScope, null, "count");
     }
 
     @Override
