@@ -27,7 +27,7 @@ class LiquibaseConfigurationTest extends Specification {
         then:
         currentValue != null
         currentValue.getValue() == null
-        currentValue.getProvidedValue().sourceDescription == "No configuration or default value found"
+        currentValue.getProvidedValue().sourceDescription == "No configured value found"
         currentValue.getProvidedValue().requestedKey == "test.unknownValue"
         currentValue.getProvidedValue().provider != null
     }

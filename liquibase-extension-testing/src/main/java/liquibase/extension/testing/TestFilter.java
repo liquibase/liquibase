@@ -26,7 +26,7 @@ public class TestFilter {
         String excludeString = "";
 
 
-        for (String fileName : new String[] {"liquibase/liquibase.integrationtest.local.properties", "liquibase/liquibase.integrationtest.jenkins.properties", "liquibase/liquibase.integrationtest.properties"}) {
+        for (String fileName : new String[] {"liquibase/liquibase.integrationtest.local.properties", "liquibase/liquibase.integrationtest.properties"}) {
             try (InputStream propertiesStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
                 if (propertiesStream != null) {
                     final Properties properties = new Properties();

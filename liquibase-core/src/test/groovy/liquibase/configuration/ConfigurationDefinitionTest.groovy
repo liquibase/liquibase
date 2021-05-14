@@ -70,7 +70,7 @@ class ConfigurationDefinitionTest extends Specification {
         key            | defaultValue         | expectedValue        | expectedSource                                              | defaultValueUsed
         "currentValue" | "Default Value"      | "From scope"         | "Scoped value 'test.currentValue'"                          | false
         "unsetValue"   | "Configured Default" | "Configured Default" | "Default value 'test.unsetValue'"                           | true
-        "unsetValue"   | null                 | null                 | "No configuration or default value found 'test.unsetValue'" | false
+        "unsetValue"   | null                 | null                 | "No configured value found 'test.unsetValue'" | false
 
     }
 
