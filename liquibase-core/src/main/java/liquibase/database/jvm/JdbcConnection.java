@@ -1,6 +1,5 @@
 package liquibase.database.jvm;
 
-import javafx.util.Pair;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -18,30 +17,13 @@ import java.util.regex.Pattern;
  */
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
-    private static final List<javafx.util.Pair<Pattern/*when it suits*/, Pattern/*then we apply*/>> PATTERN_JDBC = new LinkedList<>();
+    private static final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC = new HashSet<>();
 
     static {
-        /*
-         * Explanation of the regex:
-         * <ul>
-         *     <li><code>(?i)</code> - match ignore case</li>
-         *     <li><code>;password=</code> - match semicolon followed by "password=". Properties always
-         *     start with semicolon for the cases we want to support. Other cases that have
-         *     properties inside parenthesis are not supported.</li>
-         *     <li><code>[^;]*</code> - zero or more characters that is not a semicolon</li>
-         * </ul>
-         */
-        PATTERN_JDBC.add(new Pair<>(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i);password=[^;]*")));
-
-        /*
-         * Explanation of the regex:
-         * <ul>
-         *     <li><code>(?i)</code> - match ignore case</li>
-         *     <li>/(.*)((?=@)) - catch string starting from / and end with @ not including @ in match</li>
-         * </ul>
-         */
-        PATTERN_JDBC.add(new Pair<>(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+        PATTERN_JDBC.add(Pair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i);password=[^;]*")));
+        PATTERN_JDBC.add(Pair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
     }
+
     public JdbcConnection() {
 
     }
@@ -62,8 +44,7 @@ public class JdbcConnection implements DatabaseConnection {
             if (this.con == null) {
                 throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
             }
-        }
-        catch (SQLException sqle) {
+        } catch (SQLException sqle) {
             throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  " + sqle.getMessage());
         }
     }
@@ -135,14 +116,14 @@ public class JdbcConnection implements DatabaseConnection {
      * @return modified string
      */
     public static String stripPasswordPropFromJdbcUrl(String jdbcUrl) {
-        if (jdbcUrl ==null || (jdbcUrl !=null && jdbcUrl.equals(""))) {
+        if (jdbcUrl == null || (jdbcUrl != null && jdbcUrl.equals(""))) {
             return jdbcUrl;
         }
-        for (Pair<Pattern/*when it suits*/, Pattern/*then we apply*/> patternPair : PATTERN_JDBC) {
-            Pattern jdbcUrlPattern = patternPair.getKey();
+        for (Map.Entry<Pattern, Pattern> entry : PATTERN_JDBC) {
+            Pattern jdbcUrlPattern = entry.getKey();
             Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
             if (matcher.matches()) {
-                Pattern passwordPattern = patternPair.getValue();
+                Pattern passwordPattern = entry.getValue();
                 jdbcUrl = passwordPattern.matcher(jdbcUrl).replaceAll("");
             }
         }
@@ -530,6 +511,12 @@ public class JdbcConnection implements DatabaseConnection {
             return getUnderlyingConnection().getMetaData().supportsBatchUpdates();
         } catch (SQLException e) {
             throw new DatabaseException("Asking the JDBC driver if it supports batched updates has failed.", e);
+        }
+    }
+   public static class Pair {
+        // Return a map entry (key-value pair) from the specified values
+        public static <T, U> Map.Entry<T, U> of(T first, U second) {
+            return new AbstractMap.SimpleEntry<>(first, second);
         }
     }
 }
