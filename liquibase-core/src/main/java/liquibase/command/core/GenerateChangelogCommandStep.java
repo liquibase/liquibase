@@ -53,8 +53,8 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
 
 
     @Override
-    public String[] getName() {
-        return COMMAND_NAME;
+    public String[][] defineCommandNames() {
+        return new String[][] { COMMAND_NAME };
     }
 
     @Override

@@ -6,6 +6,7 @@ import liquibase.exception.CommandExecutionException;
 
 public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
 
+    public static final String[] LEGACY_COMMAND_NAME = {"migrate"};
     public static String[] COMMAND_NAME = {"update"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
@@ -22,7 +23,7 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
     static {
-        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME, LEGACY_COMMAND_NAME);
 
         URL_ARG = builder.argument("url", String.class).required()
                 .description("The JDBC database connection URL").build();
@@ -47,19 +48,27 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
         CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Changeset contexts to match").build();
         CHANGE_EXEC_LISTENER_CLASS_ARG = builder.argument("changeExecListenerClass", String.class)
-            .description("Fully-qualified class which specifies a ChangeExecListener").build();
+                .description("Fully-qualified class which specifies a ChangeExecListener").build();
         CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
-            .description("Path to a properties file for the ChangeExecListenerClass").build();
+                .description("Path to a properties file for the ChangeExecListenerClass").build();
     }
 
     @Override
-    public String[] getName() {
-        return COMMAND_NAME;
+    public String[][] defineCommandNames() {
+        return new String[][]{
+                COMMAND_NAME,
+                LEGACY_COMMAND_NAME
+        };
     }
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Deploy any changes in the changelog file that have not been deployed");
+
+        if (commandDefinition.is(LEGACY_COMMAND_NAME)) {
+            commandDefinition.setHidden(true);
+        }
+
     }
 
     @Override

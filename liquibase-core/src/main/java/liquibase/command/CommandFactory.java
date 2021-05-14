@@ -66,8 +66,9 @@ public class CommandFactory implements SingletonObject {
     public SortedSet<CommandDefinition> getCommands(boolean includeInternal) {
         Map<String, String[]> commandNames = new HashMap<>();
         for (CommandStep step : Scope.getCurrentScope().getServiceLocator().findInstances(CommandStep.class)) {
-            final String[] name = step.getName();
-            commandNames.put(StringUtil.join(name, " "), name);
+            for (String[] name : step.defineCommandNames()) {
+                commandNames.put(StringUtil.join(name, " "), name);
+            }
         }
 
         SortedSet<CommandDefinition> commands = new TreeSet<>();

@@ -48,7 +48,7 @@ class TestAbstractCliWrapperCommandStepTest extends Specification {
 
     private static class TestCliWrapperCommandStep extends AbstractCliWrapperCommandStep {
         @Override
-        String[] getName() {
+        String[][] defineCommandNames() {
             return "test"
         }
 

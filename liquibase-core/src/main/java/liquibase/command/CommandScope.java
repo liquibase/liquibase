@@ -135,6 +135,8 @@ public class CommandScope {
 
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
 
+        Scope.getCurrentScope().getLog(getClass()).fine("Pipeline for command '"+StringUtil.join(commandDefinition.getName(), " ")+": "+StringUtil.join(pipeline, " then ", obj -> obj.getClass().getName()));
+
         for (CommandStep step : pipeline) {
             step.validate(this);
         }

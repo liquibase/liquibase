@@ -573,7 +573,6 @@ public class LiquibaseCommandLine {
         commandNames.add(StringUtil.toKabobCase(commandDefinition.getName()[0]));
         commandNames.add(commandDefinition.getName()[0]);
 
-        boolean documentedName = true;
         for (String commandName : commandNames) {
 
             final CommandRunner commandRunner = new CommandRunner();
@@ -589,7 +588,7 @@ public class LiquibaseCommandLine {
             subCommandSpec.optionsCaseInsensitive(true);
             subCommandSpec.subcommandsCaseInsensitive(true);
 
-            subCommandSpec.usageMessage().hidden(!documentedName);
+            subCommandSpec.usageMessage().hidden(commandDefinition.getHidden());
 
             for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
                 final String[] argNames = toArgNames(def);
@@ -651,9 +650,6 @@ public class LiquibaseCommandLine {
             }
 
             commandLine.getCommandSpec().addSubcommand(commandName, new CommandLine(subCommandSpec, defaultFactory));
-
-            //rest of the iterations don't document the commandName
-            documentedName = false;
         }
 
     }

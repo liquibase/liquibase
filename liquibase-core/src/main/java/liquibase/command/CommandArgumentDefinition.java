@@ -141,11 +141,11 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      * A new {@link CommandArgumentDefinition} under construction from {@link CommandBuilder}
      */
     public static class Building<DataType> {
-        private final String[] commandName;
+        private final String[][] commandNames;
         private final CommandArgumentDefinition<DataType> newCommandArgument;
 
-        Building(String[] commandName, CommandArgumentDefinition<DataType> newCommandArgument) {
-            this.commandName = commandName;
+        Building(String[][] commandNames, CommandArgumentDefinition<DataType> newCommandArgument) {
+            this.commandNames = commandNames;
             this.newCommandArgument = newCommandArgument;
         }
 
@@ -225,13 +225,14 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
                 throw new IllegalArgumentException("Invalid argument format: " + newCommandArgument.name);
             }
 
-            try {
-                Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandName, newCommandArgument);
-            }
-            catch (IllegalArgumentException iae) {
-                Scope.getCurrentScope().getLog(CommandArgumentDefinition.class).warning(
-                    "Unable to register command '" + commandName + "' argument '" + newCommandArgument.getName() + "': " + iae.getMessage());
-                throw iae;
+            for (String[] commandName : commandNames) {
+                try {
+                    Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandName, newCommandArgument);
+                } catch (IllegalArgumentException iae) {
+                    Scope.getCurrentScope().getLog(CommandArgumentDefinition.class).warning(
+                            "Unable to register command '" + commandName + "' argument '" + newCommandArgument.getName() + "': " + iae.getMessage());
+                    throw iae;
+                }
             }
 
             return newCommandArgument;

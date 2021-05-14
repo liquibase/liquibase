@@ -22,6 +22,7 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     private String longDescription = null;
     private String shortDescription = null;
     private boolean internal;
+    private boolean hidden;
 
     protected CommandDefinition(String[] name) {
         this.name = name;
@@ -124,7 +125,7 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     }
 
     /**
-     * Hidden commands are ones that can be called programmatically, but should not be exposed directly and automatically through integrations.
+     * Internal commands are ones that can be called programmatically, but should not be exposed directly and automatically through integrations.
      */
     public boolean getInternal() {
         return internal;
@@ -134,4 +135,22 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
         this.internal = internal;
     }
 
+    /**
+     * Hidden commands are ones that can be called via integrations, but should not be normally shown in help to users.
+     * "Alias" or legacy commands are often marked as hidden commands.
+     */
+    public boolean getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
+    /**
+     * Return true if this command represents the given command
+     */
+    public boolean is(String... commandName) {
+        return Arrays.equals(getName(), commandName);
+    }
 }

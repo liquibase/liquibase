@@ -4,9 +4,6 @@ import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class TagCommandStep extends AbstractCliWrapperCommandStep {
 
     public static final String[] COMMAND_NAME = {"tag"};
@@ -43,8 +40,8 @@ public class TagCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    public String[] getName() {
-        return COMMAND_NAME;
+    public String[][] defineCommandNames() {
+        return new String[][] { COMMAND_NAME };
     }
 
     @Override

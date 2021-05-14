@@ -4,9 +4,7 @@ import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class StatusCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -53,8 +51,8 @@ public class StatusCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    public String[] getName() {
-        return COMMAND_NAME;
+    public String[][] defineCommandNames() {
+        return new String[][] { COMMAND_NAME };
     }
 
 

@@ -4,8 +4,6 @@ import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
 
-import java.util.Arrays;
-
 public class CalculateChecksumCommandStep extends AbstractCliWrapperCommandStep {
 
     public static String[] COMMAND_NAME = {"calculateChecksum"};
@@ -45,8 +43,8 @@ public class CalculateChecksumCommandStep extends AbstractCliWrapperCommandStep 
     }
 
     @Override
-    public String[] getName() {
-        return COMMAND_NAME;
+    public String[][] defineCommandNames() {
+        return new String[][] { COMMAND_NAME };
     }
 
 

@@ -26,8 +26,6 @@ liquibase.command.core.InternalSyncHubCommandStep
 liquibase.command.core.ListLocksCommandStep
 liquibase.command.core.MarkNextChangesetRanCommandStep
 liquibase.command.core.MarkNextChangesetRanSqlCommandStep
-liquibase.command.core.MigrateCommandStep
-liquibase.command.core.MigrateSqlCommandStep
 liquibase.command.core.RegisterChangelogCommandStep
 liquibase.command.core.ReleaseLocksCommandStep
 liquibase.command.core.RollbackCommandStep
