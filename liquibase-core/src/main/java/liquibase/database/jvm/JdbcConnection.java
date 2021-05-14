@@ -20,8 +20,8 @@ public class JdbcConnection implements DatabaseConnection {
     private static final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC = new HashSet<>();
 
     static {
-        PATTERN_JDBC.add(Pair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i);password=[^;]*")));
-        PATTERN_JDBC.add(Pair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i);password=[^;]*")));
+        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
     }
 
     public JdbcConnection() {
@@ -513,7 +513,7 @@ public class JdbcConnection implements DatabaseConnection {
             throw new DatabaseException("Asking the JDBC driver if it supports batched updates has failed.", e);
         }
     }
-   public static class Pair {
+   public static class PatternPair {
         // Return a map entry (key-value pair) from the specified values
         public static <T, U> Map.Entry<T, U> of(T first, U second) {
             return new AbstractMap.SimpleEntry<>(first, second);
