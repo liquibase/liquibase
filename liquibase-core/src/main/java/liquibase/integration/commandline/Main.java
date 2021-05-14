@@ -7,6 +7,8 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
+import liquibase.configuration.ConfigurationDefinition;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
@@ -738,16 +740,16 @@ public class Main {
      * @throws CommandLineParsingException if an error occurs during parsing
      */
     protected void parseDefaultPropertyFiles() throws CommandLineParsingException {
-        if (Main.runningFromNewCli) {
-            //properties file already handled and set earlier
-            return;
-        }
+        LinkedHashSet<File> potentialPropertyFiles = new LinkedHashSet<>();
 
-        File[] potentialPropertyFiles = new File[2];
-
-        potentialPropertyFiles[0] = new File(defaultsFile);
+        potentialPropertyFiles.add(new File(defaultsFile));
         String localDefaultsPathName = defaultsFile.replaceFirst("(\\.[^\\.]+)$", ".local$1");
-        potentialPropertyFiles[1] = new File(localDefaultsPathName);
+        potentialPropertyFiles.add(new File(localDefaultsPathName));
+
+        final ConfiguredValue<String> currentConfiguredValue = IntegrationConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue();
+        if (currentConfiguredValue.found()) {
+            potentialPropertyFiles.add(new File(currentConfiguredValue.getValue()));
+        }
 
         for (File potentialPropertyFile : potentialPropertyFiles) {
 
@@ -1038,6 +1040,12 @@ public class Main {
 
         Properties props = new Properties();
         props.load(propertiesInputStream);
+
+        if (Main.runningFromNewCli) {
+            parsePropertiesFileForNewCli(props);
+            return;
+        }
+
         if (props.containsKey("strict")) {
             strict = Boolean.valueOf(props.getProperty("strict"));
         }
@@ -1105,6 +1113,17 @@ public class Main {
                 throw new UnexpectedLiquibaseException(
                         String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
                 );
+            }
+        }
+    }
+
+    /**
+     * Most of the properties file is handled by the new CLI. But, for now we have to handle changelog parameter values still
+     */
+    private void parsePropertiesFileForNewCli(Properties props) {
+        for (Map.Entry entry : props.entrySet()) {
+            if (((String) entry.getKey()).startsWith("parameter.")) {
+                changeLogParameters.put(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue());
             }
         }
     }
