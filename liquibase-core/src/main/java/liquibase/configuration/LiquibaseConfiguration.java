@@ -163,7 +163,7 @@ public class LiquibaseConfiguration implements SingletonObject {
     }
 
     /**
-     * Registers a {@link ConfigurationDefinition} so it will be returned by {@link #getRegisteredDefinitions()}
+     * Registers a {@link ConfigurationDefinition} so it will be returned by {@link #getRegisteredDefinitions(boolean)}
      */
     public void registerDefinition(ConfigurationDefinition<?> definition) {
         this.definitions.add(definition);
@@ -171,16 +171,24 @@ public class LiquibaseConfiguration implements SingletonObject {
 
     /**
      * Returns all registered {@link ConfigurationDefinition}s. Registered definitions are used for generated help documentation.
+     * @param includeInternal if true, include {@link ConfigurationDefinition#isInternal()} definitions.
      */
-    public SortedSet<ConfigurationDefinition<?>> getRegisteredDefinitions() {
-        return Collections.unmodifiableSortedSet(this.definitions);
+    public SortedSet<ConfigurationDefinition<?>> getRegisteredDefinitions(boolean includeInternal) {
+        SortedSet<ConfigurationDefinition<?>> returnSet = new TreeSet<>();
+        for (ConfigurationDefinition<?> definition : this.definitions) {
+            if (includeInternal || !definition.isInternal()) {
+                returnSet.add(definition);
+            }
+        }
+
+        return Collections.unmodifiableSortedSet(returnSet);
     }
 
     /**
      * @return the registered {@link ConfigurationDefinition} asssociated with this key. Null if none match.
      */
     public ConfigurationDefinition<?> getRegisteredDefinition(String key) {
-        for (ConfigurationDefinition<?> def : getRegisteredDefinitions()) {
+        for (ConfigurationDefinition<?> def : getRegisteredDefinitions(true)) {
             if (def.getKey().equalsIgnoreCase(key)) {
                 return def;
             }

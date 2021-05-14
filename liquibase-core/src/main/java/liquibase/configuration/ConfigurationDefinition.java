@@ -30,6 +30,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     private DataType defaultValue;
     private String defaultValueDescription;
     private boolean commonlyUsed;
+    private boolean internal;
     private ConfigurationValueConverter<DataType> valueConverter;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
 
@@ -177,6 +178,14 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         return commonlyUsed;
     }
 
+    /**
+     * Return true if this configuration is for internal and/or programmatic use only.
+     * End-user facing integrations should not expose internal configurations directly.
+     */
+    public boolean isInternal() {
+        return internal;
+    }
+
     @Override
     public int compareTo(ConfigurationDefinition o) {
         return this.getKey().compareTo(o.getKey());
@@ -296,6 +305,12 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
 
         public Building<DataType> setCommonlyUsed(boolean commonlyUsed) {
             definition.commonlyUsed = commonlyUsed;
+
+            return this;
+        }
+
+        public Building<DataType> setInternal(boolean internal) {
+            definition.internal = internal;
 
             return this;
         }

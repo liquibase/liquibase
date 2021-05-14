@@ -37,7 +37,7 @@ class ConfigurationDefinitionTest extends Specification {
                 .build()
 
         then:
-        assert Scope.currentScope.getSingleton(LiquibaseConfiguration).getRegisteredDefinitions().contains(definition)
+        assert Scope.currentScope.getSingleton(LiquibaseConfiguration).getRegisteredDefinitions(false).contains(definition)
         definition.key == "test.canBuild.testProperty"
         definition.defaultValue == "Default Value"
         definition.description == "A description here"

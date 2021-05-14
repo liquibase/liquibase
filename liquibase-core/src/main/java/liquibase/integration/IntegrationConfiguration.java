@@ -24,6 +24,7 @@ public class IntegrationConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<File> LOG_FILE;
     public static final ConfigurationDefinition<File> OUTPUT_FILE;
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
+    public static final ConfigurationDefinition<ArgumentConverter> ARGUMENT_CONVERTER;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -72,6 +73,16 @@ public class IntegrationConfiguration implements AutoloadedConfigurations {
 
         LOG_FILE = builder.define("logFile", File.class).build();
         OUTPUT_FILE = builder.define("outputFile", File.class).build();
+
+        ARGUMENT_CONVERTER = builder.define("argumentConverter", ArgumentConverter.class)
+                .setInternal(true)
+                .setDescription("Configured by the integration to convert arguments in user messages to something that matches the formats they expect")
+                .setDefaultValue(argument -> argument)
+                .build();
+    }
+
+    public interface ArgumentConverter {
+        String convert(String argument);
     }
 
 }

@@ -40,7 +40,7 @@ class LiquibaseConfigurationTest extends Specification {
 
     def "autoRegisters definitions"() {
         expect:
-        Scope.getCurrentScope().getSingleton(LiquibaseConfiguration).getRegisteredDefinitions().size() > 10
+        Scope.getCurrentScope().getSingleton(LiquibaseConfiguration).getRegisteredDefinitions(false).size() > 10
     }
 
     def "getRegisteredDefinition for a key"() {

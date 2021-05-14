@@ -436,6 +436,9 @@ public class LiquibaseCommandLine {
         ui.setOutputStream(System.err);
         returnMap.put(Scope.Attr.ui.name(), ui);
 
+        returnMap.put(IntegrationConfiguration.ARGUMENT_CONVERTER.getKey(),
+                (IntegrationConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
+
 
         return returnMap;
     }
@@ -743,7 +746,7 @@ public class LiquibaseCommandLine {
     private void addGlobalArguments(CommandLine commandLine) {
         final CommandLine.Model.CommandSpec rootCommandSpec = commandLine.getCommandSpec();
 
-        final SortedSet<ConfigurationDefinition<?>> globalConfigurations = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getRegisteredDefinitions();
+        final SortedSet<ConfigurationDefinition<?>> globalConfigurations = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getRegisteredDefinitions(false);
         for (ConfigurationDefinition<?> def : globalConfigurations) {
             final String[] argNames = toArgNames(def);
             for (int i = 0; i < argNames.length; i++) {
