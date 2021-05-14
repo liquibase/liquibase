@@ -33,10 +33,10 @@ public class TestFilter {
                     properties.load(propertiesStream);
 
                     if (includeString.equals("")) {
-                        includeString = properties.getProperty(includeKey);
+                        includeString = StringUtil.trimToEmpty(properties.getProperty(includeKey));
                     }
                     if (excludeString.equals("")) {
-                        excludeString = properties.getProperty(excludeKey);
+                        excludeString = StringUtil.trimToEmpty(properties.getProperty(excludeKey));
                     }
                 }
             } catch (IOException e) {
