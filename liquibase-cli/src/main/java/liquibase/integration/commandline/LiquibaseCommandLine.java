@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandDefinition;
 import liquibase.command.CommandFactory;
+import liquibase.command.core.*;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.ConfiguredValue;
@@ -94,17 +95,24 @@ public class LiquibaseCommandLine {
 
     public LiquibaseCommandLine() {
         this.legacyPositionalArguments = new HashMap<>();
-        this.legacyPositionalArguments.put("tag", "tag");
-        this.legacyPositionalArguments.put("rollback", "tag");
-        this.legacyPositionalArguments.put("rollbacksql", "tag");
-        this.legacyPositionalArguments.put("rollbacktodate", "date");
-        this.legacyPositionalArguments.put("rollbacktodatesql", "date");
-        this.legacyPositionalArguments.put("rollbackcount", "count");
-        this.legacyPositionalArguments.put("rollbackcountsql", "count");
-        this.legacyPositionalArguments.put("futurerollbackcount", "count");
-        this.legacyPositionalArguments.put("futurerollbackcountsql", "count");
-        this.legacyPositionalArguments.put("futurerollbackfromtag", "tag");
-        this.legacyPositionalArguments.put("futurerollbackfromtagsql", "tag");
+        this.legacyPositionalArguments.put("calculatechecksum", CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG.getName());
+        this.legacyPositionalArguments.put("changelogsynctotag", ChangelogSyncToTagCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("changelogsynctotagsql", ChangelogSyncToTagSqlCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("dbdoc", DbDocCommandStep.OUTPUT_DIRECTORY_ARG.getName());
+        this.legacyPositionalArguments.put("futurerollbackcountsql", FutureRollbackCountSqlCommandStep.COUNT_ARG.getName());
+        this.legacyPositionalArguments.put("futurerollbackfromtagsql", FutureRollbackFromTagSqlCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("tag", TagCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("tagExists", TagExistsCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("rollback", RollbackCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("rollbacksql", RollbackSqlCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("rollbacktodate", RollbackToDateCommandStep.DATE_ARG.getName());
+        this.legacyPositionalArguments.put("rollbacktodatesql", RollbackToDateSqlCommandStep.DATE_ARG.getName());
+        this.legacyPositionalArguments.put("rollbackcount", RollbackCountCommandStep.COUNT_ARG.getName());
+        this.legacyPositionalArguments.put("rollbackcountsql", RollbackCountSqlCommandStep.COUNT_ARG.getName());
+        this.legacyPositionalArguments.put("updatecount", UpdateCountCommandStep.COUNT_ARG.getName());
+        this.legacyPositionalArguments.put("updatecountsql", UpdateCountSqlCommandStep.COUNT_ARG.getName());
+        this.legacyPositionalArguments.put("updatetotag", UpdateToTagCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("updatetotagsql", UpdateToTagSqlCommandStep.TAG_ARG.getName());
 
         this.legacyNoLongerGlobalArguments = Stream.of(
                 "username",
