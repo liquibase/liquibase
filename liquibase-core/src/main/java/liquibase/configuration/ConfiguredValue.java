@@ -97,7 +97,7 @@ public class ConfiguredValue<DataType> {
 
         @Override
         public ProvidedValue getProvidedValue(String... keyAndAliases) {
-            return new ProvidedValue(keyAndAliases[0], keyAndAliases[0], null, "No configuration or default value found", this);
+            return new ProvidedValue(keyAndAliases[0], keyAndAliases[0], null, "No configured value found", this);
         }
     }
 }

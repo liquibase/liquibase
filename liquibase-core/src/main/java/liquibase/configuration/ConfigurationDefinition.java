@@ -1,5 +1,6 @@
 package liquibase.configuration;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.util.ObjectUtil;
@@ -105,6 +106,15 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         if (!configurationValue.found()) {
             defaultValue = this.getDefaultValue();
             if (defaultValue != null) {
+                DataType obfuscatedValue;
+                if (valueObfuscator == null) {
+                    obfuscatedValue = defaultValue;
+                } else {
+                    obfuscatedValue = valueObfuscator.obfuscate(defaultValue);
+                }
+                if (!key.equals(GlobalConfiguration.FILTER_LOG_MESSAGES.getKey())) {
+                    Scope.getCurrentScope().getLog(getClass()).fine(key + " is using value of " + obfuscatedValue);
+                }
                 configurationValue.override(new DefaultValueProvider(this.getDefaultValue()).getProvidedValue(key));
             }
         }
