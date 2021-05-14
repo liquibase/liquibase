@@ -11,6 +11,8 @@ services:
       MYSQL_DATABASE: lbcat
       MYSQL_USER: lbuser
       MYSQL_PASSWORD: LiquibasePass1
+    networks:
+      - integration
     volumes:
       - "./mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql"
 
@@ -22,6 +24,8 @@ services:
     environment:
       POSTGRES_PASSWORD: LbRootPass1
       POSTGRES_DB: lbcat
+    networks:
+      - integration
     volumes:
       - "./postgres-init.sh:/docker-entrypoint-initdb.d/postgres-init.sh"
 
@@ -40,8 +44,12 @@ services:
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: LiquibasePass1
+    networks:
+      - integration
     volumes:
       - "./mssql-init.sh:/docker-entrypoint-initdb.d/mssql-init.sh"
       - "./mssql-init.sql:/docker-entrypoint-initdb.d/mssql-init.sql"
     entrypoint: /bin/bash /docker-entrypoint-initdb.d/mssql-init.sh
 
+networks:
+  integration:
