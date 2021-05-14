@@ -1,12 +1,11 @@
 package liquibase.database.jvm;
 
+import javafx.util.Pair;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.sql.*;
 import java.util.*;
@@ -19,7 +18,7 @@ import java.util.regex.Pattern;
  */
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
-    private static final List<Pair<Pattern/*when it suits*/, Pattern/*then we apply*/>> PATTERN_JDBC = new LinkedList<>();
+    private static final List<javafx.util.Pair<Pattern/*when it suits*/, Pattern/*then we apply*/>> PATTERN_JDBC = new LinkedList<>();
 
     static {
         /*
@@ -32,7 +31,7 @@ public class JdbcConnection implements DatabaseConnection {
          *     <li><code>[^;]*</code> - zero or more characters that is not a semicolon</li>
          * </ul>
          */
-        PATTERN_JDBC.add(Pair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i);password=[^;]*")));
+        PATTERN_JDBC.add(new Pair<>(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i);password=[^;]*")));
 
         /*
          * Explanation of the regex:
@@ -41,7 +40,7 @@ public class JdbcConnection implements DatabaseConnection {
          *     <li>/(.*)((?=@)) - catch string starting from / and end with @ not including @ in match</li>
          * </ul>
          */
-        PATTERN_JDBC.add(Pair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+        PATTERN_JDBC.add(new Pair<>(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
     }
     public JdbcConnection() {
 
@@ -136,15 +135,15 @@ public class JdbcConnection implements DatabaseConnection {
      * @return modified string
      */
     public static String stripPasswordPropFromJdbcUrl(String jdbcUrl) {
-        if (StringUtils.isBlank(jdbcUrl)) {
+        if (jdbcUrl ==null || (jdbcUrl !=null && jdbcUrl.equals(""))) {
             return jdbcUrl;
         }
         for (Pair<Pattern/*when it suits*/, Pattern/*then we apply*/> patternPair : PATTERN_JDBC) {
-            Pattern jdbcUrlPattern = patternPair.getLeft();
+            Pattern jdbcUrlPattern = patternPair.getKey();
             Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
             if (matcher.matches()) {
-                Pattern passwordPattern = patternPair.getRight();
-                jdbcUrl = passwordPattern.matcher(jdbcUrl).replaceAll(StringUtils.EMPTY);
+                Pattern passwordPattern = patternPair.getValue();
+                jdbcUrl = passwordPattern.matcher(jdbcUrl).replaceAll("");
             }
         }
         return jdbcUrl;
