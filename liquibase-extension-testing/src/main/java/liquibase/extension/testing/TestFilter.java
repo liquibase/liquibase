@@ -26,18 +26,22 @@ public class TestFilter {
         String excludeString = "";
 
 
-        final String fileName = "liquibase/liquibase.integrationtest.local.properties";
-        try (InputStream propertiesStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
-            if (propertiesStream != null) {
-                final Properties properties = new Properties();
-                properties.load(propertiesStream);
+        for (String fileName : new String[] {"liquibase/liquibase.integrationtest.local.properties", "liquibase/liquibase.integrationtest.jenkins.properties", "liquibase/liquibase.integrationtest.properties"}) {
+            try (InputStream propertiesStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
+                if (propertiesStream != null) {
+                    final Properties properties = new Properties();
+                    properties.load(propertiesStream);
 
-                includeString = properties.getProperty(includeKey);
-                excludeString = properties.getProperty(excludeKey);
+                    if (includeString.equals("")) {
+                        includeString = properties.getProperty(includeKey);
+                    }
+                    if (excludeString.equals("")) {
+                        excludeString = properties.getProperty(excludeKey);
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("Cannot load " + fileName + ": " + e.getMessage());
             }
-        } catch (IOException e) {
-            System.out.println("Cannot load " + fileName + ": " + e.getMessage());
-            e.printStackTrace();
         }
 
         includeString = System.getProperty(includeKey, includeString);

@@ -8,7 +8,7 @@ public interface ConfigurationValueObfuscator<DataType> {
     /**
      * Standard obfuscator. Returns the constant "*****".
      */
-    ConfigurationValueObfuscator<String> STANDARD = value -> "*****";
+    ConfigurationValueObfuscator<String> STANDARD = value -> value == null ? null : "*****";
 
     /**
      * Not really an obfuscator -- simply returns the passed value directly.
