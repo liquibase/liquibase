@@ -31,7 +31,7 @@ class CommandRunner implements Callable<CommandResults> {
         final CommandLine rootCommand = parentCommand;
 
 
-        final String[] commandName = LiquibaseCommandLine.getCommandNames(spec.commandLine().getParseResult());
+        final String[] commandName = LiquibaseCommandLine.getCommandNames(spec.commandLine());
         for (int i=0; i<commandName.length; i++) {
             commandName[i] = StringUtil.toCamelCase(commandName[i]);
         }

@@ -312,7 +312,7 @@ public class LiquibaseCommandLine {
                         }
 
                         if (response == 0) {
-                            final String commandName = StringUtil.join(getCommandNames(commandLine.getParseResult()), " ");
+                            final String commandName = StringUtil.join(getCommandNames(commandLine), " ");
                             Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
                         }
                     }
@@ -389,15 +389,13 @@ public class LiquibaseCommandLine {
         return returnArgs.toArray(new String[0]);
     }
 
-    static String[] getCommandNames(CommandLine.ParseResult parseResult) {
+    static String[] getCommandNames(CommandLine parseResult) {
         List<String> returnList = new ArrayList<>();
-        for (CommandLine command : parseResult.asCommandLineList()) {
-            final String commandName = command.getCommandName();
-            if (commandName.equals("liquibase")) {
-                continue;
-            }
-            returnList.add(commandName);
+        while (!parseResult.getCommandName().equals("liquibase")) {
+            returnList.add(0, parseResult.getCommandName());
+            parseResult = parseResult.getParent();
         }
+
         return returnList.toArray(new String[0]);
     }
 
@@ -576,12 +574,11 @@ public class LiquibaseCommandLine {
         return classLoader;
     }
 
-    private void addSubcommand(CommandDefinition commandDefinition, CommandLine commandLine) {
-        Set<String> commandNames = new LinkedHashSet<String>();
-        commandNames.add(StringUtil.toKabobCase(commandDefinition.getName()[0]));
-        commandNames.add(commandDefinition.getName()[0]);
+    private void addSubcommand(CommandDefinition commandDefinition, CommandLine rootCommand) {
+        List<String[]> commandNames = expandCommandNames(commandDefinition);
 
-        for (String commandName : commandNames) {
+        boolean showCommand = true;
+        for (String[] commandName : commandNames) {
 
             final CommandRunner commandRunner = new CommandRunner();
             final CommandLine.Model.CommandSpec subCommandSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(commandRunner, defaultFactory);
@@ -596,7 +593,13 @@ public class LiquibaseCommandLine {
             subCommandSpec.optionsCaseInsensitive(true);
             subCommandSpec.subcommandsCaseInsensitive(true);
 
-            subCommandSpec.usageMessage().hidden(commandDefinition.getHidden());
+            if (!showCommand) {
+                subCommandSpec.usageMessage().hidden(true);
+            } else {
+                subCommandSpec.usageMessage().hidden(commandDefinition.getHidden());
+            }
+            showCommand = false;
+
 
             for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
                 final String[] argNames = toArgNames(def);
@@ -657,9 +660,75 @@ public class LiquibaseCommandLine {
                 subCommandSpec.addOption(builder.build());
             }
 
-            commandLine.getCommandSpec().addSubcommand(commandName, new CommandLine(subCommandSpec, defaultFactory));
+            getParentCommandSpec(commandDefinition, rootCommand).addSubcommand(commandName[commandName.length - 1], new CommandLine(subCommandSpec, defaultFactory));
         }
 
+    }
+
+    private List<String[]> expandCommandNames(CommandDefinition commandDefinition) {
+        List<String[]> returnList = new ArrayList<>();
+
+        //create standard version first
+        final String[] standardName = commandDefinition.getName().clone();
+        for (int i = 0; i < standardName.length; i++) {
+            standardName[i] = StringUtil.toKabobCase(commandDefinition.getName()[i]);
+        }
+        returnList.add(standardName);
+
+        if (!StringUtil.join(standardName, " ").equals(StringUtil.join(commandDefinition.getName(), " "))) {
+            returnList.add(commandDefinition.getName());
+        }
+
+        return returnList;
+    }
+
+    private CommandLine.Model.CommandSpec getParentCommandSpec(CommandDefinition commandDefinition, CommandLine rootCommand) {
+        final String[] commandName = commandDefinition.getName();
+
+        CommandLine.Model.CommandSpec parent = rootCommand.getCommandSpec();
+
+        //length-1 to not include the actual command name
+        for (int i = 0; i < commandName.length - 1; i++) {
+            final CommandLine commandGroup = parent.subcommands().get(commandName[i]);
+            final String[] groupName = Arrays.copyOfRange(commandName, 0, i + 1);
+
+            if (commandGroup == null) {
+                parent = addSubcommandGroup(groupName, commandDefinition, parent);
+            } else {
+                parent = commandGroup.getCommandSpec();
+            }
+            configureSubcommandGroup(parent, groupName, commandDefinition);
+        }
+
+
+        return parent;
+    }
+
+    private void configureSubcommandGroup(CommandLine.Model.CommandSpec groupSpec, String[] groupName, CommandDefinition commandDefinition) {
+        final String header = StringUtil.trimToEmpty(commandDefinition.getGroupShortDescription(groupName));
+        final String description = StringUtil.trimToEmpty(commandDefinition.getGroupLongDescription(groupName));
+
+        if (!header.equals("")) {
+            groupSpec.usageMessage().header("< " + header + " >\n");
+        }
+
+        if (!description.equals("")) {
+            groupSpec.usageMessage().description(description + "\n");
+        }
+    }
+
+    private CommandLine.Model.CommandSpec addSubcommandGroup(String[] groupName, CommandDefinition commandDefinition, CommandLine.Model.CommandSpec parent) {
+        final CommandLine.Model.CommandSpec groupSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(null, defaultFactory);
+
+        configureHelp(groupSpec, false);
+
+
+        groupSpec.optionsCaseInsensitive(true);
+        groupSpec.subcommandsCaseInsensitive(true);
+
+        parent.addSubcommand(groupName[groupName.length - 1], groupSpec);
+
+        return groupSpec;
     }
 
     private String toEnvVariable(String property) {
