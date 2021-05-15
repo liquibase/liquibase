@@ -312,7 +312,8 @@ public class LiquibaseCommandLine {
                         }
 
                         if (response == 0) {
-                            final String commandName = StringUtil.join(getCommandNames(commandLine), " ");
+                            final List<CommandLine> commandList = commandLine.getParseResult().asCommandLineList();
+                            final String commandName = StringUtil.join(getCommandNames(commandList.get(commandList.size() - 1)), " ");
                             Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
                         }
                     }
@@ -411,7 +412,19 @@ public class LiquibaseCommandLine {
         if (defaultsFile.exists()) {
             final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsFile);
             liquibaseConfiguration.registerProvider(fileProvider);
-            returnList.add(argumentProvider);
+            returnList.add(fileProvider);
+        }
+
+        File localDefaultsFile = new File(defaultsFile.getAbsolutePath().replaceFirst(".properties$", ".local.properties"));
+        if (localDefaultsFile.exists()) {
+            final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(localDefaultsFile) {
+                @Override
+                public int getPrecedence() {
+                    return super.getPrecedence() + 1;
+                }
+            };
+            liquibaseConfiguration.registerProvider(fileProvider);
+            returnList.add(fileProvider);
         }
 
 
