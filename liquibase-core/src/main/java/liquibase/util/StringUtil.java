@@ -837,5 +837,16 @@ public class StringUtil {
         }
     }
 
+    public static String stripEnclosingQuotes(String string) {
+        if (string.length() > 1 &&
+                (string.charAt(0) == '"' || string.charAt(0) == '\'') &&
+                string.charAt(0) == string.charAt(string.length() - 1)) {
+            return substring(string, 1, string.length() - 1);
+        }
+        else {
+            return string;
+        }
+    }
+
 
 }
