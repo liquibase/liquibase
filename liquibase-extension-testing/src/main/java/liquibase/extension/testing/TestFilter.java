@@ -51,6 +51,9 @@ public class TestFilter {
             System.out.println("Integration test filtering: ");
             System.out.println("    " + includeKey + ": " + includeString);
             System.out.println("    " + excludeKey + ": " + excludeString);
+        } else {
+            //hard code default until we support more
+            includeString = "db:hsqldb";
         }
 
         instance = new TestFilter(includeString, excludeString);
