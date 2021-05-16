@@ -48,6 +48,12 @@ class CommandTests extends Specification {
     def setup() {
         def properties = new Properties()
 
+        getClass().getClassLoader().getResources("liquibase.test.properties").each {
+            it.withReader {
+                properties.load(it)
+            }
+        }
+
         getClass().getClassLoader().getResources("liquibase.test.local.properties").each {
             it.withReader {
                 properties.load(it)
