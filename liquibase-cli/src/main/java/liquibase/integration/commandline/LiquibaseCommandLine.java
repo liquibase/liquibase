@@ -408,11 +408,18 @@ public class LiquibaseCommandLine {
         liquibaseConfiguration.registerProvider(argumentProvider);
         returnList.add(argumentProvider);
 
-        final File defaultsFile = new File(IntegrationConfiguration.DEFAULTS_FILE.getCurrentValue());
+        final ConfiguredValue<String> defaultsFileConfig = IntegrationConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue();
+        final File defaultsFile = new File(defaultsFileConfig.getValue());
         if (defaultsFile.exists()) {
             final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsFile);
             liquibaseConfiguration.registerProvider(fileProvider);
             returnList.add(fileProvider);
+        } else {
+            Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
+            if (!defaultsFileConfig.wasDefaultValueUsed()) {
+                //can't use UI since it's not configured correctly yet
+                System.err.println("Could not find defaults file " + defaultsFile.getAbsolutePath());
+            }
         }
 
         File localDefaultsFile = new File(defaultsFile.getAbsolutePath().replaceFirst(".properties$", ".local.properties"));
@@ -425,6 +432,8 @@ public class LiquibaseCommandLine {
             };
             liquibaseConfiguration.registerProvider(fileProvider);
             returnList.add(fileProvider);
+        } else {
+            Scope.getCurrentScope().getLog(getClass()).fine("Cannot find local defaultsFile " + defaultsFile.getAbsolutePath());
         }
 
 
