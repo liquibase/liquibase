@@ -32,10 +32,10 @@ public class TestFilter {
                     final Properties properties = new Properties();
                     properties.load(propertiesStream);
 
-                    if (includeString.equals("")) {
+                    if (includeString != null && includeString.equals("")) {
                         includeString = properties.getProperty(includeKey);
                     }
-                    if (excludeString.equals("")) {
+                    if (excludeString != null && excludeString.equals("")) {
                         excludeString = properties.getProperty(excludeKey);
                     }
                 }

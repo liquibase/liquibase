@@ -4,7 +4,6 @@ import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Labels;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
