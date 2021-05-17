@@ -108,6 +108,7 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     /**
+     * Remove any secure information from the URL. Used for logging purposes
      * Strips off the <code>;password=</code> property from string.
      * Note: it does not remove the password from the
      * <code>user:password@host</code> section
@@ -115,7 +116,11 @@ public class JdbcConnection implements DatabaseConnection {
      * @param jdbcUrl string to remove password=xxx from
      * @return modified string
      */
-    public static String stripPasswordPropFromJdbcUrl(String jdbcUrl) {
+    public static String sanitizeUrl(String url) {
+        return stripPasswordPropFromJdbcUrl(url);
+    }
+
+    private static String stripPasswordPropFromJdbcUrl(String jdbcUrl) {
         if (jdbcUrl == null || (jdbcUrl != null && jdbcUrl.equals(""))) {
             return jdbcUrl;
         }
@@ -513,7 +518,8 @@ public class JdbcConnection implements DatabaseConnection {
             throw new DatabaseException("Asking the JDBC driver if it supports batched updates has failed.", e);
         }
     }
-   public static class PatternPair {
+
+    private static class PatternPair {
         // Return a map entry (key-value pair) from the specified values
         public static <T, U> Map.Entry<T, U> of(T first, U second) {
             return new AbstractMap.SimpleEntry<>(first, second);
