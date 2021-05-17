@@ -13,7 +13,9 @@ class LoadDataColumnConfigTest extends Specification {
 
     def "load includes base and custom parameters"() {
         when:
-        def node = new ParsedNode(null, "column").addChildren([index: "5", header: "header_col", name: "col_name"])
+        def node = new ParsedNode(null, "column")
+                .addChildren([index: "5", header: "header_col", name: "col_name", defaultValue: "defVal",
+                              defaultValueNumeric: "1", type: "NUMERIC"])
         def column = new LoadDataColumnConfig()
         try {
             column.load(node, resourceSupplier.simpleResourceAccessor)
@@ -24,9 +26,12 @@ class LoadDataColumnConfigTest extends Specification {
         }
 
         then:
-        column.index== 5
-        column.header== "header_col"
+        column.index == 5
+        column.header == "header_col"
         column.name == "col_name"
+        column.type() == LoadDataChange.LOAD_DATA_TYPE.NUMERIC
+        column.defaultValue == "defVal"
+        column.defaultValueNumeric == 1
     }
 
 }

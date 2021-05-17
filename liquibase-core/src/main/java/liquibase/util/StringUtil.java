@@ -838,4 +838,9 @@ public class StringUtil {
     }
 
 
+
+    /** Check whether the value is 'null' */
+    public static boolean equalsNULL(String value){
+        return "NULL".equalsIgnoreCase(value);
+    }
 }

@@ -398,14 +398,15 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      */
     @Override
     public ValidationErrors validate(Database database) {
-        ValidationErrors changeValidationErrors = new ValidationErrors();
+        ValidationErrors changeValidationErrors = new ValidationErrors(this);
 
         // Record an error if a parameter is not set, but that parameter is required by database.
         for (ChangeParameterMetaData param :
-            Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().values()) {
-            if (param.isRequiredFor(database) && (param.getCurrentValue(this) == null)) {
-                changeValidationErrors.addError(param.getParameterName() + " is required for " +
-                    Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " on " + database.getShortName());
+                Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().values()) {
+            if (param.isRequiredFor(database)) {
+                changeValidationErrors.checkRequiredField (
+                        param.getParameterName(), param.getCurrentValue(this)
+                        , " on " + database.getShortName());
             }
         }
 
