@@ -475,7 +475,7 @@ public class LiquibaseCommandLine {
         final File logFile = IntegrationConfiguration.LOG_FILE.getCurrentValue();
 
         Level logLevel = Level.OFF;
-        if (!ConfigurationDefinition.wasDefaultValueUsed(currentConfiguredValue)) {
+        if (!currentConfiguredValue.wasDefaultValueUsed()) {
             logLevel = currentConfiguredValue.getValue();
         }
 

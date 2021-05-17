@@ -57,6 +57,16 @@ public class ConfiguredValue<DataType> {
     }
 
 
+    public boolean wasDefaultValueUsed() {
+        for (ProvidedValue providedValue : this.getProvidedValues()) {
+            if (providedValue.getProvider() != null && providedValue.getProvider() instanceof ConfigurationDefinition.DefaultValueProvider) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Replaces the current configured value with a higher-precedence one.
      * If a null value is passed, do nothing.

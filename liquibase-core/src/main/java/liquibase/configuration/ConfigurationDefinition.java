@@ -40,19 +40,6 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     private boolean loggedUsingDefault = false;
 
     /**
-     * @return if the given {@link ConfiguredValue} was set by a default value
-     */
-    public static boolean wasDefaultValueUsed(ConfiguredValue<?> configuredValue) {
-        for (ProvidedValue providedValue : configuredValue.getProvidedValues()) {
-            if (providedValue.getProvider() != null && providedValue.getProvider() instanceof ConfigurationDefinition.DefaultValueProvider) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Constructor private to force {@link Builder} usage
      *
      * @throws IllegalArgumentException if an invalid key is specified.
@@ -350,7 +337,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     /**
      * Used to track configuration values set by a default
      */
-    private static final class DefaultValueProvider implements ConfigurationValueProvider {
+    static final class DefaultValueProvider implements ConfigurationValueProvider {
 
         private final Object value;
 

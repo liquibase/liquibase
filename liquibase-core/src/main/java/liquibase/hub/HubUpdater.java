@@ -450,7 +450,7 @@ public class HubUpdater {
                 // Do not update liquibase.hub.mode if it is already set
                 //
                 ConfiguredValue<HubConfiguration.HubMode> hubModeProperty = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentConfiguredValue();
-                if (ConfigurationDefinition.wasDefaultValueUsed(hubModeProperty)) {
+                if (hubModeProperty.wasDefaultValueUsed()) {
                     writeToPropertiesFile(defaultsFile, "\nliquibase.hub.mode=all\n");
                     message = "* Updated properties file " + defaultsFile + " to set liquibase.hub properties";
                     Scope.getCurrentScope().getUI().sendMessage(message);

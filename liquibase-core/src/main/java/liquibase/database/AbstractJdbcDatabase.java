@@ -695,7 +695,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
 
         final ConfiguredValue<String> configuredValue = GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentConfiguredValue();
-        if (!ConfigurationDefinition.wasDefaultValueUsed(configuredValue)) {
+        if (!configuredValue.wasDefaultValueUsed()) {
             return configuredValue.getValue();
         }
 
