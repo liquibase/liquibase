@@ -292,7 +292,7 @@ public class LiquibaseCommandLine {
 
                     configureVersionInfo();
 
-                    if (!wasHelpOrVersionRequeted()) {
+                    if (!wasHelpOrVersionRequested()) {
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
                         Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion()));
                         Scope.getCurrentScope().getUI().sendMessage(Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService().getLicenseInfo());
@@ -300,7 +300,7 @@ public class LiquibaseCommandLine {
 
                     int response = commandLine.execute(finalArgs);
 
-                    if (!wasHelpOrVersionRequeted()) {
+                    if (!wasHelpOrVersionRequested()) {
                         final ConfiguredValue<File> logFile = IntegrationConfiguration.LOG_FILE.getCurrentConfiguredValue();
                         if (logFile.found()) {
                             Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue().getAbsolutePath());
@@ -336,7 +336,7 @@ public class LiquibaseCommandLine {
         }
     }
 
-    private boolean wasHelpOrVersionRequeted() {
+    private boolean wasHelpOrVersionRequested() {
         CommandLine.ParseResult parseResult = commandLine.getParseResult();
 
         while (parseResult != null) {
