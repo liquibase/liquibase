@@ -6,7 +6,6 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.*;
-import liquibase.logging.LogFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
@@ -162,12 +161,24 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @Override
     public CheckSum generateCheckSum() {
-            String statementSql = this.sql;
-            if (statementSql == null) {
-                statementSql = "";
+        InputStream stream;
+        CheckSum generatedChecksum;
+        String statementSql = this.sql;
+        try {
+            stream = openSqlStream();
+            try (InputStream openedInputStream = stream) {
+                if (openedInputStream == null && statementSql == null) {
+                    statementSql = "";
+                }
+                if (statementSql != null) {
+                    try (InputStream byteArrayInputStream = new ByteArrayInputStream(statementSql.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()))) {
+                           generatedChecksum = CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), byteArrayInputStream), false);
+                    }
+                } else {
+                    generatedChecksum = CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), openedInputStream), false);
+                }
+                return generatedChecksum;
             }
-            try (InputStream  stream = new ByteArrayInputStream(statementSql.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()))){
-            return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -184,7 +195,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
-        List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
+        List<SqlStatement> returnStatements = new ArrayList<>();
 
         String statementSql = StringUtils.trimToNull(getSql());
         if (statementSql == null) {
@@ -240,7 +251,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         private PushbackInputStream stream;
 
         private byte[] quickBuffer = new byte[100];
-        private List<Byte> resizingBuffer = new ArrayList<Byte>();
+        private List<Byte> resizingBuffer = new ArrayList<>();
 
 
         private int lastChar = 'X';
