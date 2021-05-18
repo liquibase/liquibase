@@ -14,6 +14,7 @@ import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.util.StringUtil;
 
+import java.io.File;
 import java.io.PrintStream;
 
 public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogCommandStep {
@@ -85,6 +86,9 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
                     outputStream.flush();
                 }
 
+            }
+            if (StringUtil.trimToNull(changeLogFile) != null) {
+                Scope.getCurrentScope().getUI().sendMessage("Generated changelog written to " + new File(changeLogFile).getAbsolutePath());
             }
         } finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);
