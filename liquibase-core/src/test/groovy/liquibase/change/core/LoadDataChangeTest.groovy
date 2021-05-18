@@ -789,7 +789,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         ValidationErrors errors = change.validate(mockDB)
         then:
-        errors.getErrorMessages().size() == 3
+        errors.getErrorMessages().size() == 1
         errors.getErrorMessages().get(i) == message
 
         errors.getWarningMessages().size() == 1
@@ -799,8 +799,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         where:
         i | message
         0 | "tableName is empty for loadData on mock"
-        1 | "name is empty for loadData / column[2]"
-        2 | "name is required for loadData / column[3]"
     }
 
 

@@ -697,13 +697,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     public void validateColumn(LoadDataColumnConfig columnConfig, ValidationErrors validationErrors, String columnIDString) {
-        validationErrors.checkRequiredField( "name", columnConfig.getName(), columnIDString);
-
-        // Empty validation
-        if(columnConfig.getHeader() != null) {
-            validationErrors.checkRequiredField(
-                    "header", columnConfig.getName(), columnIDString);
-        }
         if(columnConfig.getHeader() != null && columnConfig.getIndex() != null) {
             validationErrors.addWarning("Since attribute 'header' is also defined, 'index' ignored for "
                     + validationErrors.getChangeName() + columnIDString);
