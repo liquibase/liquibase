@@ -257,6 +257,7 @@
     <xsd:attributeGroup name="changeLogAttributes">
         <xsd:attribute name="logicalFilePath" type="xsd:string"/>
         <xsd:attribute name="context" type="xsd:string"/>
+        <xsd:attribute name="changeLogId" type="xsd:string"/>
         <xsd:attribute name="objectQuotingStrategy" type="objectQuotingStrategy" default="LEGACY"/>
     </xsd:attributeGroup>
 
@@ -277,11 +278,12 @@
         <xsd:attribute name="created" type="xsd:string"/>
         <xsd:attribute name="runOrder" type="xsd:string"/>
         <xsd:attribute name="ignore" type="booleanExp"/>
+        <xsd:attribute name="runWith" type="xsd:string" />
     </xsd:attributeGroup>
 
     <!-- Attributes for changes -->
     <xsd:attributeGroup name="changeAttributes">
-        <xsd:anyAttribute namespace="##any" processContents="lax"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:attributeGroup>
 
     <!-- Attributes for constraints -->
@@ -310,7 +312,7 @@
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="column">
-        <xsd:attribute name="name" type="xsd:string"/>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
         <xsd:attribute name="computed" type="booleanExp"/>
         <xsd:attribute name="descending" type="booleanExp"/>
         <xsd:attribute name="type" type="xsd:string"/>
@@ -482,6 +484,7 @@
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="constraintName" type="xsd:string"/>
+            <xsd:attribute name="dropIndex" type="booleanExp"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -557,17 +560,21 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:attributeGroup name="defaultValueAttributes">
+        <xsd:attribute name="defaultValue" type="xsd:string"/>
+        <xsd:attribute name="defaultValueNumeric" type="xsd:string"/>
+        <xsd:attribute name="defaultValueDate" type="xsd:string"/>
+        <xsd:attribute name="defaultValueBoolean" type="xsd:string"/>
+        <xsd:attribute name="defaultValueComputed" type="xsd:string"/>
+    </xsd:attributeGroup>
+
     <xsd:element name="addDefaultValue">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="columnName" type="xsd:string" use="required"/>
-            <xsd:attribute name="columnDataType" type="xsd:string"/>
-            <xsd:attribute name="defaultValue" type="xsd:string"/>
-            <xsd:attribute name="defaultValueNumeric" type="xsd:string"/>
-            <xsd:attribute name="defaultValueDate" type="xsd:string"/>
-            <xsd:attribute name="defaultValueBoolean" type="xsd:string"/>
-            <xsd:attribute name="defaultValueComputed" type="xsd:string"/>
+            <xsd:attribute name="columnDataType" type="nonEmptyString"/>
+            <xsd:attributeGroup ref="defaultValueAttributes"/>
             <xsd:attribute name="defaultValueSequenceNext" type="xsd:string"/>
             <xsd:attribute name="defaultValueConstraintName" type="xsd:string"/>
         </xsd:complexType>
@@ -582,6 +589,22 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:simpleType name="nonEmptyString">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="\S.*"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:attributeGroup name="loadDataAttributes">
+        <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
+        <xsd:attribute name="file" type="nonEmptyString" use="required"/>
+        <xsd:attribute name="encoding" type="xsd:NMTOKEN" default="UTF-8"/>
+        <xsd:attribute name="separator" type="nonEmptyString" default=","/>
+        <xsd:attribute name="quotchar" type="nonEmptyString" default="&quot;"/>
+        <xsd:attribute name="commentLineStartsWith" type="nonEmptyString" default="#"/>
+        <xsd:attribute name="usePreparedStatements" type="booleanExp" default="false"/>
+    </xsd:attributeGroup>
+
     <xsd:element name="loadData">
         <xsd:complexType mixed="true">
             <xsd:sequence>
@@ -591,23 +614,13 @@
                         <xsd:attribute name="header" type="xsd:string"/>
                         <xsd:attribute name="name" type="xsd:string"/>
                         <xsd:attribute name="type" type="xsd:string"/>
-                        <xsd:attribute name="defaultValue" type="xsd:string"/>
-                        <xsd:attribute name="defaultValueNumeric" type="xsd:string"/>
-                        <xsd:attribute name="defaultValueDate" type="xsd:string"/>
-                        <xsd:attribute name="defaultValueBoolean" type="booleanExp"/>
-                        <xsd:attribute name="defaultValueComputed" type="xsd:string"/>
+                        <xsd:attributeGroup ref="defaultValueAttributes"/>
                     </xsd:complexType>
                 </xsd:element>
             </xsd:sequence>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="tableNameAttribute"/>
-            <xsd:attribute name="file" type="xsd:string"/>
-            <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
-            <xsd:attribute name="usePreparedStatements" type="booleanExp"/>
-            <xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
-            <xsd:attribute name="separator" type="xsd:string" default=","/>
-            <xsd:attribute name="quotchar" type="xsd:string" default="&quot;"/>
-            <xsd:attribute name="commentLineStartsWith" type="xsd:string" default="#"/>
+            <xsd:attributeGroup ref="loadDataAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -620,22 +633,15 @@
                         <xsd:attribute name="header" type="xsd:string"/>
                         <xsd:attribute name="name" type="xsd:string"/>
                         <xsd:attribute name="type" type="xsd:string"/>
-                        <xsd:attribute name="defaultValue" type="xsd:string"/>
-                        <xsd:attribute name="defaultValueNumeric" type="xsd:string"/>
-                        <xsd:attribute name="defaultValueDate" type="xsd:string"/>
-                        <xsd:attribute name="defaultValueBoolean" type="booleanExp"/>
-                        <xsd:attribute name="defaultValueComputed" type="xsd:string"/>
+                        <xsd:attribute name="allowUpdate" type="booleanExp"/>
+                        <xsd:attributeGroup ref="defaultValueAttributes"/>
                     </xsd:complexType>
                 </xsd:element>
             </xsd:sequence>
             <xsd:attributeGroup ref="tableNameAttribute"/>
-            <xsd:attribute name="file" type="xsd:string"/>
-            <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
-            <xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
+            <xsd:attributeGroup ref="loadDataAttributes"/>
             <xsd:attribute name="primaryKey" type="xsd:string" use="required"/>
             <xsd:attribute name="onlyUpdate" type="xsd:boolean" default="false"/>
-            <xsd:attribute name="separator" type="xsd:string" default=","/>
-            <xsd:attribute name="quotchar" type="xsd:string" default="&quot;"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -923,6 +929,7 @@
             <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string" use="required"/>
             <xsd:attribute name="columnName" type="xsd:string" use="required"/>
+            <xsd:attribute name="columnDataType" type="xsd:string"/>
             <xsd:attribute name="remarks" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
@@ -1129,7 +1136,7 @@
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attribute name="tag" type="xsd:string" use="required"/>
-			<xsd:anyAttribute namespace="##other"  processContents="lax"/>
+            <xsd:anyAttribute namespace="##other"  processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
 

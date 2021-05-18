@@ -839,8 +839,8 @@ public class StringUtil {
 
 
 
-    /** Check whether the value is 'null' */
-    public static boolean equalsNULL(String value){
+    /** Check whether the value is 'null' (case insensitive) */
+    public static boolean equalsWordNull(String value){
         return "NULL".equalsIgnoreCase(value);
     }
 }

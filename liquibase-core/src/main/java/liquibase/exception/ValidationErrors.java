@@ -1,5 +1,6 @@
 package liquibase.exception;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeSet;
@@ -15,6 +16,7 @@ public class ValidationErrors {
 
     protected List<String> errorMessages = new ArrayList<>();
     protected List<String> warningMessages = new ArrayList<>();
+    protected String change = null;
 
     public boolean hasErrors() {
         return !errorMessages.isEmpty();
@@ -23,30 +25,27 @@ public class ValidationErrors {
     public ValidationErrors() {
     }
 
-    public String getChangeName() {
-        return this.change;
-    }
-
-    protected String change = null;
-
     public ValidationErrors(String change) {
         this.change = change;
     }
 
     public ValidationErrors(Change change) {
-        this.change = ChangeFactory.getInstance().getChangeMetaData(change).getName();
+        this.change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName();
+    }
+
+    public String getChangeName() {
+        return this.change;
     }
 
     public ValidationErrors checkRequiredField(String requiredFieldName, Object value) {
-        return checkRequiredField(requiredFieldName, value, (String) null);
+        return checkRequiredField(requiredFieldName, value, null);
     }
 
     public ValidationErrors checkRequiredField(String requiredFieldName, Object value, String postfix) {
         String err = null;
         if (value == null) {
             err = requiredFieldName + " is required";
-        } else if (
-                   (value instanceof Collection && ((Collection) value).isEmpty())
+        } else if ((value instanceof Collection && ((Collection<?>) value).isEmpty())
                 || (value instanceof Object[] && ((Object[]) value).length == 0)) {
             err = "No " + requiredFieldName + " defined";
         } else if (value instanceof String && StringUtil.trimToNull((String) value) == null) {

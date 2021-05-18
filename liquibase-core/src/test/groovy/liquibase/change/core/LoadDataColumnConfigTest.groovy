@@ -29,7 +29,7 @@ class LoadDataColumnConfigTest extends Specification {
         column.index == 5
         column.header == "header_col"
         column.name == "col_name"
-        column.type() == LoadDataChange.LOAD_DATA_TYPE.NUMERIC
+        column.getTypeEnum() == LoadDataChange.LOAD_DATA_TYPE.NUMERIC
         column.defaultValue == "defVal"
         column.defaultValueNumeric == 1
     }

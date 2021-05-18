@@ -8,7 +8,6 @@ import liquibase.database.DatabaseFactory
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ValidationErrors
-import liquibase.exception.ValidationErrorsTests
 import liquibase.parser.core.ParsedNodeException
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.ResourceAccessor
@@ -23,7 +22,6 @@ import liquibase.structure.DatabaseObject
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
 import liquibase.structure.core.Table
-import liquibase.test.JUnitResourceAccessor
 import liquibase.test.TestContext
 import spock.lang.Unroll
 
@@ -556,25 +554,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
     }
 
-
-
-    enum Col {
-        name, num, date, bool, id
-
-        String s() {
-            return name();
-        }
-    }
-
-    class ColDef {
-        ColDef(Object n, String type) {
-            this.name = n.toString()
-            this.type = type
-        }
-        String name
-        String type
-    }
-
     Table addColumns(Table table, ColDef... colunms) {
         colunms.each {
             table.addColumn(new Column(Table.class, table.schema.catalogName, table.schema.name, table.name
@@ -620,10 +599,10 @@ public class LoadDataChangeTest extends StandardChangeTest {
         SqlStatement[] sqlStatements = change.generateStatements(mockDB)
 
         then:
-        change.columns[0].type() == LoadDataChange.LOAD_DATA_TYPE.STRING
-        change.columns[1].type() == LoadDataChange.LOAD_DATA_TYPE.NUMERIC
-        change.columns[2].type() == LoadDataChange.LOAD_DATA_TYPE.DATE
-        change.columns[3].type() == LoadDataChange.LOAD_DATA_TYPE.BOOLEAN
+        change.columns[0].getTypeEnum() == LoadDataChange.LOAD_DATA_TYPE.STRING
+        change.columns[1].getTypeEnum() == LoadDataChange.LOAD_DATA_TYPE.NUMERIC
+        change.columns[2].getTypeEnum() == LoadDataChange.LOAD_DATA_TYPE.DATE
+        change.columns[3].getTypeEnum() == LoadDataChange.LOAD_DATA_TYPE.BOOLEAN
 
         columnValue(sqlStatements[0], Col.name) == "Fred"
         columnValue(sqlStatements[0], Col.num) == 2
@@ -713,10 +692,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         assert dCol2 instanceof Timestamp
         ((Timestamp) dCol2).toLocalDateTime() == LocalDateTime.parse("2020-01-02T03:04:05")
         columnValue(sqlStatements[2], Col.bool) == Boolean.TRUE
-    }
-
-    enum Cols2 {
-        regular, space_left, space_right, space_both, empty
     }
 
     def "string with space + DB def"() {
@@ -827,6 +802,29 @@ public class LoadDataChangeTest extends StandardChangeTest {
         1 | "name is empty for loadData / column[2]"
         2 | "name is required for loadData / column[3]"
     }
+
+
+    class ColDef {
+        ColDef(Object n, String type) {
+            this.name = n.toString()
+            this.type = type
+        }
+        String name
+        String type
+    }
+
+    enum Col {
+        name, num, date, bool, id
+
+        String s() {
+            return name();
+        }
+    }
+
+    enum Cols2 {
+        regular, space_left, space_right, space_both, empty
+    }
+
 }
 
 

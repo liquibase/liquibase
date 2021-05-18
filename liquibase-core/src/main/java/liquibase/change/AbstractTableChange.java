@@ -4,6 +4,7 @@ public abstract class AbstractTableChange extends AbstractChange {
     protected String catalogName;
     protected String schemaName;
     protected String tableName;
+
     @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="table.catalog")
     public String getCatalogName() {
         return catalogName;

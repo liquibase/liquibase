@@ -43,7 +43,6 @@ import java.util.regex.Pattern;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.change.ChangeParameterMetaData.ALL;
-import static liquibase.statement.SqlStatement.NULL;
 
 @DatabaseChange(name = "loadData",
         description = "Loads data from a CSV file into an existing table. A value of NULL in a cell will be " +
@@ -88,6 +87,21 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     private Boolean usePreparedStatements;
 
+    /**
+     * Transform a value read from a CSV file into a string to be written into the database if the column type
+     * is not known.
+     *
+     * @param value the value to transform
+     * @return if the value is empty or the string "NULL" (case-insensitive), return the empty string.
+     * If not, the value "toString()" representation (trimmed of spaces left and right) is returned.
+     */
+    protected static String getValueToWrite(Object value) {
+        if ((value == null) || "NULL".equalsIgnoreCase(value.toString())) {
+            return "";
+        } else {
+            return value.toString().trim();
+        }
+    }
     // TODO: We can currently do this for INSERT operations, but not yet for UPDATE operations, so loadUpdateDataChange
     // will overwrite this flag for now.
     protected boolean hasPreparedStatementsImplemented() {
@@ -95,7 +109,9 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     @Override
-    public boolean supports(Database database) { return true; }
+    public boolean supports(Database database) {
+        return true;
+    }
 
     @Override
     public boolean generateRollbackStatementsVolatile(Database database) {
@@ -190,6 +206,12 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         this.quotchar = quotchar;
     }
 
+
+    @Override
+    public void addColumn(LoadDataColumnConfig column) {
+        columns.add(column);
+    }
+
     @Override
     @DatabaseChangeProperty( supportsDatabase = ALL, serializationType = SerializationType.NESTED_OBJECT,
         description = "Column mapping and defaults can be defined.\n\n" +
@@ -202,6 +224,34 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     @Override
     public void setColumns(List<LoadDataColumnConfig> columns) {
         this.columns = columns;
+    }
+
+    /**
+     * Unique string for the column for better identification
+     * @param index index of the column
+     * @param columnConfig the column
+     * @return
+     */
+    protected String columnIdString(int index, LoadDataColumnConfig columnConfig) {
+        return " / column[" + index + "]" +
+                (StringUtil.trimToNull(columnConfig.getName()) != null ?
+                        " (name:'" + columnConfig.getName() + "')" : "") ;
+    }
+
+    /**
+     * Validate all columns and collect errors in 'validationErrors'
+     * @param validationErrors ValidationErrors to collect errors
+     * @return validationErrors
+     */
+    protected ValidationErrors validateColumns(ValidationErrors validationErrors) {
+        if (getColumns() != null) {
+            int i = 1;
+            for (LoadDataColumnConfig columnConfig : getColumns()) {
+                validateColumn(columnConfig, validationErrors, columnIdString(i, columnConfig));
+                i++;
+            }
+        }
+        return validationErrors;
     }
 
     @Override
@@ -296,7 +346,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         //
                         // Always set the type for the valueConfig if the value is NULL
                         //
-                        if ("NULL".equalsIgnoreCase(value.toString())) {
+                        if ("NULL".equalsIgnoreCase(value)) {
                             valueConfig.setType(columnConfig.getType());
                         }
                         valueConfig.setName(columnName);
@@ -305,19 +355,22 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         if (value.isEmpty()) {
                             value = columnConfig.getDefaultValue();
                         }
-                        if (StringUtil.equalsNULL(value)) {
+                        if (StringUtil.equalsWordNull(value)) {
                             valueConfig.setValue(null);
                         } else if (columnConfig.getType() == null) {
                             // columnConfig did not specify a type
                             valueConfig.setValue(value);
-                        } else if (columnConfig.type() == LOAD_DATA_TYPE.BOOLEAN) {
-                            if (null != value) {
-                                valueConfig.setValueBoolean(BooleanParser.parseBoolean(value));
-                            } else { // TODO getDefaultValueBoolean should use BooleanParser.parseBoolean also for consistent behaviour
+                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UNKNOWN) {
+                            // columnConfig did not match a specific type
+                            valueConfig.setValue(value);
+                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.BOOLEAN) {
+                            if (value == null) { // TODO getDefaultValueBoolean should use BooleanParser.parseBoolean also for consistent behaviour
                                 valueConfig.setValueBoolean(columnConfig.getDefaultValueBoolean());
+                            } else {
+                                valueConfig.setValueBoolean(BooleanParser.parseBoolean(value));
                             }
-                        } else if (columnConfig.type() == LOAD_DATA_TYPE.NUMERIC) {
-                            if (null != value) {
+                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.NUMERIC) {
+                            if (value != null) {
                                 valueConfig.setValueNumeric(value);
                             } else {
                                 valueConfig.setValueNumeric(columnConfig.getDefaultValueNumeric());
@@ -332,7 +385,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                     try {
                                         // Need the column type for handling 'NOW' or 'TODAY' type column value
                                         valueConfig.setType(columnConfig.getType());
-                                        if (null != value) {
+                                        if (value != null) {
                                             valueConfig.setValueDate(value);
                                         } else {
                                             valueConfig.setValueDate(columnConfig.getDefaultValueDate());
@@ -341,10 +394,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                         throw new UnexpectedLiquibaseException(e);
                                     }
                                 }
-                        } else if (columnConfig.type() == LOAD_DATA_TYPE.STRING) {
+                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.STRING) {
                             valueConfig.setType(columnConfig.getType());
                                     valueConfig.setValue(value == null ? "" : value);
-                        } else if (columnConfig.type() == LOAD_DATA_TYPE.COMPUTED) {
+                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.COMPUTED) {
                             if (null != value) {
                                 liquibase.statement.DatabaseFunction function =
                                         new liquibase.statement.DatabaseFunction(value);
@@ -352,7 +405,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             } else {
                                 valueConfig.setValueComputed(columnConfig.getDefaultValueComputed());
                             }
-                        } else if (columnConfig.type() == LOAD_DATA_TYPE.SEQUENCE) {
+                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.SEQUENCE) {
                             if (value == null) {
                                 throw new UnexpectedLiquibaseException(
                                         "Must set a sequence name in the loadData column defaultValue attribute"
@@ -363,32 +416,32 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             valueConfig.setValueComputed(function);
 
                             } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.BLOB.toString())) {
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
+                                if ("NULL".equalsIgnoreCase(value)) {
                                     valueConfig.setValue(null);
-                                } else if (BASE64_PATTERN.matcher(value.toString()).matches()) {
+                                } else if (BASE64_PATTERN.matcher(value).matches()) {
                                     valueConfig.setType(columnConfig.getType());
-                                    valueConfig.setValue(value.toString());
+                                    valueConfig.setValue(value);
                                     needsPreparedStatement = true;
                                 } else {
-                                    valueConfig.setValueBlobFile(value.toString());
+                                    valueConfig.setValueBlobFile(value);
                                     needsPreparedStatement = true;
                                 }
-                        } else if (columnConfig.type() == LOAD_DATA_TYPE.CLOB) {
+                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.CLOB) {
                             valueConfig.setValueClobFile(value);
                             needsPreparedStatement = true;
-                        } else if (columnConfig.type() == LOAD_DATA_TYPE.UUID) {
+                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UUID) {
                             valueConfig.setType(columnConfig.getType());
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
+                                if ("NULL".equalsIgnoreCase(value)) {
                                     valueConfig.setValue(null);
                                 } else {
-                                    valueConfig.setValue(value.toString());
+                                    valueConfig.setValue(value);
                                 }
                             } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.OTHER.toString())) {
                                 valueConfig.setType(columnConfig.getType());
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
+                                if ("NULL".equalsIgnoreCase(value)) {
                                     valueConfig.setValue(null);
                                 } else {
-                                    valueConfig.setValue(value.toString());
+                                    valueConfig.setValue(value);
                                 }
                         } else {
                             throw new UnexpectedLiquibaseException(
@@ -406,7 +459,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
                         valueConfig.setName(columnName);
 
-                        valueConfig.setValue( StringUtil.equalsNULL(value) ? null : value);
+                        valueConfig.setValue(getValueToWrite(value));
                     }
                     columnsFromCsv.add(valueConfig);
                 }
@@ -436,7 +489,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         Object value = column.getValueObject();
 
                         if (value == null) {
-                            value = NULL;
+                            value = "NULL";
                         }
 
                         insertStatement.addColumnValue(columnName, value);
@@ -643,10 +696,9 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         return validateColumns(validationErrors);
     }
 
-    @Override
-    public void validateColumn(LoadDataColumnConfig columnConfig, ValidationErrors validationErrors
-            , String columnIDString) {
-        ChangeWithColumns.super.validateColumn(columnConfig,validationErrors,columnIDString);
+    public void validateColumn(LoadDataColumnConfig columnConfig, ValidationErrors validationErrors, String columnIDString) {
+        validationErrors.checkRequiredField( "name", columnConfig.getName(), columnIDString);
+
         // Empty validation
         if(columnConfig.getHeader() != null) {
             validationErrors.checkRequiredField(
@@ -818,6 +870,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     @SuppressWarnings("HardCodedStringLiteral")
     public enum LOAD_DATA_TYPE {
-        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP,UUID, OTHER
+        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP,UUID, OTHER, UNKNOWN
     }
 }

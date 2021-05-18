@@ -1,6 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeStatus;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
@@ -18,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static liquibase.change.ChangeParameterMetaData.ALL;
-import static liquibase.statement.SqlStatement.NULL;
 
 @DatabaseChange(name = "loadUpdateData",
         description = "Loads or updates data from a CSV file into an existing table. Differs from loadData by " +
@@ -120,10 +122,10 @@ public class LoadUpdateDataChange extends LoadDataChange {
             where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(),
                     insertOrUpdateStatement.getSchemaName(),
                     insertOrUpdateStatement.getTableName(),
-                    thisPkColumn)).append(((newValue == null) || StringUtil.equalsNULL(newValue.toString())) ? " is " : " = ");
+                    thisPkColumn)).append(((newValue == null) || StringUtil.equalsWordNull(newValue.toString())) ? " is " : " = ");
 
-            if ((newValue == null) || StringUtil.equalsNULL(newValue.toString())) {
-                where.append(NULL);
+            if ((newValue == null) || StringUtil.equalsWordNull(newValue.toString())) {
+                where.append("NULL");
             } else {
                 where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue,
                         database));
