@@ -51,10 +51,15 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 					+ database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(),
 							insertOrUpdateStatement.getTableName()) + " WHERE " + getWhereClause(insertOrUpdateStatement, database) + ";\n");
 		}
-		generatedSql.append("IF not found THEN\n");
-		generatedSql.append(getInsertStatement(insertOrUpdateStatement,
-				database, sqlGeneratorChain));
-		generatedSql.append("END IF;\n");
+
+		// if we don't want to only update, then add the INSERT statement
+		if (!insertOrUpdateStatement.getOnlyUpdate()) {
+			generatedSql.append("IF not found THEN\n");
+			generatedSql.append(getInsertStatement(insertOrUpdateStatement,
+					database, sqlGeneratorChain));
+			generatedSql.append("END IF;\n");
+		}
+
 		generatedSql.append("END;\n");
 		generatedSql.append("$$\n");
 		generatedSql.append("LANGUAGE plpgsql;\n");

@@ -204,7 +204,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "i.CREATOR AS INDEX_QUALIFIER " +
                                 "FROM SYSIBM.SYSKEYS k " +
                                 "JOIN SYSIBM.SYSINDEXES i ON k.IXNAME = i.NAME " +
-                                "WHERE  i.CREATOR = '" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
+                                "WHERE  i.CREATOR = '" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'" +
+                                "AND  k.IXCREATOR = '" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
                         if (!isBulkFetchMode && tableName != null) {
                             sql += " AND i.TBNAME='" + database.escapeStringForDatabase(tableName) + "'";
                         }
