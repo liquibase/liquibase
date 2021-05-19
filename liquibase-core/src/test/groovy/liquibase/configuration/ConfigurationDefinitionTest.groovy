@@ -64,7 +64,7 @@ class ConfigurationDefinitionTest extends Specification {
         then:
         currentValue.value == expectedValue
         currentValue.getProvidedValue().describe() == expectedSource
-        ConfigurationDefinition.wasDefaultValueUsed(currentValue) == defaultValueUsed
+        currentValue.wasDefaultValueUsed() == defaultValueUsed
 
         where:
         key            | defaultValue         | expectedValue        | expectedSource                                              | defaultValueUsed
