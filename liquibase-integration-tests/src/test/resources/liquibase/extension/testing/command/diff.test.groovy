@@ -410,12 +410,9 @@ Changed Column\(s\):
 
     run "Run without a referenceURL throws an exception", {
         arguments = [
-                url              : "",
+                url              : { it.url },
                 username         : { it.username },
-                password         : { it.password },
-                referenceUrl     : { it.altUrl },
-                referenceUsername: { it.altUsername },
-                referencePassword: { it.altPassword },
+                password         : { it.password }
         ]
 
         setup {
