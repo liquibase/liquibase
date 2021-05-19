@@ -404,7 +404,7 @@ public class LiquibaseCommandLine {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
         List<ConfigurationValueProvider> returnList = new ArrayList<>();
 
-        final CommandLineArgumentValueProvider argumentProvider = new CommandLineArgumentValueProvider(commandLine.parseArgs(args), legacyNoLongerCommandArguments);
+        final CommandLineArgumentValueProvider argumentProvider = new CommandLineArgumentValueProvider(commandLine.parseArgs(args));
         liquibaseConfiguration.registerProvider(argumentProvider);
         returnList.add(argumentProvider);
 

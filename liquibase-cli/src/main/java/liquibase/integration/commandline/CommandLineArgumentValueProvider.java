@@ -12,21 +12,13 @@ public class CommandLineArgumentValueProvider extends AbstractMapConfigurationVa
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
 
-    public CommandLineArgumentValueProvider(CommandLine.ParseResult parseResult, Set<String> legacyNoLongerCommandArguments) {
-        if (parseResult != null) {
+    public CommandLineArgumentValueProvider(CommandLine.ParseResult parseResult) {
+        while (parseResult != null) {
             for (CommandLine.Model.OptionSpec option : parseResult.matchedOptions()) {
                 this.argumentValues.put(option.names()[0], option.getValue());
             }
 
-            while (parseResult.hasSubcommand()) {
-                parseResult = parseResult.subcommand();
-            }
-
-            for (CommandLine.Model.OptionSpec option : parseResult.matchedOptions()) {
-                if (legacyNoLongerCommandArguments.contains(option.names()[0].replace("--", ""))) {
-                    this.argumentValues.put(option.names()[0], option.getValue());
-                }
-            }
+            parseResult = parseResult.subcommand();
         }
     }
 
@@ -42,8 +34,16 @@ public class CommandLineArgumentValueProvider extends AbstractMapConfigurationVa
 
     @Override
     protected boolean keyMatches(String wantedKey, String storedKey) {
-        return super.keyMatches(wantedKey, storedKey.replaceFirst("^--", ""))
-                || super.keyMatches(wantedKey, "liquibase" + storedKey.replaceFirst("^--", "").replace("-",""));
+        storedKey = storedKey.replaceFirst("^--", "");
+
+        if (super.keyMatches(wantedKey, storedKey)) {
+            return true;
+        }
+        if (wantedKey.startsWith("liquibase.command.")) {
+            return super.keyMatches(wantedKey.replaceFirst("^liquibase\\.command\\.", ""), storedKey);
+        }
+
+        return super.keyMatches(wantedKey.replaceFirst("^liquibase\\.", ""), storedKey);
     }
 
     @Override

@@ -46,14 +46,6 @@ class CommandRunner implements Callable<CommandResults> {
                 commandScope.setOutput(outputStream);
             }
 
-            for (CommandLine.Model.OptionSpec option : spec.commandLine().getParseResult().matchedOptions()) {
-                commandScope.addArgumentValue(toCommandArgumentDefinition(option), option.getValue());
-            }
-
-            for (CommandLine.Model.OptionSpec option : rootCommand.getParseResult().matchedOptions()) {
-                commandScope.addArgumentValue(toCommandArgumentDefinition(option), option.getValue());
-            }
-
             return commandScope.execute();
         } finally {
             if (outputStream != null) {
