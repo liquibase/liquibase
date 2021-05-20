@@ -25,7 +25,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
-import liquibase.structure.core.Table;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtil;
 
@@ -33,7 +32,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class DiffToChangeLog {
 
