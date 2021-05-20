@@ -175,7 +175,7 @@ public class LiquibaseServletListener implements ServletContextListener {
         }
 
         final ConfiguredValue<Boolean> shouldRunValue = IntegrationConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
-        if (IntegrationConfiguration.SHOULD_RUN.getCurrentValue() && !ConfigurationDefinition.wasDefaultValueUsed(shouldRunValue)) {
+        if (IntegrationConfiguration.SHOULD_RUN.getCurrentValue() && !shouldRunValue.wasDefaultValueUsed()) {
             shouldRun = true;
             servletContext.log("ignoring " + LIQUIBASE_HOST_INCLUDES + " and "
                     + LIQUIBASE_HOST_EXCLUDES + ", since " + shouldRunValue.getProvidedValue().describe()

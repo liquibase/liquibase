@@ -48,6 +48,12 @@ class CommandTests extends Specification {
     def setup() {
         def properties = new Properties()
 
+        getClass().getClassLoader().getResources("liquibase.test.properties").each {
+            it.withReader {
+                properties.load(it)
+            }
+        }
+
         getClass().getClassLoader().getResources("liquibase.test.local.properties").each {
             it.withReader {
                 properties.load(it)
@@ -427,25 +433,31 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             def config = new CompilerConfiguration()
             def shell = new GroovyShell(this.class.classLoader, config)
 
-            ("src/test/resources/liquibase/extension/testing/command/" as File).eachFileRecurse {
-                if (!it.name.endsWith("test.groovy")) {
-                    return
-                }
-
-                try {
-                    def returnValue = shell.evaluate(it)
-
-                    if (!returnValue instanceof CommandTestDefinition) {
-                        org.spockframework.util.Assert.fail("${it} is not a CommandTest definition")
+            def path = "src/test/resources/liquibase/extension/testing/command/"
+            try {
+                (path as File).eachFileRecurse {
+                    if (!it.name.endsWith("test.groovy")) {
+                        return
                     }
 
-                    def definition = (CommandTestDefinition) returnValue
-                    definition.testFile = it
-                    commandTestDefinitions.add(definition)
+                    try {
+                        def returnValue = shell.evaluate(it)
 
-                } catch (Throwable e) {
-                    throw new RuntimeException("Error parsing ${it}: ${e.message}", e)
+                        if (!returnValue instanceof CommandTestDefinition) {
+                            org.spockframework.util.Assert.fail("${it} is not a CommandTest definition")
+                        }
+
+                        def definition = (CommandTestDefinition) returnValue
+                        definition.testFile = it
+                        commandTestDefinitions.add(definition)
+
+                    } catch (Throwable e) {
+                        throw new RuntimeException("Error parsing ${it}: ${e.message}", e)
+                    }
                 }
+            }
+            catch (Exception e) {
+                throw new RuntimeException("No command tests found in ${path}.\nIf running CommandTests directly, make sure you are choosing the classpath of the module you want to test")
             }
         }
 

@@ -1,5 +1,6 @@
 package liquibase.configuration;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.util.ObjectUtil;
@@ -30,23 +31,13 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     private DataType defaultValue;
     private String defaultValueDescription;
     private boolean commonlyUsed;
+    private boolean internal;
     private ConfigurationValueConverter<DataType> valueConverter;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
 
     private static final Pattern ALLOWED_KEY_PATTERN = Pattern.compile("[a-zA-Z0-9.]+");
 
-    /**
-     * @return if the given {@link ConfiguredValue} was set by a default value
-     */
-    public static boolean wasDefaultValueUsed(ConfiguredValue<?> configuredValue) {
-        for (ProvidedValue providedValue : configuredValue.getProvidedValues()) {
-            if (providedValue.getProvider() != null && providedValue.getProvider() instanceof ConfigurationDefinition.DefaultValueProvider) {
-                return true;
-            }
-        }
-
-        return false;
-    }
+    private boolean loggedUsingDefault = false;
 
     /**
      * Constructor private to force {@link Builder} usage
@@ -104,6 +95,16 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         if (!configurationValue.found()) {
             defaultValue = this.getDefaultValue();
             if (defaultValue != null) {
+                DataType obfuscatedValue;
+                if (valueObfuscator == null) {
+                    obfuscatedValue = defaultValue;
+                } else {
+                    obfuscatedValue = valueObfuscator.obfuscate(defaultValue);
+                }
+                if (!loggedUsingDefault && !key.equals(GlobalConfiguration.FILTER_LOG_MESSAGES.getKey())) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Configuration " + key + " is using the default value of " + obfuscatedValue);
+                    loggedUsingDefault = true;
+                }
                 configurationValue.override(new DefaultValueProvider(this.getDefaultValue()).getProvidedValue(key));
             }
         }
@@ -175,6 +176,14 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
      */
     public boolean getCommonlyUsed() {
         return commonlyUsed;
+    }
+
+    /**
+     * Return true if this configuration is for internal and/or programmatic use only.
+     * End-user facing integrations should not expose internal configurations directly.
+     */
+    public boolean isInternal() {
+        return internal;
     }
 
     @Override
@@ -300,6 +309,12 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
             return this;
         }
 
+        public Building<DataType> setInternal(boolean internal) {
+            definition.internal = internal;
+
+            return this;
+        }
+
         /**
          * Finishes building this definition AND registers it with {@link LiquibaseConfiguration#registerDefinition(ConfigurationDefinition)}.
          * To not register this definition, use {@link #buildTemporary()}
@@ -322,7 +337,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     /**
      * Used to track configuration values set by a default
      */
-    private static final class DefaultValueProvider implements ConfigurationValueProvider {
+    static final class DefaultValueProvider implements ConfigurationValueProvider {
 
         private final Object value;
 

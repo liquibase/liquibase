@@ -31,7 +31,7 @@ class CommandRunner implements Callable<CommandResults> {
         final CommandLine rootCommand = parentCommand;
 
 
-        final String[] commandName = LiquibaseCommandLine.getCommandNames(spec.commandLine().getParseResult());
+        final String[] commandName = LiquibaseCommandLine.getCommandNames(spec.commandLine());
         for (int i=0; i<commandName.length; i++) {
             commandName[i] = StringUtil.toCamelCase(commandName[i]);
         }
@@ -44,14 +44,6 @@ class CommandRunner implements Callable<CommandResults> {
             if (outputFile != null) {
                 outputStream = new FileOutputStream(outputFile);
                 commandScope.setOutput(outputStream);
-            }
-
-            for (CommandLine.Model.OptionSpec option : spec.commandLine().getParseResult().matchedOptions()) {
-                commandScope.addArgumentValue(toCommandArgumentDefinition(option), option.getValue());
-            }
-
-            for (CommandLine.Model.OptionSpec option : rootCommand.getParseResult().matchedOptions()) {
-                commandScope.addArgumentValue(toCommandArgumentDefinition(option), option.getValue());
             }
 
             return commandScope.execute();

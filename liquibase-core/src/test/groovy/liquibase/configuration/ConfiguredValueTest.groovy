@@ -13,8 +13,8 @@ class ConfiguredValueTest extends Specification {
         then:
         !configuredValue.found()
         configuredValue.getValue() == null
-        configuredValue.getProvidedValues()*.describe() == ["No configuration or default value found 'requested.key'"]
-        configuredValue.getProvidedValue().describe() == "No configuration or default value found 'requested.key'"
+        configuredValue.getProvidedValues()*.describe() == ["No configured value found 'requested.key'"]
+        configuredValue.getProvidedValue().describe() == "No configured value found 'requested.key'"
     }
 
     def "one override"() {

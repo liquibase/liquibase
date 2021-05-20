@@ -135,7 +135,7 @@ public class CommandScope {
 
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
 
-        Scope.getCurrentScope().getLog(getClass()).fine("Pipeline for command '"+StringUtil.join(commandDefinition.getName(), " ")+": "+StringUtil.join(pipeline, " then ", obj -> obj.getClass().getName()));
+        Scope.getCurrentScope().getLog(getClass()).fine("Pipeline for command '" + StringUtil.join(commandDefinition.getName(), " ") + ": " + StringUtil.join(pipeline, " then ", obj -> obj.getClass().getName()));
 
         for (CommandStep step : pipeline) {
             step.validate(this);
@@ -165,7 +165,7 @@ public class CommandScope {
         final String key;
         if (includeCommandName) {
             key = completeConfigPrefix;
-        }  else {
+        } else {
             key = shortConfigPrefix;
         }
 
@@ -177,7 +177,6 @@ public class CommandScope {
                 .setValueObfuscator(argument.getValueObfuscator())
                 .buildTemporary();
     }
-
 
     private class CommandScopeValueProvider extends AbstractMapConfigurationValueProvider {
 

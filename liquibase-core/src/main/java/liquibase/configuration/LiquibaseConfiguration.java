@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.SingletonObject;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -131,39 +132,43 @@ public class LiquibaseConfiguration implements SingletonObject {
             lastLoggedKeyValues.put(keyAndAliases[0], foundValue);
 
             //avoid infinite loop when logging is getting set up
-            StringBuilder logMessage = new StringBuilder("Found '" + keyAndAliases[0] + "' configuration of '" + details.getValueObfuscated() + "'");
-            boolean foundFirstValue = false;
-            for (ProvidedValue providedValue : details.getProvidedValues()) {
-                logMessage.append("\n    ");
-                if (foundFirstValue) {
-                    logMessage.append("Overrides ");
-                }
-                logMessage.append(providedValue.describe());
-                Object value = providedValue.getValue();
-                if (value != null) {
-                    if (converter != null) {
-                        value = converter.convert(value);
+            if (details.found()) {
+                StringBuilder logMessage = new StringBuilder("Found '" + keyAndAliases[0] + "' configuration of '" + details.getValueObfuscated() + "'");
+                boolean foundFirstValue = false;
+                for (ProvidedValue providedValue : details.getProvidedValues()) {
+                    logMessage.append("\n    ");
+                    if (foundFirstValue) {
+                        logMessage.append("Overrides ");
                     }
-                    if (obfuscator != null) {
-                        try {
-                            value = obfuscator.obfuscate((DataType) value);
-                        } catch (ClassCastException e) {
-                            value = "*****";
+                    logMessage.append(StringUtil.lowerCaseFirst(providedValue.describe()));
+                    Object value = providedValue.getValue();
+                    if (value != null) {
+                        if (converter != null) {
+                            value = converter.convert(value);
                         }
+                        if (obfuscator != null) {
+                            try {
+                                value = obfuscator.obfuscate((DataType) value);
+                            } catch (ClassCastException e) {
+                                value = "*****";
+                            }
+                        }
+                        logMessage.append(" of '").append(value).append("'");
                     }
-                    logMessage.append(" of '").append(value).append("'");
+                    foundFirstValue = true;
                 }
-                foundFirstValue = true;
-            }
 
-            Scope.getCurrentScope().getLog(getClass()).fine(logMessage.toString());
+                Scope.getCurrentScope().getLog(getClass()).fine(logMessage.toString());
+            } else {
+                Scope.getCurrentScope().getLog(getClass()).fine("No configuration value for " + StringUtil.join(keyAndAliases, " aka ") + " found");
+            }
         }
 
         return details;
     }
 
     /**
-     * Registers a {@link ConfigurationDefinition} so it will be returned by {@link #getRegisteredDefinitions()}
+     * Registers a {@link ConfigurationDefinition} so it will be returned by {@link #getRegisteredDefinitions(boolean)}
      */
     public void registerDefinition(ConfigurationDefinition<?> definition) {
         this.definitions.add(definition);
@@ -171,16 +176,24 @@ public class LiquibaseConfiguration implements SingletonObject {
 
     /**
      * Returns all registered {@link ConfigurationDefinition}s. Registered definitions are used for generated help documentation.
+     * @param includeInternal if true, include {@link ConfigurationDefinition#isInternal()} definitions.
      */
-    public SortedSet<ConfigurationDefinition<?>> getRegisteredDefinitions() {
-        return Collections.unmodifiableSortedSet(this.definitions);
+    public SortedSet<ConfigurationDefinition<?>> getRegisteredDefinitions(boolean includeInternal) {
+        SortedSet<ConfigurationDefinition<?>> returnSet = new TreeSet<>();
+        for (ConfigurationDefinition<?> definition : this.definitions) {
+            if (includeInternal || !definition.isInternal()) {
+                returnSet.add(definition);
+            }
+        }
+
+        return Collections.unmodifiableSortedSet(returnSet);
     }
 
     /**
      * @return the registered {@link ConfigurationDefinition} asssociated with this key. Null if none match.
      */
     public ConfigurationDefinition<?> getRegisteredDefinition(String key) {
-        for (ConfigurationDefinition<?> def : getRegisteredDefinitions()) {
+        for (ConfigurationDefinition<?> def : getRegisteredDefinitions(true)) {
             if (def.getKey().equalsIgnoreCase(key)) {
                 return def;
             }

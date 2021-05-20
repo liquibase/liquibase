@@ -292,7 +292,7 @@ public class LiquibaseCommandLine {
 
                     configureVersionInfo();
 
-                    if (!wasHelpOrVersionRequeted()) {
+                    if (!wasHelpOrVersionRequested()) {
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
                         Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion()));
                         Scope.getCurrentScope().getUI().sendMessage(Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService().getLicenseInfo());
@@ -300,7 +300,7 @@ public class LiquibaseCommandLine {
 
                     int response = commandLine.execute(finalArgs);
 
-                    if (!wasHelpOrVersionRequeted()) {
+                    if (!wasHelpOrVersionRequested()) {
                         final ConfiguredValue<File> logFile = IntegrationConfiguration.LOG_FILE.getCurrentConfiguredValue();
                         if (logFile.found()) {
                             Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue().getAbsolutePath());
@@ -312,7 +312,8 @@ public class LiquibaseCommandLine {
                         }
 
                         if (response == 0) {
-                            final String commandName = StringUtil.join(getCommandNames(commandLine.getParseResult()), " ");
+                            final List<CommandLine> commandList = commandLine.getParseResult().asCommandLineList();
+                            final String commandName = StringUtil.join(getCommandNames(commandList.get(commandList.size() - 1)), " ");
                             Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
                         }
                     }
@@ -335,7 +336,7 @@ public class LiquibaseCommandLine {
         }
     }
 
-    private boolean wasHelpOrVersionRequeted() {
+    private boolean wasHelpOrVersionRequested() {
         CommandLine.ParseResult parseResult = commandLine.getParseResult();
 
         while (parseResult != null) {
@@ -389,15 +390,13 @@ public class LiquibaseCommandLine {
         return returnArgs.toArray(new String[0]);
     }
 
-    static String[] getCommandNames(CommandLine.ParseResult parseResult) {
+    static String[] getCommandNames(CommandLine parseResult) {
         List<String> returnList = new ArrayList<>();
-        for (CommandLine command : parseResult.asCommandLineList()) {
-            final String commandName = command.getCommandName();
-            if (commandName.equals("liquibase")) {
-                continue;
-            }
-            returnList.add(commandName);
+        while (!parseResult.getCommandName().equals("liquibase")) {
+            returnList.add(0, parseResult.getCommandName());
+            parseResult = parseResult.getParent();
         }
+
         return returnList.toArray(new String[0]);
     }
 
@@ -405,15 +404,36 @@ public class LiquibaseCommandLine {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
         List<ConfigurationValueProvider> returnList = new ArrayList<>();
 
-        final CommandLineArgumentValueProvider argumentProvider = new CommandLineArgumentValueProvider(commandLine.parseArgs(args), legacyNoLongerCommandArguments);
+        final CommandLineArgumentValueProvider argumentProvider = new CommandLineArgumentValueProvider(commandLine.parseArgs(args));
         liquibaseConfiguration.registerProvider(argumentProvider);
         returnList.add(argumentProvider);
 
-        final File defaultsFile = new File(IntegrationConfiguration.DEFAULTS_FILE.getCurrentValue());
+        final ConfiguredValue<String> defaultsFileConfig = IntegrationConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue();
+        final File defaultsFile = new File(defaultsFileConfig.getValue());
         if (defaultsFile.exists()) {
             final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsFile);
             liquibaseConfiguration.registerProvider(fileProvider);
-            returnList.add(argumentProvider);
+            returnList.add(fileProvider);
+        } else {
+            Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
+            if (!defaultsFileConfig.wasDefaultValueUsed()) {
+                //can't use UI since it's not configured correctly yet
+                System.err.println("Could not find defaults file " + defaultsFile.getAbsolutePath());
+            }
+        }
+
+        File localDefaultsFile = new File(defaultsFile.getAbsolutePath().replaceFirst(".properties$", ".local.properties"));
+        if (localDefaultsFile.exists()) {
+            final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(localDefaultsFile) {
+                @Override
+                public int getPrecedence() {
+                    return super.getPrecedence() + 1;
+                }
+            };
+            liquibaseConfiguration.registerProvider(fileProvider);
+            returnList.add(fileProvider);
+        } else {
+            Scope.getCurrentScope().getLog(getClass()).fine("Cannot find local defaultsFile " + defaultsFile.getAbsolutePath());
         }
 
 
@@ -438,6 +458,9 @@ public class LiquibaseCommandLine {
         ui.setOutputStream(System.err);
         returnMap.put(Scope.Attr.ui.name(), ui);
 
+        returnMap.put(IntegrationConfiguration.ARGUMENT_CONVERTER.getKey(),
+                (IntegrationConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
+
 
         return returnMap;
     }
@@ -461,7 +484,7 @@ public class LiquibaseCommandLine {
         final File logFile = IntegrationConfiguration.LOG_FILE.getCurrentValue();
 
         Level logLevel = Level.OFF;
-        if (!ConfigurationDefinition.wasDefaultValueUsed(currentConfiguredValue)) {
+        if (!currentConfiguredValue.wasDefaultValueUsed()) {
             logLevel = currentConfiguredValue.getValue();
         }
 
@@ -576,12 +599,11 @@ public class LiquibaseCommandLine {
         return classLoader;
     }
 
-    private void addSubcommand(CommandDefinition commandDefinition, CommandLine commandLine) {
-        Set<String> commandNames = new LinkedHashSet<String>();
-        commandNames.add(StringUtil.toKabobCase(commandDefinition.getName()[0]));
-        commandNames.add(commandDefinition.getName()[0]);
+    private void addSubcommand(CommandDefinition commandDefinition, CommandLine rootCommand) {
+        List<String[]> commandNames = expandCommandNames(commandDefinition);
 
-        for (String commandName : commandNames) {
+        boolean showCommand = true;
+        for (String[] commandName : commandNames) {
 
             final CommandRunner commandRunner = new CommandRunner();
             final CommandLine.Model.CommandSpec subCommandSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(commandRunner, defaultFactory);
@@ -596,7 +618,13 @@ public class LiquibaseCommandLine {
             subCommandSpec.optionsCaseInsensitive(true);
             subCommandSpec.subcommandsCaseInsensitive(true);
 
-            subCommandSpec.usageMessage().hidden(commandDefinition.getHidden());
+            if (!showCommand) {
+                subCommandSpec.usageMessage().hidden(true);
+            } else {
+                subCommandSpec.usageMessage().hidden(commandDefinition.getHidden());
+            }
+            showCommand = false;
+
 
             for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
                 final String[] argNames = toArgNames(def);
@@ -657,9 +685,75 @@ public class LiquibaseCommandLine {
                 subCommandSpec.addOption(builder.build());
             }
 
-            commandLine.getCommandSpec().addSubcommand(commandName, new CommandLine(subCommandSpec, defaultFactory));
+            getParentCommandSpec(commandDefinition, rootCommand).addSubcommand(commandName[commandName.length - 1], new CommandLine(subCommandSpec, defaultFactory));
         }
 
+    }
+
+    private List<String[]> expandCommandNames(CommandDefinition commandDefinition) {
+        List<String[]> returnList = new ArrayList<>();
+
+        //create standard version first
+        final String[] standardName = commandDefinition.getName().clone();
+        for (int i = 0; i < standardName.length; i++) {
+            standardName[i] = StringUtil.toKabobCase(commandDefinition.getName()[i]);
+        }
+        returnList.add(standardName);
+
+        if (!StringUtil.join(standardName, " ").equals(StringUtil.join(commandDefinition.getName(), " "))) {
+            returnList.add(commandDefinition.getName());
+        }
+
+        return returnList;
+    }
+
+    private CommandLine.Model.CommandSpec getParentCommandSpec(CommandDefinition commandDefinition, CommandLine rootCommand) {
+        final String[] commandName = commandDefinition.getName();
+
+        CommandLine.Model.CommandSpec parent = rootCommand.getCommandSpec();
+
+        //length-1 to not include the actual command name
+        for (int i = 0; i < commandName.length - 1; i++) {
+            final CommandLine commandGroup = parent.subcommands().get(commandName[i]);
+            final String[] groupName = Arrays.copyOfRange(commandName, 0, i + 1);
+
+            if (commandGroup == null) {
+                parent = addSubcommandGroup(groupName, commandDefinition, parent);
+            } else {
+                parent = commandGroup.getCommandSpec();
+            }
+            configureSubcommandGroup(parent, groupName, commandDefinition);
+        }
+
+
+        return parent;
+    }
+
+    private void configureSubcommandGroup(CommandLine.Model.CommandSpec groupSpec, String[] groupName, CommandDefinition commandDefinition) {
+        final String header = StringUtil.trimToEmpty(commandDefinition.getGroupShortDescription(groupName));
+        final String description = StringUtil.trimToEmpty(commandDefinition.getGroupLongDescription(groupName));
+
+        if (!header.equals("")) {
+            groupSpec.usageMessage().header("< " + header + " >\n");
+        }
+
+        if (!description.equals("")) {
+            groupSpec.usageMessage().description(description + "\n");
+        }
+    }
+
+    private CommandLine.Model.CommandSpec addSubcommandGroup(String[] groupName, CommandDefinition commandDefinition, CommandLine.Model.CommandSpec parent) {
+        final CommandLine.Model.CommandSpec groupSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(null, defaultFactory);
+
+        configureHelp(groupSpec, false);
+
+
+        groupSpec.optionsCaseInsensitive(true);
+        groupSpec.subcommandsCaseInsensitive(true);
+
+        parent.addSubcommand(groupName[groupName.length - 1], groupSpec);
+
+        return groupSpec;
     }
 
     private String toEnvVariable(String property) {
@@ -674,7 +768,7 @@ public class LiquibaseCommandLine {
     private void addGlobalArguments(CommandLine commandLine) {
         final CommandLine.Model.CommandSpec rootCommandSpec = commandLine.getCommandSpec();
 
-        final SortedSet<ConfigurationDefinition<?>> globalConfigurations = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getRegisteredDefinitions();
+        final SortedSet<ConfigurationDefinition<?>> globalConfigurations = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getRegisteredDefinitions(false);
         for (ConfigurationDefinition<?> def : globalConfigurations) {
             final String[] argNames = toArgNames(def);
             for (int i = 0; i < argNames.length; i++) {

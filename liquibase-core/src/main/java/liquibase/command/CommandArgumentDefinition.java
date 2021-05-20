@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandValidationException;
+import liquibase.integration.IntegrationConfiguration;
 import liquibase.util.ObjectUtil;
 
 import java.util.Objects;
@@ -104,7 +105,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     public void validate(CommandScope commandScope) throws CommandValidationException {
         final DataType currentValue = commandScope.getArgumentValue(this);
         if (this.isRequired() && currentValue == null) {
-            throw new CommandValidationException(this.getName(), "missing required argument");
+            throw new CommandValidationException(IntegrationConfiguration.ARGUMENT_CONVERTER.getCurrentValue().convert(this.getName()), "missing required argument");
         }
     }
 

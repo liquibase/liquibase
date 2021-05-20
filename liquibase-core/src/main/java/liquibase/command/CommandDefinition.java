@@ -24,6 +24,9 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     private boolean internal;
     private boolean hidden;
 
+    private Map<String, String> groupLongDescription = new HashMap<>();
+    private Map<String, String> groupShortDescription = new HashMap<>();
+
     protected CommandDefinition(String[] name) {
         this.name = name;
         this.concatName = StringUtil.join(Arrays.asList(name), " ");
@@ -104,6 +107,35 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     public void setShortDescription(String shortDescription) {
         this.shortDescription = shortDescription;
     }
+
+    /**
+     * The short description of the given command group. Used in help docs.
+     */
+    public String getGroupShortDescription(String[] group) {
+        return groupShortDescription.get(StringUtil.join(group, " "));
+    }
+
+    /**
+     * Sets the short description of the given command group for help docs.
+     * If multiple command commands set different descriptions for the group, which version will be shown in any rolled up help is undefined.
+     */
+    public void setGroupShortDescription(String[] group, String shortDescription) {
+        this.groupShortDescription.put(StringUtil.join(group, " "), shortDescription);
+    }
+
+
+    /**
+     * The long description of the given command group. Used in help docs.
+     * If multiple command commands set different descriptions for the group, which version will be shown in any rolled up help is undefined.
+     */
+    public String getGroupLongDescription(String[] group) {
+        return groupLongDescription.get(StringUtil.join(group, " "));
+    }
+
+    public void setGroupLongDescription(String[] group, String longDescription) {
+        this.groupLongDescription.put(StringUtil.join(group, " "), longDescription);
+    }
+
 
     /**
      * The long description of the command. Used in help docs.

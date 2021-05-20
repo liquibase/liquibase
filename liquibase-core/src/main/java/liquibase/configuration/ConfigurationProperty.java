@@ -162,7 +162,7 @@ public class ConfigurationProperty {
      * @deprecated
      */
     public boolean getWasOverridden() {
-        return !ConfigurationDefinition.wasDefaultValueUsed(this.definition.getCurrentConfiguredValue());
+        return !this.definition.getCurrentConfiguredValue().wasDefaultValueUsed();
     }
 
     /**
