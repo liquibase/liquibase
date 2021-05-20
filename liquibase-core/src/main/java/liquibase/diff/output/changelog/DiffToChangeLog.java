@@ -443,24 +443,6 @@ public class DiffToChangeLog {
         return new ArrayList<>(objects);
     }
 
-    //
-    // Check each attribute to see if it contains a reference to the Column
-    // Return true if there if the reference exists and false if not
-    //
-    private boolean columnDependencyExists(final DatabaseObject column, DatabaseObject obj, String sa) {
-        Object attrValueObj = obj.getAttribute(sa, Object.class);
-        if (attrValueObj instanceof ArrayList) {
-            List<Object> values = (List<Object>) attrValueObj;
-            return
-                values.stream()
-                      .filter(item -> item instanceof Column)
-                      .anyMatch(item -> item == column);
-        } else if (attrValueObj instanceof Column) {
-            return attrValueObj == column;
-        }
-        return false;
-    }
-
     private List<Map<String, ?>> queryForDependenciesOracle(Executor executor, List<String> schemas)
             throws DatabaseException {
         List<Map<String, ?>> rs = null;
