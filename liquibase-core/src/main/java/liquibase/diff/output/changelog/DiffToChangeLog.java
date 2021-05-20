@@ -434,53 +434,8 @@ public class DiffToChangeLog {
                             return order;
                         }
                     });
-                    //
-                    // Find the last Table position
-                    // If there are no tables then the
-                    // insertion position is 0
-                    //
-                    int lastTableIndex = -1;
-                    if (toSort.size() > 0) {
-                        lastTableIndex =
-                            IntStream.range(toSort.size() - 1, 0)
-                                .filter(i -> (toSort.get(i) instanceof Table))
-                                .findFirst()
-                                .orElse(-1);
-                    }
-                    if (lastTableIndex == -1) {
-                        lastTableIndex = 0;
-                    }
 
-                    //
-                    // Iterate the list of objects which were not sorted
-                    // If there are dependencies on the Columns that were were not sorted
-                    // then we will insert these columns in the list after the last Table
-                    // otherwise they just get inserted at the end
-                    //
-                    for (DatabaseObject notSort : toNotSort) {
-                        DatabaseObject objectWithDependency =
-                            objects.stream()
-                                .filter(obj -> ! (obj instanceof Table))
-                                .filter(obj -> {
-                                    Set<String> attributes = obj.getAttributes();
-                                    String matched =
-                                        attributes.stream()
-                                            .filter(sa -> {
-                                                return columnDependencyExists(notSort, obj, sa);
-                                            })
-                                            .findFirst()
-                                            .orElse(null);
-                                    return matched != null;
-                                })
-                                .findFirst()
-                                .orElse(null);
-                        if (objectWithDependency != null) {
-                            toSort.add(lastTableIndex, notSort);
-                        } else {
-                            toSort.add(notSort);
-                        }
-                    }
-
+                    toSort.addAll(toNotSort);
                     return toSort;
                 }
             } catch (DatabaseException e) {
@@ -742,6 +697,10 @@ public class DiffToChangeLog {
                 "                   SELECT DISTINCT " +
                 "                         substring(pg_identify_object(classid, objid, 0)::text, E'(\\\\w+?)\\\\.') as referenced_schema_name, " +
                 "                         CASE classid\n" +
+                "                              WHEN 'pg_constraint'::regclass THEN (SELECT CONTYPE FROM pg_constraint WHERE oid = objid)\n" +
+                "                              ELSE objid::text\n" +
+                "                              END AS CONTYPE,\n" +
+                "                         CASE classid\n" +
                 "                              WHEN 'pg_attrdef'::regclass THEN (SELECT attname FROM pg_attrdef d JOIN pg_attribute c ON (c.attrelid,c.attnum)=(d.adrelid,d.adnum) WHERE d.oid = objid)\n" +
                 "                              WHEN 'pg_cast'::regclass THEN (SELECT concat(castsource::regtype::text, ' AS ', casttarget::regtype::text,' WITH ', castfunc::regprocedure::text) FROM pg_cast WHERE oid = objid)\n" +
                 "                              WHEN 'pg_class'::regclass THEN rel.object_name\n" +
@@ -794,7 +753,8 @@ public class DiffToChangeLog {
                     public String toString(String obj) {
                         return " REFERENCED_NAME like '" + obj + ".%' OR REFERENCED_NAME NOT LIKE '%.%'";
                     }
-                }) + ") " +
+                }) + ")\n" +
+                " AND CONTYPE::text != 'p'\n" +
                 " AND referencing_schema_name is not null and referencing_name is not null";
     }
 
