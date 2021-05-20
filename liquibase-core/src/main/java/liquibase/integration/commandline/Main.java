@@ -184,14 +184,31 @@ public class Main {
         Map<String, Object> scopeObjects = new HashMap<>();
         final IntegrationDetails integrationDetails = new IntegrationDetails();
         integrationDetails.setName("cli");
-        for (String arg : args) {
+        final ListIterator<String> argIterator = Arrays.asList(args).listIterator();
+        while (argIterator.hasNext()) {
+            final String arg = argIterator.next();
             if (arg.startsWith("--")) {
-                String[] splitArg = arg.split("=", 2);
-                String argKey = "argument__" + splitArg[0].replaceFirst("^--", "");
-                if (splitArg.length == 2) {
-                    integrationDetails.setParameter(argKey, splitArg[1]);
+                if (arg.contains("=")) {
+                    String[] splitArg = arg.split("=", 2);
+                    String argKey = "argument__" + splitArg[0].replaceFirst("^--", "");
+                    if (splitArg.length == 2) {
+                        integrationDetails.setParameter(argKey, splitArg[1]);
+                    } else {
+                        integrationDetails.setParameter(argKey, "true");
+                    }
                 } else {
-                    integrationDetails.setParameter(argKey, "true");
+                    String argKey = "argument__" + arg.replaceFirst("^--", "");
+                    if (argIterator.hasNext()) {
+                        final String next = argIterator.next();
+                        if (next.startsWith("--") || isCommand(next)) {
+                            integrationDetails.setParameter(argKey, "true");
+                            argIterator.previous(); //put value back
+                        } else {
+                            integrationDetails.setParameter(argKey, next);
+                        }
+                    } else {
+                        integrationDetails.setParameter(argKey, "true");
+                    }
                 }
             }
         }
