@@ -31,6 +31,9 @@ Optional Args:
 
     run "Happy path", {
         arguments = [
+                url              : { it.altUrl },
+                username         : { it.altUsername },
+                password         : { it.altPassword },
                 changesetIdentifier: "changelogs/hsqldb/complete/rollback.tag.changelog.xml::1::nvoxland",
                 changelogFile    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
         ]

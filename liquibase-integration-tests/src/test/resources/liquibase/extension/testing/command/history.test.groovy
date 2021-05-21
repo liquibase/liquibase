@@ -30,6 +30,11 @@ Optional Args:
     Default: null
 """
     run "Happy path", {
+        arguments = [
+                url : { it.url },
+                username: { it.username },
+                password: { it.password }
+        ]
         setup {
             history = [
                     new HistoryEntry(
@@ -72,6 +77,11 @@ Optional Args:
     }
 
     run "Happy path with an output file", {
+        arguments = [
+            url : { it.url },
+            username: { it.username },
+            password: { it.password }
+        ]
         setup {
             cleanResources("target/test-classes/history.sql")
             history = [

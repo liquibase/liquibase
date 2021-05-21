@@ -6,7 +6,6 @@ import liquibase.Scope
 import liquibase.change.Change
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
-import liquibase.changelog.RanChangeSet
 import liquibase.command.CommandArgumentDefinition
 import liquibase.command.CommandFactory
 import liquibase.command.CommandResults
@@ -42,6 +41,8 @@ import java.util.regex.Pattern
 class CommandTests extends Specification {
 
     private static List<CommandTestDefinition> commandTestDefinitions
+
+    public static final PATTERN_FLAGS = Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE
 
     private ConfigurationValueProvider propertiesProvider
 
@@ -318,9 +319,15 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     static OutputCheck assertNotContains(String substring) {
+        return assertNotContains(substring, false)
+    }
+
+    static OutputCheck assertNotContains(String substring, boolean caseInsensitive) {
         return new OutputCheck() {
             @Override
             def check(String actual) throws AssertionError {
+                actual = (caseInsensitive && actual != null ? actual.toLowerCase() : actual)
+                substring = (caseInsensitive && substring != null ? substring.toLowerCase() : substring)
                 assert !actual.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))): "$actual does not contain: '$substring'"
             }
         }
@@ -410,7 +417,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                             .contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck)).replaceAll(/\s+/," ")): "$outputDescription does not contain: '$expectedOutputCheck'"
                 } else if (expectedOutputCheck instanceof Pattern) {
                     String patternString = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern()))
-                    expectedOutputCheck = Pattern.compile(patternString, Pattern.MULTILINE | Pattern.DOTALL)
+                    //expectedOutputCheck = Pattern.compile(patternString, Pattern.MULTILINE | Pattern.DOTALL)
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
                     assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"

@@ -1717,9 +1717,9 @@ public class Liquibase implements AutoCloseable {
                         //
                         if (! upToTagChangeSetFilter.isSeenTag()) {
                             String message = "No tag matching '" + tag + "' found";
-                            Scope.getCurrentScope().getUI().sendMessage(message);
-                            Scope.getCurrentScope().getLog(Liquibase.class).warning(message);
-                            return;
+                            Scope.getCurrentScope().getUI().sendMessage("ERROR: " + message);
+                            Scope.getCurrentScope().getLog(Liquibase.class).severe(message);
+                            throw new LiquibaseException(new IllegalArgumentException(message));
                         }
 
                         logIterator = new ChangeLogIterator(changeLog,

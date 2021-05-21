@@ -38,6 +38,9 @@ Optional Args:
 
     run "Happy path", {
         arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
                 changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 
@@ -48,6 +51,9 @@ Optional Args:
     
     run "Happy path with output file", {
         arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
                 changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 

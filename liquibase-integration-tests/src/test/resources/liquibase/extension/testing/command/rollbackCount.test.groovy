@@ -41,6 +41,9 @@ Optional Args:
 
     run "Happy path", {
         arguments = [
+                url      : { it.url },
+                username : { it.username },
+                password : { it.password },
                 count        : 1,
                 changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml"
         ]
@@ -50,8 +53,8 @@ Optional Args:
         }
 
         expectedDatabaseContent = [
-                "txt": [Pattern.compile(".*liquibase.structure.core.Table.*FIRSTTABLE.*", Pattern.MULTILINE|Pattern.DOTALL),
-                        CommandTests.assertNotContains(".*liquibase.structure.core.Table.*SECONDTABLE.*")]
+                "txt": [Pattern.compile(".*liquibase.structure.core.Table.*FIRSTTABLE.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE),
+                        CommandTests.assertNotContains(".*liquibase.structure.core.Table.*SECONDTABLE.*", true)]
         ]
 
         expectedResults = [

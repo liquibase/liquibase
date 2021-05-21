@@ -36,6 +36,9 @@ Optional Args:
 """
     run "Happy path", {
         arguments = [
+            url:        { it.url },
+            username:   { it.username },
+            password:   { it.password },
             changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
         ]
 
@@ -62,6 +65,9 @@ Optional Args:
 
     run "Run with unknown Hub connection ID throws an exception", {
         arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
                 hubConnectionId: {MockHubService.failUUID}
         ]
 
@@ -74,6 +80,9 @@ Optional Args:
 
     run "Run with deleted changelog throws an exception", {
         arguments = [
+            url:        { it.url },
+            username:   { it.username },
+            password:   { it.password },
             changelogFile: "simple.changelog.with.deleted-id.xml"
         ]
 
@@ -88,7 +97,10 @@ Optional Args:
 
     run "Run with unrecognized project throws an exception", {
         arguments = [
-                hubProjectId: { MockHubService.failUUID.toString() }
+            url:        { it.url },
+            username:   { it.username },
+            password:   { it.password },
+            hubProjectId: { MockHubService.failUUID.toString() }
         ]
 
         expectedException = CommandExecutionException.class
@@ -97,6 +109,9 @@ Optional Args:
 
     run "Run with unrecognized changelog ID throws an exception", {
         arguments = [
+            url:        { it.url },
+            username:   { it.username },
+            password:   { it.password },
             changelogFile: "changelogs/hsqldb/complete/simple.changelog.with.id.xml"
         ]
 
@@ -107,6 +122,11 @@ Optional Args:
     }
 
     run "Run without any options should not throw an exception",  {
+        arguments = [
+            url:        { it.url },
+            username:   { it.username },
+            password:   { it.password },
+        ]
     }
 
     run "Run without any arguments should throw an exception",  {

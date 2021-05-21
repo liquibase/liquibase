@@ -7,6 +7,8 @@ import liquibase.exception.CommandValidationException
 
 import java.util.regex.Pattern
 
+final int PATTERN_FLAGS = Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE
+
 CommandTests.define {
     command = ["diff"]
     signature = """
@@ -115,20 +117,8 @@ Changed Column(s): NONE
 
         }
         expectedOutput = [
-                """
-Missing Table(s): NONE
-Unexpected Table(s): 
-     FIRSTTABLE
-     SECONDTABLE
-Changed Table(s): NONE
-""",
-                """
-Missing Column(s): NONE
-Unexpected Column(s): 
-     PUBLIC.FIRSTTABLE.FIRSTCOLUMN
-     PUBLIC.SECONDTABLE.SECONDCOLUMN
-Changed Column(s): NONE
-""",
+                Pattern.compile(".*Missing Table.s.*NONE.*Unexpected Table.s.*FIRSTTABLE.*SECONDTABLE.*", PATTERN_FLAGS),
+                Pattern.compile(".*Missing Column.s.*NONE.*Unexpected Column.s.*FIRSTTABLE.*FIRSTCOLUMN.*SECONDTABLE.*SECONDCOLUMN.*", PATTERN_FLAGS)
         ]
     }
 
@@ -164,20 +154,8 @@ Changed Column(s): NONE
 
         }
         expectedOutput = [
-                """
-Missing Table(s): 
-     FIRSTTABLE
-     SECONDTABLE
-Unexpected Table(s): NONE
-Changed Table(s): NONE
-""",
-                """
-Missing Column(s): 
-     PUBLIC.FIRSTTABLE.FIRSTCOLUMN
-     PUBLIC.SECONDTABLE.SECONDCOLUMN
-Unexpected Column(s): NONE
-Changed Column(s): NONE
-""",
+                Pattern.compile(".*Missing Table.s.*FIRSTTABLE.*SECONDTABLE.*", PATTERN_FLAGS),
+                Pattern.compile(".*Missing Column.s.*FIRSTTABLE.*FIRSTCOLUMN.*SECONDTABLE.*SECONDCOLUMN.*", PATTERN_FLAGS)
         ]
     }
     run "Running diff against a full database finds things missing and writes to an output file", {
@@ -310,23 +288,10 @@ Changed Column(s): NONE
 
         }
         expectedOutput = [
-                """
-Missing Table(s): 
-     SECONDARYTABLE
-Unexpected Table(s): 
-     PRIMARYTABLE
-Changed Table(s): NONE
-""",
-                Pattern.compile(/
-Missing Column\(s\): 
-     [\w.]*SECONDARYTABLE.ID
-     [\w.]*SHAREDTABLE.NAME
-Unexpected Column\(s\): 
-     [\w.]*PRIMARYTABLE.ID
-     [\w.]*SHAREDTABLE.ID
-Changed Column\(s\): 
-     PUBLIC.SHAREDTABLE.SHARED
-          type changed from 'VARCHAR\(3.*?\)' to 'VARCHAR\(255.*?\)'/),
+                Pattern.compile(".*Missing Table.s.*SECONDARYTABLE.*Unexpected Table.s.*PRIMARYTABLE.*Changed Table.s.*NONE", PATTERN_FLAGS),
+                Pattern.compile(".*Missing Column.s.*SECONDARYTABLE.ID.*SHAREDTABLE.NAME.*", PATTERN_FLAGS),
+                Pattern.compile(".*Unexpected Column.s.*PRIMARYTABLE.ID.*SHAREDTABLE.ID.*Changed Column.s.*", PATTERN_FLAGS),
+                Pattern.compile(".*SHAREDTABLE.SHARED.*type changed from .VARCHAR.3.*to .VARCHAR.255.*", PATTERN_FLAGS)
         ]
     }
 

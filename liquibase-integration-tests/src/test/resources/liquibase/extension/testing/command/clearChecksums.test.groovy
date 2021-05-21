@@ -28,6 +28,11 @@ Optional Args:
 """
 
     run "Happy path", {
+        arguments = [
+            url:        { it.url },
+            username:   { it.username },
+            password:   { it.password }
+        ]
         setup {
             history = [
                     new HistoryEntry(
