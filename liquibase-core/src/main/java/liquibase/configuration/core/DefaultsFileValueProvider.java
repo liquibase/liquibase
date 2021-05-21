@@ -91,7 +91,10 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
 
         if (invalidKeys.size() > 0) {
             if (this.properties.getProperty("strict", "false").equalsIgnoreCase("true")) {
-                throw new IllegalArgumentException("Undefined key(s) in " + StringUtil.lowerCaseFirst(sourceDescription) + " for '" + StringUtil.join(commandScope.getCommand().getName(), " ") + "':\n" + StringUtil.join(invalidKeys, "\n") + "\nIf the key applies to only some commands, prefix it with 'liquibase.command.' ");
+                throw new IllegalArgumentException("Strict check failed due to undefined key(s) for '" + StringUtil.join(commandScope.getCommand().getName(), " ")
+                        + "' command in " + StringUtil.lowerCaseFirst(sourceDescription) + "':\n"
+                        + StringUtil.join(invalidKeys, "\n")
+                        + "\nTo define keys that could apply to any command, prefix it with 'liquibase.command.'\nTo disable strict checking, remove 'strict' from the file.");
             } else {
                 Scope.getCurrentScope().getLog(getClass()).warning("Potentially ignored key(s) in " + StringUtil.lowerCaseFirst(sourceDescription) + "\n" + StringUtil.join(invalidKeys, "\n"));
             }
