@@ -28,8 +28,6 @@ class CommandRunner implements Callable<CommandResults> {
             command.add(0, parentCommand.getCommandName());
             parentCommand = parentCommand.getParent();
         }
-        final CommandLine rootCommand = parentCommand;
-
 
         final String[] commandName = LiquibaseCommandLine.getCommandNames(spec.commandLine());
         for (int i=0; i<commandName.length; i++) {
@@ -53,12 +51,6 @@ class CommandRunner implements Callable<CommandResults> {
                 outputStream.close();
             }
         }
-    }
-
-
-    private String toCommandArgumentDefinition(CommandLine.Model.OptionSpec option) {
-        final String argName = option.names()[0];
-        return StringUtil.toCamelCase(argName.replaceFirst("^--", ""));
     }
 
     public void setSpec(CommandLine.Model.CommandSpec spec) {

@@ -1701,15 +1701,26 @@ public class Liquibase implements AutoCloseable {
                                 });
                     } else {
                         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
+                        UpToTagChangeSetFilter upToTagChangeSetFilter = new UpToTagChangeSetFilter(tag, ranChangeSetList);
                         ChangeLogIterator forwardIterator = new ChangeLogIterator(changeLog,
                                 new NotRanChangeSetFilter(ranChangeSetList),
                                 new ContextChangeSetFilter(contexts),
                                 new LabelChangeSetFilter(labelExpression),
                                 new DbmsChangeSetFilter(database),
                                 new IgnoreChangeSetFilter(),
-                                new UpToTagChangeSetFilter(tag, ranChangeSetList));
+                                upToTagChangeSetFilter);
                         final ListVisitor listVisitor = new ListVisitor();
                         forwardIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+
+                        //
+                        // Check to see if the tag was found and stop if not
+                        //
+                        if (! upToTagChangeSetFilter.isSeenTag()) {
+                            String message = "No tag matching '" + tag + "' found";
+                            Scope.getCurrentScope().getUI().sendMessage(message);
+                            Scope.getCurrentScope().getLog(Liquibase.class).warning(message);
+                            return;
+                        }
 
                         logIterator = new ChangeLogIterator(changeLog,
                                 new NotRanChangeSetFilter(ranChangeSetList),
