@@ -83,7 +83,7 @@ class DefaultsFileValueProviderTest extends Specification {
 
         then:
         def e = thrown(IllegalArgumentException)
-        e.message == "Undefined key(s) in passed default properties\n - '$key'"
+        e.message.startsWith("Undefined key(s) in passed default properties for 'update':\n - '$key'")
 
 
         where:
