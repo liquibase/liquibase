@@ -1,9 +1,7 @@
 package liquibase.command;
 
 import liquibase.Scope;
-import liquibase.configuration.AbstractMapConfigurationValueProvider;
-import liquibase.configuration.ConfigurationDefinition;
-import liquibase.configuration.ConfiguredValue;
+import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.util.StringUtil;
 
@@ -128,6 +126,10 @@ public class CommandScope {
      */
     public CommandResults execute() throws CommandExecutionException {
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
+
+        for (ConfigurationValueProvider provider : Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getProviders()) {
+            provider.validate(this);
+        }
 
         for (CommandArgumentDefinition<?> definition : commandDefinition.getArguments().values()) {
             definition.validate(this);

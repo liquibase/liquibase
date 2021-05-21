@@ -99,7 +99,7 @@ public class ConfiguredValue<DataType> {
     /**
      * Used to track configuration with no value set
      */
-    private static final class NoValueProvider implements ConfigurationValueProvider {
+    private static final class NoValueProvider extends AbstractConfigurationValueProvider {
         @Override
         public int getPrecedence() {
             return -1;

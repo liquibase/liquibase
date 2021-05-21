@@ -1,5 +1,6 @@
 package liquibase.configuration;
 
+import liquibase.command.CommandScope;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 
 /**
@@ -35,4 +36,10 @@ public interface ConfigurationValueProvider {
      * @return null if the key is not defined in this provider.
      */
     ProvidedValue getProvidedValue(String... keyAndAliases);
+
+    /**
+     * Perform any validation of keys/values stored in this provider for the given commandScope.
+     * For example, check for keys that do not match anything expected.
+     */
+    void validate(CommandScope commandScope) throws IllegalArgumentException;
 }

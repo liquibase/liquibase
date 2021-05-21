@@ -74,6 +74,23 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
         return Collections.unmodifiableList(new ArrayList<>(pipeline));
     }
 
+
+    /**
+     * Returns the given argument definition for this command. Handles argument name smoothing.
+     * Returns null if no argument matches.
+     */
+    public CommandArgumentDefinition<?> getArgument(String argName) {
+        argName = StringUtil.toCamelCase(argName);
+
+        for (CommandArgumentDefinition<?> argumentDefinition : getArguments().values()) {
+            if (argumentDefinition.getName().equalsIgnoreCase(argName)) {
+                return argumentDefinition;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Returns the arguments for this command.
      */
@@ -185,4 +202,5 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     public boolean is(String... commandName) {
         return Arrays.equals(getName(), commandName);
     }
+
 }

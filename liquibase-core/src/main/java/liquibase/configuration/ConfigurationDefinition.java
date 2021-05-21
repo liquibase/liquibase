@@ -337,7 +337,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     /**
      * Used to track configuration values set by a default
      */
-    static final class DefaultValueProvider implements ConfigurationValueProvider {
+    static final class DefaultValueProvider extends AbstractConfigurationValueProvider {
 
         private final Object value;
 
@@ -359,7 +359,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     /**
      * Used to track configuration values converted by a handler
      */
-    private static final class ConvertedValueProvider<DataType> implements ConfigurationValueProvider {
+    private static final class ConvertedValueProvider<DataType> extends AbstractConfigurationValueProvider {
 
         private final DataType value;
         private final String originalSource;
