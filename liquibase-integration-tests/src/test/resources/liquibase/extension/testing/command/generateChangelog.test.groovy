@@ -37,7 +37,10 @@ Optional Args:
 
     run "Happy path", {
         arguments = [
-            changelogFile: "target/test-classes/changelog-test.xml",
+            url     : { it.url },
+            username: { it.username },
+            password: { it.password },
+            changelogFile: "target/test-classes/changelog-test.xml"
         ]
         setup {
             cleanResources("changelog-test.xml")

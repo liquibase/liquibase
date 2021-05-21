@@ -34,6 +34,11 @@ Optional Args:
     Default: null
 """
     run "Happy path", {
+        arguments = [
+                url       : { it.url },
+                username  : { it.username },
+                password  : { it.password }
+        ]
         setup {
             database = [
                     new CreateTableChange(
@@ -70,6 +75,9 @@ Optional Args:
 
     run "Happy path with an unregistered changelog file", {
         arguments = [
+                url       : { it.url },
+                username  : { it.username },
+                password  : { it.password },
                 changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
         setup {

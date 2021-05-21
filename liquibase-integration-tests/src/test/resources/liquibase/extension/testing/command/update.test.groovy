@@ -38,6 +38,9 @@ Optional Args:
 
     run "Happy path with a simple changelog", {
         arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
                 changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 
@@ -46,8 +49,8 @@ Optional Args:
         ]
 
         expectedDatabaseContent = [
-                "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL),
-                        Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*CITY.*", Pattern.MULTILINE|Pattern.DOTALL)]
+                "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE),
+                        Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*city.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)]
         ]
     }
 

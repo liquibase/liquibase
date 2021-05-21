@@ -31,6 +31,11 @@ Optional Args:
 """
 
     run "Happy path", {
+        arguments = [
+            url      : { it.url },
+            username : { it.username },
+            password : { it.password }
+        ]
         setup {
             database = [
                     new CreateTableChange(
@@ -66,6 +71,11 @@ Optional Args:
     }
 
     run "Happy path with an output file", {
+        arguments = [
+            url      : { it.url },
+            username : { it.username },
+            password : { it.password }
+        ]
         setup {
             cleanResources("target/test-classes/snapshot.txt")
             database = [

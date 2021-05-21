@@ -32,6 +32,9 @@ Optional Args:
 
     run "Happy path", {
         arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
                 changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml",
         ]
 
@@ -42,13 +45,16 @@ Optional Args:
         }
 
         expectedResults = [
-                statusCode   : 0
+            statusCode   : 0
         ]
     }
 
     run "Happy path with an output file", {
         arguments = [
-                changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml",
+            url:        { it.url },
+            username:   { it.username },
+            password:   { it.password },
+            changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml",
         ]
 
         setup {

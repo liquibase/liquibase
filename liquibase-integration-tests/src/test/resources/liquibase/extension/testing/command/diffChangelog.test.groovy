@@ -1,8 +1,13 @@
 package liquibase.extension.testing.command
 
+import liquibase.change.AddColumnConfig
 import liquibase.change.ColumnConfig
+import liquibase.change.core.AddColumnChange
+import liquibase.change.core.AddPrimaryKeyChange
 import liquibase.change.core.CreateTableChange
+import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
+import liquibase.structure.core.Column
 
 import java.util.regex.Pattern
 
@@ -84,8 +89,11 @@ Optional Args:
                 //
                 // Empty changelog contains no changeSet tags and an empty databaseChangeLog tag
                 //
-                "target/test-classes/diffChangelog-test.xml" : [CommandTests.assertNotContains("<changeSet"),
-                                                                Pattern.compile("^.*<?xml.*databaseChangeLog.*xsd./>", Pattern.MULTILINE|Pattern.DOTALL)]
+                "target/test-classes/diffChangelog-test.xml" :
+                        [
+                            CommandTests.assertNotContains("<changeSet"),
+                            Pattern.compile("^.*<?xml.*databaseChangeLog.*xsd./>", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)
+                        ]
         ]
     }
 
@@ -145,6 +153,58 @@ Optional Args:
                 "target/test-classes/diffChangeLog-test.xml" : [CommandTests.assertContains("<changeSet ", 5),
                                                                 CommandTests.assertContains("<dropTable ", 1)]
         ]
+    }
+
+    run "Running diffChangelog should add change sets in the correct order", {
+        arguments = [
+                url              : { it.altUrl },
+                username         : { it.altUsername },
+                password         : { it.altPassword },
+                referenceUrl     : { it.url},
+                referenceUsername: { it.username},
+                referencePassword: { it.password},
+                changelogFile: "target/test-classes/diffChangelogOrder-test.xml",
+        ]
+
+        setup {
+            cleanResources("diffChangelogOrder-test.xml")
+            database = [
+                    new CreateTableChange(
+                        tableName: "person",
+                        columns: [
+                            ColumnConfig.fromName("address").setType("VARCHAR(255)")
+                        ]
+                    ),
+                    new AddColumnChange(
+                        tableName: "person",
+                        columns: [
+                           new AddColumnConfig(new Column(ColumnConfig.fromName("id").setType("VARCHAR(255)")))
+                        ]
+                    ),
+                    new AddPrimaryKeyChange(
+                        tableName:       "person",
+                        columnNames:     "id",
+                        constraintName:  "pk_person"
+                    )
+            ]
+
+            altDatabase = [
+                    new CreateTableChange(
+                        tableName: "person",
+                        columns: [
+                            ColumnConfig.fromName("address").setType("VARCHAR(255)"),
+                        ]
+                    )
+            ]
+
+        }
+        expectedFileContent = [
+                "target/test-classes/diffChangelogOrder-test.xml" :
+                [
+                        CommandTests.assertContains("<changeSet ", 2),
+                        CommandTests.assertNotContains("<dropColumn "),
+                        Pattern.compile(".*addColumn.*addPrimaryKey.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)]
+                ]
     }
 
     run "Running diff against differently structured databases finds changed objects", {

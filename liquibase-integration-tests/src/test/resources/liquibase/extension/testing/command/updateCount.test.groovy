@@ -37,6 +37,9 @@ Optional Args:
 
     run "Happy path", {
         arguments = [
+                url:      { it.url},
+                username: { it.username },
+                password: { it.password },
                 count        : 1,
                 changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
         ]

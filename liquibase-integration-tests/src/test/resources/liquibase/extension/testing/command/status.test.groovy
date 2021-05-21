@@ -34,6 +34,9 @@ Optional Args:
 
     run "Happy path", {
         arguments = [
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
                 verbose      : "true",
                 changelogFile: "changelogs/hsqldb/complete/rollback.tag.plus.changelog.xml"
         ]
