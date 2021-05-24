@@ -1,0 +1,9 @@
+09:27:08.491 [Start Level: Equinox Container: 55000885-700d-4ca5-90b4-7f2487284920] DEBUG liquibase - Opening bundleresource://19.fwk628392976/META-INF/MANIFEST.MF as META-INF/MANIFEST.MF
+09:27:08.929 [Start Level: Equinox Container: 55000885-700d-4ca5-90b4-7f2487284920] INFO  c.d.j.osgi.AcceleratorDriverService - Activating AcceleratorDriverService.
+09:27:08.932 [Start Level: Equinox Container: 55000885-700d-4ca5-90b4-7f2487284920] INFO  com.datical.jdbc.osgi.DriverConsumer - DaticalJDBC notified of potential delegate driver oracle.jdbc.OracleDriver
+09:27:08.933 [Start Level: Equinox Container: 55000885-700d-4ca5-90b4-7f2487284920] INFO  com.datical.jdbc.osgi.DriverConsumer - DaticalJDBC notified of potential delegate driver com.microsoft.sqlserver.jdbc.SQLServerDriver
+09:27:08.933 [Start Level: Equinox Container: 55000885-700d-4ca5-90b4-7f2487284920] INFO  com.datical.jdbc.osgi.DriverConsumer - DaticalJDBC notified of potential delegate driver com.ibm.db2.jcc.DB2Driver
+09:27:08.933 [Start Level: Equinox Container: 55000885-700d-4ca5-90b4-7f2487284920] INFO  com.datical.jdbc.osgi.DriverConsumer - DaticalJDBC notified of potential delegate driver org.postgresql.Driver
+09:27:08.934 [Start Level: Equinox Container: 55000885-700d-4ca5-90b4-7f2487284920] INFO  com.datical.jdbc.osgi.DriverConsumer - DaticalJDBC notified of potential delegate driver com.datical.jdbc.oracle.DaticalOracleDriver
+09:27:09.021 [Framework stop] INFO  c.d.j.osgi.AcceleratorDriverService - Deactivating AcceleratorDriverService.
+09:27:09.117 [Framework stop] DEBUG liquibase - Opening bundleresource://19.fwk628392976/META-INF/MANIFEST.MF as META-INF/MANIFEST.MF
