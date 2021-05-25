@@ -655,7 +655,7 @@ public class LiquibaseCommandLine {
                     String argName = argNames[i];
                     String camelCaseArg = StringUtil.toCamelCase(argName.substring(2));
                     if (! argName.equals("--" + camelCaseArg)) {
-                       legacyArgDisplayPrefix = "--" + camelCaseArg + " [deprecated]";
+                       legacyArgDisplayPrefix = "\n--" + camelCaseArg + " [deprecated]";
                        legacyArgDisplaySuffix = "\n(legacy: " + camelCaseArg + ")";
                     }
 
