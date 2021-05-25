@@ -234,7 +234,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         commandScope.addArgumentValue("database", database)
-        commandScope.addArgumentValue("url", database.getConnection().getURL())
+        //Do not set the default url.  Let the tests set it up
+        //commandScope.addArgumentValue("url", database.getConnection().getURL())
         commandScope.setOutput(outputStream)
 
         if (testDef.setup != null) {

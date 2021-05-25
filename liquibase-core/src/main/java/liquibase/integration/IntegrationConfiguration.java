@@ -29,14 +29,25 @@ public class IntegrationConfiguration implements AutoloadedConfigurations {
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
 
-        DRIVER = builder.define("driver", Class.class).build();
-        DATABASE_CLASS = builder.define("databaseClass", Class.class).build();
-        CLASSPATH = builder.define("classpath", String.class).build();
-        DRIVER_PROPERTIES_FILE = builder.define("driverPropertiesFile", String.class).build();
-        PROPERTY_PROVIDER_CLASS = builder.define("propertyProviderClass", Class.class).build();
-        PROMPT_FOR_NON_LOCAL_DATABASE = builder.define("promptForNonLocalDatabase", Boolean.class).build();
-        INCLUDE_SYSTEM_CLASSPATH = builder.define("includeSystemClasspath", Boolean.class).setDefaultValue(true).build();
-        DEFAULTS_FILE = builder.define("defaultsFile", String.class).setDefaultValue("liquibase.properties").build();
+        DRIVER = builder.define("driver", Class.class).setDescription("Database driver class").build();
+        DATABASE_CLASS = builder.define("databaseClass", Class.class).setDescription("Class to use for Database implementation").build();
+        CLASSPATH = builder.define("classpath", String.class).setDescription("Additional classpath entries to use").build();
+        DRIVER_PROPERTIES_FILE = builder.define("driverPropertiesFile", String.class)
+                                        .setDescription("Driver-specific properties")
+                                        .build();
+        PROPERTY_PROVIDER_CLASS = builder.define("propertyProviderClass", Class.class)
+                                         .setDescription("Implementation of Properties class to provide additional properties")
+                                         .build();
+        PROMPT_FOR_NON_LOCAL_DATABASE = builder.define("promptForNonLocalDatabase", Boolean.class)
+                                               .setDescription("Should Liquibase prompt if a non-local database is being accessed")
+                                               .build();
+        INCLUDE_SYSTEM_CLASSPATH = builder.define("includeSystemClasspath", Boolean.class)
+                                          .setDescription("Include the system classpath when resolving classes at runtime")
+                                          .setDefaultValue(true).build();
+        DEFAULTS_FILE = builder.define("defaultsFile", String.class)
+                               .setDescription("File with default Liquibase properties")
+                               .setDefaultValue("liquibase.properties")
+                               .build();
 
         SHOULD_RUN = builder.define("shouldRun", Boolean.class)
                 .setDescription("Should Liquibase commands execute")

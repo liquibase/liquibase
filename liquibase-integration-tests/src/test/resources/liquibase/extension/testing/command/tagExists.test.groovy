@@ -5,7 +5,7 @@ import liquibase.exception.CommandValidationException
 CommandTests.define {
     command = ["tagExists"]
     signature = """
-Short Description: MISSING
+Short Description: Verify the existence of the specified tag
 Long Description: NOT SET
 Required Args:
   tag (String) Tag to check

@@ -53,6 +53,9 @@ Optional Args:
 
     run "Run with both Hub connection ID and Hub Project ID throws an exception", {
         arguments = [
+            url:        { it.url },
+            username:   { it.username },
+            password:   { it.password },
             hubConnectionId: {UUID.randomUUID().toString()},
             hubProjectId: {UUID.randomUUID().toString()}
         ]

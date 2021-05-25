@@ -120,13 +120,13 @@ public class LiquibaseCommandLine {
                 "url",
                 "outputDefaultSchema",
                 "outputDefaultCatalog",
-                "changeLogFile",
+                "changelogFile",
                 "hubConnectionId",
                 "contexts",
                 "labels",
                 "diffTypes",
-                "changeSetAuthor",
-                "changeSetContext",
+                "changesetAuthor",
+                "changesetContext",
                 "dataOutputDirectory",
                 "referenceDriver",
                 "referenceUrl",
@@ -611,8 +611,17 @@ public class LiquibaseCommandLine {
 
             configureHelp(subCommandSpec, false);
 
+            String shortDescription = commandDefinition.getShortDescription();
+            String displayDescription = shortDescription;
+            String legacyCommand = commandName[commandName.length-1];
+            String camelCaseCommand  = StringUtil.toCamelCase(legacyCommand);
+            if (! legacyCommand.equals(camelCaseCommand)) {
+                displayDescription = "\n" + camelCaseCommand + " [deprecated]\n" + shortDescription +
+                        "\n(legacy: " + camelCaseCommand + ")";
+            }
+
             subCommandSpec.usageMessage()
-                    .header(StringUtil.trimToEmpty(commandDefinition.getShortDescription()) + "\n")
+                    .header(StringUtil.trimToEmpty(displayDescription) + "\n")
                     .description(StringUtil.trimToEmpty(commandDefinition.getLongDescription()));
 
             subCommandSpec.optionsCaseInsensitive(true);
@@ -641,9 +650,21 @@ public class LiquibaseCommandLine {
                             })
                             .type(String.class);
 
+                    String legacyArgDisplayPrefix = "";
+                    String legacyArgDisplaySuffix = "";
+                    String argName = argNames[i];
+                    String camelCaseArg = StringUtil.toCamelCase(argName.substring(2));
+                    if (! argName.equals("--" + camelCaseArg)) {
+                       legacyArgDisplayPrefix = "--" + camelCaseArg + " [deprecated]";
+                       legacyArgDisplaySuffix = "\n(legacy: " + camelCaseArg + ")";
+                    }
 
-                    String description = "\n(liquibase.command." + def.getName() + " OR liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
-                            "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " + toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName()) + ")";
+                    String description = legacyArgDisplayPrefix +
+                        "\n(liquibase.command." + def.getName() + " OR liquibase.command." +
+                            StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
+                        "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " +
+                            toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
+                                "." + def.getName()) + ")" + legacyArgDisplaySuffix;
 
                     if (def.getDefaultValue() != null) {
                         if (def.getDefaultValueDescription() == null) {
@@ -656,10 +677,10 @@ public class LiquibaseCommandLine {
                     if (def.getDescription() != null) {
                         description = def.getDescription() + description;
                     }
-
                     if (def.isRequired()) {
                         description = "[REQUIRED] " + description;
                     }
+
                     builder.description(description + "\n");
 
 
@@ -775,7 +796,6 @@ public class LiquibaseCommandLine {
                 final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(argNames[i])
                         .required(false)
                         .type(String.class);
-
                 String description = "(" + def.getKey() + ")\n"
                         + "(" + toEnvVariable(def.getKey()) + ")";
 
@@ -790,6 +810,15 @@ public class LiquibaseCommandLine {
                 if (def.getDescription() != null) {
                     description = def.getDescription() + "\n" + description;
                 }
+                if (i == 0) {
+                    String primaryArg = argNames[i];
+                    String camelCaseArg = StringUtil.toCamelCase(primaryArg.substring(2));
+                    if (! primaryArg.equals("--" + camelCaseArg)) {
+                        description = "--" + camelCaseArg + " [deprecated]\n" + description +
+                        "\n(legacy: " + camelCaseArg + ")";
+                    }
+                }
+
                 optionBuilder.description(description + "\n");
 
                 if (def.getDataType().equals(Boolean.class)) {
@@ -806,14 +835,27 @@ public class LiquibaseCommandLine {
             }
         }
 
+        //
+        // We add both camel and Kabob case style arguments
+        //
         for (String arg : legacyNoLongerGlobalArguments) {
-            final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder("--" + arg)
+            final CommandLine.Model.OptionSpec.Builder optionBuilder =
+                CommandLine.Model.OptionSpec.builder("--" + arg)
                     .required(false)
                     .type(String.class)
                     .hidden(true)
                     .description("Legacy global argument");
-
             rootCommandSpec.addOption(optionBuilder.build());
+            String kabobArg = StringUtil.toKabobCase(arg);
+            if (! kabobArg.equals(arg)) {
+                final CommandLine.Model.OptionSpec.Builder kabobOptionBuilder =
+                    CommandLine.Model.OptionSpec.builder("--" + kabobArg)
+                        .required(false)
+                        .type(String.class)
+                        .hidden(true)
+                        .description("Legacy global argument");
+                rootCommandSpec.addOption(kabobOptionBuilder.build());
+            }
         }
     }
 
