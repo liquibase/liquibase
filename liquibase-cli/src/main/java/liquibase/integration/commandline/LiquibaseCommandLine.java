@@ -616,8 +616,7 @@ public class LiquibaseCommandLine {
             String legacyCommand = commandName[commandName.length-1];
             String camelCaseCommand  = StringUtil.toCamelCase(legacyCommand);
             if (! legacyCommand.equals(camelCaseCommand)) {
-                displayDescription = "\n" + camelCaseCommand + " [deprecated]\n" + shortDescription +
-                        "\n(legacy: " + camelCaseCommand + ")";
+                displayDescription = "\n" + shortDescription + "\n[deprecated: " + camelCaseCommand + "]";
             }
 
             subCommandSpec.usageMessage()
@@ -650,21 +649,19 @@ public class LiquibaseCommandLine {
                             })
                             .type(String.class);
 
-                    String legacyArgDisplayPrefix = "";
-                    String legacyArgDisplaySuffix = "";
+                    String argDisplaySuffix = "";
                     String argName = argNames[i];
                     String camelCaseArg = StringUtil.toCamelCase(argName.substring(2));
                     if (! argName.equals("--" + camelCaseArg)) {
-                       legacyArgDisplayPrefix = "\n--" + camelCaseArg + " [deprecated]";
-                       legacyArgDisplaySuffix = "\n(legacy: " + camelCaseArg + ")";
+                        argDisplaySuffix = "\n[deprecated: --" + camelCaseArg + "]";
                     }
 
-                    String description = legacyArgDisplayPrefix +
+                    String description =
                         "\n(liquibase.command." + def.getName() + " OR liquibase.command." +
                             StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
                         "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " +
                             toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
-                                "." + def.getName()) + ")" + legacyArgDisplaySuffix;
+                                "." + def.getName()) + ")" + argDisplaySuffix;
 
                     if (def.getDefaultValue() != null) {
                         if (def.getDefaultValueDescription() == null) {
@@ -814,8 +811,8 @@ public class LiquibaseCommandLine {
                     String primaryArg = argNames[i];
                     String camelCaseArg = StringUtil.toCamelCase(primaryArg.substring(2));
                     if (! primaryArg.equals("--" + camelCaseArg)) {
-                        description = "--" + camelCaseArg + " [deprecated]\n" + description +
-                        "\n(legacy: " + camelCaseArg + ")";
+                        description = "\n" + description +
+                            "\n[deprecated: --" + camelCaseArg + "]";
                     }
                 }
 
