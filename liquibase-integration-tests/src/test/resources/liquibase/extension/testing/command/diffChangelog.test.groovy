@@ -155,6 +155,58 @@ Optional Args:
         ]
     }
 
+    run "Running diffChangelog should add change sets in the correct order", {
+        arguments = [
+                url              : { it.altUrl },
+                username         : { it.altUsername },
+                password         : { it.altPassword },
+                referenceUrl     : { it.url},
+                referenceUsername: { it.username},
+                referencePassword: { it.password},
+                changelogFile: "target/test-classes/diffChangelogOrder-test.xml",
+        ]
+
+        setup {
+            cleanResources("diffChangelogOrder-test.xml")
+            database = [
+                    new CreateTableChange(
+                        tableName: "person",
+                        columns: [
+                            ColumnConfig.fromName("address").setType("VARCHAR(255)")
+                        ]
+                    ),
+                    new AddColumnChange(
+                        tableName: "person",
+                        columns: [
+                           new AddColumnConfig(new Column(ColumnConfig.fromName("id").setType("VARCHAR(255)")))
+                        ]
+                    ),
+                    new AddPrimaryKeyChange(
+                        tableName:       "person",
+                        columnNames:     "id",
+                        constraintName:  "pk_person"
+                    )
+            ]
+
+            altDatabase = [
+                    new CreateTableChange(
+                        tableName: "person",
+                        columns: [
+                            ColumnConfig.fromName("address").setType("VARCHAR(255)"),
+                        ]
+                    )
+            ]
+
+        }
+        expectedFileContent = [
+                "target/test-classes/diffChangelogOrder-test.xml" :
+                [
+                        CommandTests.assertContains("<changeSet ", 2),
+                        CommandTests.assertNotContains("<dropColumn "),
+                        Pattern.compile(".*addColumn.*addPrimaryKey.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)]
+                ]
+    }
+
     run "Running diff against differently structured databases finds changed objects", {
         arguments = [
                 url              : { it.url },
