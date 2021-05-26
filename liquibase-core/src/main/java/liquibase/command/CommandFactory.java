@@ -1,79 +1,131 @@
 package liquibase.command;
 
 import liquibase.Scope;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
+import liquibase.SingletonObject;
+import liquibase.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
- * Manages {@link LiquibaseCommand} implementations.
+ * Manages the command related implementations.
  */
-public class CommandFactory  {
+public class CommandFactory implements SingletonObject {
 
-    private static CommandFactory instance;
+    private final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new HashMap<>();
 
-    private List<LiquibaseCommand> commands;
+    /**
+     * @deprecated. Use {@link Scope#getSingleton(Class)}
+     */
+    public static CommandFactory getInstance() {
+        return Scope.getCurrentScope().getSingleton(CommandFactory.class);
+    }
 
-    private CommandFactory() {
-        commands = new ArrayList<>();
+    protected CommandFactory() {
+    }
+
+    /**
+     * Returns the complete {@link CommandDefinition} for the given commandName.
+     *
+     * @throws IllegalArgumentException if the commandName is not known
+     */
+    public CommandDefinition getCommandDefinition(String... commandName) throws IllegalArgumentException{
+        CommandDefinition commandDefinition = new CommandDefinition(commandName);
+
+        for (CommandStep step : Scope.getCurrentScope().getServiceLocator().findInstances(CommandStep.class)) {
+            if (step.getOrder(commandDefinition) > 0) {
+                commandDefinition.add(step);
+            }
+        }
+
+        final List<CommandStep> pipeline = commandDefinition.getPipeline();
+        if (pipeline.size() == 0) {
+            throw new IllegalArgumentException("Unknown command '" + StringUtil.join(commandName, " ") + "'");
+        }
+
+        final Set<CommandArgumentDefinition<?>> stepArguments = this.commandArgumentDefinitions.get(StringUtil.join(commandDefinition.getName(), " "));
+
+        if (stepArguments != null) {
+            for (CommandArgumentDefinition<?> commandArg : stepArguments) {
+                commandDefinition.add(commandArg);
+            }
+        }
+
+        for (CommandStep step : pipeline) {
+            step.adjustCommandDefinition(commandDefinition);
+        }
+
+
+        return commandDefinition;
+    }
+
+    /**
+     * Returns all known {@link CommandDefinition}s.
+     */
+    public SortedSet<CommandDefinition> getCommands() {
+        Map<String, String[]> commandNames = new HashMap<>();
+        for (CommandStep step : Scope.getCurrentScope().getServiceLocator().findInstances(CommandStep.class)) {
+            final String[] name = step.getName();
+            commandNames.put(StringUtil.join(name, " "), name);
+        }
+
+        SortedSet<CommandDefinition> commands = new TreeSet<>();
+        for (String[] commandName : commandNames.values()) {
+            try {
+                commands.add(getCommandDefinition(commandName));
+            } catch (IllegalArgumentException e) {
+                //not a full command, like ConvertCommandStep
+            }
+        }
+
+        return Collections.unmodifiableSortedSet(commands);
+
+    }
+
+    /**
+     * Called by {@link CommandArgumentDefinition.Building#build()} to
+     * register that a particular {@link CommandArgumentDefinition} is available for a command.
+     */
+    protected void register(String[] commandName, CommandArgumentDefinition<?> definition) {
+        String commandNameKey = StringUtil.join(commandName, " ");
+        if (!commandArgumentDefinitions.containsKey(commandNameKey)) {
+            commandArgumentDefinitions.put(commandNameKey, new TreeSet<>());
+        }
+
+        if (commandArgumentDefinitions.get(commandNameKey).contains(definition)) {
+           throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
+        }
+        this.commandArgumentDefinitions.get(commandNameKey).add(definition);
+    }
+
+    /**
+     * Unregisters all information about the given {@link CommandStep}.
+     * <bNOTE:</b> package-protected method used primarily for testing and may be removed or modified in the future.
+     */
+    protected void unregister(String[] commandName) {
+        commandArgumentDefinitions.remove(StringUtil.join(commandName, " "));
+    }
+
+    /**
+     * @deprecated use {@link #getCommandDefinition(String...)}
+     */
+    public LiquibaseCommand getCommand(String commandName) {
+        return Scope.getCurrentScope().getSingleton(LiquibaseCommandFactory.class).getCommand(commandName);
+    }
+
+    /**
+     * @deprecated Use {@link CommandScope#execute()}
+     */
+    public <T extends CommandResult> T execute(LiquibaseCommand<T> command) throws CommandExecutionException {
+        command.validate();
         try {
-            for (LiquibaseCommand command : Scope.getCurrentScope().getServiceLocator().findInstances(LiquibaseCommand.class)) {
-                register(command);
-            }
+            return command.run();
         } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-    }
-
-    public static synchronized CommandFactory getInstance() {
-        if (instance == null) {
-            instance = new CommandFactory();
-        }
-        return instance;
-    }
-
-    public static synchronized void reset() {
-        instance = new CommandFactory();
-    }
-
-
-    public LiquibaseCommand getCommand(final String commandName) {
-
-        Comparator<LiquibaseCommand> commandComparator = new Comparator<LiquibaseCommand>() {
-            @Override
-            public int compare(LiquibaseCommand o1, LiquibaseCommand o2) {
-                return Integer.valueOf(o2.getPriority(commandName)).compareTo(o1.getPriority(commandName));
+            if (e instanceof CommandExecutionException) {
+                throw (CommandExecutionException) e;
+            } else {
+                throw new CommandExecutionException(e);
             }
-        };
-
-
-        List<LiquibaseCommand> sortedCommands = new ArrayList<>(commands);
-        Collections.sort(sortedCommands, commandComparator);
-        if (sortedCommands.isEmpty()) {
-            throw new UnexpectedLiquibaseException("Could not find command class for "+commandName);
         }
-        try {
-            LiquibaseCommand command = sortedCommands.iterator().next().getClass().getConstructor().newInstance();
 
-            if (command.getPriority(commandName) <= 0) {
-                throw new UnexpectedLiquibaseException("Could not find command class for "+commandName);
-            }
-            return command;
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
     }
-
-    public void register(LiquibaseCommand command) {
-        commands.add(command);
-    }
-
-    public void unregister(LiquibaseCommand command) {
-        commands.remove(command);
-    }
-
 }

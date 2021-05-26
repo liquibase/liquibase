@@ -4,8 +4,8 @@ package org.liquibase.maven.plugins;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.command.*;
-import liquibase.command.core.DiffCommand;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
@@ -25,8 +25,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * <p>Generates a diff between the specified database and the reference database.
@@ -249,22 +247,14 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         } else {
             PrintStream printStream = createPrintStream();
             if (isFormattedDiff()) {
-                LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand("formattedDiff");
-                DiffCommand diffCommand =
+                CommandScope liquibaseCommand = new CommandScope("formattedDiff");
+                CommandScope diffCommand =
                         CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtil.trimToNull(diffTypes),
                                 schemaComparisons, objectChangeFilter, printStream);
-                Map<String, Object> argsMap = new HashMap<>();
-                argsMap.put("format", format);
-                argsMap.put("diffCommand", diffCommand);
-                ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
-                try {
-                    CommandResult result = liquibaseCommand.execute();
-                    if (!result.succeeded) {
-                        throw new LiquibaseException(result.message);
-                    }
-                } catch (CommandExecutionException cee) {
-                    throw new LiquibaseException(cee);
-                }
+
+                liquibaseCommand.addArgumentValue("format", format);
+                liquibaseCommand.addArgumentValue("diffCommand", diffCommand);
+                liquibaseCommand.execute();
             } else {
                 CommandLineUtils.doDiff(referenceDatabase, db, StringUtil.trimToNull(diffTypes), schemaComparisons, objectChangeFilter, printStream);
             }

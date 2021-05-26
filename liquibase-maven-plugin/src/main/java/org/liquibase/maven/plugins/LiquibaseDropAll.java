@@ -2,10 +2,8 @@ package org.liquibase.maven.plugins;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.hub.HubConfiguration;
 import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
 
 import java.util.ArrayList;
@@ -45,9 +43,8 @@ public class LiquibaseDropAll extends AbstractLiquibaseChangeLogMojo {
     		//
 	    	// Override because changeLogFile is not required
 		    //
-  			HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-			  String liquibaseHubApiKey = hubConfiguration.getLiquibaseHubApiKey();
-  			String hubMode = hubConfiguration.getLiquibaseHubMode();
+			  String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
+  			String hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
   			if (liquibaseHubApiKey != null && ! hubMode.toLowerCase().equals("off")) {
   		  		if (hubConnectionId == null && changeLogFile == null) {
   		    			String errorMessage =

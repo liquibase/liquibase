@@ -1,8 +1,10 @@
 package liquibase.hub.core;
 
+import liquibase.Scope;
 import liquibase.changelog.RanChangeSet;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubService;
+import liquibase.hub.HubServiceFactory;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.*;
 
@@ -45,7 +47,7 @@ public class MockHubService implements HubService {
 
     @Override
     public Project createProject(Project project) {
-        return null;
+        return new Project().setName("Project 1");
     }
 
     public HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException {
@@ -78,6 +80,16 @@ public class MockHubService implements HubService {
     }
 
     @Override
+    public HubRegisterResponse register(String email) throws LiquibaseHubException {
+        return null;
+    }
+
+    @Override
+    public HubChangeLog deactivateChangeLog(HubChangeLog hubChangeLog) throws LiquibaseHubException {
+        return null;
+    }
+
+    @Override
     public void setRanChangeSets(Connection connectionId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         sentObjects.computeIfAbsent("setRanChangeSets/" + connectionId, k -> new ArrayList<>()).addAll(ranChangeSets);
     }
@@ -103,12 +115,16 @@ public class MockHubService implements HubService {
 
     @Override
     public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
+        return getHubChangeLog(changeLogId, "*");
+    }
+
+    @Override
+    public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus) throws LiquibaseHubException {
         for (HubChangeLog changeLog : returnChangeLogs) {
             if (String.valueOf(changeLog.getId()).equals(String.valueOf(changeLogId))) {
                 return changeLog;
             }
         }
-
         return null;
     }
 
@@ -135,6 +151,11 @@ public class MockHubService implements HubService {
 
     }
 
+    @Override
+    public String shortenLink(String url) throws LiquibaseException {
+        return null;
+    }
+
     public void reset() {
         randomUUID = UUID.randomUUID();
 
@@ -157,5 +178,8 @@ public class MockHubService implements HubService {
                         .setProject(this.returnProjects.get(0))
         ));
         this.sentObjects = new TreeMap<>();
+        final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
+        hubServiceFactory.setOfflineReason("Using MockHubService which is configured to be offline");
+        online = true;
     }
 }

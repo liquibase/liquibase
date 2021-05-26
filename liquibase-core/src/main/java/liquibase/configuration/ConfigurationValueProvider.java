@@ -1,19 +1,35 @@
 package liquibase.configuration;
 
 /**
- * Interface for classes that are able to lookup overriding default LiquibaseConfiguration values.
- * For example, {@link liquibase.configuration.SystemPropertyProvider} can look up property values in system properties.
+ * Defines a way for {@link LiquibaseConfiguration} to find configured values.
  */
 public interface ConfigurationValueProvider {
 
     /**
-     * Return the value for a given namespace and property. Returns null if this provider does not have a value for this property.
+     * Returns the precedence of values returned by this provider. Higher a provider with higher precedence overrides values from lower precedence providers.
+     * <br><br>
+     * Standard provider precedence:
+     * <ul>
+     *     <li>400 {@link liquibase.configuration.core.ScopeValueProvider}</li>
+     *     <li>350 {@link liquibase.configuration.core.DeprecatedConfigurationValueProvider}</li>
+     *     <li>300: TODO JNDI attributes</li>
+     *     <li>250: TODO Servlet Context</li>
+     *     <li>200 {@link liquibase.configuration.core.SystemPropertyValueProvider}</li>
+     *     <li>150 EnvironmentValueProvider</li>
+     *     <li>100: TODO profile/context specific properties files</li>
+     *     <li>50: TODO default properties files</li>
+     * </ul>
      */
-    Object getValue(String namespace, String property);
+    int getPrecedence();
 
     /**
-     * Generates a human consumable description of how the configured ConfigurationValueProvider(s) will attempt to set a default value.
-     * See {@link LiquibaseConfiguration#describeValueLookupLogic(ConfigurationProperty)}
+     * Lookup the given key(s) in this source.
+     * It is up to the implementation to provide any "smoothing" or translation of key names.
+     * For example, an EnvironmentValueProvider will look check environment variables containing _'s rather than .'s.
+     *
+     * @param keyAndAliases an array of keys to check, where the first element is the canonical key name, any aliases for that key as later elements.
+     *
+     * @return null if the key is not defined in this provider.
      */
-    String describeValueLookupLogic(ConfigurationProperty property);
+    ProvidedValue getProvidedValue(String... keyAndAliases);
 }

@@ -1,184 +1,181 @@
 package liquibase.configuration;
 
+import liquibase.Scope;
+import liquibase.SingletonObject;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.StringUtil;
+import liquibase.servicelocator.ServiceLocator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Provides unified management of configuration properties within Liquibase core and in extensions.
  * <p>
- * This class is the top level container used to access {@link ConfigurationContainer} implementations which contain
- * the actual configuration properties.
- * Normal use is to call
- * LiquibaseConfiguration.getInstance().getConfiguration(NEEDED_CONFIGURATION.class).getYOUR_PROPERTY()
+ * Because this class focuses on raw/untyped access to what is actually configured, it is usually best to interact with {@link ConfigurationDefinition} instances
+ * which provide type safety, standardized key naming, default values, and more.
  * <p>
- * This class is implemented as a singleton with a single global set of configuration objects, but the
- * {@link #setInstance(LiquibaseConfiguration)} method can be used to replace
- * the singleton with an alternate implementation that uses ThreadLocal objects or any other way of managing
- * configurations.
+ * "Registered" configuration definitions will be available for generated help.
+ * <p>
+ * This class will search through the configured {@link ConfigurationValueProvider}s. Standard value providers are auto-loaded on startup, but more can be added/removed at runtime.
+ * <p>
  */
-public class LiquibaseConfiguration {
+public class LiquibaseConfiguration implements SingletonObject {
 
-    private Map<Class, ConfigurationContainer> configurations;
-
-    private ConfigurationValueProvider[] configurationValueProviders;
-
-    private static LiquibaseConfiguration instance;
+    private final SortedSet<ConfigurationValueProvider> configurationValueProviders;
+    private final SortedSet<ConfigurationDefinition> definitions = new TreeSet<>();
 
     /**
-     * Returns the singleton instance, creating it if necessary. On creation, the configuration is initialized with {@link liquibase.configuration.SystemPropertyProvider}
+     * Track looked up values we have logged to avoid infinite loops between this and the log system using configurations
+     * and to limit logged messages.
+     * Only re-log when values changed from the last time they were logged.
      */
-    public static synchronized LiquibaseConfiguration getInstance() {
-        if (instance == null) {
-            instance = new LiquibaseConfiguration();
-            instance.init(new SystemPropertyProvider());
-        }
+    private final Map<String, String> lastLoggedKeyValues = new HashMap<>();
 
-        return instance;
-    }
-
-    /**
-     * Overrides the standard singleton instance created by getInstance().
-     * Useful for alternate implementations with more complex AbstractConfigurationContainer lookup logic such
-     * as different configurations per thread.
-     */
-    public static synchronized void setInstance(LiquibaseConfiguration instance) {
-        LiquibaseConfiguration.instance = instance;
-    }
-
-
-    /**
-     * Constructor protected to prevent construction outside getInstance()
-     */
     protected LiquibaseConfiguration() {
+        configurationValueProviders = new TreeSet<>((o1, o2) -> {
+            if (o1.getPrecedence() < o2.getPrecedence()) {
+                return -1;
+            } else if (o1.getPrecedence() > o2.getPrecedence()) {
+                return 1;
+            }
+
+            return o1.getClass().getName().compareTo(o2.getClass().getName());
+        });
+
     }
 
+    /**
+     * @deprecated use {@link Scope#getSingleton(Class)}
+     */
+    public static LiquibaseConfiguration getInstance() {
+        return Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+    }
 
     /**
-     * Re-initialize the configuration with the given ConfigurationProviders. Any existing
-     * AbstractConfigurationContainer instances are reset to defaults.
+     * Finishes configuration of this service. Called as the root scope is set up, should not be called elsewhere.
      */
-    public void init(ConfigurationValueProvider... configurationValueProviders) {
-        if (configurationValueProviders == null) {
-            configurationValueProviders = new ConfigurationValueProvider[0];
+    public void init(Scope scope) {
+        configurationValueProviders.clear();
+        ServiceLocator serviceLocator = scope.getServiceLocator();
+        final List<AutoloadedConfigurations> containers = serviceLocator.findInstances(AutoloadedConfigurations.class);
+        for (AutoloadedConfigurations container : containers) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Found ConfigurationDefinitions in " + container.getClass().getName());
         }
-        this.configurationValueProviders = configurationValueProviders;
 
-        this.reset();
+        configurationValueProviders.addAll(serviceLocator.findInstances(ConfigurationValueProvider.class));
     }
 
     /**
-     * Resets existing AbstractConfigurationContainer instances to their default values.
+     * Adds a new {@link ConfigurationValueProvider} to the active collection of providers.
      */
-    public void reset() {
-        this.configurations = new HashMap<>();
+    public void registerProvider(ConfigurationValueProvider valueProvider) {
+        this.configurationValueProviders.add(valueProvider);
     }
 
+    /**
+     * Removes the given {@link ConfigurationValueProvider} from the active collection of providers.
+     *
+     * @return true if the given provider was previously registered.
+     */
+    public boolean unregisterProvider(ConfigurationValueProvider valueProvider) {
+        return this.configurationValueProviders.remove(valueProvider);
+    }
 
     /**
-     * Return an instance of the passed AbstractConfigurationContainer type.
-     * The same instance is returned from every call to getConfiguration()
+     * Removes a specific {@link ConfigurationValueProvider} from the active collection of providers.
+     *
+     * @return true if the provider was removed.
+     */
+    public boolean removeProvider(ConfigurationValueProvider provider) {
+        return this.configurationValueProviders.remove(provider);
+    }
+
+    /**
+     * @deprecated use {@link ConfigurationDefinition} instances directly
      */
     public <T extends ConfigurationContainer> T getConfiguration(Class<T> type) {
-        if (!configurations.containsKey(type)) {
-            configurations.put(type, createConfiguration(type));
-        }
-
-        return (T) configurations.get(type);
-    }
-
-    /**
-     *
-     * Return an instance of the passed ConfigurationContainer type
-     * The typeName can be the name of a class or the namespace associated with the container
-     *
-     * @param    typeName
-     * @return   ConfigurationContainer
-     *
-     */
-    public ConfigurationContainer getConfiguration(String typeName) {
-        //
-        // Lookup by class name
-        //
-        for (Map.Entry<Class, ConfigurationContainer> entry : configurations.entrySet()) {
-            if (entry.getKey().getName().equals(typeName)) {
-                return entry.getValue();
-            }
-        }
-
-        //
-        // Lookup by namespace
-        //
-        for (ConfigurationContainer container : configurations.values()) {
-            String namespace = container.getNamespace();
-            if (namespace.equalsIgnoreCase(typeName)) {
-                return container;
-            }
-        }
-
-        //
-        // Instantiate and put in the map
-        //
         try {
-            Class typeClass = Class.forName(typeName);
-            configurations.put(typeClass, createConfiguration(typeClass));
-            return configurations.get(typeClass);
-        } catch (Exception e) {
+            return type.newInstance();
+        } catch (Throwable e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }
 
-    /**
-     * Convenience method for liquibaseConfiguration.getConfiguration(type).getProperty(property)
-     */
-    public ConfigurationProperty getProperty(Class<? extends ConfigurationContainer> type, String property) {
-        ConfigurationContainer configuration = getConfiguration(type);
-        return configuration.getProperty(property);
-    }
-
-    protected  <T extends ConfigurationContainer> T createConfiguration(Class<T> type) {
-        try {
-            T configuration = type.getConstructor().newInstance();
-            configuration.init(configurationValueProviders);
-            return configuration;
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException("Cannot create default configuration "+type.getName(), e);
-        }
-    }
 
     /**
-     * Convenience method for {@link #describeValueLookupLogic(ConfigurationProperty)}
-     */
-    public String describeValueLookupLogic(Class<? extends ConfigurationContainer> config, String property) {
-        return describeValueLookupLogic(getProperty(config, property));
-    }
-
-    /**
-     * Generates a human consumable description of how the configured ConfigurationValueProvider(s) will
-     * attempt to set a default value.
-     */
-    public String describeValueLookupLogic(ConfigurationProperty property) {
-        List<String> reasons = new ArrayList<>();
-        for (ConfigurationValueProvider container : configurationValueProviders) {
-            reasons.add(container.describeValueLookupLogic(property));
-        }
-
-        return StringUtil.join(reasons, " AND ");
-    }
-
-    /**
-     * Convenience method to check if the object types should consider catalog name
-     * also during comparision (equals(), hashcode() and compareTo())
+     * Searches for the given keys in the current providers.
+     * @param keyAndAliases The first element should be the canonical key name, with later elements being aliases. At least one element must be provided.
      *
-     * @return
+     * @return the value for the key, or null if not configured.
      */
-    public boolean shouldIncludeCatalogInSpecification() {
-        Boolean includeCatalog = getConfiguration(GlobalConfiguration.class)
-                .getValue(GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION, Boolean.class);
-        return includeCatalog != null ? includeCatalog : false;
+    public ConfiguredValue<?> getCurrentConfiguredValue(String... keyAndAliases) {
+        if (keyAndAliases == null || keyAndAliases.length == 0) {
+            throw new IllegalArgumentException("Must specify at least one key");
+        }
+
+        ConfiguredValue<?> details = new ConfiguredValue<>(keyAndAliases[0]);
+
+        for (ConfigurationValueProvider provider : configurationValueProviders) {
+            final ProvidedValue providerValue = provider.getProvidedValue(keyAndAliases);
+
+            if (providerValue != null) {
+                details.override(providerValue);
+            }
+        }
+
+        final String foundValue = String.valueOf(details.getValue());
+        if (!foundValue.equals(lastLoggedKeyValues.get(keyAndAliases[0]))) {
+            lastLoggedKeyValues.put(keyAndAliases[0], foundValue);
+
+            //avoid infinite loop when logging is getting set up
+            StringBuilder logMessage = new StringBuilder("Found '" + keyAndAliases[0] + "' configuration of '"+foundValue+"'");
+            boolean foundFirstValue = false;
+            for (ProvidedValue providedValue : details.getProvidedValues()) {
+                logMessage.append("\n    ");
+                if (foundFirstValue) {
+                    logMessage.append("Overrides ");
+                }
+                logMessage.append(providedValue.describe());
+                final Object value = providedValue.getValue();
+                if (value != null) {
+                    logMessage.append(" of '").append(providedValue.getValue()).append("'");
+                }
+                foundFirstValue = true;
+            }
+
+            Scope.getCurrentScope().getLog(getClass()).fine(logMessage.toString());
+        }
+
+        return details;
+    }
+
+    /**
+     * Registers a {@link ConfigurationDefinition} so it will be returned by {@link #getRegisteredDefinitions()}
+     */
+    public void registerDefinition(ConfigurationDefinition definition) {
+        this.definitions.add(definition);
+    }
+
+    /**
+     * Returns all registered {@link ConfigurationDefinition}s. Registered definitions are used for generated help documentation.
+     */
+    public SortedSet<ConfigurationDefinition> getRegisteredDefinitions() {
+        return Collections.unmodifiableSortedSet(this.definitions);
+    }
+
+    /**
+     * @return the registered {@link ConfigurationDefinition} asssociated with this key. Null if none match.
+     */
+    public ConfigurationDefinition getRegisteredDefinition(String key) {
+        for (ConfigurationDefinition def : getRegisteredDefinitions()) {
+            if (def.getKey().equalsIgnoreCase(key)) {
+                return def;
+            }
+            final Set aliasKeys = def.getAliasKeys();
+            if (aliasKeys != null && aliasKeys.contains(def.getKey())) {
+                return def;
+            }
+        }
+
+        return null;
     }
 }

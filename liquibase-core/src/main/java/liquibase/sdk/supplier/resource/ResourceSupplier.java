@@ -3,8 +3,7 @@ package liquibase.sdk.supplier.resource;
 import liquibase.Scope;
 import liquibase.change.ChangeFactory;
 import liquibase.change.core.CreateProcedureChange;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.InputStreamList;
@@ -36,8 +35,7 @@ public class ResourceSupplier {
         @Override
         public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
             InputStream stream = null;
-            String encoding = LiquibaseConfiguration.getInstance().getConfiguration(
-                    GlobalConfiguration.class).getOutputEncoding();
+            String encoding = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
             if (streamPath.toLowerCase().endsWith("csv")) {
                 stream = new ByteArrayInputStream(USERS_CSV.getBytes(encoding));
             } else if (streamPath.toLowerCase().endsWith("my-logic.sql")) {

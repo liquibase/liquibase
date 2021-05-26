@@ -2,32 +2,26 @@ package liquibase.integration.commandline;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
-import liquibase.command.CommandExecutionException;
-import liquibase.command.CommandFactory;
-import liquibase.command.core.DiffCommand;
-import liquibase.command.core.DiffToChangeLogCommand;
-import liquibase.command.core.GenerateChangeLogCommand;
+import liquibase.command.CommandScope;
+import liquibase.command.core.InternalDiffCommandStep;
+import liquibase.command.core.InternalDiffChangeLogCommandStep;
+import liquibase.command.core.InternalGenerateChangeLogCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
+import liquibase.exception.CommandExecutionException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.ResourceBundle;
@@ -147,23 +141,26 @@ public class CommandLineUtils {
         doDiff(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, null, output);
     }
 
-    public static DiffCommand createDiffCommand(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
-                              CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) {
-        DiffCommand diffCommand = (DiffCommand) CommandFactory.getInstance().getCommand("diff");
+    public static CommandScope createDiffCommand(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
+                                                CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws CommandExecutionException {
+        CommandScope diffCommand = new CommandScope("internalDiff");
 
         diffCommand
-                .setReferenceDatabase(referenceDatabase)
-                .setTargetDatabase(targetDatabase)
-                .setCompareControl(new CompareControl(schemaComparisons, snapshotTypes))
-                .setObjectChangeFilter(objectChangeFilter)
-                .setSnapshotTypes(snapshotTypes)
-                .setOutputStream(output);
+                .addArgumentValue(InternalDiffCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+                .addArgumentValue(InternalDiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
+                .addArgumentValue(InternalDiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
+                .addArgumentValue(InternalDiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
+                .addArgumentValue(InternalDiffCommandStep.SNAPSHOT_TYPES_ARG, InternalDiffCommandStep.parseSnapshotTypes(snapshotTypes))
+        ;
+
+        diffCommand.setOutput(output);
+
         return diffCommand;
     }
 
     public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
-            CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws LiquibaseException {
-        DiffCommand diffCommand = createDiffCommand(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, objectChangeFilter, output);
+                              CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws LiquibaseException {
+        CommandScope diffCommand = createDiffCommand(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, objectChangeFilter, output);
 
         Scope.getCurrentScope().getUI().sendMessage("");
         Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("diff.results"));
@@ -194,17 +191,16 @@ public class CommandLineUtils {
                                          CompareControl.SchemaComparison[] schemaComparisons)
             throws LiquibaseException, IOException, ParserConfigurationException {
 
-        DiffToChangeLogCommand command = (DiffToChangeLogCommand) CommandFactory.getInstance().getCommand
-                ("diffChangeLog");
-        command.setReferenceDatabase(referenceDatabase)
-                .setTargetDatabase(targetDatabase)
-                .setSnapshotTypes(snapshotTypes)
-                .setCompareControl(new CompareControl(schemaComparisons, snapshotTypes))
-                .setObjectChangeFilter(objectChangeFilter)
-                .setOutputStream(System.out);
-        command.setChangeLogFile(changeLogFile)
-                .setDiffOutputControl(diffOutputControl);
-
+        CommandScope command = new CommandScope("internalDiffChangeLog");
+        command
+                .addArgumentValue(InternalDiffChangeLogCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+                .addArgumentValue(InternalDiffChangeLogCommandStep.TARGET_DATABASE_ARG, targetDatabase)
+                .addArgumentValue(InternalDiffChangeLogCommandStep.SNAPSHOT_TYPES_ARG, InternalDiffChangeLogCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(InternalDiffChangeLogCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
+                .addArgumentValue(InternalDiffChangeLogCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
+                .addArgumentValue(InternalDiffChangeLogCommandStep.CHANGELOG_FILENAME_ARG, changeLogFile)
+                .addArgumentValue(InternalDiffChangeLogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl);
+        command.setOutput(System.out);
         try {
             command.execute();
         } catch (CommandExecutionException e) {
@@ -233,18 +229,17 @@ public class CommandLineUtils {
         CompareControl compareControl = new CompareControl(comparisons, snapshotTypes);
         diffOutputControl.setDataDir(dataDir);
 
-        GenerateChangeLogCommand command = (GenerateChangeLogCommand) CommandFactory.getInstance().getCommand
-                ("generateChangeLog");
+        CommandScope command = new CommandScope("internalGenerateChangeLog");
+        command
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.REFERENCE_DATABASE_ARG, originalDatabase)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.SNAPSHOT_TYPES_ARG, InternalGenerateChangeLogCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.COMPARE_CONTROL_ARG, compareControl)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.CHANGELOG_FILENAME_ARG, changeLogFile)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.AUTHOR_ARG, author)
+                .addArgumentValue(InternalGenerateChangeLogCommandStep.CONTEXT_ARG, context);
 
-        command.setReferenceDatabase(originalDatabase)
-                .setSnapshotTypes(snapshotTypes)
-                .setOutputStream(System.out)
-                .setCompareControl(compareControl);
-        command.setChangeLogFile(changeLogFile)
-                .setDiffOutputControl(diffOutputControl);
-        command.setAuthor(author)
-                .setContext(context);
-
+        command.setOutput(System.out);
         try {
             command.execute();
         } catch (CommandExecutionException e) {
@@ -265,36 +260,36 @@ public class CommandLineUtils {
         StringBuilder banner = new StringBuilder();
 
         // Banner is stored in liquibase/banner.txt in resources.
-	    Class commandLinUtilsClass = CommandLineUtils.class;
-	    InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
-	    try {
-			banner.append(readFromInputStream(inputStream));
-		} catch (IOException e) {
-			Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
-		}
+        Class commandLinUtilsClass = CommandLineUtils.class;
+        InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
+        try {
+            banner.append(readFromInputStream(inputStream));
+        } catch (IOException e) {
+            Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
+        }
 
         banner.append(String.format(
-            coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
+                coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
         ));
 
         if (StringUtil.isNotEmpty(myVersion) && StringUtil.isNotEmpty(buildTimeString)) {
-            myVersion = myVersion + " #"+ LiquibaseUtil.getBuildNumber();
+            myVersion = myVersion + " #" + LiquibaseUtil.getBuildNumber();
             banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion, buildTimeString));
         }
 
         return banner.toString();
     }
 
-	private static String readFromInputStream(InputStream inputStream) throws IOException {
-		StringBuilder resultStringBuilder = new StringBuilder();
-		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-			String line;
-			while ((line = bufferedReader.readLine()) != null) {
-				resultStringBuilder.append(line + "\n");
+    private static String readFromInputStream(InputStream inputStream) throws IOException {
+        StringBuilder resultStringBuilder = new StringBuilder();
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                resultStringBuilder.append(line + "\n");
 
-			}
-		}
-		return resultStringBuilder.toString();
-	}
+            }
+        }
+        return resultStringBuilder.toString();
+    }
 
 }

@@ -1,8 +1,8 @@
 package liquibase.logging.core;
 
 import liquibase.AbstractExtensibleObject;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
+import liquibase.exception.UnknownConfigurationType;
 import liquibase.logging.LogMessageFilter;
 import liquibase.logging.Logger;
 
@@ -81,7 +81,12 @@ public abstract class AbstractLogger extends AbstractExtensibleObject implements
     }
 
     protected String filterMessage(String message) {
-        if (filter == null || !LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getShouldFilterLogMessages()) {
+        try {
+            if (filter == null || GlobalConfiguration.FILTER_LOG_MESSAGES == null || !GlobalConfiguration.FILTER_LOG_MESSAGES.getCurrentValue()) {
+                return message;
+            }
+        } catch (UnknownConfigurationType unknownConfigurationType) {
+            //probably in initial scope bootstrap
             return message;
         }
         return filter.filterMessage(message);

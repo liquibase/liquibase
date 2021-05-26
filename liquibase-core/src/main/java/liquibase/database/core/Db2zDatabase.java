@@ -8,7 +8,11 @@ import liquibase.structure.core.Index;
 import liquibase.util.StringUtil;
 
 public class Db2zDatabase extends AbstractDb2Database {
-
+	
+	// See https://www.ibm.com/support/knowledgecenter/en/SSEPEK_11.0.0/sqlref/src/tpc/db2z_limits.html#db2z_limits__limdt, 
+	// may not apply to older versions, caveat emptor 
+	private static final int MAX_DB2Z_TIMESTAMP_FRACTIONAL_DIGITS = 12;
+	
     public Db2zDatabase() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
@@ -48,4 +52,8 @@ public class Db2zDatabase extends AbstractDb2Database {
         return "DB2/z";
     }
 
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+    	return MAX_DB2Z_TIMESTAMP_FRACTIONAL_DIGITS;
+    }
 }

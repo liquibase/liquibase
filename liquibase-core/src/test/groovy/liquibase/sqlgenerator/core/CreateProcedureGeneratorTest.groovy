@@ -1,11 +1,8 @@
 package liquibase.sqlgenerator.core
 
-import liquibase.configuration.LiquibaseConfiguration
+
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.OracleDatabase
-import liquibase.parser.ChangeLogParserCofiguration
-import liquibase.sqlgenerator.SqlGeneratorFactory
-import liquibase.statement.core.CreateProcedureStatement
 import spock.lang.Specification
 import spock.lang.Unroll
 

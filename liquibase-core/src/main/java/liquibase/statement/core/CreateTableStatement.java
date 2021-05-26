@@ -87,6 +87,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         return uniqueConstraints;
     }
 
+    @java.lang.SuppressWarnings("squid:S4275")
     public Map<String, NotNullConstraint> getNotNullColumns() {
         return notNullConstraints;
     }

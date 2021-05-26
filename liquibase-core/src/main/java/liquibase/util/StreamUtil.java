@@ -2,12 +2,12 @@ package liquibase.util;
 
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.resource.ResourceAccessor;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Utilities for working with streams.
@@ -15,7 +15,7 @@ import java.nio.charset.Charset;
 public class StreamUtil {
 
     public static String getLineSeparator() {
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
+        return GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getCurrentValue();
     }
 
     public static void copy(InputStream inputStream, OutputStream outputStream) throws IOException {

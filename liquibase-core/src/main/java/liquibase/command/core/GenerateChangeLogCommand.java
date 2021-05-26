@@ -1,25 +1,12 @@
 package liquibase.command.core;
 
-import liquibase.Scope;
 import liquibase.command.CommandResult;
-import liquibase.database.ObjectQuotingStrategy;
-import liquibase.diff.DiffResult;
-import liquibase.diff.compare.CompareControl;
-import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.exception.DatabaseException;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.InvalidExampleException;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.util.StringUtil;
+import liquibase.command.CommandScope;
 
-import java.io.PrintStream;
-
+/**
+ * @deprecated Implement commands with {@link liquibase.command.CommandStep} and call them with {@link liquibase.command.CommandFactory#getCommandDefinition(String...)}.
+ */
 public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
-    private static final String INFO_MESSAGE =
-        "When generating formatted SQL changelogs, it is important to decide if batched statements\n" +
-        "should be split (splitStatements:true is the default behavior) or not (splitStatements:false).\n" +
-        "See http://liquibase.org for additional documentation.";
 
     private String author;
     private String context;
@@ -48,49 +35,28 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
     }
 
     @Override
-    protected CommandResult run() throws Exception {
-        outputBestPracticeMessage();
+    public CommandResult run() throws Exception {
+        InternalSnapshotCommandStep.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());
 
-        String changeLogFile = StringUtil.trimToNull(getChangeLogFile());
-        if (changeLogFile.toLowerCase().endsWith(".sql")) {
-            Scope.getCurrentScope().getUI().sendMessage("\n" + INFO_MESSAGE + "\n");
-            Scope.getCurrentScope().getLog(getClass()).info("\n" + INFO_MESSAGE + "\n");
-        }
+        final CommandScope commandScope = new CommandScope("generateChangeLogInternal");
+        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.REFERENCE_DATABASE_ARG, getReferenceDatabase());
+        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.TARGET_DATABASE_ARG, getTargetDatabase());
+        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.SNAPSHOT_TYPES_ARG, getSnapshotTypes());
+        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.SNAPSHOT_LISTENER_ARG, getSnapshotListener());
+        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, getReferenceSnapshotControl());
+        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.TARGET_SNAPSHOT_CONTROL_ARG, getTargetSnapshotControl());
+        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.OBJECT_CHANGE_FILTER_ARG, getObjectChangeFilter());
+        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.COMPARE_CONTROL_ARG, getCompareControl());
 
-        SnapshotCommand.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());
+        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.CHANGELOG_FILENAME_ARG, getChangeLogFile());
+        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.DIFF_OUTPUT_CONTROL_ARG, getDiffOutputControl());
 
-        DiffResult diffResult = createDiffResult();
+        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.AUTHOR_ARG, getAuthor());
+        commandScope.addArgumentValue(InternalGenerateChangeLogCommandStep.CONTEXT_ARG, getContext());
 
-        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, getDiffOutputControl());
-
-        changeLogWriter.setChangeSetAuthor(author);
-        changeLogWriter.setChangeSetContext(context);
-        changeLogWriter.setChangeSetPath(getChangeLogFile());
-
-        ObjectQuotingStrategy originalStrategy = getReferenceDatabase().getObjectQuotingStrategy();
-        try {
-            getReferenceDatabase().setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
-            if (StringUtil.trimToNull(getChangeLogFile()) != null) {
-                changeLogWriter.print(getChangeLogFile());
-            } else {
-                PrintStream outputStream = getOutputStream();
-                if (outputStream == null) {
-                    outputStream = System.out;
-                }
-                changeLogWriter.print(outputStream);
-            }
-        }
-        finally {
-            getReferenceDatabase().setObjectQuotingStrategy(originalStrategy);
-        }
+        commandScope.setOutput(getOutputStream());
+        commandScope.execute();
 
         return new CommandResult("OK");
-
-    }
-
-    @Override
-    protected DatabaseSnapshot createTargetSnapshot() throws DatabaseException, InvalidExampleException {
-        SnapshotControl snapshotControl = new SnapshotControl(getReferenceDatabase(), getSnapshotTypes());
-        return SnapshotGeneratorFactory.getInstance().createSnapshot(getCompareControl().getSchemas(CompareControl.DatabaseRole.REFERENCE), null, snapshotControl);
     }
 }

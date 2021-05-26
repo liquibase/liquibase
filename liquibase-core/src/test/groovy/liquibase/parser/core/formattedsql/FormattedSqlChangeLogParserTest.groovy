@@ -24,7 +24,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
     private static final String VALID_CHANGELOG = """
 --liquibase formatted sql
 
---changeset nvoxland:1
+ --changeset nvoxland:1
 select * from table1;
 
 --changeset nvoxland:2 (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
@@ -89,14 +89,6 @@ select 1
             "--precondition-invalid-type 123\n" +
             "select 1;"
 
-
-    def setup() {
-        LiquibaseConfiguration.getInstance().reset()
-    }
-
-    def cleanup() {
-        LiquibaseConfiguration.getInstance().reset()
-    }
 
     def supports() throws Exception {
         expect:

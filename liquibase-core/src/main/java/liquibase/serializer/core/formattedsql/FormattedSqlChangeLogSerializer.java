@@ -4,8 +4,7 @@ import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.diff.output.changelog.DiffToChangeLog;
@@ -105,7 +104,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             builder.append("\n");
         }
 
-        out.write(builder.toString().getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+        out.write(builder.toString().getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
 
     }
 

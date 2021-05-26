@@ -1,7 +1,6 @@
 package liquibase.sdk.resource;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.InputStreamList;
 
@@ -28,7 +27,7 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         InputStream stream = null;
         if (contentByFileName.containsKey(streamPath)) {
-            stream = new ByteArrayInputStream(contentByFileName.get(streamPath).getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+            stream = new ByteArrayInputStream(contentByFileName.get(streamPath).getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
         }
         if (stream == null) {
             return null;

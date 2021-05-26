@@ -2,8 +2,7 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -13,6 +12,7 @@ import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.FileUtil;
 import liquibase.util.ui.UIFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
@@ -294,7 +294,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding == null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
-            return new OutputStreamWriter(new FileOutputStream(outputFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            return new OutputStreamWriter(new FileOutputStream(outputFile), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
         }
         getLog().debug("Writing output file with [" + outputFileEncoding + "] file encoding.");
         return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), outputFileEncoding));
@@ -317,11 +317,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 processSystemProperties();
 
-                LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
-
-                if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-                    getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic
-                            (GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
+                if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
+                    getLog().info("Liquibase did not run because " + GlobalConfiguration.SHOULD_RUN.getKey() + " was set to false");
                     return;
                 }
                 if (skip) {
@@ -435,19 +432,19 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                         getLog().info("Executing on Database: " + url);
 
-                    if (isPromptOnNonLocalDatabase()) {
-                        if (!liquibase.isSafeToRunUpdate()) {
-                            if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                                throw new LiquibaseException("User decided not to run against non-local database");
+                        if (isPromptOnNonLocalDatabase()) {
+                            if (!liquibase.isSafeToRunUpdate()) {
+                                if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
+                                    throw new LiquibaseException("User decided not to run against non-local database");
+                                }
                             }
                         }
+                        setupBindInfoPackage();
+                        performLiquibaseTask(liquibase);
+                    } catch (LiquibaseException e) {
+                        cleanup(database);
+                        throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
                     }
-                    setupBindInfoPackage();
-                    performLiquibaseTask(liquibase);
-                } catch (LiquibaseException e) {
-                    cleanup(database);
-                    throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
-                }
 
                     cleanup(database);
                     getLog().info(MavenUtils.LOG_SEPARATOR);
@@ -457,8 +454,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         } catch (Exception e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
-
-
     }
 
     protected Field getField(Class clazz, String name) throws NoSuchFieldException {
@@ -528,6 +523,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
             try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
+                if (is == null) {
+                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
+                }
+
                 parsePropertiesFile(is);
                 getLog().info(MavenUtils.LOG_SEPARATOR);
             } catch (IOException e) {
@@ -559,12 +558,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         try {
             is = Scope.getCurrentScope().getResourceAccessor().openStream(null, propertyFile);
         } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
+            throw new MojoFailureException("Failed to resolve the properties file.", e);
         }
-        if (is == null) {
-            throw new MojoFailureException("Failed to resolve the properties file.");
-        }
-
         return is;
     }
 

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Liquibase Forums
+    url: https://forum.liquibase.org/
+    about: Please use the forums to ask open-ended questions and connect with other Liquibase Users and Developers.
+  - name: StackOverflow
+    url: https://stackoverflow.com/questions/tagged/liquibase
+    about: For specific questions about Liquibase that will have specific answers, please use StackOverflow and tag the question `liquibase`.

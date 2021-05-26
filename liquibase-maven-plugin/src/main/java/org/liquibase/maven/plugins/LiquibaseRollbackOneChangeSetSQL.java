@@ -4,8 +4,7 @@ import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.*;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -106,8 +105,8 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
                "The command 'rollbackOneChangeSetSQL' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
         }
         Database database = liquibase.getDatabase();
-        LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand("rollbackOneChangeSet"));
-        AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand)liquibaseCommand;
+        CommandScope liquibaseCommand = new CommandScope("internalRollbackOneChangeSetSQL");
+
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         ChangeLogParameters clp = new ChangeLogParameters(database);
         Writer outputWriter = null;
@@ -120,25 +119,12 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         }
         argsMap.put("changeLogParameters", clp);
         argsMap.put("liquibase", liquibase);
-        configuratingCommand.configure(argsMap);
-        try {
-            CommandResult result = liquibaseCommand.execute();
-            if (!result.succeeded) {
-                throw new LiquibaseException(result.message);
-            }
+
+        for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
+            liquibaseCommand.addArgumentValue(entry.getKey(), entry.getValue());
         }
-        catch (CommandExecutionException cee) {
-            throw new LiquibaseException("Error executing rollbackOneChangeSet", cee);
-        }
-        finally {
-            try {
-                outputWriter.flush();
-                closeOutputWriter(outputWriter);
-            }
-            catch (IOException ioe) {
-                Scope.getCurrentScope().getLog(getClass()).info(String.format("Unable to close output file"));
-            }
-        }
+
+        liquibaseCommand.execute();
     }
 
     private OutputStream getOutputStream() throws IOException {
@@ -163,8 +149,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
     }
 
     private Writer createOutputWriter() throws IOException {
-        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .getOutputEncoding();
+        String charsetName = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
     }

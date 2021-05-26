@@ -7,9 +7,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.sql.*;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A ConnectionWrapper implementation which delegates completely to an
@@ -17,6 +17,12 @@ import java.util.Properties;
  */
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
+    private static final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC = new HashSet<>();
+
+    static {
+        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i);password=[^;]*")));
+        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+    }
 
     public JdbcConnection() {
 
@@ -38,8 +44,7 @@ public class JdbcConnection implements DatabaseConnection {
             if (this.con == null) {
                 throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
             }
-        }
-        catch (SQLException sqle) {
+        } catch (SQLException sqle) {
             throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  " + sqle.getMessage());
         }
     }
@@ -94,10 +99,44 @@ public class JdbcConnection implements DatabaseConnection {
     @Override
     public String getURL() {
         try {
-            return con.getMetaData().getURL();
+            String url = getConnectionUrl();
+            url = stripPasswordPropFromJdbcUrl(url);
+            return url;
         } catch (SQLException e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    /**
+     * Remove any secure information from the URL. Used for logging purposes
+     * Strips off the <code>;password=</code> property from string.
+     * Note: it does not remove the password from the
+     * <code>user:password@host</code> section
+     *
+     * @param jdbcUrl string to remove password=xxx from
+     * @return modified string
+     */
+    public static String sanitizeUrl(String url) {
+        return stripPasswordPropFromJdbcUrl(url);
+    }
+
+    private static String stripPasswordPropFromJdbcUrl(String jdbcUrl) {
+        if (jdbcUrl == null || (jdbcUrl != null && jdbcUrl.equals(""))) {
+            return jdbcUrl;
+        }
+        for (Map.Entry<Pattern, Pattern> entry : PATTERN_JDBC) {
+            Pattern jdbcUrlPattern = entry.getKey();
+            Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
+            if (matcher.matches()) {
+                Pattern passwordPattern = entry.getValue();
+                jdbcUrl = passwordPattern.matcher(jdbcUrl).replaceAll("");
+            }
+        }
+        return jdbcUrl;
+    }
+
+    protected String getConnectionUrl() throws SQLException {
+        return con.getMetaData().getURL();
     }
 
     @Override
@@ -477,6 +516,13 @@ public class JdbcConnection implements DatabaseConnection {
             return getUnderlyingConnection().getMetaData().supportsBatchUpdates();
         } catch (SQLException e) {
             throw new DatabaseException("Asking the JDBC driver if it supports batched updates has failed.", e);
+        }
+    }
+
+    private static class PatternPair {
+        // Return a map entry (key-value pair) from the specified values
+        public static <T, U> Map.Entry<T, U> of(T first, U second) {
+            return new AbstractMap.SimpleEntry<>(first, second);
         }
     }
 }

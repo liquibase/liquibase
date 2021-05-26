@@ -1,8 +1,8 @@
 package liquibase.sdk;
 
-import liquibase.command.LiquibaseCommand;
+import liquibase.command.CommandScope;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.sdk.convert.ConvertCommand;
+import liquibase.sdk.convert.ConvertCommandStep;
 import liquibase.util.StringUtil;
 import org.apache.commons.cli.*;
 
@@ -41,22 +41,21 @@ public class Main {
                 return;
             }
 
-            LiquibaseCommand command;
+            CommandScope command = new CommandScope();
             CommandLineParser commandParser = new GnuParser();
             if ("convert".equals(main.command)) {
-                command = new ConvertCommand();
-
                 Options options = new Options();
                 options.addOption(OptionBuilder.hasArg().withDescription("Original changelog").isRequired().create("src"));
                 options.addOption(OptionBuilder.hasArg().withDescription("Output changelog").isRequired().create("out"));
                 options.addOption(OptionBuilder.hasArg().withDescription("Classpath").create("classpath"));
 
                 CommandLine commandArguments = commandParser.parse(options, main.commandArgs.toArray(new String[main.commandArgs.size()]));
-                ((ConvertCommand) command).setSrc(commandArguments.getOptionValue("src"));
-                ((ConvertCommand) command).setOut(commandArguments.getOptionValue("out"));
-                ((ConvertCommand) command).setClasspath(commandArguments.getOptionValue("classpath"));
+                command
+                        .addArgumentValue(ConvertCommandStep.SRC_ARG, commandArguments.getOptionValue("src"))
+                        .addArgumentValue(ConvertCommandStep.OUT_ARG, commandArguments.getOptionValue("out"))
+                        .addArgumentValue(ConvertCommandStep.CLASSPATH_ARG, commandArguments.getOptionValue("classpath"));
             } else {
-                throw new UserError("Unknown command: "+main.command);
+                throw new UserError("Unknown command: " + main.command);
             }
 
             command.execute();
@@ -73,7 +72,7 @@ public class Main {
             main.out("");
             return;
         } catch (Throwable exception) {
-            System.out.println("Unexpected error: "+exception.getMessage());
+            System.out.println("Unexpected error: " + exception.getMessage());
             exception.printStackTrace();
         }
     }
@@ -145,7 +144,7 @@ public class Main {
         }
 
         throw new UnexpectedLiquibaseException("Could not find Liquibase SDK home. Please run liquibase-sdk from the " +
-            "liquibase/sdk directory or one of it's sub directories");
+                "liquibase/sdk directory or one of it's sub directories");
     }
 
     public String getCommand() {
@@ -171,7 +170,7 @@ public class Main {
 
     public void debug(String message) {
         if (debug) {
-            System.out.println("DEBUG: "+message);
+            System.out.println("DEBUG: " + message);
         }
     }
 
@@ -225,9 +224,9 @@ public class Main {
     }
 
     private static class UserError extends RuntimeException {
-    
+
         private static final long serialVersionUID = 6926190469964122370L;
-    
+
         public UserError(String message) {
             super(message);
         }

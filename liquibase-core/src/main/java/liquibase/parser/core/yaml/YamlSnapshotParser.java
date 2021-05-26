@@ -1,7 +1,6 @@
 package liquibase.parser.core.yaml;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
@@ -67,7 +66,7 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
         Map parsedYaml;
         try (
             InputStreamReader inputStreamReader = new InputStreamReader(
-                stream, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()
+                stream, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()
             );
         ) {
             parsedYaml = (Map) yaml.load(inputStreamReader);
