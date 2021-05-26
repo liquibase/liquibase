@@ -393,7 +393,7 @@ public class Main {
 
                     main.applyDefaults();
                     Map<String, Object> innerScopeObjects = new HashMap<>();
-                    innerScopeObjects.put("defaultsFile", main.defaultsFile);
+                    innerScopeObjects.put("defaultsFile", IntegrationConfiguration.DEFAULTS_FILE.getCurrentValue());
                     if (!Main.runningFromNewCli) {
                         innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
                     }
