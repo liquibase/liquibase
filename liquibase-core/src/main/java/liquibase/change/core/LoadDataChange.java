@@ -396,7 +396,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 }
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.STRING) {
                             valueConfig.setType(columnConfig.getType());
-                                    valueConfig.setValue(value == null ? "" : value);
+                                    valueConfig.setValue(value);
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.COMPUTED) {
                             if (null != value) {
                                 liquibase.statement.DatabaseFunction function =
