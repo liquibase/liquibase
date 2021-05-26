@@ -45,7 +45,6 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
         PRINT_RESULT = builder.argument("printResult", Boolean.class).defaultValue(true).build();
     }
 
-
     @Override
     public String[][] defineCommandNames() {
         return new String[][] { COMMAND_NAME };
