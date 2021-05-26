@@ -401,6 +401,14 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         return columns;
     }
 
+    public ChangeSet getChangeSet() {
+        return changeSet;
+    }
+
+    public ResourceAccessor getResourceAccessor() {
+        return resourceAccessor;
+    }
+
     protected long getContentLength(InputStream in) throws IOException {
         long length = 0;
         byte[] buf = new byte[4096];
