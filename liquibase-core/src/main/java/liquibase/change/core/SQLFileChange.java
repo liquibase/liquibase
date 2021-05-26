@@ -114,27 +114,17 @@ public class SQLFileChange extends AbstractSQLChange {
             return null;
         }
 
-        InputStream inputStream = null;
+        InputStream inputStream;
         try {
-
-
-            StringBuilder newPath=new StringBuilder();
             String relativeTo = null;
             if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
                 relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
-                newPath.append(relativeTo.substring(0,relativeTo.lastIndexOf("/")+1));
-                int loc=path.lastIndexOf("/");
-                if (loc>=0) {
-                    newPath.append(path.substring(loc+1));
-                }
-                else {
-                    newPath.append(path);
-                }
             }
-            inputStream = Scope.getCurrentScope().getResourceAccessor().openStream(null, newPath.toString());
+            inputStream = Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
             throw new IOException("Unable to read file '" + path + "'", e);
         }
+
         if (inputStream != null) {
             return inputStream;
         }
