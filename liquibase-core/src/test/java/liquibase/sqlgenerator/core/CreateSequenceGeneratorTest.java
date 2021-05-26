@@ -1,20 +1,20 @@
 package liquibase.sqlgenerator.core;
 
-import static org.mockito.Mockito.*;
-
-import java.math.BigInteger;
-
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
-
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.core.CreateSequenceStatement;
+import org.junit.Test;
+
+import java.math.BigInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<CreateSequenceStatement> {
 
@@ -48,62 +48,62 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
 
         // verify that for version <= 9.4 no IF NOT EXISTS is not in the statement
         Sql[] sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
-        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
-        Assertions.assertThat(sql[0].toSql()).doesNotContain("IF NOT EXISTS");
+        assertThat(sql).isNotEmpty().hasSize(1);
+        assertThat(sql[0].toSql()).doesNotContain("IF NOT EXISTS");
 
         // verify that if no version is available the optional no IF NOT EXISTS is not in the statement
         reset(dbConnection);
         when(dbConnection.getDatabaseMajorVersion()).thenThrow(DatabaseException.class);
 
         sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
-        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
-        Assertions.assertThat(sql[0].toSql()).doesNotContain("IF NOT EXISTS");
+        assertThat(sql).isNotEmpty().hasSize(1);
+        assertThat(sql[0].toSql()).doesNotContain("IF NOT EXISTS");
 
         reset(dbConnection);
         when(dbConnection.getDatabaseMajorVersion()).thenReturn(9);
         when(dbConnection.getDatabaseMinorVersion()).thenReturn(5);
 
         sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
-        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
-        Assertions.assertThat(sql[0].toSql()).contains("IF NOT EXISTS");
+        assertThat(sql).isNotEmpty().hasSize(1);
+        assertThat(sql[0].toSql()).contains("IF NOT EXISTS");
     }
 
     @Test
     public void postgresDatabaseSupportAsStructureByVersion() throws Exception {
         DatabaseConnection dbConnection = mock(DatabaseConnection.class);
-        when(dbConnection.getDatabaseMajorVersion()).thenReturn(9);
-        when(dbConnection.getDatabaseMinorVersion()).thenReturn(6);
-
+        ValidationErrors errors;
         PostgresDatabase postgresDatabase = spy(new PostgresDatabase());
         postgresDatabase.setConnection(dbConnection);
         doReturn(SEQUENCE_NAME).when(postgresDatabase).escapeSequenceName(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
+
+        // verify that for version < 10 validate() method returns error
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(9);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(6);
 
         CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
         createSequenceStatement.setStartValue(new BigInteger("1"));
         createSequenceStatement.setDataType("int");
 
-        // verify that for version < 10 no AS is not in the statement
-        Sql[] sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
-        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
-        Assertions.assertThat(sql[0].toSql()).doesNotContain("SEQUENCE_NAME AS");
+        errors = new CreateSequenceGenerator().validate(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).contains("AS is not allowed on postgresql");
 
-        // verify that if no version is available the optional AS is not in the statement
+
+        // verify that if no version is available the validate() method passes
         reset(dbConnection);
         when(dbConnection.getDatabaseMajorVersion()).thenThrow(DatabaseException.class);
+        errors = new CreateSequenceGenerator().validate(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
 
-        sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
-        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
-        Assertions.assertThat(sql[0].toSql()).doesNotContain("SEQUENCE_NAME AS");
 
+        // verify that for version >= 10 the validate() method passes
         reset(dbConnection);
         when(dbConnection.getDatabaseMajorVersion()).thenReturn(10);
         when(dbConnection.getDatabaseMinorVersion()).thenReturn(0);
 
-        // verify that for version >= 10 AS is present in the statement
-        sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
-        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
-        Assertions.assertThat(sql[0].toSql()).contains("SEQUENCE_NAME AS");
+        errors = new CreateSequenceGenerator().validate(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
     }
+
 //    @Before
 //    public void setUpMocks() throws DatabaseException {
 //
