@@ -48,7 +48,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
                 continue;
             }
 
-            if (key.startsWith("property.")) {
+            if (key.startsWith("parameter.")) {
                 continue;
             }
 
