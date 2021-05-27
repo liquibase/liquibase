@@ -1,6 +1,5 @@
 package liquibase.command.core;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
