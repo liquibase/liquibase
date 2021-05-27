@@ -28,7 +28,7 @@ Optional Args:
     OBFUSCATED
   username (String) Username to use to connect to the database
     Default: null
-  verbose (String) Verbose flag
+  verbose (Boolean) Verbose flag
     Default: null
 """
 
