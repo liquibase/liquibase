@@ -201,8 +201,10 @@ public class LiquibaseConfiguration implements SingletonObject {
             if (aliasKeys != null && aliasKeys.contains(def.getKey())) {
                 return def;
             }
+            if(def.getKey().replace(".","").equalsIgnoreCase(key)) {
+                return def;
+            }
         }
-
         return null;
     }
 }

@@ -44,8 +44,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
             key = StringUtil.toCamelCase(key);
             String originalKey = key;
 
-            if (key.equalsIgnoreCase("strict") || key.equalsIgnoreCase("liquibaseProLicenseKey")
-                    || key.startsWith("parameter.")) {
+            if (key.equalsIgnoreCase("strict") || key.startsWith("parameter.")) {
                 continue;
             }
 
@@ -53,10 +52,9 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
             final String targettedCommandPrefix = "liquibase.command." + StringUtil.join(commandScope.getCommand().getName(), ".") + ".";
             if (!key.contains(".")) {
                 if (commandScope.getCommand().getArgument(key) == null) {
-                    if (!key.contains(".")) {
-                        key = "liquibase." + key;
-                    }
-
+                        if(!key.startsWith("liquibase")) {
+                            key = "liquibase." + key;
+                        }
                     if (Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getRegisteredDefinition(key) == null) {
                         invalidKeys.add(" - '" + originalKey + "'");
                     }

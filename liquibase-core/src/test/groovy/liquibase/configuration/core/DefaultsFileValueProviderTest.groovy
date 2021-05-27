@@ -65,7 +65,7 @@ class DefaultsFileValueProviderTest extends Specification {
         "changelog-file"                         | true
         "liquibase.command.update.changelogFile" | true
         "liquibase.command.changelogFile"        | true
-        "property.my-property"                   | true
+        "parameter.my-property"                  | true
         "liquibase.command.invalid"              | false
         "liquibase.invalid"                      | false
         "external.config"                        | false
