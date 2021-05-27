@@ -44,11 +44,8 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
             key = StringUtil.toCamelCase(key);
             String originalKey = key;
 
-            if (key.equalsIgnoreCase("strict")) {
-                continue;
-            }
-
-            if (key.startsWith("parameter.")) {
+            if (key.equalsIgnoreCase("strict") || key.equalsIgnoreCase("liquibaseProLicenseKey")
+                    || key.startsWith("parameter.")) {
                 continue;
             }
 
