@@ -7,7 +7,6 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
-import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;

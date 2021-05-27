@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
@@ -21,6 +22,7 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
     public static final CommandArgumentDefinition<String> DIFF_TYPES_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+    public static final CommandArgumentDefinition<String> OVERWRITE_OUTPUT_FILE_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -48,7 +50,8 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
                 .description("Schemas to include in diff").build();
         DIFF_TYPES_ARG = builder.argument("diffTypes", String.class)
                 .description("Types of objects to compare").build();
-
+        OVERWRITE_OUTPUT_FILE_ARG = builder.argument("overwriteOutputFile", String.class)
+                .description("Flag to allow overwriting of output changelog file").build();
     }
 
 

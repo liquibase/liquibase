@@ -155,7 +155,6 @@ public class LiquibaseCommandLine {
                 "databaseChangeLogTableName",
                 "databaseChangeLogLockTableName",
                 "databaseChangeLogTablespaceName",
-                "overwriteOutputFile",
                 "classpath",
                 "propertyProviderClass",
                 "promptForNonLocalDatabase",
@@ -637,17 +636,7 @@ public class LiquibaseCommandLine {
             for (CommandArgumentDefinition<?> def : commandDefinition.getArguments().values()) {
                 final String[] argNames = toArgNames(def);
                 for (int i = 0; i < argNames.length; i++) {
-                    final CommandLine.Model.OptionSpec.Builder builder = CommandLine.Model.OptionSpec.builder(argNames[i])
-                            .required(false)
-                            .converters(value -> {
-                                if (def.getDataType().equals(Boolean.class)) {
-                                    if (value.equals("")) {
-                                        return "true";
-                                    }
-                                }
-                                return value;
-                            })
-                            .type(String.class);
+                    final CommandLine.Model.OptionSpec.Builder builder = createArgBuilder(def, argNames[i]);
 
                     String argDisplaySuffix = "";
                     String argName = argNames[i];
@@ -680,7 +669,6 @@ public class LiquibaseCommandLine {
 
                     builder.description(description + "\n");
 
-
                     if (def.getDataType().equals(Boolean.class)) {
                         builder.arity("0..1");
                     }
@@ -701,11 +689,35 @@ public class LiquibaseCommandLine {
                         .description("Legacy CLI argument")
                         .hidden(true);
                 subCommandSpec.addOption(builder.build());
+                String kabobArg = StringUtil.toKabobCase(legacyArg);
+                if (! kabobArg.equals(legacyArg)) {
+                    final CommandLine.Model.OptionSpec.Builder kabobOptionBuilder =
+                        CommandLine.Model.OptionSpec.builder("--" + kabobArg)
+                            .required(false)
+                            .type(String.class)
+                            .hidden(true)
+                            .description("Legacy CLI argument");
+                    subCommandSpec.addOption(kabobOptionBuilder.build());
+                }
             }
 
             getParentCommandSpec(commandDefinition, rootCommand).addSubcommand(commandName[commandName.length - 1], new CommandLine(subCommandSpec, defaultFactory));
         }
 
+    }
+
+    private CommandLine.Model.OptionSpec.Builder createArgBuilder(CommandArgumentDefinition<?> def, String argName) {
+        return CommandLine.Model.OptionSpec.builder(argName)
+                                .required(false)
+                                .converters(value -> {
+                                    if (def.getDataType().equals(Boolean.class)) {
+                                        if (value.equals("")) {
+                                            return "true";
+                                        }
+                                    }
+                                    return value;
+                                })
+                                .type(String.class);
     }
 
     private List<String[]> expandCommandNames(CommandDefinition commandDefinition) {
