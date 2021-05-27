@@ -18,7 +18,7 @@ public class StatusCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
-    public static final CommandArgumentDefinition<String> VERBOSE_ARG;
+    public static final CommandArgumentDefinition<Boolean> VERBOSE_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
@@ -46,7 +46,7 @@ public class StatusCommandStep extends AbstractCliWrapperCommandStep {
                 .description("Changeset contexts to match").build();
         LABELS_ARG = builder.argument("labels", String.class)
                 .description("Changeset labels to match").build();
-        VERBOSE_ARG = builder.argument("verbose", String.class)
+        VERBOSE_ARG = builder.argument("verbose", Boolean.class)
                 .description("Verbose flag").build();
     }
 
