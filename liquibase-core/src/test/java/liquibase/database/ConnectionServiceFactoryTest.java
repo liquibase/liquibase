@@ -11,12 +11,11 @@ import static org.mockito.Mockito.mock;
 
 public class ConnectionServiceFactoryTest {
 
-    private Driver driverMock;
+    private String mockUrl = "mock://url";
     private ConnectionServiceFactory connectionServiceFactory;
 
     @Before
     public void setUp() {
-        driverMock = mock(Driver.class);
         ConnectionServiceFactory.reset();
         connectionServiceFactory = ConnectionServiceFactory.getInstance();
     }
@@ -25,28 +24,28 @@ public class ConnectionServiceFactoryTest {
     public void testGetDatabaseConnection() {
 
         // By Default only JdbcConnection registered that supports any Driver
-        assertThat(connectionServiceFactory.getDatabaseConnection(driverMock))
+        assertThat(connectionServiceFactory.getDatabaseConnection(mockUrl))
                 .isInstanceOf(JdbcConnection.class);
 
         // Register Medium Priority Connection that supports the Driver
         final DatabaseConnection jdbcConnection100SupportsDriver = new JdbcConnection100SupportsDriver();
         connectionServiceFactory.register(jdbcConnection100SupportsDriver);
 
-        assertThat(connectionServiceFactory.getDatabaseConnection(driverMock))
+        assertThat(connectionServiceFactory.getDatabaseConnection(mockUrl))
                 .isInstanceOf(JdbcConnection100SupportsDriver.class);
 
         // Register Higher Priority Connection that does not support the Driver
         final DatabaseConnection jdbcConnection200DoesNotSupportDriver = new JdbcConnection200DoesNotSupportDriver();
         connectionServiceFactory.register(jdbcConnection200DoesNotSupportDriver);
 
-        assertThat(connectionServiceFactory.getDatabaseConnection(driverMock))
+        assertThat(connectionServiceFactory.getDatabaseConnection(mockUrl))
                 .isInstanceOf(JdbcConnection100SupportsDriver.class);
 
         // Register Lower Priority Connection that supports the Driver
         final DatabaseConnection jdbcConnection50SupportsDriver = new JdbcConnection50SupportsDriver();
         connectionServiceFactory.register(jdbcConnection50SupportsDriver);
 
-        assertThat(connectionServiceFactory.getDatabaseConnection(driverMock))
+        assertThat(connectionServiceFactory.getDatabaseConnection(mockUrl))
                 .isInstanceOf(JdbcConnection100SupportsDriver.class);
 
     }
@@ -62,7 +61,7 @@ public class ConnectionServiceFactoryTest {
         }
 
         @Override
-        public boolean supports(Driver driverObject) {
+        public boolean supports(String url) {
             return true;
         }
     }
@@ -78,7 +77,7 @@ public class ConnectionServiceFactoryTest {
         }
 
         @Override
-        public boolean supports(Driver driverObject) {
+        public boolean supports(String url) {
             return true;
         }
     }
@@ -94,7 +93,7 @@ public class ConnectionServiceFactoryTest {
         }
 
         @Override
-        public boolean supports(Driver driverObject) {
+        public boolean supports(String url) {
             return false;
         }
     }

@@ -27,7 +27,7 @@ public class ConnectionServiceFactory {
 
     public DatabaseConnection create(String url, Driver driverObject, Properties driverProperties)
                throws DatabaseException {
-        DatabaseConnection databaseConnection = getDatabaseConnection(driverObject);
+        DatabaseConnection databaseConnection = getDatabaseConnection(url);
         try {
             databaseConnection.open(url, driverObject, driverProperties);
         }
@@ -37,11 +37,18 @@ public class ConnectionServiceFactory {
         return databaseConnection;
     }
 
-    public DatabaseConnection getDatabaseConnection(final Driver driverObject) {
+    /**
+     * @deprecated use {@link #getDatabaseConnection(String)}
+     */
+    public DatabaseConnection getDatabaseConnection() {
+        return getDatabaseConnection(null);
+    }
+
+    public DatabaseConnection getDatabaseConnection(String url) {
         final SortedSet<DatabaseConnection> sortedConnections = new TreeSet<>(
                 (o1, o2) -> -1 * Integer.compare(o1.getPriority(), o2.getPriority()));
 
-        databaseConnections.stream().filter(c -> c.supports(driverObject))
+        databaseConnections.stream().filter(c -> c.supports(url))
                 .forEach(sortedConnections::add);
 
         try {

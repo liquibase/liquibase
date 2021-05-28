@@ -18,14 +18,14 @@ public interface DatabaseConnection extends PrioritizedService {
             throws DatabaseException;
 
     /**
-     * Default implementation for compatibility with a Driver.
+     * Default implementation for compatibility with a URL.
      * Method is used when a Connection is opened based on an identified driverObject from url.
-     * Can be overridden in DatabaseConnection implementations with a higher priority to check against Driver.
+     * Can be overridden in DatabaseConnection implementations with a higher priority to check against a given url.
      *
-     * @param driverObject the Driver identified from url connection string
-     * @return true if Driver is supported
+     * @param url the url connection string
+     * @return true if URL is supported
      */
-    default boolean supports(final Driver driverObject) {
+    default boolean supports(String url) {
         return true;
     }
 
