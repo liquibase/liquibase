@@ -14,22 +14,34 @@ import java.util.Properties;
  */
 public interface DatabaseConnection extends PrioritizedService {
 
-    public void open(String url, Driver driverObject, Properties driverProperties)
+    void open(String url, Driver driverObject, Properties driverProperties)
             throws DatabaseException;
 
-    public void close() throws DatabaseException;
+    /**
+     * Default implementation for compatibility with a Driver.
+     * Method is used when a Connection is opened based on an identified driverObject from url.
+     * Can be overridden in DatabaseConnection implementations with a higher priority to check against Driver.
+     *
+     * @param driverObject the Driver identified from url connection string
+     * @return true if Driver is supported
+     */
+    default boolean supports(final Driver driverObject) {
+        return true;
+    }
 
-    public void commit() throws DatabaseException;
+    void close() throws DatabaseException;
 
-    public boolean getAutoCommit() throws DatabaseException;
+    void commit() throws DatabaseException;
 
-    public String getCatalog() throws DatabaseException;
+    boolean getAutoCommit() throws DatabaseException;
 
-    public String nativeSQL(String sql) throws DatabaseException;
+    String getCatalog() throws DatabaseException;
 
-    public void rollback() throws DatabaseException;
+    String nativeSQL(String sql) throws DatabaseException;
 
-    public void setAutoCommit(boolean autoCommit) throws DatabaseException;
+    void rollback() throws DatabaseException;
+
+    void setAutoCommit(boolean autoCommit) throws DatabaseException;
 
     String getDatabaseProductName() throws DatabaseException;
 
