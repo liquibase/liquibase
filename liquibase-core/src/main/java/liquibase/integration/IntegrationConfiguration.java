@@ -56,7 +56,7 @@ public class IntegrationConfiguration implements AutoloadedConfigurations {
                 .build();
 
         LOG_LEVEL = builder.define("logLevel", Level.class)
-                .setDefaultValue(Level.INFO)
+                .setDefaultValue(Level.OFF,"Controls which logs get set to stderr AND to any log file. The CLI defaults, if log file set, to SEVERE. Others vary by integration. The official log levels are: OFF, SEVERE, WARNING, INFO, FINE")
                 .setValueHandler(value -> {
                     if (value == null) {
                         return null;
