@@ -11,7 +11,6 @@ import liquibase.exception.CommandExecutionException;
 import liquibase.command.CommandScope;
 import liquibase.command.core.RegisterChangelogCommandStep;
 import liquibase.command.core.InternalSyncHubCommandStep;
-import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
@@ -313,10 +312,16 @@ public class HubUpdater {
     }
 
     public void syncHub(String changeLogFile, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) throws CommandExecutionException {
+        //
+        // We pass in a setting of CONTINUE IF_BOTH_CONNECTION_AND_PROJECT_ID_SET_ARG=true
+        // to tell syncHub to not complain when both connectionID and projectID
+        // are set.
+        //
         final CommandScope syncHub = new CommandScope("internalSyncHub")
                 .addArgumentValue(InternalSyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, database.getConnection().getURL())
                 .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
+                .addArgumentValue(InternalSyncHubCommandStep.CONTINUE_IF_CONNECTION_AND_PROJECT_ID_BOTH_SET_ARG, true)
                 .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_OFFLINE_ARG, false);
 
