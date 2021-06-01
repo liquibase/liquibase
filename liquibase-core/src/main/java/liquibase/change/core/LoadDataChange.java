@@ -466,9 +466,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 //     of whether the 'usePreparedStatement' is set to false
                 // 2. The database supports batched statements (for improved performance) AND we are not in an
                 //    "SQL" mode (i.e. we generate an SQL file instead of actually modifying the database).
-                if
-                ((needsPreparedStatement && (databaseSupportsBatchUpdates && ! isLoggingExecutor(database))) &&
-                        hasPreparedStatementsImplemented()) {
+                if (
+                        (needsPreparedStatement || (databaseSupportsBatchUpdates && !isLoggingExecutor(database)))
+                                && hasPreparedStatementsImplemented()
+                ) {
                     anyPreparedStatements = true;
                     ExecutablePreparedStatementBase stmt =
                         this.createPreparedStatement(
