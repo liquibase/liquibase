@@ -1249,6 +1249,13 @@ public class Main {
             String key = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
             liquibaseHubApiKey = key;
         }
+
+        if (propertyProviderClass == null) {
+            Class clazz = IntegrationConfiguration.PROPERTY_PROVIDER_CLASS.getCurrentValue();
+            if (clazz != null) {
+                propertyProviderClass = clazz.getName();
+            }
+        }
     }
 
     /**

@@ -36,7 +36,7 @@ public class IntegrationConfiguration implements AutoloadedConfigurations {
                                         .setDescription("Driver-specific properties")
                                         .build();
         PROPERTY_PROVIDER_CLASS = builder.define("propertyProviderClass", Class.class)
-                                         .setDescription("Implementation of Properties class to provide additional properties")
+                                         .setDescription("Implementation of Properties class to provide additional driver properties")
                                          .build();
         PROMPT_FOR_NON_LOCAL_DATABASE = builder.define("promptForNonLocalDatabase", Boolean.class)
                                                .setDescription("Should Liquibase prompt if a non-local database is being accessed")
