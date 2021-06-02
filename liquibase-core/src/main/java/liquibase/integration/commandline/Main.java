@@ -1250,10 +1250,23 @@ public class Main {
             liquibaseHubApiKey = key;
         }
 
+        //
+        // Property provider class
+        //
         if (propertyProviderClass == null) {
             Class clazz = IntegrationConfiguration.PROPERTY_PROVIDER_CLASS.getCurrentValue();
             if (clazz != null) {
                 propertyProviderClass = clazz.getName();
+            }
+        }
+
+        //
+        // Database class
+        //
+        if (databaseClass == null) {
+            Class clazz = IntegrationConfiguration.DATABASE_CLASS.getCurrentValue();
+            if (clazz != null) {
+                databaseClass = clazz.getName();
             }
         }
     }
