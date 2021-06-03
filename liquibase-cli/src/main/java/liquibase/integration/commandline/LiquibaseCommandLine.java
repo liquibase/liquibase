@@ -145,7 +145,8 @@ public class LiquibaseCommandLine {
                 "snapshotFormat",
                 "sqlFile",
                 "delimiter",
-                "rollbackScript"
+                "rollbackScript",
+                "overwriteOutputFile"
         ).collect(Collectors.toSet());
 
         this.legacyNoLongerCommandArguments = Stream.of(
@@ -165,7 +166,9 @@ public class LiquibaseCommandLine {
                 "logFile",
                 "outputFile",
                 "liquibaseProLicenseKey",
-                "liquibaseHubApiKey"
+                "liquibaseHubApiKey",
+                "outputFileEncoding",
+                "outputLineSeparator"
         ).collect(Collectors.toSet());
 
         this.commandLine = buildPicoCommandLine();
