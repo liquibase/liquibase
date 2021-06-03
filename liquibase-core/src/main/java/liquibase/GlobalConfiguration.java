@@ -73,7 +73,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         OUTPUT_LINE_SEPARATOR = builder.define("outputLineSeparator", String.class)
                 .setDescription("Line separator for output")
-                .setDefaultValue(System.getProperty("line.separator"),"OS default")
+                .setDefaultValue(System.getProperty("line.separator"),"Line separator(LF or CRLF) for output. Defaults to OS default")
                 .build();
 
         OUTPUT_FILE_ENCODING = builder.define("outputFileEncoding", String.class)
