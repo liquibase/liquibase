@@ -151,7 +151,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         signature.println "Optional Args:"
         def foundOptional = false
         for (def argDef : commandDefinition.arguments.values()) {
-            if (argDef.required) {
+            if (argDef.required || argDef.hidden) {
                 continue
             }
             foundOptional = true

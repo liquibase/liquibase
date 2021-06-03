@@ -27,6 +27,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
 
     private String description;
     private boolean required;
+    private boolean hidden;
     private DataType defaultValue;
     private String defaultValueDescription;
     private ConfigurationValueConverter<DataType> valueConverter;
@@ -66,6 +67,12 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     public boolean isRequired() {
         return required;
     }
+
+    public boolean isHidden() {
+        return hidden;
+    }
+
+
 
     /**
      * The default value to use for this argument
@@ -166,6 +173,15 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
          */
         public Building<DataType> optional() {
             this.newCommandArgument.required = false;
+
+            return this;
+        }
+
+        /**
+         * Mark argument as hidden.
+         */
+        public Building<DataType> hidden() {
+            this.newCommandArgument.hidden = true;
 
             return this;
         }

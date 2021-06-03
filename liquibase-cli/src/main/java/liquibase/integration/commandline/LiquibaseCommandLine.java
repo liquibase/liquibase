@@ -679,6 +679,8 @@ public class LiquibaseCommandLine {
 
                     if (i > 0) {
                         builder.hidden(true);
+                    } else {
+                        builder.hidden(def.isHidden());
                     }
 
                     subCommandSpec.addOption(builder.build());
