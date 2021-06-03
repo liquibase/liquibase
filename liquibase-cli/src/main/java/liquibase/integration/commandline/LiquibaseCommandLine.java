@@ -146,7 +146,11 @@ public class LiquibaseCommandLine {
                 "sqlFile",
                 "delimiter",
                 "rollbackScript",
-                "overwriteOutputFile"
+                "overwriteOutputFile",
+                "changeExecListenerClass",
+                "changeExecListenerPropertiesFile",
+                "defaultSchemaName",
+                "defaultCatalogName"
         ).collect(Collectors.toSet());
 
         this.legacyNoLongerCommandArguments = Stream.of(
