@@ -5,9 +5,14 @@ import liquibase.command.CommandScope;
 import liquibase.command.core.RegisterChangeLogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoFailureException;
+import java.io.File;
+import java.util.*;
 
-import java.util.UUID;
 
 /**
  * <p>Registers a change log with Hub.</p>
@@ -60,5 +65,23 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         registerChangeLog.addArgumentValue("changeLog", liquibase.getDatabaseChangeLog());
 
         registerChangeLog.execute();
+    }
+
+    /**
+     *
+     * Override this method in order to create a ResourceAccessor which only
+     * looks for files in root and src/main/resources paths
+     *
+     * @param   cl
+     * @return  ResourceAccessor
+     *
+     */
+    @Override
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
+        List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
+        File baseDir = project.getBasedir();
+        File sourceDir = new File(baseDir, "src/main/resources");
+        resourceAccessors.add(new FileSystemResourceAccessor(baseDir, sourceDir));
+        return new CompositeResourceAccessor(resourceAccessors);
     }
 }
