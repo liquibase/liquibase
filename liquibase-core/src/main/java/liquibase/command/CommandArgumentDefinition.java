@@ -68,11 +68,12 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         return required;
     }
 
-    public boolean isHidden() {
+    /**
+     * Hidden arguments are ones that can be called via integrations, but should not be normally shown in help to users.
+     */
+    public boolean getHidden() {
         return hidden;
     }
-
-
 
     /**
      * The default value to use for this argument
