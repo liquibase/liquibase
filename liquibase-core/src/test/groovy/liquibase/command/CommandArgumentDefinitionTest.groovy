@@ -40,6 +40,17 @@ class CommandArgumentDefinitionTest extends Specification {
         definition.validate(commandScope)
         then:
         notThrown(CommandValidationException)
+
+        when:// by default hidden attribute is false
+        definition.validate(commandScope)
+        then:
+        definition.hidden == false
+
+        when:// when hidden attribute is set to true, no exception is thrown
+        definition.hidden = true
+        definition.validate(commandScope)
+        then:
+        notThrown(CommandValidationException)
     }
 
     def "toString test"() {
