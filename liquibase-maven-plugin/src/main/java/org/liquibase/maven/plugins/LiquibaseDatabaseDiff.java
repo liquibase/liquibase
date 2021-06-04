@@ -292,8 +292,8 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         super.printSettings(indent);
         getLog().info(indent + "referenceDriver: " + referenceDriver);
         getLog().info(indent + "referenceUrl: " + referenceUrl);
-        getLog().info(indent + "referenceUsername: " + referenceUsername);
-        getLog().info(indent + "referencePassword: " + referencePassword);
+        getLog().info(indent + "referenceUsername: " + "*****");
+        getLog().info(indent + "referencePassword: " + "*****");
         getLog().info(indent + "referenceDefaultSchema: " + referenceDefaultSchemaName);
         getLog().info(indent + "diffChangeLogFile: " + diffChangeLogFile);
     }
