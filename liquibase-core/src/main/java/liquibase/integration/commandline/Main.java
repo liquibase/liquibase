@@ -18,7 +18,6 @@ import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
 import liquibase.hub.HubConfiguration;
 import liquibase.hub.HubServiceFactory;
-import liquibase.integration.IntegrationConfiguration;
 import liquibase.integration.IntegrationDetails;
 import liquibase.license.*;
 import liquibase.lockservice.LockService;
@@ -361,10 +360,10 @@ public class Main {
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
                     }
 
-                    if (!IntegrationConfiguration.SHOULD_RUN.getCurrentValue()) {
+                    if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
                         Scope.getCurrentScope().getUI().sendErrorMessage((
                                 String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                                        IntegrationConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
+                                        LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
                         return Integer.valueOf(0);
                     }
 
@@ -392,7 +391,7 @@ public class Main {
 
                     main.applyDefaults();
                     Map<String, Object> innerScopeObjects = new HashMap<>();
-                    innerScopeObjects.put("defaultsFile", IntegrationConfiguration.DEFAULTS_FILE.getCurrentValue());
+                    innerScopeObjects.put("defaultsFile", LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentValue());
                     if (!Main.runningFromNewCli) {
                         innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
                     }
@@ -762,7 +761,7 @@ public class Main {
         String localDefaultsPathName = defaultsFile.replaceFirst("(\\.[^\\.]+)$", ".local$1");
         potentialPropertyFiles.add(new File(localDefaultsPathName));
 
-        final ConfiguredValue<String> currentConfiguredValue = IntegrationConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue();
+        final ConfiguredValue<String> currentConfiguredValue = LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue();
         if (currentConfiguredValue.found()) {
             potentialPropertyFiles.add(new File(currentConfiguredValue.getValue()));
         }
@@ -1254,7 +1253,7 @@ public class Main {
         // Property provider class
         //
         if (propertyProviderClass == null) {
-            Class clazz = IntegrationConfiguration.PROPERTY_PROVIDER_CLASS.getCurrentValue();
+            Class clazz = LiquibaseCommandLineConfiguration.PROPERTY_PROVIDER_CLASS.getCurrentValue();
             if (clazz != null) {
                 propertyProviderClass = clazz.getName();
             }
@@ -1264,7 +1263,7 @@ public class Main {
         // Database class
         //
         if (databaseClass == null) {
-            Class clazz = IntegrationConfiguration.DATABASE_CLASS.getCurrentValue();
+            Class clazz = LiquibaseCommandLineConfiguration.DATABASE_CLASS.getCurrentValue();
             if (clazz != null) {
                 databaseClass = clazz.getName();
             }

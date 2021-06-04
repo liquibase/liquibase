@@ -13,7 +13,6 @@ import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
 import liquibase.hub.HubConfiguration;
-import liquibase.integration.IntegrationConfiguration;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.LogMessageFilter;
 import liquibase.logging.LogService;
@@ -253,7 +252,7 @@ public class LiquibaseCommandLine {
                 if (Level.OFF.equals(this.configuredLogLevel)) {
                     System.err.println("For more information, please use the --log-level flag");
                 } else {
-                    if (IntegrationConfiguration.LOG_FILE.getCurrentValue() == null) {
+                    if (LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue() == null) {
                         exception.printStackTrace(System.err);
                     }
                 }
@@ -289,10 +288,10 @@ public class LiquibaseCommandLine {
             try {
                 return Scope.child(configureScope(), () -> {
 
-                    if (!IntegrationConfiguration.SHOULD_RUN.getCurrentValue()) {
+                    if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
                         Scope.getCurrentScope().getUI().sendErrorMessage((
                                 String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                                        IntegrationConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
+                                        LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
                         return 0;
                     }
 
@@ -307,12 +306,12 @@ public class LiquibaseCommandLine {
                     int response = commandLine.execute(finalArgs);
 
                     if (!wasHelpOrVersionRequested()) {
-                        final ConfiguredValue<File> logFile = IntegrationConfiguration.LOG_FILE.getCurrentConfiguredValue();
+                        final ConfiguredValue<File> logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentConfiguredValue();
                         if (logFile.found()) {
                             Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue().getAbsolutePath());
                         }
 
-                        final ConfiguredValue<File> outputFile = IntegrationConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
+                        final ConfiguredValue<File> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
                         if (outputFile.found()) {
                             Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue().getAbsolutePath());
                         }
@@ -414,7 +413,7 @@ public class LiquibaseCommandLine {
         liquibaseConfiguration.registerProvider(argumentProvider);
         returnList.add(argumentProvider);
 
-        final ConfiguredValue<String> defaultsFileConfig = IntegrationConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue();
+        final ConfiguredValue<String> defaultsFileConfig = LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue();
         final File defaultsFile = new File(defaultsFileConfig.getValue());
         if (defaultsFile.exists()) {
             final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsFile);
@@ -464,8 +463,8 @@ public class LiquibaseCommandLine {
         ui.setOutputStream(System.err);
         returnMap.put(Scope.Attr.ui.name(), ui);
 
-        returnMap.put(IntegrationConfiguration.ARGUMENT_CONVERTER.getKey(),
-                (IntegrationConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
+        returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
+                (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
 
         return returnMap;
@@ -486,8 +485,8 @@ public class LiquibaseCommandLine {
 
     protected Map<String, Object> configureLogging() throws IOException {
         Map<String, Object> returnMap = new HashMap<>();
-        final ConfiguredValue<Level> currentConfiguredValue = IntegrationConfiguration.LOG_LEVEL.getCurrentConfiguredValue();
-        final File logFile = IntegrationConfiguration.LOG_FILE.getCurrentValue();
+        final ConfiguredValue<Level> currentConfiguredValue = LiquibaseCommandLineConfiguration.LOG_LEVEL.getCurrentConfiguredValue();
+        final File logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue();
 
         Level logLevel = Level.OFF;
         if (!currentConfiguredValue.wasDefaultValueUsed()) {
@@ -564,7 +563,7 @@ public class LiquibaseCommandLine {
     }
 
     protected ClassLoader configureClassLoader() throws IllegalArgumentException {
-        final String classpath = IntegrationConfiguration.CLASSPATH.getCurrentValue();
+        final String classpath = LiquibaseCommandLineConfiguration.CLASSPATH.getCurrentValue();
 
         final List<URL> urls = new ArrayList<>();
         if (classpath != null) {
@@ -592,7 +591,7 @@ public class LiquibaseCommandLine {
         }
 
         final ClassLoader classLoader;
-        if (IntegrationConfiguration.INCLUDE_SYSTEM_CLASSPATH.getCurrentValue()) {
+        if (LiquibaseCommandLineConfiguration.INCLUDE_SYSTEM_CLASSPATH.getCurrentValue()) {
             classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
                     .getContextClassLoader()));
 

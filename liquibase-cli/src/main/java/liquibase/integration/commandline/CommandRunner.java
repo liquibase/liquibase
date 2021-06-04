@@ -1,9 +1,7 @@
 package liquibase.integration.commandline;
 
-import liquibase.Scope;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
-import liquibase.integration.IntegrationConfiguration;
 import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
@@ -35,7 +33,7 @@ class CommandRunner implements Callable<CommandResults> {
         }
 
         final CommandScope commandScope = new CommandScope(commandName);
-        final File outputFile = IntegrationConfiguration.OUTPUT_FILE.getCurrentValue();
+        final File outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentValue();
         OutputStream outputStream = null;
 
         try {

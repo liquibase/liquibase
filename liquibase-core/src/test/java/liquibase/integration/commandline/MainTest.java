@@ -1,10 +1,7 @@
 package liquibase.integration.commandline;
 
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.exception.CommandLineParsingException;
-import liquibase.integration.IntegrationConfiguration;
-import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.util.StringUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -134,7 +131,7 @@ public class MainTest {
 
     @Test
     public void globalConfigurationSaysDoNotRun() throws Exception {
-        Scope.child(Collections.singletonMap(IntegrationConfiguration.SHOULD_RUN.getKey(), false), () -> {
+        Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey(), false), () -> {
 
             int errorLevel = Main.run(new String[0]);
             assertEquals(errorLevel, 0); // If it SHOULD run, and we would call without parameters, we would get -1
