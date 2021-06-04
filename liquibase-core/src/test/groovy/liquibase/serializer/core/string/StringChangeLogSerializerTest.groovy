@@ -156,6 +156,7 @@ public class StringChangeLogSerializerTest extends Specification {
                 "    baseTableSchemaName=\"BASE_SCHEM\"\n" +
                 "    constraintName=\"FK_TEST\"\n" +
                 "    deferrable=\"true\"\n" +
+                "    deleteCascade=\"true\"\n" +
                 "    initiallyDeferred=\"true\"\n" +
                 "    onDelete=\"SET NULL\"\n" +
                 "    onUpdate=\"NO ACTION\"\n" +
