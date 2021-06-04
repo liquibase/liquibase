@@ -39,7 +39,6 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     private Boolean deferrable;
     private Boolean initiallyDeferred;
     private Boolean shouldValidate;
-    private Boolean deleteCascade;
 
     private String onUpdate;
     private String onDelete;
@@ -194,11 +193,13 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.initiallyDeferred = initiallyDeferred;
     }
 
+    /**
+     * @deprecated Use {@link #getOnDelete()}
+     */
     @DatabaseChangeProperty(description = "This is true to set onDelete to Cascade, priority given to onDelete tag if one exists")
-    public Boolean getDeleteCascade() { return deleteCascade; }
+    public Boolean getDeleteCascade() { return onDelete != null && onDelete.equalsIgnoreCase("CASCADE"); }
 
     public void setDeleteCascade(Boolean deleteCascade) {
-        this.deleteCascade = deleteCascade;
         if ((deleteCascade != null) && deleteCascade && (this.onDelete == null)) {
             setOnDelete("CASCADE");
         }
