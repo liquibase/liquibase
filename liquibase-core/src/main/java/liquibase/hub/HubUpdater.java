@@ -56,7 +56,8 @@ public class HubUpdater {
      * This method performs a syncHub and returns a new Operation instance
      * If there is an error or the Hub is not available it returns null
      *
-     * @param operationType     Operation type (UPDATE or ROLLBACK)
+     * @param operationType     Operation type (UPDATE, ROLLBACK, or CHANGELOGSYNC)
+     * @param operationCommand  Specific command which is executing (update, update-count, etc.)
      * @param connection        Connection for this operation
      * @param changeLogFile     Path to DatabaseChangelog for this operation
      * @param contexts          Contexts to use for filtering
@@ -68,6 +69,7 @@ public class HubUpdater {
      * @throws LiquibaseException    Thrown by Liquibase core
      */
     public Operation preUpdateHub(String operationType,
+                                  String operationCommand,
                                   Connection connection,
                                   String changeLogFile,
                                   Contexts contexts,
@@ -113,7 +115,7 @@ public class HubUpdater {
         //
         // Send the START operation event
         //
-        Operation updateOperation = hubService.createOperation(operationType, hubChangeLog, connection);
+        Operation updateOperation = hubService.createOperation(operationType, operationCommand, hubChangeLog, connection);
         try {
             hubService.sendOperationEvent(updateOperation, new OperationEvent()
                     .setEventType("START")
