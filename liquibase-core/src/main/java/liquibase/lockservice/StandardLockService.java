@@ -107,7 +107,7 @@ public class StandardLockService implements LockService {
                                 )
                 );
             } catch (DatabaseException e) {
-                if (errorIsCausedByLogTableExists(e)) {
+                if (isLockTableExistsException(e)) {
                     //hit a race condition where the table got created by another node.
                     Scope.getCurrentScope().getLog(getClass()).fine("Database lock table already appears to exist " +
                             "due to exception: " + e.getMessage() + ". Continuing on");
@@ -156,7 +156,10 @@ public class StandardLockService implements LockService {
 
     }
 
-    private boolean errorIsCausedByLogTableExists(final DatabaseException e) {
+    /**
+     * @return true if the given exception is because the lock table already exists. Used for better logging and handling of race conditions.
+     */
+    protected boolean isLockTableExistsException(final DatabaseException e) {
         final Throwable cause = e.getCause();
         if (cause instanceof SQLException) {
             // now database specific error code evaluation can follow, currently for sqlserver, only
@@ -166,7 +169,7 @@ public class StandardLockService implements LockService {
             }
         }
         // fallback to default
-        return e.getMessage() != null && e.getMessage().contains("exists");
+        return e.getMessage() != null && e.getMessage().toLowerCase().contains("exists");
     }
 
     public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated) throws DatabaseException {
