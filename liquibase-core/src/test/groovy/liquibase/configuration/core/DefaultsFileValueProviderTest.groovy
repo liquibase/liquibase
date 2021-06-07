@@ -6,6 +6,19 @@ import spock.lang.Unroll
 
 class DefaultsFileValueProviderTest extends Specification {
 
+    def "can load from stream"() {
+        when:
+        def stream = new ByteArrayInputStream("""
+long.key: Long Key
+long.multiWord: Long MultiWord
+""".getBytes())
+        def provider = new DefaultsFileValueProvider(stream, "Test stream")
+
+        then:
+        provider.getProvidedValue("long.key").getValue() == "Long Key"
+        provider.getProvidedValue("long.multiWord").getValue() == "Long MultiWord"
+    }
+
     @Unroll
     def "getProvidedValue"() {
         setup:
