@@ -1,6 +1,5 @@
 package liquibase.extension.testing.command
 
-
 import liquibase.AbstractExtensibleObject
 import liquibase.CatalogAndSchema
 import liquibase.Scope
@@ -23,7 +22,7 @@ import liquibase.extension.testing.TestFilter
 import liquibase.extension.testing.setup.*
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
-import liquibase.integration.IntegrationConfiguration
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
 import liquibase.ui.InputHandler
@@ -43,10 +42,18 @@ class CommandTests extends Specification {
 
     private static List<CommandTestDefinition> commandTestDefinitions
 
+    public static final PATTERN_FLAGS = Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE
+
     private ConfigurationValueProvider propertiesProvider
 
     def setup() {
         def properties = new Properties()
+
+        getClass().getClassLoader().getResources("liquibase.test.properties").each {
+            it.withReader {
+                properties.load(it)
+            }
+        }
 
         getClass().getClassLoader().getResources("liquibase.test.local.properties").each {
             it.withReader {
@@ -86,9 +93,26 @@ class CommandTests extends Specification {
 
         assert commandTestDefinition.testFile.name == commandTestDefinition.getCommand().join("") + ".test.groovy": "Incorrect test file name"
 
+        assert commandDefinition.getShortDescription() == null || commandDefinition.getShortDescription() != commandDefinition.getLongDescription() : "Short and long description should not be identical. If there is nothing more to say in the long description, return null"
+
         for (def runTest : commandTestDefinition.runTests) {
             for (def arg : runTest.arguments.keySet()) {
                 assert commandDefinition.arguments.containsKey(arg): "Unknown argument '${arg}' in run ${runTest.description}"
+            }
+        }
+
+        where:
+        commandTestDefinition << getCommandTestDefinitions()
+    }
+
+    @Unroll("#featureName: #commandTestDefinition.testFile.name")
+    def "check for secure configurations"() {
+        expect:
+        def commandDefinition = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition(commandTestDefinition.getCommand() as String[])
+        assert commandDefinition != null: "Cannot find specified command ${commandTestDefinition.getCommand()}"
+        for (def argDef : commandDefinition.arguments.values()) {
+            if (argDef.name.toLowerCase().contains("password")) {
+                assert argDef.valueObfuscator != null : "${argDef.name} should be obfuscated OR explicitly set an obfuscator of ConfigurationValueObfuscator.NONE"
             }
         }
 
@@ -105,7 +129,7 @@ class CommandTests extends Specification {
         StringWriter signature = new StringWriter()
         signature.print """
 Short Description: ${commandDefinition.getShortDescription() ?: "MISSING"}
-Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
+Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 """
         signature.println "Required Args:"
         def foundRequired = false
@@ -115,6 +139,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
             }
             foundRequired = true
             signature.println "  ${argDef.name} (${argDef.dataType.simpleName}) ${argDef.description ?: "MISSING DESCRIPTION"}"
+            if (argDef.valueObfuscator != null) {
+                signature.println("    OBFUSCATED")
+            }
         }
         if (!foundRequired) {
             signature.println "  NONE"
@@ -124,12 +151,15 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         signature.println "Optional Args:"
         def foundOptional = false
         for (def argDef : commandDefinition.arguments.values()) {
-            if (argDef.required) {
+            if (argDef.required || argDef.hidden) {
                 continue
             }
             foundOptional = true
             signature.println "  ${argDef.name} (${argDef.dataType.simpleName}) ${argDef.description ?:  "MISSING DESCRIPTION"}"
             signature.println "    Default: ${argDef.defaultValueDescription}"
+            if (argDef.valueObfuscator != null) {
+                signature.println("    OBFUSCATED")
+            }
         }
         if (!foundOptional) {
             signature.println "  NONE"
@@ -195,15 +225,17 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
                 altPassword: permutation.connectionStatus.altPassword,
         )
 
-        def outputStream = new ByteArrayOutputStream()
         def uiOutputWriter = new StringWriter()
         def uiErrorWriter = new StringWriter()
         def logService = new BufferedLogService()
+        def outputStream = new ByteArrayOutputStream()
+        if (testDef.outputFile != null) {
+            outputStream = new FileOutputStream(testDef.outputFile)
+        }
 
         commandScope.addArgumentValue("database", database)
-        commandScope.addArgumentValue("url", database.getConnection().getURL())
-        commandScope.addArgumentValue("referenceUrl", database.getConnection().getURL())
-        commandScope.addArgumentValue("schemas", catalogAndSchemas)
+        //Do not set the default url.  Let the tests set it up
+        //commandScope.addArgumentValue("url", database.getConnection().getURL())
         commandScope.setOutput(outputStream)
 
         if (testDef.setup != null) {
@@ -229,24 +261,35 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
             }
         }
 
+        boolean exceptionThrown = false
         def results = Scope.child([
-                (IntegrationConfiguration.LOG_LEVEL.getKey()): Level.INFO,
-                ("liquibase.plugin." + HubService.name): MockHubService,
-                (Scope.Attr.ui.name()): new TestUI(uiOutputWriter, uiErrorWriter),
-                (Scope.Attr.logService.name()): logService
+                (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
+                ("liquibase.plugin." + HubService.name)               : MockHubService,
+                (Scope.Attr.ui.name())                                : new TestUI(uiOutputWriter, uiErrorWriter),
+                (Scope.Attr.logService.name())                        : logService,
         ], {
             try {
-                return commandScope.execute()
+                def returnValue = commandScope.execute()
+                assert testDef.expectedException == null : "An exception was expected but the command completed successfully"
+                return returnValue
             }
             catch (Exception e) {
+                exceptionThrown = true
                 if (testDef.expectedException == null) {
                     throw e
                 } else {
                     assert e.class == testDef.expectedException
+                    if (testDef.expectedExceptionMessage != null) {
+                        checkOutput("Exception message", e.getMessage(), Collections.singletonList(testDef.expectedExceptionMessage))
+                    }
                     return
                 }
             }
         } as Scope.ScopedRunnerWithReturn<CommandResults>)
+
+        //
+        // Check to see if there was supposed to be an exception
+        //
 
         if (testDef.expectedResults.size() > 0 && (results == null || results.getResults().isEmpty())) {
             throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
@@ -263,7 +306,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
 
         if (!testDef.expectedResults.isEmpty()) {
             for (def returnedResult : results.getResults().entrySet()) {
-                def expectedValue = String.valueOf(testDef.expectedResults.get(returnedResult.getKey()))
+                def expectedResult = testDef.expectedResults.get(returnedResult.getKey())
+                def expectedValue = expectedResult instanceof Closure ? expectedResult.call() : String.valueOf(expectedResult)
                 def seenValue = String.valueOf(returnedResult.getValue())
 
                 assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
@@ -276,9 +320,15 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
     }
 
     static OutputCheck assertNotContains(String substring) {
+        return assertNotContains(substring, false)
+    }
+
+    static OutputCheck assertNotContains(String substring, boolean caseInsensitive) {
         return new OutputCheck() {
             @Override
             def check(String actual) throws AssertionError {
+                actual = (caseInsensitive && actual != null ? actual.toLowerCase() : actual)
+                substring = (caseInsensitive && substring != null ? substring.toLowerCase() : substring)
                 assert !actual.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))): "$actual does not contain: '$substring'"
             }
         }
@@ -356,7 +406,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(fullOutput))
 
         if (fullOutput.length() == 0) {
-            assert checks != null && checks.size() >= 0: "$outputDescription was empty but checks were defined"
+            assert checks == null || checks.size() == 0: "$outputDescription was empty but checks were defined"
         } else {
             for (def expectedOutputCheck : checks) {
                 if (expectedOutputCheck == null) {
@@ -368,7 +418,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
                             .contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck)).replaceAll(/\s+/," ")): "$outputDescription does not contain: '$expectedOutputCheck'"
                 } else if (expectedOutputCheck instanceof Pattern) {
                     String patternString = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern()))
-                    expectedOutputCheck = Pattern.compile(patternString, Pattern.MULTILINE | Pattern.DOTALL)
+                    //expectedOutputCheck = Pattern.compile(patternString, Pattern.MULTILINE | Pattern.DOTALL)
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
                     assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
@@ -391,25 +441,31 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
             def config = new CompilerConfiguration()
             def shell = new GroovyShell(this.class.classLoader, config)
 
-            ("src/test/resources/liquibase/extension/testing/command/" as File).eachFileRecurse {
-                if (!it.name.endsWith("test.groovy")) {
-                    return
-                }
-
-                try {
-                    def returnValue = shell.evaluate(it)
-
-                    if (!returnValue instanceof CommandTestDefinition) {
-                        org.spockframework.util.Assert.fail("${it} is not a CommandTest definition")
+            def path = "src/test/resources/liquibase/extension/testing/command/"
+            try {
+                (path as File).eachFileRecurse {
+                    if (!it.name.endsWith("test.groovy")) {
+                        return
                     }
 
-                    def definition = (CommandTestDefinition) returnValue
-                    definition.testFile = it
-                    commandTestDefinitions.add(definition)
+                    try {
+                        def returnValue = shell.evaluate(it)
 
-                } catch (Throwable e) {
-                    throw new RuntimeException("Error parsing ${it}: ${e.message}", e)
+                        if (!returnValue instanceof CommandTestDefinition) {
+                            org.spockframework.util.Assert.fail("${it} is not a CommandTest definition")
+                        }
+
+                        def definition = (CommandTestDefinition) returnValue
+                        definition.testFile = it
+                        commandTestDefinitions.add(definition)
+
+                    } catch (Throwable e) {
+                        throw new RuntimeException("Error parsing ${it}: ${e.message}", e)
+                    }
                 }
+            }
+            catch (Exception e) {
+                throw new RuntimeException("No command tests found in ${path}.\nIf running CommandTests directly, make sure you are choosing the classpath of the module you want to test")
             }
         }
 
@@ -525,8 +581,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
         private List<Object> expectedUIErrors = new ArrayList<>()
         private List<Object> expectedLogs = new ArrayList<>()
 
+        private File outputFile
+
         private Map<String, ?> expectedResults = new HashMap<>()
         private Class<Throwable> expectedException
+        private Object expectedExceptionMessage
 
         def setup(@DelegatesTo(TestSetupDefinition) Closure closure) {
             def setupDef = new TestSetupDefinition()
@@ -538,6 +597,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
             setupDef.validate()
 
             this.setup = setupDef.build()
+        }
+
+        def setOutputFile(File outputFile) {
+            this.outputFile = outputFile
         }
 
         /**
@@ -642,6 +705,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
             this.expectedException = exception
         }
 
+        def setExpectedExceptionMessage(Object expectedExceptionMessage) {
+            this.expectedExceptionMessage = expectedExceptionMessage
+        }
+
         void validate() {
         }
     }
@@ -707,20 +774,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
             this.setups.add(new SetupRunChangelog(changeLogPath, labels))
         }
 
-        /**
-         *
-         * Create a specified file with the contents from a source
-         *
-         * @param originalFile
-         * @param newFile
-         *
-         */
         void createTempResource(String originalFile, String newFile) {
-            URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
-            File f = new File(url.toURI())
-            String contents = FileUtil.getContents(f)
-            File outputFile = new File("target/test-classes", newFile)
-            FileUtil.write(contents, outputFile)
+            this.setups.add(new SetupCreateTempResources(originalFile, newFile))
         }
 
         /**
@@ -738,7 +793,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
             File outputFile = new File("target/test-classes", newFile)
             FileUtil.write(contents, outputFile)
             println "Copied file " + originalFile + " to file " + newFile
+        }
 
+        void modifyChangeLogId(String originalFile, String newChangeLogId) {
+            this.setups.add(new SetupModifyChangelog(originalFile, newChangeLogId))
         }
 
         /**
@@ -828,7 +886,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "MISSING"}
 
         @Override
         def <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
-            throw new RuntimeException("Cannot prompt in tests")
+            return defaultValue
         }
 
         @Override

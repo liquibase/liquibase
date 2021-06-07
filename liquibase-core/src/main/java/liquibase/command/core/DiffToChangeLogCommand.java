@@ -52,17 +52,17 @@ public class DiffToChangeLogCommand extends DiffCommand {
         InternalSnapshotCommandStep.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());
 
         final CommandScope commandScope = new CommandScope("diffToChangeLogInternal");
-        commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.REFERENCE_DATABASE_ARG, getReferenceDatabase());
-        commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.TARGET_DATABASE_ARG, getTargetDatabase());
-        commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.SNAPSHOT_TYPES_ARG, getSnapshotTypes());
-        commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.SNAPSHOT_LISTENER_ARG, getSnapshotListener());
-        commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, getReferenceSnapshotControl());
-        commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.TARGET_SNAPSHOT_CONTROL_ARG, getTargetSnapshotControl());
-        commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.OBJECT_CHANGE_FILTER_ARG, getObjectChangeFilter());
-        commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.COMPARE_CONTROL_ARG, getCompareControl());
+        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.REFERENCE_DATABASE_ARG, getReferenceDatabase());
+        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.TARGET_DATABASE_ARG, getTargetDatabase());
+        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.SNAPSHOT_TYPES_ARG, getSnapshotTypes());
+        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.SNAPSHOT_LISTENER_ARG, getSnapshotListener());
+        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, getReferenceSnapshotControl());
+        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.TARGET_SNAPSHOT_CONTROL_ARG, getTargetSnapshotControl());
+        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.OBJECT_CHANGE_FILTER_ARG, getObjectChangeFilter());
+        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.COMPARE_CONTROL_ARG, getCompareControl());
 
-        commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.CHANGELOG_FILENAME_ARG, getChangeLogFile());
-        commandScope.addArgumentValue(InternalDiffChangeLogCommandStep.DIFF_OUTPUT_CONTROL_ARG, getDiffOutputControl());
+        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.CHANGELOG_FILE_ARG, getChangeLogFile());
+        commandScope.addArgumentValue(InternalDiffChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG, getDiffOutputControl());
 
         commandScope.setOutput(getOutputStream());
         commandScope.execute();

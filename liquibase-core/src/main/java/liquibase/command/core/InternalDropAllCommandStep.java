@@ -48,12 +48,12 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         CHANGELOG_FILE_ARG = builder.argument("changeFile", String.class)
             .description("The root changelog").build();
         HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", UUID.class)
-            .description("The Hub connection ID").build();
+            .description("Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.").build();
     }
 
     @Override
-    public String[] getName() {
-        return COMMAND_NAME;
+    public String[][] defineCommandNames() {
+        return new String[][] { COMMAND_NAME };
     }
 
     @Override
@@ -110,7 +110,6 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
 
         Scope.getCurrentScope().getUI().sendMessage("All objects dropped from " + commandScope.getArgumentValue(DATABASE_ARG).getConnection().getConnectionUserName() + "@" + commandScope.getArgumentValue(DATABASE_ARG).getConnection().getURL());
         resultsBuilder.addResult("statusCode", 0);
-        resultsBuilder.addResult("statusMessage", "Successfully executed dropAll");
     }
 
     //
@@ -121,10 +120,10 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
     //
     private HubChangeLog getHubChangeLog(DatabaseChangeLog changeLog) throws LiquibaseHubException {
         String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
-        String hubMode = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
+        HubConfiguration.HubMode hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
         String changeLogId = changeLog.getChangeLogId();
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
-        if (apiKey == null || hubMode.equals("off") || !hubServiceFactory.isOnline()) {
+        if (apiKey == null || hubMode == HubConfiguration.HubMode.OFF || !hubServiceFactory.isOnline()) {
             return null;
         }
         final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
@@ -183,8 +182,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        commandDefinition.setShortDescription("Drop all database objects owned by the user");
-        commandDefinition.setLongDescription("Drop all database objects owned by the user");
+        commandDefinition.setInternal(true);
     }
 
     private DatabaseChangeLog parseChangeLogFile(String changeLogFile) throws LiquibaseException {

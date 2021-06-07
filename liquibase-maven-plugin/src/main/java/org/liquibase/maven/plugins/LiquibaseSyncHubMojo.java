@@ -7,6 +7,8 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
 
+import java.util.UUID;
+
 /**
  * <p>Syncs all changes in change log with Hub.</p>
  *
@@ -45,10 +47,10 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
         syncHub
                 .addArgumentValue(InternalSyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, database.getConnection().getURL())
-                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
-                .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId)
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, UUID.fromString(hubConnectionId))
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId))
                 .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_ONLINE_ARG, false);
+                .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_OFFLINE_ARG, false);
 
         syncHub.execute();
     }

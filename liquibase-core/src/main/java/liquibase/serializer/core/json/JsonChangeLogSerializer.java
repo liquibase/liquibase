@@ -15,7 +15,7 @@ public class JsonChangeLogSerializer extends YamlChangeLogSerializer {
 
     @Override
     public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
         writer.write("{ \"databaseChangeLog\": [\n");
         int i = 0;
         for (T child : children) {
