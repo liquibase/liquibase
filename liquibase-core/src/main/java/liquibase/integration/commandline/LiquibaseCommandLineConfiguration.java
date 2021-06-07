@@ -28,7 +28,6 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<ArgumentConverter> ARGUMENT_CONVERTER;
 
     static {
-        final AtomicBoolean hasComplained = new AtomicBoolean(false);
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
 
         DRIVER = builder.define("driver", Class.class).setDescription("Database driver class").build();
@@ -78,10 +77,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                     try {
                         return Level.parse(stringLevel);
                     } catch (IllegalArgumentException e) {
-                        if (! hasComplained.get()) {
-                            Scope.getCurrentScope().getUI().sendErrorMessage("WARNING:  Unknown log level " + stringLevel);
-                            hasComplained.set(true);
-                        }
+                        Scope.getCurrentScope().getUI().sendErrorMessage("WARNING:  Unknown log level " + stringLevel);
                         return Level.INFO;
                     }
                 })
