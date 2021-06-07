@@ -309,7 +309,7 @@ public class CustomChangeWrapper extends AbstractChange {
             }
             String paramName = child.getChildValue(null, "name", String.class);
             if (paramName == null) {
-                throw new ParsedNodeException("Custom change parameter (" + child.toString() + ") did not have a 'name' child value!");
+                throw new ParsedNodeException("Custom change param " + child + " does not have a 'name' attribute");
             }
             this.setParam(paramName, (String) value);
         }
