@@ -22,7 +22,6 @@ import liquibase.integration.IntegrationDetails;
 import liquibase.license.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogFactory;
 import liquibase.logging.LogMessageFilter;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -496,12 +495,23 @@ public class Main {
     }
 
     private static Level parseLogLevel(String logLevelName, ConsoleUIService ui) {
-        try {
-            return Scope.getCurrentScope().getSingleton(LogFactory.class).parseLogLevel(logLevelName);
-        } catch (IllegalArgumentException e) {
-            ui.sendErrorMessage("Unknown log level " + logLevelName);
-            return Level.OFF;
+        logLevelName = logLevelName.toUpperCase();
+        Level logLevel;
+        if (logLevelName.equals("DEBUG")) {
+            logLevel = Level.FINE;
+        } else if (logLevelName.equals("WARN")) {
+            logLevel = Level.WARNING;
+        } else if (logLevelName.equals("ERROR")) {
+            logLevel = Level.SEVERE;
+        } else {
+            try {
+                logLevel = Level.parse(logLevelName);
+            } catch (IllegalArgumentException e) {
+                ui.sendErrorMessage("Unknown log level " + logLevelName);
+                logLevel = Level.OFF;
+            }
         }
+        return logLevel;
     }
 
     /**

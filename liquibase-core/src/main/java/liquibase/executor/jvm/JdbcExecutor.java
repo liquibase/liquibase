@@ -1,8 +1,7 @@
 package liquibase.executor.jvm;
 
 import liquibase.Scope;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.SqlConfiguration;
+import liquibase.sql.SqlConfiguration;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
@@ -22,7 +21,6 @@ import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.CompoundStatement;
 import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.DropTableStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtil;
 
@@ -383,7 +381,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     listener.writeSqlWillRun(String.format("%s", statement));
                 }
 
-                Level sqlLogLevel = LiquibaseConfiguration.getInstance().getConfiguration(SqlConfiguration.class).getShowAtLogLevel();
+                Level sqlLogLevel = SqlConfiguration.SHOW_AT_LOG_LEVEL.getCurrentValue();
 
                 log.log(sqlLogLevel, statement, null);
                 if (statement.contains("?")) {
