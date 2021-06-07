@@ -4,14 +4,13 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.integration.cdi.annotations.LiquibaseType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
@@ -107,12 +106,10 @@ public class CDILiquibase implements Extension {
             return;
         }
 
-        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
-        if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
+        if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
             log.info(String.format("Liquibase did not run on %s because %s was set to false.",
                     hostName,
-                liquibaseConfiguration.describeValueLookupLogic(
-                    GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN)
+                LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey()
             ));
             return;
         }
@@ -157,6 +154,7 @@ public class CDILiquibase implements Extension {
         }
     }
 
+    @java.lang.SuppressWarnings("squid:S2095")
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
         Liquibase liquibase = new Liquibase(config.getChangeLog(), resourceAccessor, createDatabase(c));
         if (config.getParameters() != null) {

@@ -20,7 +20,7 @@ public class JavaLogger extends AbstractLogger {
 
     @Override
     public void log(Level level, String message, Throwable e) {
-        if (level == Level.OFF) {
+        if (!logger.isLoggable(level)) {
             return;
         }
         logger.logp(level, className, null, filterMessage(message), e);

@@ -330,6 +330,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
+    @java.lang.SuppressWarnings("squid:S2095")
     private InputStream getResourceAsStream(String valueLobFile) throws IOException, LiquibaseException {
         String fileName = getFileName(valueLobFile);
         InputStreamList streams = this.resourceAccessor.openStreams(null, fileName);
@@ -398,6 +399,14 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     public List<? extends ColumnConfig> getColumns() {
         return columns;
+    }
+
+    public ChangeSet getChangeSet() {
+        return changeSet;
+    }
+
+    public ResourceAccessor getResourceAccessor() {
+        return resourceAccessor;
     }
 
     protected long getContentLength(InputStream in) throws IOException {

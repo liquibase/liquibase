@@ -183,6 +183,9 @@ public class StringUtil {
     }
 
     public static String join(String[] array, String delimiter) {
+        if (array == null) {
+            return null;
+        }
         return join(Arrays.asList(array), delimiter);
     }
 
@@ -503,6 +506,35 @@ public class StringUtil {
         return sb.toString();
     }
 
+    /**
+     * Converts a camelCase string to a kabob-case one
+     */
+    public static String toKabobCase(String string) {
+        if (string == null) {
+            return null;
+        }
+        return string.replaceAll("([A-Z])", "-$1").toLowerCase();
+    }
+
+    /**
+     * Converts a kabob-case or underscore_case string to a camel-case one
+     */
+    public static String toCamelCase(String string) {
+        if (string == null) {
+            return null;
+        }
+
+        final String[] splitString = string.split("[-_]");
+        if (splitString.length == 1) {
+            return string;
+        }
+        for (int i=1; i<splitString.length; i++) {
+            splitString[i] = upperCaseFirst(splitString[i]);
+        }
+
+        return join(splitString, "");
+    }
+
     public interface StringUtilFormatter<Type> {
         String toString(Type obj);
     }
@@ -686,7 +718,7 @@ public class StringUtil {
             // since line comments could be inside block comments, we want to
             // remove them first.
             String lastBlockComment = getLastBlockComment(str.toString());
-            if (isNotEmpty(lastBlockComment)) {
+            if (lastBlockComment != null && ! lastBlockComment.isEmpty()) {
                 str.setLength(str.length() - lastBlockComment.length());
                 // we just modified the end of the string,
                 // do another loop to check for next block or line comments
@@ -694,7 +726,7 @@ public class StringUtil {
             }
             // now check for the line comments
             String lastLineComment = getLastLineComment(str.toString());
-            if (isNotEmpty(lastLineComment)) {
+            if (lastLineComment != null && ! lastLineComment.isEmpty()) {
                 str.setLength(str.length() - lastLineComment.length());
                 // we just modified the end of the string,
                 // do another loop to check for next block or line comments
@@ -831,4 +863,9 @@ public class StringUtil {
     }
 
 
+
+    /** Check whether the value is 'null' (case insensitive) */
+    public static boolean equalsWordNull(String value){
+        return "NULL".equalsIgnoreCase(value);
+    }
 }

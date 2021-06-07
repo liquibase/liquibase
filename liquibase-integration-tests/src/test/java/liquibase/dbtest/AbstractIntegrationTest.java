@@ -3,8 +3,6 @@ package liquibase.dbtest;
 import liquibase.*;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -24,6 +22,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.hub.HubConfiguration;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
@@ -130,11 +129,9 @@ public abstract class AbstractIntegrationTest {
 
         String testHubApiKey = integrationTestProperties.getProperty("integration.test.hub.apiKey");
         if (testHubApiKey != null) {
-            HubConfiguration hubConfiguration =
-              LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-            hubConfiguration.setLiquibaseHubApiKey(testHubApiKey);
+            System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), testHubApiKey);
             String testHubUrl = integrationTestProperties.getProperty("integration.test.hub.url");
-            hubConfiguration.setLiquibaseHubUrl(testHubUrl);
+            System.setProperty(HubConfiguration.LIQUIBASE_HUB_URL.getKey(), testHubUrl);
         }
         Scope.setScopeManager(new TestScopeManager());
     }

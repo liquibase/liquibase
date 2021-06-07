@@ -50,14 +50,14 @@
     </scm>
 
     <properties>
-        <liquibase.base.version>4.2.0</liquibase.base.version>
+        <liquibase.base.version>4.4.0</liquibase.base.version>
         <liquibase.version.qualifier>-local</liquibase.version.qualifier>
         <liquibase.version.snapshot>-SNAPSHOT</liquibase.version.snapshot>
-        <liquibase.version>${liquibase.base.version}${liquibase.version.qualifier}${liquibase.version.snapshot}</liquibase.version>
+        <liquibase.version>${liquibase.base.version}${liquibase.version.qualifier}${liquibase.version.snapshot}
+        </liquibase.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.enforcer.requireMavenVersion>3.6</maven.enforcer.requireMavenVersion>
-        <maven.enforcer.requireJavaVersion>${maven.compiler.source}</maven.enforcer.requireJavaVersion>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mmZ</maven.build.timestamp.format>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
         <build.number>0</build.number>
@@ -66,6 +66,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring.version>5.0.12.RELEASE</spring.version>
+        <sonar.projectKey>org.liquibase:liquibase-parent</sonar.projectKey>
+        <sonar.organization>liquibase-core</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.moduleKey>${artifactId}</sonar.moduleKey>
+        <groovy.version>2.4.17</groovy.version>
+        <dependency.spock.version>1.3-groovy-2.4</dependency.spock.version>
+        <junit.version>4.12</junit.version>
+
         <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
     </properties>
 
@@ -74,14 +82,14 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.24</version>
+            <version>1.27</version>
             <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -110,9 +118,9 @@
         <dependency> <!-- use a specific Groovy version rather than the one specified by spock-core -->
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>2.4.17</version>
-            <type>pom</type>
+            <version>${groovy.version}</version>
             <scope>test</scope>
+            <type>pom</type>
             <exclusions>
                 <exclusion>
                     <groupId>org.codehaus.groovy</groupId>
@@ -124,7 +132,7 @@
         <dependency>
             <groupId>org.spockframework</groupId>
             <artifactId>spock-core</artifactId>
-            <version>1.3-groovy-2.4</version>
+            <version>${dependency.spock.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -159,7 +167,7 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>6.0.6</version>
             <scope>test</scope>
-    	</dependency>
+        </dependency>
 
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
@@ -169,33 +177,47 @@
         </dependency>
 
         <dependency>
-    	    <groupId>org.postgresql</groupId>
+            <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.12</version>
-	    <scope>test</scope>
-	</dependency>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- needed for newer java versions -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.3.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.3.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+            </plugin>
+
+            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.0.2</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
-                <configuration>
-                    <passphrase>${env.GPG_PASSPHRASE}</passphrase>
-                    <gpgArguments>
-                        <arg>--batch</arg>
-                        <!-- This is necessary for gpg to not try to use the pinentry programs -->
-                        <arg>--pinentry-mode</arg>
-                        <arg>loopback</arg>
-                    </gpgArguments>
                 </configuration>
             </plugin>
             <plugin>
@@ -214,9 +236,6 @@
                                     <version>${maven.enforcer.requireMavenVersion}</version>
                                     <message>This POM requires Maven ${maven.enforcer.requireMavenVersion}.</message>
                                 </requireMavenVersion>
-                                <requireJavaVersion>
-                                    <version>${maven.enforcer.requireJavaVersion}</version>
-                                </requireJavaVersion>
                             </rules>
                         </configuration>
                     </execution>
@@ -269,6 +288,13 @@
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
 
@@ -301,7 +327,6 @@
 
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -319,20 +344,40 @@
                  include_relative instruction to include the generated pages in our markdown
                  pages. -->
             <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-site-plugin</artifactId>
-              <version>3.8.2</version>
-              <configuration>
-                <templateFile>${maven.multiModuleProjectDirectory}/maven-site.vm</templateFile>
-              </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.8.2</version>
+                <configuration>
+                    <templateFile>${maven.multiModuleProjectDirectory}/maven-site.vm</templateFile>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <!-- by default don't run snyk on all modules. On  ones that "ship", mark them as skip=false -->
+                <groupId>io.snyk</groupId>
+                <artifactId>snyk-maven-plugin</artifactId>
+                <version>1.2.9</version>
+                <configuration>
+                    <skip>true</skip>
+                    <apiToken>${env.SNYK_API_TOKEN}</apiToken>
+                    <failOnSeverity>high</failOnSeverity>
+                    <org>${env.SNYK_ORG}</org>
+                    <includeProvidedDependencies>false</includeProvidedDependencies>
+                </configuration>
             </plugin>
         </plugins>
+
 
         <pluginManagement>
             <plugins>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
                     <version>2.5.2</version>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
                 </plugin>
 
                 <plugin>
@@ -355,4 +400,41 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>non-jdk-8</id>
+            <activation>
+                <jdk>!1.8</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>8</maven.compiler.release>
+            </properties>
+        </profile>
+        <profile>
+            <id>gpg-sign</id>
+            <activation>
+                <property>
+                    <name>env.GPG_PASSPHRASE</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <configuration>
+                            <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+                            <gpgArguments>
+                                <arg>--batch</arg>
+                                <!-- This is necessary for gpg to not try to use the pinentry programs -->
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

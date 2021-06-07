@@ -2,7 +2,7 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -377,7 +377,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return super.escapeObjectName(objectName, objectType);
         }
 
-        boolean includeCatalog = LiquibaseConfiguration.getInstance().shouldIncludeCatalogInSpecification();
+        boolean includeCatalog = GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION.getCurrentValue();
         if ((catalogName != null) && (includeCatalog || !catalogName.equalsIgnoreCase(this.getDefaultCatalogName()))) {
             return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
         } else {

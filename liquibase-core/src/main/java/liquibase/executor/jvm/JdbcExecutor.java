@@ -150,12 +150,7 @@ public class JdbcExecutor extends AbstractExecutor {
             }
         }
 
-        if (sql instanceof DropTableStatement && database instanceof Db2zDatabase) {
-            execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
-        }
-        else {
-            execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
-        }
+        execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
     }
 
 

@@ -4,8 +4,7 @@ import liquibase.Scope;
 import liquibase.change.core.LoadDataChange;
 import java.util.Locale;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -67,9 +66,7 @@ public class TimestampType extends DateTimeType {
             return super.toDatabaseDataType(database);
         }
         if (database instanceof MSSQLDatabase) {
-            if (!LiquibaseConfiguration.getInstance()
-                    .getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES)
-                    .getValue(Boolean.class)
+            if (!GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue()
                     && originalDefinition.toLowerCase(Locale.US).startsWith("timestamp")) {
                 return new DatabaseDataType(database.escapeDataTypeName("timestamp"));
             }

@@ -53,6 +53,7 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 	}
 
 	@Override
+	@java.lang.SuppressWarnings("squid:S2095")
 	protected Liquibase createLiquibase(Database db)
 			throws MojoExecutionException {
 		Liquibase liquibase = super.createLiquibase(db);

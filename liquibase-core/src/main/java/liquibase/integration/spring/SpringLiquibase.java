@@ -1,12 +1,7 @@
 package liquibase.integration.spring;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
-import liquibase.Scope;
-import liquibase.configuration.ConfigurationProperty;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.*;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -14,6 +9,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
@@ -104,31 +100,37 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		this.shouldRun = shouldRun;
 	}
 
+	@java.lang.SuppressWarnings("squid:S2095")
 	public String getDatabaseProductName() throws DatabaseException {
-		Connection connection = null;
+        Connection connection = null;
         Database database = null;
-		String name = "unknown";
-		try {
-			connection = getDataSource().getConnection();
-			database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-			name = database.getDatabaseProductName();
-		} catch (SQLException e) {
-			throw new DatabaseException(e);
-		} finally {
+        String name = "unknown";
+        try {
+            connection = getDataSource().getConnection();
+            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            name = database.getDatabaseProductName();
+        }
+        catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+        finally {
             if (database != null) {
                 database.close();
-            } else if (connection != null) {
-				try {
-					if (!connection.getAutoCommit()) {
-						connection.rollback();
-					}
-					connection.close();
-                } catch (SQLException e) {
-					log.warning("problem closing connection", e);
-				}
-			}
-		}
-		return name;
+            }
+            else {
+                if (connection != null) {
+                    try {
+                        if (!connection.getAutoCommit()) {
+                            connection.rollback();
+                        }
+                        connection.close();
+                    } catch (SQLException e) {
+                        log.warning("problem closing connection", e);
+                    }
+                }
+		    }
+       }
+       return name;
 	}
 
 	/**
@@ -246,12 +248,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 */
 	@Override
     public void afterPropertiesSet() throws LiquibaseException {
-        ConfigurationProperty shouldRunProperty = LiquibaseConfiguration.getInstance()
-            .getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
+		final ConfiguredValue<Boolean> shouldRunProperty = LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
 
-		if (!shouldRunProperty.getValue(Boolean.class)) {
-            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " + LiquibaseConfiguration
-                .getInstance().describeValueLookupLogic(shouldRunProperty) + " was set to false");
+		if (!(Boolean) shouldRunProperty.getValue()) {
+            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " +shouldRunProperty.getProvidedValue().describe() + " was set to false");
             return;
 		}
 		if (!shouldRun) {
@@ -262,34 +262,27 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 		Connection c = null;
 		Liquibase liquibase = null;
-		try {
-			c = getDataSource().getConnection();
+        try {
+            c = getDataSource().getConnection();
             liquibase = createLiquibase(c);
-			generateRollbackFile(liquibase);
-			performUpdate(liquibase);
-		} catch (SQLException e) {
-			throw new DatabaseException(e);
-		} finally {
-			Database database = null;
-			if (liquibase != null) {
-				database = liquibase.getDatabase();
-			}
-			if (database != null) {
-                database.close();
+            generateRollbackFile(liquibase);
+            performUpdate(liquibase);
+        } catch (SQLException e) {
+        	throw new DatabaseException(e);
+        } finally {
+            if (liquibase != null) {
+                liquibase.close();
             }
         }
-
-	}
+    }
 
     private void generateRollbackFile(Liquibase liquibase) throws LiquibaseException {
         if (rollbackFile != null) {
 
             try (
                 FileOutputStream fileOutputStream = new FileOutputStream(rollbackFile);
-                Writer output = new OutputStreamWriter(fileOutputStream, LiquibaseConfiguration.getInstance()
-                    .getConfiguration(GlobalConfiguration.class).getOutputEncoding())
-
-            ) {
+                Writer output = new OutputStreamWriter(fileOutputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()) )
+			{
 
                 if (tag != null) {
                     liquibase.futureRollbackSQL(tag, new Contexts(getContexts()),
@@ -300,29 +293,30 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             } catch (IOException e) {
                 throw new LiquibaseException("Unable to generate rollback file.", e);
             }
-        }
+       }
     }
 
     protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
-		if (isClearCheckSums()) {
-			liquibase.clearCheckSums();
-		}
+        if (isClearCheckSums()) {
+            liquibase.clearCheckSums();
+        }
 
-		if (isTestRollbackOnUpdate()) {
-			if (tag != null) {
-				liquibase.updateTestingRollback(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
-			} else {
-				liquibase.updateTestingRollback(new Contexts(getContexts()), new LabelExpression(getLabels()));
-			}
-		} else {
-			if (tag != null) {
-				liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
-			} else {
-				liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
-			}
-		}
+        if (isTestRollbackOnUpdate()) {
+            if (tag != null) {
+                liquibase.updateTestingRollback(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+            } else {
+                liquibase.updateTestingRollback(new Contexts(getContexts()), new LabelExpression(getLabels()));
+            }
+        } else {
+            if (tag != null) {
+                liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+            } else {
+                liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
+            }
+        }
     }
 
+	@java.lang.SuppressWarnings("squid:S2095")
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
 		SpringResourceAccessor resourceAccessor = createResourceOpener();
 		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));

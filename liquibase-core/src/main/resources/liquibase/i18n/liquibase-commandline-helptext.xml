@@ -88,8 +88,10 @@ Hub Commands
                                  create a Project from the CLI, or choose one
                                  already created. Learn more about free
                                  Liquibase Hub at https://hub.liquibase.com.
-
-
+ deactivateChangeLog             This command will deactivate the specified
+                                 changelog in in your Liquibase Hub
+                                 organization.  Learn more about free
+                                 Liquibase Hub at https://hub.liquibase.com.
  syncHub                         Synchronizes your local DATABASECHANGELOG
                                  table with its Liquibase Hub counterpart.
                                  Learn more about free Liquibase Hub at
@@ -102,6 +104,17 @@ Hub integration CLI parameter
                                  monitoring and reports in your Liquibase Hub
                                  account. Get a free key at
                                  https://hub.liquibase.com.
+ --hubConnectionId=<connectionId>
+                                 Used to identify the specific Connection in
+                                 which to record or extract data at Liquibase
+                                 Hub. Available in your Liquibase Hub Project
+                                 at https://hub.liquibase.com.
+ --hubProjectId=<projectId>
+                                 Used to identify the specific Project in which
+                                 to record or extract data at Liquibase Hub.
+                                 Available in your Liquibase Hub account at
+                                 https://hub.liquibase.com.
+
 
 Documentation Commands
  dbDoc <outputDirectory>         Generates Javadoc-like documentation
@@ -111,28 +124,38 @@ Documentation Commands
                                  grouped by default according to their update
                                  command's "deployment_id" value.
 Maintenance Commands
- tag <tag string>          'Tags' the current database state for future rollback
- tagExists <tag string>    Checks whether the given tag is already existing
- status [--verbose]        Outputs count (list if --verbose) of unrun changesets
+ tag <tag string>            'Tags' the current database state for future
+                             rollback
+ tagExists <tag string>      Checks whether the given tag is already existing
+ status [--verbose]          Outputs count (list if --verbose) of unrun
+                             changesets
  unexpectedChangeSets [--verbose]
-                           Outputs count (list if --verbose) of changesets run
-                           in the database that do not exist in the changelog.
- validate                  Checks changelog for errors
- calculateCheckSum <id>    Calculates and prints a checksum for the changeset
-                           with the given id in the format filepath::id::author.
- clearCheckSums            Removes all saved checksums from database log.
-                           Useful for 'MD5Sum Check Failed' errors
- changelogSync             Mark all changes as executed in the database
- changelogSyncSQL          Writes SQL to mark all changes as executed
-                           in the database to STDOUT
- markNextChangeSetRan      Mark the next change changes as executed
-                           in the database
- markNextChangeSetRanSQL   Writes SQL to mark the next change
-                           as executed in the database to STDOUT
- listLocks                 Lists who currently has locks on the
-                           database changelog
- releaseLocks              Releases all locks on the database changelog
- dropAll                   Drop all database objects owned by user
+                             Outputs count (list if --verbose) of changesets
+                             run
+                             in the database that do not exist in the
+                             changelog.
+ validate                    Checks changelog for errors
+ calculateCheckSum <id>      Calculates and prints a checksum for the changeset
+                             with the given id in the format
+                             filepath::id::author.
+ clearCheckSums              Removes all saved checksums from database log.
+                             Useful for 'MD5Sum Check Failed' errors
+ changelogSync               Mark all changes as executed in the database
+ changelogSyncSQL            Writes SQL to mark all changes as executed
+                             in the database to STDOUT
+ changelogSyncToTag <tag>    Mark all changes, upto and including the specified
+                             tag, as executed in the database
+ changelogSyncToTagSQL <tag> Write SQL to mark all changes, upto and including
+                             the specified tag, as executed in the database to
+                             STDOUT
+ markNextChangeSetRan        Mark the next change changes as executed
+                             in the database
+ markNextChangeSetRanSQL     Writes SQL to mark the next change
+                             as executed in the database to STDOUT
+ listLocks                   Lists who currently has locks on the
+                             database changelog
+ releaseLocks                Releases all locks on the database changelog
+ dropAll                     Drop all database objects owned by user
 
 Required Parameters:
  --changeLogFile=<path and filename>        Migration file

@@ -43,10 +43,6 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     @Shared resourceSupplier = new ResourceSupplier()
 
-    def before() {
-        LiquibaseConfiguration.getInstance().reset();
-    }
-
     def "namespace configured correctly"() {
         expect:
         assert new XMLChangeLogSAXParser().saxParserFactory.isNamespaceAware()

@@ -1,8 +1,8 @@
 package liquibase.hub.core;
 
 import liquibase.Scope;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
+import liquibase.hub.HubConfiguration;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.LiquibaseHubObjectNotFoundException;
 import liquibase.hub.LiquibaseHubRedirectException;
@@ -90,13 +90,14 @@ class HttpClient {
     }
 
     private URLConnection openConnection(String url) throws LiquibaseHubException {
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        String apiKey = hubConfiguration.getLiquibaseHubApiKey();
+        String apiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
 
         try {
             final URLConnection connection = new URL(getHubUrl() + url).openConnection();
             connection.setRequestProperty("User-Agent", "Liquibase " + LiquibaseUtil.getBuildVersion());
-            connection.setRequestProperty("Authorization", "Bearer " + apiKey);
+            if (StringUtil.isNotEmpty(apiKey)) {
+                connection.setRequestProperty("Authorization", "Bearer " + apiKey);
+            }
             connection.setRequestProperty("Accept", "application/json");
             connection.setRequestProperty("Content-Type", "application/json");
             return connection;
@@ -180,8 +181,8 @@ class HttpClient {
                         String newHubUrl = connection.getHeaderField("Location");
                         newHubUrl = newHubUrl.replaceAll(url, "");
                         Scope.getCurrentScope().getLog(getClass()).info("Redirecting to URL: " + newHubUrl);
-                        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-                        hubConfiguration.setLiquibaseHubUrl(newHubUrl);
+
+                        DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_URL, newHubUrl);
                         throw new LiquibaseHubRedirectException();
                     }
                 }
@@ -194,22 +195,29 @@ class HttpClient {
                 return (T) yaml.loadAs(response, returnType);
             } catch (IOException e) {
                 if (connection.getResponseCode() == 401) {
-                    throw new LiquibaseHubSecurityException("Authentication failure for "+connection.getRequestMethod()+" "+connection.getURL().toExternalForm());
+                    throw new LiquibaseHubSecurityException("Authentication failure for "+connection.getRequestMethod()+" "+connection.getURL().toExternalForm()+"\n"+
+                        "Check your Liquibase Hub API Key or other permissions. Learn more https://hub.liquibase.com.");
                 }
                 try {
                     try (InputStream error = connection.getErrorStream()) {
                         if (error != null) {
-                            final Map errorDetails = yaml.load(error);
+                            Object loadedObject = yaml.load(error);
+                            if (loadedObject instanceof Map) {
+                                final Map errorDetails = (Map)loadedObject;
 
-                            LiquibaseHubException returnException = new LiquibaseHubException((String) errorDetails.get("message"), e);
+                                LiquibaseHubException returnException = new LiquibaseHubException((String) errorDetails.get("message"), e);
 
-                            if (connection.getResponseCode() == 404) {
-                                returnException = new LiquibaseHubObjectNotFoundException(returnException.getMessage(), returnException.getCause());
+                                if (connection.getResponseCode() == 404) {
+                                    returnException = new LiquibaseHubObjectNotFoundException(returnException.getMessage(), returnException.getCause());
+                                }
+                                returnException.setTimestamp((String) errorDetails.get("timestamp"));
+                                returnException.setDetails((String) errorDetails.get("details"));
+                                throw returnException;
                             }
-                            returnException.setTimestamp((String) errorDetails.get("timestamp"));
-                            returnException.setDetails((String) errorDetails.get("details"));
-                            throw returnException;
-
+                            else {
+                                String errorMessage = "Unable to parse '" + loadedObject.toString() + "': " + e.getMessage();
+                                throw new LiquibaseHubException(errorMessage, e.getCause());
+                            }
                         }
                     }
                 } catch (IOException ioException) {
@@ -224,8 +232,7 @@ class HttpClient {
     }
 
     public String getHubUrl() {
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        return hubConfiguration.getLiquibaseHubUrl();
+        return HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue();
     }
 
 

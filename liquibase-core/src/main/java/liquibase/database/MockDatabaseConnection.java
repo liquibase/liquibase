@@ -88,7 +88,7 @@ public class MockDatabaseConnection implements DatabaseConnection {
 
 	@Override
 	public String getURL() {
-		return null;
+		return "jdbc://mock";
 	}
 
 	@Override

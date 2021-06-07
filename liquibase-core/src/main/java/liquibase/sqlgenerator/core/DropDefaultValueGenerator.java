@@ -10,7 +10,20 @@ import liquibase.statement.core.DropDefaultValueStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
+import java.util.function.BiFunction;
+
 public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultValueStatement> {
+
+    public static BiFunction DROP_DF_MSSQL = (tableName, columnName) -> {
+        return "DECLARE @sql [nvarchar](MAX)\r\n" +
+                "SELECT @sql = N'ALTER TABLE " + tableName + " DROP CONSTRAINT ' + QUOTENAME([df].[name]) " +
+                "FROM [sys].[columns] AS [c] " +
+                "INNER JOIN [sys].[default_constraints] AS [df] " +
+                "ON [df].[object_id] = [c].[default_object_id] " +
+                "WHERE [c].[object_id] = OBJECT_ID(N'" + tableName + "') " +
+                "AND [c].[name] = N'" + columnName + "'\r\n" +
+                "EXEC sp_executesql @sql";
+    };
 
     @Override
     public boolean supports(DropDefaultValueStatement statement, Database database) {
@@ -36,15 +49,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
         String sql;
         String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
         if (database instanceof MSSQLDatabase) {
-            sql =
-                    "DECLARE @sql [nvarchar](MAX)\r\n" +
-                    "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([df].[name]) " +
-                    "FROM [sys].[columns] AS [c] " +
-                    "INNER JOIN [sys].[default_constraints] AS [df] " +
-                    "ON [df].[object_id] = [c].[default_object_id] " +
-                    "WHERE [c].[object_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
-                    "AND [c].[name] = N'" + database.escapeStringForDatabase(statement.getColumnName()) +  "'\r\n" +
-                    "EXEC sp_executesql @sql";
+            sql = (String) DROP_DF_MSSQL.apply(database.escapeStringForDatabase(escapedTableName), database.escapeStringForDatabase(statement.getColumnName()));
         } else if (database instanceof MySQLDatabase) {
             sql = "ALTER TABLE " + escapedTableName + " ALTER " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DROP DEFAULT";
         } else if (database instanceof OracleDatabase) {
@@ -62,6 +67,8 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
         	 */
         	sql = "ALTER TABLE " + escapedTableName + " MODIFY (" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + statement.getColumnDataType() + ")";
         } else if (database instanceof AbstractDb2Database) {
+            sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DROP DEFAULT";
+        } else if (database instanceof PostgresDatabase) {
             sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DROP DEFAULT";
         } else {
             sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET DEFAULT NULL";

@@ -3,8 +3,6 @@ package liquibase.logging;
 import liquibase.Scope;
 import liquibase.plugin.AbstractPluginFactory;
 
-import java.util.logging.Level;
-
 public class LogFactory extends AbstractPluginFactory<LogService> {
 
     private LogFactory() {
@@ -36,19 +34,10 @@ public class LogFactory extends AbstractPluginFactory<LogService> {
         return Scope.getCurrentScope().getLog(LogFactory.class);
     }
 
-    public Level parseLogLevel(String logLevelName) throws IllegalArgumentException {
-        logLevelName = logLevelName.toUpperCase();
-
-        Level logLevel;
-        if (logLevelName.equals("DEBUG")) {
-            logLevel = Level.FINE;
-        } else if (logLevelName.equals("WARN")) {
-            logLevel = Level.WARNING;
-        } else if (logLevelName.equals("ERROR")) {
-            logLevel = Level.SEVERE;
-        } else {
-            logLevel = Level.parse(logLevelName);
-        }
-        return logLevel;
+    /**
+     * @deprecated Use {@link Scope#getSingleton(Class)}
+     */
+    public static LogFactory getInstance() {
+        return Scope.getCurrentScope().getSingleton(LogFactory.class);
     }
 }

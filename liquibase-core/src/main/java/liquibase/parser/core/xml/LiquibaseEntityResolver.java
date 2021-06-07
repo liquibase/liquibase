@@ -2,10 +2,7 @@ package liquibase.parser.core.xml;
 
 import liquibase.Scope;
 import liquibase.logging.Logger;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.InputStreamList;
-import liquibase.resource.ResourceAccessor;
+import liquibase.resource.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
@@ -19,7 +16,10 @@ import java.io.InputStream;
  */
 public class LiquibaseEntityResolver implements EntityResolver2 {
 
+    final ClassLoaderResourceAccessor fallbackResourceAccessor = new ClassLoaderResourceAccessor();
+
     @Override
+    @java.lang.SuppressWarnings("squid:S2095")
     public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
         Logger log = Scope.getCurrentScope().getLog(getClass());
 
@@ -34,7 +34,8 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 .replace("http://www.liquibase.org/xml/ns/migrator/", "http://www.liquibase.org/xml/ns/dbchangelog/")
                 .replaceFirst("https?://", "");
 
-        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+
+        ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), fallbackResourceAccessor);
         InputStreamList streams = resourceAccessor.openStreams(null, path);
         if (streams.isEmpty()) {
             log.fine("Unable to resolve XML entity locally. Will load from network.");

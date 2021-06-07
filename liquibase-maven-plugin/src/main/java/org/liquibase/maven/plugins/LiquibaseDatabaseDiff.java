@@ -4,8 +4,10 @@ package org.liquibase.maven.plugins;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.command.*;
-import liquibase.command.core.DiffCommand;
+import liquibase.command.core.DiffCommandStep;
+import liquibase.command.core.InternalDiffCommandStep;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
@@ -14,6 +16,7 @@ import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
+import liquibase.integration.commandline.Main;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -25,8 +28,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * <p>Generates a diff between the specified database and the reference database.
@@ -249,22 +250,29 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         } else {
             PrintStream printStream = createPrintStream();
             if (isFormattedDiff()) {
-                LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand("formattedDiff");
-                DiffCommand diffCommand =
+                CommandScope liquibaseCommand = new CommandScope("internalDiff");
+                CommandScope diffCommand =
                         CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtil.trimToNull(diffTypes),
                                 schemaComparisons, objectChangeFilter, printStream);
-                Map<String, Object> argsMap = new HashMap<>();
-                argsMap.put("format", format);
-                argsMap.put("diffCommand", diffCommand);
-                ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
-                try {
-                    CommandResult result = liquibaseCommand.execute();
-                    if (!result.succeeded) {
-                        throw new LiquibaseException(result.message);
-                    }
-                } catch (CommandExecutionException cee) {
-                    throw new LiquibaseException(cee);
+                CompareControl compareControl = new CompareControl(schemaComparisons, diffTypes);
+
+                liquibaseCommand.addArgumentValue("format", format);
+                liquibaseCommand.addArgumentValue("diffCommand", diffCommand);
+                liquibaseCommand.addArgumentValue("targetDatabase", db);
+                liquibaseCommand.addArgumentValue("referenceDatabase", referenceDatabase);
+                liquibaseCommand.addArgumentValue("compareControl", compareControl);
+                liquibaseCommand.addArgumentValue("objectChangeFilter", objectChangeFilter);
+                if (StringUtil.isEmpty(diffTypes)) {
+                    liquibaseCommand.addArgumentValue("snapshotTypes", new Class[0]);
+                } else {
+                    liquibaseCommand.addArgumentValue("snapshotTypes", diffTypes);
                 }
+
+                CommandScope formattedDiffCommand = new CommandScope("internalFormattedDiff");
+                formattedDiffCommand.addArgumentValue("format", format);
+                formattedDiffCommand.addArgumentValue("diffCommand", liquibaseCommand);
+
+                formattedDiffCommand.execute();
             } else {
                 CommandLineUtils.doDiff(referenceDatabase, db, StringUtil.trimToNull(diffTypes), schemaComparisons, objectChangeFilter, printStream);
             }
@@ -302,8 +310,8 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         super.printSettings(indent);
         getLog().info(indent + "referenceDriver: " + referenceDriver);
         getLog().info(indent + "referenceUrl: " + referenceUrl);
-        getLog().info(indent + "referenceUsername: " + referenceUsername);
-        getLog().info(indent + "referencePassword: " + referencePassword);
+        getLog().info(indent + "referenceUsername: " + "*****");
+        getLog().info(indent + "referencePassword: " + "*****");
         getLog().info(indent + "referenceDefaultSchema: " + referenceDefaultSchemaName);
         getLog().info(indent + "diffChangeLogFile: " + diffChangeLogFile);
     }
