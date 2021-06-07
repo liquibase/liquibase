@@ -22,7 +22,7 @@ import liquibase.extension.testing.TestFilter
 import liquibase.extension.testing.setup.*
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
-import liquibase.integration.IntegrationConfiguration
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
 import liquibase.ui.InputHandler
@@ -263,10 +263,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         boolean exceptionThrown = false
         def results = Scope.child([
-                (IntegrationConfiguration.LOG_LEVEL.getKey()): Level.INFO,
-                ("liquibase.plugin." + HubService.name): MockHubService,
-                (Scope.Attr.ui.name()): new TestUI(uiOutputWriter, uiErrorWriter),
-                (Scope.Attr.logService.name()): logService,
+                (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
+                ("liquibase.plugin." + HubService.name)               : MockHubService,
+                (Scope.Attr.ui.name())                                : new TestUI(uiOutputWriter, uiErrorWriter),
+                (Scope.Attr.logService.name())                        : logService,
         ], {
             try {
                 def returnValue = commandScope.execute()

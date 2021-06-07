@@ -1,16 +1,17 @@
-package liquibase.integration;
+package liquibase.integration.commandline;
 
 import liquibase.Scope;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 
 import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 /**
  * Common configuration settings for integrations
  */
-public class IntegrationConfiguration implements AutoloadedConfigurations {
+public class LiquibaseCommandLineConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<Class> DRIVER;
     public static final ConfigurationDefinition<Class> DATABASE_CLASS;
@@ -76,7 +77,7 @@ public class IntegrationConfiguration implements AutoloadedConfigurations {
                     try {
                         return Level.parse(stringLevel);
                     } catch (IllegalArgumentException e) {
-                        Scope.getCurrentScope().getUI().sendErrorMessage("Unknown log level " + stringLevel);
+                        Scope.getCurrentScope().getUI().sendErrorMessage("WARNING:  Unknown log level " + stringLevel);
                         return Level.INFO;
                     }
                 })
