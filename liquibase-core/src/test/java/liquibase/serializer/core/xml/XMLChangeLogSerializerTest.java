@@ -888,6 +888,7 @@ public class XMLChangeLogSerializerTest {
     	changeSet.setCreated("created");
     	changeSet.setFailOnError(true);
     	changeSet.setLabels(new Labels("label"));
+    	changeSet.setLogicalFilePath("path/to/file.json");
     	
     	
     	Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(changeSet);
@@ -933,7 +934,8 @@ public class XMLChangeLogSerializerTest {
     	changeSet.setCreated("created");
     	changeSet.setFailOnError(true);
     	changeSet.setLabels(new Labels("label"));
-    	
+    	changeSet.setLogicalFilePath("path/to/file.json");
+
     	String out = new XMLChangeLogSerializer().serialize(changeSet, true);
     	
     	assertEquals("<changeSet author=\"tms\"\n"

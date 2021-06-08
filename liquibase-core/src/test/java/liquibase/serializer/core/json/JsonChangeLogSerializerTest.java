@@ -46,7 +46,6 @@ public class JsonChangeLogSerializerTest {
                 "  \"changeSet\": {\n" +
                 "    \"id\": \"1\",\n" +
                 "    \"author\": \"nvoxland\",\n" +
-    			"    \"logicalFilePath\": \"path/to/file.json\",\n" +
                 "    \"objectQuotingStrategy\": \"LEGACY\",\n" +
                 "    \"preconditions\": {\n" +
                 "      \"preConditions\": {\n" +
