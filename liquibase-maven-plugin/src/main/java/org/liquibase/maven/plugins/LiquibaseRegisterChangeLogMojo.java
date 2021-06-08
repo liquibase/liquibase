@@ -42,7 +42,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
         if (hubProjectId == null && hubProjectName == null) {
-            throw new MojoFailureException("\nThe Hub project ID must be specified.");
+            throw new MojoFailureException("\nEither the Hub project ID or project name must be specified.");
         }
         if (hubProjectId != null && hubProjectName != null) {
             throw new MojoFailureException("\nThe 'registerchangelog' command failed because too many parameters were provided. Command expects project ID or new projectname, but not both.\n");
@@ -56,7 +56,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         CommandScope registerChangeLog = new CommandScope("registerChangeLog");
         registerChangeLog
                 .addArgumentValue(RegisterChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId))
+                .addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, (hubProjectId != null ? UUID.fromString(hubProjectId) : null))
                 .addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_NAME_ARG, hubProjectName);
 
         registerChangeLog.addArgumentValue("changeLogFile", changeLogFile);
