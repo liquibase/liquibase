@@ -1093,7 +1093,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 Arrays.asList(
                         "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
                         "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
-                        "objectQuotingStrategy", "created"
+                "logicalFilePath", "created"
                 )
         );
     }
@@ -1176,6 +1176,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         if ("created".equals(field)) {
             return getCreated();
+        }
+
+        if ("logicalFilePath".equals(field)) {
+        	return getFilePath();
         }
 
         if ("rollback".equals(field)) {
