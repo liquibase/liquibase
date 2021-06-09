@@ -7,6 +7,7 @@ import liquibase.exception.LiquibaseException;
 
 /**
  * produces a list of changesets that were run in the database but do not exist in the current changelog.
+ * @goal unexpectedChangesets
  */
 public class LiquibaseUnexpectedChangeSetsMojo extends AbstractLiquibaseChangeLogMojo {
 
