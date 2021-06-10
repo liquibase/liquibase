@@ -226,7 +226,9 @@ public class Liquibase implements AutoCloseable {
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
                 }
 
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+                ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance()
+                   .getChangeLogService( database );
+                changeLogService.generateDeploymentId();
 
                 changeLog.validate(database, contexts, labelExpression);
 
@@ -235,6 +237,12 @@ public class Liquibase implements AutoCloseable {
                 //
                 hubUpdater = new HubUpdater(new Date(), changeLog, database);
                 hubUpdater.register(changeLogFile);
+
+                // Before continuing the changelog service has to be invalidated due to the fact that the
+                // hubUpdater releases the lock temporarily. In this time span another JVM instance might have
+                // acquired the database lock and could have applied further changesets to prevent that
+                // liquibase works with an outdated changelog.
+                changeLogService.reset();
 
                 //
                 // Create or retrieve the Connection if this is not SQL generation
@@ -2317,10 +2325,6 @@ public class Liquibase implements AutoCloseable {
         setChangeLogParameter("database.supportsSchemas", database.supportsSchemas());
         setChangeLogParameter("database.supportsSequences", database.supportsSequences());
         setChangeLogParameter("database.supportsTablespaces", database.supportsTablespaces());
-    }
-
-    private LockService getLockService() {
-        return LockServiceFactory.getInstance().getLockService(database);
     }
 
     public void setChangeExecListener(ChangeExecListener listener) {

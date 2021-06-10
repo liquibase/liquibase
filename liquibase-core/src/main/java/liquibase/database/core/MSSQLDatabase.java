@@ -662,4 +662,14 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 "VALUES", "VARYING", "VIEW",
                 "WAITFOR", "WHEN", "WHERE", "WHILE", "WITH", "WITHIN GROUP", "WRITETEXT");
     }
+
+    @Override
+    public boolean isTableExistsException(DatabaseException e) {
+        return "S0001".equals(e.getSqlState());
+    }
+
+    @Override
+    public boolean isUniqueConstraintException(DatabaseException e) {
+        return "23000".equals(e.getSqlState());
+    }
 }

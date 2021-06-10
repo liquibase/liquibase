@@ -327,8 +327,10 @@ public class JdbcExecutor extends AbstractExecutor {
                         JdbcUtil.closeStatement(stmt);
                     }
                 }
+            } catch (SQLException e) {
+                throw new DatabaseException(e.getMessage() + " [Failed SQL: (" + e.getErrorCode() + ", " + e.getSQLState() + ") " + sql.toSql() + "]", e.getSQLState(), e);
             } catch (Exception e) {
-                throw new DatabaseException(e.getMessage() + " [Failed SQL: " + getErrorCode(e) + sql.toSql() + "]", e);
+                throw new DatabaseException(e.getMessage() + " [Failed SQL: " + sql.toSql() + "]", e);
             }
         }
     }
@@ -345,13 +347,6 @@ public class JdbcExecutor extends AbstractExecutor {
             }
             throw new DatabaseException(message.toString());
         }
-    }
-
-    String getErrorCode(Throwable e) {
-        if (e instanceof SQLException) {
-            return "(" + ((SQLException)e).getErrorCode() + ") ";
-        }
-        return "";
     }
 
     private class ExecuteStatementCallback implements StatementCallback {
@@ -388,8 +383,10 @@ public class JdbcExecutor extends AbstractExecutor {
                     if (!stmt.execute(statement)) {
                         log.fine(Integer.toString(stmt.getUpdateCount()) + " row(s) affected");
                     }
+                } catch (SQLException e) {
+                    throw new DatabaseException(e.getMessage() + " [Failed SQL: (" + e.getErrorCode() + ", " + e.getSQLState() + ") " + statement + "]", e.getSQLState(), e);
                 } catch (Throwable e) {
-                    throw new DatabaseException(e.getMessage()+ " [Failed SQL: " + getErrorCode(e) + statement+"]", e);
+                    throw new DatabaseException(e.getMessage() + " [Failed SQL: " + statement + "]", e);
                 }
                 try {
                     int updateCount = 0;
@@ -402,8 +399,10 @@ public class JdbcExecutor extends AbstractExecutor {
                         }
                     } while (updateCount != -1);
 
+                } catch (SQLException e) {
+                    throw new DatabaseException(e.getMessage() + " [Failed SQL: (" + e.getErrorCode() + ", " + e.getSQLState() + ") " + statement + "]", e.getSQLState(), e);
                 } catch (Exception e) {
-                    throw new DatabaseException(e.getMessage()+ " [Failed SQL: "+ getErrorCode(e) + statement+"]", e);
+                    throw new DatabaseException(e.getMessage()+ " [Failed SQL: " + statement +"]", e);
                 }
             }
             return null;

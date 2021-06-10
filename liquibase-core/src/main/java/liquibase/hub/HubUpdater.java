@@ -429,22 +429,26 @@ public class HubUpdater {
         } catch (LockException e) {
             Scope.getCurrentScope().getLog(HubUpdater.class).warning(Liquibase.MSG_COULD_NOT_RELEASE_LOCK);
         }
-        String promptString =
-                "Do you want to see this operation's report in Liquibase Hub, which improves team collaboration? \n" +
-                        "If so, enter your email. If not, enter [N] to no longer be prompted, or [S] to skip for now, but ask again next time";
-        String input = Scope.getCurrentScope().getUI().prompt(promptString, "S", (input1, returnType) -> {
-            input1 = input1.trim().toLowerCase();
-            if (!(input1.equals("s") || input1.equals("n") || input1.contains("@"))) {
-                throw new IllegalArgumentException("Invalid input '" + input1 + "'");
-            }
-            return input1;
-        }, String.class);
 
-        //
-        // Re-lock before proceeding
-        //
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-        lockService.waitForLock();
+        String input;
+        try {
+            String promptString =
+               "Do you want to see this operation's report in Liquibase Hub, which improves team collaboration? \n" +
+                  "If so, enter your email. If not, enter [N] to no longer be prompted, or [S] to skip for now, but ask again next time";
+            input = Scope.getCurrentScope().getUI().prompt(promptString, "S", (input1, returnType) -> {
+                input1 = input1.trim().toLowerCase();
+                if (!(input1.equals("s") || input1.equals("n") || input1.contains("@"))) {
+                    throw new IllegalArgumentException("Invalid input '" + input1 + "'");
+                }
+                return input1;
+            }, String.class);
+        } finally {
+            //
+            // Re-lock before proceeding
+            //
+            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+            lockService.waitForLock();
+        }
 
         String defaultsFilePath = Scope.getCurrentScope().get("defaultsFile", String.class);
         File defaultsFile = null;

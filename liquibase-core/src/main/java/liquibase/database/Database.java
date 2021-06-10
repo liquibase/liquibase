@@ -453,5 +453,13 @@ public interface Database extends PrioritizedService {
     String unescapeDataTypeString(String dataTypeString);
 
     ValidationErrors validate();
+
+    default boolean isTableExistsException(DatabaseException e) {
+        return false;
+    }
+
+    default boolean isUniqueConstraintException(DatabaseException e) {
+        return false;
+    }
 }
 

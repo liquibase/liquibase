@@ -432,4 +432,14 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return enterpriseDb ? DbTypes.EDB : DbTypes.COMMUNITY;
     }
 
+    @Override
+    public boolean isTableExistsException(DatabaseException e) {
+        return "42P07".equals(e.getSqlState());
+    }
+
+    @Override
+    public boolean isUniqueConstraintException(DatabaseException e)
+    {
+        return "23505".equals(e.getSqlState());
+    }
 }
