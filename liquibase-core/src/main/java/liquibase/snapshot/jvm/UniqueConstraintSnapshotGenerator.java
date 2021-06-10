@@ -325,6 +325,14 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 //does not support bulkQuery,  supportsBulkQuery should return false()
 
                 sql = getUniqueConstraintsSqlInformix((InformixDatabase) database, schema, name);
+            } else if (database instanceof Db2zDatabase) {
+                sql = "select KC.TBCREATOR as CONSTRAINT_CONTAINER, KC.CONSTNAME as CONSTRAINT_NAME, KC.COLNAME as COLUMN_NAME from SYSIBM.SYSKEYCOLUSE KC, SYSIBM.SYSTABCONST TC "
+                        + "where KC.CONSTNAME = TC.CONSTNAME "
+                        + "and KC.TBCREATOR = TC.TBCREATOR "
+                        + "and TC.TYPE='U' "
+                        + (bulkQuery? "" : "and KC.CONSTNAME='" + database.correctObjectName(name, UniqueConstraint.class) + "' ")
+                        + "and TC.TBCREATOR = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
+                        + "order by KC.COLSEQ";
             } else {
                 // If we do not have a specific handler for the RDBMS, we assume that the database has an
                 // INFORMATION_SCHEMA we can use. This is a last-resort measure and might fail.
