@@ -143,7 +143,8 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
                     ChangelogRewriter.addChangeLogId(changeLogFile, hubChangeLog.getId().toString(), databaseChangeLog);
             if (changeLogRewriterResult.success) {
                 Scope.getCurrentScope().getLog(RegisterChangelogCommandStep.class).info(changeLogRewriterResult.message);
-                output.println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been registered");
+                output.println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been " +
+                        "registered to Project "+hubProjectName);
                 resultsBuilder.addResult("statusCode", 0);
                 resultsBuilder.addResult(REGISTERED_CHANGELOG_ID.getName(), hubChangeLog.getId().toString());
             }
@@ -195,12 +196,12 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
             }
         }
         return project;
-    }
 
     //
     // Retrieve the projects and sort them by create date
     //
-    private List<Project> getProjectsFromHub() throws LiquibaseHubException {
+    private List<Project> getProjectsFromHub() throws LiquibaseHubException
+} {
         final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         List<Project> projects = service.getProjects();
         Collections.sort(projects, new Comparator<Project>() {
