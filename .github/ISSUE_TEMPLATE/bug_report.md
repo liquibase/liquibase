@@ -1,5 +1,5 @@
 ---
-name: Bug report
+name: Bug report or Feature request
 about: Create a report to help us improve
 title: ''
 labels: Status:Discovery
@@ -37,12 +37,12 @@ List the steps to reproduce the behavior.
   - Exact commands used - CLI, maven, gradle, spring boot, servlet, etc.
 
 ## Actual Behavior
-A clear and concise description of what happens in the software **before** this pull request.
+A clear and concise description of what happens in the software with the **version used**.
 - Include console output if relevant
 - Include log files if available.
 
 ## Expected/Desired Behavior
-A clear and concise description of what happens in the software **after** this pull request.
+A clear and concise description of what happens in the software **after** a fix is created and merged.
 
 ## Screenshots (if appropriate)
 If applicable, add screenshots to help explain your problem.

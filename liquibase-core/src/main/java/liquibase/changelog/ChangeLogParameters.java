@@ -8,7 +8,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
-import liquibase.parser.ChangeLogParserCofiguration;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.util.StringUtil;
 
 import java.util.*;
@@ -210,8 +210,7 @@ public class ChangeLogParameters {
 
         public ExpressionExpander(ChangeLogParameters changeLogParameters) {
             this.changeLogParameters = changeLogParameters;
-            this.enableEscaping = LiquibaseConfiguration.getInstance()
-                .getConfiguration(ChangeLogParserCofiguration.class).getSupportPropertyEscaping();
+            this.enableEscaping = ChangeLogParserConfiguration.SUPPORT_PROPERTY_ESCAPING.getCurrentValue();
         }
 
         public String expandExpressions(String text, DatabaseChangeLog changeLog) {

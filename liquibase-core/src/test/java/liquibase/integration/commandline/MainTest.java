@@ -1,12 +1,12 @@
 package liquibase.integration.commandline;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.Scope;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.util.StringUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.Properties;
 import java.util.Arrays;
 import java.util.List;
@@ -85,7 +85,7 @@ public class MainTest {
 //        snapshotCommandResult = PowerMockito.mock(SnapshotCommand.SnapshotCommandResult.class);
 //
 //        // Do not do actual database snapshots.
-//        when(CommandFactory.getInstance()).thenReturn(commandFactory);
+//        when(Scope.getCurrentScope().getSingleton(CommandFactory.class)).thenReturn(commandFactory);
 //        when(commandFactory.getCommand("snapshot")).thenReturn(snapshotCommand);
 //        when(snapshotCommand.execute()).thenReturn(snapshotCommandResult);
 //        when(snapshotCommandResult.print()).thenReturn("<?xml version=\"1.0\" encoding=\"UTF-8\"?>...");
@@ -131,12 +131,11 @@ public class MainTest {
 
     @Test
     public void globalConfigurationSaysDoNotRun() throws Exception {
-        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .setValue("shouldRun", false);
-        int errorLevel = Main.run(new String[0]);
-        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .setValue("shouldRun", true);
-        assertEquals(errorLevel, 0); // If it SHOULD run, and we would call without parameters, we would get -1
+        Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey(), false), () -> {
+
+            int errorLevel = Main.run(new String[0]);
+            assertEquals(errorLevel, 0); // If it SHOULD run, and we would call without parameters, we would get -1
+        });
     }
 
 //    @Test
@@ -596,10 +595,9 @@ public class MainTest {
         assertEquals(0, cli.checkSetup().size());
 
         String[] noArgCommand = { "migrate", "migrateSQL", "update", "updateSQL",
-                "futureRollbackSQL", "updateTestingRollback", "listLocks",
+                "updateTestingRollback", "listLocks",
                 "releaseLocks", "validate", "help",
-                "clearCheckSums", "changelogSync", "changelogSyncSQL",
-                "markNextChangeSetRan", "markNextChangeSetRanSQL"
+                "clearCheckSums", "changelogSync", "changelogSyncSQL"
         };
 
         cli.commandParams.clear();

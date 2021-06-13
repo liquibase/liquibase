@@ -69,6 +69,9 @@ public class LiquibaseServletListenerTest extends TestCase {
     }
 
     public void testShouldNotShutEmbeddedDerbyDown() throws Exception {
+        if (dataSource == null) {
+            return;
+        }
         try (Connection pooled = dataSource.getConnection()) {
             servletListener.contextInitialized(new ServletContextEvent(servletContext));
             assertEquals("connection.closed", false, pooled.isClosed());

@@ -17,8 +17,6 @@ import java.io.InputStream;
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     public static final String LIQUIBASE_SCHEMA_VERSION = "4.1";
-    private static final boolean PREFER_INTERNAL_XSD = Boolean.getBoolean("liquibase.prefer.internal.xsd");
-    private static final String XSD_FILE = "dbchangelog-" + LIQUIBASE_SCHEMA_VERSION + ".xsd";
     private SAXParserFactory saxParserFactory;
 
     public XMLChangeLogSAXParser() {
@@ -47,8 +45,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     @Override
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        try (
-                InputStream inputStream = resourceAccessor.openStream(null, physicalChangeLogLocation)) {
+        try (InputStream inputStream = resourceAccessor.openStream(null, physicalChangeLogLocation)) {
             SAXParser parser = saxParserFactory.newSAXParser();
             trySetSchemaLanguageProperty(parser);
 

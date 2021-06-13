@@ -1,6 +1,6 @@
 package liquibase.structure;
 
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -174,11 +174,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public LiquibaseSerializable.SerializationType getSerializableFieldType(String field) {
-        if (getSerializableFieldValue(field) instanceof DatabaseObject) {
-            return LiquibaseSerializable.SerializationType.NAMED_FIELD;
-        } else {
-            return LiquibaseSerializable.SerializationType.NAMED_FIELD;
-        }
+        return LiquibaseSerializable.SerializationType.NAMED_FIELD;
     }
 
     @Override
@@ -241,6 +237,6 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
      * @return
      */
     public boolean shouldIncludeCatalogInSpecification() {
-        return LiquibaseConfiguration.getInstance().shouldIncludeCatalogInSpecification();
+        return GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION.getCurrentValue();
     }
 }

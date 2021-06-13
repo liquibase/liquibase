@@ -33,4 +33,11 @@ public class LogFactory extends AbstractPluginFactory<LogService> {
     public static Logger getLogger() {
         return Scope.getCurrentScope().getLog(LogFactory.class);
     }
+
+    /**
+     * @deprecated Use {@link Scope#getSingleton(Class)}
+     */
+    public static LogFactory getInstance() {
+        return Scope.getCurrentScope().getSingleton(LogFactory.class);
+    }
 }

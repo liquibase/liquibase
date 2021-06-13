@@ -21,6 +21,10 @@ public class UpToTagChangeSetFilter implements ChangeSetFilter {
         }
     }
 
+    public boolean isSeenTag() {
+        return seenTag;
+    }
+
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         if (seenTag) {

@@ -2,17 +2,18 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.FileUtil;
 import liquibase.util.ui.UIFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
@@ -294,7 +295,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding == null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
-            return new OutputStreamWriter(new FileOutputStream(outputFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            return new OutputStreamWriter(new FileOutputStream(outputFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
         }
         getLog().debug("Writing output file with [" + outputFileEncoding + "] file encoding.");
         return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), outputFileEncoding));
@@ -317,11 +318,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 processSystemProperties();
 
-                LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
-
-                if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-                    getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic
-                            (GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
+                if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
+                    getLog().info("Liquibase did not run because " + LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey() + " was set to false");
                     return;
                 }
                 if (skip) {
@@ -334,41 +332,41 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
                 scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
 
-            IntegrationDetails integrationDetails = new IntegrationDetails();
-            integrationDetails.setName("maven");
+                IntegrationDetails integrationDetails = new IntegrationDetails();
+                integrationDetails.setName("maven");
 
-            final PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
-            for (MojoDescriptor descriptor : pluginDescriptor.getMojos()) {
-                if (!descriptor.getImplementationClass().equals(this.getClass())) {
-                    continue;
-                }
-
-                for (Parameter param : descriptor.getParameters()) {
-                    final String name = param.getName();
-                    if (name.equalsIgnoreCase("project") || name.equalsIgnoreCase("systemProperties")) {
+                final PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
+                for (MojoDescriptor descriptor : pluginDescriptor.getMojos()) {
+                    if (!descriptor.getImplementationClass().equals(this.getClass())) {
                         continue;
                     }
 
-                    final Field field = getField(this.getClass(), name);
-                    if (field == null) {
-                        getLog().debug("Cannot read current maven value for. Will not send the value to hub " + name);
-                    } else {
-                        field.setAccessible(true);
-                        final Object value = field.get(this);
-                        if (value != null) {
-                            try {
-                                integrationDetails.setParameter("maven__" + param.getName().replaceAll("[${}]", ""), String.valueOf(value));
-                            } catch (Throwable e) {
-                                e.printStackTrace();
+                    for (Parameter param : descriptor.getParameters()) {
+                        final String name = param.getName();
+                        if (name.equalsIgnoreCase("project") || name.equalsIgnoreCase("systemProperties")) {
+                            continue;
+                        }
+
+                        final Field field = getField(this.getClass(), name);
+                        if (field == null) {
+                            getLog().debug("Cannot read current maven value for. Will not send the value to hub " + name);
+                        } else {
+                            field.setAccessible(true);
+                            final Object value = field.get(this);
+                            if (value != null) {
+                                try {
+                                    integrationDetails.setParameter("maven__" + param.getName().replaceAll("[${}]", ""), String.valueOf(value));
+                                } catch (Throwable e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }
                 }
-            }
-            scopeValues.put("integrationDetails", integrationDetails);
+                scopeValues.put("integrationDetails", integrationDetails);
 
-            final Map pluginContext = this.getPluginContext();
-            System.out.println(pluginContext.keySet());
+                final Map pluginContext = this.getPluginContext();
+                System.out.println(pluginContext.keySet());
                 Scope.child(scopeValues, () -> {
 
                     configureFieldsAndValues();
@@ -435,19 +433,19 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                         getLog().info("Executing on Database: " + url);
 
-                    if (isPromptOnNonLocalDatabase()) {
-                        if (!liquibase.isSafeToRunUpdate()) {
-                            if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                                throw new LiquibaseException("User decided not to run against non-local database");
+                        if (isPromptOnNonLocalDatabase()) {
+                            if (!liquibase.isSafeToRunUpdate()) {
+                                if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
+                                    throw new LiquibaseException("User decided not to run against non-local database");
+                                }
                             }
                         }
+                        setupBindInfoPackage();
+                        performLiquibaseTask(liquibase);
+                    } catch (LiquibaseException e) {
+                        cleanup(database);
+                        throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
                     }
-                    setupBindInfoPackage();
-                    performLiquibaseTask(liquibase);
-                } catch (LiquibaseException e) {
-                    cleanup(database);
-                    throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
-                }
 
                     cleanup(database);
                     getLog().info(MavenUtils.LOG_SEPARATOR);
@@ -457,8 +455,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         } catch (Exception e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
-
-
     }
 
     protected Field getField(Class clazz, String name) throws NoSuchFieldException {
@@ -528,6 +524,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
             try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
+                if (is == null) {
+                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
+                }
+
                 parsePropertiesFile(is);
                 getLog().info(MavenUtils.LOG_SEPARATOR);
             } catch (IOException e) {
@@ -559,12 +559,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         try {
             is = Scope.getCurrentScope().getResourceAccessor().openStream(null, propertyFile);
         } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
+            throw new MojoFailureException("Failed to resolve the properties file.", e);
         }
-        if (is == null) {
-            throw new MojoFailureException("Failed to resolve the properties file.");
-        }
-
         return is;
     }
 
@@ -638,7 +634,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
         getLog().info(indent + "driver: " + driver);
         getLog().info(indent + "url: " + url);
-        getLog().info(indent + "username: " + username);
+        getLog().info(indent + "username: " + "*****");
         getLog().info(indent + "password: " + "*****");
         getLog().info(indent + "use empty password: " + emptyPassword);
         getLog().info(indent + "properties file: " + propertyFile);

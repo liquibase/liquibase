@@ -16,11 +16,13 @@
 
     <modules>
         <module>liquibase-core</module>
+        <module>liquibase-cli</module>
         <module>liquibase-maven-plugin</module>
         <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
         <module>liquibase-dist</module>
         <module>liquibase-extension-examples</module>
+        <module>liquibase-extension-testing</module>
     </modules>
 
     <ciManagement>
@@ -44,7 +46,7 @@
                 </executions>
                 <configuration>
                     <outputDirectory>${project.build.directory}</outputDirectory>
-                    <finalName>liquibase-core-oss-${liquibase.version}</finalName>
+                    <finalName>liquibase-${liquibase.version}</finalName>
                     <attach>true</attach>
                     <excludes>
                         <exclude>com/datical/**</exclude>
@@ -68,7 +70,7 @@
                     <quiet>true</quiet>
                     <doclint>none</doclint>
                     <encoding>UTF-8</encoding>
-                    <finalName>liquibase-core-oss-${version}</finalName>
+                    <finalName>liquibase-${version}</finalName>
                     <jarOutputDirectory>${project.build.directory}</jarOutputDirectory>
                 </configuration>
                 <executions>
@@ -111,4 +113,18 @@
 <!--        </pluginManagement>-->
 
     </build>
+
+    <profiles>
+        <profile>
+            <id>liquibase-pro</id>
+            <activation>
+                <file>
+                    <exists>../liquibase-pro/pom.xml</exists>
+                </file>
+            </activation>
+            <modules>
+                <module>../liquibase-pro</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

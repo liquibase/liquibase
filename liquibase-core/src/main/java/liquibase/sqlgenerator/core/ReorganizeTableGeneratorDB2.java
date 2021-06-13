@@ -1,7 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.exception.DatabaseException;
@@ -33,7 +32,7 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
 
     @Override
     public Sql[] generateSql(ReorganizeTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        if (!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.AUTO_REORG).getValue(Boolean.class)) {
+        if (!GlobalConfiguration.AUTO_REORG.getCurrentValue()) {
             return null;
         }
 

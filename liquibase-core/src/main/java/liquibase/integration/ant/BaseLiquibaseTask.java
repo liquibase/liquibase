@@ -2,10 +2,10 @@ package liquibase.integration.ant;
 
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -135,20 +135,15 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     protected boolean shouldRun() {
-        LiquibaseConfiguration configuration = LiquibaseConfiguration.getInstance();
-        GlobalConfiguration globalConfiguration = configuration.getConfiguration(GlobalConfiguration.class);
-        if (!globalConfiguration.getShouldRun()) {
-            log("Liquibase did not run because " + configuration.describeValueLookupLogic(globalConfiguration
-                    .getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false", Project.MSG_INFO);
+        if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
+            log("Liquibase did not run because " + LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey() + " was set to false", Project.MSG_INFO);
             return false;
         }
         return true;
     }
 
     protected String getDefaultOutputEncoding() {
-        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
-        GlobalConfiguration globalConfiguration = liquibaseConfiguration.getConfiguration(GlobalConfiguration.class);
-        return globalConfiguration.getOutputEncoding();
+        return GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
     }
 
     /**
