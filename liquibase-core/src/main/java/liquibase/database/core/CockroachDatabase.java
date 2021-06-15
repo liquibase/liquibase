@@ -68,5 +68,9 @@ public class CockroachDatabase extends PostgresDatabase {
     public boolean supportsDDLInTransaction() {
         return false;
     }
-
+    
+    @Override
+    protected String getAutoIncrementClause(final String generationType, final Boolean defaultOnNull) {
+        return "";
+    }
 }
