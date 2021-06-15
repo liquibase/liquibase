@@ -6,6 +6,8 @@ import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.command.*;
+import liquibase.command.core.DiffCommandStep;
+import liquibase.command.core.InternalDiffCommandStep;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
@@ -14,6 +16,7 @@ import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
+import liquibase.integration.commandline.Main;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -247,14 +250,29 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         } else {
             PrintStream printStream = createPrintStream();
             if (isFormattedDiff()) {
-                CommandScope liquibaseCommand = new CommandScope("formattedDiff");
+                CommandScope liquibaseCommand = new CommandScope("internalDiff");
                 CommandScope diffCommand =
                         CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtil.trimToNull(diffTypes),
                                 schemaComparisons, objectChangeFilter, printStream);
+                CompareControl compareControl = new CompareControl(schemaComparisons, diffTypes);
 
                 liquibaseCommand.addArgumentValue("format", format);
                 liquibaseCommand.addArgumentValue("diffCommand", diffCommand);
-                liquibaseCommand.execute();
+                liquibaseCommand.addArgumentValue("targetDatabase", db);
+                liquibaseCommand.addArgumentValue("referenceDatabase", referenceDatabase);
+                liquibaseCommand.addArgumentValue("compareControl", compareControl);
+                liquibaseCommand.addArgumentValue("objectChangeFilter", objectChangeFilter);
+                if (StringUtil.isEmpty(diffTypes)) {
+                    liquibaseCommand.addArgumentValue("snapshotTypes", new Class[0]);
+                } else {
+                    liquibaseCommand.addArgumentValue("snapshotTypes", diffTypes);
+                }
+
+                CommandScope formattedDiffCommand = new CommandScope("internalFormattedDiff");
+                formattedDiffCommand.addArgumentValue("format", format);
+                formattedDiffCommand.addArgumentValue("diffCommand", liquibaseCommand);
+
+                formattedDiffCommand.execute();
             } else {
                 CommandLineUtils.doDiff(referenceDatabase, db, StringUtil.trimToNull(diffTypes), schemaComparisons, objectChangeFilter, printStream);
             }
@@ -292,8 +310,8 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         super.printSettings(indent);
         getLog().info(indent + "referenceDriver: " + referenceDriver);
         getLog().info(indent + "referenceUrl: " + referenceUrl);
-        getLog().info(indent + "referenceUsername: " + referenceUsername);
-        getLog().info(indent + "referencePassword: " + referencePassword);
+        getLog().info(indent + "referenceUsername: " + "*****");
+        getLog().info(indent + "referencePassword: " + "*****");
         getLog().info(indent + "referenceDefaultSchema: " + referenceDefaultSchemaName);
         getLog().info(indent + "diffChangeLogFile: " + diffChangeLogFile);
     }

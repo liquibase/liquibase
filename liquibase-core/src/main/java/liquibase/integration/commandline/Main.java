@@ -30,9 +30,7 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.structure.core.DataType;
 import liquibase.ui.ConsoleUIService;
-import liquibase.ui.UIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
@@ -58,6 +56,8 @@ import static java.util.ResourceBundle.getBundle;
 
 /**
  * Class for executing Liquibase via the command line.
+ *
+ * @deprecated use liquibase.integration.commandline.LiquibaseCommandLine.
  */
 public class Main {
 
@@ -182,14 +182,31 @@ public class Main {
         Map<String, Object> scopeObjects = new HashMap<>();
         final IntegrationDetails integrationDetails = new IntegrationDetails();
         integrationDetails.setName("cli");
-        for (String arg : args) {
+        final ListIterator<String> argIterator = Arrays.asList(args).listIterator();
+        while (argIterator.hasNext()) {
+            final String arg = argIterator.next();
             if (arg.startsWith("--")) {
-                String[] splitArg = arg.split("=", 2);
-                String argKey = "argument__" + splitArg[0].replaceFirst("^--", "");
-                if (splitArg.length == 2) {
-                    integrationDetails.setParameter(argKey, splitArg[1]);
+                if (arg.contains("=")) {
+                    String[] splitArg = arg.split("=", 2);
+                    String argKey = "argument__" + splitArg[0].replaceFirst("^--", "");
+                    if (splitArg.length == 2) {
+                        integrationDetails.setParameter(argKey, splitArg[1]);
+                    } else {
+                        integrationDetails.setParameter(argKey, "true");
+                    }
                 } else {
-                    integrationDetails.setParameter(argKey, "true");
+                    String argKey = "argument__" + arg.replaceFirst("^--", "");
+                    if (argIterator.hasNext()) {
+                        final String next = argIterator.next();
+                        if (next.startsWith("--") || isCommand(next)) {
+                            integrationDetails.setParameter(argKey, "true");
+                            argIterator.previous(); //put value back
+                        } else {
+                            integrationDetails.setParameter(argKey, next);
+                        }
+                    } else {
+                        integrationDetails.setParameter(argKey, "true");
+                    }
                 }
             }
         }
@@ -312,13 +329,17 @@ public class Main {
                     LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                     if (licenseService != null) {
                         if (main.liquibaseProLicenseKey == null) {
-                            Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                            if (!Main.runningFromNewCli) {
+                                Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                            }
                         } else {
                             Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
                             LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                             if (result.code != 0) {
                                 String allMessages = String.join("\n", result.messages);
-                                Scope.getCurrentScope().getUI().sendMessage(allMessages);
+                                if (!Main.runningFromNewCli) {
+                                    Scope.getCurrentScope().getUI().sendMessage(allMessages);
+                                }
                             } else {
                                 main.liquibaseProLicenseValid = true;
                             }
@@ -330,15 +351,19 @@ public class Main {
                         if (licenseService.daysTilExpiration() < 0) {
                             main.liquibaseProLicenseValid = false;
                         }
-                        Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                        if (!Main.runningFromNewCli) {
+                            Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                        }
                     }
 
-                    Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                    if (!Main.runningFromNewCli) {
+                        Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                    }
 
-                    if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
+                    if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
                         Scope.getCurrentScope().getUI().sendErrorMessage((
                                 String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                                        GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
+                                        LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
                         return Integer.valueOf(0);
                     }
 
@@ -366,17 +391,21 @@ public class Main {
 
                     main.applyDefaults();
                     Map<String, Object> innerScopeObjects = new HashMap<>();
-                    innerScopeObjects.put("defaultsFile", main.defaultsFile);
-                    innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
+                    innerScopeObjects.put("defaultsFile", LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentValue());
+                    if (!Main.runningFromNewCli) {
+                        innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
+                    }
                     Scope.child(innerScopeObjects, () -> {
                         main.doMigration();
 
-                        if (COMMANDS.UPDATE.equals(main.command)) {
-                            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
-                        } else if (main.command.startsWith(COMMANDS.ROLLBACK)) {
-                            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("rollback.successful"));
-                        } else {
-                            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("command.successful"), main.command));
+                        if (!Main.runningFromNewCli) {
+                            if (COMMANDS.UPDATE.equals(main.command)) {
+                                Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+                            } else if (main.command.startsWith(COMMANDS.ROLLBACK)) {
+                                Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("rollback.successful"));
+                            } else {
+                                Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("command.successful"), main.command));
+                            }
                         }
                     });
                 } catch (Throwable e) {
@@ -393,17 +422,23 @@ public class Main {
                         if (e.getCause() instanceof ValidationFailedException) {
                             ((ValidationFailedException) e.getCause()).printDescriptiveError(outputStream);
                         } else {
-                            if (main.outputsLogMessages) {
-                                Scope.getCurrentScope().getUI().sendErrorMessage((String.format(coreBundle.getString("unexpected.error"), message)), e);
-                            } else {
-                                Scope.getCurrentScope().getUI().sendMessage((String.format(coreBundle.getString("unexpected.error"), message)));
-                                Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("for.more.information.use.loglevel.flag"));
+                            if (!Main.runningFromNewCli) {
+                                if (main.outputsLogMessages) {
+                                    Scope.getCurrentScope().getUI().sendErrorMessage((String.format(coreBundle.getString("unexpected.error"), message)), e);
+                                } else {
+                                    Scope.getCurrentScope().getUI().sendMessage((String.format(coreBundle.getString("unexpected.error"), message)));
+                                    Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("for.more.information.use.loglevel.flag"));
 
-                                //send it to the LOG in case we're using logFile
-                                Scope.getCurrentScope().getLog(getClass()).severe((String.format(coreBundle.getString("unexpected.error"), message)), e);
+                                    //send it to the LOG in case we're using logFile
+                                    Scope.getCurrentScope().getLog(getClass()).severe((String.format(coreBundle.getString("unexpected.error"), message)), e);
+                                }
                             }
                         }
                     } catch (IllegalFormatException e1) {
+                        if (Main.runningFromNewCli) {
+                            throw e1;
+                        }
+
                         e1.printStackTrace();
                     }
                     throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
@@ -434,6 +469,11 @@ public class Main {
     }
 
     protected static void setLogLevel(LogService logService, java.util.logging.Logger rootLogger, java.util.logging.Logger liquibaseLogger, Level level) {
+        if (Main.runningFromNewCli) {
+            //new CLI configures logging
+            return;
+        }
+
         if (level.intValue() < Level.INFO.intValue()) {
             //limit non-liquibase logging to INFO at a minimum to avoid too much logs
             rootLogger.setLevel(Level.INFO);
@@ -649,7 +689,6 @@ public class Main {
                 || COMMANDS.MIGRATE_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.UPDATE.equalsIgnoreCase(arg)
                 || COMMANDS.UPDATE_SQL.equalsIgnoreCase(arg)
-                || COMMANDS.FUTURE_ROLLBACK_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(arg)
                 || COMMANDS.LIST_LOCKS.equalsIgnoreCase(arg)
                 || COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(arg)
@@ -657,9 +696,7 @@ public class Main {
                 || COMMANDS.HELP.equalsIgnoreCase(arg)
                 || COMMANDS.CLEAR_CHECKSUMS.equalsIgnoreCase(arg)
                 || COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(arg)
-                || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(arg)
-                || COMMANDS.MARK_NEXT_CHANGESET_RAN.equalsIgnoreCase(arg)
-                || COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(arg);
+                || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(arg);
     }
 
     private static void addWarFileClasspathEntries(File classPathFile, List<URL> urls) throws IOException {
@@ -718,11 +755,16 @@ public class Main {
      * @throws CommandLineParsingException if an error occurs during parsing
      */
     protected void parseDefaultPropertyFiles() throws CommandLineParsingException {
-        File[] potentialPropertyFiles = new File[2];
+        LinkedHashSet<File> potentialPropertyFiles = new LinkedHashSet<>();
 
-        potentialPropertyFiles[0] = new File(defaultsFile);
+        potentialPropertyFiles.add(new File(defaultsFile));
         String localDefaultsPathName = defaultsFile.replaceFirst("(\\.[^\\.]+)$", ".local$1");
-        potentialPropertyFiles[1] = new File(localDefaultsPathName);
+        potentialPropertyFiles.add(new File(localDefaultsPathName));
+
+        final ConfiguredValue<String> currentConfiguredValue = LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue();
+        if (currentConfiguredValue.found()) {
+            potentialPropertyFiles.add(new File(currentConfiguredValue.getValue()));
+        }
 
         for (File potentialPropertyFile : potentialPropertyFiles) {
 
@@ -857,27 +899,28 @@ public class Main {
                 || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
             if ((!commandParams.isEmpty())) {
                 for (String cmdParm : commandParams) {
-                    if (!cmdParm.startsWith("--" + OPTIONS.REFERENCE_USERNAME)
-                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_PASSWORD)
-                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_DRIVER)
-                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_DEFAULT_CATALOG_NAME)
-                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_DEFAULT_SCHEMA_NAME)
-                            && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
-                            && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
-                            && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
-                            && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
-                            && !cmdParm.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS)
-                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_SCHEMAS)
-                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_URL)
-                            && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
-                            && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
-                            && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)
-                            && !cmdParm.startsWith("--" + OPTIONS.FORMAT)
-                            && !cmdParm.startsWith("--" + OPTIONS.HELP)
-                            && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
+                    String caseInsensitiveCommandParam = cmdParm.toLowerCase();
+                    if (!caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_USERNAME.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_PASSWORD.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_DRIVER.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_DEFAULT_CATALOG_NAME.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_DEFAULT_SCHEMA_NAME.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_SCHEMA.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_CATALOG.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SCHEMAS.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_SCHEMAS.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.REFERENCE_URL.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_OBJECTS.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.DIFF_TYPES.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORMAT.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT.toLowerCase())) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
-                    if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && cmdParm.startsWith("--" + OPTIONS.FORMAT)) {
+                    if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && cmdParm.toLowerCase().startsWith("--" + OPTIONS.FORMAT.toLowerCase())) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
@@ -886,51 +929,57 @@ public class Main {
                 || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command))
                 && (!commandParams.isEmpty())) {
             for (String cmdParm : commandParams) {
-                if (!cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
-                        && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
-                        && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
-                        && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
-                        && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)
-                        && !cmdParm.startsWith("--" + OPTIONS.DATA_OUTPUT_DIRECTORY)
-                        && !cmdParm.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS)) {
+                String caseInsensitiveCommandParam = cmdParm.toLowerCase();
+                if (!caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_SCHEMA.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_CATALOG.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SCHEMAS.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.DATA_OUTPUT_DIRECTORY.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS.toLowerCase())) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
         } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
-                if (!cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
-                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
-                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)
-                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
-                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
-                        && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)) {
+                String caseInsensitiveCommandParam = cmdParm.toLowerCase();
+                if (!caseInsensitiveCommandParam.startsWith("--" + OPTIONS.CHANGE_SET_ID.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORCE.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.CHANGE_SET_PATH.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT.toLowerCase())) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
         } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
-                if (!cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
-                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
-                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)
-                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
-                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
-                        && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)) {
+                String caseInsensitiveCommandParam = cmdParm.toLowerCase();
+                if (!caseInsensitiveCommandParam.startsWith("--" + OPTIONS.CHANGE_SET_ID.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORCE.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.CHANGE_SET_PATH.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT.toLowerCase())) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
         } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
-                if (!cmdParm.startsWith("--" + OPTIONS.DEPLOYMENT_ID)
-                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
-                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)) {
+                String caseInsensitiveCommandParam = cmdParm.toLowerCase();
+                if (!caseInsensitiveCommandParam.startsWith("--" + OPTIONS.DEPLOYMENT_ID.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORCE.toLowerCase())) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
         } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
-                if (!cmdParm.startsWith("--" + OPTIONS.DEPLOYMENT_ID)
-                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
-                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)) {
+                String caseInsensitiveCommandParam = cmdParm.toLowerCase();
+
+                if (!caseInsensitiveCommandParam.startsWith("--" + OPTIONS.DEPLOYMENT_ID.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
+                        && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORCE.toLowerCase())) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
@@ -1006,6 +1055,12 @@ public class Main {
 
         Properties props = new Properties();
         props.load(propertiesInputStream);
+
+        if (Main.runningFromNewCli) {
+            parsePropertiesFileForNewCli(props);
+            return;
+        }
+
         if (props.containsKey("strict")) {
             strict = Boolean.valueOf(props.getProperty("strict"));
         }
@@ -1073,6 +1128,17 @@ public class Main {
                 throw new UnexpectedLiquibaseException(
                         String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
                 );
+            }
+        }
+    }
+
+    /**
+     * Most of the properties file is handled by the new CLI. But, for now we have to handle changelog parameter values still
+     */
+    private void parsePropertiesFileForNewCli(Properties props) {
+        for (Map.Entry entry : props.entrySet()) {
+            if (((String) entry.getKey()).startsWith("parameter.")) {
+                changeLogParameters.put(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue());
             }
         }
     }
@@ -1175,12 +1241,32 @@ public class Main {
         // Check the licensing keys to see if they are being set from properties
         //
         if (liquibaseProLicenseKey == null) {
-            String key = (String)Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue("liquibase.pro.licenseKey").getValue();
+            String key = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.pro.licenseKey").getValue();
             liquibaseProLicenseKey = key;
         }
         if (liquibaseHubApiKey == null) {
             String key = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
             liquibaseHubApiKey = key;
+        }
+
+        //
+        // Property provider class
+        //
+        if (propertyProviderClass == null) {
+            Class clazz = LiquibaseCommandLineConfiguration.PROPERTY_PROVIDER_CLASS.getCurrentValue();
+            if (clazz != null) {
+                propertyProviderClass = clazz.getName();
+            }
+        }
+
+        //
+        // Database class
+        //
+        if (databaseClass == null) {
+            Class clazz = LiquibaseCommandLineConfiguration.DATABASE_CLASS.getCurrentValue();
+            if (clazz != null) {
+                databaseClass = clazz.getName();
+            }
         }
     }
 
@@ -1384,9 +1470,7 @@ public class Main {
         if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue())) {
             LOG.fine("Liquibase Hub URL:      " + HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue());
         }
-        if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue())) {
-            LOG.fine("Liquibase Hub Mode:     " + HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
-        }
+        LOG.fine("Liquibase Hub Mode:     " + HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
 
         //
         // Check for a valid license to run PRO commands
@@ -1421,10 +1505,15 @@ public class Main {
             throw new CommandLineParsingException(e.getMessage(), e);
         }
 
-        CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(
-                new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
-                new CommandLineResourceAccessor(classLoader)
-        );
+        final ResourceAccessor fileOpener;
+        if (Main.runningFromNewCli) {
+            fileOpener = Scope.getCurrentScope().getResourceAccessor();
+        } else {
+            fileOpener = new CompositeResourceAccessor(
+                    new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
+                    new CommandLineResourceAccessor(classLoader)
+            );
+        }
 
         Database database = null;
         if (dbConnectionNeeded(command) && this.url != null) {
@@ -1647,30 +1736,31 @@ public class Main {
                     );
                 }
                 return;
-            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command)) {
+            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
                 argsMap.put("changeLogFile", changeLogFile);
                 CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneChangeSet", argsMap);
                 liquibaseCommand.execute();
                 return;
-            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command)) {
+            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command)) {
                 Writer outputWriter = getOutputWriter();
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
                 argsMap.put("changeLogFile", changeLogFile);
                 argsMap.put("outputWriter", outputWriter);
+                argsMap.put("force", Boolean.TRUE);
                 CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneChangeSetSQL", argsMap);
                 liquibaseCommand.execute();
                 return;
-            } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equals(command)) {
+            } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
                 argsMap.put("changeLogFile", changeLogFile);
                 argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
                 CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneUpdate", argsMap);
                 liquibaseCommand.execute();
                 return;
-            } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command)) {
+            } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
                 Writer outputWriter = getOutputWriter();
                 Map<String, Object> argsMap = new HashMap<>();
                 argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
@@ -1683,7 +1773,7 @@ public class Main {
                 Map<String, Object> argsMap = new HashMap<>();
                 CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.DEACTIVATE_CHANGELOG, argsMap);
 
-                liquibaseCommand.addArgumentValue(DeactivateChangeLogCommandStep.CHANGE_LOG_FILE_ARG, changeLogFile);
+                liquibaseCommand.addArgumentValue(DeactivateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
                 liquibaseCommand.execute();
 
@@ -1697,7 +1787,7 @@ public class Main {
                 try {
                     if (hubProjectId != null) {
                         try {
-                            liquibaseCommand.addArgumentValue(RegisterChangeLogCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
+                            liquibaseCommand.addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
                         } catch (IllegalArgumentException e) {
                             throw new LiquibaseException("The command '" + command +
                                     "' failed because parameter 'hubProjectId' has invalid value '" + hubProjectId + "'. Learn more at https://hub.liquibase.com");
@@ -1707,7 +1797,7 @@ public class Main {
                     throw new LiquibaseException("Unexpected hubProjectId format: " + hubProjectId, e);
                 }
                 if (hubProjectName != null) {
-                    liquibaseCommand.addArgumentValue(RegisterChangeLogCommandStep.HUB_PROJECT_NAME_ARG.getName(), hubProjectName);
+                    liquibaseCommand.addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_NAME_ARG.getName(), hubProjectName);
                 }
                 liquibaseCommand.execute();
 
@@ -1715,10 +1805,10 @@ public class Main {
             } else if (COMMANDS.SYNC_HUB.equalsIgnoreCase(command)) {
                 executeSyncHub(database, liquibase);
                 return;
-            } else if (COMMANDS.DROP_ALL.equals(command)) {
+            } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
                 String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
-                String hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
-                if (liquibaseHubApiKey != null && !hubMode.toLowerCase().equals("off")) {
+                HubConfiguration.HubMode hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
+                if (liquibaseHubApiKey != null && hubMode != HubConfiguration.HubMode.OFF) {
                     if (hubConnectionId == null && changeLogFile == null) {
                         String warningMessage =
                                 "The dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +
@@ -1944,10 +2034,10 @@ public class Main {
         CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalSyncHub", argsMap);
 
         liquibaseCommand
-                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId == null ? null : UUID.fromString(hubConnectionId))
                 .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, url)
                 .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId == null ? null : UUID.fromString(hubProjectId));
 
         liquibaseCommand.execute();
     }
@@ -2107,6 +2197,10 @@ public class Main {
     }
 
     private OutputStream getOutputStream() throws IOException {
+        if (outputStream != null) {
+            return outputStream;
+        }
+
         if (outputFile != null) {
             FileOutputStream fileOut;
             try {
@@ -2133,7 +2227,7 @@ public class Main {
     }
 
     private Writer getOutputWriter() throws IOException {
-        String charsetName = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
     }

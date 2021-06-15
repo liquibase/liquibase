@@ -21,7 +21,7 @@ public class ChangeLogWriter {
         xmlFile.getParentFile().mkdirs();
         
         BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(xmlFile,
-        false), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
+        false), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
         try (InputStream stylesheet = resourceAccessor.openStream(null, physicalFilePath)) {
             if (stylesheet == null) {
                 throw new IOException("Can not find " + changeLog);

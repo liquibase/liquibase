@@ -40,6 +40,17 @@ class CommandArgumentDefinitionTest extends Specification {
         definition.validate(commandScope)
         then:
         notThrown(CommandValidationException)
+
+        when:// by default hidden attribute is false
+        definition.validate(commandScope)
+        then:
+        definition.hidden == false
+
+        when:// when hidden attribute is set to true, no exception is thrown
+        definition.hidden = true
+        definition.validate(commandScope)
+        then:
+        notThrown(CommandValidationException)
     }
 
     def "toString test"() {
@@ -57,7 +68,7 @@ class CommandArgumentDefinitionTest extends Specification {
     def "test builder"() {
         setup:
         MockCommandStep.reset()
-        def builder = new CommandBuilder("mock")
+        def builder = new CommandBuilder([["mock"]] as String[][])
 
         when:
         def arg1 = builder.argument("arg1", String).build()

@@ -115,7 +115,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
         if (console == null) {
             final ConfiguredValue<Boolean> headlessValue = GlobalConfiguration.HEADLESS.getCurrentConfiguredValue();
             boolean headlessConfigValue = headlessValue.getValue();
-            boolean wasHeadlessOverridden = !ConfigurationDefinition.wasDefaultValueUsed(headlessValue);
+            boolean wasHeadlessOverridden = !headlessValue.wasDefaultValueUsed();
 
             final Logger log = Scope.getCurrentScope().getLog(getClass());
 

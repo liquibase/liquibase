@@ -1,5 +1,8 @@
 package liquibase.configuration;
 
+import liquibase.command.CommandScope;
+import liquibase.configuration.core.DefaultsFileValueProvider;
+
 /**
  * Defines a way for {@link LiquibaseConfiguration} to find configured values.
  */
@@ -12,12 +15,13 @@ public interface ConfigurationValueProvider {
      * <ul>
      *     <li>400 {@link liquibase.configuration.core.ScopeValueProvider}</li>
      *     <li>350 {@link liquibase.configuration.core.DeprecatedConfigurationValueProvider}</li>
+     *     <li>250 Integration specific providers</li>
      *     <li>300: TODO JNDI attributes</li>
      *     <li>250: TODO Servlet Context</li>
      *     <li>200 {@link liquibase.configuration.core.SystemPropertyValueProvider}</li>
      *     <li>150 EnvironmentValueProvider</li>
      *     <li>100: TODO profile/context specific properties files</li>
-     *     <li>50: TODO default properties files</li>
+     *     <li>50: {@link DefaultsFileValueProvider}</li>
      * </ul>
      */
     int getPrecedence();
@@ -32,4 +36,10 @@ public interface ConfigurationValueProvider {
      * @return null if the key is not defined in this provider.
      */
     ProvidedValue getProvidedValue(String... keyAndAliases);
+
+    /**
+     * Perform any validation of keys/values stored in this provider for the given commandScope.
+     * For example, check for keys that do not match anything expected.
+     */
+    void validate(CommandScope commandScope) throws IllegalArgumentException;
 }

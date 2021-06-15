@@ -28,7 +28,7 @@ public class YamlChangeLogSerializer extends YamlSerializer implements ChangeLog
         Map<String, Object> containerMap = new HashMap<>();
         containerMap.put("databaseChangeLog", maps);
 
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
         writer.write(yaml.dumpAsMap(containerMap));
         writer.write("\n");
         writer.flush();

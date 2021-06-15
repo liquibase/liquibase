@@ -1,6 +1,20 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.4.0 (2021.06.08)
+- Refactor Configuration API
+-- [PRO] including native use of Environment variables
+- Refactor Command API
+- Rewrote CLI to use new library
+-- including new command options and help content
+- Fixes an issue with Maven logs and username password (#1859)
+- Fixes an issue with resolving properties files (#1723)
+- Fixes an issue with diffChangelog dependency order (#1722)
+- Fixes an issue with generating changlogs with DB2 on z/OS (#1506)
+- Fixes an issue with long table names in Postgres (#1483)
+- Fixes an issue with update flags for Postegres(#1213)
+- Fixes an issue with loadData and loadUpdateData(#964)
+
 Changes in version 4.3.5 (2021.04.29)
 - Better error handling in runWith=sqlplus when user doesn't have create/drop table permissions
 
