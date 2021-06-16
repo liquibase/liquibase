@@ -1,8 +1,6 @@
 package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -32,9 +30,11 @@ import liquibase.util.StringUtil;
 import java.util.Date;
 import java.util.UUID;
 
+@SuppressWarnings("java:S1144")
 public class InternalDropAllCommandStep extends AbstractCommandStep {
 
-    public static final String[] COMMAND_NAME = {"internalDropAll"};
+    protected static final String[] COMMAND_NAME = {"internalDropAll"};
+    private final Logger log = Scope.getCurrentScope().getLog(getClass());
 
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGELOG_ARG;
@@ -75,8 +75,8 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
 
         Operation dropAllOperation;
         LockService lockService = LockServiceFactory.getInstance().getLockService(commandScope.getArgumentValue(DATABASE_ARG));
-        Logger log = Scope.getCurrentScope().getLog(getClass());
         HubUpdater hubUpdater;
+
         try {
             lockService.waitForLock();
 
@@ -88,6 +88,8 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                 hubUpdater.register(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
 
                 // Access the HubChangeLog and check to see if we should run syncHub
+                HubChangeLog hubChangeLog = getHubChangeLog(changeLog);
+                checkForRegisteredChangeLog(changeLog, hubChangeLog);
             } else {
                 hubUpdater = new HubUpdater(new Date(), commandScope.getArgumentValue(DATABASE_ARG));
             }
@@ -97,7 +99,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
             try {
                 for (CatalogAndSchema schema : commandScope.getArgumentValue(SCHEMAS_ARG)) {
                     log.info("Dropping Database Objects in schema: " + schema);
-                    checkLiquibaseTables(false, null, new Contexts(), new LabelExpression(), commandScope.getArgumentValue(DATABASE_ARG));
+                    checkLiquibaseTables(commandScope.getArgumentValue(DATABASE_ARG));
                     commandScope.getArgumentValue(DATABASE_ARG).dropDatabaseObjects(schema);
                 }
             } catch (LiquibaseException liquibaseException) {
@@ -212,11 +214,10 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         return hubChangeLog;
     }
 
-    private boolean checkForRegisteredChangeLog(DatabaseChangeLog changeLog, HubChangeLog hubChangeLog) {
-        Logger log = Scope.getCurrentScope().getLog(getClass());
+    private void checkForRegisteredChangeLog(DatabaseChangeLog changeLog, HubChangeLog hubChangeLog) {
         String changeLogId = changeLog.getChangeLogId();
         if (changeLogId != null && hubChangeLog != null) {
-            return true;
+            return;
         }
         String message =
                 "The changelog file specified is not registered with any Liquibase Hub project,\n" +
@@ -225,15 +226,11 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                         "Learn more at https://hub.liquibase.com.";
         Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
         log.warning(message);
-        return false;
     }
 
-    protected void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression, Database database) throws LiquibaseException {
+    protected void checkLiquibaseTables(Database database) throws LiquibaseException {
         ChangeLogHistoryService changeLogHistoryService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
         changeLogHistoryService.init();
-        if (updateExistingNullChecksums) {
-            changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
-        }
         LockServiceFactory.getInstance().getLockService(database).init();
     }
 
