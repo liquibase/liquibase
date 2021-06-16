@@ -103,9 +103,10 @@ public class ChangeLogParameters {
          * #findParameter() is only catching the first one. So here we should eliminate duplicate entries
          */
         ChangeLogParameter param = findParameter(parameter, null);
-        if (param == null) {
-            // okay add it
-            changeLogParameters.add(new ChangeLogParameter(parameter, value));
+        // okay add it
+        changeLogParameters.add(new ChangeLogParameter(parameter, value));
+        if (param != null) {
+            changeLogParameters.remove(param);
         }
     }
 
@@ -121,15 +122,20 @@ public class ChangeLogParameters {
          * #findParameter() is only catching the first one. So here we should eliminate duplicate entries
          **/
         if (globalParam) {
-            // if it is global param ignore additional adds
+            // if it is global param remove duplicate
             ChangeLogParameter param = findParameter(key, null);
-            if (param == null) {
-                // okay add it
-                changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam,
-                    changeLog));
+            if (param != null) {
+                changeLogParameters.remove(param);
             }
+            // okay add it
+            changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam,
+                changeLog));
         } else {
-            //this is a non-global param, just add it
+           ChangeLogParameter param = findParameter(key, changeLog);
+           if (param != null) {
+               changeLogParameters.remove(param);
+           }
+           //this is a non-global param, just add it
            changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam, changeLog));
         }
     }
