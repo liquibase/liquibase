@@ -198,12 +198,14 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
+     *
      * Liquibase update
      *
-     * @param contexts
-     * @param labelExpression
-     * @param checkLiquibaseTables
-     * @throws LiquibaseException
+     * @param   contexts
+     * @param   labelExpression
+     * @param   checkLiquibaseTables
+     * @throws  LiquibaseException
+     *
      */
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
@@ -244,7 +246,7 @@ public class Liquibase implements AutoCloseable {
                 Connection connection = getConnection(changeLog);
                 if (connection != null) {
                     updateOperation =
-                            hubUpdater.preUpdateHub("UPDATE", connection, changeLogFile, contexts, labelExpression, changeLogIterator);
+                        hubUpdater.preUpdateHub("UPDATE", connection, changeLogFile, contexts, labelExpression, changeLogIterator);
                 }
 
                 //
@@ -286,11 +288,13 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
+     *
      * Create or retrieve the Connection object
      *
-     * @param changeLog Database changelog
-     * @return Connection
-     * @throws LiquibaseHubException Thrown by HubService
+     * @param   changeLog              Database changelog
+     * @return  Connection
+     * @throws  LiquibaseHubException  Thrown by HubService
+     *
      */
     public Connection getConnection(DatabaseChangeLog changeLog) throws LiquibaseHubException {
         //
@@ -305,9 +309,9 @@ public class Liquibase implements AutoCloseable {
         if (hubUpdater.hubIsNotAvailable(changeLogId)) {
             if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) && changeLogId == null) {
                 String message =
-                        "The API key '" + HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue() + "' was found, but no changelog ID exists.\n" +
-                                "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
-                                "Learn more at https://hub.liquibase.com.";
+                    "The API key '" + HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue() + "' was found, but no changelog ID exists.\n" +
+                    "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
+                    "Learn more at https://hub.liquibase.com.";
                 Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
                 Scope.getCurrentScope().getLog(getClass()).warning(message);
             }
@@ -319,8 +323,8 @@ public class Liquibase implements AutoCloseable {
         //
         if (StringUtil.isEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) && changeLogId != null) {
             String message = "The changelog ID '" + changeLogId + "' was found, but no API Key exists.\n" +
-                    "No operations will be reported. Simply add a liquibase.hub.apiKey setting to generate free deployment reports.\n" +
-                    "Learn more at https://hub.liquibase.com.";
+                             "No operations will be reported. Simply add a liquibase.hub.apiKey setting to generate free deployment reports.\n" +
+                             "Learn more at https://hub.liquibase.com.";
             Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
             Scope.getCurrentScope().getLog(getClass()).warning(message);
             return null;
@@ -331,7 +335,7 @@ public class Liquibase implements AutoCloseable {
             HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId), "*");
             if (hubChangeLog == null) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        "Retrieving Hub Change Log failed for Changelog ID: " + changeLogId);
+                    "Retrieving Hub Change Log failed for Changelog ID: " + changeLogId);
                 return null;
             }
             if (hubChangeLog.isDeleted()) {
@@ -339,10 +343,10 @@ public class Liquibase implements AutoCloseable {
                 // Complain and stop the operation
                 //
                 String message =
-                        "\n" +
-                                "The operation did not complete and will not be reported to Hub because the\n" + "" +
-                                "registered changelog has been deleted by someone in your organization.\n" +
-                                "Learn more at http://hub.liquibase.com.";
+                    "\n" +
+                        "The operation did not complete and will not be reported to Hub because the\n" +  "" +
+                        "registered changelog has been deleted by someone in your organization.\n" +
+                        "Learn more at http://hub.liquibase.com.";
                 throw new LiquibaseHubException(message);
             }
 
@@ -392,20 +396,20 @@ public class Liquibase implements AutoCloseable {
 
         if (tag == null) {
             return new ChangeLogIterator(changeLog,
-                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                    new ContextChangeSetFilter(contexts),
-                    new LabelChangeSetFilter(labelExpression),
-                    new IgnoreChangeSetFilter(),
-                    new DbmsChangeSetFilter(database));
+                new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new IgnoreChangeSetFilter(),
+                new DbmsChangeSetFilter(database));
         } else {
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             return new ChangeLogIterator(changeLog,
-                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                    new ContextChangeSetFilter(contexts),
-                    new LabelChangeSetFilter(labelExpression),
-                    new IgnoreChangeSetFilter(),
-                    new DbmsChangeSetFilter(database),
-                    new UpToTagChangeSetFilter(tag, ranChangeSetList));
+                new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new IgnoreChangeSetFilter(),
+                new DbmsChangeSetFilter(database),
+                new UpToTagChangeSetFilter(tag, ranChangeSetList));
         }
     }
 
@@ -453,12 +457,14 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
+     *
      * Update to count
      *
-     * @param changesToApply
-     * @param contexts
-     * @param labelExpression
+     * @param  changesToApply
+     * @param  contexts
+     * @param  labelExpression
      * @throws LiquibaseException
+     *
      */
     public void update(int changesToApply, Contexts contexts, LabelExpression labelExpression)
             throws LiquibaseException {
@@ -509,7 +515,7 @@ public class Liquibase implements AutoCloseable {
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
                         updateOperation =
-                                hubUpdater.preUpdateHub("UPDATE", connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                            hubUpdater.preUpdateHub("UPDATE", connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -535,7 +541,8 @@ public class Liquibase implements AutoCloseable {
                         runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                     });
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
-                } catch (Throwable e) {
+                }
+                catch (Throwable e) {
                     if (hubUpdater != null) {
                         hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
                     }
@@ -563,12 +570,14 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
+     *
      * Update to tag
      *
-     * @param tag             Tag to update for
-     * @param contexts
-     * @param labelExpression
-     * @throws LiquibaseException
+     * @param   tag                             Tag to update for
+     * @param   contexts
+     * @param   labelExpression
+     * @throws  LiquibaseException
+     *
      */
     public void update(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         if (tag == null) {
@@ -624,7 +633,7 @@ public class Liquibase implements AutoCloseable {
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
                         updateOperation =
-                                hubUpdater.preUpdateHub("UPDATE", connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                           hubUpdater.preUpdateHub("UPDATE", connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -650,7 +659,8 @@ public class Liquibase implements AutoCloseable {
                         runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                     });
                     hubUpdater.postUpdateHub(updateOperation, bufferLog);
-                } catch (Throwable e) {
+                }
+                catch (Throwable e) {
                     if (hubUpdater != null) {
                         hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
                     }
@@ -904,7 +914,8 @@ public class Liquibase implements AutoCloseable {
                         removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
-                } catch (Throwable t) {
+                }
+                catch (Throwable t) {
                     if (hubUpdater != null) {
                         hubUpdater.postUpdateHubExceptionHandling(rollbackOperation, bufferLog, t.getMessage());
                     }
@@ -973,7 +984,7 @@ public class Liquibase implements AutoCloseable {
         RawSQLChange rollbackChange = buildRawSQLChange(rollbackScriptContents);
 
         try {
-            ((HubChangeExecListener) changeExecListener).setRollbackScriptContents(rollbackScriptContents);
+            ((HubChangeExecListener)changeExecListener).setRollbackScriptContents(rollbackScriptContents);
             sendRollbackMessages(changeSets, changelog, RollbackMessageType.WILL_ROLLBACK, contexts, labelExpression, null);
             executor.execute(rollbackChange);
             sendRollbackMessages(changeSets, changelog, RollbackMessageType.ROLLED_BACK, contexts, labelExpression, null);
@@ -997,12 +1008,14 @@ public class Liquibase implements AutoCloseable {
         for (ChangeSet changeSet : changeSets) {
             if (messageType == RollbackMessageType.WILL_ROLLBACK) {
                 changeExecListener.willRollback(changeSet, databaseChangeLog, database);
-            } else if (messageType == RollbackMessageType.ROLLED_BACK) {
+            }
+            else if (messageType == RollbackMessageType.ROLLED_BACK) {
                 final String message = "Rolled Back Changeset:" + changeSet.toString(false);
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 LOG.info(message);
                 changeExecListener.rolledBack(changeSet, databaseChangeLog, database);
-            } else if (messageType == RollbackMessageType.ROLLBACK_FAILED) {
+            }
+            else if (messageType == RollbackMessageType.ROLLBACK_FAILED) {
                 final String message = "Failed rolling back Changeset:" + changeSet.toString(false);
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 changeExecListener.rollbackFailed(changeSet, databaseChangeLog, database, exception);
@@ -1166,7 +1179,8 @@ public class Liquibase implements AutoCloseable {
                         removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
-                } catch (Throwable t) {
+                }
+                catch (Throwable t) {
                     if (hubUpdater != null) {
                         hubUpdater.postUpdateHubExceptionHandling(rollbackOperation, bufferLog, t.getMessage());
                     }
@@ -1323,7 +1337,8 @@ public class Liquibase implements AutoCloseable {
                         removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
-                } catch (Throwable t) {
+                }
+                catch (Throwable t) {
                     if (hubUpdater != null) {
                         hubUpdater.postUpdateHubExceptionHandling(rollbackOperation, bufferLog, t.getMessage());
                     }
@@ -1347,10 +1362,10 @@ public class Liquibase implements AutoCloseable {
     }
 
     public void changeLogSync(Contexts contexts, LabelExpression labelExpression, Writer output)
-            throws LiquibaseException {
+        throws LiquibaseException {
 
         doChangeLogSyncSql(null, contexts, labelExpression, output,
-                () -> "SQL to add all changesets to database history table");
+            () -> "SQL to add all changesets to database history table");
     }
 
     private void flushOutputWriter(Writer output) throws LiquibaseException {
@@ -1444,7 +1459,8 @@ public class Liquibase implements AutoCloseable {
                                 new RuntimeEnvironment(database, contexts, labelExpression));
                     });
                     hubUpdater.postUpdateHub(changeLogSyncOperation, bufferLog);
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     if (changeLogSyncOperation != null) {
                         hubUpdater.postUpdateHubExceptionHandling(changeLogSyncOperation, bufferLog, e.getMessage());
                     }
@@ -1468,10 +1484,10 @@ public class Liquibase implements AutoCloseable {
     }
 
     public void changeLogSync(String tag, Contexts contexts, LabelExpression labelExpression, Writer output)
-            throws LiquibaseException {
+        throws LiquibaseException {
 
         doChangeLogSyncSql(tag, contexts, labelExpression, output,
-                () -> "SQL to add changesets upto '" + tag + "' to database history table");
+            () -> "SQL to add changesets upto '" + tag + "' to database history table");
     }
 
     private void doChangeLogSyncSql(String tag, Contexts contexts, LabelExpression labelExpression, Writer output,
@@ -1486,11 +1502,11 @@ public class Liquibase implements AutoCloseable {
                     Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(database), output, database
             );
 
-            /* We have no other choice than to save the current Executer here. */
-            @SuppressWarnings("squid:S1941")
-            Executor oldTemplate = getAndReplaceJdbcExecutor(output);
+                /* We have no other choice than to save the current Executer here. */
+                @SuppressWarnings("squid:S1941")
+                Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
-            outputHeader("SQL to add all changesets to database history table");
+                outputHeader("SQL to add all changesets to database history table");
 
             changeLogSync(tag, contexts, labelExpression);
 
@@ -1683,7 +1699,6 @@ public class Liquibase implements AutoCloseable {
                                         );
                                     }
                                 });
-                        dropAll(new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
                     } else {
                         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                         UpToTagChangeSetFilter upToTagChangeSetFilter = new UpToTagChangeSetFilter(tag, ranChangeSetList);
@@ -1700,7 +1715,7 @@ public class Liquibase implements AutoCloseable {
                         //
                         // Check to see if the tag was found and stop if not
                         //
-                        if (!upToTagChangeSetFilter.isSeenTag()) {
+                        if (! upToTagChangeSetFilter.isSeenTag()) {
                             String message = "No tag matching '" + tag + "' found";
                             Scope.getCurrentScope().getUI().sendMessage("ERROR: " + message);
                             Scope.getCurrentScope().getLog(Liquibase.class).severe(message);
