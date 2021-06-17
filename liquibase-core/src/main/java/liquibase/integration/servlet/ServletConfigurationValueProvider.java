@@ -1,5 +1,6 @@
 package liquibase.integration.servlet;
 
+import liquibase.configuration.AbstractConfigurationValueProvider;
 import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.ProvidedValue;
 
@@ -8,7 +9,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 
-public class ServletConfigurationValueProvider implements ConfigurationValueProvider {
+public class ServletConfigurationValueProvider extends AbstractConfigurationValueProvider {
 
     private static final String JAVA_COMP_ENV = "java:comp/env";
 

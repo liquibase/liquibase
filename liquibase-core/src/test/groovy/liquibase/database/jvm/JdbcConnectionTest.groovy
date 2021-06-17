@@ -27,6 +27,8 @@ class JdbcConnectionTest extends Specification {
         "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=my_user;password=my_password"  | "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=my_user"
         "jdbc:jtds:sqlserver://localhost:1433/proCatalog;password=my_password;user=my_user;" | "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=my_user;"
         "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=my_user;"                      | "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=my_user;"
+        "jdbc:oracle:thin:user/password@host:1521/db"                                        | "jdbc:oracle:thin:user@host:1521/db"
+        "jdbc:oracle:thin:@host:1521/db"                                                     | "jdbc:oracle:thin:@host:1521/db"
         null                                                                                 | null
     }
 }

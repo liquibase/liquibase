@@ -5,10 +5,12 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -253,7 +255,15 @@ public class ObjectUtil {
 
         try {
             if (Enum.class.isAssignableFrom(targetClass)) {
-                return (T) Enum.valueOf((Class<Enum>) targetClass, object.toString());
+                try {
+                    return (T) Enum.valueOf((Class<Enum>) targetClass, object.toString().toUpperCase());
+                } catch (Exception e) {
+                    SortedSet<String> values = new TreeSet<>();
+                    for (Enum value : ((Class<Enum>) targetClass).getEnumConstants()) {
+                        values.add(value.name());
+                    }
+                    throw new IllegalArgumentException("Invalid value "+object+". Acceptable values are "+StringUtil.join(values, ", "));
+                }
             } else if (Number.class.isAssignableFrom(targetClass)) {
                 if (object instanceof Number) {
                     Number number = (Number) object;
@@ -346,9 +356,18 @@ public class ObjectUtil {
                 } catch (ClassNotFoundException e) {
                     throw new IllegalArgumentException(e);
                 }
+            } else if (targetClass.isAssignableFrom(File.class)) {
+                return (T) new File(object.toString());
+            } else if (targetClass.equals(UUID.class)) {
+                return (T) UUID.fromString(object.toString());
+            } else if (Date.class.isAssignableFrom(targetClass)) {
+                return (T) new ISODateFormat().parse(object.toString());
             }
+
             return (T) object;
         } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(e);
+        } catch (ParseException e) {
             throw new IllegalArgumentException(e);
         }
     }
