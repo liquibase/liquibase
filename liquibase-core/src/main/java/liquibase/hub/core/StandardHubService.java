@@ -162,7 +162,7 @@ public class StandardHubService implements HubService {
         final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", parameters, Map.class);
         List<Project> returnList = transformProjectResponseToList(response);
         if (returnList.size() > 1) {
-            throw new LiquibaseHubException(String.format("ConnectionId: %s was associated with multiple projects", connectionId));
+            throw new LiquibaseHubException(String.format("jdbcUrl %s was associated with multiple projects. Please specify --hubProjectId=<id> or --hubConnectionId=<id>", jdbcUrl));
         }
         if (returnList.isEmpty()) {
             throw new LiquibaseHubObjectNotFoundException("Project wasn't found");
