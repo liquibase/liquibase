@@ -140,8 +140,8 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         if (projectId != null) {
             project = hubService.getProject(projectId);
             hubConnection.setProject(project);
-        } else if (connectionId != null) {
-            project = hubService.findProjectByConnectionId(connectionId);
+        } else {
+            project = hubService.findProjectByConnectionIdOrJdbcUrl(connectionId, hubConnection.getJdbcUrl());
         }
         hubConnection.setProject(project);
 

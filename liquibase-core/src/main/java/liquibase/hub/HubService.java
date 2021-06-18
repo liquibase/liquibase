@@ -19,7 +19,7 @@ public interface HubService extends Plugin, PrioritizedService {
 
     Project getProject(UUID projectId) throws LiquibaseHubException;
 
-    Project findProjectByConnectionId(UUID connectionId) throws LiquibaseHubException;
+    Project findProjectByConnectionIdOrJdbcUrl(UUID connectionId, String jdbcUrl) throws LiquibaseHubException;
 
     List<Project> getProjects() throws LiquibaseHubException;
 

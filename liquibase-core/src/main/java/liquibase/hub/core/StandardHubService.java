@@ -147,10 +147,19 @@ public class StandardHubService implements HubService {
     }
 
     @Override
-    public Project findProjectByConnectionId(UUID connectionId) throws LiquibaseHubException {
+    public Project findProjectByConnectionIdOrJdbcUrl(UUID connectionId, String jdbcUrl) throws LiquibaseHubException {
         final AtomicReference<UUID> organizationId = new AtomicReference<>(getOrganization().getId());
-        String searchParam = "?search=connections.id:\"" + connectionId.toString() + "\"";
-        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects" + searchParam, Map.class);
+        String searchParam = null;
+        if (connectionId != null) {
+            searchParam = "connections.id:\"" + connectionId.toString() + "\"";
+        } else if (jdbcUrl != null) {
+            searchParam = "connections.jdbcUrl:\"" + jdbcUrl + "\"";
+        } else {
+            throw new LiquibaseHubException("connectionId or jdbcUrl should be specified");
+        }
+        Map<String, String> parameters = new LinkedHashMap<>();
+        parameters.put("search", searchParam);
+        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", parameters, Map.class);
         List<Project> returnList = transformProjectResponseToList(response);
         if (returnList.size() > 1) {
             throw new LiquibaseHubException(String.format("ConnectionId: %s was associated with multiple projects", connectionId));
