@@ -146,7 +146,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         hubConnection.setProject(project);
 
         if (hubConnection.getProject() == null) {
-            throw new LiquibaseHubException("Hub project doesn't exist or it can not be associated with any connections");
+            throw new LiquibaseHubException("Please specify --hubProjectId=<id> or --hubConnectionId=<id>");
         }
 
     }
