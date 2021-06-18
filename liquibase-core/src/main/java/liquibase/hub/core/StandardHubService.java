@@ -13,9 +13,12 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.ConnectException;
 import java.net.InetAddress;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -178,6 +181,14 @@ public class StandardHubService implements HubService {
             returnList.add(project);
         }
         return returnList;
+    }
+
+    private String encodeValue(String value) throws LiquibaseHubException {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw new LiquibaseHubException(e);
+        }
     }
 
     @Override
