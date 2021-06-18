@@ -146,7 +146,7 @@ public class StandardHubService implements HubService {
     @Override
     public Project findProjectByConnectionId(UUID connectionId) throws LiquibaseHubException {
         final AtomicReference<UUID> organizationId = new AtomicReference<>(getOrganization().getId());
-        String searchParam = "?search=connection.id:\"" + connectionId.toString() + "\"";
+        String searchParam = "?search=connections.id:\"" + connectionId.toString() + "\"";
         final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects" + searchParam, Map.class);
         List<Project> returnList = transformProjectResponseToList(response);
         if (returnList.size() > 1) {
