@@ -74,7 +74,7 @@ public class HubUpdater {
      */
     public Operation preUpdateHub(String operationType, String operationCommand, Connection connection)
             throws LiquibaseException, SQLException {
-        if (connection == null || connection.getId() == null) {
+        if (connection == null) {
             return null;
         }
         return this.preUpdateHub(operationType,operationCommand, connection, null, null, null, null);
