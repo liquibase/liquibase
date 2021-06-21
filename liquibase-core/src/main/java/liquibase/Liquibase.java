@@ -246,7 +246,7 @@ public class Liquibase implements AutoCloseable {
                 Connection connection = getConnection(changeLog);
                 if (connection != null) {
                     updateOperation =
-                        hubUpdater.preUpdateHub("UPDATE", connection, changeLogFile, contexts, labelExpression, changeLogIterator);
+                        hubUpdater.preUpdateHub("UPDATE", "update", connection, changeLogFile, contexts, labelExpression, changeLogIterator);
                 }
 
                 //
@@ -515,7 +515,7 @@ public class Liquibase implements AutoCloseable {
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
                         updateOperation =
-                            hubUpdater.preUpdateHub("UPDATE", connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                            hubUpdater.preUpdateHub("UPDATE", "update-count", connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -633,7 +633,7 @@ public class Liquibase implements AutoCloseable {
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
                         updateOperation =
-                           hubUpdater.preUpdateHub("UPDATE", connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                           hubUpdater.preUpdateHub("UPDATE", "update-to-tag", connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -830,6 +830,16 @@ public class Liquibase implements AutoCloseable {
         rollback(changesToRollback, rollbackScript, new Contexts(contexts), new LabelExpression());
     }
 
+    /**
+     *
+     * Rollback count
+     *
+     * @param changesToRollback
+     * @param rollbackScript
+     * @param contexts
+     * @param labelExpression
+     * @throws LiquibaseException
+     */
     public void rollback(int changesToRollback, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
@@ -877,7 +887,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", "rollback-count", connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1092,6 +1102,16 @@ public class Liquibase implements AutoCloseable {
         rollback(tagToRollBackTo, rollbackScript, contexts, new LabelExpression());
     }
 
+    /**
+     *
+     * Rollback to tag
+     *
+     * @param tagToRollBackTo
+     * @param rollbackScript
+     * @param contexts
+     * @param labelExpression
+     * @throws LiquibaseException
+     */
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
@@ -1142,7 +1162,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", "rollback-to-tag", connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1252,6 +1272,16 @@ public class Liquibase implements AutoCloseable {
         rollback(dateToRollBackTo, new Contexts(contexts), new LabelExpression());
     }
 
+    /**
+     *
+     * Rollback to date
+     *
+     * @param dateToRollBackTo
+     * @param rollbackScript
+     * @param contexts
+     * @param labelExpression
+     * @throws LiquibaseException
+     */
     public void rollback(Date dateToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
@@ -1300,7 +1330,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", "rollback-to-date", connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1400,6 +1430,16 @@ public class Liquibase implements AutoCloseable {
         changeLogSync(tag, new Contexts(contexts), new LabelExpression());
     }
 
+    /**
+     *
+     * Changelogsync or changelogsync to tag
+     *
+     * @param tag
+     * @param contexts
+     * @param labelExpression
+     * @throws LiquibaseException
+     *
+     */
     public void changeLogSync(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
@@ -1441,8 +1481,9 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
+                        String operationCommand = (tag == null ? "changelog-sync" : "changelog-sync-to-tag");
                         changeLogSyncOperation =
-                                hubUpdater.preUpdateHub("CHANGELOGSYNC", connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                            hubUpdater.preUpdateHub("CHANGELOGSYNC", operationCommand, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
