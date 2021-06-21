@@ -105,7 +105,7 @@ public class ChangeLogParameters {
         ChangeLogParameter param = findParameter(parameter, null);
         // okay add it
         changeLogParameters.add(new ChangeLogParameter(parameter, value));
-        if (param != null) {
+        if (param != null && ! param.isGlobal()) {
             changeLogParameters.remove(param);
         }
     }
@@ -122,9 +122,9 @@ public class ChangeLogParameters {
          * #findParameter() is only catching the first one. So here we should eliminate duplicate entries
          **/
         if (globalParam) {
-            // if it is global param remove duplicate
+            // if it is global param remove duplicate non-global parameters
             ChangeLogParameter param = findParameter(key, null);
-            if (param != null) {
+            if (param != null && ! param.isGlobal()) {
                 changeLogParameters.remove(param);
             }
             // okay add it
@@ -132,7 +132,7 @@ public class ChangeLogParameters {
                 changeLog));
         } else {
            ChangeLogParameter param = findParameter(key, changeLog);
-           if (param != null) {
+           if (param != null && ! param.isGlobal() && param.getChangeLog() == changeLog) {
                changeLogParameters.remove(param);
            }
            //this is a non-global param, just add it
