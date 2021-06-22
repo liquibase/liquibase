@@ -73,8 +73,8 @@
             <outputDirectory>lib</outputDirectory>
             <includes>
                 <include>org.yaml:snakeyaml:jar:</include>
-                <include>commons-cli:commons-cli:jar:</include>
                 <include>com.h2database:h2:jar:</include>
+                <include>info.picocli:picocli:jar:</include>
             </includes>
         </dependencySet>
     </dependencySets>

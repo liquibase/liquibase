@@ -6,11 +6,11 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ListVisitor;
 import liquibase.changelog.visitor.RollbackListVisitor;
+import liquibase.command.CommandResults;
 import liquibase.exception.CommandExecutionException;
 import liquibase.command.CommandScope;
-import liquibase.command.core.RegisterChangeLogCommandStep;
+import liquibase.command.core.RegisterChangelogCommandStep;
 import liquibase.command.core.InternalSyncHubCommandStep;
-import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
@@ -56,7 +56,8 @@ public class HubUpdater {
      * This method performs a syncHub and returns a new Operation instance
      * If there is an error or the Hub is not available it returns null
      *
-     * @param operationType     Operation type (UPDATE or ROLLBACK)
+     * @param operationType     Operation type (UPDATE, ROLLBACK, or CHANGELOGSYNC)
+     * @param operationCommand  Specific command which is executing (update, update-count, etc.)
      * @param connection        Connection for this operation
      * @param changeLogFile     Path to DatabaseChangelog for this operation
      * @param contexts          Contexts to use for filtering
@@ -68,6 +69,7 @@ public class HubUpdater {
      * @throws LiquibaseException    Thrown by Liquibase core
      */
     public Operation preUpdateHub(String operationType,
+                                  String operationCommand,
                                   Connection connection,
                                   String changeLogFile,
                                   Contexts contexts,
@@ -113,7 +115,7 @@ public class HubUpdater {
         //
         // Send the START operation event
         //
-        Operation updateOperation = hubService.createOperation(operationType, hubChangeLog, connection);
+        Operation updateOperation = hubService.createOperation(operationType, operationCommand, hubChangeLog, connection);
         try {
             hubService.sendOperationEvent(updateOperation, new OperationEvent()
                     .setEventType("START")
@@ -312,12 +314,18 @@ public class HubUpdater {
     }
 
     public void syncHub(String changeLogFile, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) throws CommandExecutionException {
+        //
+        // We pass in a setting of CONTINUE IF_BOTH_CONNECTION_AND_PROJECT_ID_SET_ARG=true
+        // to tell syncHub to not complain when both connectionID and projectID
+        // are set.
+        //
         final CommandScope syncHub = new CommandScope("internalSyncHub")
                 .addArgumentValue(InternalSyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, database.getConnection().getURL())
-                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId != null ? Objects.toString(hubConnectionId) : null)
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
+                .addArgumentValue(InternalSyncHubCommandStep.CONTINUE_IF_CONNECTION_AND_PROJECT_ID_BOTH_SET_ARG, true)
                 .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_ONLINE_ARG, false);
+                .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_OFFLINE_ARG, false);
 
         try {
             syncHub.execute();
@@ -448,8 +456,8 @@ public class HubUpdater {
                 // If there is no liquibase.hub.mode setting then add one with value 'all'
                 // Do not update liquibase.hub.mode if it is already set
                 //
-                ConfiguredValue<String> hubModeProperty = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentConfiguredValue();
-                if (ConfigurationDefinition.wasDefaultValueUsed(hubModeProperty)) {
+                ConfiguredValue<HubConfiguration.HubMode> hubModeProperty = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentConfiguredValue();
+                if (hubModeProperty.wasDefaultValueUsed()) {
                     writeToPropertiesFile(defaultsFile, "\nliquibase.hub.mode=all\n");
                     message = "* Updated properties file " + defaultsFile + " to set liquibase.hub properties";
                     Scope.getCurrentScope().getUI().sendMessage(message);
@@ -496,7 +504,7 @@ public class HubUpdater {
     // Write the string to a properties file
     //
     private void writeToPropertiesFile(File defaultsFile, String stringToWrite) throws IOException {
-        String encoding = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+        String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(defaultsFile, "rw")) {
             randomAccessFile.seek(defaultsFile.length());
             randomAccessFile.write(stringToWrite.getBytes(encoding));
@@ -511,15 +519,15 @@ public class HubUpdater {
 
         CommandScope registerChangeLogCommand = new CommandScope("registerChangeLog");
         registerChangeLogCommand
-                .addArgumentValue(RegisterChangeLogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            .addArgumentValue(RegisterChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
         try {
             if (hubProjectId != null) {
                 try {
-                    registerChangeLogCommand.addArgumentValue(RegisterChangeLogCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
+                    registerChangeLogCommand.addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
                 } catch (IllegalArgumentException e) {
                     throw new LiquibaseException("The command 'RegisterChangeLog' " +
-                            " failed because parameter 'hubProjectId' has invalid value '" + hubProjectId +
-                            "'. Learn more at https://hub.liquibase.com");
+                        " failed because parameter 'hubProjectId' has invalid value '" + hubProjectId +
+                        "'. Learn more at https://hub.liquibase.com");
                 }
             }
         } catch (IllegalArgumentException e) {
@@ -527,9 +535,13 @@ public class HubUpdater {
         }
 
         //
-        // Execute registerChangeLog
+        // Execute registerChangeLog and reset the changeLog ID
         //
-        registerChangeLogCommand.execute();
+        CommandResults results = registerChangeLogCommand.execute();
+        String registerChangeLogId = results.getResult(RegisterChangelogCommandStep.REGISTERED_CHANGELOG_ID);
+        if (registerChangeLogId != null) {
+            changeLog.setChangeLogId(registerChangeLogId);
+        }
     }
 
     //

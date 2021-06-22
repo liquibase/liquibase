@@ -4,7 +4,6 @@ import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
@@ -99,7 +98,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
     }
 
     private Writer createOutputWriter() throws IOException {
-        String charsetName = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
     }

@@ -12,6 +12,8 @@ import liquibase.statement.SequenceNextValueFunction
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.sql.Time
+
 class ObjectUtilTest extends Specification {
 
     @Unroll
@@ -66,5 +68,18 @@ class ObjectUtilTest extends Specification {
         new ColumnConfig()           | "valueSequenceNext"    | "seq_next"    | SequenceNextValueFunction.class
         new ColumnConfig()           | "valueSequenceCurrent" | "seq_current" | SequenceCurrentValueFunction.class
         new PreconditionContainer()  | "onSqlOutput"          | "IGNORE"      | PreconditionContainer.OnSqlOutputOption.class
+    }
+
+    def convert() {
+        expect:
+        ObjectUtil.convert(input, targetClass) == expected
+
+        where:
+        input                                  | targetClass | expected
+        "xyz"                                  | String      | "xyz"
+        "123"                                  | Integer     | 123
+        "78bff7f0-dd80-4f53-9bb3-f3cbb9a15ba5" | UUID        | UUID.fromString("78bff7f0-dd80-4f53-9bb3-f3cbb9a15ba5")
+        "2021-05-09 00:54:57.574616"           | Date        | new ISODateFormat().parse("2021-05-09 00:54:57.574616")
+        "2021-05-09"                           | Date        | new ISODateFormat().parse("2021-05-09")
     }
 }

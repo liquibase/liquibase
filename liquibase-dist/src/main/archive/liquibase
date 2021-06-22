@@ -74,4 +74,4 @@ fi
 # add any JVM options here
 JAVA_OPTS="${JAVA_OPTS-}"
 
-"${JAVA_PATH}" -cp "$CP" $JAVA_OPTS liquibase.integration.commandline.Main ${1+"$@"}
+"${JAVA_PATH}" -cp "$CP" $JAVA_OPTS liquibase.integration.commandline.LiquibaseCommandLine ${1+"$@"}

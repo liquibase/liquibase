@@ -45,7 +45,7 @@ public class StandardHubService implements HubService {
 
     @Override
     public boolean isOnline() {
-        return !HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("OFF");
+        return HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue() != HubConfiguration.HubMode.OFF;
     }
 
     public boolean isHubAvailable() {
@@ -53,7 +53,7 @@ public class StandardHubService implements HubService {
             final Logger log = Scope.getCurrentScope().getLog(getClass());
             final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
 
-            if (HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("OFF")) {
+            if (HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue() == HubConfiguration.HubMode.OFF) {
                 hubServiceFactory.setOfflineReason("property liquibase.hub.mode is 'OFF'. To send data to Liquibase Hub, please set it to \"all\"");
                 this.available = false;
             } else if (getApiKey() == null) {
@@ -365,7 +365,7 @@ public class StandardHubService implements HubService {
     }
 
     @Override
-    public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
+    public Operation createOperation(String operationType, String operationCommand, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
 
         String hostName;
         try {
@@ -387,6 +387,7 @@ public class StandardHubService implements HubService {
         requestBody.put("connectionId", connection.getId());
         requestBody.put("changelogId", changeLog.getId());
         requestBody.put("operationType", operationType);
+        requestBody.put("operationCommand", operationCommand);
         requestBody.put("operationStatusType", "PASS");
         requestBody.put("statusMessage", operationType);
         requestBody.put("clientMetadata", clientMetadata);
@@ -452,7 +453,7 @@ public class StandardHubService implements HubService {
         }
 
         if (operationEvent.getOperationEventLog() != null) {
-            if (!HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("meta")) {
+            if (HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue() != HubConfiguration.HubMode.META) {
                 requestParams.put("logs", operationEvent.getOperationEventLog().getLogMessage());
                 requestParams.put("logsTimestamp", operationEvent.getOperationEventLog().getTimestampLog());
             }
@@ -473,7 +474,7 @@ public class StandardHubService implements HubService {
         String[] generatedSql = null;
         String logs = null;
         Date logsTimestamp = operationChangeEvent.getLogsTimestamp();
-        if (!HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("meta")) {
+        if (HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue() != HubConfiguration.HubMode.META) {
             changesetBody = operationChangeEvent.getChangesetBody();
             generatedSql = operationChangeEvent.getGeneratedSql();
 

@@ -149,7 +149,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
     }
 
     private Writer createOutputWriter() throws IOException {
-        String charsetName = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
     }

@@ -104,7 +104,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             builder.append("\n");
         }
 
-        out.write(builder.toString().getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
+        out.write(builder.toString().getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
 
     }
 
