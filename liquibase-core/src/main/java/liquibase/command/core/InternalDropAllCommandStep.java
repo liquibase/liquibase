@@ -106,7 +106,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                 hubUpdater.postUpdateHubExceptionHandling(dropAllOperation, bufferLog, liquibaseException.getMessage());
                 return;
             }
-
+            hubUpdater.syncHub(commandScope.getArgumentValue(CHANGELOG_FILE_ARG), hubConnection.getId());
             hubUpdater.postUpdateHub(dropAllOperation, bufferLog);
         } catch (DatabaseException e) {
             throw e;
