@@ -16,7 +16,19 @@ public class FilenameUtilsTest {
     public void concatWithNullBasePath() {
         final String something = "liquibase/delta-changelogs/";
         Assert.assertEquals("null basePath must not kill the result of concatenation",
-                FilenameUtils.concat(null, something),
-                something);
+            FilenameUtils.concat(null, something),
+            something);
+    }
+
+    /**
+     *
+     * This test checks that {@link FilenameUtils#sanitizeFileName(filenName)} works with
+     * specified characters by replacing them with '_'
+     *
+     */
+    @Test
+    public void testProblematicChars() {
+        final String fileName = "<B>o\\b|I/s|*?Yo\"u\\r?Uncle:/";
+        Assert.assertEquals("_B_o_b_I_s___Yo_u_r_Uncle__", FilenameUtils.sanitizeFileName(fileName));
     }
 }
