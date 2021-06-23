@@ -94,7 +94,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                 hubUpdater = new HubUpdater(new Date(), commandScope.getArgumentValue(DATABASE_ARG));
             }
 
-            dropAllOperation = hubUpdater.preUpdateHub("DROPALL","dropAll", hubConnection);
+            dropAllOperation = hubUpdater.preUpdateHub("DROPALL", "dropAll", hubConnection);
 
             try {
                 for (CatalogAndSchema schema : commandScope.getArgumentValue(SCHEMAS_ARG)) {
@@ -106,7 +106,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                 hubUpdater.postUpdateHubExceptionHandling(dropAllOperation, bufferLog, liquibaseException.getMessage());
                 return;
             }
-            hubUpdater.syncHub(commandScope.getArgumentValue(CHANGELOG_FILE_ARG), hubConnection.getId());
+            hubUpdater.syncHub(commandScope.getArgumentValue(CHANGELOG_FILE_ARG), hubConnection == null ? null : hubConnection.getId());
             hubUpdater.postUpdateHub(dropAllOperation, bufferLog);
         } catch (DatabaseException e) {
             throw e;
@@ -152,6 +152,10 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
     }
 
     private Connection getHubConnection(CommandScope commandScope) {
+        String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
+        if (apiKey == null) {
+            return null;
+        }
         Database database = commandScope.getArgumentValue(DATABASE_ARG);
         DatabaseConnection dbConnection = database.getConnection();
         Connection connection = new Connection();

@@ -416,8 +416,9 @@ public class StandardHubService implements HubService {
         clientMetadata.put("liquibaseVersion", LiquibaseUtil.getBuildVersion());
         clientMetadata.put("hostName", hostName);
         clientMetadata.put("systemUser", System.getProperty("user.name"));
-        clientMetadata.put("clientInterface", integrationDetails.getName());
-
+        if (integrationDetails != null) {
+            clientMetadata.put("clientInterface", integrationDetails.getName());
+        }
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("connectionId", connection.getId());
         requestBody.put("connectionJdbcUrl", connection.getJdbcUrl());
@@ -428,7 +429,9 @@ public class StandardHubService implements HubService {
         requestBody.put("operationStatusType", "PASS");
         requestBody.put("statusMessage", operationType);
         requestBody.put("clientMetadata", clientMetadata);
-        requestBody.put("operationParameters", getCleanOperationParameters(integrationDetails.getParameters()));
+        if (integrationDetails!=null) {
+            requestBody.put("operationParameters", getCleanOperationParameters(integrationDetails.getParameters()));
+        }
 
         final Operation operation = http.doPost("/api/v1/operations", requestBody, Operation.class);
         operation.setConnection(connection);
