@@ -89,6 +89,11 @@ select 1
             "--precondition-invalid-type 123\n" +
             "select 1;"
 
+    private static final String VALID_CHANGELOG_VALID_PRECONDITION = "--liquibase formatted sql\n" +
+            "\n" +
+            "--changeset jasperroelofsen:valid_precondition\n" +
+            "--precondition-sqlCheck\n" +
+            "select * from table1;"
 
     def supports() throws Exception {
         expect:
@@ -101,6 +106,11 @@ select 1
         new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_INVALID_PRECONDITION).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
         then:
         thrown(ChangeLogParseException)
+    }
+
+    def validPrecondition() {
+        expect:
+        assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG_VALID_PRECONDITION).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
     }
 
     def parse() throws Exception {
