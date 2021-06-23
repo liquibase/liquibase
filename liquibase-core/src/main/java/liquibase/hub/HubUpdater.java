@@ -122,26 +122,17 @@ public class HubUpdater {
 
         Operation updateOperation = sendStartOperationEvent(operationType,operationCommand, connection, hubChangeLog);
 
-        // Send the list of change sets which will be updated/rolled back
-        // If the operation type is DROPALL then we send no changes
-        if ("DROPALL".equalsIgnoreCase(operationType)) {
-            return updateOperation;
-        }
         ListVisitor listVisitor;
         if (operationType.equalsIgnoreCase("ROLLBACK")) {
             listVisitor = new RollbackListVisitor();
         } else {
             listVisitor = new ListVisitor();
         }
-
-        changeLogIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-        List<ChangeSet> operationChangeSets = listVisitor.getSeenChangeSets();
         OperationChange operationChange = new OperationChange();
-        for (ChangeSet operationChangeSet : operationChangeSets) {
-            operationChange.getChangeSets().add(operationChangeSet);
-        }
-        operationChange.setProject(hubChangeLog == null ? null : hubChangeLog.getProject());
+        populateOperationChange(contexts, labelExpression, changeLogIterator, listVisitor, operationChange);
+        populateProject(connection, hubChangeLog, operationChange);
         operationChange.setOperation(updateOperation);
+
         try {
             hubService.sendOperationChanges(operationChange);
         } catch (LiquibaseException e) {
@@ -149,6 +140,24 @@ public class HubUpdater {
         }
 
         return updateOperation;
+    }
+
+    private void populateOperationChange(Contexts contexts, LabelExpression labelExpression, ChangeLogIterator changeLogIterator, ListVisitor listVisitor, OperationChange operationChange) throws LiquibaseException {
+        if (changeLogIterator != null) {
+            changeLogIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+            List<ChangeSet> operationChangeSets = listVisitor.getSeenChangeSets();
+            for (ChangeSet operationChangeSet : operationChangeSets) {
+                operationChange.getChangeSets().add(operationChangeSet);
+            }
+        }
+    }
+
+    private void populateProject(Connection connection, HubChangeLog hubChangeLog, OperationChange operationChange) {
+        if (hubChangeLog == null) {
+            operationChange.setProject(connection.getProject());
+        } else {
+            operationChange.setProject(hubChangeLog.getProject());
+        }
     }
 
     private Operation sendStartOperationEvent(String operationType, String operationCommand, Connection connection, HubChangeLog hubChangeLog) throws LiquibaseHubException {
