@@ -365,7 +365,7 @@ public class StandardHubService implements HubService {
     }
 
     @Override
-    public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
+    public Operation createOperation(String operationType, String operationCommand, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
 
         String hostName;
         try {
@@ -387,6 +387,7 @@ public class StandardHubService implements HubService {
         requestBody.put("connectionId", connection.getId());
         requestBody.put("changelogId", changeLog.getId());
         requestBody.put("operationType", operationType);
+        requestBody.put("operationCommand", operationCommand);
         requestBody.put("operationStatusType", "PASS");
         requestBody.put("statusMessage", operationType);
         requestBody.put("clientMetadata", clientMetadata);
