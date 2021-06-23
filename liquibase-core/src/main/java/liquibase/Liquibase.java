@@ -1792,49 +1792,8 @@ public class Liquibase implements AutoCloseable {
     /**
      * Drops all database objects in the default schema.
      */
-    public final void dropAll() throws LiquibaseException {
-        Operation dropAllOperation = null;
-        BufferedLogService bufferLog = new BufferedLogService();
-        DatabaseChangeLog changeLog;
-        HubUpdater hubUpdater = null;
-        try {
-            changeLog = getDatabaseChangeLog();
-
-            // Let the user know that they can register for Hub
-            hubUpdater = new HubUpdater(new Date(), changeLog, database);
-            hubUpdater.register(changeLogFile);
-
-            // Create or retrieve the Connection if this is not SQL generation
-            // Make sure the Hub is available here by checking the return
-            // We do not need a connection if we are using a LoggingExecutor
-            ChangeLogIterator changeLogIterator = getStandardChangelogIterator(null, null, changeLog);
-
-            Connection connection = getConnection(changeLog);
-            if (connection != null) {
-                dropAllOperation =
-                        hubUpdater.preUpdateHub("DROPALL","dropAll", connection,
-                                changeLogFile, null /*context*/, null /*labelExpression*/, changeLogIterator);
-            }
-
-            // Make sure we don't already have a listener
-            if (connection != null) {
-                changeExecListener = new HubChangeExecListener(dropAllOperation, changeExecListener);
-            }
-
-            dropAll(new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
-
-            // Update Hub with the operation information
-            hubUpdater.postUpdateHub(dropAllOperation, bufferLog);
-        } catch (Exception e) {
-            if (hubUpdater != null) {
-                hubUpdater.postUpdateHubExceptionHandling(dropAllOperation, bufferLog, e.getMessage());
-            }
-            throw new LiquibaseException(e);
-        } finally {
-            resetServices();
-            setChangeExecListener(null);
-        }
-
+    public final void dropAll() throws DatabaseException {
+        dropAll(new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
     }
 
     /**

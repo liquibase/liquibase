@@ -74,7 +74,7 @@ public class HubUpdater {
      */
     public Operation preUpdateHub(String operationType, String operationCommand, Connection connection)
             throws LiquibaseException, SQLException {
-        if (connection == null) {
+        if (connection == null || connection.getId() == null) {
             return null;
         }
         return this.preUpdateHub(operationType,operationCommand, connection, null, null, null, null);
@@ -380,6 +380,9 @@ public class HubUpdater {
      */
     public void register(String changeLogFile)
             throws LiquibaseException, CommandExecutionException {
+        if (changeLogFile == null) {
+            return;
+        }
         //
         // If our current Executor is a LoggingExecutor then just return since we will not update Hub
         //
