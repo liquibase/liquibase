@@ -136,7 +136,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         }
         UUID connectionId = commandScope.getArgumentValue(HUB_CONNECTION_ID_ARG);
         UUID projectId = commandScope.getArgumentValue(HUB_PROJECT_ID_ARG);
-        Project project = null;
+        Project project;
         if (projectId != null) {
             project = hubService.getProject(projectId);
             hubConnection.setProject(project);
@@ -165,10 +165,11 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         UUID projectId = commandScope.getArgumentValue(HUB_PROJECT_ID_ARG);
         String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
         if (apiKey == null) {
-            if (connectionId != null || projectId != null) {
-                throw new CommandExecutionException("No valid Hub API Key detected. Please add liquibase.hub.apikey to \n" +
-                        "defaults file or pass --hub-api-key=<yourkey> on the command line.");
+            if (connectionId == null && projectId == null) {
+                return;
             }
+            throw new CommandExecutionException("No valid Hub API Key detected. Please add liquibase.hub.apikey to \n" +
+                    "defaults file or pass --hub-api-key=<yourkey> on the command line.");
         }
     }
 

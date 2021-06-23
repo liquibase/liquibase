@@ -77,7 +77,7 @@ public class HubUpdater {
         if (connection == null) {
             return null;
         }
-        return this.preUpdateHub(operationType,operationCommand, connection, null, null, null, null);
+        return this.preUpdateHub(operationType, operationCommand, connection, null, null, null, null);
     }
 
     /**
@@ -119,7 +119,6 @@ public class HubUpdater {
         loadDatabaseMetadata();
 
         // Send the START operation event
-
         Operation updateOperation = sendStartOperationEvent(operationType,operationCommand, connection, hubChangeLog);
 
         ListVisitor listVisitor;
