@@ -70,9 +70,6 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         BufferedLogService bufferLog = new BufferedLogService();
         validateConnectionAndProjectIdsDependingOnApiKey(commandScope);
-        Connection hubConnection = getHubConnection(commandScope);
-        attachProjectToConnection(commandScope, hubConnection);
-
         Operation dropAllOperation;
         LockService lockService = LockServiceFactory.getInstance().getLockService(commandScope.getArgumentValue(DATABASE_ARG));
         HubUpdater hubUpdater;
@@ -94,6 +91,8 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                 hubUpdater = new HubUpdater(new Date(), commandScope.getArgumentValue(DATABASE_ARG));
                 hubUpdater.register(null/*changelogFile*/);
             }
+            Connection hubConnection = getHubConnection(commandScope);
+            attachProjectToConnection(commandScope, hubConnection);
 
             dropAllOperation = hubUpdater.preUpdateHub("DROPALL", "dropAll", hubConnection);
 
