@@ -7,7 +7,6 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.DatabaseSchemaBasedFunction;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
@@ -39,7 +38,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
             sql.append(" ")
                 .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column))
                 .append(" = ")
-                .append(convertToString(statement.getNewColumnValues().get(column), database, statement))
+                .append(convertToString(statement.getNewColumnValues().get(column), database))
                 .append(",");
         }
 
@@ -60,7 +59,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
         return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 
-    private String convertToString(Object newValue, Database database, UpdateStatement statement) {
+    private String convertToString(Object newValue, Database database) {
         String sqlString;
         if ((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) {
             sqlString = "NULL";
@@ -81,10 +80,6 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
                 sqlString = DataTypeFactory.getInstance().getFalseBooleanValue(database);
             }
         } else if (newValue instanceof DatabaseFunction) {
-            if (newValue instanceof DatabaseSchemaBasedFunction) {
-                ((DatabaseSchemaBasedFunction) newValue).setSchemaName(statement.getSchemaName());
-            }
-
             sqlString = database.generateDatabaseFunctionValue((DatabaseFunction) newValue);
         } else {
             sqlString = newValue.toString();

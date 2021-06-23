@@ -22,7 +22,7 @@ public class InsertOrUpdateGeneratorPostgresTest {
         InsertGenerator generator = new InsertGenerator();
         InsertStatement statement = new InsertStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
         ColumnConfig columnConfig = new ColumnConfig();
-        columnConfig.setValueSequenceNext(new SequenceNextValueFunction(SEQUENCE_NAME, SCHEMA_NAME));
+        columnConfig.setValueSequenceNext(new SequenceNextValueFunction(SCHEMA_NAME, SEQUENCE_NAME));
         columnConfig.setName("col3");
         statement.addColumn(columnConfig);
 
@@ -38,7 +38,7 @@ public class InsertOrUpdateGeneratorPostgresTest {
         InsertGenerator generator = new InsertGenerator();
         InsertStatement statement = new InsertStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
         ColumnConfig columnConfig = new ColumnConfig();
-        columnConfig.setValueSequenceNext(new SequenceNextValueFunction(SEQUENCE_NAME));
+        columnConfig.setValueSequenceNext(new SequenceNextValueFunction(SCHEMA_NAME, SEQUENCE_NAME));
         columnConfig.setName("col3");
         statement.addColumn(columnConfig);
 

@@ -4,7 +4,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.OracleDatabase;
 import liquibase.sql.Sql;
-import liquibase.statement.DatabaseSchemaBasedFunction;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.InsertOrUpdateStatement;
@@ -98,7 +98,7 @@ END;*/
         assertEquals("Wrong number of lines", 1, sqlLines.length);
     }
 
-    private String prepareInsertStatement(DatabaseSchemaBasedFunction databaseSchemaBasedFunction) {
+    private String prepareInsertStatement(DatabaseFunction databaseSchemaBasedFunction) {
         OracleDatabase database = new OracleDatabase();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
 
@@ -135,7 +135,7 @@ END;*/
 
     @Test
     public void testInsertSequenceValWithSchema() {
-        SequenceNextValueFunction sequenceNext = new SequenceNextValueFunction("my_seq", "myschema");
+        SequenceNextValueFunction sequenceNext = new SequenceNextValueFunction("myschema", "my_seq");
         assertEquals(
                 "INSERT INTO mycatalog.mytable (col3) VALUES (myschema.my_seq.nextval)",
                 prepareInsertStatement(sequenceNext));
@@ -143,7 +143,7 @@ END;*/
 
     @Test
     public void testInsertSequenceValWithSchemaInWholeStatement() {
-        SequenceNextValueFunction sequenceNext = new SequenceNextValueFunction("my_seq");
+        SequenceNextValueFunction sequenceNext = new SequenceNextValueFunction("myschema", "my_seq");
         assertEquals(
                 "INSERT INTO mycatalog.mytable (col3) VALUES (myschema.my_seq.nextval)",
                 prepareInsertStatement(sequenceNext));
@@ -152,7 +152,7 @@ END;*/
 
     @Test
     public void testUpdateSequenceValWithSchema() {
-        SequenceNextValueFunction sequenceNext = new SequenceNextValueFunction("my_seq", "myschema");
+        SequenceNextValueFunction sequenceNext = new SequenceNextValueFunction("myschema", "my_seq");
         assertEquals(
                 "UPDATE mycatalog.mytable SET col3 = myschema.my_seq.nextval",
                 prepareUpdateStatement(sequenceNext));
@@ -160,7 +160,7 @@ END;*/
 
     @Test
     public void testUpdateSequenceValWithSchemaInWholeStatement() {
-        SequenceNextValueFunction sequenceNext = new SequenceNextValueFunction("my_seq");
+        SequenceNextValueFunction sequenceNext = new SequenceNextValueFunction("myschema", "my_seq");
         assertEquals(
                 "UPDATE mycatalog.mytable SET col3 = myschema.my_seq.nextval",
                 prepareUpdateStatement(sequenceNext));

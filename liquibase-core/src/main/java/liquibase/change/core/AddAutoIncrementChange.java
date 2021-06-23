@@ -142,7 +142,7 @@ public class AddAutoIncrementChange extends AbstractChange {
                 schemaPrefix = this.schemaName;
             }
 
-            SequenceNextValueFunction nvf = new SequenceNextValueFunction(sequenceName, schemaPrefix);
+            SequenceNextValueFunction nvf = new SequenceNextValueFunction(schemaPrefix, sequenceName);
 
             return new SqlStatement[]{
                     new CreateSequenceStatement(catalogName, this.schemaName, sequenceName),
