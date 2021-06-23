@@ -9,6 +9,7 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.*;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
      *
      * @parameter property="liquibase.deploymentId"
      */
+    @PropertyElement
     protected String deploymentId;
 
     /**
@@ -38,6 +40,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
      *
      * @parameter property="liquibase.force"
      */
+    @PropertyElement
     protected String force;
 
     /**
@@ -45,6 +48,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
      *
      * @parameter property="liquibase.outputFile"
      */
+    @PropertyElement
     protected String outputFile;
 
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
