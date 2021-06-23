@@ -92,6 +92,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                 checkForRegisteredChangeLog(changeLog, hubChangeLog);
             } else {
                 hubUpdater = new HubUpdater(new Date(), commandScope.getArgumentValue(DATABASE_ARG));
+                hubUpdater.register(null/*changelogFile*/);
             }
 
             dropAllOperation = hubUpdater.preUpdateHub("DROPALL", "dropAll", hubConnection);

@@ -119,7 +119,7 @@ public class HubUpdater {
         loadDatabaseMetadata();
 
         // Send the START operation event
-        Operation updateOperation = sendStartOperationEvent(operationType,operationCommand, connection, hubChangeLog);
+        Operation updateOperation = sendStartOperationEvent(operationType, operationCommand, connection, hubChangeLog);
 
         ListVisitor listVisitor;
         if (operationType.equalsIgnoreCase("ROLLBACK")) {
@@ -386,34 +386,16 @@ public class HubUpdater {
      * @throws LiquibaseException        Thrown if registration fails
      * @throws CommandExecutionException Thrown if registerChangeLog fails
      */
-    public void register(String changeLogFile)
-            throws LiquibaseException, CommandExecutionException {
-        if (changeLogFile == null) {
-            return;
-        }
-        //
-        // If our current Executor is a LoggingExecutor then just return since we will not update Hub
-        //
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        if (executor instanceof LoggingExecutor) {
-            return;
-        }
-
-        //
-        // Just return if Hub is off
-        //
-        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+    public void register(String changeLogFile) throws LiquibaseException {
         if (!hubService.isOnline()) {
             return;
         }
 
-        //
         // Do not try to register if
         //   1.  We have a key already OR
-        //   2.  We have a changeLogId already
-        //
+        //   2.  We have a changelog and a changeLogId in it already
         if (!StringUtil.isEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) ||
-                changeLog.getChangeLogId() != null) {
+                (changeLog != null && changeLog.getChangeLogId() != null)) {
             return;
         }
 
@@ -493,7 +475,7 @@ public class HubUpdater {
                 Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
                 return;
             }
-            String message = null;
+            String message;
             try {
                 //
                 // Update the properties file
@@ -519,15 +501,16 @@ public class HubUpdater {
                     Scope.getCurrentScope().getLog(getClass()).warning(message2);
                 }
 
-                //
-                // register the changelog
+                // register the changelog if it exist
+                if (changeLog != null) {
+                    message = "* Registering changelog file " + changeLogFile + " with Hub";
+                    Scope.getCurrentScope().getUI().sendMessage(message);
+                    Scope.getCurrentScope().getLog(getClass()).info(message);
+                    registerChangeLog(registerResponse.getProjectId(), changeLog, changeLogFile);
+                }
+
                 // Update the API key in HubConfiguration
-                //
-                message = "* Registering changelog file " + changeLogFile + " with Hub";
-                Scope.getCurrentScope().getUI().sendMessage(message);
-                Scope.getCurrentScope().getLog(getClass()).info(message);
                 DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, registerResponse.getApiKey());
-                registerChangeLog(registerResponse.getProjectId(), changeLog, changeLogFile);
 
                 message = "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
@@ -563,7 +546,7 @@ public class HubUpdater {
     // Register the specified changelog
     //
     private void registerChangeLog(UUID hubProjectId, DatabaseChangeLog changeLog, String changeLogFile)
-            throws LiquibaseException, CommandExecutionException {
+            throws LiquibaseException {
 
         CommandScope registerChangeLogCommand = new CommandScope("registerChangeLog");
         registerChangeLogCommand
