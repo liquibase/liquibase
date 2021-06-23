@@ -412,7 +412,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 );
                             }
                             liquibase.statement.SequenceNextValueFunction function =
-                                    new liquibase.statement.SequenceNextValueFunction(value);
+                                    new liquibase.statement.SequenceNextValueFunction(value, getSchemaName());
                             valueConfig.setValueComputed(function);
 
                             } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.BLOB.toString())) {
