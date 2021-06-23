@@ -9,6 +9,8 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
+import liquibase.precondition.Precondition;
+import liquibase.precondition.PreconditionFactory;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
@@ -74,6 +76,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
             ChangeSet changeSet = null;
             RawSQLChange change = null;
+
             Pattern changeLogPattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
             Pattern changeSetPattern = Pattern.compile("\\s*\\-\\-[\\s]*changeset\\s+([^:]+):(\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
@@ -267,11 +270,16 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             if (preconditionMatcher.groupCount() == 2) {
                                 String name = StringUtil.trimToNull(preconditionMatcher.group(1));
                                 if (name != null) {
-                                    String body = preconditionMatcher.group(2).trim();
                                     if ("sql-check".equals(name)) {
+                                        String body = preconditionMatcher.group(2).trim();
                                         changeSet.getPreconditions().addNestedPrecondition(parseSqlCheckCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog())));
                                     } else {
-                                        throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
+                                        Precondition precondition = PreconditionFactory.getInstance().create(name);
+                                        if(precondition != null) {
+                                            changeSet.getPreconditions().addNestedPrecondition(precondition);
+                                        } else {
+                                            throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
+                                        }
                                     }
                                 }
                             }
