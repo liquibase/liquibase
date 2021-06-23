@@ -13,6 +13,7 @@ import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
 import liquibase.hub.HubConfiguration;
+import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.LogMessageFilter;
 import liquibase.logging.LogService;
@@ -300,7 +301,13 @@ public class LiquibaseCommandLine {
                     if (!wasHelpOrVersionRequested()) {
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
                         Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion()));
-                        Scope.getCurrentScope().getUI().sendMessage(Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService().getLicenseInfo());
+
+                        final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+                        if (licenseService == null) {
+                            Scope.getCurrentScope().getUI().sendMessage("Cannot determine license status: License service did not load");
+                        } else {
+                            Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                        }
                     }
 
                     int response = commandLine.execute(finalArgs);
@@ -471,6 +478,13 @@ public class LiquibaseCommandLine {
     }
 
     private void configureVersionInfo() {
+        final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+        String licenseInfo = "";
+        if (licenseService == null) {
+            licenseInfo = "Cannot determine license status: License service did not load";
+        } else {
+            licenseInfo = licenseService.getLicenseInfo();
+        }
         getRootCommand(this.commandLine).getCommandSpec().version(
                 CommandLineUtils.getBanner(),
                 String.format("Running Java under %s (Version %s)",
@@ -479,7 +493,7 @@ public class LiquibaseCommandLine {
                 ),
                 "",
                 "Liquibase Version: " + LiquibaseUtil.getBuildVersion(),
-                Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService().getLicenseInfo()
+                licenseInfo
         );
     }
 
