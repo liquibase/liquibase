@@ -93,6 +93,11 @@ public class HubServiceFactory extends AbstractPluginFactory<HubService> {
         }
 
         @Override
+        public Project findProjectByConnectionId(UUID connectionId) throws LiquibaseHubException {
+            return null;
+        }
+
+        @Override
         public List<Project> getProjects() throws LiquibaseHubException {
             return null;
         }

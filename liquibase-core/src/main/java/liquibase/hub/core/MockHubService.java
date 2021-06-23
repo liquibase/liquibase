@@ -90,6 +90,11 @@ public class MockHubService implements HubService {
     }
 
     @Override
+    public Project findProjectByConnectionId(UUID connectionId) throws LiquibaseHubException {
+        return null;
+    }
+
+    @Override
     public HubRegisterResponse register(String email) throws LiquibaseHubException {
         return null;
     }

@@ -3,7 +3,6 @@ package liquibase.hub.core;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
-import liquibase.hub.HubConfiguration;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.*;
 import liquibase.hub.model.*;
@@ -19,6 +18,7 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class StandardHubService implements HubService {
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
@@ -144,10 +144,21 @@ public class StandardHubService implements HubService {
     }
 
     @Override
-    public List<Project> getProjects() throws LiquibaseHubException {
-        final UUID organizationId = getOrganization().getId();
+    public Project findProjectByConnectionId(UUID connectionId) throws LiquibaseHubException {
+        final AtomicReference<UUID> organizationId = new AtomicReference<>(getOrganization().getId());
+        String searchParam = "?search=connection.id:\"" + connectionId.toString() + "\"";
+        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects" + searchParam, Map.class);
+        List<Project> returnList = transformProjectResponseToList(response);
+        if (returnList.size() > 1) {
+            throw new LiquibaseHubException(String.format("ConnectionId: %s was associated with multiple projects", connectionId));
+        }
+        if (returnList.isEmpty()) {
+            throw new LiquibaseHubObjectNotFoundException("Project wasn't found");
+        }
+        return returnList.get(0);
+    }
 
-        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", Map.class);
+    private List<Project> transformProjectResponseToList(Map<String, List<Map>> response) {
         List<Map> contentList = response.get("content");
         List<Project> returnList = new ArrayList<>();
         for (int i = 0; i < contentList.size(); i++) {
@@ -166,8 +177,16 @@ public class StandardHubService implements HubService {
             project.setCreateDate(date);
             returnList.add(project);
         }
-
         return returnList;
+    }
+
+    @Override
+    public List<Project> getProjects() throws LiquibaseHubException {
+        final AtomicReference<UUID> organizationId = new AtomicReference<>(getOrganization().getId());
+
+        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", Map.class);
+
+        return transformProjectResponseToList(response);
     }
 
     @Override
@@ -202,8 +221,8 @@ public class StandardHubService implements HubService {
     @Override
     public HubChangeLog deactivateChangeLog(HubChangeLog hubChangeLog) throws LiquibaseHubException {
         return http.doPut("/api/v1/organizations/" + getOrganization().getId() +
-                             "/projects/" + hubChangeLog.getProject().getId().toString() +
-                             "/changelogs/" +  hubChangeLog.getId().toString(), hubChangeLog, HubChangeLog.class);
+                "/projects/" + hubChangeLog.getProject().getId().toString() +
+                "/changelogs/" + hubChangeLog.getId().toString(), hubChangeLog, HubChangeLog.class);
     }
 
     @Override
@@ -313,18 +332,16 @@ public class StandardHubService implements HubService {
         HubLinkRequest reportHubLink = new HubLinkRequest();
         reportHubLink.url = url;
 
-        return http.getHubUrl()+ http.doPut("/api/v1/links", reportHubLink, HubLink.class).getShortUrl();
+        return http.getHubUrl() + http.doPut("/api/v1/links", reportHubLink, HubLink.class).getShortUrl();
     }
 
     /**
-     *
      * Query for a changelog ID.  If no result we return null
      * We cache this result and a map
      *
-     * @param   changeLogId                Changelog ID for query
-     * @return  HubChangeLog               Object container for result
-     * @throws  LiquibaseHubException
-     *
+     * @param changeLogId Changelog ID for query
+     * @return HubChangeLog               Object container for result
+     * @throws LiquibaseHubException
      */
     @Override
     public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
@@ -332,15 +349,13 @@ public class StandardHubService implements HubService {
     }
 
     /**
-     *
      * Query for a changelog ID.  If no result we return null
      * We cache this result and a map
      *
-     * @param   changeLogId                Changelog ID for query
-     * @param   includeStatus              Allowable status for returned changelog
-     * @return  HubChangeLog               Object container for result
-     * @throws  LiquibaseHubException
-     *
+     * @param changeLogId   Changelog ID for query
+     * @param includeStatus Allowable status for returned changelog
+     * @return HubChangeLog               Object container for result
+     * @throws LiquibaseHubException
      */
     @Override
     public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus) throws LiquibaseHubException {
@@ -385,7 +400,9 @@ public class StandardHubService implements HubService {
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("connectionId", connection.getId());
-        requestBody.put("changelogId", changeLog.getId());
+        requestBody.put("connectionJdbcUrl", connection.getJdbcUrl());
+        requestBody.put("projectId", connection.getProject() == null ? null : connection.getProject().getId());
+        requestBody.put("changelogId", changeLog == null ? null : changeLog.getId());
         requestBody.put("operationType", operationType);
         requestBody.put("operationCommand", operationCommand);
         requestBody.put("operationStatusType", "PASS");
