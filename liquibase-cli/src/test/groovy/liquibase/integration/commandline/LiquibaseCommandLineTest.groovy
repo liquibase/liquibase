@@ -26,12 +26,13 @@ class LiquibaseCommandLineTest extends Specification {
         LiquibaseCommandLine.toArgNames(new ConfigurationDefinition.Builder(prefix).define(argName, String).buildTemporary()).join(", ") == expected
 
         where:
-        prefix      | argName          | expected
-        "liquibase" | "test"           | "--test, --liquibase-test"
-        "liquibase" | "test"           | "--test, --liquibase-test"
-        "liquibase" | "twoWords"       | "--two-words, --liquibase-two-words, --twoWords"
-        "liquibase" | "threeWordsHere" | "--three-words-here, --liquibase-three-words-here, --threeWordsHere"
-        "other"     | "twoWords"       | "--other-two-words, --othertwoWords"
+        prefix          | argName          | expected
+        "liquibase"     | "test"           | "--test, --liquibase-test"
+        "liquibase"     | "test"           | "--test, --liquibase-test"
+        "liquibase"     | "twoWords"       | "--two-words, --liquibase-two-words, --twoWords"
+        "liquibase"     | "threeWordsHere" | "--three-words-here, --liquibase-three-words-here, --threeWordsHere"
+        "liquibase.pro" | "test"           | "--test, --liquibase-pro-test"
+        "other"         | "twoWords"       | "--other-two-words, --othertwoWords"
     }
 
     @Unroll
