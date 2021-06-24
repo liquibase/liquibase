@@ -35,7 +35,7 @@ import static java.util.ResourceBundle.getBundle;
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
-	public static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
+    public static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
     public static final String PRODUCT_NAME = "oracle";
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
