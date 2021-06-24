@@ -21,7 +21,6 @@ public class DefaultXmlWriter implements XmlWriter {
         try {
             TransformerFactory factory = TransformerFactory.newInstance();
             factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET , "");
             try {
                 factory.setAttribute("indent-number", 4);
