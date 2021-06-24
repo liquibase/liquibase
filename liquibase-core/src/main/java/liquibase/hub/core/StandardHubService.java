@@ -387,7 +387,7 @@ public class StandardHubService implements HubService {
      * @throws LiquibaseHubException
      */
     @Override
-    public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus) throws LiquibaseHubException {
+    public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus)  {
         if (includeStatus == null && hubChangeLogCache.containsKey(changeLogId)) {
             return hubChangeLogCache.get(changeLogId);
         }
@@ -399,11 +399,11 @@ public class StandardHubService implements HubService {
             HubChangeLog hubChangeLog = http.doGet("/api/v1/changelogs/" + changeLogId, parameters, HubChangeLog.class);
             hubChangeLogCache.put(changeLogId, hubChangeLog);
             return hubChangeLog;
-        } catch (LiquibaseHubObjectNotFoundException lbe) {
+        } catch (LiquibaseHubException lbe) {
             final String message = lbe.getMessage();
             String uiMessage = "Retrieving Hub Change Log failed for Changelog ID " + changeLogId.toString();
             Scope.getCurrentScope().getUI().sendMessage(uiMessage + ": " + message);
-            Scope.getCurrentScope().getLog(getClass()).severe(message, lbe);
+            Scope.getCurrentScope().getLog(getClass()).warning(message, lbe);
             return null;
         }
     }
