@@ -197,7 +197,12 @@ public class SchemesCDIConfigBuilder {
                 }
                 if (null == lock) {
                     log.fine(String.format("[id = %s] Waiting for the lock...", id));
-                    Thread.sleep(FILE_LOCK_TIMEOUT);
+                    try {
+                        Thread.sleep(FILE_LOCK_TIMEOUT);
+                    } catch (InterruptedException interruptedException) {
+                        log.severe(interruptedException.getMessage(), interruptedException);
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
             log.info(String.format("[id = %s] File lock acquired, running liquibase...", id));

@@ -46,8 +46,8 @@ public class ChangeParameterMetaData {
     private LiquibaseSerializable.SerializationType serializationType;
     private String[] requiredForDatabaseArg;
     private String[] supportedDatabasesArg;
-    private Optional<Method> readMethodRef;
-    private Optional<Method> writeMethodRef;
+    private Optional<Method> readMethodRef = Optional.empty();
+    private Optional<Method> writeMethodRef = Optional.empty();
 
     public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
                                    Map<String, Object> exampleValues, String since, Type dataType,
@@ -287,7 +287,7 @@ public class ChangeParameterMetaData {
     }
 
     private Method getReadMethod(Change change) {
-        if (readMethodRef != null) {
+        if (readMethodRef.isPresent()) {
             return readMethodRef.orElseThrow(() -> new UnexpectedLiquibaseException("No readMethod for " + parameterName));
         }
 
@@ -356,7 +356,7 @@ public class ChangeParameterMetaData {
     }
 
     private Method getWriteMethod(Change change) {
-        if (writeMethodRef != null) {
+        if (writeMethodRef.isPresent()) {
             return writeMethodRef.orElseThrow(() -> new UnexpectedLiquibaseException("No writeMethod for " + parameterName));
         }
 

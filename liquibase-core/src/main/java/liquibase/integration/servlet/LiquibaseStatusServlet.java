@@ -16,6 +16,7 @@ import java.util.logging.LogRecord;
 /**
  * Servlet that can be registered via web.xml to view the log of the Liquibase run from the LiquibaseServletListener.
  */
+@SuppressWarnings("java:S1989")
 public class LiquibaseStatusServlet extends HttpServlet {
     
     private static final long serialVersionUID = 1092565349351848089L;
@@ -27,13 +28,18 @@ public class LiquibaseStatusServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
         httpServletResponse.setContentType("text/html");
 
         String logLevelToDisplay = httpServletRequest.getParameter("logLevel");
         Level currentLevel = Level.INFO;
         if (logLevelToDisplay != null) {
-            currentLevel = Level.parse(logLevelToDisplay);
+            try {
+                currentLevel = Level.parse(logLevelToDisplay);
+            } catch (IllegalArgumentException illegalArgumentException) {
+                throw new IOException(illegalArgumentException);
+            }
+
         }
 
         PrintWriter writer = httpServletResponse.getWriter();

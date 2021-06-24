@@ -64,30 +64,34 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 	@Override
 	protected Liquibase createLiquibase(Database db)
 			throws MojoExecutionException {
-		Liquibase liquibase = super.createLiquibase(db);
+		try (Liquibase liquibase = super.createLiquibase(db)) {
 
-		// Setup the output file writer
-		try {
-			if (!migrationSqlOutputFile.exists()) {
-				// Ensure the parent directories exist
-				migrationSqlOutputFile.getParentFile().mkdirs();
-				// Create the actual file
-				if (!migrationSqlOutputFile.createNewFile()) {
-					throw new MojoExecutionException(
-							"Cannot create the migration SQL file; "
-									+ migrationSqlOutputFile.getAbsolutePath());
+			// Setup the output file writer
+			try {
+				if (!migrationSqlOutputFile.exists()) {
+					// Ensure the parent directories exist
+					migrationSqlOutputFile.getParentFile().mkdirs();
+					// Create the actual file
+					if (!migrationSqlOutputFile.createNewFile()) {
+						throw new MojoExecutionException(
+								"Cannot create the migration SQL file; "
+										+ migrationSqlOutputFile.getAbsolutePath());
+					}
 				}
+				outputWriter = getOutputWriter(migrationSqlOutputFile);
+			} catch (IOException e) {
+				getLog().error(e);
+				throw new MojoExecutionException(
+						"Failed to create SQL output writer", e);
 			}
-			outputWriter = getOutputWriter(migrationSqlOutputFile);;
-		} catch (IOException e) {
-			getLog().error(e);
-			throw new MojoExecutionException(
-					"Failed to create SQL output writer", e);
+			getLog().info(
+					"Output SQL Migration File: "
+							+ migrationSqlOutputFile.getAbsolutePath());
+			return liquibase;
+		} catch (LiquibaseException liquibaseException) {
+			getLog().error(liquibaseException);
+			throw new MojoExecutionException("Can't get migrationSqlOutputFile", liquibaseException);
 		}
-		getLog().info(
-				"Output SQL Migration File: "
-						+ migrationSqlOutputFile.getAbsolutePath());
-		return liquibase;
 	}
 
 	@Override
