@@ -63,7 +63,7 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
             //
             final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
             if (!hubServiceFactory.isOnline()) {
-                throw new CommandExecutionException("The command registerChangeLog requires access to Liquibase Hub: " + hubServiceFactory.getOfflineReason() + ".  Learn more at https://hub.liquibase.com");
+                throw new CommandExecutionException("The command registerChangeLog requires communication with Liquibase Hub, \nwhich is prevented by liquibase.hub.mode='off'. \nPlease set to 'all' or 'meta' and try again.  \nLearn more at https://hub.liquibase.com");
             }
 
             //
