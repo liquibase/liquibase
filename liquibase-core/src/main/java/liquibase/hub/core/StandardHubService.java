@@ -210,6 +210,15 @@ public class StandardHubService implements HubService {
     }
 
     @Override
+    public List<Project> getProjects() throws LiquibaseHubException {
+        final AtomicReference<UUID> organizationId = new AtomicReference<>(getOrganization().getId());
+
+        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", Map.class);
+
+        return transformProjectResponseToList(response);
+    }
+
+    @Override
     public HubRegisterResponse register(String email) throws LiquibaseException {
         HubRegister hubRegister = new HubRegister();
         hubRegister.setEmail(email);
