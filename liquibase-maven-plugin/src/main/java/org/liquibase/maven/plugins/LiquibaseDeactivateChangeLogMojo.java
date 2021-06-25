@@ -2,7 +2,7 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.command.CommandScope;
-import liquibase.command.core.DeactivateChangeLogCommandStep;
+import liquibase.command.core.DeactivateChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 
@@ -24,7 +24,7 @@ public class LiquibaseDeactivateChangeLogMojo extends AbstractLiquibaseChangeLog
 
         CommandScope liquibaseCommand = new CommandScope("deactivateChangeLog");
         liquibaseCommand
-                .addArgumentValue(DeactivateChangeLogCommandStep.CHANGE_LOG_FILE_ARG, changeLogFile);
+                .addArgumentValue(DeactivateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
         liquibaseCommand.execute();
     }
 }

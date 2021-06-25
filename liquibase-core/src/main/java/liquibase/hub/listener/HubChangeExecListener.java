@@ -192,7 +192,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                                       String statusMessage) {
         if (operation == null) {
             String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
-            boolean hubOn = !(HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("off"));
+            boolean hubOn = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue() != HubConfiguration.HubMode.OFF;
             if (apiKey != null && hubOn) {
                 String message =
                         "Hub communication failure.\n" +
@@ -337,7 +337,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         //
         if (operation == null) {
             String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValueObfuscated());
-            boolean hubOn = ! (HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("off"));
+            boolean hubOn = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue() != HubConfiguration.HubMode.OFF;
             if (apiKey != null && hubOn) {
                 String message;
                 if (databaseChangeLog.getChangeLogId() == null) {
