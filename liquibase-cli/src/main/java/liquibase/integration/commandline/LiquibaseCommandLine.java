@@ -704,7 +704,7 @@ public class LiquibaseCommandLine {
                         final CommandLine.Model.OptionSpec.Builder paramBuilder = (CommandLine.Model.OptionSpec.Builder) CommandLine.Model.OptionSpec.builder("-D")
                                 .required(false)
                                 .type(HashMap.class)
-                                .description("Pass a name/value pair for substitution in the changelog(s).\nPass as -D<property.name>=<property.value>\n[deprecated: set changelog properties in defaults file or environment variables]")
+                                .description("Pass a name/value pair for substitution in the changelog(s)\nPass as -D<property.name>=<property.value>\n[deprecated: set changelog properties in defaults file or environment variables]")
                                 .mapFallbackValue("");
                         subCommandSpec.add(paramBuilder.build());
                     }
