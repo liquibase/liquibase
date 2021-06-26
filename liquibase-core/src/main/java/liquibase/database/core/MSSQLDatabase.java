@@ -94,6 +94,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         systemTablesAndViews.add("sysdiagrams");
         systemTablesAndViews.add("syssegments");
         systemTablesAndViews.add("sysconstraints");
+        systemTablesAndViews.add("systranschemas");
 
         // Information obtained from:
         // https://docs.microsoft.com/en-us/sql/t-sql/data-types/precision-scale-and-length-transact-sql
