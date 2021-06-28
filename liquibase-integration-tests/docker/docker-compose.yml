@@ -61,6 +61,8 @@ services:
       MYSQL_DATABASE: lbcat
       MYSQL_USER: lbuser
       MYSQL_PASSWORD: LiquibasePass1
+    networks:
+      - integration
     volumes:
       - "./mariadb-init.sql:/docker-entrypoint-initdb.d/mariadb-init.sql"
 
