@@ -9,6 +9,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
@@ -23,6 +24,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Encapsulates MySQL database support.
@@ -30,6 +33,9 @@ import java.util.Set;
 public class MySQLDatabase extends AbstractJdbcDatabase {
     private static final String PRODUCT_NAME = "MySQL";
     private static final Set<String> RESERVED_WORDS = createReservedWords();
+
+    /** Pattern used to extract function precision like 3 in CURRENT_TIMESTAMP(3) */
+    public static final Pattern PRECISION_PATTERN = Pattern.compile("\\(\\d+\\)");
 
     public MySQLDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
@@ -638,4 +644,25 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         ));
     }
 
+    public String getCurrentDateTimeFunction(int precision) {
+        return currentDateTimeFunction.replace("()", "("+precision+")");
+    }
+
+    @Override
+    public String generateDatabaseFunctionValue(DatabaseFunction databaseFunction) {
+        if (databaseFunction.getValue() != null && isCurrentTimeFunction(databaseFunction.getValue().toLowerCase())) {
+            int precision = extractPrecision(databaseFunction);
+            return precision != 0 ? getCurrentDateTimeFunction(precision) : getCurrentDateTimeFunction();
+        }
+        return super.generateDatabaseFunctionValue(databaseFunction);
+    }
+
+    private int extractPrecision(DatabaseFunction databaseFunction) {
+        int precision = 0;
+        Matcher precisionMatcher = PRECISION_PATTERN.matcher(databaseFunction.getValue());
+        if (precisionMatcher.find()) {
+            precision = Integer.parseInt(precisionMatcher.group().replaceAll("[(,)]", ""));
+        }
+        return precision;
+    }
 }
