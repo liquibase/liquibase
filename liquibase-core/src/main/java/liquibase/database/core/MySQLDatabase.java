@@ -4,10 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
@@ -17,9 +14,6 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
@@ -644,7 +638,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         ));
     }
 
-    public String getCurrentDateTimeFunction(int precision) {
+    protected String getCurrentDateTimeFunction(int precision) {
         return currentDateTimeFunction.replace("()", "("+precision+")");
     }
 
