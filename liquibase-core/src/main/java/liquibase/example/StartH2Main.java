@@ -52,14 +52,12 @@ public class StartH2Main {
                 try {
                     Thread.sleep(seconds * millis);
                 } catch (InterruptedException interruptedException) {
-                        System.err.println("Error starting H2");
                         interruptedException.printStackTrace();
                         Thread.currentThread().interrupt();
                 }
             }
 
         } catch (Throwable e) {
-            System.err.println("Error starting H2");
             e.printStackTrace();
             System.exit(-1);
         }
