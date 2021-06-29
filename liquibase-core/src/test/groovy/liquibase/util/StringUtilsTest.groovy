@@ -170,6 +170,8 @@ class StringUtilsTest extends Specification {
         "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;--last comment"                                                | "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;"
         "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;--last comment\n/*****another\nblock\n***/"                    | "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;"
         "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;\t--last comment\n\n\n\t--another\n/*****another\nblock\n***/" | "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;"
+        "create procedure [test].[name] as select * from dual go;\n------------------------------------------------------------------------------------" | "create procedure [test].[name] as select * from dual go;"
+        "---------- \n----------line comment \ncreate procedure [test].[name] as select * from dual go;\n----------------------------------------------" | "---------- \n----------line comment \ncreate procedure [test].[name] as select * from dual go;"
 
     }
 }

@@ -443,7 +443,7 @@ public class StringUtils {
         for (int i = 0; i < sqlString.length(); i++) {
             char c = sqlString.charAt(i);
             // we have not found the start of the line comment yet
-            if (c == '-') {
+            if ((c == '-') && (sqlString.length() > i + 1)) {
                 // check the next one
                 char s = sqlString.charAt(i + 1);
                 if (s == '-') {
