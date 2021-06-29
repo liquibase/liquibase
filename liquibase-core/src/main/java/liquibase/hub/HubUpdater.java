@@ -7,15 +7,15 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ListVisitor;
 import liquibase.changelog.visitor.RollbackListVisitor;
 import liquibase.command.CommandResults;
-import liquibase.exception.CommandExecutionException;
 import liquibase.command.CommandScope;
-import liquibase.command.core.RegisterChangelogCommandStep;
 import liquibase.command.core.InternalSyncHubCommandStep;
+import liquibase.command.core.RegisterChangelogCommandStep;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.CommandExecutionException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
@@ -33,7 +33,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**
@@ -45,11 +47,37 @@ public class HubUpdater {
     private final Database database;
 
     private static final String SEPARATOR_LINE = "\n----------------------------------------------------------------------\n";
+    final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
 
     public HubUpdater(Date startTime, DatabaseChangeLog changeLog, Database database) {
         this.startTime = startTime;
         this.changeLog = changeLog;
         this.database = database;
+    }
+
+    public HubUpdater(Date startTime, Database database) {
+        this.startTime = startTime;
+        this.database = database;
+        this.changeLog = null;
+    }
+
+    /**
+     * This method performs a syncHub and returns a new Operation instance
+     * If there is an error or the Hub is not available it returns null
+     *
+     * @param operationType Operation type (UPDATE or ROLLBACK)
+     * @param connection    Connection for this operation
+     * @return Operation        Valid Operation object or null
+     * @throws LiquibaseHubException Thrown by HubService
+     * @throws DatabaseException     Thrown by Liquibase core
+     * @throws LiquibaseException    Thrown by Liquibase core
+     */
+    public Operation preUpdateHub(String operationType, String operationCommand, Connection connection)
+            throws LiquibaseException, SQLException {
+        if (connection == null) {
+            return null;
+        }
+        return this.preUpdateHub(operationType, operationCommand, connection, null, null, null, null);
     }
 
     /**
@@ -63,7 +91,7 @@ public class HubUpdater {
      * @param contexts          Contexts to use for filtering
      * @param labelExpression   Labels to use for filtering
      * @param changeLogIterator Iterator to use for going through change sets
-     * @return Operation             Valid Operation object or null
+     * @return Operation        Valid Operation object or null
      * @throws LiquibaseHubException Thrown by HubService
      * @throws DatabaseException     Thrown by Liquibase core
      * @throws LiquibaseException    Thrown by Liquibase core
@@ -76,45 +104,62 @@ public class HubUpdater {
                                   LabelExpression labelExpression,
                                   ChangeLogIterator changeLogIterator)
             throws LiquibaseHubException, DatabaseException, LiquibaseException, SQLException {
-        //
+
         // If our current Executor is a LoggingExecutor then just return since we will not update Hub
-        //
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         if (executor instanceof LoggingExecutor) {
             return null;
         }
-        if (hubIsNotAvailable(changeLog.getChangeLogId())) {
-            return null;
-        }
+        HubChangeLog hubChangeLog = getHubChangeLog();
 
-        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-        HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLog.getChangeLogId()), "DELETED");
-        if (hubChangeLog.isDeleted()) {
-            //
-            // Complain and stop the operation
-            //
-            String message =
-                "\n" +
-                "The operation did not complete and will not be reported to Hub because the\n" +  "" +
-                "registered changelog has been deleted by someone in your organization.\n" +
-                "Learn more at http://hub.liquibase.com";
-            Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
-            throw new LiquibaseHubException(message);
-        }
-
-        //
         // Perform syncHub
-        //
-        syncHub(changeLogFile, changeLog, connection.getId());
+        syncHub(changeLogFile, connection.getId());
 
-        //
         // Load up metadata for database/driver version
-        //
         loadDatabaseMetadata();
 
-        //
         // Send the START operation event
-        //
+        Operation updateOperation = sendStartOperationEvent(operationType, operationCommand, connection, hubChangeLog);
+
+        ListVisitor listVisitor;
+        if (operationType.equalsIgnoreCase("ROLLBACK")) {
+            listVisitor = new RollbackListVisitor();
+        } else {
+            listVisitor = new ListVisitor();
+        }
+        OperationChange operationChange = new OperationChange();
+        populateOperationChange(contexts, labelExpression, changeLogIterator, listVisitor, operationChange);
+        populateProject(connection, hubChangeLog, operationChange);
+        operationChange.setOperation(updateOperation);
+
+        try {
+            hubService.sendOperationChanges(operationChange);
+        } catch (LiquibaseException e) {
+            Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
+        }
+
+        return updateOperation;
+    }
+
+    private void populateOperationChange(Contexts contexts, LabelExpression labelExpression, ChangeLogIterator changeLogIterator, ListVisitor listVisitor, OperationChange operationChange) throws LiquibaseException {
+        if (changeLogIterator != null) {
+            changeLogIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+            List<ChangeSet> operationChangeSets = listVisitor.getSeenChangeSets();
+            for (ChangeSet operationChangeSet : operationChangeSets) {
+                operationChange.getChangeSets().add(operationChangeSet);
+            }
+        }
+    }
+
+    private void populateProject(Connection connection, HubChangeLog hubChangeLog, OperationChange operationChange) {
+        if (hubChangeLog == null) {
+            operationChange.setProject(connection.getProject());
+        } else {
+            operationChange.setProject(hubChangeLog.getProject());
+        }
+    }
+
+    private Operation sendStartOperationEvent(String operationType, String operationCommand, Connection connection, HubChangeLog hubChangeLog) throws LiquibaseHubException {
         Operation updateOperation = hubService.createOperation(operationType, operationCommand, hubChangeLog, connection);
         try {
             hubService.sendOperationEvent(updateOperation, new OperationEvent()
@@ -123,38 +168,34 @@ public class HubUpdater {
                     .setOperationEventStatus(
                             new OperationEvent.OperationEventStatus()
                                     .setOperationEventStatusType("PASS")
-                                    .setStatusMessage("Update operation started successfully")
+                                    .setStatusMessage(String.format("%s operation started successfully", operationType))
                     )
             );
         } catch (LiquibaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
         }
-
-        //
-        // Send the list of change sets which will be updated/rolled back
-        // If the operation type is DROPALL then we send no changes
-        //
-        ListVisitor listVisitor;
-        if (operationType.equalsIgnoreCase("ROLLBACK")) {
-            listVisitor = new RollbackListVisitor();
-        } else {
-            listVisitor = new ListVisitor();
-        }
-
-        changeLogIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
-        List<ChangeSet> operationChangeSets = listVisitor.getSeenChangeSets();
-        OperationChange operationChange = new OperationChange();
-        for (ChangeSet operationChangeSet : operationChangeSets) {
-            operationChange.getChangeSets().add(operationChangeSet);
-        }
-        operationChange.setProject(hubChangeLog.getProject());
-        operationChange.setOperation(updateOperation);
-        try {
-            hubService.sendOperationChanges(operationChange);
-        } catch (LiquibaseException e) {
-            Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
-        }
         return updateOperation;
+    }
+
+    private HubChangeLog getHubChangeLog() throws LiquibaseHubException {
+        HubChangeLog hubChangeLog = null;
+        if (changeLog != null) {
+            if (hubIsNotAvailable(changeLog.getChangeLogId())) {
+                return null;
+            }
+            hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLog.getChangeLogId()), "DELETED");
+            if (hubChangeLog.isDeleted()) {
+                // Complain and stop the operation
+                String message =
+                        "\n" +
+                                "The operation did not complete and will not be reported to Hub because the\n" + "" +
+                                "registered changelog has been deleted by someone in your organization.\n" +
+                                "Learn more at http://hub.liquibase.com";
+                Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
+                throw new LiquibaseHubException(message);
+            }
+        }
+        return hubChangeLog;
     }
 
     /**
@@ -172,58 +213,62 @@ public class HubUpdater {
             if (executor instanceof LoggingExecutor) {
                 return;
             }
-            if (updateOperation == null || hubIsNotAvailable(changeLog.getChangeLogId())) {
+            if (updateOperation == null || (changeLog != null && hubIsNotAvailable(changeLog.getChangeLogId()))) {
                 return;
             }
 
             //
             // Check to see if the changelog has been deactivated
             //
-            final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-            final HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLog.getChangeLogId()));
-            if (hubChangeLog.isInactive()) {
-                String message =
-                    "\n" +
-                        "The command completed and reported to Hub, but changelog '" + hubChangeLog.getName() + "' has been deactivated by someone in your organization.\n" +
-                        "To synchronize your changelog, checkout the latest from source control or run \"deactivatechangelog\".\n" +
-                        "After that, commands run against this changelog will not be reported to Hub until \"registerchangelog\" is run again.\n"  +
-                        "Learn more at http://hub.liquibase.com";
-                Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
-                Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
+            if (changeLog != null) {
+                final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+                final HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLog.getChangeLogId()));
+                if (hubChangeLog.isInactive()) {
+                    String message =
+                            "\n" +
+                                    "The command completed and reported to Hub, but changelog '" + hubChangeLog.getName() + "' has been deactivated by someone in your organization.\n" +
+                                    "To synchronize your changelog, checkout the latest from source control or run \"deactivatechangelog\".\n" +
+                                    "After that, commands run against this changelog will not be reported to Hub until \"registerchangelog\" is run again.\n" +
+                                    "Learn more at http://hub.liquibase.com";
+                    Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
+                    Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
+                }
+                sendCompleteOperationEvent(updateOperation, bufferLog);
+                // Show the report link if this is an active changelog
+                if (hubChangeLog.isActive()) {
+                    showOperationReportLink(updateOperation, hubService);
+                }
+            } else {
+                sendCompleteOperationEvent(updateOperation, bufferLog);
+
             }
-
-            //
-            // Send the COMPLETE operation event
-            // Capture the Liquibase Hub log level to use for filtering
-            //
-            Level currentLevel = HubConfiguration.LIQUIBASE_HUB_LOGLEVEL.getCurrentValue();
-
-            hubService.sendOperationEvent(updateOperation, new OperationEvent()
-                    .setEventType("COMPLETE")
-                    .setStartDate(startTime)
-                    .setEndDate(new Date())
-                    .setOperationEventStatus(
-                            new OperationEvent.OperationEventStatus()
-                                    .setOperationEventStatusType("PASS")
-                                    .setStatusMessage("Update operation completed successfully")
-                    )
-                    .setOperationEventLog(
-                            new OperationEvent.OperationEventLog()
-                        .setLogMessage(bufferLog.getLogAsString(currentLevel))
-                                    .setTimestampLog(startTime)
-                    )
-            );
-
-            //
-            // Show the report link if this is an active changelog
-            //
-            if (hubChangeLog.isActive()) {
-                showOperationReportLink(updateOperation, hubService);
-            }
-
         } catch (LiquibaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
         }
+    }
+
+    //
+    // Send the COMPLETE operation event
+    // Capture the Liquibase Hub log level to use for filtering
+    //
+    private void sendCompleteOperationEvent(Operation updateOperation, BufferedLogService bufferLog) throws LiquibaseException {
+        Level currentLevel = HubConfiguration.LIQUIBASE_HUB_LOGLEVEL.getCurrentValue();
+
+        hubService.sendOperationEvent(updateOperation, new OperationEvent()
+                .setEventType("COMPLETE")
+                .setStartDate(startTime)
+                .setEndDate(new Date())
+                .setOperationEventStatus(
+                        new OperationEvent.OperationEventStatus()
+                                .setOperationEventStatusType("PASS")
+                                .setStatusMessage("Update operation completed successfully")
+                )
+                .setOperationEventLog(
+                        new OperationEvent.OperationEventLog()
+                                .setLogMessage(bufferLog.getLogAsString(currentLevel))
+                                .setTimestampLog(startTime)
+                )
+        );
     }
 
     /**
@@ -266,11 +311,11 @@ public class HubUpdater {
             final HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLog.getChangeLogId()));
             if (hubChangeLog.isInactive()) {
                 String message =
-                    "\n" +
-                        "The command completed and reported to Hub, but changelog '" + hubChangeLog.getName() + "' has been deactivated by someone in your organization.\n" +
-                        "To synchronize your changelog, checkout the latest from source control or run \"deactivatechangelog\".\n" +
-                        "After that, commands run against this changelog will not be reported to Hub until \"registerchangelog\" is run again.\n"  +
-                        "Learn more at http://hub.liquibase.com";
+                        "\n" +
+                                "The command completed and reported to Hub, but changelog '" + hubChangeLog.getName() + "' has been deactivated by someone in your organization.\n" +
+                                "To synchronize your changelog, checkout the latest from source control or run \"deactivatechangelog\".\n" +
+                                "After that, commands run against this changelog will not be reported to Hub until \"registerchangelog\" is run again.\n" +
+                                "Learn more at http://hub.liquibase.com";
                 Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
                 Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
             }
@@ -286,7 +331,7 @@ public class HubUpdater {
                     )
                     .setOperationEventLog(
                             new OperationEvent.OperationEventLog()
-                        .setLogMessage(bufferLog.getLogAsString(currentLevel))
+                                    .setLogMessage(bufferLog.getLogAsString(currentLevel))
                     )
             );
 
@@ -313,7 +358,7 @@ public class HubUpdater {
         return !hubService.isOnline() || changeLogId == null;
     }
 
-    public void syncHub(String changeLogFile, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) throws CommandExecutionException {
+    public void syncHub(String changeLogFile, UUID hubConnectionId) throws CommandExecutionException {
         //
         // We pass in a setting of CONTINUE IF_BOTH_CONNECTION_AND_PROJECT_ID_SET_ARG=true
         // to tell syncHub to not complain when both connectionID and projectID
@@ -341,31 +386,16 @@ public class HubUpdater {
      * @throws LiquibaseException        Thrown if registration fails
      * @throws CommandExecutionException Thrown if registerChangeLog fails
      */
-    public void register(String changeLogFile)
-            throws LiquibaseException, CommandExecutionException {
-        //
-        // If our current Executor is a LoggingExecutor then just return since we will not update Hub
-        //
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        if (executor instanceof LoggingExecutor) {
-            return;
-        }
-
-        //
-        // Just return if Hub is off
-        //
-        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+    public void register(String changeLogFile) throws LiquibaseException {
         if (!hubService.isOnline()) {
             return;
         }
 
-        //
         // Do not try to register if
         //   1.  We have a key already OR
-        //   2.  We have a changeLogId already
-        //
+        //   2.  We have a changelog and a changeLogId in it already
         if (!StringUtil.isEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) ||
-                changeLog.getChangeLogId() != null) {
+                (changeLog != null && changeLog.getChangeLogId() != null)) {
             return;
         }
 
@@ -445,7 +475,7 @@ public class HubUpdater {
                 Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
                 return;
             }
-            String message = null;
+            String message;
             try {
                 //
                 // Update the properties file
@@ -471,15 +501,16 @@ public class HubUpdater {
                     Scope.getCurrentScope().getLog(getClass()).warning(message2);
                 }
 
-                //
-                // register the changelog
+                // register the changelog if it exist
+                if (changeLog != null) {
+                    message = "* Registering changelog file " + changeLogFile + " with Hub";
+                    Scope.getCurrentScope().getUI().sendMessage(message);
+                    Scope.getCurrentScope().getLog(getClass()).info(message);
+                    registerChangeLog(registerResponse.getProjectId(), changeLog, changeLogFile);
+                }
+
                 // Update the API key in HubConfiguration
-                //
-                message = "* Registering changelog file " + changeLogFile + " with Hub";
-                Scope.getCurrentScope().getUI().sendMessage(message);
-                Scope.getCurrentScope().getLog(getClass()).info(message);
                 DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, registerResponse.getApiKey());
-                registerChangeLog(registerResponse.getProjectId(), changeLog, changeLogFile);
 
                 message = "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
@@ -518,19 +549,19 @@ public class HubUpdater {
     // Register the specified changelog
     //
     private void registerChangeLog(UUID hubProjectId, DatabaseChangeLog changeLog, String changeLogFile)
-            throws LiquibaseException, CommandExecutionException {
+            throws LiquibaseException {
 
         CommandScope registerChangeLogCommand = new CommandScope("registerChangeLog");
         registerChangeLogCommand
-            .addArgumentValue(RegisterChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+                .addArgumentValue(RegisterChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
         try {
             if (hubProjectId != null) {
                 try {
                     registerChangeLogCommand.addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
                 } catch (IllegalArgumentException e) {
                     throw new LiquibaseException("The command 'RegisterChangeLog' " +
-                        " failed because parameter 'hubProjectId' has invalid value '" + hubProjectId +
-                        "'. Learn more at https://hub.liquibase.com");
+                            " failed because parameter 'hubProjectId' has invalid value '" + hubProjectId +
+                            "'. Learn more at https://hub.liquibase.com");
                 }
             }
         } catch (IllegalArgumentException e) {

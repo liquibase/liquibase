@@ -1806,23 +1806,12 @@ public class Main {
                 executeSyncHub(database, liquibase);
                 return;
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
-                String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
-                HubConfiguration.HubMode hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
-                if (liquibaseHubApiKey != null && hubMode != HubConfiguration.HubMode.OFF) {
-                    if (hubConnectionId == null && changeLogFile == null) {
-                        String warningMessage =
-                                "The dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +
-                                        "can send reports to your Hub project. To enable this, please add the \n" +
-                                        "'--hubConnectionId=<hubConnectionId>' parameter to the CLI, or ensure\n" +
-                                        "a registered changelog file is passed in your defaults file or in the CLI.\n" +
-                                        "Learn more at https://hub.liquibase.com";
-                        Scope.getCurrentScope().getUI().sendMessage("\nWARNING: " + warningMessage);
-                        LOG.warning("\n" + warningMessage);
-                    }
-                }
                 CommandScope dropAllCommand = new CommandScope("internalDropAll");
                 if (hubConnectionId != null) {
                     dropAllCommand.addArgumentValue(InternalDropAllCommandStep.HUB_CONNECTION_ID_ARG, UUID.fromString(hubConnectionId));
+                }
+                if (hubProjectId != null) {
+                    dropAllCommand.addArgumentValue(InternalDropAllCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
                 }
                 dropAllCommand
                         .addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, liquibase.getDatabase())

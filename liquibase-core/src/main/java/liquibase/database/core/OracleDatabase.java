@@ -35,7 +35,7 @@ import static java.util.ResourceBundle.getBundle;
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
-	private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
+	public static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
     public static final String PRODUCT_NAME = "oracle";
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -85,6 +85,17 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 Method method = con.getClass().getMethod("openProxySession", int.class, Properties.class);
                 method.setAccessible(true);
                 method.invoke(con, 1, props);
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
+                return;
+            }
+            try {
+                Method method = con.getClass().getMethod("isProxySession");
+                method.setAccessible(true);
+                boolean b = (boolean)method.invoke(con);
+                if (! b) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Proxy session not established on OracleDatabase: ");
+                }
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
             }
