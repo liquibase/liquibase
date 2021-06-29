@@ -14,14 +14,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
+@SuppressWarnings("java:S2755")
+//We would like to enable access to external entities in XML parsing
 public class DefaultXmlWriter implements XmlWriter {
 
     @Override
     public void write(Document doc, OutputStream outputStream) throws IOException {
         try {
             TransformerFactory factory = TransformerFactory.newInstance();
-            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET , "");
             try {
                 factory.setAttribute("indent-number", 4);
             } catch (Exception e) {
