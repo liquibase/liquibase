@@ -146,7 +146,9 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         hubConnection.setProject(project);
 
         if (hubConnection.getProject() == null) {
-            throw new LiquibaseHubException("Please specify --hubProjectId=<id> or --hubConnectionId=<id>");
+            String message = "Operation will not be send to Liquibase Hub. Please specify --hubProjectId=<id> or --hubConnectionId=<id>";
+            Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
+            log.warning(message);
         }
 
     }
