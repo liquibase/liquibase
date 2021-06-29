@@ -58,7 +58,6 @@ public class StartH2Main {
             }
 
         } catch (Throwable e) {
-            System.err.println("Error starting H2");
             e.printStackTrace();
             System.exit(-1);
         }
