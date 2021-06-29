@@ -14,8 +14,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-@SuppressWarnings("java:S2755")
-//We would like to enable access to external entities in XML parsing
+@SuppressWarnings("java:S2755" /*We would like to enable access to external entities in XML parsing.This is intentional*/)
 public class DefaultXmlWriter implements XmlWriter {
 
     @Override
