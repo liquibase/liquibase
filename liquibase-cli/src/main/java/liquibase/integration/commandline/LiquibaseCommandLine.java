@@ -121,6 +121,7 @@ public class LiquibaseCommandLine {
                 "outputDefaultCatalog",
                 "changelogFile",
                 "hubConnectionId",
+                "hubProjectId",
                 "contexts",
                 "labels",
                 "diffTypes",
