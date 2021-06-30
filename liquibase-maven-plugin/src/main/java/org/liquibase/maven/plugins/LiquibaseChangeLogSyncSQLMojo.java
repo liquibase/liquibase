@@ -17,6 +17,7 @@ import java.io.Writer;
  * @author JAmes Atwill
  * @goal changelogSyncSQL
  */
+@SuppressWarnings("java:S2095")
 public class LiquibaseChangeLogSyncSQLMojo extends
 		AbstractLiquibaseChangeLogMojo {
 
