@@ -3,6 +3,7 @@ package liquibase.util.xml;
 import liquibase.GlobalConfiguration;
 import org.w3c.dom.Document;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -20,6 +21,8 @@ public class DefaultXmlWriter implements XmlWriter {
     public void write(Document doc, OutputStream outputStream) throws IOException {
         try {
             TransformerFactory factory = TransformerFactory.newInstance();
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET , "");
             try {
                 factory.setAttribute("indent-number", 4);
             } catch (Exception e) {
