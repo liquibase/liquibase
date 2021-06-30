@@ -119,7 +119,7 @@ public class HubUpdater {
         loadDatabaseMetadata();
 
         // Send the START operation event
-        Operation updateOperation = sendStartOperationEvent(operationType, operationCommand, connection, hubChangeLog);
+        Operation operation = sendStartOperationEvent(operationType, operationCommand, connection, hubChangeLog);
 
         ListVisitor listVisitor;
         if (operationType.equalsIgnoreCase("ROLLBACK")) {
@@ -130,15 +130,17 @@ public class HubUpdater {
         OperationChange operationChange = new OperationChange();
         populateOperationChange(contexts, labelExpression, changeLogIterator, listVisitor, operationChange);
         populateProject(connection, hubChangeLog, operationChange);
-        operationChange.setOperation(updateOperation);
+        operationChange.setOperation(operation);
 
         try {
             hubService.sendOperationChanges(operationChange);
         } catch (LiquibaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
         }
-        updateOperation.getOperationStatus().setOperationStatusType(operationType);
-        return updateOperation;
+        if (operation != null) {
+            operation.getOperationStatus().setOperationStatusType(operationType);
+        }
+        return operation;
     }
 
     private void populateOperationChange(Contexts contexts, LabelExpression labelExpression, ChangeLogIterator changeLogIterator, ListVisitor listVisitor, OperationChange operationChange) throws LiquibaseException {
@@ -274,7 +276,7 @@ public class HubUpdater {
     /**
      * Handle Hub exceptions thrown during the operation
      *
-     * @param operation          Operation object
+     * @param operation                Operation object
      * @param bufferLog                Log output
      * @param originalExceptionMessage Exception thrown by the operation
      */
