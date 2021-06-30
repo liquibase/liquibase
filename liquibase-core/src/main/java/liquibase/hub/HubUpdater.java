@@ -137,7 +137,7 @@ public class HubUpdater {
         } catch (LiquibaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
         }
-
+        updateOperation.getOperationStatus().setOperationStatusType(operationType);
         return updateOperation;
     }
 
@@ -261,7 +261,7 @@ public class HubUpdater {
                 .setOperationEventStatus(
                         new OperationEvent.OperationEventStatus()
                                 .setOperationEventStatusType("PASS")
-                                .setStatusMessage("Update operation completed successfully")
+                                .setStatusMessage(String.format("%s operation completed successfully", updateOperation.getOperationStatus().getOperationStatusType()))
                 )
                 .setOperationEventLog(
                         new OperationEvent.OperationEventLog()
@@ -274,11 +274,11 @@ public class HubUpdater {
     /**
      * Handle Hub exceptions thrown during the operation
      *
-     * @param updateOperation          Operation object used during update
+     * @param operation          Operation object
      * @param bufferLog                Log output
      * @param originalExceptionMessage Exception thrown by the operation
      */
-    public void postUpdateHubExceptionHandling(Operation updateOperation,
+    public void postUpdateHubExceptionHandling(Operation operation,
                                                BufferedLogService bufferLog,
                                                String originalExceptionMessage) {
         try {
@@ -294,7 +294,7 @@ public class HubUpdater {
             // Not a valid Hub connection
             // Just go back
             //
-            if (updateOperation == null || hubIsNotAvailable(changeLog.getChangeLogId())) {
+            if (operation == null || hubIsNotAvailable(changeLog.getChangeLogId())) {
                 return;
             }
 
@@ -320,14 +320,14 @@ public class HubUpdater {
                 Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
             }
 
-            hubService.sendOperationEvent(updateOperation, new OperationEvent()
+            hubService.sendOperationEvent(operation, new OperationEvent()
                     .setEventType("COMPLETE")
                     .setStartDate(startTime)
                     .setEndDate(new Date())
                     .setOperationEventStatus(
                             new OperationEvent.OperationEventStatus()
                                     .setOperationEventStatusType("FAIL")
-                                    .setStatusMessage("Update operation completed with errors")
+                                    .setStatusMessage(String.format("%s operation completed with errors", operation.getOperationStatus().getOperationStatusType()))
                     )
                     .setOperationEventLog(
                             new OperationEvent.OperationEventLog()
@@ -339,7 +339,7 @@ public class HubUpdater {
             // Show the report link if this is an active changelog
             //
             if (hubChangeLog.isActive()) {
-                showOperationReportLink(updateOperation, hubService);
+                showOperationReportLink(operation, hubService);
             }
 
         } catch (LiquibaseException serviceException) {
