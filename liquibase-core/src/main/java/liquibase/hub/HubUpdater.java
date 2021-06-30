@@ -386,9 +386,10 @@ public class HubUpdater {
      * @throws LiquibaseException        Thrown if registration fails
      * @throws CommandExecutionException Thrown if registerChangeLog fails
      */
-    public void register(String changeLogFile) throws LiquibaseException {
+    public HubRegisterResponse register(String changeLogFile) throws LiquibaseException {
+        HubRegisterResponse registerResponse = null;
         if (!hubService.isOnline()) {
-            return;
+            return registerResponse;
         }
 
         // Do not try to register if
@@ -396,7 +397,7 @@ public class HubUpdater {
         //   2.  We have a changelog and a changeLogId in it already
         if (!StringUtil.isEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) ||
                 (changeLog != null && changeLog.getChangeLogId() != null)) {
-            return;
+            return registerResponse;
         }
 
         //
@@ -458,7 +459,6 @@ public class HubUpdater {
             // Consider this an email
             // Call the Hub API to create a new user
             //
-            HubRegisterResponse registerResponse = null;
             try {
                 registerResponse = hubService.register(input);
             } catch (LiquibaseException lhe) {
@@ -466,14 +466,14 @@ public class HubUpdater {
                         "No operation report will be generated.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
-                return;
+                return registerResponse;
             }
             if (registerResponse == null) {
                 String message = "Account creation failed for email address '" + input + "'.\n" +
                         "No operation report will be generated.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
-                return;
+                return registerResponse;
             }
             String message;
             try {
@@ -529,6 +529,7 @@ public class HubUpdater {
                 System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), null);
             }
         }
+        return registerResponse;
     }
 
     //
