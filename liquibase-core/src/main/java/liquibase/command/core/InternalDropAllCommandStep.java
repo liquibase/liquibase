@@ -92,7 +92,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
             Connection hubConnection = getHubConnection(commandScope);
             attachProjectToConnection(commandScope, hubConnection, hubRegisterResponse);
 
-            dropAllOperation = hubUpdater.preUpdateHub("DROPALL", "dropAll", hubConnection);
+            dropAllOperation = hubUpdater.preUpdateHub("DROPALL", "drop-all", hubConnection);
 
             try {
                 for (CatalogAndSchema schema : commandScope.getArgumentValue(SCHEMAS_ARG)) {
