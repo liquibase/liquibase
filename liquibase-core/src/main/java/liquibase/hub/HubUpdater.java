@@ -138,7 +138,9 @@ public class HubUpdater {
             Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
         }
         if (operation != null) {
-            operation.getOperationStatus().setOperationStatusType(operationType);
+            Operation.OperationStatus operationStatus = new Operation.OperationStatus();
+            operationStatus.setOperationStatusType(operationType);
+            operation.setOperationStatus(operationStatus);
         }
         return operation;
     }
