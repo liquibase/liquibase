@@ -7,6 +7,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -109,7 +110,7 @@ public class LiquibaseServletListener implements ServletContextListener {
 
             liquibaseConfiguration.registerProvider(servletConfigurationValueProvider);
 
-            failOnError = (String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_ONERROR_FAIL).getValue();
+            failOnError = (String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_ONERROR_FAIL).getValue();
             if (checkPreconditions(servletContext, ic)) {
                 executeUpdate(servletContext, ic);
             }
@@ -141,17 +142,17 @@ public class LiquibaseServletListener implements ServletContextListener {
      * </ol>
      */
     private boolean checkPreconditions(ServletContext servletContext, InitialContext ic) {
-        if (!liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
+        if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
             Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run on " + hostName
-                    + " because " + liquibase.GlobalConfiguration.SHOULD_RUN.getKey()
+                    + " because " + LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey()
                     + " was set to false");
             return false;
         }
 
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
 
-        String machineIncludes = (String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_HOST_INCLUDES).getValue();
-        String machineExcludes = (String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_HOST_EXCLUDES).getValue();
+        String machineIncludes = (String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_HOST_INCLUDES).getValue();
+        String machineExcludes = (String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_HOST_EXCLUDES).getValue();
 
         boolean shouldRun = false;
         if ((machineIncludes == null) && (machineExcludes == null)) {
@@ -173,8 +174,8 @@ public class LiquibaseServletListener implements ServletContextListener {
             }
         }
 
-        final ConfiguredValue<Boolean> shouldRunValue = liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
-        if (liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentValue() && !ConfigurationDefinition.wasDefaultValueUsed(shouldRunValue)) {
+        final ConfiguredValue<Boolean> shouldRunValue = LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
+        if (LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue() && !shouldRunValue.wasDefaultValueUsed()) {
             shouldRun = true;
             servletContext.log("ignoring " + LIQUIBASE_HOST_INCLUDES + " and "
                     + LIQUIBASE_HOST_EXCLUDES + ", since " + shouldRunValue.getProvidedValue().describe()
@@ -195,19 +196,19 @@ public class LiquibaseServletListener implements ServletContextListener {
     private void executeUpdate(ServletContext servletContext, InitialContext ic) throws NamingException, SQLException, LiquibaseException {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
 
-        setDataSource((String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_DATASOURCE).getValue());
+        setDataSource((String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_DATASOURCE).getValue());
         if (getDataSource() == null) {
             throw new RuntimeException("Cannot run Liquibase, " + LIQUIBASE_DATASOURCE + " is not set");
         }
 
-        setChangeLogFile((String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_CHANGELOG).getValue());
+        setChangeLogFile((String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_CHANGELOG).getValue());
         if (getChangeLogFile() == null) {
             throw new RuntimeException("Cannot run Liquibase, " + LIQUIBASE_CHANGELOG + " is not set");
         }
 
-        setContexts((String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_CONTEXTS).getValue());
-        setLabels((String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_LABELS).getValue());
-        this.defaultSchema = StringUtil.trimToNull((String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_SCHEMA_DEFAULT).getValue());
+        setContexts((String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_CONTEXTS).getValue());
+        setLabels((String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_LABELS).getValue());
+        this.defaultSchema = StringUtil.trimToNull((String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_SCHEMA_DEFAULT).getValue());
 
         Connection connection = null;
         Database database = null;
@@ -234,7 +235,7 @@ public class LiquibaseServletListener implements ServletContextListener {
             while (initParameters.hasMoreElements()) {
                 String name = initParameters.nextElement().trim();
                 if (name.startsWith(LIQUIBASE_PARAMETER + ".")) {
-                    liquibase.setChangeLogParameter(name.substring(LIQUIBASE_PARAMETER.length() + 1), liquibaseConfiguration.getCurrentConfiguredValue(name));
+                    liquibase.setChangeLogParameter(name.substring(LIQUIBASE_PARAMETER.length() + 1), liquibaseConfiguration.getCurrentConfiguredValue(null, null, name ));
                 }
             }
 

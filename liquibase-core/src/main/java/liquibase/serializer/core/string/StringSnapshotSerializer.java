@@ -148,7 +148,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
 
     @Override
     public void write(DatabaseSnapshot snapshot, OutputStream out) throws IOException {
-        out.write(serialize(snapshot, true).getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
+        out.write(serialize(snapshot, true).getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
     }
 
     @Override
