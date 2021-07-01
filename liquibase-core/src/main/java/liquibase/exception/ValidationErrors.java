@@ -1,5 +1,8 @@
 package liquibase.exception;
 
+import liquibase.Scope;
+import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.util.StringUtil;
@@ -13,19 +16,46 @@ public class ValidationErrors {
 
     protected List<String> errorMessages = new ArrayList<>();
     protected List<String> warningMessages = new ArrayList<>();
+    protected String change = null;
 
     public boolean hasErrors() {
         return !errorMessages.isEmpty();
     }
 
-    public void checkRequiredField(String requiredFieldName, Object value) {
+    public ValidationErrors() {
+    }
+
+    public ValidationErrors(String change) {
+        this.change = change;
+    }
+
+    public ValidationErrors(Change change) {
+        this.change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName();
+    }
+
+    public String getChangeName() {
+        return this.change;
+    }
+
+    public ValidationErrors checkRequiredField(String requiredFieldName, Object value) {
+        return checkRequiredField(requiredFieldName, value, null);
+    }
+
+    public ValidationErrors checkRequiredField(String requiredFieldName, Object value, String postfix) {
+        String err = null;
         if (value == null) {
-            addError(requiredFieldName + " is required");
-        } else if ((value instanceof Collection) && ((Collection) value).isEmpty()) {
-            addError(requiredFieldName + " is empty");
-        } else if ((value instanceof Object[]) && (((Object[]) value).length == 0)) {
-            addError(requiredFieldName + " is empty");
+            err = requiredFieldName + " is required";
+        } else if ((value instanceof Collection && ((Collection<?>) value).isEmpty())
+                || (value instanceof Object[] && ((Object[]) value).length == 0)) {
+            err = "No " + requiredFieldName + " defined";
+        } else if (value instanceof String && StringUtil.trimToNull((String) value) == null) {
+            err = requiredFieldName + " is empty";
         }
+        if (err != null) {
+            addError(err + (this.change == null ? "" : " for " + this.change)
+                    + (postfix == null ? "" : postfix));
+        }
+        return this;
     }
 
     /**
@@ -58,7 +88,7 @@ public class ValidationErrors {
         }
 
         if (isDisallowed && (value != null)) {
-            addError(disallowedFieldName + " is not allowed on "+(database == null?"unknown":database.getShortName()));
+            addError(disallowedFieldName + " is not allowed on " + (database == null ? "unknown" : database.getShortName()));
         }
     }
 
@@ -90,10 +120,10 @@ public class ValidationErrors {
 
     public void addAll(ValidationErrors validationErrors, ChangeSet changeSet) {
         for (String message : validationErrors.getErrorMessages()) {
-            this.errorMessages.add(message+", "+changeSet);
+            this.errorMessages.add(message + ", " + changeSet);
         }
         for (String message : validationErrors.getWarningMessages()) {
-            this.warningMessages.add(message+", "+changeSet);
+            this.warningMessages.add(message + ", " + changeSet);
         }
     }
 

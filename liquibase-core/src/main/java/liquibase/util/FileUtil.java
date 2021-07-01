@@ -64,7 +64,7 @@ public class FileUtil {
         try (
             FileOutputStream output = new FileOutputStream(file);
         ){
-            StreamUtil.copy(new ByteArrayInputStream(contents.getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue())), output);
+            StreamUtil.copy(new ByteArrayInputStream(contents.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())), output);
         }
     }
 

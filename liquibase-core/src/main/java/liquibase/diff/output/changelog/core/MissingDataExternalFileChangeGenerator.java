@@ -88,7 +88,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 try (
                         FileOutputStream fileOutputStream = new FileOutputStream(fileName);
                         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
-                                fileOutputStream, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+                                fileOutputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
                         CSVWriter outputFile = new CSVWriter(new BufferedWriter(outputStreamWriter));
                 ) {
 
@@ -142,7 +142,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
 
                 LoadDataChange change = new LoadDataChange();
                 change.setFile(fileName);
-                change.setEncoding(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+                change.setEncoding(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
                 if (outputControl.getIncludeCatalog()) {
                     change.setCatalogName(table.getSchema().getCatalogName());
                 }

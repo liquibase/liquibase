@@ -29,7 +29,7 @@ public abstract class HTMLWriter {
     protected abstract void writeCustomHTML(Writer fileWriter, Object object, List<Change> changes, Database database) throws IOException;
 
     private Writer createFileWriter(Object object) throws IOException {
-        return new OutputStreamWriter(new FileOutputStream(new File(outputDir, DBDocUtil.toFileName(object.toString().toLowerCase()) + ".html")), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+        return new OutputStreamWriter(new FileOutputStream(new File(outputDir, DBDocUtil.toFileName(object.toString().toLowerCase()) + ".html")), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
     }
 
     public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog) throws IOException, DatabaseHistoryException, DatabaseException {

@@ -93,6 +93,11 @@ public class HubServiceFactory extends AbstractPluginFactory<HubService> {
         }
 
         @Override
+        public Project findProjectByConnectionIdOrJdbcUrl(UUID connectionId, String jdbcUrl) throws LiquibaseHubException {
+            return null;
+        }
+
+        @Override
         public List<Project> getProjects() throws LiquibaseHubException {
             return null;
         }
@@ -138,7 +143,7 @@ public class HubServiceFactory extends AbstractPluginFactory<HubService> {
         }
 
         @Override
-        public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
+        public Operation createOperation(String operationType, String operationCommand, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
             return null;
         }
 
