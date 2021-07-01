@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.resource.CompositeResourceAccessor;
@@ -294,7 +295,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding == null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
-            return new OutputStreamWriter(new FileOutputStream(outputFile), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+            return new OutputStreamWriter(new FileOutputStream(outputFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
         }
         getLog().debug("Writing output file with [" + outputFileEncoding + "] file encoding.");
         return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), outputFileEncoding));
@@ -317,8 +318,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 processSystemProperties();
 
-                if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
-                    getLog().info("Liquibase did not run because " + GlobalConfiguration.SHOULD_RUN.getKey() + " was set to false");
+                if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
+                    getLog().info("Liquibase did not run because " + LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey() + " was set to false");
                     return;
                 }
                 if (skip) {
@@ -633,7 +634,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
         getLog().info(indent + "driver: " + driver);
         getLog().info(indent + "url: " + url);
-        getLog().info(indent + "username: " + username);
+        getLog().info(indent + "username: " + "*****");
         getLog().info(indent + "password: " + "*****");
         getLog().info(indent + "use empty password: " + emptyPassword);
         getLog().info(indent + "properties file: " + propertyFile);

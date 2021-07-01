@@ -193,7 +193,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
 
             if (sql != null) {
-                stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue())
+                stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())
                 );
             }
 
@@ -287,7 +287,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         public NormalizingStream(String endDelimiter, Boolean splitStatements, Boolean stripComments, InputStream stream) {
             this.stream = new PushbackInputStream(stream, 2048);
             try {
-                this.headerStream = new ByteArrayInputStream((endDelimiter+":"+splitStatements+":"+stripComments+":").getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
+                this.headerStream = new ByteArrayInputStream((endDelimiter+":"+splitStatements+":"+stripComments+":").getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
             } catch (UnsupportedEncodingException e) {
                 throw new UnexpectedLiquibaseException(e);
             }

@@ -3,19 +3,20 @@ package liquibase;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.AutoloadedConfigurations;
 
+import java.nio.charset.Charset;
+
 /**
  * Configuration container for global properties.
  */
 public class GlobalConfiguration implements AutoloadedConfigurations {
 
-    public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<String> DATABASECHANGELOG_TABLE_NAME;
     public static final ConfigurationDefinition<String> DATABASECHANGELOGLOCK_TABLE_NAME;
     public static final ConfigurationDefinition<String> LIQUIBASE_TABLESPACE_NAME;
     public static final ConfigurationDefinition<String> LIQUIBASE_CATALOG_NAME;
     public static final ConfigurationDefinition<String> LIQUIBASE_SCHEMA_NAME;
     public static final ConfigurationDefinition<String> OUTPUT_LINE_SEPARATOR;
-    public static final ConfigurationDefinition<String> OUTPUT_ENCODING;
+    public static final ConfigurationDefinition<String> OUTPUT_FILE_ENCODING;
     public static final ConfigurationDefinition<Long> CHANGELOGLOCK_WAIT_TIME;
     public static final ConfigurationDefinition<Long> CHANGELOGLOCK_POLL_RATE;
     public static final ConfigurationDefinition<Boolean> CONVERT_DATA_TYPES;
@@ -31,12 +32,6 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
-
-        SHOULD_RUN = builder.define("shouldRun", Boolean.class)
-                .setDescription("Should Liquibase commands execute")
-                .setDefaultValue(true)
-                .addAliasKey("should.run")
-                .build();
 
         DATABASECHANGELOG_TABLE_NAME = builder.define("databaseChangelogTableName", String.class)
                 .addAliasKey("liquibase.databaseChangeLogTableName")
@@ -66,23 +61,24 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDescription("Tablespace to use for Liquibase objects")
                 .build();
 
-        LIQUIBASE_CATALOG_NAME = builder.define("catalogName", String.class)
+        LIQUIBASE_CATALOG_NAME = builder.define("liquibaseCatalogName", String.class)
+                .addAliasKey("liquibase.catalogName")
                 .setDescription("Catalog to use for Liquibase objects")
                 .build();
 
-        LIQUIBASE_SCHEMA_NAME = builder.define("schemaName", String.class)
+        LIQUIBASE_SCHEMA_NAME = builder.define("liquibaseSchemaName", String.class)
+                .addAliasKey("liquibase.schemaName")
                 .setDescription("Schema to use for Liquibase objects")
                 .build();
 
         OUTPUT_LINE_SEPARATOR = builder.define("outputLineSeparator", String.class)
-                .setDescription("Line separator for output. Defaults to OS default")
-                .setDefaultValue(System.getProperty("line.separator"))
+                .setDescription("Line separator for output")
+                .setDefaultValue(System.getProperty("line.separator"),"Line separator(LF or CRLF) for output. Defaults to OS default")
                 .build();
 
-        OUTPUT_ENCODING = builder.define("outputFileEncoding", String.class)
-                .setDescription("Encoding to output text in. Defaults to file.encoding system property or UTF-8")
+        OUTPUT_FILE_ENCODING = builder.define("outputFileEncoding", String.class)
+                .setDescription("Encoding to use when writing files")
                 .setDefaultValue("UTF-8")
-                .addAliasKey("file.encoding")
                 .setCommonlyUsed(true)
                 .build();
 

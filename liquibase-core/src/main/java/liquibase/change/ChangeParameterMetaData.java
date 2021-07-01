@@ -28,6 +28,8 @@ import java.util.*;
 public class ChangeParameterMetaData {
 
     public static final String COMPUTE = "COMPUTE";
+    public static final String ALL = "all";
+    public static final String NONE = "none";
 
     private Change change;
     private String parameterName;
@@ -100,13 +102,13 @@ public class ChangeParameterMetaData {
 
     protected Set<String> analyzeSupportedDatabases(String[] supportedDatabases) {
         if (supportedDatabases == null) {
-            supportedDatabases = new String[]{ChangeParameterMetaData.COMPUTE};
+            supportedDatabases = new String[]{COMPUTE};
         }
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if ((supportedDatabases.length == 1) && StringUtil.join(supportedDatabases, ",").equals
-            (ChangeParameterMetaData.COMPUTE)) {
+        if ((supportedDatabases.length == 1)
+          && StringUtil.join(supportedDatabases, ",").equals(COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 if ((database.getShortName() == null) || "unsupported".equals(database.getShortName())) {
@@ -134,12 +136,12 @@ public class ChangeParameterMetaData {
             }
 
             if (validDatabases == 0) {
-                return new HashSet<>(Arrays.asList("all"));
+                return new HashSet<>(Arrays.asList(ALL));
             } else if (computedDatabases.size() == validDatabases) {
-                computedDatabases = new HashSet<>(Arrays.asList("all"));
+                computedDatabases = new HashSet<>(Arrays.asList(ALL));
             }
 
-            computedDatabases.remove("none");
+            computedDatabases.remove(NONE);
 
             return computedDatabases;
         } else {
@@ -150,13 +152,13 @@ public class ChangeParameterMetaData {
 
     protected Set<String> analyzeRequiredDatabases(String[] requiredDatabases) {
         if (requiredDatabases == null) {
-            requiredDatabases = new String[]{ChangeParameterMetaData.COMPUTE};
+            requiredDatabases = new String[]{COMPUTE};
         }
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if ((requiredDatabases.length == 1) && StringUtil.join(requiredDatabases, ",").equals
-            (ChangeParameterMetaData.COMPUTE)) {
+        if ((requiredDatabases.length == 1)
+           && StringUtil.join(requiredDatabases, ",").equals(COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 try {
@@ -180,14 +182,14 @@ public class ChangeParameterMetaData {
             if (validDatabases == 0) {
                 return new HashSet<>();
             } else if (computedDatabases.size() == validDatabases) {
-                computedDatabases = new HashSet<>(Arrays.asList("all"));
+                computedDatabases = new HashSet<>(Arrays.asList(ALL));
             }
 
-            computedDatabases.remove("none");
+            computedDatabases.remove(NONE);
         } else {
             computedDatabases = new HashSet<>(Arrays.asList(requiredDatabases));
         }
-        computedDatabases.remove("none");
+        computedDatabases.remove(NONE);
         return computedDatabases;
     }
 
@@ -263,11 +265,11 @@ public class ChangeParameterMetaData {
      * required database list contains the string "all"
      */
     public boolean isRequiredFor(Database database) {
-        return getRequiredForDatabase().contains("all") || getRequiredForDatabase().contains(database.getShortName());
+        return getRequiredForDatabase().contains(ALL) || getRequiredForDatabase().contains(database.getShortName());
     }
 
     public boolean supports(Database database) {
-        return getSupportedDatabases().contains("all") || getSupportedDatabases().contains(database.getShortName());
+        return getSupportedDatabases().contains(ALL) || getSupportedDatabases().contains(database.getShortName());
     }
 
 
@@ -407,7 +409,7 @@ public class ChangeParameterMetaData {
             Object exampleValue = null;
 
             for (Map.Entry<String, Object> entry: exampleValues.entrySet()) {
-                if ("all".equalsIgnoreCase(entry.getKey())) {
+                if (ALL.equalsIgnoreCase(entry.getKey())) {
                     exampleValue = entry.getValue();
                 } else if (DatabaseList.definitionMatches(entry.getKey(), database, false)) {
                     return entry.getValue();

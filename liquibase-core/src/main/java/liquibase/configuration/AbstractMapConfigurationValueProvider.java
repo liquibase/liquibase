@@ -27,6 +27,10 @@ public abstract class AbstractMapConfigurationValueProvider extends AbstractConf
 
         final Map<?, ?> sourceData = getMap();
 
+        if (sourceData == null) {
+            return null;
+        }
+
         for (String key : keyAndAliases) {
             //try direct lookup first, for performance:
             if (sourceData.containsKey(key)) {
@@ -79,6 +83,17 @@ public abstract class AbstractMapConfigurationValueProvider extends AbstractConf
         }
 
         wantedKey = StringUtil.toKabobCase(wantedKey);
+        if (storedKey.equalsIgnoreCase(wantedKey)) {
+            return true;
+        }
+
+        wantedKey = wantedKey.replace(".", "-");
+        if (storedKey.equalsIgnoreCase(wantedKey)) {
+            return true;
+        }
+
+        //check for everythingSmashedTogether case insensitively
+        wantedKey = wantedKey.replace("-", "");
         if (storedKey.equalsIgnoreCase(wantedKey)) {
             return true;
         }

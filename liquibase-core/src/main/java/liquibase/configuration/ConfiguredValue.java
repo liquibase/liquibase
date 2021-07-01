@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * This wraps all the {@link ProvidedValue}s to return the overall value returned from the collection of {@link ConfigurationValueProvider}s.
- * Returned by {@link LiquibaseConfiguration#getCurrentConfiguredValue(String...)}
+ * Returned by {@link LiquibaseConfiguration#getCurrentConfiguredValue(ConfigurationValueConverter, ConfigurationValueObfuscator, String...)}
  */
 public class ConfiguredValue<DataType> {
 
@@ -14,9 +14,18 @@ public class ConfiguredValue<DataType> {
 
     private final List<ProvidedValue> providedValues = new ArrayList<>();
     private final String key;
+    private final ConfigurationValueObfuscator<DataType> valueObfuscator;
+    private final ConfigurationValueConverter<DataType> valueConverter;
 
-    protected ConfiguredValue(String key) {
+    protected ConfiguredValue(String key, ConfigurationValueConverter<DataType> converter, ConfigurationValueObfuscator<DataType> obfuscator) {
         this.key = key;
+        this.valueObfuscator = obfuscator;
+
+        if (converter == null) {
+            this.valueConverter = (value -> (DataType) value);
+        } else {
+            this.valueConverter = converter;
+        }
     }
 
     public DataType getValue() {
@@ -25,7 +34,15 @@ public class ConfiguredValue<DataType> {
             return null;
         }
 
-        return (DataType) providedValue.getValue();
+        return valueConverter.convert(providedValue.getValue());
+    }
+
+    public DataType getValueObfuscated() {
+        final DataType rawValue = getValue();
+        if (valueObfuscator != null) {
+            return valueObfuscator.obfuscate(rawValue);
+        }
+        return rawValue;
     }
 
 
@@ -39,6 +56,16 @@ public class ConfiguredValue<DataType> {
         return getProvidedValues().get(0);
     }
 
+
+    public boolean wasDefaultValueUsed() {
+        for (ProvidedValue providedValue : this.getProvidedValues()) {
+            if (providedValue.getProvider() != null && providedValue.getProvider() instanceof ConfigurationDefinition.DefaultValueProvider) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Replaces the current configured value with a higher-precedence one.
@@ -72,7 +99,7 @@ public class ConfiguredValue<DataType> {
     /**
      * Used to track configuration with no value set
      */
-    private static final class NoValueProvider implements ConfigurationValueProvider {
+    private static final class NoValueProvider extends AbstractConfigurationValueProvider {
         @Override
         public int getPrecedence() {
             return -1;
@@ -80,7 +107,7 @@ public class ConfiguredValue<DataType> {
 
         @Override
         public ProvidedValue getProvidedValue(String... keyAndAliases) {
-            return new ProvidedValue(keyAndAliases[0], keyAndAliases[0], null, "No configuration or default value found", this);
+            return new ProvidedValue(keyAndAliases[0], keyAndAliases[0], null, "No configured value found", this);
         }
     }
 }
