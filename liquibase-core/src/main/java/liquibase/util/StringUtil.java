@@ -143,13 +143,6 @@ public class StringUtil {
             }
         }
 
-        //
-        // After the loop, add in any remaining tokens
-        //
-        if (possibleMerge.size() > 0) {
-            returnList.addAll(possibleMerge);
-        }
-
         return returnList;
 
     }
