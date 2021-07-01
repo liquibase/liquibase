@@ -9,6 +9,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
@@ -247,7 +248,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 */
 	@Override
     public void afterPropertiesSet() throws LiquibaseException {
-		final ConfiguredValue<Boolean> shouldRunProperty = GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
+		final ConfiguredValue<Boolean> shouldRunProperty = LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
 
 		if (!(Boolean) shouldRunProperty.getValue()) {
             Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " +shouldRunProperty.getProvidedValue().describe() + " was set to false");
@@ -280,7 +281,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
             try (
                 FileOutputStream fileOutputStream = new FileOutputStream(rollbackFile);
-                Writer output = new OutputStreamWriter(fileOutputStream, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()) )
+                Writer output = new OutputStreamWriter(fileOutputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()) )
 			{
 
                 if (tag != null) {

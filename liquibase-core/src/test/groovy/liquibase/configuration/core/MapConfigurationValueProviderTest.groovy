@@ -12,7 +12,7 @@ class MapConfigurationValueProviderTest extends Specification {
 
     def "empty values count as not set"() {
         when:
-        def provider = new MapConfigurationValueProvider(["empty.property":""])
+        def provider = new MapConfigurationValueProvider(["empty.property": ""])
 
         then:
         provider.getProvidedValue("empty.property") == null
@@ -31,13 +31,17 @@ class MapConfigurationValueProviderTest extends Specification {
         "single"              | "SiNglE"               | true
         "parent.child"        | "parent.child"         | true
         "parent.child"        | "PARENT.Child"         | true
-        "parent.child"        | "PARENT-Child"         | false
+        "parent.child"        | "PARENT-Child"         | true
+        "parent.child"        | "ParentChild"          | true
+        "parent.child"        | "PARENTCHILD"          | true
         "parent.child"        | "PARENT_Child"         | false
         "parent.bothChildren" | "Parent.BothChildren"  | true
         "parent.bothChildren" | "parent.both-children" | true
         "parent.bothChildren" | "parent.both_children" | false
         "single"              | "invalid"              | false
         "parent.child"        | "parent"               | false
+        "upper.kabob"         | "UPPER-KABOB"          | true
+        "one.two.three"       | "one-two-three"        | true
     }
 
     static class MapConfigurationValueProvider extends AbstractMapConfigurationValueProvider {
