@@ -3,7 +3,7 @@ Liquibase Core Changelog
 
 Changes in version 4.4.0 (2021.06.08)
 - Refactor Configuration API
--- including native use of Environment variables
+-- [PRO] including native use of Environment variables
 - Refactor Command API
 - Rewrote CLI to use new library
 -- including new command options and help content

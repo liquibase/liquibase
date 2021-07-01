@@ -1232,6 +1232,39 @@ public class FilenameUtils {
     }
 
     /**
+     *
+     * Remove problematic characters from filename and replace them with '_'
+     * https://stackoverflow.com/questions/1976007/what-characters-are-forbidden-in-windows-and-linux-directory-names
+     *
+     * ' ' '/' ':' '"' '\' '|' '*' '?' '<' '>'
+     *
+     * @param   fileName     Filename to remove characters from
+     * @return  String       Sanitized file name
+     *
+     */
+    public static String sanitizeFileName(String fileName) {
+        fileName = fileName.replaceAll(" ","_")
+                           .replaceAll("/","_")
+                           .replaceAll(":","_")
+                           .replaceAll("\"", "_")
+                           .replaceAll("\\|", "_")
+                           .replaceAll("\\*", "_")
+                           .replaceAll("\\?", "_")
+                           .replaceAll("<","_")
+                           .replaceAll(">","_");
+
+        boolean done = false;
+        while (! done) {
+            String replacedString = fileName.replace('\\', '_');
+            done = (fileName.equals(replacedString));
+            if (! done) {
+                fileName = replacedString;
+            }
+        }
+        return fileName;
+    }
+
+    /**
      * Splits a string into a number of tokens.
      *
      * @param text  the text to split
