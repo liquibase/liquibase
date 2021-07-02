@@ -921,17 +921,10 @@ public class LiquibaseCommandLine {
 
     protected static String[] toArgNames(ConfigurationDefinition<?> def) {
         LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        if(def.getKey().startsWith("liquibase.pro")) {
-            returnList.add("--" + StringUtil.toKabobCase(def.getKey().replaceFirst("^liquibase.pro.", "")).replace(".", "-"));
-        } else {
-            returnList.add("--" + StringUtil.toKabobCase(def.getKey().replaceFirst("^liquibase.", "")).replace(".", "-"));
-        }
+        returnList.add("--" + StringUtil.toKabobCase(def.getKey().replaceFirst("^liquibase.", "")).replace(".", "-"));
         returnList.add("--" + StringUtil.toKabobCase(def.getKey()).replace(".", "-"));
-        if(def.getKey().startsWith("liquibase.pro")) {
-            returnList.add("--" + def.getKey().replaceFirst("^liquibase.pro.", "").replaceAll("\\.", ""));
-        } else {
-            returnList.add("--" + def.getKey().replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
-        }
+        returnList.add("--" + def.getKey().replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
+        returnList.add("--" + def.getKey().replaceAll("\\.", ""));
         return returnList.toArray(new String[0]);
     }
 
