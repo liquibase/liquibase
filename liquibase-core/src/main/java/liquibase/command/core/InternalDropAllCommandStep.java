@@ -42,7 +42,6 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<CatalogAndSchema[]> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<UUID> HUB_CONNECTION_ID_ARG;
     public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
-    final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -136,6 +135,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         }
         UUID connectionId = commandScope.getArgumentValue(HUB_CONNECTION_ID_ARG);
         UUID projectId = commandScope.getArgumentValue(HUB_PROJECT_ID_ARG);
+        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         Project project;
         if (projectId != null) {
             project = hubService.getProject(projectId);

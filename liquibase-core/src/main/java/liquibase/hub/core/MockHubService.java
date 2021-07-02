@@ -91,7 +91,7 @@ public class MockHubService implements HubService {
 
     @Override
     public Project findProjectByConnectionIdOrJdbcUrl(UUID connectionId, String jdbcUrl) throws LiquibaseHubException {
-        return null;
+        return returnProjects.get(0);
     }
 
     @Override
