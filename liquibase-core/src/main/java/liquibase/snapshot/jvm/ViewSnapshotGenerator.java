@@ -8,6 +8,7 @@ import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
