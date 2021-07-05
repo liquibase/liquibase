@@ -103,7 +103,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
                     if (database instanceof MSSQLDatabase) {
                         // Strip the schema name in definition, because it can optional from OBJECT_DEFINITION
-                        definition = definition.replaceFirst("(?i)(create view )\\[?"
+                        definition = definition.replaceFirst("(?i)(create\\s+view\\s+)\\[?"
                                 + view.getSchema().getName()
                                 + "\\]?\\.\\[?([a-z][a-z0-9_$#@]*)\\]?", "$1$2");
                     }
