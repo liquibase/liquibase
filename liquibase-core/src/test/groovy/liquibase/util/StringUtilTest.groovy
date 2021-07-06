@@ -260,4 +260,20 @@ class StringUtilTest extends Specification {
         "test_Value" | "testValue"
         null         | null
     }
+
+    @Unroll
+    def "stripEnclosingQuotes"() {
+        expect:
+        StringUtil.stripEnclosingQuotes(input) == expected
+
+        where:
+        input           | expected
+        ""              | ""
+        "a"             | "a"
+        "\""            | "\""
+        "\"testValue\"" | "testValue"
+        "'testValue'"   | "testValue"
+        "\"testValue"   | "\"testValue"
+    }
+
 }
