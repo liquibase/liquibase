@@ -27,7 +27,7 @@ public class DatabaseFunction {
 
     @Override
     public String toString() {
-        return getSchemaName() == null ? "" : getSchemaName() + "." + getValue();
+        return (getSchemaName() == null ? "" : getSchemaName() + ".") + getValue();
     }
 
     public String getSchemaName() {
