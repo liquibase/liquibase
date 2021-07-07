@@ -395,6 +395,12 @@ public class HubUpdater {
             return;
         }
 
+        // Just return if cannot prompt
+        //
+        if (!Scope.getCurrentScope().getUI().getAllowPrompt()) {
+            return;
+        }
+
         // Do not try to register if
         //   1.  We have a key already OR
         //   2.  We have a changelog and a changeLogId in it already
