@@ -104,8 +104,12 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                 hubUpdater.postUpdateHubExceptionHandling(dropAllOperation, bufferLog, liquibaseException.getMessage());
                 return;
             }
-            hubUpdater.syncHub(commandScope.getArgumentValue(CHANGELOG_FILE_ARG), hubConnection == null ? null : hubConnection.getId());
-            hubUpdater.postUpdateHub(dropAllOperation, bufferLog);
+            final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
+            String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
+            if (apiKey != null && hubServiceFactory.isOnline()) {
+                hubUpdater.syncHub(commandScope.getArgumentValue(CHANGELOG_FILE_ARG), hubConnection);
+                hubUpdater.postUpdateHub(dropAllOperation, bufferLog);
+            }
         } catch (DatabaseException e) {
             throw e;
         } catch (Exception e) {
@@ -149,7 +153,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         hubConnection.setProject(project);
 
         if (hubConnection.getProject() == null) {
-            String message = "Operation will not be send to Liquibase Hub. Please specify --hubProjectId=<id> or --hubConnectionId=<id>";
+            String message = "Operation will not be sent to Liquibase Hub. Please specify --hubProjectId=<id> or --hubConnectionId=<id>";
             Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
             log.warning(message);
         }
