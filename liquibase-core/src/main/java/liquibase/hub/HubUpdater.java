@@ -510,12 +510,12 @@ public class HubUpdater {
                 }
 
                 // register the changelog if it exist
+                DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, registerResponse.getApiKey());
                 if (changeLog != null) {
                     message = "* Registering changelog file " + changeLogFile + " with Hub";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getLog(getClass()).info(message);
                     // Update the API key in HubConfiguration
-                    DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, registerResponse.getApiKey());
                     registerChangeLog(registerResponse.getProjectId(), changeLog, changeLogFile);
                 }
 
