@@ -80,7 +80,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                 // Let the user know they can register for Hub
                 changeLog = parseChangeLogFile(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
                 hubUpdater = new HubUpdater(new Date(), changeLog, commandScope.getArgumentValue(DATABASE_ARG));
-                hubUpdater.register(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
+                hubRegisterResponse = hubUpdater.register(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
 
                 // Access the HubChangeLog and check to see if we should run syncHub
                 HubChangeLog hubChangeLog = getHubChangeLog(changeLog);
@@ -140,7 +140,7 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         }
         UUID connectionId = commandScope.getArgumentValue(HUB_CONNECTION_ID_ARG);
         UUID projectId = commandScope.getArgumentValue(HUB_PROJECT_ID_ARG);
-        if (hubRegisterResponse !=null) {
+        if (hubRegisterResponse != null) {
             projectId = hubRegisterResponse.getProjectId();
         }
         Project project;
