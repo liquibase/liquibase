@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,12 +33,14 @@ public class LiquibaseChangeLogSyncToTagSQLMojo extends
 	 *            default-value=
 	 *            "${project.build.directory}/liquibase/migrate.sql"
 	 */
+	@PropertyElement
 	protected File migrationSqlOutputFile;
 
 	/**
 	 * Update to the changeSet with the given tag command.
 	 * @parameter property="liquibase.toTag"
 	 */
+	@PropertyElement
 	protected String toTag;
 
 	/** The writer for writing the migration SQL. */
