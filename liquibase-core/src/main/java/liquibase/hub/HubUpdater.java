@@ -397,13 +397,13 @@ public class HubUpdater {
     public HubRegisterResponse register(String changeLogFile) throws LiquibaseException {
         HubRegisterResponse registerResponse = null;
         if (!hubService.isOnline()) {
-            return registerResponse;
+            return null;
         }
 
         // Just return if cannot prompt
         //
         if (!Scope.getCurrentScope().getUI().getAllowPrompt()) {
-            return;
+            return null;
         }
 
         // Do not try to register if
@@ -411,7 +411,7 @@ public class HubUpdater {
         //   2.  We have a changelog and a changeLogId in it already
         if (!StringUtil.isEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) ||
                 (changeLog != null && changeLog.getChangeLogId() != null)) {
-            return registerResponse;
+            return null;
         }
 
         //
