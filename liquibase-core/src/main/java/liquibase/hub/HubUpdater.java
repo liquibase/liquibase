@@ -244,6 +244,7 @@ public class HubUpdater {
                 }
             } else {
                 sendCompleteOperationEvent(updateOperation, bufferLog);
+                showOperationReportLink(updateOperation, hubService);
 
             }
         } catch (LiquibaseException e) {
