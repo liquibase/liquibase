@@ -1475,7 +1475,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    private boolean isCurrentTimeFunction(final String functionValue) {
+    protected boolean isCurrentTimeFunction(final String functionValue) {
         if (functionValue == null) {
             return false;
         }
