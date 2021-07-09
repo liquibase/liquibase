@@ -1,0 +1,3 @@
+liquibase.ext.bigquery.sqlgenerator.BigqueryCreateDatabaseChangeLogLockTableGenerator
+liquibase.ext.bigquery.sqlgenerator.BigqueryCreateDatabaseChangeLogTableGenerator
+liquibase.ext.bigquery.sqlgenerator.BigqueryDeleteGenerator
