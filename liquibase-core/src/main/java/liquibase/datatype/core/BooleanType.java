@@ -102,6 +102,9 @@ public class BooleanType extends LiquibaseDataType {
     }
 
     protected boolean isNumericBoolean(Database database) {
+        if (database instanceof Firebird3Database) {
+            return false;
+        }
         if (database instanceof DerbyDatabase) {
             return !((DerbyDatabase) database).supportsBooleanDataType();
         } else if (database.getClass().isAssignableFrom(DB2Database.class)) {
