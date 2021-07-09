@@ -1,6 +1,8 @@
 package liquibase.dbdoc;
 
 import liquibase.GlobalConfiguration;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
 import java.io.*;
@@ -32,10 +34,28 @@ public class HTMLListWriter {
             fileWriter.append(title);
             fileWriter.append("</B></FONT>\n" + "<BR>\n" + "<TABLE BORDER=\"0\" WIDTH=\"100%\" SUMMARY=\"\">" + "<TR>\n" + "<TD NOWRAP><FONT CLASS=\"FrameItemFont\">");
 
+            String currentSchema = null;
+            if (objects.first().getClass() == Table.class) {
+                currentSchema = ((Table )objects.first()).getAttribute("schema", new Schema()).toString();
+                fileWriter.append("<section><article><details><summary>" + currentSchema + "</summary>");
+            }
+
 
             for (Object object : objects) {
-                fileWriter.append("<A HREF=\"");
-                fileWriter.append(directory);
+                if (object.getClass() == Table.class) {
+                    String tableSchema = ((Table) object).getAttribute("schema", new Schema()).toString();
+                    if (!tableSchema.equals(currentSchema)) {
+                        currentSchema = tableSchema;
+                        fileWriter.append("</details>");
+                        fileWriter.append("<details><summary>" + currentSchema + "</summary>");
+                    }
+                    fileWriter.append("<A HREF=\"");
+                    fileWriter.append(directory + System.getProperty("file.separator") + tableSchema);
+                }
+                else {
+                    fileWriter.append("<A HREF=\"");
+                    fileWriter.append(directory);
+                }
                 fileWriter.append("/");
                 fileWriter.append(DBDocUtil.toFileName(object.toString().endsWith(".xml") ? object.toString() : object.toString().toLowerCase()));
                 fileWriter.append(getTargetExtension());
@@ -44,7 +64,8 @@ public class HTMLListWriter {
                 fileWriter.append("</A><BR>\n");
             }
 
-            fileWriter.append("</FONT></TD>\n" +
+            fileWriter.append("</details></article></section>\n" + 
+                    "</FONT></TD>\n" +
                     "</TR>\n" +
                     "</TABLE>\n" +
                     "\n" +

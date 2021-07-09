@@ -289,6 +289,10 @@ Optional Diff Parameters:
                                             Output results in the the specified
                                             format ("JSON" or "TXT")
 
+Optional dbDoc parameters:
+ --schemas=<name1,name2>                    Database schemas to include
+                                            objects from in comparison
+
 Change Log Properties:
  -D<property.name>=<property.value>         Pass a name/value pair for
                                             substitution in the change log(s)

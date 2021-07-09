@@ -16,10 +16,12 @@ import java.util.List;
 
 public abstract class HTMLWriter {
     protected File outputDir;
+    protected File baseOutputDir;
     protected Database database;
 
     public HTMLWriter(File outputDir, Database database) {
         this.outputDir = outputDir;
+        this.baseOutputDir = outputDir;
         this.database = database;
         if (!outputDir.exists()) {
             outputDir.mkdirs();
