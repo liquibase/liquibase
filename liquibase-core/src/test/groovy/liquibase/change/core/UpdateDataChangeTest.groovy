@@ -1,10 +1,13 @@
 package liquibase.change.core
 
 import liquibase.change.ChangeStatus
+import liquibase.change.ColumnConfig
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
+import liquibase.statement.SequenceNextValueFunction
+import liquibase.statement.core.UpdateStatement
 
 public class UpdateDataChangeTest extends StandardChangeTest {
 
@@ -51,6 +54,24 @@ public class UpdateDataChangeTest extends StandardChangeTest {
         change.whereParams[0].valueNumeric == 134
         change.whereParams[1].name == "other_val"
         change.whereParams[1].value == "asdf"
+    }
+
+
+    def "generateStatements adds schema to nested sequences"() {
+        when:
+        def change = new UpdateDataChange(
+                schemaName: "my_schema",
+                tableName: "my_table",
+                columns: [
+                        new ColumnConfig(name: "id", type: "int", valueSequenceNext: new SequenceNextValueFunction("my_sequence")),
+                        new ColumnConfig(name: "name", type: "varchar(50)"),
+                ],
+        )
+        def statements = change.generateStatements(new MockDatabase())
+
+        then:
+        ((SequenceNextValueFunction) ((UpdateStatement) statements[0]).getNewColumnValues()["id"]).schemaName == "my_schema"
+
     }
 
 }

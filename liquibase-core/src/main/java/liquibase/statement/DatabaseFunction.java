@@ -8,9 +8,16 @@ public class DatabaseFunction {
      */
     public static final String CURRENT_DATE_TIME_PLACE_HOLDER = "current_datetime";
 
+    private String schemaName;
+
     private String value;
 
     public DatabaseFunction(String value) {
+        this.value = value;
+    }
+
+    public DatabaseFunction(String schemaName, String value) {
+        this.schemaName = schemaName;
         this.value = value;
     }
 
@@ -20,7 +27,15 @@ public class DatabaseFunction {
 
     @Override
     public String toString() {
-        return getValue();
+        return (getSchemaName() == null ? "" : getSchemaName() + ".") + getValue();
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     @Override
