@@ -764,30 +764,60 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             }
 
             protected String getDB2Sql(String jdbcSchemaName, String tableName) {
-                return "SELECT  " +
-                        "  pk_col.tabschema AS pktable_cat,  " +
-                        "  pk_col.tabname as pktable_name,  " +
-                        "  pk_col.colname as pkcolumn_name, " +
-                        "  fk_col.tabschema as fktable_cat,  " +
-                        "  fk_col.tabname as fktable_name,  " +
-                        "  fk_col.colname as fkcolumn_name, " +
-                        "  fk_col.colseq as key_seq,  " +
-                        "  decode (ref.updaterule, 'A', 3, 'R', 1, 1) as update_rule,  " +
-                        "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
-                        "  ref.constname as fk_name,  " +
-                        "  ref.refkeyname as pk_name,  " +
-                        "  7 as deferrability  " +
-                        "FROM " +
-                        "syscat.references ref " +
-                        "join syscat.keycoluse fk_col on ref.constname=fk_col.constname and ref.tabschema=fk_col.tabschema and ref.tabname=fk_col.tabname " +
-                        "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname " +
-                        "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
-                        "and pk_col.colseq=fk_col.colseq " +
-                        (tableName != null ? " AND fk_col.tabname='" + tableName + "' " : "") +
-                        "ORDER BY fk_col.colseq";
+                if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                    return getDB2ForAs400Sql(jdbcSchemaName, tableName);
+                }
+                else {
+                    return getDefaultDB2Sql(jdbcSchemaName, tableName);
+                }
             }
 
-            protected String getDB2ZOSSql(String jdbcSchemaName, String tableName) {
+          private String getDefaultDB2Sql(String jdbcSchemaName, String tableName) {
+              return "SELECT  " +
+                      "  pk_col.tabschema AS pktable_cat,  " +
+                      "  pk_col.tabname as pktable_name,  " +
+                      "  pk_col.colname as pkcolumn_name, " +
+                      "  fk_col.tabschema as fktable_cat,  " +
+                      "  fk_col.tabname as fktable_name,  " +
+                      "  fk_col.colname as fkcolumn_name, " +
+                      "  fk_col.colseq as key_seq,  " +
+                      "  decode (ref.updaterule, 'A', 3, 'R', 1, 1) as update_rule,  " +
+                      "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
+                      "  ref.constname as fk_name,  " +
+                      "  ref.refkeyname as pk_name,  " +
+                      "  7 as deferrability  " +
+                      "FROM " +
+                      "syscat.references ref " +
+                      "join syscat.keycoluse fk_col on ref.constname=fk_col.constname and ref.tabschema=fk_col.tabschema and ref.tabname=fk_col.tabname " +
+                      "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname " +
+                      "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
+                      "and pk_col.colseq=fk_col.colseq " +
+                      (tableName != null ? " AND fk_col.tabname='" + tableName + "' " : "") +
+                      "ORDER BY fk_col.colseq";
+          }
+
+          private String getDB2ForAs400Sql(String jdbcSchemaName, String tableName) {
+              return "SELECT " +
+                          "pktable_cat, " +
+                          "pktable_name, " +
+                          "pkcolumn_name, " +
+                          "fktable_cat, " +
+                          "fktable_name, " +
+                          "fkcolumn_name, " +
+                          "key_seq, " +
+                          "update_rule, " +
+                          "delete_rule, " +
+                          "fk_name, " +
+                          "pk_name, " +
+                          "deferrability " +
+                      "FROM " +
+                          "sysibm.SQLFORKEYS " +
+                      "WHERE " +
+                          "FKTABLE_SCHEM = '" + jdbcSchemaName + "' " +
+                          "AND FKTABLE_NAME = '" + tableName + "'";
+          }
+
+          protected String getDB2ZOSSql(String jdbcSchemaName, String tableName) {
                 return "SELECT  " +
                         "  ref.REFTBCREATOR AS pktable_cat,  " +
                         "  ref.REFTBNAME as pktable_name,  " +
