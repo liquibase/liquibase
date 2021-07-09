@@ -307,7 +307,11 @@ public class CustomChangeWrapper extends AbstractChange {
             if (value != null) {
                 value = value.toString();
             }
-            this.setParam(child.getChildValue(null, "name", String.class), (String) value);
+            String paramName = child.getChildValue(null, "name", String.class);
+            if (paramName == null) {
+                throw new ParsedNodeException("Custom change param " + child + " does not have a 'name' attribute");
+            }
+            this.setParam(paramName, (String) value);
         }
 
         CustomChange customChange = null;

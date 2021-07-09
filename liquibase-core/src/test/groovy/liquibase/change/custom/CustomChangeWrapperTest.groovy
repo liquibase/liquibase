@@ -257,6 +257,22 @@ class CustomChangeWrapperTest extends Specification {
 
     }
 
+    def "load of param without name fails well"() {
+        when:
+        def node = new ParsedNode(null, "customChange")
+                .addChild(null, "class", "liquibase.change.custom.ExampleCustomSqlChange")
+                .addChild(new ParsedNode(null, "param").addChildren([nameo: "param 1", value: "param 1 value"]))
+                .addChild(new ParsedNode(null, "param").addChildren([name: "param 2", value: "param 2 value"]))
+                .addChild(new ParsedNode(null, "otherNode").setValue("should be ignored"))
+                .addChild(new ParsedNode(null, "param").addChildren([name: "param 3"]).setValue("param 3 value"))
+        def change = new CustomChangeWrapper()
+        change.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        thrown(ParsedNodeException.class)
+
+    }
+
     def "load handles params in a 'params' collection"() {
         when:
         def node = new ParsedNode(null, "customChange")
