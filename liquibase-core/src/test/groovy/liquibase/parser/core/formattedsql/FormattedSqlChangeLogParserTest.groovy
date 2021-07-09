@@ -89,7 +89,6 @@ select 1
             "--precondition-invalid-type 123\n" +
             "select 1;"
 
-
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
@@ -225,6 +224,21 @@ select 1
 
         changeLog.getChangeSets().get(9).getContexts().toString() == "a or b"
 
+    }
+
+    def parse_startsWithSpace() throws Exception {
+        when:
+        String changeLogWithSpace = "   \n\n" +
+                "--liquibase formatted sql\n\n" +
+                "--changeset John Doe:12345\n" +
+                "create table test (id int);\n"
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithSpace).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 1
+        changeLog.getChangeSets().get(0).getAuthor() == "John Doe"
+        changeLog.getChangeSets().get(0).getId() == "12345"
     }
 
     def parse_authorWithSpace() throws Exception {
