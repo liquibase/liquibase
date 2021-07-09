@@ -251,10 +251,11 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null " +
                         "so they will be updated on next database update");
                     databaseChecksumsCompatible = false;
-                    statementsToExecute.add(new RawSqlStatement(
-                        "UPDATE " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName()
-                            , getDatabaseChangeLogTableName()) + " " +
-                            "SET " +  getDatabase().escapeObjectName("MD5SUM", Column.class) + " = NULL"));
+                    UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(),
+                            database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                            .addNewColumnValue("MD5SUM", null);
+
+                    statementsToExecute.add(updateStatement);
                 }
             }
 
