@@ -70,7 +70,14 @@ public class TimestampType extends DateTimeType {
                     && originalDefinition.toLowerCase(Locale.US).startsWith("timestamp")) {
                 return new DatabaseDataType(database.escapeDataTypeName("timestamp"));
             }
-            return new DatabaseDataType(database.escapeDataTypeName("datetime"));
+            Object[] parameters = getParameters();
+            // If the scale for datetime2 is the database default anyway, omit it.
+            if ( (parameters.length >= 1) &&
+                    (Integer.parseInt(parameters[0].toString())
+                            == (database.getDefaultScaleForNativeDataType("datetime2"))) ) {
+                parameters = new Object[0];
+            }
+            return new DatabaseDataType(database.escapeDataTypeName("datetime2"), parameters);
         }
         if (database instanceof SybaseDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("datetime"));

@@ -131,7 +131,7 @@ class DataTypeFactoryTest extends Specification {
         "[time](6)"                                    | new MSSQLDatabase()    | "time(6)"                                      | TimeType      | false
         "time(7)"                                      | new MSSQLDatabase()    | "time"                                         | TimeType      | false
         "[time](7)"                                    | new MSSQLDatabase()    | "time"                                         | TimeType      | false
-        "timestamp"                                    | new MSSQLDatabase()    | "datetime"                                     | TimestampType | false
+        "timestamp"                                    | new MSSQLDatabase()    | "datetime2"                                    | TimestampType | false
         "tinyint"                                      | new MSSQLDatabase()    | "tinyint"                                      | TinyIntType   | false
         "[tinyint]"                                    | new MSSQLDatabase()    | "tinyint"                                      | TinyIntType   | false
         "uniqueidentifier"                             | new MSSQLDatabase()    | "uniqueidentifier"                             | UUIDType      | false
