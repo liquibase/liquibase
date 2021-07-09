@@ -782,7 +782,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
                 file     : "liquibase/change/core/sample.data1.csv",
                 tableName: ""
         ]).setValue([
-                [column: [name: "a", header:"", index:1, type: "STRING"]],
+                [column: [name: "a", header:"", index:1, type: "STRING", defaultValue: ""]],
                 [column: [name: "", type: ""]],
                 [column: []]
         ]), new ClassLoaderResourceAccessor())
