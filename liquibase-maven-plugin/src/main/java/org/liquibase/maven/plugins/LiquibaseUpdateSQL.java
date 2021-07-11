@@ -5,8 +5,8 @@ import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +30,7 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 	 *            default-value=
 	 *            "${project.build.directory}/liquibase/migrate.sql"
 	 */
+	@PropertyElement
 	protected File migrationSqlOutputFile;
 
 	/** The writer for writing the migration SQL. */
