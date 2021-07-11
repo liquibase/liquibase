@@ -65,6 +65,8 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     try {
                         addDescription(url);
                         this.rootPaths.add(FileSystems.newFileSystem(Paths.get(url.toURI()), this.getClass().getClassLoader()));
+                    } catch (FileSystemAlreadyExistsException e) {
+                        //has been defined already, that is OK
                     } catch (ProviderNotFoundException e) {
                         if (url.toExternalForm().startsWith("file:/")) {
                             //that is expected, the classloader itself will handle it
