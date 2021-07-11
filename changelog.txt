@@ -1,6 +1,22 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.4.1 (2021.07.09)
+ - GH PR#1869 ⁃ HubUpdater releases lock even though registration is skipped
+ - GH PR#1861 ⁃ Only snapshot tables/columns in loadData
+ - GH PR#1843 ⁃ [LB-704] fixed generating sequences for Postgres versions prior to 10
+ - GH Issue#1829 ⁃ Fixes MySQL Snapshot/Generated ChangeLog output for table key constraints when multiple tables
+ - Postgres: Rollback of rename target fails due to malformed SQL.
+ - Liquibase Hub registerChangeLog messaging fixes
+ - Liquibase Hub, Maven, and liquibase.properties file fixes
+ - Using --liquibaseProLicenseKey is on the left side of the command
+ - Update Liquibase installer adoptopenjdk from 11.0.10 to 11.0.11  
+ - [PRO] SQL Plus handles backslashes in changeset  attributes' values
+ - [PRO] SQL Plus passing arguments during runtime fixes
+ - [PRO] SQL Plus handles Oracle proxy user setups
+ - [PRO] SQL Plus improve temp file handling
+ - [PRO] Fixes snapshot on MySQL Stored Logic Objects with Integer Types
+
 Changes in version 4.4.0 (2021.06.08)
 - Refactor Configuration API
 -- [PRO] including native use of Environment variables
