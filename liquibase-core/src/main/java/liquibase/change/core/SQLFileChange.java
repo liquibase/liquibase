@@ -155,7 +155,7 @@ public class SQLFileChange extends AbstractSQLChange {
                 if (sqlStream == null) {
                     return null;
                 }
-                String content = StreamUtil.readStreamAsString(sqlStream);
+                String content = StreamUtil.readStreamAsString(sqlStream, getEncoding());
                 if (getChangeSet() != null) {
                     ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
                     if (parameters != null) {
