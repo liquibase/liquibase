@@ -219,7 +219,8 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
             boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
             if (!hasProLicense) {
                 throw new LiquibaseException("The command 'diff --format=" + format +
-                        "' requires a Liquibase Pro License, available at https://www.liquibase.org/download or sales@liquibase.com");
+                        "' requires a Liquibase Pro License, available at https://www.liquibase.org/download or sales@liquibase.com" +
+                        "Add liquibase.pro.licenseKey=<yourKey> into your defaults file or use --pro-license-key=<yourKey> before your command in the CLI.");
             }
         }
         ClassLoader cl = null;
