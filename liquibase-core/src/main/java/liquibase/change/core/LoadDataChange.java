@@ -316,10 +316,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                     );
                 }
 
-                boolean needsPreparedStatement = true;
-                if (usePreparedStatements != null && !usePreparedStatements) {
-                    needsPreparedStatement = false;
-                }
+                boolean needsPreparedStatement = false;
 
                 List<LoadDataColumnConfig> columnsFromCsv = new ArrayList<>();
                 for (int i = 0; i < headers.length; i++) {
@@ -466,10 +463,20 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 //     of whether the 'usePreparedStatement' is set to false
                 // 2. The database supports batched statements (for improved performance) AND we are not in an
                 //    "SQL" mode (i.e. we generate an SQL file instead of actually modifying the database).
-                if (
-                        (needsPreparedStatement || (databaseSupportsBatchUpdates && !isLoggingExecutor(database)))
-                                && hasPreparedStatementsImplemented()
-                ) {
+                // BUT: if the user specifically requests usePreparedStatement=false, then respect that
+                boolean actuallyUsePreparedStatements = false;
+                if (hasPreparedStatementsImplemented()) {
+                    if (usePreparedStatements != null) {
+                        if (!usePreparedStatements && needsPreparedStatement) {
+                            throw new UnexpectedLiquibaseException("loadData is requesting usePreparedStatements=false but prepared statements are required");
+                        }
+                        actuallyUsePreparedStatements = usePreparedStatements;
+                    } else {
+                        actuallyUsePreparedStatements = needsPreparedStatement || (databaseSupportsBatchUpdates && !isLoggingExecutor(database));
+                    }
+                }
+
+                if (actuallyUsePreparedStatements) {
                     anyPreparedStatements = true;
                     ExecutablePreparedStatementBase stmt =
                         this.createPreparedStatement(
