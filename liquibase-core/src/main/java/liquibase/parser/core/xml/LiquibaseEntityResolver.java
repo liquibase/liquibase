@@ -34,9 +34,11 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 .replace("http://www.liquibase.org/xml/ns/migrator/", "http://www.liquibase.org/xml/ns/dbchangelog/")
                 .replaceFirst("https?://", "");
 
+        InputStreamList streams = Scope.getCurrentScope().getResourceAccessor().openStreams(null, path);
+        if (streams.isEmpty()) {
+            streams.addAll(fallbackResourceAccessor.openStreams(null, path));
+        }
 
-        ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), fallbackResourceAccessor);
-        InputStreamList streams = resourceAccessor.openStreams(null, path);
         if (streams.isEmpty()) {
             log.fine("Unable to resolve XML entity locally. Will load from network.");
             return null;
