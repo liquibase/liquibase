@@ -43,4 +43,4 @@ jobs:
           body: Release ${{ env.RELEASE_BRANCH }}-latest
           draft: false
           prerelease: false
-          files: liquibase-bigquery-${{ env.RELEASE_BRANCH }}-latest.jar
+          files: target/liquibase-bigquery-${{ env.RELEASE_BRANCH }}-latest.jar
