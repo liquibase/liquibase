@@ -1,5 +1,8 @@
 package liquibase.structure.core;
 
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtil;
@@ -260,5 +263,23 @@ public class Index extends AbstractDatabaseObject {
             }
         }
         return result.toString();
+    }
+
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        final ParsedNode columns = parsedNode.getChild(null, "columns");
+        if (columns.getValue() == null) {
+            final List<ParsedNode> children = columns.getChildren();
+            if (children.size() != 0) {
+                List<Column> columnList = new ArrayList<>();
+                for (ParsedNode columnNode : children) {
+                    Column columnObj = new Column();
+                    columnObj.load(columnNode, resourceAccessor);
+                    columnList.add(columnObj);
+                }
+                columns.setValue(columnList);
+            }
+        }
+        super.load(parsedNode, resourceAccessor);
     }
 }
