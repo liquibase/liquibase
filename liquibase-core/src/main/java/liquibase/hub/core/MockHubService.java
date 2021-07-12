@@ -90,6 +90,11 @@ public class MockHubService implements HubService {
     }
 
     @Override
+    public Project findProjectByConnectionIdOrJdbcUrl(UUID connectionId, String jdbcUrl) throws LiquibaseHubException {
+        return returnProjects.get(0);
+    }
+
+    @Override
     public HubRegisterResponse register(String email) throws LiquibaseHubException {
         return null;
     }
@@ -213,7 +218,7 @@ public class MockHubService implements HubService {
         this.returnChangeLogs.add(notFoundChangeLog);
         this.sentObjects = new TreeMap<>();
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
-        hubServiceFactory.setOfflineReason("Using MockHubService which is configured to be offline");
+        hubServiceFactory.setOfflineReason("HubService is configured to be offline");
         online = true;
     }
 }
