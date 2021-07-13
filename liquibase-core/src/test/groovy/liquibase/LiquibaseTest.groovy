@@ -199,7 +199,20 @@ class LiquibaseTest extends Specification {
 //        verify(database).setCurrentDateTimeFunction(testFunction);
 //    }
 
-    def "update communicates with hub"() {
+    def "update() communicates with hub"() {
+        given:
+        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
+
+        when:
+        liquibase.update()
+
+        then:
+        mockHubService.sentObjects.toString() ==
+                "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author], startOperation/$MockHubService.randomUUID:[$MockHubService.operationCreateDate]]"
+
+    }
+
+    def "update(\"\") communicates with hub"() {
         given:
         Map<String, Object> scopedObjects = new HashMap<>()
         TestConsoleUIService uiService = new TestConsoleUIService()

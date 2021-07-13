@@ -5,7 +5,14 @@ import liquibase.util.StringUtil;
 import java.util.*;
 
 /**
- * List of contexts Liquibase is running under.
+ * Wrapper for list of contexts.
+ *
+ * <p>
+ * Contexts in Liquibase are expressions you can add to changesets to control which will be executed in any particular
+ * migration run. Any string can be used for the context name and they are checked case-insensitively.
+ * </p>
+ *
+ * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
  */
 public class Contexts {
 

@@ -5,6 +5,17 @@ import liquibase.util.StringUtil;
 
 import java.util.*;
 
+/**
+ * Wrapper for list of labels.
+ *
+ * <p>
+ * Labels are tags that you can add to changesets to control which changeset will be executed in any migration run.
+ * Labels control whether a changeset is executed depending on runtime settings. Any string can be used for the label
+ * name, and it is case-insensitive.
+ * </p>
+ *
+ * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
+ */
 public class LabelExpression {
 
     private HashSet<String> labels = new LinkedHashSet<>();
