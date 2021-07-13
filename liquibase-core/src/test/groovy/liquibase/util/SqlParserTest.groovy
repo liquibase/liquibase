@@ -52,6 +52,7 @@ class SqlParserTest extends Specification {
     @Unroll
     def "parse with unicode"() {
         expect:
+        def p_out = SqlParser.parse(input)
         SqlParser.parse(input).toArray(true) == output
 
         where:
@@ -61,6 +62,24 @@ class SqlParserTest extends Specification {
         "x \u2013 abc"                                      | ["x", "\u2013", "abc"] //ndash synmbol
         "x 'quote with unicode punctuation \u2013 in it' y" | ["x", "'quote with unicode punctuation \u2013 in it'", "y"]
     }
+
+    @Unroll
+    def "parse with unicode currencies"() {
+        when:
+            SqlParser.parse(input)
+        then:
+            notThrown liquibase.util.grammar.TokenMgrError
+
+        where:
+        input | output
+        ", (('['||(REPLACE(REPLACE(REPLACE(REPLACE((X.adj_descr_list)::text, '\\\\',''),'\"[','['),']\"',']'),'£££',','))||']')::json)->0 --> need to cast/fix this JSON" | null
+        ", (('['||(REPLACE(REPLACE(REPLACE(REPLACE((X.adj_descr_list)::text, '\\\\',''),'\"[','['),']\"',']'),'£',','))||']')::json)->0 --> need to cast/fix this JSON" | null
+        ", (('['||(REPLACE(REPLACE(REPLACE(REPLACE((X.adj_descr_list)::text, '\\\\',''),'\"[','['),']\"',']'),'¥',','))||']')::json)->0 --> need to cast/fix this JSON" | null
+        ", (('['||(REPLACE(REPLACE(REPLACE(REPLACE((X.adj_descr_list)::text, '\\\\',''),'\"[','['),']\"',']'),'¥¥¥',','))||']')::json)->0 --> need to cast/fix this JSON" | null
+        ", (('['||(REPLACE(REPLACE(REPLACE(REPLACE((X.adj_descr_list)::text, '\\\\',''),'\"[','['),']\"',']'),'₿',','))||']')::json)->0 --> need to cast/fix this JSON" | null
+        ", (('['||(REPLACE(REPLACE(REPLACE(REPLACE((X.adj_descr_list)::text, '\\\\',''),'\"[','['),']\"',']'),'₿₿₿',','))||']')::json)->0 --> need to cast/fix this JSON" | null
+    }
+
 
     @Unroll("#featureName `#input`")
     def "parse with whitespace preserved"() {
