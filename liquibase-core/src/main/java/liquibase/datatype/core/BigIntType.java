@@ -55,6 +55,9 @@ public class BigIntType extends LiquibaseDataType {
             HsqlDatabase) || (database instanceof FirebirdDatabase)) {
             return new DatabaseDataType("BIGINT");
         }
+        if (database instanceof CockroachDatabase && isAutoIncrement()) {
+            return new DatabaseDataType("BIGSERIAL");
+        }
         if (database instanceof PostgresDatabase) {
             if (isAutoIncrement()) {
                 int majorVersion = 9;
