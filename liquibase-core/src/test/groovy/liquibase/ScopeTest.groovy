@@ -1,5 +1,6 @@
 package liquibase
 
+import liquibase.exception.UnexpectedLiquibaseException
 import spock.lang.Specification
 
 class ScopeTest extends Specification {
@@ -8,6 +9,7 @@ class ScopeTest extends Specification {
         expect:
         Scope.getCurrentScope().describe() == "scope(database=null)"
     }
+
 
     def "Nesting Scopes works"() {
         expect:
@@ -87,4 +89,12 @@ class ScopeTest extends Specification {
         e.message.startsWith("Cannot end scope ")
     }
 
+    def "Constructor passed a null value gives useful error message"() {
+        when:
+            new Scope(null, Collections.emptyMap());
+
+        then:
+        def e = thrown(UnexpectedLiquibaseException)
+        e.message == "Cannot pass a null parent to a new Scope. Use Scope.child to correctly create a nested scope"
+    }
 }
