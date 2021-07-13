@@ -1,5 +1,12 @@
 package liquibase.parser.core.formattedsql;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.core.EmptyChange;
@@ -9,19 +16,13 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
+import liquibase.precondition.core.ChangeLogPropertyDefinedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
@@ -270,7 +271,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                     String body = preconditionMatcher.group(2).trim();
                                     if ("sql-check".equals(name)) {
                                         changeSet.getPreconditions().addNestedPrecondition(parseSqlCheckCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog())));
-                                    } else {
+                                    }else if ("defined-property".equals(name)) {
+                                        changeSet.getPreconditions().addNestedPrecondition(parseDefinedPropertyCheck(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog())));
+                                    }else {
                                         throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
                                     }
                                 }
@@ -332,7 +335,33 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         }
         throw new ChangeLogParseException("Could not parse a SqlCheck precondition from '" + body + "'.");
     }
-
+    
+    private ChangeLogPropertyDefinedPrecondition parseDefinedPropertyCheck(String body) throws ChangeLogParseException {
+		Pattern[] propertyPatterns = new Pattern[] {
+				Pattern.compile("^(?:property:)?(\\w+) (.*)", Pattern.CASE_INSENSITIVE),
+				Pattern.compile("^(?:property:)?'([^']+)' (.*)", Pattern.CASE_INSENSITIVE),
+				Pattern.compile("^(?:property:)?\"([^\"]+)\" (.*)", Pattern.CASE_INSENSITIVE) };
+		for (Pattern pattern : propertyPatterns) {
+			Matcher matcher = pattern.matcher(body);
+			if (matcher.matches() && (matcher.groupCount() == 2)) {
+				ChangeLogPropertyDefinedPrecondition p = new ChangeLogPropertyDefinedPrecondition();
+				p.setProperty(matcher.group(1));
+				String value = matcher.group(2);
+				Pattern[] valuePatterns = new Pattern[] {
+						Pattern.compile("^(?:value:)?(\\w+)(.*)", Pattern.CASE_INSENSITIVE),
+						Pattern.compile("^(?:value:)?'([^']+)'(.*)", Pattern.CASE_INSENSITIVE),
+						Pattern.compile("^(?:value:)?\"([^\"]+)\"(.*)", Pattern.CASE_INSENSITIVE) };
+				for (Pattern valuePattern : valuePatterns) {
+					matcher = valuePattern.matcher(value);
+					if (matcher.matches() && (matcher.groupCount() > 0)) {
+						p.setValue(matcher.group(1));
+					}
+				}
+				return p;
+			}
+		}
+		throw new ChangeLogParseException("Could not parse a ChangeLogProperty precondition from '" + body + "'.");
+	}
 
 
     private String parseString(Matcher matcher) {
