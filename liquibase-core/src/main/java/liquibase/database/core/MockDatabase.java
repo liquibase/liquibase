@@ -796,6 +796,11 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
+    public boolean failOnDefferable() {
+        return true;
+    }
+
+    @Override
     public boolean supportsNotNullConstraintNames() {
         return false;
     }
