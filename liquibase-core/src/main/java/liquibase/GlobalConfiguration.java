@@ -29,6 +29,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
     public static final ConfigurationDefinition<Boolean> FILTER_LOG_MESSAGES;
     public static final ConfigurationDefinition<Boolean> HEADLESS;
+    public static final ConfigurationDefinition<Boolean> DIFF_COLUMN_DEFAULT_VALUE_CONSTRAINT_NAME;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -136,6 +137,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDescription("Force liquibase think it has no access to a keyboard?")
                 .setDefaultValue(false)
                 .setCommonlyUsed(true)
+                .build();
+
+        DIFF_COLUMN_DEFAULT_VALUE_CONSTRAINT_NAME = builder.define("diffColumnDefaultValueConstraintName", Boolean.class)
+                .setDescription("Should Liquibase compare column default value constraint name in diff operation?")
+                .setDefaultValue(true)
                 .build();
     }
 }
