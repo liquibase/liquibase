@@ -25,7 +25,7 @@ import java.util.List;
  * Creates a new table.
  */
 @DatabaseChange(name="createTable", description = "Create Table", priority = ChangeMetaData.PRIORITY_DEFAULT)
-public class CreateTableChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
+public class CreateTableChange extends AbstractChange implements ChangeWithColumns<ColumnConfig>, ChangeWithTablespace {
 
     private List<ColumnConfig> columns;
     private String catalogName;

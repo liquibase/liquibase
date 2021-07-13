@@ -12,7 +12,7 @@ import liquibase.structure.core.UniqueConstraint;
  * Adds a unique constraint to an existing column.
  */
 @DatabaseChange(name="addUniqueConstraint", description = "Adds a unique constrant to an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
-public class AddUniqueConstraintChange extends AbstractChange {
+public class AddUniqueConstraintChange extends AbstractChange implements ChangeWithTablespace {
 
     private String catalogName;
     private String schemaName;

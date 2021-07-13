@@ -17,7 +17,7 @@ import java.util.List;
  * Creates an index on an existing column.
  */
 @DatabaseChange(name="createIndex", description = "Creates an index on an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
-public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
+public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig>, ChangeWithTablespace {
 
     private String catalogName;
     private String schemaName;
