@@ -54,8 +54,12 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         String nullableString = statement.isNullable()?" NULL":" NOT NULL";
 
         if ((database instanceof OracleDatabase) && (statement.getConstraintName() != null)) {
-            nullableString += !statement.isValidate() ? " ENABLE NOVALIDATE " : "";
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " CONSTRAINT " + statement.getConstraintName() + nullableString;
+            if (!statement.isNullable()) {
+                nullableString += !statement.isValidate() ? " ENABLE NOVALIDATE " : "";
+                sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " CONSTRAINT " + statement.getConstraintName() + nullableString;
+            } else {
+                sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + statement.getConstraintName();
+            }
         } else if ((database instanceof OracleDatabase) || (database instanceof SybaseDatabase) || (database
             instanceof SybaseASADatabase)) {
             nullableString += (database instanceof OracleDatabase)&&(!statement.isValidate()) ? " ENABLE NOVALIDATE " : "";
