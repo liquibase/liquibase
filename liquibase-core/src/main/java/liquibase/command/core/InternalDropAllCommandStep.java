@@ -14,10 +14,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.hub.*;
-import liquibase.hub.model.Connection;
-import liquibase.hub.model.HubChangeLog;
-import liquibase.hub.model.Operation;
-import liquibase.hub.model.Project;
+import liquibase.hub.model.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
@@ -42,7 +39,6 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<CatalogAndSchema[]> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<UUID> HUB_CONNECTION_ID_ARG;
     public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
-    final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -78,23 +74,24 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
             lockService.waitForLock();
 
             DatabaseChangeLog changeLog;
+            HubRegisterResponse hubRegisterResponse = null;
             if (StringUtil.isNotEmpty(commandScope.getArgumentValue(CHANGELOG_FILE_ARG))) {
                 // Let the user know they can register for Hub
                 changeLog = parseChangeLogFile(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
                 hubUpdater = new HubUpdater(new Date(), changeLog, commandScope.getArgumentValue(DATABASE_ARG));
-                hubUpdater.register(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
+                hubRegisterResponse = hubUpdater.register(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
 
                 // Access the HubChangeLog and check to see if we should run syncHub
                 HubChangeLog hubChangeLog = getHubChangeLog(changeLog);
                 checkForRegisteredChangeLog(changeLog, hubChangeLog);
             } else {
                 hubUpdater = new HubUpdater(new Date(), commandScope.getArgumentValue(DATABASE_ARG));
-                hubUpdater.register(null/*changelogFile*/);
+                hubRegisterResponse = hubUpdater.register(null/*changelogFile*/);
             }
             Connection hubConnection = getHubConnection(commandScope);
-            attachProjectToConnection(commandScope, hubConnection);
+            attachProjectToConnection(commandScope, hubConnection, hubRegisterResponse);
 
-            dropAllOperation = hubUpdater.preUpdateHub("DROPALL", "dropAll", hubConnection);
+            dropAllOperation = hubUpdater.preUpdateHub("DROPALL", "drop-all", hubConnection);
 
             try {
                 for (CatalogAndSchema schema : commandScope.getArgumentValue(SCHEMAS_ARG)) {
@@ -106,8 +103,12 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
                 hubUpdater.postUpdateHubExceptionHandling(dropAllOperation, bufferLog, liquibaseException.getMessage());
                 return;
             }
-            hubUpdater.syncHub(commandScope.getArgumentValue(CHANGELOG_FILE_ARG), hubConnection == null ? null : hubConnection.getId());
-            hubUpdater.postUpdateHub(dropAllOperation, bufferLog);
+            final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
+            String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
+            if (apiKey != null && hubServiceFactory.isOnline()) {
+                hubUpdater.syncHub(commandScope.getArgumentValue(CHANGELOG_FILE_ARG), hubConnection);
+                hubUpdater.postUpdateHub(dropAllOperation, bufferLog);
+            }
         } catch (DatabaseException e) {
             throw e;
         } catch (Exception e) {
@@ -125,17 +126,23 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
     /**
      * Method to attach project to connection
      *
-     * @param commandScope  - The primary facade used for executing commands where we can take cmd arguments
-     * @param hubConnection - It's hubConnection
+     * @param commandScope        - The primary facade used for executing commands where we can take cmd arguments
+     * @param hubConnection       - It's hubConnection
+     * @param hubRegisterResponse - it's response from auto registration API. It it's null we assume
+     *                            that user has been registered already of we don't have connection to HUB
      * @throws LiquibaseHubException - If project can't be found and attached to connection
      */
-    private void attachProjectToConnection(CommandScope commandScope, Connection hubConnection) throws LiquibaseHubException {
+    private void attachProjectToConnection(CommandScope commandScope, Connection hubConnection, HubRegisterResponse hubRegisterResponse) throws LiquibaseHubException {
         String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
         if (apiKey == null) {
             return;
         }
         UUID connectionId = commandScope.getArgumentValue(HUB_CONNECTION_ID_ARG);
         UUID projectId = commandScope.getArgumentValue(HUB_PROJECT_ID_ARG);
+        if (hubRegisterResponse != null) {
+            projectId = hubRegisterResponse.getProjectId();
+        }
+        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         Project project;
         if (projectId != null) {
             project = hubService.getProject(projectId);
@@ -146,7 +153,9 @@ public class InternalDropAllCommandStep extends AbstractCommandStep {
         hubConnection.setProject(project);
 
         if (hubConnection.getProject() == null) {
-            throw new LiquibaseHubException("Please specify --hubProjectId=<id> or --hubConnectionId=<id>");
+            String message = "Operation will not be sent to Liquibase Hub. Please specify --hubProjectId=<id> or --hubConnectionId=<id>";
+            Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
+            log.warning(message);
         }
 
     }
