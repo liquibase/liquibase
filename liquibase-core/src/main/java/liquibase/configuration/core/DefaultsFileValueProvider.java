@@ -10,9 +10,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
@@ -24,15 +22,25 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
     private final Properties properties;
     private final String sourceDescription;
 
-    public DefaultsFileValueProvider(File path) {
+    protected DefaultsFileValueProvider(Properties properties) {
+        this.properties = properties;
+        sourceDescription = "Passed default properties";
+    }
+
+    public DefaultsFileValueProvider(InputStream stream, String sourceDescription) throws IOException {
+        this.sourceDescription = sourceDescription;
+        this.properties = new Properties();
+        this.properties.load(stream);
+        trimAllProperties();
+    }
+
+    public DefaultsFileValueProvider(File path) throws IOException {
         this.sourceDescription = "File " + path.getAbsolutePath();
 
         try (InputStream stream = new FileInputStream(path)) {
             this.properties = new Properties();
             this.properties.load(stream);
             trimAllProperties();
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
         }
     }
 
@@ -109,11 +117,6 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
             }
             properties.put(key, StringUtil.trimToEmpty((String) value));
         });
-    }
-
-    protected DefaultsFileValueProvider(Properties properties) {
-        this.properties = properties;
-        sourceDescription = "Passed default properties";
     }
 
     @Override
