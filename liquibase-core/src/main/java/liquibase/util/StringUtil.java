@@ -50,15 +50,17 @@ public class StringUtil {
             return returnString;
         }
     }
-    
+
     /**
+     *
      * Removes any comments from multiple line SQL using {@link #stripComments(String)}
      *  and then extracts each individual statement using {@link #splitSQL(String, String)}.
-     * 
+     *
      * @param multiLineSQL A String containing all the SQL statements
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
+     *
      */
-    public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
+    public static String[] processMultiLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
 
         StringClauses parsed = SqlParser.parse(multiLineSQL, true, !stripComments);
 
@@ -93,6 +95,20 @@ public class StringUtil {
         }
 
         return returnArray.toArray(new String[returnArray.size()]);
+    }
+
+    /**
+     *
+     * Removes any comments from multiple line SQL using {@link #stripComments(String)}
+     *  and then extracts each individual statement using {@link #splitSQL(String, String)}.
+     *
+     * @param       multiLineSQL   A String containing all the SQL statements
+     * @param       stripComments  If true then comments will be stripped, if false then they will be left in the code
+     * @deprecated  The new method is {@link #processMultiLineSQL(String, boolean, boolean, String)} (String)}
+     *
+     */
+    public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
+        return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter);
     }
 
     /**
@@ -160,7 +176,7 @@ public class StringUtil {
      * Splits a candidate multi-line SQL statement along ;'s and "go"'s.
      */
     public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
-        return processMutliLineSQL(multiLineSQL, false, true, endDelimiter);
+        return processMultiLineSQL(multiLineSQL, false, true, endDelimiter);
     }
 
     /**
