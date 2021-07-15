@@ -1,5 +1,8 @@
 package liquibase.exception;
 
+/**
+ * @deprecated
+ */
 public class CommandLineParsingException extends Exception {
 
     private static final long serialVersionUID = 1L;

@@ -23,7 +23,7 @@ public class HTMLListWriter {
     }
 
     public void writeHTML(SortedSet objects) throws IOException {
-        Writer fileWriter = new OutputStreamWriter(new FileOutputStream(new File(outputDir, filename)), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+        Writer fileWriter = new OutputStreamWriter(new FileOutputStream(new File(outputDir, filename)), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
 
         try {
             fileWriter.append("<HTML>\n" + "<HEAD><meta charset=\"utf-8\"/>\n" + "<TITLE>\n");
