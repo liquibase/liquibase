@@ -37,6 +37,9 @@ public class CSVIterator implements Iterator<String[]> {
     * @return The next element of the iterator.
     */
    public String[] next() {
+      if(!hasNext()){
+         throw new NoSuchElementException();
+      }
       String[] temp = nextLine;
       try {
          nextLine = reader.readNext();

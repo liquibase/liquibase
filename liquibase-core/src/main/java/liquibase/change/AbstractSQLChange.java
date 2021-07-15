@@ -24,6 +24,7 @@ import java.util.List;
  * Implements the necessary logic to choose how the SQL string should be parsed to generate the statements.
  *
  */
+@SuppressWarnings("java:S5998")
 public abstract class AbstractSQLChange extends AbstractChange implements DbmsTargetedChange {
 
     private boolean stripComments;

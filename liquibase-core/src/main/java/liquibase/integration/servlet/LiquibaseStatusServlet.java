@@ -1,6 +1,5 @@
 package liquibase.integration.servlet;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,10 +15,11 @@ import java.util.logging.LogRecord;
 /**
  * Servlet that can be registered via web.xml to view the log of the Liquibase run from the LiquibaseServletListener.
  */
+@SuppressWarnings("java:S1989")
 public class LiquibaseStatusServlet extends HttpServlet {
-    
+
     private static final long serialVersionUID = 1092565349351848089L;
-    private static List<LogRecord> liquibaseRunLog = new ArrayList<>();
+    private static final List<LogRecord> liquibaseRunLog = new ArrayList<>();
 
     public static synchronized void logMessage(LogRecord message) {
         liquibaseRunLog.add(message);
@@ -27,13 +27,18 @@ public class LiquibaseStatusServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
         httpServletResponse.setContentType("text/html");
 
         String logLevelToDisplay = httpServletRequest.getParameter("logLevel");
         Level currentLevel = Level.INFO;
         if (logLevelToDisplay != null) {
-            currentLevel = Level.parse(logLevelToDisplay);
+            try {
+                currentLevel = Level.parse(logLevelToDisplay);
+            } catch (IllegalArgumentException illegalArgumentException) {
+                throw new IOException(illegalArgumentException);
+            }
+
         }
 
         PrintWriter writer = httpServletResponse.getWriter();
@@ -54,7 +59,7 @@ public class LiquibaseStatusServlet extends HttpServlet {
 
             writer.println("<hr>");
             writer.println("<b>Liquibase started at " + DateFormat.getDateTimeInstance().format(new Date
-                (liquibaseRunLog.get(0).getMillis())));
+                    (liquibaseRunLog.get(0).getMillis())));
             writer.println("<hr>");
             writer.println("<pre>");
             for (LogRecord record : liquibaseRunLog) {
@@ -71,7 +76,7 @@ public class LiquibaseStatusServlet extends HttpServlet {
             writer.println("</pre>");
             writer.println("<hr>");
             writer.println("<b>Liquibase finished at " + DateFormat.getDateTimeInstance().format(new Date
-                (liquibaseRunLog.get(liquibaseRunLog.size() - 1).getMillis())));
+                    (liquibaseRunLog.get(liquibaseRunLog.size() - 1).getMillis())));
         }
         writer.println("</body>");
         writer.println("</html>");

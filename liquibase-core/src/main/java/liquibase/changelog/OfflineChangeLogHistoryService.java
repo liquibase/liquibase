@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 
 @LiquibaseService(skip = true)
+@SuppressWarnings("java:S899")
 public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
     private final File changeLogFile;

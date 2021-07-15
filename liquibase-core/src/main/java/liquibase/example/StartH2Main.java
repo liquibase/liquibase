@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 /**
  * Wrapper around the h2 console for use in the "examples" directory
  */
+@SuppressWarnings("java:S2189")
 public class StartH2Main {
 
     private static final String dbPort = "9090";
@@ -48,11 +49,15 @@ public class StartH2Main {
             long seconds = 60;
             long millis = 1000;
             while (true) {
-                Thread.sleep(seconds * millis);
+                try {
+                    Thread.sleep(seconds * millis);
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                    Thread.currentThread().interrupt();
+                }
             }
 
         } catch (Throwable e) {
-            System.err.println("Error starting H2");
             e.printStackTrace();
             System.exit(-1);
         }

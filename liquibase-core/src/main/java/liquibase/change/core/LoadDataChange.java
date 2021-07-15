@@ -70,6 +70,7 @@ import static liquibase.change.ChangeParameterMetaData.ALL;
                 "If UUID type is used UUID value is stored as string and NULL in cell is supported.",
         priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table",
         since = "1.7")
+@SuppressWarnings("java:S2583")
 public class LoadDataChange extends AbstractTableChange implements ChangeWithColumns<LoadDataColumnConfig> {
     /**
      * CSV Lines starting with that sign(s) will be treated as comments by default
