@@ -18,9 +18,6 @@ import liquibase.statement.core.CreateTableStatement;
 public class BigqueryCreateDatabaseChangeLogTableGenerator extends CreateDatabaseChangeLogTableGenerator {
 
     protected String getCharTypeName(Database database) {
-        if ((database instanceof MSSQLDatabase) && ((MSSQLDatabase) database).sendsStringParametersAsUnicode()) {
-            return "nvarchar";
-        }
         return "string";
     }
 
