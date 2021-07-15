@@ -470,7 +470,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (value instanceof String) {
                 String finalValue = StringUtil.trimToNull((String) value);
                 if (finalValue != null) {
-                    String[] strings = StringUtil.processMutliLineSQL(finalValue, true, true, ";");
+                    String[] strings = StringUtil.processMultiLineSQL(finalValue, true, true, ";");
                     for (String string : strings) {
                         addRollbackChange(new RawSQLChange(string));
                         foundValue = true;

@@ -74,7 +74,7 @@ public class HubUpdater {
      */
     public Operation preUpdateHub(String operationType, String operationCommand, Connection connection)
             throws LiquibaseException, SQLException {
-        if (connection == null) {
+        if (connection == null || connection.getProject() == null) {
             return null;
         }
         return this.preUpdateHub(operationType, operationCommand, connection, null, null, null, null);
@@ -113,13 +113,13 @@ public class HubUpdater {
         HubChangeLog hubChangeLog = getHubChangeLog();
 
         // Perform syncHub
-        syncHub(changeLogFile, connection.getId());
+        syncHub(changeLogFile, connection);
 
         // Load up metadata for database/driver version
         loadDatabaseMetadata();
 
         // Send the START operation event
-        Operation updateOperation = sendStartOperationEvent(operationType, operationCommand, connection, hubChangeLog);
+        Operation operation = sendStartOperationEvent(operationType, operationCommand, connection, hubChangeLog);
 
         ListVisitor listVisitor;
         if (operationType.equalsIgnoreCase("ROLLBACK")) {
@@ -130,15 +130,19 @@ public class HubUpdater {
         OperationChange operationChange = new OperationChange();
         populateOperationChange(contexts, labelExpression, changeLogIterator, listVisitor, operationChange);
         populateProject(connection, hubChangeLog, operationChange);
-        operationChange.setOperation(updateOperation);
+        operationChange.setOperation(operation);
 
         try {
             hubService.sendOperationChanges(operationChange);
         } catch (LiquibaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
         }
-
-        return updateOperation;
+        if (operation != null) {
+            Operation.OperationStatus operationStatus = new Operation.OperationStatus();
+            operationStatus.setOperationStatusType(operationType);
+            operation.setOperationStatus(operationStatus);
+        }
+        return operation;
     }
 
     private void populateOperationChange(Contexts contexts, LabelExpression labelExpression, ChangeLogIterator changeLogIterator, ListVisitor listVisitor, OperationChange operationChange) throws LiquibaseException {
@@ -240,6 +244,7 @@ public class HubUpdater {
                 }
             } else {
                 sendCompleteOperationEvent(updateOperation, bufferLog);
+                showOperationReportLink(updateOperation, hubService);
 
             }
         } catch (LiquibaseException e) {
@@ -261,7 +266,7 @@ public class HubUpdater {
                 .setOperationEventStatus(
                         new OperationEvent.OperationEventStatus()
                                 .setOperationEventStatusType("PASS")
-                                .setStatusMessage("Update operation completed successfully")
+                                .setStatusMessage(String.format("%s operation completed successfully", updateOperation.getOperationStatus().getOperationStatusType()))
                 )
                 .setOperationEventLog(
                         new OperationEvent.OperationEventLog()
@@ -274,11 +279,11 @@ public class HubUpdater {
     /**
      * Handle Hub exceptions thrown during the operation
      *
-     * @param updateOperation          Operation object used during update
+     * @param operation                Operation object
      * @param bufferLog                Log output
      * @param originalExceptionMessage Exception thrown by the operation
      */
-    public void postUpdateHubExceptionHandling(Operation updateOperation,
+    public void postUpdateHubExceptionHandling(Operation operation,
                                                BufferedLogService bufferLog,
                                                String originalExceptionMessage) {
         try {
@@ -294,7 +299,7 @@ public class HubUpdater {
             // Not a valid Hub connection
             // Just go back
             //
-            if (updateOperation == null || hubIsNotAvailable(changeLog.getChangeLogId())) {
+            if (operation == null || hubIsNotAvailable(changeLog.getChangeLogId())) {
                 return;
             }
 
@@ -320,14 +325,14 @@ public class HubUpdater {
                 Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
             }
 
-            hubService.sendOperationEvent(updateOperation, new OperationEvent()
+            hubService.sendOperationEvent(operation, new OperationEvent()
                     .setEventType("COMPLETE")
                     .setStartDate(startTime)
                     .setEndDate(new Date())
                     .setOperationEventStatus(
                             new OperationEvent.OperationEventStatus()
                                     .setOperationEventStatusType("FAIL")
-                                    .setStatusMessage("Update operation completed with errors")
+                                    .setStatusMessage(String.format("%s operation completed with errors", operation.getOperationStatus().getOperationStatusType()))
                     )
                     .setOperationEventLog(
                             new OperationEvent.OperationEventLog()
@@ -339,7 +344,7 @@ public class HubUpdater {
             // Show the report link if this is an active changelog
             //
             if (hubChangeLog.isActive()) {
-                showOperationReportLink(updateOperation, hubService);
+                showOperationReportLink(operation, hubService);
             }
 
         } catch (LiquibaseException serviceException) {
@@ -358,16 +363,19 @@ public class HubUpdater {
         return !hubService.isOnline() || changeLogId == null;
     }
 
-    public void syncHub(String changeLogFile, UUID hubConnectionId) throws CommandExecutionException {
+    public void syncHub(String changeLogFile, Connection hubConnection) throws CommandExecutionException {
         //
         // We pass in a setting of CONTINUE IF_BOTH_CONNECTION_AND_PROJECT_ID_SET_ARG=true
         // to tell syncHub to not complain when both connectionID and projectID
         // are set.
         //
+        UUID hubConnectionId = (hubConnection != null ? hubConnection.getId() : null);
+        UUID hubProjectId = (hubConnection != null && hubConnection.getProject() != null ? hubConnection.getProject().getId() : null);
         final CommandScope syncHub = new CommandScope("internalSyncHub")
                 .addArgumentValue(InternalSyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, database.getConnection().getURL())
                 .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId)
                 .addArgumentValue(InternalSyncHubCommandStep.CONTINUE_IF_CONNECTION_AND_PROJECT_ID_BOTH_SET_ARG, true)
                 .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_OFFLINE_ARG, false);
@@ -386,9 +394,16 @@ public class HubUpdater {
      * @throws LiquibaseException        Thrown if registration fails
      * @throws CommandExecutionException Thrown if registerChangeLog fails
      */
-    public void register(String changeLogFile) throws LiquibaseException {
+    public HubRegisterResponse register(String changeLogFile) throws LiquibaseException {
+        HubRegisterResponse registerResponse = null;
         if (!hubService.isOnline()) {
-            return;
+            return null;
+        }
+
+        // Just return if cannot prompt
+        //
+        if (!Scope.getCurrentScope().getUI().getAllowPrompt()) {
+            return null;
         }
 
         // Do not try to register if
@@ -396,7 +411,7 @@ public class HubUpdater {
         //   2.  We have a changelog and a changeLogId in it already
         if (!StringUtil.isEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) ||
                 (changeLog != null && changeLog.getChangeLogId() != null)) {
-            return;
+            return null;
         }
 
         //
@@ -444,6 +459,7 @@ public class HubUpdater {
                 message = "* Updated properties file " + defaultsFile + " to set liquibase.hub.mode=off";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).info(message);
+                DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_MODE, HubConfiguration.HubMode.OFF);
             } catch (IOException ioe) {
                 String message = "Unable to write hubMode to liquibase.properties: " + ioe.getMessage();
                 Scope.getCurrentScope().getUI().sendMessage(message);
@@ -458,7 +474,6 @@ public class HubUpdater {
             // Consider this an email
             // Call the Hub API to create a new user
             //
-            HubRegisterResponse registerResponse = null;
             try {
                 registerResponse = hubService.register(input);
             } catch (LiquibaseException lhe) {
@@ -466,14 +481,14 @@ public class HubUpdater {
                         "No operation report will be generated.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
-                return;
+                return registerResponse;
             }
             if (registerResponse == null) {
                 String message = "Account creation failed for email address '" + input + "'.\n" +
                         "No operation report will be generated.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
-                return;
+                return registerResponse;
             }
             String message;
             try {
@@ -502,15 +517,14 @@ public class HubUpdater {
                 }
 
                 // register the changelog if it exist
+                DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, registerResponse.getApiKey());
                 if (changeLog != null) {
                     message = "* Registering changelog file " + changeLogFile + " with Hub";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getLog(getClass()).info(message);
+                    // Update the API key in HubConfiguration
                     registerChangeLog(registerResponse.getProjectId(), changeLog, changeLogFile);
                 }
-
-                // Update the API key in HubConfiguration
-                DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, registerResponse.getApiKey());
 
                 message = "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
@@ -526,9 +540,12 @@ public class HubUpdater {
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).warning(message);
 
-                System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), null);
+                // System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), null);
+                DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, null);
+
             }
         }
+        return registerResponse;
     }
 
     //
@@ -547,7 +564,11 @@ public class HubUpdater {
     //
     private void registerChangeLog(UUID hubProjectId, DatabaseChangeLog changeLog, String changeLogFile)
             throws LiquibaseException {
-
+        String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
+        if (apiKey == null) {
+            throw new LiquibaseException("The command 'RegisterChangeLog' " +
+                " failed because the Liquibase API Key has not been set. Learn more at https://hub.liquibase.com");
+        }
         CommandScope registerChangeLogCommand = new CommandScope("registerChangeLog");
         registerChangeLogCommand
                 .addArgumentValue(RegisterChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
@@ -557,8 +578,8 @@ public class HubUpdater {
                     registerChangeLogCommand.addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
                 } catch (IllegalArgumentException e) {
                     throw new LiquibaseException("The command 'RegisterChangeLog' " +
-                            " failed because parameter 'hubProjectId' has invalid value '" + hubProjectId +
-                            "'. Learn more at https://hub.liquibase.com");
+                        " failed because parameter 'hubProjectId' has invalid value '" + hubProjectId +
+                        "'. Learn more at https://hub.liquibase.com");
                 }
             }
         } catch (IllegalArgumentException e) {
