@@ -4,12 +4,12 @@ import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.*;
 import java.util.HashMap;
@@ -32,6 +32,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
      *
      * @parameter property="liquibase.deploymentId"
      */
+    @PropertyElement
     protected String deploymentId;
 
     /**
@@ -39,6 +40,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
      *
      * @parameter property="liquibase.force"
      */
+    @PropertyElement
     protected String force;
 
     /**
@@ -46,6 +48,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
      *
      * @parameter property="liquibase.outputFile"
      */
+    @PropertyElement
     protected String outputFile;
 
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -99,7 +102,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
     }
 
     private Writer createOutputWriter() throws IOException {
-        String charsetName = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
     }

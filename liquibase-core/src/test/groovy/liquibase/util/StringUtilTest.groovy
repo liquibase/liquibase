@@ -11,7 +11,7 @@ class StringUtilTest extends Specification {
     @Unroll
     def "processMultilineSql examples"() {
         expect:
-        that Arrays.asList(StringUtil.processMutliLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
+        that Arrays.asList(StringUtil.processMultiLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
 
         where:
         stripComments | splitStatements | endDelimiter | rawString                                                                                                                                                                                           | expected
@@ -245,5 +245,19 @@ class StringUtilTest extends Specification {
         input       | expected
         "a"         | "a"
         "testValue" | "test-value"
+        null        | null
+    }
+
+    @Unroll
+    def "toCamelCase"() {
+        expect:
+        StringUtil.toCamelCase(input) == expected
+
+        where:
+        input        | expected
+        "a"          | "a"
+        "test-Value" | "testValue"
+        "test_Value" | "testValue"
+        null         | null
     }
 }

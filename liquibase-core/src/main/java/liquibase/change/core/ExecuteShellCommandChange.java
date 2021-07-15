@@ -214,8 +214,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
             Thread.currentThread().interrupt();
         }
 
-        String errorStreamOut = errorStream.toString(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
-        String infoStreamOut = inputStream.toString(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+        String errorStreamOut = errorStream.toString(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+        String infoStreamOut = inputStream.toString(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
 
         if (errorStreamOut != null && !errorStreamOut.isEmpty()) {
             Scope.getCurrentScope().getLog(getClass()).severe(errorStreamOut);

@@ -1,12 +1,8 @@
 package liquibase.hub;
 
 import liquibase.changelog.RanChangeSet;
-import liquibase.hub.model.*;
 import liquibase.exception.LiquibaseException;
-import liquibase.hub.model.HubChangeLog;
-import liquibase.hub.model.HubUser;
-import liquibase.hub.model.Organization;
-import liquibase.hub.model.Project;
+import liquibase.hub.model.*;
 import liquibase.plugin.Plugin;
 import liquibase.servicelocator.PrioritizedService;
 
@@ -22,6 +18,8 @@ public interface HubService extends Plugin, PrioritizedService {
     Organization getOrganization() throws LiquibaseHubException;
 
     Project getProject(UUID projectId) throws LiquibaseHubException;
+
+    Project findProjectByConnectionIdOrJdbcUrl(UUID connectionId, String jdbcUrl) throws LiquibaseHubException;
 
     List<Project> getProjects() throws LiquibaseHubException;
 
@@ -45,7 +43,7 @@ public interface HubService extends Plugin, PrioritizedService {
 
     HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus) throws LiquibaseHubException;
 
-    Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException;
+    Operation createOperation(String operationType, String operationCommand, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException;
 
     OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException;
 
