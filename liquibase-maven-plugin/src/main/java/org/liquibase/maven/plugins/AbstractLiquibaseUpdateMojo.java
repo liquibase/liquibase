@@ -2,6 +2,7 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
+import org.liquibase.maven.property.PropertyElement;
 
 /**
  * Liquibase Update Maven plugin. This plugin allows for DatabaseChangeLogs to be
@@ -16,6 +17,7 @@ public abstract class AbstractLiquibaseUpdateMojo extends AbstractLiquibaseChang
    * will result in all changes (not already applied to the database) being applied.
    * @parameter property="liquibase.changesToApply" default-value=0
    */
+  @PropertyElement
   protected int changesToApply;
 
   /**

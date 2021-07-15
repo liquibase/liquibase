@@ -34,6 +34,7 @@ class SetupDatabaseStructure extends TestSetup {
         changes.each {
             try {
                 executor.execute(it)
+                database.commit()
             } catch (DatabaseException dbe) {
                 throw new RuntimeException(dbe)
             }

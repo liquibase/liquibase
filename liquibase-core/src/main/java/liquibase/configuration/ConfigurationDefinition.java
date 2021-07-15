@@ -1,7 +1,10 @@
 package liquibase.configuration;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.command.CommandArgumentDefinition;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -23,41 +26,32 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
 
     private final String key;
     private final Set<String> aliasKeys = new TreeSet<>();
-    private final Class<DataType> type;
+    private final Class<DataType> dataType;
     private String description;
     private DataType defaultValue;
+    private String defaultValueDescription;
     private boolean commonlyUsed;
-    private ConfigurationValueConverter<DataType> valueHandler;
+    private boolean internal;
+    private ConfigurationValueConverter<DataType> valueConverter;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
 
     private static final Pattern ALLOWED_KEY_PATTERN = Pattern.compile("[a-zA-Z0-9.]+");
 
-    /**
-     * @return if the given {@link ConfiguredValue} was set by a default value
-     */
-    public static boolean wasDefaultValueUsed(ConfiguredValue<?> configuredValue) {
-        for (ProvidedValue providedValue : configuredValue.getProvidedValues()) {
-            if (providedValue.getProvider() != null && providedValue.getProvider() instanceof ConfigurationDefinition.DefaultValueProvider) {
-                return true;
-            }
-        }
-
-        return false;
-    }
+    private boolean loggedUsingDefault = false;
 
     /**
      * Constructor private to force {@link Builder} usage
      *
      * @throws IllegalArgumentException if an invalid key is specified.
      */
-    private ConfigurationDefinition(String key, Class<DataType> type) throws IllegalArgumentException {
+    private ConfigurationDefinition(String key, Class<DataType> dataType) throws IllegalArgumentException {
         if (!ALLOWED_KEY_PATTERN.matcher(key).matches()) {
             throw new IllegalArgumentException("Invalid key format: " + key);
         }
 
         this.key = key;
-        this.type = type;
-        this.valueHandler = value -> ObjectUtil.convert(value, type);
+        this.dataType = dataType;
+        this.valueConverter = value -> ObjectUtil.convert(value, dataType);
     }
 
     /**
@@ -72,19 +66,17 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         }
     }
 
+    public ConfigurationValueConverter<DataType> getValueConverter() {
+        return valueConverter;
+    }
+
     /**
      * Convenience method around {@link #getCurrentConfiguredValue()} to return the obfuscated version of the value.
      *
      * @return the obfuscated value, or the plain-text value if no obfuscator is defined for this definition.
      */
     public DataType getCurrentValueObfuscated() {
-        final DataType currentValue = getCurrentValue();
-
-        if (this.valueObfuscator == null) {
-            return currentValue;
-        }
-
-        return this.valueObfuscator.obfuscate(currentValue);
+        return getCurrentConfiguredValue().getValueObfuscated();
     }
 
     /**
@@ -98,23 +90,37 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         keyList.add(this.getKey());
         keyList.addAll(this.getAliasKeys());
 
-        ConfiguredValue<?> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(keyList.toArray(new String[0]));
+        ConfiguredValue<?> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(valueConverter, valueObfuscator, keyList.toArray(new String[0]));
 
         if (!configurationValue.found()) {
             defaultValue = this.getDefaultValue();
             if (defaultValue != null) {
+                DataType obfuscatedValue;
+                if (valueObfuscator == null) {
+                    obfuscatedValue = defaultValue;
+                } else {
+                    obfuscatedValue = valueObfuscator.obfuscate(defaultValue);
+                }
+                if (!loggedUsingDefault && !key.equals(GlobalConfiguration.FILTER_LOG_MESSAGES.getKey())) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Configuration " + key + " is using the default value of " + obfuscatedValue);
+                    loggedUsingDefault = true;
+                }
                 configurationValue.override(new DefaultValueProvider(this.getDefaultValue()).getProvidedValue(key));
             }
         }
 
         final ProvidedValue providedValue = configurationValue.getProvidedValue();
         final Object originalValue = providedValue.getValue();
-        final DataType finalValue = valueHandler.convert(originalValue);
-        if (originalValue != finalValue) {
-            configurationValue.override(new ConvertedValueProvider<DataType>(finalValue, providedValue).getProvidedValue(key));
-        }
+        try {
+            final DataType finalValue = valueConverter.convert(originalValue);
+            if (originalValue != finalValue) {
+                configurationValue.override(new ConvertedValueProvider<DataType>(finalValue, providedValue).getProvidedValue(key));
+            }
 
-        return (ConfiguredValue<DataType>) configurationValue;
+            return (ConfiguredValue<DataType>) configurationValue;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("An invalid " + (providedValue.getSourceDescription().toLowerCase() + " value " + providedValue.getActualKey() + " detected: " + StringUtil.lowerCaseFirst(e.getMessage())), e);
+        }
     }
 
     /**
@@ -134,8 +140,8 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     /**
      * @return the type of data this definition returns.
      */
-    public Class<DataType> getType() {
-        return type;
+    public Class<DataType> getDataType() {
+        return dataType;
     }
 
     /**
@@ -157,11 +163,27 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     }
 
     /**
+     * A description of the default value. Defaults to {@link String#valueOf(Object)} of {@link #getDefaultValue()} but
+     * can be explicitly with {@link CommandArgumentDefinition.Building#defaultValue(Object, String)}.
+     */
+    public String getDefaultValueDescription() {
+        return defaultValueDescription;
+    }
+
+    /**
      * Returns true if this is configuration users are often interested in setting.
      * Used to simplify generated help by hiding less commonly used settings.
      */
     public boolean getCommonlyUsed() {
         return commonlyUsed;
+    }
+
+    /**
+     * Return true if this configuration is for internal and/or programmatic use only.
+     * End-user facing integrations should not expose internal configurations directly.
+     */
+    public boolean isInternal() {
+        return internal;
     }
 
     @Override
@@ -253,13 +275,24 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
             return this;
         }
 
+        public Building<DataType> setDefaultValue(DataType defaultValue, String defaultValueDescription) {
+            definition.defaultValue = defaultValue;
+            definition.defaultValueDescription = defaultValueDescription;
+
+            if (defaultValue != null && defaultValueDescription == null) {
+                definition.defaultValueDescription = String.valueOf(defaultValue);
+            }
+            return this;
+
+        }
+
         public Building<DataType> setDefaultValue(DataType defaultValue) {
             definition.defaultValue = defaultValue;
             return this;
         }
 
         public Building<DataType> setValueHandler(ConfigurationValueConverter<DataType> handler) {
-            definition.valueHandler = handler;
+            definition.valueConverter = handler;
 
             return this;
         }
@@ -272,6 +305,12 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
 
         public Building<DataType> setCommonlyUsed(boolean commonlyUsed) {
             definition.commonlyUsed = commonlyUsed;
+
+            return this;
+        }
+
+        public Building<DataType> setInternal(boolean internal) {
+            definition.internal = internal;
 
             return this;
         }
@@ -298,7 +337,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     /**
      * Used to track configuration values set by a default
      */
-    private static final class DefaultValueProvider implements ConfigurationValueProvider {
+    static final class DefaultValueProvider extends AbstractConfigurationValueProvider {
 
         private final Object value;
 
@@ -320,7 +359,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     /**
      * Used to track configuration values converted by a handler
      */
-    private static final class ConvertedValueProvider<DataType> implements ConfigurationValueProvider {
+    private static final class ConvertedValueProvider<DataType> extends AbstractConfigurationValueProvider {
 
         private final DataType value;
         private final String originalSource;
