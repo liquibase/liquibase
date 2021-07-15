@@ -77,6 +77,7 @@
         <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
 
         <h2.version>1.4.200</h2.version>
+        <hsqldb.version>2.4.0</hsqldb.version>
         <postgresql.version>42.2.15</postgresql.version>
         <sqlserver.version>8.4.0.jre8</sqlserver.version>
         <mysql.version>8.0.21</mysql.version>
@@ -159,49 +160,49 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.200</version>
+            <version>${h2.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>2.4.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.21</version>
+            <version>${hsqldb.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>8.4.0.jre8</version>
+            <version>${sqlserver.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.15</version>
+            <version>${postgresql.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>2.7.0</version>
+            <version>${mariadb.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>18.3.0.0</version>
+            <version>${oracle.version}</version>
             <scope>test</scope>
         </dependency>
 
