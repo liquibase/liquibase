@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
     private static final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC = new HashSet<>();
+    private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
     static {
         PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i);password=[^;]*")));
@@ -113,7 +114,7 @@ public class JdbcConnection implements DatabaseConnection {
      * Note: it does not remove the password from the
      * <code>user:password@host</code> section
      *
-     * @param jdbcUrl string to remove password=xxx from
+     * @param  url string to remove password=xxx from
      * @return modified string
      */
     public static String sanitizeUrl(String url) {
@@ -122,6 +123,14 @@ public class JdbcConnection implements DatabaseConnection {
 
     private static String stripPasswordPropFromJdbcUrl(String jdbcUrl) {
         if (jdbcUrl == null || (jdbcUrl != null && jdbcUrl.equals(""))) {
+            return jdbcUrl;
+        }
+
+        //
+        // Do not try to strip passwords from a proxy URL
+        //
+        Matcher m = PROXY_USER.matcher(jdbcUrl);
+        if (m.matches()) {
             return jdbcUrl;
         }
         for (Map.Entry<Pattern, Pattern> entry : PATTERN_JDBC) {

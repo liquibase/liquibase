@@ -5,11 +5,12 @@ import liquibase.command.CommandScope;
 import liquibase.command.core.RegisterChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
+
 import java.io.File;
 import java.util.*;
 
@@ -27,6 +28,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
      *
      * @parameter property="liquibase.hubProjectId"
      */
+    @PropertyElement
     protected String hubProjectId;
 
     /**
@@ -36,13 +38,14 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
      * @parameter property="liquibase.hubProjectName"
      *
      */
+    @PropertyElement
     protected String hubProjectName;
 
     @Override
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
         if (hubProjectId == null && hubProjectName == null) {
-            throw new MojoFailureException("\nThe Hub project ID must be specified.");
+            throw new MojoFailureException("\nEither the Hub project ID or project name must be specified.");
         }
         if (hubProjectId != null && hubProjectName != null) {
             throw new MojoFailureException("\nThe 'registerchangelog' command failed because too many parameters were provided. Command expects project ID or new projectname, but not both.\n");
@@ -56,7 +59,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         CommandScope registerChangeLog = new CommandScope("registerChangeLog");
         registerChangeLog
                 .addArgumentValue(RegisterChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
-                .addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId))
+                .addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, (hubProjectId != null ? UUID.fromString(hubProjectId) : null))
                 .addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_NAME_ARG, hubProjectName);
 
         registerChangeLog.addArgumentValue("changeLogFile", changeLogFile);

@@ -118,6 +118,7 @@ public class LiquibaseCommandLine {
                 "outputDefaultCatalog",
                 "changelogFile",
                 "hubConnectionId",
+                "hubProjectId",
                 "contexts",
                 "labels",
                 "diffTypes",
@@ -928,7 +929,7 @@ public class LiquibaseCommandLine {
         returnList.add("--" + StringUtil.toKabobCase(def.getKey().replaceFirst("^liquibase.", "")).replace(".", "-"));
         returnList.add("--" + StringUtil.toKabobCase(def.getKey()).replace(".", "-"));
         returnList.add("--" + def.getKey().replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
-
+        returnList.add("--" + def.getKey().replaceAll("\\.", ""));
         return returnList.toArray(new String[0]);
     }
 
