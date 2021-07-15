@@ -5,6 +5,7 @@ import liquibase.Liquibase;
 import liquibase.hub.HubConfiguration;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ public class LiquibaseDropAll extends AbstractLiquibaseChangeLogMojo {
   	 * @parameter property="liquibase.schemas"
      *
   	 */
+	@PropertyElement
   	protected String schemas;
 
 	  /**
@@ -34,6 +36,7 @@ public class LiquibaseDropAll extends AbstractLiquibaseChangeLogMojo {
   	 * @parameter property="liquibase.hubConnectionId"
   	 *
   	 */
+	  @PropertyElement
   	protected String hubConnectionId;
 
     protected String catalog;
