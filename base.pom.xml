@@ -75,6 +75,13 @@
         <junit.version>4.12</junit.version>
 
         <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
+
+        <h2.version>1.4.200</h2.version>
+        <postgresql.version>42.2.15</postgresql.version>
+        <sqlserver.version>8.4.0.jre8</sqlserver.version>
+        <mysql.version>8.0.21</mysql.version>
+        <mariadb.version>2.7.0</mariadb.version>
+        <oracle.version>18.3.0.0</oracle.version>
     </properties>
 
     <dependencies>
