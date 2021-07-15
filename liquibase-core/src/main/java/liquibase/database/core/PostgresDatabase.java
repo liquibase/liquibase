@@ -415,12 +415,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         throw new DatabaseException("Connection set to Postgres type we don't support !");
     }
 
-    @Override
-    public void rollback() throws DatabaseException {
-        super.rollback();
-        DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
-    }
-
     /**
      * Method to get Postgres DB type
      * @return Db types

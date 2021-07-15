@@ -1,14 +1,20 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.jvm.JdbcExecutor;
 import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateProcedureStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
 import liquibase.util.SqlParser;
@@ -132,10 +138,33 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             if (database instanceof OracleDatabase) {
                 sql.add(0, new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(schemaName, Schema.class)));
                 sql.add(new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(defaultSchema, Schema.class)));
-            }
-            else if (database instanceof AbstractDb2Database) {
+            } else if (database instanceof AbstractDb2Database) {
                 sql.add(0, new UnparsedSql("SET CURRENT SCHEMA " + schemaName));
                 sql.add(new UnparsedSql("SET CURRENT SCHEMA " + defaultSchema));
+            } else if (database instanceof PostgresDatabase) {
+                final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+                String originalSearchPath = null;
+                if (executor instanceof JdbcExecutor) {
+                    try {
+                        originalSearchPath = executor.queryForObject(new RawSqlStatement("SHOW SEARCH_PATH"), String.class);
+                    } catch (Throwable e) {
+                        Scope.getCurrentScope().getLog(CreateProcedureGenerator.class).warning("Cannot get search_path", e);
+                    }
+                }
+                if (originalSearchPath == null) {
+                    originalSearchPath = defaultSchema;
+                }
+
+                if (!originalSearchPath.equals(schemaName) && !originalSearchPath.startsWith(schemaName + ",") && !originalSearchPath.startsWith("\"" + schemaName + "\",")) {
+                    PostgresDatabase.DbTypes dbType = ((PostgresDatabase) database).getDbType();
+                    if (PostgresDatabase.DbTypes.EDB.equals(dbType)){
+                        sql.add(0, new UnparsedSql("ALTER SESSION SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchema, Schema.class) + ", " + originalSearchPath));
+                        sql.add(new UnparsedSql("ALTER SESSION SET CURRENT SCHEMA " + originalSearchPath));
+                    } else {
+                        sql.add(0, new UnparsedSql("SET SEARCH_PATH TO " + database.escapeObjectName(schemaName, Schema.class) + ", " + originalSearchPath));
+                        sql.add(new UnparsedSql("SET CURRENT SCHEMA " + originalSearchPath));
+                    }
+                }
             }
         }
     }
