@@ -11,7 +11,7 @@ class StringUtilTest extends Specification {
     @Unroll
     def "processMultilineSql examples"() {
         expect:
-        that Arrays.asList(StringUtil.processMutliLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
+        that Arrays.asList(StringUtil.processMultiLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
 
         where:
         stripComments | splitStatements | endDelimiter | rawString                                                                                                                                                                                           | expected
