@@ -19,6 +19,8 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
     public static final String LIQUIBASE_SCHEMA_VERSION = "4.1";
     private SAXParserFactory saxParserFactory;
 
+    private final LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
+
     public XMLChangeLogSAXParser() {
         saxParserFactory = SAXParserFactory.newInstance();
         saxParserFactory.setValidating(true);
@@ -50,7 +52,6 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             trySetSchemaLanguageProperty(parser);
 
             XMLReader xmlReader = parser.getXMLReader();
-            LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
             xmlReader.setEntityResolver(resolver);
             xmlReader.setErrorHandler(new ErrorHandler() {
                 @Override
