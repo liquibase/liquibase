@@ -12,6 +12,7 @@ import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 /**
  * <p>Generates a changelog based on the current database schema. Typically used when
@@ -30,6 +31,7 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter property="liquibase.diffTypes"
      */
+    @PropertyElement
     protected String diffTypes;
 
     /**
@@ -37,6 +39,7 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter property="liquibase.dataDir"
      */
+    @PropertyElement
     protected String dataDir;
 
     /**
@@ -44,12 +47,14 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter property="liquibase.changeSetAuthor"
      */
+    @PropertyElement
     protected String changeSetAuthor;
 
     /**
      * are required. If no context is specified then ALL contexts will be executed.
      * @parameter property="liquibase.contexts" default-value=""
      */
+    @PropertyElement
     protected String contexts;
 
     /**
@@ -57,6 +62,7 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter property="liquibase.changeSetContext"
      */
+    @PropertyElement
     protected String changeSetContext;
 
     /**
@@ -64,6 +70,7 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter property="liquibase.outputChangeLogFile"
      */
+    @PropertyElement
     protected String outputChangeLogFile;
 
 
@@ -72,6 +79,7 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter property="liquibase.diffExcludeObjects"
      */
+    @PropertyElement
     protected String diffExcludeObjects;
 
     /**
@@ -79,6 +87,7 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter property="liquibase.diffIncludeObjects"
      */
+    @PropertyElement
     protected String diffIncludeObjects;
 
 

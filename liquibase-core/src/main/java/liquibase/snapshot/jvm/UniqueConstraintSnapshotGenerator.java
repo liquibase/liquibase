@@ -163,7 +163,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             snapshot.setScratchData(queryCountKey, columnQueryCount + 1);
 
             if ((database instanceof MySQLDatabase) || (database instanceof HsqlDatabase)) {
-                sql = "select const.CONSTRAINT_NAME, COLUMN_NAME, const.constraint_schema as CONSTRAINT_CONTAINER "
+                sql = "select const.CONSTRAINT_NAME, const.TABLE_NAME, COLUMN_NAME, const.constraint_schema as CONSTRAINT_CONTAINER "
                         + "from " + database.getSystemSchema() + ".table_constraints const "
                         + "join " + database.getSystemSchema() + ".key_column_usage col "
                         + "on const.constraint_schema=col.constraint_schema "
@@ -357,7 +357,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 columnCache = new HashMap<>();
                 snapshot.setScratchData(cacheKey, columnCache);
                 for (Map<String, ?> row : rows) {
-                    String key = row.get("CONSTRAINT_CONTAINER") + "_" + row.get("CONSTRAINT_NAME");
+                    String key = row.get("CONSTRAINT_CONTAINER") + "_" + row.get("TABLE_NAME") + "_" + row.get("CONSTRAINT_NAME");
                     List<Map<String, ?>> constraintRows = columnCache.get(key);
                     if (constraintRows == null) {
                         constraintRows = new ArrayList<>();
@@ -371,7 +371,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 return rows;
             }
         } else {
-            String lookupKey = schema.getName() + "_" + example.getName();
+            String lookupKey = schema.getName() + "_" + table + "_" + example.getName();
             List<Map<String, ?>> rows = columnCache.get(lookupKey);
             if (rows == null) {
                 rows = new ArrayList<>();
