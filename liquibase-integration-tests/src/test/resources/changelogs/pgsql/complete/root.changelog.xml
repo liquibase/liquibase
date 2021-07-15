@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
     <preConditions>
             <dbms type="postgresql"/>
@@ -305,10 +305,16 @@
         </customChange>
     </changeSet>
     <changeSet id="57" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>
+        <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="tableName" value="person"/>
+            <param name="columnName" value="employer_id"/>
+            <param name="newValue" value="4"/>
+        </customChange>
     </changeSet>
     <changeSet id="58" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
+        <customChange class="liquibase.change.custom.ExampleCustomTaskChange">
+            <param name="helloTo" value="world"/>
+        </customChange>
     </changeSet>
 
     <changeSet id="60" author="nvoxland">
@@ -411,4 +417,19 @@
                                  referencedTableName="partition_parent"
                                  referencedColumnNames="id"/>
     </changeSet>
+
+    <changeSet id="cluster-pk-check" author="nvoxland">
+        <createTable tableName="cluster_table">
+            <column name="id" type="int"/>
+        </createTable>
+        <addPrimaryKey tableName="cluster_table" columnNames="id" clustered="true" constraintName="cluster_pkey"/>
+    </changeSet>
+
+    <changeSet id="not-clustered-pk-check" author="nvoxland">
+        <createTable tableName="nocluster_table">
+            <column name="id" type="int"/>
+        </createTable>
+        <addPrimaryKey tableName="nocluster_table" columnNames="id" clustered="false"/>
+    </changeSet>
+
 </databaseChangeLog>
