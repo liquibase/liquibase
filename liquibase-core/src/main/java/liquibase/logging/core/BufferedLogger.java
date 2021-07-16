@@ -17,6 +17,10 @@ public class BufferedLogger extends AbstractLogger {
 
     @Override
     public void log(Level level, String message, Throwable e) {
+        if (level == Level.OFF) {
+            return;
+        }
+
         this.bufferedLogService.addLog(new BufferedLogService.BufferedLogMessage(level, clazz, filterMessage(message), e));
     }
 
