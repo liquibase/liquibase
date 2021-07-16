@@ -142,8 +142,10 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
             if (isAutoIncrementColumn) {
-                // TODO: check if database supports auto increment on non primary key column
-                if (database.supportsAutoIncrement()) {
+                if (database instanceof PostgresDatabase && buffer.toString().toLowerCase().endsWith("serial")) {
+                    //don't add more info
+                } else if (database.supportsAutoIncrement()) {
+                    // TODO: check if database supports auto increment on non primary key column
                     String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy(), autoIncrementConstraint.getGenerationType(), autoIncrementConstraint.getDefaultOnNull());
 
                     if (!"".equals(autoIncrementClause)) {
