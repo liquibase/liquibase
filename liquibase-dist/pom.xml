@@ -158,6 +158,9 @@
                         <manifestFile>${project.basedir}/../liquibase-core/target/classes/META-INF/MANIFEST.MF
                         </manifestFile>
                     </archive>
+
+                    <!-- Enables building Liquibase on MacOS -->
+                    <tarLongFileMode>posix</tarLongFileMode>
                 </configuration>
                 <executions>
                     <execution>

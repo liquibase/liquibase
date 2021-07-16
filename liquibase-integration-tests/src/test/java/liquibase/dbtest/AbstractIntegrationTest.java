@@ -1,5 +1,6 @@
 package liquibase.dbtest;
 
+import java.util.stream.Collectors;
 import liquibase.*;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
@@ -1048,10 +1049,10 @@ public abstract class AbstractIntegrationTest {
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 
         SnapshotGeneratorFactory tableSnapshotGenerator = SnapshotGeneratorFactory.getInstance();
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("hyphen_context"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("camel_context"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
+        assertTrue(tableSnapshotGenerator.has(new Table().setName("hyphen_context"), database));
+        assertTrue(tableSnapshotGenerator.has(new Table().setName("camel_context"), database));
+        assertTrue(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
+        assertTrue(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
     }
 
     @Test
@@ -1145,5 +1146,80 @@ public abstract class AbstractIntegrationTest {
 
     public void setDefaultSchemaName(String defaultSchemaName) {
         this.defaultSchemaName = defaultSchemaName;
+    }
+
+    @Test
+    public void testThatMultipleJVMsCanApplyChangelog() throws Exception {
+        clearDatabase();
+
+        List<ProcessBuilder> processBuilders = Arrays.asList(
+           prepareExternalLiquibaseProcess(),
+           prepareExternalLiquibaseProcess(),
+           prepareExternalLiquibaseProcess()
+        );
+
+        List<Process> processes = new ArrayList<>();
+        for(ProcessBuilder builder : processBuilders) {
+            Process process = builder.redirectErrorStream(true).start();
+            processes.add(process);
+        }
+
+        for(Process process : processes) {
+            process.waitFor();
+        }
+
+        for(Process process : processes) {
+            if(process.exitValue() == 0) {
+                continue;
+            }
+
+            String output;
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                output = input.lines().collect(Collectors.joining(System.lineSeparator()));
+            }
+
+            fail("Migration JVM failed with exit code " + process.exitValue() + ": " + output);
+        }
+    }
+
+    private ProcessBuilder prepareExternalLiquibaseProcess() {
+        String javaHome = System.getProperty("java.home");
+        String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
+        String classpath = System.getProperty("java.class.path");
+
+        List<String> command = new LinkedList<>();
+        command.add(javaBin);
+        command.add("-cp");
+        command.add(classpath);
+        command.add(ApplyTestChangelog.class.getName());
+
+        command.add(includedChangeLog);
+        command.add(jdbcUrl);
+        command.add(username);
+        command.add(password);
+        command.add(contexts);
+
+        ProcessBuilder builder = new ProcessBuilder(command);
+        return builder;
+    }
+
+    public static final class ApplyTestChangelog {
+
+        public static void main( String[] args ) throws Exception {
+            String changeLogFile = Objects.requireNonNull( args[ 0 ], "Changelog is required" );
+            String url = Objects.requireNonNull( args[ 1 ], "JDBC url is required" );
+            String username = Objects.requireNonNull( args[ 2 ], "JDBC username is required" );
+            String password = Objects.requireNonNull( args[ 3 ], "JDBC password is required" );
+            String contexts = Objects.requireNonNull( args[ 4 ], "Liquibase contexts is required" );
+
+            DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection( url, username, password );
+            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation( connection );
+
+            ResourceAccessor fileOpener = new JUnitResourceAccessor();
+
+            Liquibase liquibase = new Liquibase( changeLogFile, fileOpener, database );
+            liquibase.setChangeLogParameter( "loginuser", username );
+            liquibase.update( contexts );
+        }
     }
 }

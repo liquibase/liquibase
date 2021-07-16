@@ -49,11 +49,4 @@ public class JdbcExecutorTest {
         assertTrue(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle1) != Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", mysql));
     }
 
-    @Test
-    public void testGetErrorCode() {
-        assertEquals("", new JdbcExecutor().getErrorCode(new RuntimeException()));
-        assertEquals("(123) ", new JdbcExecutor().getErrorCode(new SQLException("reason", "sqlState", 123)));
-        assertEquals("(0) ", new JdbcExecutor().getErrorCode(new SQLException()));
-    }
-
 }

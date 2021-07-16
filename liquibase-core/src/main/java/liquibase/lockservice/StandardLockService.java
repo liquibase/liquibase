@@ -93,36 +93,15 @@ public class StandardLockService implements LockService {
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc",  database);
 
         if (!hasDatabaseChangeLogLockTable()) {
-            try {
-                executor.comment("Create Database Lock Table");
-                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-                database.commit();
-                Scope.getCurrentScope().getLog(getClass()).fine(
-                        "Created database lock table with name: " +
-                                database.escapeTableName(
-                                        database.getLiquibaseCatalogName(),
-                                        database.getLiquibaseSchemaName(),
-                                        database.getDatabaseChangeLogLockTableName()
-                                )
-                );
-            } catch (DatabaseException e) {
-                if ((e.getMessage() != null) && e.getMessage().contains("exists")) {
-                    //hit a race condition where the table got created by another node.
-                    Scope.getCurrentScope().getLog(getClass()).fine("Database lock table already appears to exist " +
-                            "due to exception: " + e.getMessage() + ". Continuing on");
-                }  else {
-                    throw e;
-                }
-            }
+            createDatabaseChangeLogLockTable( executor );
+
             this.hasDatabaseChangeLogLockTable = true;
             createdTable = true;
             hasDatabaseChangeLogLockTable = true;
         }
 
         if (!isDatabaseChangeLogLockTableInitialized(createdTable)) {
-            executor.comment("Initialize Database Lock Table");
-            executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
-            database.commit();
+            initializeDatabaseChangeLogLockTable( executor );
         }
 
         if (executor.updatesDatabase() && (database instanceof DerbyDatabase) && ((DerbyDatabase) database)
@@ -155,6 +134,52 @@ public class StandardLockService implements LockService {
 
     }
 
+    private void createDatabaseChangeLogLockTable( Executor executor ) throws DatabaseException {
+        try {
+            executor.comment("Create Database Lock Table");
+            executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+            database.commit();
+            Scope.getCurrentScope().getLog(getClass()).fine(
+                    "Created database lock table with name: " +
+                            database.escapeTableName(
+                                    database.getLiquibaseCatalogName(),
+                                    database.getLiquibaseSchemaName(),
+                                    database.getDatabaseChangeLogLockTableName()
+                            )
+            );
+        } catch (DatabaseException e) {
+            if (database.isTableExistsException(e)) {
+                try {
+                    database.rollback();
+                } catch (DatabaseException rollbackEx) {
+                }
+                //hit a race condition where the table got created by another node.
+                Scope.getCurrentScope().getLog(getClass()).fine("Database lock table already appears to exist " +
+                        "due to exception: " + e.getMessage() + ". Continuing on");
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private void initializeDatabaseChangeLogLockTable( Executor executor ) throws DatabaseException {
+        try {
+            executor.comment("Initialize Database Lock Table");
+            executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
+            database.commit();
+        } catch (DatabaseException e) {
+            if (database.isUniqueConstraintException(e)) {
+                try {
+                    database.rollback();
+                } catch (DatabaseException rollbackEx) {
+                }
+                //hit a race condition where the lock got created by another node.
+                throw new InitializationRaceConditionException(e);
+            }  else {
+                throw e;
+            }
+        }
+    }
 
     public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated) throws DatabaseException {
         if (!isDatabaseChangeLogLockTableInitialized) {
@@ -245,7 +270,13 @@ public class StandardLockService implements LockService {
 
         try {
             database.rollback();
-            this.init();
+            try {
+                this.init();
+            } catch (InitializationRaceConditionException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Database already locked " +
+                   "due to exception: " + e.getMessage() + ". Try again later.");
+                return false;
+            }
 
             Boolean locked = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForObject(
                     new SelectFromDatabaseChangeLogLockStatement("LOCKED"), Boolean.class
@@ -448,6 +479,13 @@ public class StandardLockService implements LockService {
             reset();
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    private static class InitializationRaceConditionException extends RuntimeException {
+
+        public InitializationRaceConditionException(DatabaseException cause) {
+            super(cause);
         }
     }
 }

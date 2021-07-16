@@ -638,4 +638,13 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         ));
     }
 
+    @Override
+    public boolean isTableExistsException(DatabaseException e) {
+        return "42S01".equals(e.getSqlState());
+    }
+
+    @Override
+    public boolean isUniqueConstraintException( DatabaseException e ) {
+        return "40001".equals(e.getSqlState());
+    }
 }

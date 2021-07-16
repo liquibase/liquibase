@@ -667,4 +667,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     }
 
+    @Override
+    public boolean isTableExistsException(DatabaseException e) {
+        return "42000".equals(e.getSqlState());
+    }
 }
