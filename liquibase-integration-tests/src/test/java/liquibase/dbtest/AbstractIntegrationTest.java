@@ -1,5 +1,6 @@
 package liquibase.dbtest;
 
+import java.util.stream.Collectors;
 import liquibase.*;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
@@ -1048,10 +1049,10 @@ public abstract class AbstractIntegrationTest {
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 
         SnapshotGeneratorFactory tableSnapshotGenerator = SnapshotGeneratorFactory.getInstance();
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("hyphen_context"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("camel_context"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
+        assertTrue(tableSnapshotGenerator.has(new Table().setName("hyphen_context"), database));
+        assertTrue(tableSnapshotGenerator.has(new Table().setName("camel_context"), database));
+        assertTrue(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
+        assertTrue(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
     }
 
     @Test
@@ -1159,20 +1160,25 @@ public abstract class AbstractIntegrationTest {
 
         List<Process> processes = new ArrayList<>();
         for(ProcessBuilder builder : processBuilders) {
-            Process process = builder.inheritIO().start();
+            Process process = builder.redirectErrorStream(true).start();
             processes.add(process);
         }
 
-        List<Integer> exitCodes = new ArrayList<>();
         for(Process process : processes) {
             process.waitFor();
-            exitCodes.add(process.exitValue());
         }
 
-        for(int exitCode : exitCodes) {
-            if(exitCode != 0) {
-                fail("Migration JVM failed with exit code " + exitCode);
+        for(Process process : processes) {
+            if(process.exitValue() == 0) {
+                continue;
             }
+
+            String output;
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                output = input.lines().collect(Collectors.joining(System.lineSeparator()));
+            }
+
+            fail("Migration JVM failed with exit code " + process.exitValue() + ": " + output);
         }
     }
 
@@ -1187,7 +1193,7 @@ public abstract class AbstractIntegrationTest {
         command.add(classpath);
         command.add(ApplyTestChangelog.class.getName());
 
-        command.add(completeChangeLog);
+        command.add(includedChangeLog);
         command.add(jdbcUrl);
         command.add(username);
         command.add(password);

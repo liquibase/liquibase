@@ -329,7 +329,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     }
                 }
             } catch (SQLException e) {
-                throw new DatabaseException(e.getMessage() + " [Failed SQL: (" + e.getErrorCode() + ")" + sql.toSql() + "]", e.getSQLState(), e);
+                throw new DatabaseException(e.getMessage() + " [Failed SQL: (" + e.getErrorCode() + ", " + e.getSQLState() + ") " + sql.toSql() + "]", e.getSQLState(), e);
             } catch (Exception e) {
                 throw new DatabaseException(e.getMessage() + " [Failed SQL: " + sql.toSql() + "]", e);
             }
@@ -385,7 +385,7 @@ public class JdbcExecutor extends AbstractExecutor {
                         log.fine(Integer.toString(stmt.getUpdateCount()) + " row(s) affected");
                     }
                 } catch (SQLException e) {
-                    throw new DatabaseException(e.getMessage() + " [Failed SQL: (" + e.getErrorCode() + ")" + statement + "]", e.getSQLState(), e);
+                    throw new DatabaseException(e.getMessage() + " [Failed SQL: (" + e.getErrorCode() + ", " + e.getSQLState() + ") " + statement + "]", e.getSQLState(), e);
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage() + " [Failed SQL: " + statement + "]", e);
                 }
@@ -401,7 +401,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     } while (updateCount != -1);
 
                 } catch (SQLException e) {
-                    throw new DatabaseException(e.getMessage() + " [Failed SQL: (" + e.getErrorCode() + ")" + statement + "]", e.getSQLState(), e);
+                    throw new DatabaseException(e.getMessage() + " [Failed SQL: (" + e.getErrorCode() + ", " + e.getSQLState() + ") " + statement + "]", e.getSQLState(), e);
                 } catch (Exception e) {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: " + statement +"]", e);
                 }

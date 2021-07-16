@@ -278,6 +278,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         for (SqlStatement sql : statementsToExecute) {
             if (SqlGeneratorFactory.getInstance().supports(sql, database)) {
+                // TODO: here is another race condition
+                //  Exception in thread "main" liquibase.exception.DatabaseException: Table 'DATABASECHANGELOG'
+                //  already exists [Failed SQL: (1050, 42S01)
                 executor.execute(sql);
                 getDatabase().commit();
             } else {

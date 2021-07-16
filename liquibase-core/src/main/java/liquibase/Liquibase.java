@@ -270,6 +270,9 @@ public class Liquibase implements AutoCloseable {
                 ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
                 CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                 Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
+                    // TODO: here is another race condition
+                    //  liquibase.exception.DatabaseException: Table 'testutf8insert' already exists [Failed SQL: (1050, 42S01)
+                    //  CREATE TABLE lbcat.testutf8insert (stringvalue VARCHAR(10) NULL)]
                     runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                 });
 
