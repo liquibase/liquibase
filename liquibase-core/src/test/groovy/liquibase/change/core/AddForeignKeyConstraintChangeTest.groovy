@@ -23,6 +23,22 @@ public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
         then: change.getConfirmationMessage() == "Foreign key constraint added to TABLE_NAME (COL_NAME)"
     }
 
+    def "setDeleteCascade sets onDelete correctly"() {
+        when:
+        def change = new AddForeignKeyConstraintChange();
+        change.setDeleteCascade(true)
+
+        then:
+        change.getOnDelete() == "CASCADE"
+
+        when:
+        change.setDeleteCascade(false)
+
+        then:
+        change.getOnDelete() == null
+
+    }
+
     @Unroll
     def "checkStatus"() {
         when:
