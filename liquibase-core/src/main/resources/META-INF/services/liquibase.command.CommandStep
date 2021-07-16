@@ -45,6 +45,7 @@ liquibase.command.core.UpdateCommandStep
 liquibase.command.core.UpdateCountCommandStep
 liquibase.command.core.UpdateCountSqlCommandStep
 liquibase.command.core.UpdateSqlCommandStep
+liquibase.command.core.UpdateTestingRollbackCommandStep
 liquibase.command.core.UpdateToTagCommandStep
 liquibase.command.core.UpdateToTagSqlCommandStep
 liquibase.command.core.ValidateCommandStep
