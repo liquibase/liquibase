@@ -56,15 +56,22 @@ public class TimeType  extends LiquibaseDataType {
         }
 
         if (database instanceof PostgresDatabase) {
+            DatabaseDataType datatype = new DatabaseDataType(getName(), getValidatedParameters());
             String rawDefinition = originalDefinition.toLowerCase(Locale.US);
             if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {
-                return new DatabaseDataType("TIME WITH TIME ZONE");
+                datatype.addAdditionalInformation("WITH TIME ZONE");
             } else {
-                return new DatabaseDataType("TIME WITHOUT TIME ZONE");
+                datatype.addAdditionalInformation("WITHOUT TIME ZONE");
             }
+            return datatype;
         }
 
         return new DatabaseDataType(getName());
+    }
+
+    Object[] getValidatedParameters() {
+        Object[] parameters = getParameters();
+        return (parameters.length > 0 && (Integer.parseInt(getParameters()[0].toString()) <= 6)) ? parameters : new Object[0];
     }
 
     @Override
