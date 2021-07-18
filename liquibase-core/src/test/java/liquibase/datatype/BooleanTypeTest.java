@@ -1,27 +1,14 @@
 package liquibase.datatype;
 
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.core.BooleanType;
 import liquibase.exception.UnexpectedLiquibaseException;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class BooleanTypeTest {
-    
-    @Before
-    public void prepare() {
-        LiquibaseConfiguration.getInstance().reset();
-    }
-
-    @After
-    public void reset() {
-        LiquibaseConfiguration.getInstance().reset();
-    }
 
     @Test
     public void postgresqlBitString() {
