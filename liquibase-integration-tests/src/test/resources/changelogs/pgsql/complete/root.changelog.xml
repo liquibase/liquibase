@@ -411,4 +411,13 @@
                                  referencedTableName="partition_parent"
                                  referencedColumnNames="id"/>
     </changeSet>
+
+    <changeSet author="author" id="initially deferred PK">
+        <createTable tableName="deferred_pk">
+            <column name="id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="abc_PK" deferrable="true" initiallyDeferred="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

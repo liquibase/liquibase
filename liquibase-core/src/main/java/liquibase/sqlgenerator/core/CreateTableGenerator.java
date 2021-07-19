@@ -241,6 +241,16 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     buffer.append(statement.getPrimaryKeyConstraint().getTablespace());
                 }
                 buffer.append(!statement.getPrimaryKeyConstraint().shouldValidatePrimaryKey() ? " ENABLE NOVALIDATE " : "");
+
+                if (database.supportsInitiallyDeferrableColumns()) {
+                    if (statement.getPrimaryKeyConstraint().isInitiallyDeferred()) {
+                        buffer.append(" INITIALLY DEFERRED");
+                    }
+                    if (statement.getPrimaryKeyConstraint().isDeferrable()) {
+                        buffer.append(" DEFERRABLE");
+                    }
+                }
+
                 buffer.append(",");
             }
         }
