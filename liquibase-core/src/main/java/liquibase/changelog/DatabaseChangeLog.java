@@ -475,6 +475,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                 break;
             }
+            default:
+                // we want to exclude child nodes that are not changesets or the other things
+                // and avoid failing when encountering "child" nodes of the databaseChangeLog which are just
+                // XML node attributes (like schemaLocation). If you don't understand, remove the if and run the tests
+                // and look at the error output or review the "node" object here with a debugger.
+                if (node.getChildren() != null && !node.getChildren().isEmpty()) {
+                    throw new ParsedNodeException("Unexpected node found under databaseChangeLog: " + nodeName);
+                }
         }
     }
 
