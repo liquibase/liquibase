@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("java:S2583")
 public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
     @Override
@@ -138,7 +139,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             }
                             continue;
                         } catch (NumberFormatException | NullPointerException nfe) {
-                            throw new ChangeLogParseException("Unknown ignoreLines syntax in changeset " + changeSet.toString(false));
+                            throw new ChangeLogParseException("Unknown ignoreLines syntax");
                         }
                     }
                 }
