@@ -48,6 +48,7 @@ public class HubUpdater {
 
     private static final String SEPARATOR_LINE = "\n----------------------------------------------------------------------\n";
     final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+    private static Boolean skipAutoRegistration = null;
 
     public HubUpdater(Date startTime, DatabaseChangeLog changeLog, Database database) {
         this.startTime = startTime;
@@ -414,6 +415,10 @@ public class HubUpdater {
             return null;
         }
 
+        if (skipAutoRegistration != null && skipAutoRegistration) {
+            return null;
+        }
+
         //
         // Prompt user to connect with Hub
         // Release the lock before prompting
@@ -469,6 +474,7 @@ public class HubUpdater {
             String message = "Skipping auto-registration";
             Scope.getCurrentScope().getUI().sendMessage(message);
             Scope.getCurrentScope().getLog(getClass()).warning(message);
+            skipAutoRegistration = true;
         } else {
             //
             // Consider this an email
