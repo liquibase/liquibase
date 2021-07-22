@@ -18,6 +18,7 @@ import java.io.Writer;
  * @author JAmes Atwill
  * @goal changelogSyncSQL
  */
+@SuppressWarnings("java:S2095")
 public class LiquibaseChangeLogSyncSQLMojo extends
 		AbstractLiquibaseChangeLogMojo {
 
@@ -81,7 +82,7 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 									+ migrationSqlOutputFile.getAbsolutePath());
 				}
 			}
-			outputWriter = getOutputWriter(migrationSqlOutputFile);;
+			outputWriter = getOutputWriter(migrationSqlOutputFile);
 		} catch (IOException e) {
 			getLog().error(e);
 			throw new MojoExecutionException(

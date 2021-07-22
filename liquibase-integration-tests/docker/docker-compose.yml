@@ -65,6 +65,5 @@ services:
       - integration
     volumes:
       - "./mariadb-init.sql:/docker-entrypoint-initdb.d/mariadb-init.sql"
-
 networks:
   integration:

@@ -46,8 +46,8 @@ public class ChangeParameterMetaData {
     private LiquibaseSerializable.SerializationType serializationType;
     private String[] requiredForDatabaseArg;
     private String[] supportedDatabasesArg;
-    private Optional<Method> readMethodRef;
-    private Optional<Method> writeMethodRef;
+    private Optional<Method> readMethodRef = Optional.empty();
+    private Optional<Method> writeMethodRef = Optional.empty();
 
     public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
                                    Map<String, Object> exampleValues, String since, Type dataType,
@@ -76,11 +76,11 @@ public class ChangeParameterMetaData {
             this.dataTypeClass = (Class) dataType;
         } else if (dataType instanceof ParameterizedType) {
             this.dataType = StringUtil.lowerCaseFirst(
-                ((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName() +
-                    " of " +
-                    StringUtil.lowerCaseFirst(
-                        ((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()
-                    )
+                    ((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName() +
+                            " of " +
+                            StringUtil.lowerCaseFirst(
+                                    ((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()
+                            )
             );
             this.dataTypeClass = (Class) ((ParameterizedType) dataType).getRawType();
             this.dataTypeClassParameters = ((ParameterizedType) dataType).getActualTypeArguments();
@@ -108,7 +108,7 @@ public class ChangeParameterMetaData {
         Set<String> computedDatabases = new HashSet<>();
 
         if ((supportedDatabases.length == 1)
-          && StringUtil.join(supportedDatabases, ",").equals(COMPUTE)) {
+                && StringUtil.join(supportedDatabases, ",").equals(COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 if ((database.getShortName() == null) || "unsupported".equals(database.getShortName())) {
@@ -124,8 +124,8 @@ public class ChangeParameterMetaData {
                         this.setValue(testChange, this.getExampleValue(database));
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
                         if (finalErrors.getUnsupportedErrorMessages().isEmpty() || (finalErrors
-                            .getUnsupportedErrorMessages().size() == originalErrors.getUnsupportedErrorMessages()
-                            .size())) {
+                                .getUnsupportedErrorMessages().size() == originalErrors.getUnsupportedErrorMessages()
+                                .size())) {
                             computedDatabases.add(database.getShortName());
                         }
                         validDatabases++;
@@ -158,7 +158,7 @@ public class ChangeParameterMetaData {
         Set<String> computedDatabases = new HashSet<>();
 
         if ((requiredDatabases.length == 1)
-           && StringUtil.join(requiredDatabases, ",").equals(COMPUTE)) {
+                && StringUtil.join(requiredDatabases, ",").equals(COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 try {
@@ -168,8 +168,8 @@ public class ChangeParameterMetaData {
                         this.setValue(testChange, this.getExampleValue(database));
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
                         if (!originalErrors.getRequiredErrorMessages().isEmpty() && (finalErrors
-                            .getRequiredErrorMessages().size() < originalErrors.getRequiredErrorMessages().size())
-                         ) {
+                                .getRequiredErrorMessages().size() < originalErrors.getRequiredErrorMessages().size())
+                        ) {
                             computedDatabases.add(database.getShortName());
                         }
                         validDatabases++;
@@ -287,7 +287,7 @@ public class ChangeParameterMetaData {
     }
 
     private Method getReadMethod(Change change) {
-        if (readMethodRef != null) {
+        if (readMethodRef.isPresent()) {
             return readMethodRef.orElseThrow(() -> new UnexpectedLiquibaseException("No readMethod for " + parameterName));
         }
 
@@ -298,7 +298,7 @@ public class ChangeParameterMetaData {
                     Method readMethod = descriptor.getReadMethod();
                     if (readMethod == null) {
                         readMethod = change.getClass().getMethod(
-                            "is" + StringUtil.upperCaseFirst(descriptor.getName())
+                                "is" + StringUtil.upperCaseFirst(descriptor.getName())
                         );
                     }
                     readMethodRef = Optional.of(readMethod);
@@ -329,7 +329,7 @@ public class ChangeParameterMetaData {
                 }
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException("Cannot convert string value '" + value + "' to " +
-                    dataType + ": " + e.getMessage());
+                        dataType + ": " + e.getMessage());
             }
         }
 
@@ -341,9 +341,9 @@ public class ChangeParameterMetaData {
                     value = value.toString();
                 } else {
                     throw new UnexpectedLiquibaseException(
-                        "Could not convert " + value.getClass().getName() +
-                        " to " +
-                        expectedWriteType.getName()
+                            "Could not convert " + value.getClass().getName() +
+                                    " to " +
+                                    expectedWriteType.getName()
                     );
                 }
             }
@@ -356,7 +356,7 @@ public class ChangeParameterMetaData {
     }
 
     private Method getWriteMethod(Change change) {
-        if (writeMethodRef != null) {
+        if (writeMethodRef.isPresent()) {
             return writeMethodRef.orElseThrow(() -> new UnexpectedLiquibaseException("No writeMethod for " + parameterName));
         }
 
@@ -451,7 +451,7 @@ public class ChangeParameterMetaData {
                 }
             }
         }
-    
+
         switch (dataType) {
             case "string":
                 return "A String";
@@ -463,7 +463,7 @@ public class ChangeParameterMetaData {
                 return new BigInteger("371717");
             case "list":
                 return null; // TODO
-        
+
             case "sequenceNextValueFunction":
                 return new SequenceNextValueFunction("seq_name");
             case "databaseFunction":
