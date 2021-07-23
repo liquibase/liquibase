@@ -50,7 +50,7 @@
     </scm>
 
     <properties>
-        <liquibase.base.version>4.4.2</liquibase.base.version>
+        <liquibase.base.version>4.4.3</liquibase.base.version>
         <liquibase.version.qualifier>-local</liquibase.version.qualifier>
         <liquibase.version.snapshot>-SNAPSHOT</liquibase.version.snapshot>
         <liquibase.version>${liquibase.base.version}${liquibase.version.qualifier}${liquibase.version.snapshot}
@@ -180,6 +180,13 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.12</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>2.7.0</version>
             <scope>test</scope>
         </dependency>
 

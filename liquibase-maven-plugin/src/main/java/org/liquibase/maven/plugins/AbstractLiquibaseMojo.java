@@ -45,6 +45,7 @@ import java.util.*;
  * that it would had if it was ran inside test phase
  * @requiresDependencyResolution test
  */
+@SuppressWarnings("java:S2583")
 public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     /**

@@ -1,6 +1,26 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.4.2 (2021.07.22)
+
+- Changed NullPointerException to ChangeLogParseException for the output when there is a typo in a changeSet node (#1593)
+- Added the support method to DatabaseConnection (#1784)
+- Fixed the issue with handling serial and bigserial if liquibase.convertDataTypes=false (#1883)
+- Improved the ConfigurationValueProvider performance (#1952)
+- Added the ability to allow an empty string for the defaultValue attribute (#1963)
+- Reintroduced support for the - arguments in the CLI (#1943)
+- Restored the updateTestingRollback command (#1939) 
+- Added the Maven goal for unexpectedChangeSets (#1972)
+- Extended the dropAll command with optional hubConnectionId and hubProjectId attributes. For more information, check our [dropAll command]documentation.
+- Fixed nested properties and the substitution of variables in YML changelogs.
+- Implemented the ability to use connectionjdbcurl when there is no project or connection ID with the dropAll command.
+- Improved the Liquibase Pro License key messaging.
+- Added the ability to handle a declined auto-registration when running the dropAll command.
+- Fixed auto-registration issues.
+- [PRO] Added the ability to handle special characters in procedures when using the generateChangeLog command.
+- [PRO] Fixed the issue with formatted SQL changesets and runwith:sqlplus being stopped unless Liquibase includes a quit statement. 
+- [PRO] Fixed the SQL Plus spool log issue.
+
 Changes in version 4.4.1 (2021.07.09)
  - GH PR#1869 ⁃ HubUpdater releases lock even though registration is skipped
  - GH PR#1861 ⁃ Only snapshot tables/columns in loadData

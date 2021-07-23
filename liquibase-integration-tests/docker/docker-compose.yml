@@ -51,5 +51,19 @@ services:
       - "./mssql-init.sql:/docker-entrypoint-initdb.d/mssql-init.sql"
     entrypoint: /bin/bash /docker-entrypoint-initdb.d/mssql-init.sh
 
+  mariadb:
+    image: mariadb:10.5
+    ports:
+      - "33066:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: LbRootPass1
+      MYSQL_DATABASE: lbcat
+      MYSQL_USER: lbuser
+      MYSQL_PASSWORD: LiquibasePass1
+    networks:
+      - integration
+    volumes:
+      - "./mariadb-init.sql:/docker-entrypoint-initdb.d/mariadb-init.sql"
 networks:
   integration:
