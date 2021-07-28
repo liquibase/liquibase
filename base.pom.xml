@@ -210,12 +210,25 @@
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.jeasy/easy-rules -->
-        <dependency>
+      <!--  <dependency>
             <groupId>org.jeasy</groupId>
             <artifactId>easy-rules</artifactId>
             <version>4.1.0</version>
             <type>pom</type>
+        </dependency> -->
+        <!-- https://mvnrepository.com/artifact/org.jeasy/easy-rules-core -->
+        <dependency>
+            <groupId>org.jeasy</groupId>
+            <artifactId>easy-rules-core</artifactId>
+            <version>4.1.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jeasy/easy-rules-mvel -->
+        <dependency>
+            <groupId>org.jeasy</groupId>
+            <artifactId>easy-rules-mvel</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+
 
     </dependencies>
 
