@@ -209,6 +209,13 @@
             <version>2.3.0</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jeasy/easy-rules -->
+        <dependency>
+            <groupId>org.jeasy</groupId>
+            <artifactId>easy-rules</artifactId>
+            <version>4.1.0</version>
+            <type>pom</type>
+        </dependency>
 
     </dependencies>
 
