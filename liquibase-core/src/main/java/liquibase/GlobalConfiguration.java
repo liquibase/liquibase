@@ -57,7 +57,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(10L)
                 .build();
 
-        LIQUIBASE_TABLESPACE_NAME = builder.define("tablespaceName", String.class)
+        LIQUIBASE_TABLESPACE_NAME = builder.define("liquibaseTablespaceName", String.class)
                 .setDescription("Tablespace to use for Liquibase objects")
                 .build();
 
