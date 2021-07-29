@@ -1526,7 +1526,11 @@ public class Main {
                     this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
                     this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
                     this.databaseChangeLogLockTableName);
-            database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+            if (this.databaseChangeLogTablespaceName != null) {
+                database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+            } else {
+                database.setLiquibaseTablespaceName(GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentConfiguredValue().getValue());
+            }
         }
 
         try {

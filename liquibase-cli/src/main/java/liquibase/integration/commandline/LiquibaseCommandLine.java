@@ -373,6 +373,7 @@ public class LiquibaseCommandLine {
         final ListIterator<String> iterator = Arrays.asList(args).listIterator();
         while (iterator.hasNext()) {
             String arg = iterator.next();
+            arg = arg.replaceAll("(?i)databaseChangeLogTablespace", "liquibaseTablespaceName");
             String argAsKey = arg.replace("-", "").toLowerCase();
 
             if (arg.startsWith("-")) {
