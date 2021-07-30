@@ -1,0 +1,35 @@
+SET ECHO ON;
+WHENEVER SQLERROR EXIT SQL.SQLCODE;
+--
+-- Check that PDB's are running
+--
+COLUMN CON_ID FORMAT 9999999;
+COLUMN NAME FORMAT A20;
+COLUMN OPEN_MODE FORMAT A20;
+SELECT CON_ID, NAME, OPEN_MODE FROM V$PDBS; 
+
+
+SET ECHO ON;
+-- 
+-- Clone the SEED database and create the pluggable databases
+-- 
+
+-- Creating PDB lbcat
+ALTER SESSION SET PDB_FILE_NAME_CONVERT='/opt/oracle/oradata/ORCLCDB/pdbseed', '/opt/oracle/oradata/ORCLCDB/lbcat', '/opt/oracle/oradata/ORCLCDB/pdbseed/system01.dbf', '/opt/oracle/oradata/ORCLCDB/lbcat/system01.dbf'; 
+CREATE PLUGGABLE DATABASE lbcat ADMIN USER DATICAL_ADMIN IDENTIFIED BY DATICAL_ADMIN_PW; 
+ALTER PLUGGABLE DATABASE lbcat OPEN READ WRITE; 
+ALTER PLUGGABLE DATABASE lbcat SAVE STATE; 
+
+-- Creating PDB lbcat2
+ALTER SESSION SET PDB_FILE_NAME_CONVERT='/opt/oracle/oradata/ORCLCDB/pdbseed', '/opt/oracle/oradata/ORCLCDB/lbcat2', '/opt/oracle/oradata/ORCLCDB/pdbseed/system01.dbf', '/opt/oracle/oradata/ORCLCDB/lbcat2/system01.dbf'; 
+CREATE PLUGGABLE DATABASE lbcat2 ADMIN USER DATICAL_ADMIN IDENTIFIED BY DATICAL_ADMIN_PW; 
+ALTER PLUGGABLE DATABASE lbcat2 OPEN READ WRITE; 
+ALTER PLUGGABLE DATABASE lbcat2 SAVE STATE; 
+
+--
+-- Check that PDB's are running
+--
+COLUMN CON_ID FORMAT 9999999;
+COLUMN NAME FORMAT A20;
+COLUMN OPEN_MODE FORMAT A20;
+SELECT CON_ID, NAME, OPEN_MODE FROM V$PDBS; 

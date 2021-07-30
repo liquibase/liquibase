@@ -27,6 +27,8 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
         distribution: 'adopt'
+    - name: Docker login to retrive db images from private repo
+      run: docker login "${{ secrets.RT_URL }}" -u "${{ secrets.RT_USER }}" -p "${{ secrets.RT_PWD }}"
     - name: Start Docker Databases
       run: docker-compose -f ./liquibase-integration-tests/docker/docker-compose.yml up -d
     - name: Test With Maven
