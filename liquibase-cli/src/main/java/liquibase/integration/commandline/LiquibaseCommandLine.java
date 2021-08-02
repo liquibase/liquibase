@@ -828,7 +828,7 @@ public class LiquibaseCommandLine {
 
         final SortedSet<ConfigurationDefinition<?>> globalConfigurations = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getRegisteredDefinitions(false);
         for (ConfigurationDefinition<?> def : globalConfigurations) {
-            String[] argNames = toArgNames(def);
+            final String[] argNames = toArgNames(def);
             for (int i = 0; i < argNames.length; i++) {
                 final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(argNames[i])
                         .required(false)
