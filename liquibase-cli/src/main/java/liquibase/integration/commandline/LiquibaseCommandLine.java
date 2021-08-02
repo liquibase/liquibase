@@ -159,7 +159,6 @@ public class LiquibaseCommandLine {
                 "liquibaseSchemaName",
                 "databaseChangeLogTableName",
                 "databaseChangeLogLockTableName",
-                "databaseChangeLogTablespaceName",
                 "classpath",
                 "propertyProviderClass",
                 "promptForNonLocalDatabase",
@@ -373,7 +372,6 @@ public class LiquibaseCommandLine {
         final ListIterator<String> iterator = Arrays.asList(args).listIterator();
         while (iterator.hasNext()) {
             String arg = iterator.next();
-            arg = arg.replaceAll("(?i)databaseChangeLogTablespace", "liquibaseTablespaceName");
             String argAsKey = arg.replace("-", "").toLowerCase();
 
             if (arg.startsWith("-")) {
@@ -830,7 +828,7 @@ public class LiquibaseCommandLine {
 
         final SortedSet<ConfigurationDefinition<?>> globalConfigurations = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getRegisteredDefinitions(false);
         for (ConfigurationDefinition<?> def : globalConfigurations) {
-            final String[] argNames = toArgNames(def);
+            String[] argNames = toArgNames(def);
             for (int i = 0; i < argNames.length; i++) {
                 final CommandLine.Model.OptionSpec.Builder optionBuilder = CommandLine.Model.OptionSpec.builder(argNames[i])
                         .required(false)
@@ -946,7 +944,37 @@ public class LiquibaseCommandLine {
         returnList.add("--" + StringUtil.toKabobCase(def.getKey()).replace(".", "-"));
         returnList.add("--" + def.getKey().replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
         returnList.add("--" + def.getKey().replaceAll("\\.", ""));
-        return returnList.toArray(new String[0]);
+
+        for (String aliasKey : def.getAliasKeys()) {
+            returnList.add("--" + StringUtil.toKabobCase(aliasKey.replaceFirst("^liquibase.", "")).replace(".", "-"));
+            returnList.add("--" + StringUtil.toKabobCase(aliasKey).replace(".", "-"));
+            returnList.add("--" + aliasKey.replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
+            returnList.add("--" + aliasKey.replaceAll("\\.", ""));
+        }
+
+        Set<String> finalSet = deDupArgs(returnList);
+        return finalSet.toArray(new String[0]);
+    }
+
+    private static Set<String> deDupArgs(LinkedHashSet<String> returnList) {
+        //
+        // De-dup to create the return set of argument names
+        //
+        Set<String> finalSet = new LinkedHashSet<>();
+        String[] candidates = returnList.toArray(new String[0]);
+        for (String candidate : candidates) {
+            boolean found = false;
+            for (String inList : finalSet) {
+                if (candidate.equalsIgnoreCase(inList)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (! found) {
+                finalSet.add(candidate);
+            }
+        }
+        return finalSet;
     }
 
     public static class SecureLogFilter implements Filter {

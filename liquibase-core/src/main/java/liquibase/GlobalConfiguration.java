@@ -58,6 +58,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         LIQUIBASE_TABLESPACE_NAME = builder.define("liquibaseTablespaceName", String.class)
+                .addAliasKey("liquibase.liquibaseTableSpaceName")
+                .addAliasKey("liquibase.databaseChangeLogTablespaceName")
                 .setDescription("Tablespace to use for Liquibase objects")
                 .build();
 
