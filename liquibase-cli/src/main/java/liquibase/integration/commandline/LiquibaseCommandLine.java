@@ -939,42 +939,39 @@ public class LiquibaseCommandLine {
     }
 
     protected static String[] toArgNames(ConfigurationDefinition<?> def) {
-        LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        returnList.add("--" + StringUtil.toKabobCase(def.getKey().replaceFirst("^liquibase.", "")).replace(".", "-"));
-        returnList.add("--" + StringUtil.toKabobCase(def.getKey()).replace(".", "-"));
-        returnList.add("--" + def.getKey().replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
-        returnList.add("--" + def.getKey().replaceAll("\\.", ""));
+        List<String> keys = new ArrayList<>();
+        keys.add(def.getKey());
+        keys.addAll(def.getAliasKeys());
 
-        for (String aliasKey : def.getAliasKeys()) {
-            returnList.add("--" + StringUtil.toKabobCase(aliasKey.replaceFirst("^liquibase.", "")).replace(".", "-"));
-            returnList.add("--" + StringUtil.toKabobCase(aliasKey).replace(".", "-"));
-            returnList.add("--" + aliasKey.replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
-            returnList.add("--" + aliasKey.replaceAll("\\.", ""));
+        List<String> returns = new CaseInsensitiveList();
+        for (String key : keys) {
+            insertWithoutDuplicates(returns, "--" + StringUtil.toKabobCase(key.replaceFirst("^liquibase.", "")).replace(".", "-"));
+            insertWithoutDuplicates(returns, "--" + StringUtil.toKabobCase(key.replace(".", "-")));
+            insertWithoutDuplicates(returns, "--" + key.replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
+            insertWithoutDuplicates(returns, "--" + key.replaceAll("\\.", ""));
         }
 
-        Set<String> finalSet = deDupArgs(returnList);
-        return finalSet.toArray(new String[0]);
+        return returns.toArray(new String[0]);
     }
 
-    private static Set<String> deDupArgs(LinkedHashSet<String> returnList) {
-        //
-        // De-dup to create the return set of argument names
-        //
-        Set<String> finalSet = new LinkedHashSet<>();
-        String[] candidates = returnList.toArray(new String[0]);
-        for (String candidate : candidates) {
-            boolean found = false;
-            for (String inList : finalSet) {
-                if (candidate.equalsIgnoreCase(inList)) {
-                    found = true;
-                    break;
+    private static class CaseInsensitiveList extends ArrayList<String> {
+        @Override
+        public boolean contains(Object o) {
+            String paramStr = (String)o;
+            for (String s : this) {
+                if (paramStr.equalsIgnoreCase(s)) {
+                    return true;
                 }
             }
-            if (! found) {
-                finalSet.add(candidate);
-            }
+            return false;
         }
-        return finalSet;
+    }
+
+    private static void insertWithoutDuplicates(List<String> returnList, String key) {
+        if (returnList.contains(key)) {
+            return;
+        }
+        returnList.add(key);
     }
 
     public static class SecureLogFilter implements Filter {
