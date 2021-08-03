@@ -37,8 +37,13 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 }
                 reader = new BufferedReader(StreamUtil.readStreamWithReader(fileStream, null));
 
-                String line = reader.readLine();
-                return (line != null) && line.matches("\\-\\-\\s*liquibase formatted.*");
+                String firstLine = reader.readLine();
+
+                while (firstLine.trim().isEmpty() && reader.ready()) {
+                    firstLine = reader.readLine();
+                }
+
+                return (firstLine != null) && firstLine.matches("\\-\\-\\s*liquibase formatted.*");
             } else {
                 return false;
             }
