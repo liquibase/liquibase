@@ -92,8 +92,36 @@ GRANT EXP_FULL_DATABASE TO lbuser WITH ADMIN OPTION;
 GRANT IMP_FULL_DATABASE TO lbuser WITH ADMIN OPTION;
 GRANT SELECT ANY dictionary TO lbuser WITH ADMIN OPTION;
 GRANT ALTER SESSION TO lbuser WITH ADMIN OPTION;
-
--- try adding dba back to lbuser to fix things:
 GRANT "DBA" TO lbuser;
+
+
+-- Create lbcat2 USER
+-- not sure why this user is needed, but not having it will result in an error. Setting grants the same as lbuser
+CREATE USER lbcat2 IDENTIFIED BY LiquibasePass1
+DEFAULT TABLESPACE "USERS"
+TEMPORARY TABLESPACE "TEMP"
+ACCOUNT UNLOCK;
+ALTER USER lbcat2 QUOTA 100M ON USERS;
+GRANT UNLIMITED TABLESPACE TO lbcat2 WITH ADMIN OPTION;
+-- Oracle Oddity: Remember to grant "create table" to the schema owner, or Datical will not be able to create materialized views in that schema.
+GRANT CREATE TABLE TO lbcat2 WITH ADMIN OPTION;
+--Grant Section
+-- Grant LIQUIBASE_ROLE role to the Datical User
+GRANT LIQUIBASE_ROLE to lbcat2 with ADMIN OPTION;
+
+-- Granting to the specific schema  (not just the role) is required
+-- GRANT ALL ON DIRECTORY does not work with Oracle RDS use the following instead
+GRANT READ ON DIRECTORY DATA_PUMP_DIR TO lbcat2 with GRANT OPTION;
+GRANT WRITE ON DIRECTORY DATA_PUMP_DIR TO lbcat2 with GRANT OPTION;
+GRANT CREATE SESSION TO lbcat2 WITH ADMIN OPTION;
+GRANT CONNECT, RESOURCE TO lbcat2 WITH ADMIN OPTION;
+GRANT EXP_FULL_DATABASE TO lbcat2 WITH ADMIN OPTION;
+GRANT IMP_FULL_DATABASE TO lbcat2 WITH ADMIN OPTION;
+GRANT SELECT ANY dictionary TO lbcat2 WITH ADMIN OPTION;
+GRANT ALTER SESSION TO lbcat2 WITH ADMIN OPTION;
+
+-- try adding dba back to lbcat2 to fix things:
+GRANT "DBA" TO lbcat2;
+
 
 PROMPT "roles.sql complete"

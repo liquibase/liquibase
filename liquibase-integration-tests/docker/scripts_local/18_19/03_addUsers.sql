@@ -11,6 +11,10 @@ CREATE TABLESPACE USERS
    AUTOEXTEND ON NEXT 256K; 
 ALTER PLUGGABLE DATABASE DEFAULT TABLESPACE USERS;  
 
+CREATE TABLESPACE LIQUIBASE2
+  DATAFILE '/opt/oracle/oradata/ORCLCDB/lbcat/liquibase2.dbf' SIZE 20M 
+  AUTOEXTEND ON;
+
 -- Create roles and "lbuser" user
 @/opt/oracle/scripts/startup/support/roles.sql lbcat
 
@@ -26,7 +30,11 @@ CREATE TABLESPACE USERS
    AUTOEXTEND ON NEXT 256K; 
 ALTER PLUGGABLE DATABASE DEFAULT TABLESPACE USERS;  
 
--- Create roles and "lbuser" user
+CREATE TABLESPACE LIQUIBASE2
+  DATAFILE '/opt/oracle/oradata/ORCLCDB/lbcat2/liquibase2.dbf' SIZE 20M 
+  AUTOEXTEND ON;
+
+-- Create necessary roles and users
 @/opt/oracle/scripts/startup/support/roles.sql lbcat2
 
 -- 
