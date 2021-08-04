@@ -78,8 +78,6 @@
                 <include>com.sun.xml.bind:jaxb-core:jar:</include>
                 <include>com.h2database:h2:jar:</include>
                 <include>info.picocli:picocli:jar:</include>
-                <include>org.jeasy:easy-rules-core:jar:</include>
-                <include>org.jeasy:easy-rules-mvel:jar:</include>
             </includes>
         </dependencySet>
     </dependencySets>
