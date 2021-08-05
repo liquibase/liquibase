@@ -159,7 +159,6 @@ public class LiquibaseCommandLine {
                 "liquibaseSchemaName",
                 "databaseChangeLogTableName",
                 "databaseChangeLogLockTableName",
-                "databaseChangeLogTablespaceName",
                 "classpath",
                 "propertyProviderClass",
                 "promptForNonLocalDatabase",
@@ -940,12 +939,39 @@ public class LiquibaseCommandLine {
     }
 
     protected static String[] toArgNames(ConfigurationDefinition<?> def) {
-        LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        returnList.add("--" + StringUtil.toKabobCase(def.getKey().replaceFirst("^liquibase.", "")).replace(".", "-"));
-        returnList.add("--" + StringUtil.toKabobCase(def.getKey()).replace(".", "-"));
-        returnList.add("--" + def.getKey().replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
-        returnList.add("--" + def.getKey().replaceAll("\\.", ""));
-        return returnList.toArray(new String[0]);
+        List<String> keys = new ArrayList<>();
+        keys.add(def.getKey());
+        keys.addAll(def.getAliasKeys());
+
+        List<String> returns = new CaseInsensitiveList();
+        for (String key : keys) {
+            insertWithoutDuplicates(returns, "--" + StringUtil.toKabobCase(key.replaceFirst("^liquibase.", "")).replace(".", "-"));
+            insertWithoutDuplicates(returns, "--" + StringUtil.toKabobCase(key.replace(".", "-")));
+            insertWithoutDuplicates(returns, "--" + key.replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
+            insertWithoutDuplicates(returns, "--" + key.replaceAll("\\.", ""));
+        }
+
+        return returns.toArray(new String[0]);
+    }
+
+    private static class CaseInsensitiveList extends ArrayList<String> {
+        @Override
+        public boolean contains(Object o) {
+            String paramStr = (String)o;
+            for (String s : this) {
+                if (paramStr.equalsIgnoreCase(s)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    private static void insertWithoutDuplicates(List<String> returnList, String key) {
+        if (returnList.contains(key)) {
+            return;
+        }
+        returnList.add(key);
     }
 
     public static class SecureLogFilter implements Filter {

@@ -36,6 +36,16 @@ class LiquibaseCommandLineTest extends Specification {
     }
 
     @Unroll
+    def "toArgNames for configuration arguments and aliases"() {
+        expect:
+        LiquibaseCommandLine.toArgNames(new ConfigurationDefinition.Builder(prefix).define(argName, String).addAliasKey(alias).buildTemporary()).join(", ") == expected
+
+        where:
+        prefix          | argName          | alias                 | expected
+        "liquibase"     | "test"           | "testAlias"           | "--test, --liquibase-test, --liquibasetest, --test-alias, --testAlias"
+    }
+
+    @Unroll
     def "adjustLegacyArgs"() {
         expect:
         new LiquibaseCommandLine().adjustLegacyArgs(input as String[]).toArrayString() == (expected as String[]).toArrayString()
