@@ -65,5 +65,16 @@ services:
       - integration
     volumes:
       - "./mariadb-init.sql:/docker-entrypoint-initdb.d/mariadb-init.sql"
+
+  oracle:
+    image: docker-dev.artifactory.datical.net/datical/oracle-ee:19.3.0-local
+    networks:
+      - integration
+    volumes:
+      - "./scripts_local/18_19:/opt/oracle/scripts/startup"
+    ports:
+      - "1521:1521"
+    restart: always
+
 networks:
   integration:
