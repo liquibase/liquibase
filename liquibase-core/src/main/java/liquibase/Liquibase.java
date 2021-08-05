@@ -1162,7 +1162,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", "rollback-to-tag", connection, changeLogFile, contexts, labelExpression, listLogIterator);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", "rollback", connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //

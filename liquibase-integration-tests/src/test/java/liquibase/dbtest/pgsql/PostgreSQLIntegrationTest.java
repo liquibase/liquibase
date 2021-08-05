@@ -1,6 +1,5 @@
 package liquibase.dbtest.pgsql;
 
-import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.CreateTableChange;
@@ -13,9 +12,6 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.executor.ExecutorService;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,6 +22,18 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
     public PostgreSQLIntegrationTest() throws Exception {
         super("pgsql", DatabaseFactory.getInstance().getDatabase("postgresql"));
+    }
+
+    /**
+     * Postgresql caches info including enum oid mappings in the connection. When we do a lot of dropping/re-creating in the tests it gets confused.
+     * Closing the connection
+     */
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        if (getDatabase() != null && getDatabase().getConnection() != null) {
+            getDatabase().getConnection().close();
+        }
     }
 
     @Override
