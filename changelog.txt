@@ -1,6 +1,32 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.4.3 (2021.08.05)
+
+- Do not worry about FileSystemAlreadyExistsException errors #1885
+- The sqlFile and relativeToChangelogFile attributes fail when using the logicalFilePath attribute #1277
+- The wrong path received if relativeToChangelogFile=true and databaseChangeLog has logicalFilePath != PhisicalFilePath #1353
+- Added a separate query for DB2 on AS400, which fixed the dropAll command on DB2 for iSeries #1412
+- Fixed the logicalFilePath attribute not being serialized #1471
+- Fixed the SqlParser bug related to parsing UTF-8 valid symbols #1513
+- Fixed the invalid update SQL generated for HSQL database in InsertOrUpdateGeneratorHsql.java #1563
+- Added a validation error when the customChange Change Type has no name attribute #1592
+- Fixed the issue with Liquibase failing to create a DATABASECHANGELOGLOCK record and apply changesets into Firebird 3. isNumericBoolean now checks the Firebird3Database instance type and returns Boolean for Firebird 3. #1875
+- Fixed the issue with escaping question marks in PostgreSQL: #1877
+- SQL changesets are transforming the PostgreSQL ? JSON operator into ??, causing function definitions using this operator to become invalid #1764
+- An error when processing a large Postgres SQL changeset #1507
+- Fixed the issue with ClassCastException in a standard lock service: java.time.LocalDateTime cannot be cast to java.util.Date #1878
+- Added the MySQL reserved word CUBE to the list of Liquibase reserved columns for the schema migration to work. CUBE is a reserved word as of MySQL 8.0.1 #1515
+- Added the ability to handle empty lines at the beginning of a formatted SQL #1713
+- Fixed loading the CLOB data into PostgreSQL. Instead of loading the CLOB file name, PostgreSQL loads the content of the CLOB file. #1791
+- Changed the MD5SUM column value from RawSqlStatement to UpdateStatement #1602
+- Fixed synchronization in ChangeLogHistoryServiceFactory.java #1361
+- Enabled the dropAll report to work with a registered changelog with no extra arguments and send the information to Liquibase Hub
+- Renamed the tablespaceName parameter to liquibaseTablespaceName
+- Changed from RawSqlStatement to UpdateStatement #1602
+- Fix synchronization in ChangeLogHistoryServiceFactory.java #1361
+- [PRO] Fixed the changeset execution failure related to the DATICAL_SPERRORLOG table when using the runWith=sqlplus attribute and executing operations as a user with only SELECT, UPDATE, and INSERT permissions [DAT-7410]
+
 Changes in version 4.4.2 (2021.07.22)
 
 - Changed NullPointerException to ChangeLogParseException for the output when there is a typo in a changeSet node (#1593)
