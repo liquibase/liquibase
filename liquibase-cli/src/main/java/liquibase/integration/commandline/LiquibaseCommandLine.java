@@ -627,6 +627,16 @@ public class LiquibaseCommandLine {
 
             configureHelp(subCommandSpec, false);
 
+            //
+            // Add to the usageMessage footer if the CommandDefinition has a footer
+            //
+            if (commandDefinition.getHelpFooter() != null) {
+                String[] usageMessageFooter = subCommandSpec.usageMessage().footer();
+                List<String> list = new ArrayList<>(Arrays.asList(usageMessageFooter));
+                list.add(commandDefinition.getHelpFooter());
+                subCommandSpec.usageMessage().footer(list.toArray(new String[0]));
+            }
+
             String shortDescription = commandDefinition.getShortDescription();
             String displayDescription = shortDescription;
             String legacyCommand = commandName[commandName.length-1];
@@ -804,7 +814,12 @@ public class LiquibaseCommandLine {
         final CommandLine.Model.CommandSpec groupSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(null, defaultFactory);
 
         configureHelp(groupSpec, false);
-
+        if (commandDefinition.getHelpFooter() != null) {
+            String[] usageMessageFooter = groupSpec.usageMessage().footer();
+            List<String> list = new ArrayList<>(Arrays.asList(usageMessageFooter));
+            list.add(commandDefinition.getHelpFooter());
+            groupSpec.usageMessage().footer(list.toArray(new String[0]));
+        }
 
         groupSpec.optionsCaseInsensitive(true);
         groupSpec.subcommandsCaseInsensitive(true);
