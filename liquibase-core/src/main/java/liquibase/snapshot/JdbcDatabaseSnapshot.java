@@ -1,12 +1,5 @@
 package liquibase.snapshot;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.*;
-
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
@@ -36,6 +29,18 @@ import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
+
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
@@ -67,6 +72,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
     public class CachingDatabaseMetaData {
 
+        private static final String SQL_FILTER_MATCH_ALL = "%";
         private DatabaseMetaData databaseMetaData;
         private Database database;
 
@@ -976,6 +982,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         return queryMssql(catalogAndSchema, table);
                     } else if (database instanceof Db2zDatabase) {
                         return queryDb2Zos(catalogAndSchema, table);
+                    } else if (database instanceof PostgresDatabase) {
+                        return queryPostgres(catalogAndSchema, table);
                     }
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
@@ -993,6 +1001,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         return queryMssql(catalogAndSchema, null);
                     } else if (database instanceof Db2zDatabase) {
                         return queryDb2Zos(catalogAndSchema, null);
+                    } else if (database instanceof PostgresDatabase) {
+                        return queryPostgres(catalogAndSchema, table);
                     }
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
@@ -1073,6 +1083,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     }
 
                     return executeAndExtract(sql, database);
+                }
+                private List<CachedRow> queryPostgres(CatalogAndSchema catalogAndSchema, String tableName) throws SQLException {
+                    String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
+                    String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    return extract(databaseMetaData.getTables(catalog, schema, ((tableName == null) ?
+                            SQL_FILTER_MATCH_ALL : tableName), new String[]{"TABLE", "PARTITIONED TABLE"}));
+
                 }
             });
         }
