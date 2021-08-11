@@ -164,7 +164,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         if (!foundOptional) {
             signature.println "  NONE"
         }
-
+        String helpFooter = commandDefinition.getHelpFooter()
+        if (helpFooter != null) {
+            signature.println "Help Footer:" + helpFooter
+        }
 
         assert StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(signature.toString())) ==
                StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(commandTestDefinition.signature))
@@ -465,7 +468,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 }
             }
             catch (Exception e) {
-                throw new RuntimeException("No command tests found in ${path}.\nIf running CommandTests directly, make sure you are choosing the classpath of the module you want to test")
+                String message = "Error loading tests in ${path}: ${e.message}"
+                throw new RuntimeException("${message}.\nIf running CommandTests directly, make sure you are choosing the classpath of the module you want to test")
             }
         }
 
