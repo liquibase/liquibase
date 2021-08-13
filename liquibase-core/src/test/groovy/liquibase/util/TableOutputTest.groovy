@@ -7,7 +7,7 @@ import spock.lang.Specification
 class TableOutputTest extends Specification {
     def "Table Output"() {
          when:
-         ConsoleUIService console = Scope.getCurrentScope().getUI()
+         ConsoleUIService console = Scope.getCurrentScope().getUI() as ConsoleUIService
          def outputStream = new ByteArrayOutputStream()
          console.setOutputStream(new PrintStream(outputStream))
          TableOutput.formatOutput(table as String[][], maxWidths as int[], leftJustified, new OutputStreamWriter(outputStream))
@@ -21,7 +21,7 @@ class TableOutputTest extends Specification {
     }
     def "Data array length must match widths"() {
         when:
-        ConsoleUIService console = Scope.getCurrentScope().getUI()
+        ConsoleUIService console = Scope.getCurrentScope().getUI() as ConsoleUIService
         def outputStream = new ByteArrayOutputStream()
         console.setOutputStream(new PrintStream(outputStream))
         TableOutput.formatOutput(table as String[][], maxWidths as int[], leftJustified, new OutputStreamWriter(outputStream))
