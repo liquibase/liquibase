@@ -117,16 +117,16 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         }
     }
 
-    private Object getCommentsColumn(ChangeSet changeSet) {
+    private String getCommentsColumn(ChangeSet changeSet) {
         return limitSize(StringUtil.trimToEmpty(changeSet.getComments()));
     }
 
-    private Object getContextsColumn(ChangeSet changeSet) {
+    private String getContextsColumn(ChangeSet changeSet) {
         return ((changeSet.getContexts() == null) || changeSet.getContexts()
                 .isEmpty()) ? null : buildFullContext(changeSet);
     }
 
-    private Object getLabelsColumn(ChangeSet changeSet) {
+    private String getLabelsColumn(ChangeSet changeSet) {
         return ((changeSet.getLabels() == null) || changeSet.getLabels()
                 .isEmpty()) ? null : changeSet.getLabels().toString();
     }
