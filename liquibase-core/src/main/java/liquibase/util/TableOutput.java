@@ -9,31 +9,6 @@ import java.io.Writer;
 import java.util.*;
 
 public class TableOutput {
-    public static void main(String[] args) {
-        /*
-         * Table to print in console in 2-dimensional array. Each sub-array is a row.
-         */
-        String[][] table = new String[][] { { "id", "First Name", "Last Name", "Age", "Profile" },
-            { "1", "John", "Johnson", "45", "My name is John Johnson. My id is 1. My age is 45." },
-            { "2", "Tom", "", "35", "My name is Tom. My id is 2. My age is 35." },
-            { "3", "Rose", "Johnson Johnson Johnson Johnson Johnson Johnson Johnson Johnson Johnson Johnson", "22",
-                "My name is Rose Johnson. My id is 3. My age is 22." },
-            { "4", "Jimmy", "Kimmel", "", "My name is Jimmy Kimmel. My id is 4. My age is not specified. "
-                + "I am the host of the late night show. I am not fan of Matt Damon. " } };
-        int[] maxWidths = {30, 30, 30, 30, 30};
-        try {
-            formatOutput(table, maxWidths, true, new OutputStreamWriter(System.out));
-        } catch (LiquibaseException ioe) {
-            throw new RuntimeException(ioe);
-        }
-
-        try {
-            table = new String[][] {{ "id", "First Name", "Last Name", "Age", "Profile" }};
-            formatOutput(table, maxWidths, true, new OutputStreamWriter(System.out));
-        } catch (LiquibaseException ioe) {
-            throw new RuntimeException(ioe);
-        }
-    }
 
     /**
      *
