@@ -72,9 +72,9 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addNewColumnValue("EXECTYPE", statement.getExecType().value)
                         .addNewColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId())
-                        .addNewColumnValue(COMMENTS, column_Comments(changeSet))
-                        .addNewColumnValue(CONTEXTS, column_Contexts(changeSet))
-                        .addNewColumnValue(LABELS, column_Labels(changeSet))
+                        .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
+                        .addNewColumnValue(CONTEXTS, getContextsColumn(changeSet))
+                        .addNewColumnValue(LABELS, getLabelsColumn(changeSet))
                         .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
                                 "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
                                 "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
@@ -92,10 +92,10 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                             .addColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
                             .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                             .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
-                            .addColumnValue(COMMENTS, column_Comments(changeSet))
+                            .addColumnValue(COMMENTS, getCommentsColumn(changeSet))
                             .addColumnValue("EXECTYPE", statement.getExecType().value)
-                            .addColumnValue(CONTEXTS, column_Contexts(changeSet))
-                            .addColumnValue(LABELS, column_Labels(changeSet))
+                            .addColumnValue(CONTEXTS, getContextsColumn(changeSet))
+                            .addColumnValue(LABELS, getLabelsColumn(changeSet))
                         .addColumnValue("LIQUIBASE", StringUtil.limitSize(LiquibaseUtil.getBuildVersion()
                                                                                             .replaceAll("SNAPSHOT", "SNP")
                                                                                             .replaceAll("beta", "b")
@@ -117,16 +117,16 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         }
     }
 
-    private Object column_Comments(ChangeSet changeSet) {
+    private Object getCommentsColumn(ChangeSet changeSet) {
         return limitSize(StringUtil.trimToEmpty(changeSet.getComments()));
     }
 
-    private Object column_Contexts(ChangeSet changeSet) {
+    private Object getContextsColumn(ChangeSet changeSet) {
         return ((changeSet.getContexts() == null) || changeSet.getContexts()
                 .isEmpty()) ? null : buildFullContext(changeSet);
     }
 
-    private Object column_Labels(ChangeSet changeSet) {
+    private Object getLabelsColumn(ChangeSet changeSet) {
         return ((changeSet.getLabels() == null) || changeSet.getLabels()
                 .isEmpty()) ? null : changeSet.getLabels().toString();
     }
