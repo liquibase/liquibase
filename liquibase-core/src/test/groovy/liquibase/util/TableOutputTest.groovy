@@ -10,7 +10,7 @@ class TableOutputTest extends Specification {
          ConsoleUIService console = Scope.getCurrentScope().getUI()
          def outputStream = new ByteArrayOutputStream()
          console.setOutputStream(new PrintStream(outputStream))
-         TableOutput.formatOutput(table as String[][], maxWidths as int[], leftJustified)
+         TableOutput.formatOutput(table as String[][], maxWidths as int[], leftJustified, new OutputStreamWriter(outputStream))
 
          then:
          outputStream.toString().trim().replaceAll("\r", "") == expected
@@ -24,7 +24,7 @@ class TableOutputTest extends Specification {
         ConsoleUIService console = Scope.getCurrentScope().getUI()
         def outputStream = new ByteArrayOutputStream()
         console.setOutputStream(new PrintStream(outputStream))
-        TableOutput.formatOutput(table as String[][], maxWidths as int[], leftJustified)
+        TableOutput.formatOutput(table as String[][], maxWidths as int[], leftJustified, new OutputStreamWriter(outputStream))
 
         then:
         thrown RuntimeException
