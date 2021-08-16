@@ -164,11 +164,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         if (!foundOptional) {
             signature.println "  NONE"
         }
-        String helpFooter = commandDefinition.getHelpFooter()
-        if (helpFooter != null) {
-            signature.println "Help Footer:" + helpFooter
-        }
-
         assert StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(signature.toString())) ==
                StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(commandTestDefinition.signature))
 
