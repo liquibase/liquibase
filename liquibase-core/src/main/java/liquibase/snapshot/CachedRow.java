@@ -34,6 +34,8 @@ public class CachedRow {
             return ((Number) o).intValue();
         } else if (o instanceof String) {
             return Integer.valueOf((String) o);
+        } else if (o instanceof byte[]) {
+            return Integer.valueOf(new String((byte[]) o));
         }
         return (Integer) o;
     }
