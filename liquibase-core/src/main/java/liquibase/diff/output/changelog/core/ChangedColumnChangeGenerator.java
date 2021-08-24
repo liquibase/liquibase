@@ -327,6 +327,4 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
         return true;
     }
 
-    private
-
 }
