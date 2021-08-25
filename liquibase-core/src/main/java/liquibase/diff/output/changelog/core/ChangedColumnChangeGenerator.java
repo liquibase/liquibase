@@ -69,7 +69,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
         handleAutoIncrementDifferences(column, differences, control, changes, referenceDatabase, comparisonDatabase);
 
         // DAT-7409 & DAT-7559: add 'addNotNullConstraint' change if any differences between columns found except of nullable difference
-        // Comment: type, default value and auto increment differences generate liquibase change that generates `ALTER TABLE ... ALTER COLUMN ... sql statement
+        // Comment: type, default value and auto increment differences generate liquibase change that generates 'ALTER TABLE ... ALTER COLUMN ...' sql statement
         // and this statement removes NOT NULL constraint from a column, to prevent it we need to add add not null constraint back.
         if (comparisonDatabase instanceof MSSQLDatabase) {
             Difference nullableDifference = differences.getDifference("nullable");
