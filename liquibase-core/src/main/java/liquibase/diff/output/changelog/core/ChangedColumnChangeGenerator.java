@@ -200,7 +200,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
 
                 changes.add(change);
 
-                // DAT-7409 & DAT-7559 (obly for MSSQL): add 'addNotNullConstraint' change if:
+                // DAT-7409 & DAT-7559 (only for MSSQL): add 'addNotNullConstraint' change if:
                 //                      1. data type changed ('type' difference was found)
                 //                      2. no differences for 'nullable' ('nullable' difference was not found)
                 //                      3. a column is not nullable
