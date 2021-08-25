@@ -68,6 +68,19 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
         handleDefaultValueDifferences(column, differences, control, changes, referenceDatabase, comparisonDatabase);
         handleAutoIncrementDifferences(column, differences, control, changes, referenceDatabase, comparisonDatabase);
 
+        // DAT-7409 & DAT-7559: add 'addNotNullConstraint' change if any differences between columns found except of nullable difference
+        // Comment: type, default value and auto increment differences generate liquibase change that generates `ALTER TABLE ... ALTER COLUMN ... sql statement
+        // and this statement removes NOT NULL constraint from a column, to prevent it we need to add add not null constraint back.
+        if (comparisonDatabase instanceof MSSQLDatabase) {
+            Difference nullableDifference = differences.getDifference("nullable");
+            if (changes.size() > 1 && (nullableDifference == null || nullableDifference.getReferenceValue() == null)) {
+                boolean nullable = column.isNullable();
+                if (!nullable) {
+                    changes.add(generateAddNotNullConstraintChangeBasedOnColumn(column, control, comparisonDatabase));
+                }
+            }
+        }
+
         Difference remarksDiff = differences.getDifference("remarks");
         if (remarksDiff != null) {
             SetColumnRemarksChange change = new SetColumnRemarksChange();
@@ -104,19 +117,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
                 changes.add(change);
             } else {
-                AddNotNullConstraintChange change = new AddNotNullConstraintChange();
-                if (control.getIncludeCatalog()) {
-                    change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
-                }
-                if (control.getIncludeSchema()) {
-                    change.setSchemaName(column.getRelation().getSchema().getName());
-                }
-                change.setTableName(column.getRelation().getName());
-                change.setColumnName(column.getName());
-                change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
-                change.setValidate(column.shouldValidate());
-                change.setConstraintName(column.getAttribute("notNullConstraintName", String.class));
-                changes.add(change);
+                changes.add(generateAddNotNullConstraintChangeBasedOnColumn(column, control, comparisonDatabase));
             }
         }
     }
@@ -212,35 +213,6 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
 
                 changes.add(change);
 
-                if (comparisonDatabase instanceof MSSQLDatabase) {
-                    Boolean nullable = column.isNullable();
-                    if (nullable) {
-                        DropNotNullConstraintChange dropNotNullConstraintChange = new DropNotNullConstraintChange();
-                        if (control.getIncludeCatalog()) {
-                            dropNotNullConstraintChange.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
-                        }
-                        if (control.getIncludeSchema()) {
-                            dropNotNullConstraintChange.setSchemaName(column.getRelation().getSchema().getName());
-                        }
-                        dropNotNullConstraintChange.setTableName(column.getRelation().getName());
-                        dropNotNullConstraintChange.setColumnName(column.getName());
-                        dropNotNullConstraintChange.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
-                        changes.add(dropNotNullConstraintChange);
-                    } else {
-                        AddNotNullConstraintChange addNotNullConstraintChange = new AddNotNullConstraintChange();
-                        if (control.getIncludeCatalog()) {
-                            addNotNullConstraintChange.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
-                        }
-                        if (control.getIncludeSchema()) {
-                            addNotNullConstraintChange.setSchemaName(column.getRelation().getSchema().getName());
-                        }
-                        addNotNullConstraintChange.setTableName(column.getRelation().getName());
-                        addNotNullConstraintChange.setColumnName(column.getName());
-                        addNotNullConstraintChange.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
-                        addNotNullConstraintChange.setValidate(column.shouldValidate());
-                        changes.add(change);
-                    }
-                }
             }
         }
     }
@@ -325,6 +297,29 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
             return false;
         }
         return true;
+    }
+
+    /**
+     * Generates {@link AddNotNullConstraintChange} change for column
+     * @param column column
+     * @param control diff control
+     * @param comparisonDatabase database
+     * @return AddNotNullConstraint change
+     */
+    private AddNotNullConstraintChange generateAddNotNullConstraintChangeBasedOnColumn(Column column, DiffOutputControl control, Database comparisonDatabase) {
+        AddNotNullConstraintChange addNotNullConstraintChange = new AddNotNullConstraintChange();
+        if (control.getIncludeCatalog()) {
+            addNotNullConstraintChange.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
+        }
+        if (control.getIncludeSchema()) {
+            addNotNullConstraintChange.setSchemaName(column.getRelation().getSchema().getName());
+        }
+        addNotNullConstraintChange.setTableName(column.getRelation().getName());
+        addNotNullConstraintChange.setColumnName(column.getName());
+        addNotNullConstraintChange.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
+        addNotNullConstraintChange.setConstraintName(column.getAttribute("notNullConstraintName", String.class));
+        addNotNullConstraintChange.setValidate(column.shouldValidate());
+        return addNotNullConstraintChange;
     }
 
 }
