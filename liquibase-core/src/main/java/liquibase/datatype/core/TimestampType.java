@@ -71,11 +71,15 @@ public class TimestampType extends DateTimeType {
                 return new DatabaseDataType(database.escapeDataTypeName("timestamp"));
             }
             Object[] parameters = getParameters();
-            // If the scale for datetime2 is the database default anyway, omit it.
-            if ( (parameters.length >= 1) &&
-                    (Integer.parseInt(parameters[0].toString())
-                            == (database.getDefaultScaleForNativeDataType("datetime2"))) ) {
-                parameters = new Object[0];
+            if (parameters.length >= 1) {
+                final int paramValue = Integer.parseInt(parameters[0].toString());
+                // If the scale for datetime2 is the database default anyway, omit it.
+                // If the scale is 8, omit it since it's not a valid value for datetime2
+                if (paramValue > 7 || paramValue == (database.getDefaultScaleForNativeDataType("datetime2"))) {
+                    parameters = new Object[0];
+
+                }
+
             }
             return new DatabaseDataType(database.escapeDataTypeName("datetime2"), parameters);
         }
