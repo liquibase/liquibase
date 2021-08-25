@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.core.H2Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
@@ -14,6 +15,7 @@ import org.junit.Test;
 import java.math.BigInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<CreateSequenceStatement> {
@@ -102,6 +104,24 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
 
         errors = new CreateSequenceGenerator().validate(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
         assertThat(errors.getErrorMessages()).isEmpty();
+    }
+
+    @Test
+    public void h2IgnoresDataType() {
+
+
+        final CreateSequenceStatement stmt = new CreateSequenceStatement(null, null, "test_seq")
+                .setDataType("BIGINT");
+        ValidationErrors errors = new CreateSequenceGenerator().validate(stmt, new H2Database(), new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
+        assertThat(errors.getWarningMessages()).isEmpty();
+
+        stmt.setDataType("INT");
+        errors = new CreateSequenceGenerator().validate(stmt, new H2Database(), new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
+        assertEquals("H2 only crates BIGINT sequences. Ignoring requested type INT", errors.getWarningMessages().get(0));
+        assertEquals("CREATE SEQUENCE test_seq", new CreateSequenceGenerator().generateSql(stmt, new H2Database(), new MockSqlGeneratorChain())[0].toSql());
+
     }
 
 //    @Before

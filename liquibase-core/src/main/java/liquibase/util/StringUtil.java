@@ -529,7 +529,27 @@ public class StringUtil {
         if (string == null) {
             return null;
         }
-        return string.replaceAll("([A-Z])", "-$1").toLowerCase();
+
+        if (string.length() == 1) {
+            return string;
+        }
+
+        StringBuilder outString = new StringBuilder();
+        char[] charString = string.toCharArray();
+        for (int i=0; i<charString.length; i++) {
+            char letter = charString[i];
+            if (i == 0) {
+                outString.append(Character.toLowerCase(letter));
+                continue;
+            }
+            if (Character.isUpperCase(letter)) {
+                outString.append('-').append(Character.toLowerCase(letter));
+            } else {
+                outString.append(letter);
+            }
+        }
+
+        return outString.toString();
     }
 
     /**
@@ -540,15 +560,23 @@ public class StringUtil {
             return null;
         }
 
-        final String[] splitString = string.split("[-_]");
-        if (splitString.length == 1) {
-            return string;
-        }
-        for (int i=1; i<splitString.length; i++) {
-            splitString[i] = upperCaseFirst(splitString[i]);
+        StringBuilder outString = new StringBuilder();
+        char[] charString = string.toCharArray();
+        boolean uppercaseNext = false;
+        for (char letter : charString) {
+            if (letter == '-' || letter == '_') {
+                uppercaseNext = true;
+            } else {
+                if (uppercaseNext) {
+                    outString.append(Character.toUpperCase(letter));
+                    uppercaseNext = false;
+                } else {
+                    outString.append(letter);
+                }
+            }
         }
 
-        return join(splitString, "");
+        return outString.toString();
     }
 
     public interface StringUtilFormatter<Type> {
