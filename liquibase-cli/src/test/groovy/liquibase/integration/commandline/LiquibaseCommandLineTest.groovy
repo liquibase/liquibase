@@ -3,6 +3,7 @@ package liquibase.integration.commandline
 
 import liquibase.command.CommandBuilder
 import liquibase.configuration.ConfigurationDefinition
+import picocli.CommandLine
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -35,6 +36,16 @@ class LiquibaseCommandLineTest extends Specification {
     }
 
     @Unroll
+    def "toArgNames for configuration arguments and aliases"() {
+        expect:
+        LiquibaseCommandLine.toArgNames(new ConfigurationDefinition.Builder(prefix).define(argName, String).addAliasKey(alias).buildTemporary()).join(", ") == expected
+
+        where:
+        prefix          | argName          | alias                 | expected
+        "liquibase"     | "test"           | "testAlias"           | "--test, --liquibase-test, --liquibasetest, --test-alias, --testAlias"
+    }
+
+    @Unroll
     def "adjustLegacyArgs"() {
         expect:
         new LiquibaseCommandLine().adjustLegacyArgs(input as String[]).toArrayString() == (expected as String[]).toArrayString()
@@ -53,5 +64,14 @@ class LiquibaseCommandLineTest extends Specification {
         ["future-rollback-from-tag-sql", "my-tag"] | ["future-rollback-from-tag-sql", "--tag", "my-tag"]
 
         ["--log-level","DEBUG","--log-file","06V21.txt","--defaultsFile=liquibase.h2-mem.properties","update","--changelog-file","postgres_lbpro_master_changelog.xml","--labels","setup"] | ["--log-level","DEBUG","--log-file","06V21.txt","--defaultsFile=liquibase.h2-mem.properties","update","--changelog-file","postgres_lbpro_master_changelog.xml","--labels","setup"]
+    }
+
+    def "accepts -D subcommand arguments for changelog parameters"() {
+        when:
+        def subcommands = new LiquibaseCommandLine().commandLine.getSubcommands()
+
+        then:
+        subcommands["update"].commandSpec.findOption("-D") != null
+        subcommands["snapshot"].commandSpec.findOption("-D") == null
     }
 }
