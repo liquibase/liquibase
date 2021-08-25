@@ -68,19 +68,6 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
         handleDefaultValueDifferences(column, differences, control, changes, referenceDatabase, comparisonDatabase);
         handleAutoIncrementDifferences(column, differences, control, changes, referenceDatabase, comparisonDatabase);
 
-        // DAT-7409 & DAT-7559: add 'addNotNullConstraint' change if any differences between columns found except of nullable difference
-        // Comment: type, default value and auto increment differences generate liquibase change that generates 'ALTER TABLE ... ALTER COLUMN ...' sql statement
-        // and this statement removes NOT NULL constraint from a column, to prevent it we need to add add not null constraint back.
-        if (comparisonDatabase instanceof MSSQLDatabase) {
-            Difference nullableDifference = differences.getDifference("nullable");
-            if (changes.size() > 1 && (nullableDifference == null || nullableDifference.getReferenceValue() == null)) {
-                boolean nullable = column.isNullable();
-                if (!nullable) {
-                    changes.add(generateAddNotNullConstraintChangeBasedOnColumn(column, control, comparisonDatabase));
-                }
-            }
-        }
-
         Difference remarksDiff = differences.getDifference("remarks");
         if (remarksDiff != null) {
             SetColumnRemarksChange change = new SetColumnRemarksChange();
@@ -213,6 +200,19 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
 
                 changes.add(change);
 
+                // DAT-7409 & DAT-7559 (obly for MSSQL): add 'addNotNullConstraint' change if:
+                //                      1. data type changed ('type' difference was found)
+                //                      2. no differences for 'nullable' ('nullable' difference was not found)
+                //                      3. a column is not nullable
+                if (comparisonDatabase instanceof MSSQLDatabase) {
+                    Difference nullableDifference = differences.getDifference("nullable");
+                    if (nullableDifference == null || nullableDifference.getReferenceValue() == null) {
+                        boolean nullable = column.isNullable();
+                        if (!nullable) {
+                            changes.add(generateAddNotNullConstraintChangeBasedOnColumn(column, control, comparisonDatabase));
+                        }
+                    }
+                }
             }
         }
     }
