@@ -767,6 +767,16 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         /**
+         * Run a changelog
+         */
+        void base64Encode(String filePath) {
+            File f = new File(filePath)
+            String contents = f.getText();
+            String encoded = Base64.getEncoder().encodeToString(contents.getBytes());
+            f.write(encoded)
+        }
+
+        /**
          * Run a changelog with labels
          */
         void runChangelog(String changeLogPath, String labels) {
