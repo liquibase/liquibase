@@ -304,7 +304,7 @@ public class LiquibaseCommandLine {
 
                         final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                         if (licenseService == null) {
-                            Scope.getCurrentScope().getUI().sendMessage("Cannot determine license status: License service did not load");
+                            Scope.getCurrentScope().getUI().sendMessage("WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.");
                         } else {
                             Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                         }
@@ -481,7 +481,7 @@ public class LiquibaseCommandLine {
         final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
         String licenseInfo = "";
         if (licenseService == null) {
-            licenseInfo = "Cannot determine license status: License service did not load";
+            licenseInfo = "WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.";
         } else {
             licenseInfo = licenseService.getLicenseInfo();
         }
