@@ -100,7 +100,8 @@ public class MavenUtils {
         if (liquibaseProLicenseKey == null) {
             log.info("");
             if (commandName != null) {
-                log.info("The command '" + commandName + "' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
+                log.info("The command '" + commandName + "' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com." +
+                        "Add liquibase.pro.licenseKey as a Maven property or add liquibase.pro.licenseKey=<yourKey> into your defaults file.");
             }
             log.info("");
             hasProLicense = false;

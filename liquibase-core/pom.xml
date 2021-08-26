@@ -41,7 +41,14 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.3.3</version>
+            <version>3.8.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>3.8.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -171,6 +178,7 @@
                     <instructions>
                         <Bundle-SymbolicName>org.liquibase.core</Bundle-SymbolicName>
                         <Import-Package>
+                            javax.activation*;resolution:=optional,
                             javax.servlet.*;version="[2.6,4)";resolution:=optional,
                             javax.sql.*,
                             org.osgi.*,

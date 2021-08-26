@@ -64,6 +64,9 @@ public class Main {
     //set by new CLI to signify it is handling some of the configuration
     public static boolean runningFromNewCli;
 
+    //temporary work-around to pass -D changelog parameters from new CLI to here
+    public static Map<String, String> newCliChangelogParameters;
+
     private static PrintStream outputStream = System.out;
 
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
@@ -1523,7 +1526,11 @@ public class Main {
                     this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
                     this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
                     this.databaseChangeLogLockTableName);
-            database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+            if (this.databaseChangeLogTablespaceName != null) {
+                database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+            } else {
+                database.setLiquibaseTablespaceName(GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentConfiguredValue().getValue());
+            }
         }
 
         try {
@@ -1674,6 +1681,11 @@ public class Main {
             }
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            if (Main.newCliChangelogParameters != null) {
+                for (Map.Entry<String, String> param : Main.newCliChangelogParameters.entrySet()) {
+                    liquibase.setChangeLogParameter(param.getKey(), param.getValue());
+                }
+            }
             try {
                 if (hubConnectionId != null) {
                     try {
