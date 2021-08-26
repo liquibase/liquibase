@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("java:S2583")
 public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
     @Override
@@ -36,8 +37,13 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 }
                 reader = new BufferedReader(StreamUtil.readStreamWithReader(fileStream, null));
 
-                String line = reader.readLine();
-                return (line != null) && line.matches("\\-\\-\\s*liquibase formatted.*");
+                String firstLine = reader.readLine();
+
+                while (firstLine.trim().isEmpty() && reader.ready()) {
+                    firstLine = reader.readLine();
+                }
+
+                return (firstLine != null) && firstLine.matches("\\-\\-\\s*liquibase formatted.*");
             } else {
                 return false;
             }
@@ -138,7 +144,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             }
                             continue;
                         } catch (NumberFormatException | NullPointerException nfe) {
-                            throw new ChangeLogParseException("Unknown ignoreLines syntax in changeset " + changeSet.toString(false));
+                            throw new ChangeLogParseException("Unknown ignoreLines syntax");
                         }
                     }
                 }

@@ -11,7 +11,7 @@ class StringUtilTest extends Specification {
     @Unroll
     def "processMultilineSql examples"() {
         expect:
-        that Arrays.asList(StringUtil.processMutliLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
+        that Arrays.asList(StringUtil.processMultiLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
 
         where:
         stripComments | splitStatements | endDelimiter | rawString                                                                                                                                                                                           | expected
@@ -242,10 +242,13 @@ class StringUtilTest extends Specification {
         StringUtil.toKabobCase(input) == expected
 
         where:
-        input       | expected
-        "a"         | "a"
-        "testValue" | "test-value"
-        null        | null
+        input           | expected
+        "a"             | "a"
+        "testValue"     | "test-value"
+        "testValueHere" | "test-value-here"
+        "TestValueHere" | "test-value-here"
+        "sQL"           | "s-q-l"
+        null            | null
     }
 
     @Unroll
@@ -254,10 +257,15 @@ class StringUtilTest extends Specification {
         StringUtil.toCamelCase(input) == expected
 
         where:
-        input        | expected
-        "a"          | "a"
-        "test-Value" | "testValue"
-        "test_Value" | "testValue"
-        null         | null
+        input             | expected
+        "a"               | "a"
+        "test-value"      | "testValue"
+        "test-Value"      | "testValue"
+        "test_value"      | "testValue"
+        "test-value_here" | "testValueHere"
+        "testValue"       | "testValue"
+        "testValue"       | "testValue"
+        "s-q-l"           | "sQL"
+        null              | null
     }
 }

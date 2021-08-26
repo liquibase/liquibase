@@ -66,6 +66,8 @@ public class Scope {
     public static Scope getCurrentScope() {
         if (scopeManager == null) {
             scopeManager = new SingletonScopeManager();
+        }
+        if (scopeManager.getCurrentScope() == null) {
             Scope rootScope = new Scope();
             scopeManager.setCurrentScope(rootScope);
 

@@ -114,6 +114,15 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         change.columns[2].constraints == null
     }
 
+    def "throws a nice validation error when changeSet node has typo in name"() throws ChangeLogParseException {
+        def path = "liquibase/parser/core/yaml/typoChangeLog.yaml"
+        when:
+        new YamlChangeLogParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+
+        then:
+        thrown(ChangeLogParseException.class)
+    }
+
     def "able to parse a changelog with multiple changeSets multiChangeSetChangeLog.yaml"() throws Exception {
         def path = "liquibase/parser/core/yaml/multiChangeSetChangeLog.yaml"
         when:

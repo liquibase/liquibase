@@ -45,6 +45,10 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, HsqlDatabase.class, PostgresDatabase.class);
         validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class);
 
+        if (database instanceof H2Database && statement.getDataType() != null && !statement.getDataType().equalsIgnoreCase("bigint")) {
+            validationErrors.addWarning("H2 only crates BIGINT sequences. Ignoring requested type "+statement.getDataType());
+        }
+
         return validationErrors;
     }
 
@@ -67,7 +71,9 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
             queryStringBuilder.append(" AS BIGINT ");
         } else if (statement.getDataType() != null) {
-            queryStringBuilder.append(" AS " + statement.getDataType());
+            if (!(database instanceof H2Database)) {
+                queryStringBuilder.append(" AS " + statement.getDataType());
+            }
         }
         if (!(database instanceof MariaDBDatabase) && statement.getStartValue() != null) {
             queryStringBuilder.append(" START WITH ").append(statement.getStartValue());

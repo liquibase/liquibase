@@ -9,6 +9,7 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.*;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.changeSetId"
      *
      */
+    @PropertyElement
     protected String changeSetId;
 
     /**
@@ -43,6 +45,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.changeSetAuthor"
      *
      */
+    @PropertyElement
     protected String changeSetAuthor;
 
     /**
@@ -52,6 +55,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.changeSetPath"
      *
      */
+    @PropertyElement
     protected String changeSetPath;
 
     /**
@@ -61,6 +65,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.rollbackScript"
      *
      */
+    @PropertyElement
     protected String rollbackScript;
 
     /**
@@ -70,6 +75,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.outputFile"
      *
      */
+    @PropertyElement
     protected String outputFile;
 
 
@@ -102,7 +108,8 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
         if (! hasProLicense) {
             throw new LiquibaseException(
-               "The command 'rollbackOneChangeSetSQL' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
+               "The command 'rollbackOneChangeSetSQL' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com." +
+                       "Add liquibase.pro.licenseKey as a Maven property or add liquibase.pro.licenseKey=<yourKey> into your defaults file.");
         }
         Database database = liquibase.getDatabase();
         CommandScope liquibaseCommand = new CommandScope("internalRollbackOneChangeSetSQL");

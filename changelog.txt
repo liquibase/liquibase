@@ -1,6 +1,68 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.4.3 (2021.08.05)
+
+- Do not worry about FileSystemAlreadyExistsException errors #1885
+- The sqlFile and relativeToChangelogFile attributes fail when using the logicalFilePath attribute #1277
+- The wrong path received if relativeToChangelogFile=true and databaseChangeLog has logicalFilePath != PhisicalFilePath #1353
+- Added a separate query for DB2 on AS400, which fixed the dropAll command on DB2 for iSeries #1412
+- Fixed the logicalFilePath attribute not being serialized #1471
+- Fixed the SqlParser bug related to parsing UTF-8 valid symbols #1513
+- Fixed the invalid update SQL generated for HSQL database in InsertOrUpdateGeneratorHsql.java #1563
+- Added a validation error when the customChange Change Type has no name attribute #1592
+- Fixed the issue with Liquibase failing to create a DATABASECHANGELOGLOCK record and apply changesets into Firebird 3. isNumericBoolean now checks the Firebird3Database instance type and returns Boolean for Firebird 3. #1875
+- Fixed the issue with escaping question marks in PostgreSQL: #1877
+- SQL changesets are transforming the PostgreSQL ? JSON operator into ??, causing function definitions using this operator to become invalid #1764
+- An error when processing a large Postgres SQL changeset #1507
+- Fixed the issue with ClassCastException in a standard lock service: java.time.LocalDateTime cannot be cast to java.util.Date #1878
+- Added the MySQL reserved word CUBE to the list of Liquibase reserved columns for the schema migration to work. CUBE is a reserved word as of MySQL 8.0.1 #1515
+- Added the ability to handle empty lines at the beginning of a formatted SQL #1713
+- Fixed loading the CLOB data into PostgreSQL. Instead of loading the CLOB file name, PostgreSQL loads the content of the CLOB file. #1791
+- Changed the MD5SUM column value from RawSqlStatement to UpdateStatement #1602
+- Fixed synchronization in ChangeLogHistoryServiceFactory.java #1361
+- Enabled the dropAll report to work with a registered changelog with no extra arguments and send the information to Liquibase Hub
+- Renamed the tablespaceName parameter to liquibaseTablespaceName
+- Changed from RawSqlStatement to UpdateStatement #1602
+- Fix synchronization in ChangeLogHistoryServiceFactory.java #1361
+- [PRO] Fixed the changeset execution failure related to the DATICAL_SPERRORLOG table when using the runWith=sqlplus attribute and executing operations as a user with only SELECT, UPDATE, and INSERT permissions [DAT-7410]
+
+Changes in version 4.4.2 (2021.07.22)
+
+- Changed NullPointerException to ChangeLogParseException for the output when there is a typo in a changeSet node (#1593)
+- Added the support method to DatabaseConnection (#1784)
+- Fixed the issue with handling serial and bigserial if liquibase.convertDataTypes=false (#1883)
+- Improved the ConfigurationValueProvider performance (#1952)
+- Added the ability to allow an empty string for the defaultValue attribute (#1963)
+- Reintroduced support for the - arguments in the CLI (#1943)
+- Restored the updateTestingRollback command (#1939) 
+- Added the Maven goal for unexpectedChangeSets (#1972)
+- Extended the dropAll command with optional hubConnectionId and hubProjectId attributes. For more information, check our [dropAll command]documentation.
+- Fixed nested properties and the substitution of variables in YML changelogs.
+- Implemented the ability to use connectionjdbcurl when there is no project or connection ID with the dropAll command.
+- Improved the Liquibase Pro License key messaging.
+- Added the ability to handle a declined auto-registration when running the dropAll command.
+- Fixed auto-registration issues.
+- [PRO] Added the ability to handle special characters in procedures when using the generateChangeLog command.
+- [PRO] Fixed the issue with formatted SQL changesets and runwith:sqlplus being stopped unless Liquibase includes a quit statement. 
+- [PRO] Fixed the SQL Plus spool log issue.
+
+Changes in version 4.4.1 (2021.07.09)
+ - GH PR#1869 ⁃ HubUpdater releases lock even though registration is skipped
+ - GH PR#1861 ⁃ Only snapshot tables/columns in loadData
+ - GH PR#1843 ⁃ [LB-704] fixed generating sequences for Postgres versions prior to 10
+ - GH Issue#1829 ⁃ Fixes MySQL Snapshot/Generated ChangeLog output for table key constraints when multiple tables
+ - Postgres: Rollback of rename target fails due to malformed SQL.
+ - Liquibase Hub registerChangeLog messaging fixes
+ - Liquibase Hub, Maven, and liquibase.properties file fixes
+ - Using --liquibaseProLicenseKey is on the left side of the command
+ - Update Liquibase installer adoptopenjdk from 11.0.10 to 11.0.11  
+ - [PRO] SQL Plus handles backslashes in changeset  attributes' values
+ - [PRO] SQL Plus passing arguments during runtime fixes
+ - [PRO] SQL Plus handles Oracle proxy user setups
+ - [PRO] SQL Plus improve temp file handling
+ - [PRO] Fixes snapshot on MySQL Stored Logic Objects with Integer Types
+
 Changes in version 4.4.0 (2021.06.08)
 - Refactor Configuration API
 -- [PRO] including native use of Environment variables
