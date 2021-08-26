@@ -49,6 +49,16 @@ public class MarkChangeSetRanGeneratorTest extends AbstractSqlGeneratorTest<Mark
                                                                      "(changeSetContext1 AND changeSetContext2)"));
     }
 
+    @Test
+    public void generateSqlWithParentContextOnly() {
+        DatabaseChangeLog rootChangeLog = new DatabaseChangeLog();
+        rootChangeLog.setContexts(new ContextExpression("rootContext1"));
+        ChangeSet changeSet = new ChangeSet("1", "a", false, false, "c", null, null, rootChangeLog);
+
+        Sql[] sqls = new MarkChangeSetRanGenerator().generateSql(new MarkChangeSetRanStatement(changeSet, ChangeSet.ExecType.EXECUTED), new MockDatabase(), new MockSqlGeneratorChain());
+        assertTrue(sqls[0].toSql(), sqls[0].toSql().contains("rootContext1"));
+    }
+
     /**
      * Ensure that upon running an update on a changeset that has been run before, we still update the labels,
      * contexts and comments columns in the DBCL table.
