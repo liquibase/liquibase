@@ -1,7 +1,11 @@
 package liquibase.util;
 
 import liquibase.ExtensibleObject;
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -975,5 +979,20 @@ public class StringUtil {
         }
         list.add(new String(c, tokenStart, c.length - tokenStart));
         return list.toArray(new String[0]);
+    }
+
+    public static byte[] getBytesWithEncoding(String string) {
+        String encoding = null;
+        try {
+            encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentConfiguredValue().getValue();
+            if (encoding != null) {
+                return string.getBytes(encoding);
+            }
+        }
+        catch (UnsupportedEncodingException uoe) {
+            // Consume and fall through
+            Scope.getCurrentScope().getLog(StringUtil.class).warning("Error using encoding " + encoding);
+        }
+        return string.getBytes(StandardCharsets.UTF_8);
     }
 }
