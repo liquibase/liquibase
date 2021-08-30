@@ -5,8 +5,6 @@ import java.util.regex.Pattern;
 
 /**
  * Check that a text matches an array of regular expressions.<br/>
- *
- * @author lujop
  */
 public class RegexMatcher {
     private String text;
