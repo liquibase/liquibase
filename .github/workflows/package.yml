@@ -1,0 +1,64 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Package
+
+on:
+  workflow_run:
+    workflows: ["Build and Test"]
+    branches: [unversioned-master]
+    types:
+      - completed
+
+jobs:
+  on-build-failure:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion != 'success' }}
+    steps:
+      - name: Build failed
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Build failed: ${{ github.event.workflow_run.conclusion }}')
+
+  package:
+    name: Build Packages
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Cache Local Maven Repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+      - name: Restore Built Code Cache
+        uses: actions/cache@v2
+        with:
+          key: built-code-${{ github.event.workflow_run.head_sha }}
+          path: ./**/target
+      - name: Install pre-built modules
+        run: mvn -B -pl "!liquibase-dist" jar:jar install:install
+      - name: Build Final Jar & Tar/Zips
+        run: mvn -B -pl liquibase-dist package
+
+      - name: Archive Packages
+        uses: actions/upload-artifact@v2
+        with:
+          name: liquibase-packages
+          path: |
+            liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz
+            liquibase-dist/target/liquibase-0-SNAPSHOT.zip
+            liquibase-dist/target/liquibase-0-SNAPSHOT.jar
+            liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar
+            liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar
