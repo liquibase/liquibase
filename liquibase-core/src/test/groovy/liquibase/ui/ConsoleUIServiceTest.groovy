@@ -29,7 +29,7 @@ class ConsoleUIServiceTest extends Specification {
         ""                        | null             | null             | "Prompt here: "                                                      | String
         "x"                       | null             | "x"              | "Prompt here: "                                                      | String
         "1234"                    | null             | 1234             | "Prompt here: "                                                      | Integer
-        ["x", "1234"] as String[] | 0                | 1234             | "Prompt here (default \"0\"): \nInvalid value: \"x\"\nPrompt here: " | Integer
+        ["x", "1234"] as String[] | 0                | 1234             | "Prompt here (default \"0\"): \nInvalid value: For input string: \"x\"\nPrompt here: " | Integer
         "true"                    | false            | true             | "Prompt here (default \"false\"): "                                  | Boolean
         "false"                   | false            | false            | "Prompt here (default \"false\"): "                                  | Boolean
     }
