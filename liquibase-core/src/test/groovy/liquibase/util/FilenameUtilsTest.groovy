@@ -1,5 +1,6 @@
 package liquibase.util
 
+import org.junit.Assume
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -9,6 +10,7 @@ class FilenameUtilsTest extends Specification {
     def "normalize"() {
         expect:
         FilenameUtils.normalize(filename) == expected
+
         where:
         filename              | expected
         "/foo//"              | "/foo"
@@ -23,10 +25,22 @@ class FilenameUtilsTest extends Specification {
         "foo/../bar"          | "bar"
         "//server/foo/../bar" | "/server/bar"
         "//server/../bar"     | "/bar"
-        "C:\\foo\\..\\bar"    | "C:/bar"
-        "C:\\..\\bar"         | "C:/bar"
         null                  | null
         ""                    | ""
+    }
+
+    @Unroll
+    def "normalize (windows)"() {
+        setup:
+        Assume.assumeTrue(SystemUtil.isWindows())
+
+        expect:
+        FilenameUtils.normalize(filename) == expected
+
+        where:
+        filename           | expected
+        "C:\\foo\\..\\bar" | "C:/bar"
+        "C:\\..\\bar"      | "C:/bar"
     }
 
     @Unroll
@@ -62,12 +76,24 @@ class FilenameUtilsTest extends Specification {
         FilenameUtils.getDirectory(filename) == expected
 
         where:
+        filename | expected
+        "a.txt"  | ""
+        "a/b/c"  | "a/b/c"
+        "a/b/c/" | "a/b/c"
+        null     | null
+    }
+
+    @Unroll
+    def "getFullPath (windows)"() {
+        setup:
+        Assume.assumeTrue(SystemUtil.isWindows())
+
+        expect:
+        FilenameUtils.getDirectory(filename) == expected
+
+        where:
         filename          | expected
         "C:\\a\\b\\c.txt" | "C:/a/b"
-        "a.txt"           | ""
-        "a/b/c"           | "a/b/c"
-        "a/b/c/"          | "a/b/c"
         "C:\\"            | "C:/"
-        null              | null
     }
 }
