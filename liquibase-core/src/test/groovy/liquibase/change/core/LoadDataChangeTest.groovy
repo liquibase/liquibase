@@ -1,8 +1,10 @@
 package liquibase.change.core
 
+import liquibase.Scope
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
+import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.DatabaseConnection
 import liquibase.database.DatabaseFactory
 import liquibase.database.core.MSSQLDatabase
@@ -22,7 +24,10 @@ import liquibase.structure.DatabaseObject
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
 import liquibase.structure.core.Table
+import liquibase.test.JUnitResourceAccessor
 import liquibase.test.TestContext
+import liquibase.util.StreamUtil
+import liquibase.util.csv.CSVReader
 import spock.lang.Unroll
 
 import java.sql.Timestamp
@@ -373,6 +378,34 @@ public class LoadDataChangeTest extends StandardChangeTest {
         assert relativeStatements != null
         assert nonRelativeStatements != null
         assert relativeStatements.size() == nonRelativeStatements.size()
+    }
+
+    @Unroll
+    def "openSqlStream correctly opens files"() {
+        when:
+        def changelog = new DatabaseChangeLog("com/example/changelog.xml")
+
+        def changeset = new ChangeSet("1", "auth", false, false, logicalFilePath, null, null, changelog)
+
+        def change = new LoadDataChange()
+        change.file = csvPath
+        change.relativeToChangelogFile = relativeToChangelogFile
+        change.setChangeSet(changeset)
+
+        CSVReader csvReader = Scope.child([(Scope.Attr.resourceAccessor.name()): new JUnitResourceAccessor()], {
+            return change.getCSVReader()
+        } as Scope.ScopedRunnerWithReturn<CSVReader>)
+
+        then:
+        csvReader != null
+
+        where:
+        csvPath                   | logicalFilePath      | relativeToChangelogFile
+        "com/example/users.csv"   | null                 | false
+        "com/example/users.csv"   | "a/logical/path.xml" | false
+        "users.csv"               | null                 | true
+        "users.csv"               | "a/logical/path.xml" | true
+
     }
 
     def "checksum does not change when no comments in CSV and comment property changes"() {
