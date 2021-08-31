@@ -31,7 +31,7 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const check = github.checks.create({
+            const check = await github.checks.create({
               "owner": "liquibase",
               "repo": "liquibase",
               "name": "Build Packages",
