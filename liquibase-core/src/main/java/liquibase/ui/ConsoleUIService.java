@@ -113,9 +113,11 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             } catch (IllegalArgumentException e) {
                 String message;
                 if (e.getCause() != null && e.getCause().getMessage() != null) {
-                    message = String.format("Invalid value: %s", e.getCause().getMessage());
+                    message = "Invalid value: '" + input + "': " + e.getCause().getMessage();
+                } else if (e.getMessage() != null) {
+                    message = "Invalid value: '" + input + "': " + e.getMessage();
                 } else {
-                    message = String.format("Invalid value: \"" + input + "\"");
+                    message = "Invalid value: \"" + input + "\"";
                 }
                 this.sendMessage(message);
                 this.sendMessage(prompt + ": ");
