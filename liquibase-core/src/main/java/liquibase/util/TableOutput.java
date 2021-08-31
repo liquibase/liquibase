@@ -9,6 +9,19 @@ import java.io.Writer;
 import java.util.*;
 
 public class TableOutput {
+    /**
+     *
+     * This method outputs the input data in a tabular format with wrapping of lines
+     *
+     * @param table                    2-dimensional array of data
+     * @param maxWidths                Maximum widths of each column to control wrapping
+     * @param leftJustifiedRows        If true then add "-" to format string
+     * @param writer                   Writer to use for output
+     *
+     */
+    public static void formatOutput(List<List<String>> table, int[] maxWidths, boolean leftJustifiedRows, Writer writer) throws LiquibaseException {
+        formatOutput(table.stream().map(u -> u.toArray(new String[0])).toArray(String[][]::new), maxWidths, leftJustifiedRows, writer);
+    }
 
     /**
      *
@@ -66,7 +79,7 @@ public class TableOutput {
                 String[] newRow = new String[row.length];
                 for (int i = 0; i < row.length; i++) {
                     // If data is less than max width, use that as it is.
-                    if (row[i].length() < maxWidths[i]) {
+                    if (row[i] == null || row[i].length() < maxWidths[i]) {
                         newRow[i] = multiLine == 0 ? row[i] : "";
                     } else if ((row[i].length() > (multiLine * maxWidths[i]))) {
                         //
@@ -101,7 +114,7 @@ public class TableOutput {
         Arrays.stream(finalTable).forEach(a -> {
             for (int i=0; i < a.length; i++) {
                 columnLengths.putIfAbsent(i, 0);
-                if (columnLengths.get(i) < a[i].length()) {
+                if (a[i] != null && columnLengths.get(i) < a[i].length()) {
                     columnLengths.put(i, a[i].length());
                 }
             }
@@ -162,7 +175,7 @@ public class TableOutput {
     // can be used as a multi-line cell in an output table.
     //
     private static String padColumn(String col, int maxWidth) {
-        if (col.length() <= maxWidth) {
+        if (col == null || col.length() <= maxWidth) {
             return col;
         }
         String[] parts = col.split(" ");
