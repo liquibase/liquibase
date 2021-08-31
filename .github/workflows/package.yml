@@ -31,7 +31,7 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            github.checks.create({
+            const check = github.checks.create({
               "owner": "liquibase",
               "repo": "liquibase",
               "name": "Build Packages",
@@ -39,6 +39,8 @@ jobs:
               "status": "in_progress",
               "details_url": "https://github.com/liquibase/liquibase/actions/runs/${{ github.run_id }}"
             });
+            console.log(check);
+            core.setOutput("checkId", check.id);
 
       - uses: actions/checkout@v2
         with:
@@ -85,7 +87,7 @@ jobs:
             github.checks.update({
               "owner": "liquibase",
               "repo": "liquibase",
-              "check_run_id": "${{ steps.create-check.outputs.result.id }}"
+              "check_run_id": "${{ steps.create-check.outputs.checkId }}"
               "status": "completed",
               "conclusion": "${{ job.status }}",
             });
