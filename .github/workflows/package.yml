@@ -77,7 +77,7 @@ jobs:
             github.checks.update({
               "owner": "liquibase",
               "repo": "liquibase",
-              "check_run_id": "${{ steps.create-check.outputs.checkId }}"
+              "check_run_id": ${{ steps.create-check.outputs.checkId }},
               "status": "completed",
               "conclusion": "${{ job.status }}",
             });
