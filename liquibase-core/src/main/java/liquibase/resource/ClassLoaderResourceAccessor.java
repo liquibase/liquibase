@@ -139,13 +139,6 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             relativeTo = relativeTo.replaceFirst("^classpath\\*?:", "");
             relativeTo = relativeTo.replaceAll("//+", "/");
 
-            if (!relativeTo.endsWith("/")) {
-                String lastPortion = relativeTo.replaceFirst(".+/", "");
-                if (lastPortion.contains(".")) {
-                    relativeTo = relativeTo.replaceFirst("/[^/]+?$", "");
-                }
-            }
-
             //
             // If this is a simple file name then set the
             // relativeTo value as if it is a root path
@@ -153,6 +146,18 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             if (!relativeTo.contains("/") && relativeTo.contains(".")) {
                 relativeTo = "/";
             }
+
+            //
+            // If this is not a simple file name and the last component
+            // of the path contains a '.' remove the last component
+            //
+            if (!relativeTo.endsWith("/")) {
+                String lastPortion = relativeTo.replaceFirst(".+/", "");
+                if (lastPortion.contains(".")) {
+                    relativeTo = relativeTo.replaceFirst("/[^/]+?$", "");
+                }
+            }
+
             streamPath = relativeTo + "/" + streamPath;
         }
 
