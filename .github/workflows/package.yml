@@ -75,8 +75,9 @@ jobs:
             liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar
             liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar
 
-      - name: Complete Check
+      - name: Report Check
         uses: actions/github-script@v4
+        if: always()
         with:
           script: |
             github.checks.create({
@@ -85,5 +86,6 @@ jobs:
               "name": "Build Packages",
               "head_sha": "${{ github.event.workflow_run.head_sha }}",
               "status": "completed",
-              "conclusion": "success"
+              "conclusion": "${job.status}",
+              "details_url": "https://github.com/liquibase/liquibase/actions/runs/${{ github.run_id }}"
             });
