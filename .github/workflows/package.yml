@@ -27,6 +27,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Add Check
+        id: create-check
         uses: actions/github-script@v4
         with:
           script: |
@@ -80,11 +81,10 @@ jobs:
         if: always()
         with:
           script: |
-            github.checks.create({
+            github.checks.update({
               "owner": "liquibase",
               "repo": "liquibase",
-              "name": "Build Packages",
-              "head_sha": "${{ github.event.workflow_run.head_sha }}",
+              "check_run_id": "${{ steps.create-check.outputs.results.id }} "
               "status": "completed",
               "conclusion": "${job.status}",
               "details_url": "https://github.com/liquibase/liquibase/actions/runs/${{ github.run_id }}"
