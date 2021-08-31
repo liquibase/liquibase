@@ -41,7 +41,7 @@ public class BooleanType extends LiquibaseDataType {
             } else {
                 return new DatabaseDataType("SMALLINT");
             }
-        } else if (database.getClass().isAssignableFrom(DB2Database.class)) {
+        } else if (database instanceof DB2Database) {
 			if (((DB2Database) database).supportsBooleanDataType())
 				return new DatabaseDataType("BOOLEAN");
 			else
@@ -107,10 +107,10 @@ public class BooleanType extends LiquibaseDataType {
         }
         if (database instanceof DerbyDatabase) {
             return !((DerbyDatabase) database).supportsBooleanDataType();
-        } else if (database.getClass().isAssignableFrom(DB2Database.class)) {
+        } else if (database instanceof DB2Database) {
 			return !((DB2Database) database).supportsBooleanDataType();
     	}
-        return (database instanceof Db2zDatabase) || (database instanceof DB2Database) || (database instanceof FirebirdDatabase) || (database instanceof
+        return (database instanceof Db2zDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
             MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof OracleDatabase) ||
             (database instanceof SQLiteDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
             SybaseDatabase);
