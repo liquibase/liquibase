@@ -931,6 +931,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         def <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
             return consoleUIService.prompt(prompt, defaultValue, inputHandler, type)
         }
+
+        @Override
+        def <T> T prompt(String prompt, InputHandler<T> inputHandler, Class<T> type) {
+            return consoleUIService.prompt(prompt, null, inputHandler, type)
+        }
     }
 
     //
@@ -1004,6 +1009,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         @Override
         def <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
             return defaultValue
+        }
+
+        @Override
+        def <T> T prompt(String prompt, InputHandler<T> inputHandler, Class<T> type) {
+            return null
         }
 
         @Override

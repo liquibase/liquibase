@@ -38,6 +38,15 @@ public interface UIService extends ExtensibleObject, Plugin {
     <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type);
 
     /**
+     * Prompt the user with the message and wait for a response.<br>
+     * If the user hits "enter", they are prompted again to enter a value.
+     * If this UIService implementation does not support user prompts, return null.<br>
+     * If inputHandler is null, {@link DefaultInputHandler} will be used.<br>
+     * If inputHandler throws an {@link IllegalArgumentException}, the user will be given the chance to re-enter the value.<br>
+     */
+    <T> T prompt(String prompt, InputHandler<T> inputHandler, Class<T> type);
+
+    /**
      *
      * Method to set flag indicating whether prompting is allowed
      *

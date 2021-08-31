@@ -69,6 +69,15 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
 
     @Override
     public <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
+        return prompt(prompt, defaultValue, inputHandler, type, true);
+    }
+
+    @Override
+    public <T> T prompt(String prompt, InputHandler<T> inputHandler, Class<T> type) {
+        return prompt(prompt, null, inputHandler, type, false);
+    }
+
+    private <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type, boolean shouldAllowDefaultValue) {
         //
         // Check the allowPrompt flag
         //
@@ -97,7 +106,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
         while (true) {
             String input = StringUtil.trimToNull(console.readLine());
             try {
-                if (input == null) {
+                if (shouldAllowDefaultValue && input == null) {
                     return defaultValue;
                 }
                 return inputHandler.parseInput(input, type);
