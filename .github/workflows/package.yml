@@ -36,7 +36,8 @@ jobs:
               "repo": "liquibase",
               "name": "Build Packages",
               "head_sha": "${{ github.event.workflow_run.head_sha }}",
-              "status": "in_progress"
+              "status": "in_progress",
+              "details_url": "https://github.com/liquibase/liquibase/actions/runs/${{ github.run_id }}"
             });
 
       - uses: actions/checkout@v2
@@ -84,8 +85,7 @@ jobs:
             github.checks.update({
               "owner": "liquibase",
               "repo": "liquibase",
-              "check_run_id": "${{ steps.create-check.outputs.results.id }} "
+              "check_run_id": "${{ steps.create-check.outputs.result.id }}"
               "status": "completed",
               "conclusion": "${{ job.status }}",
-              "details_url": "https://github.com/liquibase/liquibase/actions/runs/${{ github.run_id }}"
             });
