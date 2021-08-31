@@ -15,9 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion != 'success' }}
     steps:
-      - uses: haya14busa/action-workflow_run-status@v1
       - name: Build failed
-        uses: actions/github-script@v3
+        uses: actions/github-script@v4
         with:
           script: |
             core.setFailed('Build failed: ${{ github.event.workflow_run.conclusion }}')
@@ -27,7 +26,18 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - uses: haya14busa/action-workflow_run-status@v1
+      - name: Add Check
+        uses: actions/github-script@v4
+        with:
+          script: |
+            github.checks.create({
+              "owner": "liquibase",
+              "repo": "liquibase",
+              "name": "Build Packages",
+              "head_sha": "${{ github.event.workflow_run.head_sha }}",
+              "status": "in_progress"
+            });
+
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
@@ -64,3 +74,16 @@ jobs:
             liquibase-dist/target/liquibase-0-SNAPSHOT.jar
             liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar
             liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar
+
+      - name: Complete Check
+        uses: actions/github-script@v4
+        with:
+          script: |
+            github.checks.create({
+              "owner": "liquibase",
+              "repo": "liquibase",
+              "name": "Build Packages",
+              "head_sha": "${{ github.event.workflow_run.head_sha }}",
+              "status": "completed",
+              "conclusion": "success"
+            });
