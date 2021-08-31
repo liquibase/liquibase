@@ -26,7 +26,6 @@ import liquibase.structure.core.DataType
 import liquibase.structure.core.Table
 import liquibase.test.JUnitResourceAccessor
 import liquibase.test.TestContext
-import liquibase.util.StreamUtil
 import liquibase.util.csv.CSVReader
 import spock.lang.Unroll
 
@@ -352,9 +351,10 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
     def "relativeToChangelogFile works"() throws Exception {
         when:
+        def changelog = new DatabaseChangeLog("liquibase/changelog.xml")
         ChangeSet changeSet = new ChangeSet(null, null, true, false,
-                "liquibase/empty.changelog.xml",
-                null, null, false, null, null);
+                "logical or physical file name",
+                null, null, false, null, changelog);
 
         LoadDataChange relativeChange = new LoadDataChange();
 
