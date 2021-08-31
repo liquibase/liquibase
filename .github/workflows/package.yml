@@ -11,22 +11,12 @@ on:
       - completed
 
 jobs:
-  on-build-failure:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion != 'success' }}
-    steps:
-      - name: Build failed
-        uses: actions/github-script@v4
-        with:
-          script: |
-            core.setFailed('Build failed: ${{ github.event.workflow_run.conclusion }}')
-
   package:
     name: Build Packages
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - name: Add Check
+      - name: Create Check
         id: create-check
         uses: actions/github-script@v4
         with:
@@ -40,7 +30,7 @@ jobs:
               "details_url": "https://github.com/liquibase/liquibase/actions/runs/${{ github.run_id }}"
             });
             console.log(check);
-            core.setOutput("checkId", check.id);
+            core.setOutput("checkId", check.data.id);
 
       - uses: actions/checkout@v2
         with:
