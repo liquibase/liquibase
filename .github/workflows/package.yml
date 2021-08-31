@@ -86,6 +86,6 @@ jobs:
               "repo": "liquibase",
               "check_run_id": "${{ steps.create-check.outputs.results.id }} "
               "status": "completed",
-              "conclusion": "${job.status}",
+              "conclusion": "${{ job.status }}",
               "details_url": "https://github.com/liquibase/liquibase/actions/runs/${{ github.run_id }}"
             });
