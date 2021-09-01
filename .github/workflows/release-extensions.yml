@@ -10,5 +10,17 @@ jobs:
   say_hello:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          echo "Releasing ${{ github.event.inputs.version }}!"
+      - run: echo "Releasing ${{ github.event.inputs.version }} extensions"
+
+      - name: Report Check
+        uses: actions/github-script@v4
+        with:
+          script: |
+            github.repos.createDispatchEvent({
+               "owner": "liquibase",
+               "repo": "liquibase-postgresql",
+               "event_type": "liquibase-release",
+               "client_payload": {
+                  "liquibaseVersion": "${{ github.event.inputs.version }}"
+                }
+             });
