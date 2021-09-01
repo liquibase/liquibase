@@ -29,7 +29,6 @@ jobs:
               "status": "in_progress",
               "details_url": "https://github.com/liquibase/liquibase/actions/runs/${{ github.run_id }}"
             });
-            console.log(check);
             core.setOutput("checkId", check.data.id);
 
       - uses: actions/checkout@v2
@@ -48,13 +47,12 @@ jobs:
         with:
           java-version: '8'
           distribution: 'adopt'
-      - name: Restore Built Code Cache
-        uses: actions/cache@v2
-        with:
-          key: built-code-${{ github.event.workflow_run.head_sha }}
-          path: ./**/target
-      - name: Install pre-built modules
-        run: mvn -B -pl "!liquibase-dist" jar:jar install:install
+
+      - name: Install Built Modules
+        run: |
+          find liquibase -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;
+          find liquibase -name *-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;
+
       - name: Build Final Jar & Tar/Zips
         run: mvn -B -pl liquibase-dist package
 
@@ -80,4 +78,5 @@ jobs:
               "check_run_id": ${{ steps.create-check.outputs.checkId }},
               "status": "completed",
               "conclusion": "${{ job.status }}",
+              "details_url": "https://github.com/liquibase/liquibase/actions/runs/${{ github.run_id }}",
             });
