@@ -2,7 +2,6 @@ package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
 import liquibase.Scope;
-import liquibase.exception.CommandExecutionException;
 import liquibase.exception.LiquibaseException;
 
 import java.util.logging.Level;
@@ -55,11 +54,6 @@ public class LoggerUIService extends AbstractExtensibleObject implements UIServi
     @Override
     public <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
         return defaultValue;
-    }
-
-    @Override
-    public <T> T prompt(String prompt, InputHandler<T> inputHandler, Class<T> type) {
-        return null;
     }
 
     public Level getStandardLogLevel() {

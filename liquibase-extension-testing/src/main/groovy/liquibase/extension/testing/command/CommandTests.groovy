@@ -923,7 +923,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         TestUIWithAnswers(String[] answers) {
             ConsoleUIService.ConsoleWrapper consoleWrapper = new CannedConsoleWrapper(answers)
-            consoleUIService = new ConsoleUIService(consoleWrapper)
+            consoleUIService = new ConsoleUIServiceWrapper(consoleWrapper)
             consoleUIService.setAllowPrompt(true)
         }
 
@@ -932,9 +932,15 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             return consoleUIService.prompt(prompt, defaultValue, inputHandler, type)
         }
 
-        @Override
-        def <T> T prompt(String prompt, InputHandler<T> inputHandler, Class<T> type) {
-            return consoleUIService.prompt(prompt, null, inputHandler, type)
+        class ConsoleUIServiceWrapper extends ConsoleUIService {
+            ConsoleUIServiceWrapper(ConsoleUIService.ConsoleWrapper console) {
+                super(console)
+            }
+
+            @Override
+            void sendMessage(String message) {
+                getOutput().println(message)
+            }
         }
     }
 
@@ -985,6 +991,14 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             return this
         }
 
+        Writer getOutput() {
+            return output
+        }
+
+        Writer getErrorOutput() {
+            return errorOutput
+        }
+
         @Override
         int getPriority() {
             return -1
@@ -1009,11 +1023,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         @Override
         def <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
             return defaultValue
-        }
-
-        @Override
-        def <T> T prompt(String prompt, InputHandler<T> inputHandler, Class<T> type) {
-            return null
         }
 
         @Override
