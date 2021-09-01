@@ -1,0 +1,14 @@
+name: Release Extensions
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Liquibase Version'
+        required: true
+
+jobs:
+  say_hello:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Releasing ${{ github.event.inputs.version }}!"
