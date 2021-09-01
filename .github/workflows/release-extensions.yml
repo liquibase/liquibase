@@ -15,6 +15,7 @@ jobs:
       - name: Report Check
         uses: actions/github-script@v4
         with:
+          github-token: ${{ secrets.BOT_TOKEN }}
           script: |
             github.repos.createDispatchEvent({
                "owner": "liquibase",
