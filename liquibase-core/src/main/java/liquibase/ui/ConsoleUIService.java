@@ -3,7 +3,6 @@ package liquibase.ui;
 import liquibase.AbstractExtensibleObject;
 import liquibase.Scope;
 import liquibase.GlobalConfiguration;
-import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
@@ -69,15 +68,6 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
 
     @Override
     public <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
-        return prompt(prompt, defaultValue, inputHandler, type, true);
-    }
-
-    @Override
-    public <T> T prompt(String prompt, InputHandler<T> inputHandler, Class<T> type) {
-        return prompt(prompt, null, inputHandler, type, false);
-    }
-
-    private <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type, boolean shouldAllowDefaultValue) {
         //
         // Check the allowPrompt flag
         //
@@ -106,8 +96,12 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
         while (true) {
             String input = StringUtil.trimToNull(console.readLine());
             try {
-                if (shouldAllowDefaultValue && input == null) {
-                    return defaultValue;
+                if (input == null) {
+                    if (inputHandler.shouldAllowEmptyInput()) {
+                        return defaultValue;
+                    } else {
+                        throw new IllegalArgumentException("Empty values are not permitted.");
+                    }
                 }
                 return inputHandler.parseInput(input, type);
             } catch (IllegalArgumentException e) {

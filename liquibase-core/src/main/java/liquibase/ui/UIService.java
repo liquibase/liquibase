@@ -30,21 +30,15 @@ public interface UIService extends ExtensibleObject, Plugin {
 
     /**
      * Prompt the user with the message and wait for a response.<br>
-     * If the user hits "enter" OR this UIService implementation does not support user prompts, return the default value.<br>
+     * If this UIService implementation does not support user prompts, return the default value.<br>
      * If inputHandler is null, {@link DefaultInputHandler} will be used.<br>
      * If inputHandler throws an {@link IllegalArgumentException}, the user will be given the chance to re-enter the value.<br>
-     * If defaultValue is null, a null value will be returned.
+     * If the inputHandler returns true for {@link InputHandler#shouldAllowEmptyInput()} and the user enters an empty value
+     * when prompted, or hits "enter", the defaultValue will be returned. If the inputHandler returns false for
+     * {@link InputHandler#shouldAllowEmptyInput()}, the user will be reprompted until they enter a non-empty value,
+     * which will then be returned.
      */
     <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type);
-
-    /**
-     * Prompt the user with the message and wait for a response.<br>
-     * If the user hits "enter", they are prompted again to enter a value.
-     * If this UIService implementation does not support user prompts, return null.<br>
-     * If inputHandler is null, {@link DefaultInputHandler} will be used.<br>
-     * If inputHandler throws an {@link IllegalArgumentException}, the user will be given the chance to re-enter the value.<br>
-     */
-    <T> T prompt(String prompt, InputHandler<T> inputHandler, Class<T> type);
 
     /**
      *
