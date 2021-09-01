@@ -923,13 +923,24 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         TestUIWithAnswers(String[] answers) {
             ConsoleUIService.ConsoleWrapper consoleWrapper = new CannedConsoleWrapper(answers)
-            consoleUIService = new ConsoleUIService(consoleWrapper)
+            consoleUIService = new ConsoleUIServiceWrapper(consoleWrapper)
             consoleUIService.setAllowPrompt(true)
         }
 
         @Override
         def <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
             return consoleUIService.prompt(prompt, defaultValue, inputHandler, type)
+        }
+
+        class ConsoleUIServiceWrapper extends ConsoleUIService {
+            ConsoleUIServiceWrapper(ConsoleUIService.ConsoleWrapper console) {
+                super(console)
+            }
+
+            @Override
+            void sendMessage(String message) {
+                getOutput().println(message)
+            }
         }
     }
 
@@ -978,6 +989,14 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.output = output
             this.errorOutput = errorOutput
             return this
+        }
+
+        Writer getOutput() {
+            return output
+        }
+
+        Writer getErrorOutput() {
+            return errorOutput
         }
 
         @Override
