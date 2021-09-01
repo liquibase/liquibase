@@ -11,6 +11,12 @@ import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.CreateTableStatement;
 
+/**
+ * 创建表:DATABASECHANGELOGLOCK,要注意一个点就是在继承父类:AbstractSqlGenerator时,所指定的泛型.
+ *
+ * Liquibase在运行时,会根据:AbstractSqlStatement的实现类与SqlGenerator的实现类中的泛型比较,相同的话,代码着要执行的事情
+ *
+ */
 public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenerator<CreateDatabaseChangeLogLockTableStatement> {
 
     @Override

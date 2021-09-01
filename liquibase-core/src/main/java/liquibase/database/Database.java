@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
+ * 内部包裹着:DatabaseConnection,从这个接口的方法上,能看出来,它最主要的目的是抽象出对数据库的基本操作.
+ * 然后,有着不同的实现类去做具体的事情.
  * Interface that every DBMS supported by this software must implement. Most methods belong into ont of these
  * categories:
  * <ul></ul>

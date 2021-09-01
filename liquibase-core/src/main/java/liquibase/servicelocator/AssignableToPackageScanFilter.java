@@ -28,6 +28,7 @@ public class AssignableToPackageScanFilter implements PackageScanFilter {
     public boolean matches(Class<?> type) {
         if ((parents != null) && !parents.isEmpty()) {
             for (Class<?> parent : parents) {
+                // 判断是否为某个类的子类
                 if (parent.isAssignableFrom(type)) {
                     return true;
                 }

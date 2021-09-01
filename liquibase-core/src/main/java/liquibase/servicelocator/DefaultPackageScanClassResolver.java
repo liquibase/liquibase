@@ -83,6 +83,8 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
 
         log.debug(LogType.LOG, "Searching for implementations of " + parent.getName() + " in packages: " + Arrays.asList(packageNames));
 
+        // 创建Filter规则.(扫描package下所有的类,判断是否为:parent的子类)
+        // parent.isAssignableFrom(type)
         PackageScanFilter test = getCompositeFilter(new AssignableToPackageScanFilter(parent));
         Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
         for (String pkg : packageNames) {

@@ -111,15 +111,19 @@ public class SnapshotGeneratorFactory {
         if ((example instanceof Table) && (example.getName().equals(database.getDatabaseChangeLogTableName()) ||
             example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
             try {
+                // SELECT COUNT(*) FROM lbcat.DATABASECHANGELOGLOCK;
+                // 发起一条查询语句,查看表是否存在
                 ExecutorService.getInstance().getExecutor(database).queryForInt(
                         new RawSqlStatement("SELECT COUNT(*) FROM " +
                                 database.escapeObjectName(database.getLiquibaseCatalogName(),
                                         database.getLiquibaseSchemaName(), example.getName(), Table.class)));
                 return true;
             } catch (DatabaseException e) {
+                // 抛出异常的情况下,代表:表(DATABASECHANGELOGLOCK)不存在
                 if (database instanceof PostgresDatabase) { // throws "current transaction is aborted" unless we roll back the connection
                     database.rollback();
                 }
+                // 返回false
                 return false;
             }
         }

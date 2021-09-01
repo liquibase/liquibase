@@ -27,6 +27,9 @@ import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
 
+/**
+ * 标准的加锁服务
+ */
 public class StandardLockService implements LockService {
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
@@ -86,16 +89,30 @@ public class StandardLockService implements LockService {
         this.changeLogLockRecheckTime = changeLogLockRecheckTime;
     }
 
+    /**
+     *
+     * 初始化,创建:DATABASECHANGELOGLOCK表.
+     * @throws DatabaseException
+     */
     @Override
     public void init() throws DatabaseException {
         boolean createdTable = false;
+
+        // 通过SPI,找到实现类:JdbcExecutor
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
         if (!hasDatabaseChangeLogLockTable()) {
             try {
                 executor.comment("Create Database Lock Table");
+                // ***************************************************************************************************************
+                // 注意,这里是创建了:CreateDatabaseChangeLogLockTableStatement,在底层会转换成:CreateDatabaseChangeLogLockTableGenerator
+                //     可以这样理解:
+                //     CreateDatabaseChangeLogLockTableStatement是XML到业务模型的转换
+                //     CreateDatabaseChangeLogLockTableGenerator是业务模型到SQL语句生成的转换.
+                // ***************************************************************************************************************
                 executor.execute(new CreateDatabaseChangeLogLockTableStatement());
                 database.commit();
+
                 LogService.getLog(getClass()).debug(
                         LogType.LOG, "Created database lock table with name: " +
                                 database.escapeTableName(

@@ -195,6 +195,13 @@ public abstract class AbstractIntegrationTest {
             ExecutorService.getInstance().reset();
 
             LockServiceFactory.getInstance().resetAll();
+
+            // ************************************************************************************
+            // 1. 检查DATABASECHANGELOGLOCK表是否存在
+            // 2. 创建DATABASECHANGELOGLOCK表
+            // 3. 清空表里所有的数据
+            // 4. 添加一条数据(id=1,LOCKED=true)
+            // ************************************************************************************
             LockServiceFactory.getInstance().getLockService(database).init();
 
             ChangeLogHistoryServiceFactory.getInstance().resetAll();

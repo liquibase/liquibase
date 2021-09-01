@@ -31,15 +31,18 @@ public class ServiceLocator {
 
     static {
         try {
+            // 加载出错
             Class<?> scanner = Class.forName("Liquibase.ServiceLocator.ClrServiceLocator, Liquibase");
             instance = (ServiceLocator) scanner.newInstance();
         } catch (Exception e) {
             try {
+                // 是否OSGI
                 if (OSGiUtil.isLiquibaseLoadedAsOSGiBundle()) {
                     Bundle liquibaseBundle = FrameworkUtil.getBundle(ServiceLocator.class);
                     instance = new ServiceLocator(new OSGiPackageScanClassResolver(liquibaseBundle), 
                             new OSGiResourceAccessor(liquibaseBundle));
                 } else {
+                    // 创建ServiceLocator
                     instance = new ServiceLocator();
                 }
             } catch (Throwable e1) {
@@ -48,14 +51,22 @@ public class ServiceLocator {
         }
     }
 
+    // 资源访问授权
     private ResourceAccessor resourceAccessor;
 
     private Map<Class, List<Class>> classesBySuperclass;
+    // 要扫描的package
     private List<String> packagesToScan;
+    // 扫描解析器
     private PackageScanClassResolver classResolver;
 
     protected ServiceLocator() {
+        // 设置:PackageScanClassResolver
         this.classResolver = defaultClassLoader();
+        // **************************************************************************
+        // 设置要在哪些package下扫描
+        // 首先通过环境变量读取要加载的目录:liquibase.scan.package(多个package之间用逗号分隔),如果,加载不了,则读取:META-INF/MANIFEST.MF --> Liquibase-Package进行加载,如果再加载不了,就手工指定要加载的package.
+        // **************************************************************************
         setResourceAccessor(new ClassLoaderResourceAccessor());
     }
 
@@ -87,10 +98,12 @@ public class ServiceLocator {
     }
 
     protected PackageScanClassResolver defaultClassLoader(){
-        if (WebSpherePackageScanClassResolver.isWebSphereClassLoader(this.getClass().getClassLoader())) {
+        // 判断是否为:WebSphere
+        if (WebSpherePackageScanClassResolver.isWebSphereClassLoader(this.getClass().getClassLoader())) { // false
             LogService.getLog(getClass()).debug(LogType.LOG, "Using WebSphere Specific Class Resolver");
             return new WebSpherePackageScanClassResolver("liquibase/parser/core/xml/dbchangelog-2.0.xsd");
         } else {
+            // 创建默认的包扫描解析器
             return new DefaultPackageScanClassResolver();
         }
     }
@@ -99,19 +112,23 @@ public class ServiceLocator {
         this.resourceAccessor = resourceAccessor;
         this.classesBySuperclass = new HashMap<>();
 
+        // 设置ClassLoader
         this.classResolver.setClassLoaders(new HashSet<>(Arrays.asList(new ClassLoader[]{resourceAccessor.toClassLoader()})));
 
-        if (packagesToScan == null) {
+        if (packagesToScan == null) {  // 如果没有加载过,则进行加载.
             packagesToScan = new ArrayList<>();
+            // 1. 读取环境变量里的信息进行加载
             String packagesToScanSystemProp = System.getProperty("liquibase.scan.packages");
             if ((packagesToScanSystemProp != null) &&
                 ((packagesToScanSystemProp = StringUtils.trimToNull(packagesToScanSystemProp)) != null)) {
+                // 多个之间逗号分隔
                 for (String value : packagesToScanSystemProp.split(",")) {
                     addPackageToScan(value);
                 }
             } else {
                 Set<InputStream> manifests;
                 try {
+                    // 2. 读取:META-INF/MANIFEST.MF --> Liquibase-Package加载
                     manifests = resourceAccessor.getResourcesAsStream("META-INF/MANIFEST.MF");
                     if (manifests != null) {
                         for (InputStream is : manifests) {
@@ -129,7 +146,7 @@ public class ServiceLocator {
                     throw new UnexpectedLiquibaseException(e);
                 }
 
-                if (packagesToScan.isEmpty()) {
+                if (packagesToScan.isEmpty()) {  // 3. 最后手工指定要加载的包名称
                     addPackageToScan("liquibase.change");
                     addPackageToScan("liquibase.changelog");
                     addPackageToScan("liquibase.command");
@@ -161,6 +178,7 @@ public class ServiceLocator {
         return packagesToScan;
     }
 
+
     public Class findClass(Class requiredInterface) throws ServiceNotFoundException {
         Class[] classes = findClasses(requiredInterface);
         if (PrioritizedService.class.isAssignableFrom(requiredInterface)) {
@@ -191,13 +209,24 @@ public class ServiceLocator {
         return classes[0];
     }
 
+    /**
+     * 根据类名称,找到符合该类的所有实现类
+     * @param requiredInterface
+     * @param <T>
+     * @return
+     * @throws ServiceNotFoundException
+     */
     public <T> Class<? extends T>[] findClasses(Class<T> requiredInterface) throws ServiceNotFoundException {
         LogService.getLog(getClass()).debug(LogType.LOG, "ServiceLocator.findClasses for "+requiredInterface.getName());
 
             try {
                 Class.forName(requiredInterface.getName());
 
+                // 判断是否扫描加载过了
                 if (!classesBySuperclass.containsKey(requiredInterface)) {
+                    // ********************************************************************
+                    // findClassesImpl根据类,找到所有符合的子类
+                    // ********************************************************************
                     classesBySuperclass.put(requiredInterface, findClassesImpl(requiredInterface));
                 }
             } catch (Exception e) {
@@ -217,12 +246,24 @@ public class ServiceLocator {
         }
     }
 
+    /**
+     *
+     * @param requiredInterface   例如:  liquibase.database.Database
+     * @return
+     * @throws Exception
+     */
     private List<Class> findClassesImpl(Class requiredInterface) throws Exception {
         LogService.getLog(getClass()).debug(LogType.LOG, "ServiceLocator finding classes matching interface " + requiredInterface.getName());
 
         List<Class> classes = new ArrayList<>();
 
+        // 再次设置了ClassLoader
         classResolver.addClassLoader(resourceAccessor.toClassLoader());
+
+        // *************************************************************************************
+        // 调用:DefaultPackageScanClassResolver.findImplementations(liquibase.database.Database, new String[]{ "liquibase.change","liquibase.changelog","liquibase.command" });
+        // 在指定的package下扫描,所有符合该类的子类.
+        // *************************************************************************************
         for (Class<?> clazz : classResolver.findImplementations(requiredInterface, packagesToScan.toArray(new String[packagesToScan.size()]))) {
             if ((clazz.getAnnotation(LiquibaseService.class) != null) && clazz.getAnnotation(LiquibaseService.class)
                 .skip()) {

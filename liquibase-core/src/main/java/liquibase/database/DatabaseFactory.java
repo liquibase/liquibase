@@ -25,10 +25,12 @@ public class DatabaseFactory {
 
     private DatabaseFactory() {
         try {
+            // Liquibase自己写了一个SPI加载器
             Class<? extends Database>[] classes = ServiceLocator.getInstance().findClasses(Database.class);
 
             for (Class<? extends Database> clazz : classes) {
                 try {
+                    // 注册
                     register(clazz.getConstructor().newInstance());
                 } catch (Exception e) {
                     throw new UnexpectedLiquibaseException("Error registering "+clazz.getName(), e);
@@ -43,6 +45,7 @@ public class DatabaseFactory {
 
     public static synchronized DatabaseFactory getInstance() {
         if (instance == null) {
+            // 创建数据库工厂
             instance = new DatabaseFactory();
         }
         return instance;
