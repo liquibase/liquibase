@@ -48,11 +48,19 @@ jobs:
           java-version: '8'
           distribution: 'adopt'
 
-      - name: Install Built Modules
-        run: find /home/runner/work/liquibase/liquibase -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;
+      - name: Download liquibase modules
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: build.yml
+          workflow_conclusion: success
+          branch: ${{ github.event.workflow_run.head_branch }}
+          name: liquibase-modules
+          path: download
 
-      - name: Install Built Module Sources
-        run: find /home/runner/work/liquibase/liquibase -name *-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;
+      - name: Install Built Modules
+        run: |
+          find download -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;
+          find download -name *-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;
 
       - name: Build Final Jar & Tar/Zips
         run: mvn -B -pl liquibase-dist package
