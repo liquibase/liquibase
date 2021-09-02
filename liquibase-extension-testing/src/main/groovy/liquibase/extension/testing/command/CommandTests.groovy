@@ -321,6 +321,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         if (testDef.expectFileToExist != null) {
             assert testDef.expectFileToExist.exists(): "File '${testDef.expectFileToExist.getName()}' should exist"
         }
+        if (testDef.expectFileToNotExist != null) {
+            assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getName()}' should not exist"
+        }
 
         where:
         permutation << getAllRunTestPermutations()
