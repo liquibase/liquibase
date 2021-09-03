@@ -82,4 +82,29 @@ public class AddNotNullConstraintChangeTest extends StandardChangeTest {
         output[1] instanceof SetNullableStatement
     }
 
+    def should_generateStatements_update_statement_handle_bit_1_type() {
+        given:
+        def change = new AddNotNullConstraintChange()
+        change.setTableName("xxx")
+        change.setColumnName("col_name")
+        change.setColumnDataType("BIT(1)")
+        change.setDefaultNullValue("1")
+
+        def database = new MySQLDatabase()
+
+        when:
+        def output = change.generateStatements(database)
+
+        then:
+        output.length == 2
+        output[0] instanceof UpdateStatement
+        def update = (UpdateStatement) output[0]
+        update.getTableName() == "xxx"
+        update.getNewColumnValues().size() == 1
+        update.getNewColumnValues().get("col_name") == true
+        update.getWhereClause() == "col_name IS NULL"
+
+        output[1] instanceof SetNullableStatement
+    }
+
 }

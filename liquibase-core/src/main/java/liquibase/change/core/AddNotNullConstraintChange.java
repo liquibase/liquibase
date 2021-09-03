@@ -154,8 +154,8 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
     private Object parseDefaultNullValue() {
-        if ("BOOLEAN".equalsIgnoreCase(columnDataType)) {
-            return Boolean.parseBoolean(defaultNullValue);
+        if ("BOOLEAN".equalsIgnoreCase(columnDataType) || "BIT(1)".equalsIgnoreCase(columnDataType)) {
+            return Boolean.parseBoolean(defaultNullValue) || "1".equals(defaultNullValue);
         } else {
             return defaultNullValue;
         }
