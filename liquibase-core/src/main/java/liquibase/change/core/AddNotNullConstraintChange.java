@@ -3,9 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
@@ -154,11 +152,20 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
     private Object parseDefaultNullValue() {
-        if ("BOOLEAN".equalsIgnoreCase(columnDataType) || "BIT(1)".equalsIgnoreCase(columnDataType)) {
-            return Boolean.parseBoolean(defaultNullValue) || "1".equals(defaultNullValue);
-        } else {
-            return defaultNullValue;
+        if (isABooleanColumnDataType()) {
+            return parseDefaultNullValueToBoolean();
         }
+
+        return defaultNullValue;
+    }
+
+    private boolean isABooleanColumnDataType() {
+        return
+            "BOOLEAN".equalsIgnoreCase(columnDataType) || "BIT(1)".equalsIgnoreCase(columnDataType);
+    }
+
+    private boolean parseDefaultNullValueToBoolean() {
+        return Boolean.parseBoolean(defaultNullValue) || "1".equals(defaultNullValue);
     }
 
     @Override
