@@ -183,7 +183,7 @@ public class TableOutput {
         StringBuilder result = new StringBuilder();
         for (String part : parts) {
             if (runningWidth + part.length() > maxWidth) {
-               for (int i=0; i < (maxWidth - runningWidth + 2); i++) {
+               for (int i=0; i < (maxWidth - runningWidth); i++) {
                    result.append(" ");
                }
                runningWidth = 0;
