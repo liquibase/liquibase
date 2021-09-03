@@ -405,7 +405,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         "com/example/users.csv"   | "a/logical/path.xml" | false
         "users.csv"               | null                 | true
         "users.csv"               | "a/logical/path.xml" | true
-
     }
 
     def "checksum does not change when no comments in CSV and comment property changes"() {
