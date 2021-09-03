@@ -6,7 +6,7 @@ name: Package
 on:
   workflow_run:
     workflows: ["Build and Test"]
-    branches: [unversioned-master]
+    branches: [NONE]
     types:
       - completed
 
@@ -20,6 +20,7 @@ jobs:
         id: create-check
         uses: actions/github-script@v4
         with:
+          github-token: ${{ secrets.BOT_TOKEN }}
           script: |
             const check = await github.checks.create({
               "owner": "liquibase",
@@ -80,6 +81,7 @@ jobs:
         uses: actions/github-script@v4
         if: always()
         with:
+          github-token: ${{ secrets.BOT_TOKEN }}
           script: |
             github.checks.update({
               "owner": "liquibase",
@@ -87,5 +89,5 @@ jobs:
               "check_run_id": ${{ steps.create-check.outputs.checkId }},
               "status": "completed",
               "conclusion": "${{ job.status }}",
-              "details_url": "https://github.com/liquibase/liquibase/actions/runs/${{ github.run_id }}",
+              "details_url": "https://github.com/liquibase/liquibase/actions/runs/${{ github.run_id }}"
             });
