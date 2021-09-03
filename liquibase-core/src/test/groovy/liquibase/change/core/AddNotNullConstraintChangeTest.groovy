@@ -57,4 +57,29 @@ public class AddNotNullConstraintChangeTest extends StandardChangeTest {
         output[1] instanceof SetNullableStatement
     }
 
+    def should_generateStatements_update_statement_handle_boolean_type() {
+        given:
+        def change = new AddNotNullConstraintChange()
+        change.setTableName("FOO")
+        change.setColumnName("BAR")
+        change.setColumnDataType("BOOLEAN")
+        change.setDefaultNullValue("false")
+
+        def database = new MySQLDatabase()
+
+        when:
+        def output = change.generateStatements(database)
+
+        then:
+        output.length == 2
+        output[0] instanceof UpdateStatement
+        def update = (UpdateStatement) output[0]
+        update.getTableName() == "FOO"
+        update.getNewColumnValues().size() == 1
+        update.getNewColumnValues().get("BAR") == false
+        update.getWhereClause() == "BAR IS NULL"
+
+        output[1] instanceof SetNullableStatement
+    }
+
 }

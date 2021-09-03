@@ -136,8 +136,9 @@ public class AddNotNullConstraintChange extends AbstractChange {
         List<SqlStatement> statements = new ArrayList<>();
 
         if (defaultNullValue != null) {
+            Object parsedDefaultNullValue = parseDefaultNullValue();
             statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
-                                   .addNewColumnValue(getColumnName(), defaultNullValue)
+                                   .addNewColumnValue(getColumnName(), parsedDefaultNullValue)
                                    .setWhereClause(database.escapeObjectName(getColumnName(), Column.class) +
                                    " IS NULL"));
         }
@@ -150,6 +151,14 @@ public class AddNotNullConstraintChange extends AbstractChange {
         }
         
         return statements.toArray(new SqlStatement[statements.size()]);
+    }
+
+    private Object parseDefaultNullValue() {
+        if ("BOOLEAN".equalsIgnoreCase(columnDataType)) {
+            return Boolean.parseBoolean(defaultNullValue);
+        } else {
+            return defaultNullValue;
+        }
     }
 
     @Override
