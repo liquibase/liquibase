@@ -36,6 +36,7 @@ import liquibase.util.StringUtil
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.Assert
 import org.junit.Assume
+import org.junit.ComparisonFailure
 import org.junit.Test
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -424,8 +425,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 }
 
                 if (expectedOutputCheck instanceof String) {
-                    assert fullOutput.replaceAll(/\s+/," ")
-                            .contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck)).replaceAll(/\s+/," ")): "$outputDescription does not contain: '$expectedOutputCheck'"
+                    if (!fullOutput.replaceAll(/\s+/," ")
+                            .contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck)).replaceAll(/\s+/," "))) {
+                        throw new ComparisonFailure("$outputDescription does not contain expected", expectedOutputCheck, fullOutput)
+                    }
                 } else if (expectedOutputCheck instanceof Pattern) {
                     String patternString = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern()))
                     //expectedOutputCheck = Pattern.compile(patternString, Pattern.MULTILINE | Pattern.DOTALL)
