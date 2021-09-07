@@ -182,7 +182,11 @@ public class TableOutput {
         int runningWidth = 0;
         StringBuilder result = new StringBuilder();
         for (String part : parts) {
-            if (runningWidth + part.length() > maxWidth) {
+            // how much additional width will the space add to the total length of the string; if no parts have been
+            // appended to the stringbuilder yet, then no space will be added to the part
+            int spaceWidth = runningWidth > 0 ? 1 : 0;
+            // if this part were to be added to the string, with a space (if applicable), would it exceed the maxWidth
+            if (runningWidth + (part.length() + spaceWidth) > maxWidth) {
                for (int i=0; i < (maxWidth - runningWidth); i++) {
                    result.append(" ");
                }
