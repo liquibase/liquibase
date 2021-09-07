@@ -3,7 +3,7 @@
 
 name: Build and Test
 
-on: [ pull_request_trigger ]
+on: [ pull_request_target ]
 
 jobs:
   test:
