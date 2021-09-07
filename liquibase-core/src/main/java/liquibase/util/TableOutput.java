@@ -182,19 +182,57 @@ public class TableOutput {
         int runningWidth = 0;
         StringBuilder result = new StringBuilder();
         for (String part : parts) {
-            if (runningWidth + part.length() > maxWidth) {
-               for (int i=0; i < (maxWidth - runningWidth); i++) {
-                   result.append(" ");
-               }
-               runningWidth = 0;
+            // if the string contains a line separator, then write the values onto separate lines in the table
+            String[] lineSplitParts = part.split(System.lineSeparator());
+            if (lineSplitParts.length > 1) {
+                for (int i = 0; i < lineSplitParts.length; i++) {
+                    String lineSplitPart = lineSplitParts[i];
+                    runningWidth = doAppend(runningWidth, lineSplitPart, maxWidth, result);
+                    // append spaces to push onto a new line if this is not the last entry in the array
+                    if (i != lineSplitParts.length -1) {
+                        runningWidth = fillLineWithSpaces(runningWidth, maxWidth, result);
+                    }
+                }
+            } else {
+                runningWidth = doAppend(runningWidth, part, maxWidth, result);
             }
-            if (runningWidth > 0) {
-                result.append(" ");
-                runningWidth++;
-            }
-            result.append(part);
-            runningWidth += part.length();
+
         }
         return result.toString();
+    }
+
+    /**
+     * Append the specified part of a string to the string builder and add spaces where needed.
+     * @param runningWidth the current running width
+     * @param part the part to append
+     * @param maxWidth the maxwidth for this column
+     * @param result the string builder result to append to
+     * @return the new current running width
+     */
+    private static int doAppend(int runningWidth, String part, int maxWidth, StringBuilder result) {
+        if (runningWidth + part.length() > maxWidth) {
+            runningWidth = fillLineWithSpaces(runningWidth, maxWidth, result);
+        }
+        if (runningWidth > 0) {
+            result.append(" ");
+            runningWidth++;
+        }
+        result.append(part);
+        runningWidth += part.length();
+        return runningWidth;
+    }
+
+    /**
+     * Given a current running width and a max width, fill the remaining space on the current line with spaces.
+     * @param runningWidth the current running width
+     * @param maxWidth the max width for the column
+     * @param result the result to append spaces to
+     * @return the new current running width (which is always 0, since the line has been filled to the end with spaces)
+     */
+    private static int fillLineWithSpaces(int runningWidth, int maxWidth, StringBuilder result) {
+        for (int i=0; i < (maxWidth - runningWidth); i++) {
+            result.append(" ");
+        }
+        return 0;
     }
 }
