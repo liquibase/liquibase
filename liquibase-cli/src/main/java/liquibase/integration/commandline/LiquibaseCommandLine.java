@@ -20,6 +20,7 @@ import liquibase.logging.core.JavaLogService;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.ui.ConsoleUIService;
+import liquibase.ui.UIService;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 import picocli.CommandLine;
@@ -469,7 +470,17 @@ public class LiquibaseCommandLine {
         returnMap.putAll(configureLogging());
         returnMap.putAll(configureResourceAccessor(classLoader));
 
-        ConsoleUIService ui = new ConsoleUIService();
+        ConsoleUIService ui = null;
+        List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
+        for (UIService uiService : uiServices) {
+            if (uiService instanceof ConsoleUIService) {
+                ui = (ConsoleUIService) uiService;
+                break;
+            }
+        }
+        if (ui == null) {
+            ui = new ConsoleUIService();
+        }
         ui.setAllowPrompt(true);
         ui.setOutputStream(System.err);
         returnMap.put(Scope.Attr.ui.name(), ui);
