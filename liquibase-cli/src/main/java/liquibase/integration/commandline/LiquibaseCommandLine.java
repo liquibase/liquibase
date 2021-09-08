@@ -24,10 +24,7 @@ import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -416,7 +413,7 @@ public class LiquibaseCommandLine {
         return returnList.toArray(new String[0]);
     }
 
-    private List<ConfigurationValueProvider> registerValueProviders(String[] args) {
+    private List<ConfigurationValueProvider> registerValueProviders(String[] args) throws IOException {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
         List<ConfigurationValueProvider> returnList = new ArrayList<>();
 
@@ -431,10 +428,18 @@ public class LiquibaseCommandLine {
             liquibaseConfiguration.registerProvider(fileProvider);
             returnList.add(fileProvider);
         } else {
-            Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
-            if (!defaultsFileConfig.wasDefaultValueUsed()) {
-                //can't use UI since it's not configured correctly yet
-                System.err.println("Could not find defaults file " + defaultsFile.getAbsolutePath());
+            final InputStream defaultsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
+            if (defaultsStream == null) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
+                if (!defaultsFileConfig.wasDefaultValueUsed()) {
+                    //can't use UI since it's not configured correctly yet
+                    System.err.println("Could not find defaults file " + defaultsFileConfig.getValue());
+                }
+            } else {
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File in classpath "+defaultsFileConfig.getValue());
+                liquibaseConfiguration.registerProvider(fileProvider);
+                returnList.add(fileProvider);
+
             }
         }
 

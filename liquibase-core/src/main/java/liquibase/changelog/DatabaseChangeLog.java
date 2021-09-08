@@ -513,7 +513,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
             pathName = pathName.replace('\\', '/');
 
-            if (!(pathName.endsWith("/"))) {
+            if (StringUtil.isNotEmpty(pathName) && !(pathName.endsWith("/"))) {
                 pathName = pathName + '/';
             }
             LOG.fine("includeAll for " + pathName);
