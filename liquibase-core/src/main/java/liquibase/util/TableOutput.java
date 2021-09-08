@@ -210,7 +210,8 @@ public class TableOutput {
      * @return the new current running width
      */
     private static int doAppend(int runningWidth, String part, int maxWidth, StringBuilder result) {
-        if (runningWidth + part.length() > maxWidth) {
+        int spaceWidth = runningWidth > 0 ? 1 : 0;
+        if (runningWidth + (part.length() + spaceWidth) > maxWidth) {
             runningWidth = fillLineWithSpaces(runningWidth, maxWidth, result);
         }
         if (runningWidth > 0) {
