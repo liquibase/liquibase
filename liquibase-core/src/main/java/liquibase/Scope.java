@@ -20,8 +20,6 @@ import liquibase.ui.UIService;
 import liquibase.util.SmartMap;
 import liquibase.util.StringUtil;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -53,6 +51,7 @@ public class Scope {
         fileEncoding,
         databaseChangeLog,
         changeSet,
+        osgiPlatform
     }
 
     private static ScopeManager scopeManager;
@@ -93,6 +92,7 @@ public class Scope {
             }
 
             rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
+            rootScope.values.put(Attr.osgiPlatform.name(),Activator.OSGIContainerChecker.isOsgiPlatform());
         }
         return scopeManager.getCurrentScope();
     }
