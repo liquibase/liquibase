@@ -36,19 +36,15 @@ public class LicenseServiceUtils {
     }
 
   /**
-   * check for a Liquibase Pro License, return true if licensed, false if not
-   * @param licenseType
-   * @return
+   * Check for a Liquibase Pro License.
+   * @return true if licensed, false if not
    */
-  public static boolean checkForValidLicense(String licenseType) {
+  public static boolean isProLicenseValid() {
     LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
     if (licenseService == null) {
       return false;
     }
-    if (licenseService.licenseIsValid(licenseType)) {
-      return true;
-    }
-    return false;
+    return licenseService.licenseIsValid("Liquibase Pro");
   }
 
 }

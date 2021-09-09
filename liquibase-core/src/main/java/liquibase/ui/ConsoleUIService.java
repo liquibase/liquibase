@@ -3,7 +3,6 @@ package liquibase.ui;
 import liquibase.AbstractExtensibleObject;
 import liquibase.Scope;
 import liquibase.GlobalConfiguration;
-import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
@@ -98,11 +97,23 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             String input = StringUtil.trimToNull(console.readLine());
             try {
                 if (input == null) {
-                    return defaultValue;
+                    if (inputHandler.shouldAllowEmptyInput()) {
+                        return defaultValue;
+                    } else {
+                        throw new IllegalArgumentException("Empty values are not permitted.");
+                    }
                 }
                 return inputHandler.parseInput(input, type);
             } catch (IllegalArgumentException e) {
-                this.sendMessage("Invalid value: \"" + input + "\"");
+                String message;
+                if (e.getCause() != null && e.getCause().getMessage() != null) {
+                    message = "Invalid value: '" + input + "': " + e.getCause().getMessage();
+                } else if (e.getMessage() != null) {
+                    message = "Invalid value: '" + input + "': " + e.getMessage();
+                } else {
+                    message = "Invalid value: \"" + input + "\"";
+                }
+                this.sendMessage(message);
                 this.sendMessage(prompt + ": ");
             }
         }
