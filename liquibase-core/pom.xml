@@ -178,6 +178,7 @@
                     <instructions>
                         <Bundle-SymbolicName>org.liquibase.core</Bundle-SymbolicName>
                         <Import-Package>
+                            javax.activation*;resolution:=optional,
                             javax.servlet.*;version="[2.6,4)";resolution:=optional,
                             javax.sql.*,
                             org.osgi.*,

@@ -52,7 +52,6 @@ public class StartH2Main {
                 try {
                     Thread.sleep(seconds * millis);
                 } catch (InterruptedException interruptedException) {
-                    interruptedException.printStackTrace();
                     Thread.currentThread().interrupt();
                 }
             }

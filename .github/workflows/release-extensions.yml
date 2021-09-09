@@ -1,0 +1,35 @@
+name: Release Extensions
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Liquibase Version'
+        required: true
+
+jobs:
+  say_hello:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Releasing ${{ github.event.inputs.version }} extensions"
+
+      - name: Trigger Extension Builds
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.BOT_TOKEN }}
+          script: |
+            const extensions = [
+              "liquibase-postgresql"
+            ];
+
+            for (extension of extensions) {
+              console.log("Sending liquibase-release event to "+extension);
+
+              github.repos.createDispatchEvent({
+                 "owner": "liquibase",
+                 "repo": extension,
+                 "event_type": "liquibase-release",
+                 "client_payload": {
+                    "liquibaseVersion": "${{ github.event.inputs.version }}"
+                  }
+               });
+            }
