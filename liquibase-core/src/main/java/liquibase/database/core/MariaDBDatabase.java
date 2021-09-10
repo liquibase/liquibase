@@ -78,8 +78,9 @@ public class MariaDBDatabase extends MySQLDatabase {
         if (PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName())) {
             return true; // Identified as MariaDB product
         } else {
-            return (("MYSQL".equalsIgnoreCase(conn.getDatabaseProductName())) && conn.getDatabaseProductVersion()
-                    .toLowerCase().contains("mariadb"));
+            return ("MYSQL".equalsIgnoreCase(conn.getDatabaseProductName()) &&
+                (conn.getDatabaseProductVersion().toLowerCase().contains("mariadb") ||
+                 conn.getDatabaseProductVersion().toLowerCase().contains("clustrix")));
         }
     }
 
