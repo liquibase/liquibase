@@ -808,16 +808,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         /**
-         * Run a changelog
-         */
-        void base64Encode(String filePath) {
-            File f = new File(filePath)
-            String contents = f.getText()
-            String encoded = Base64.getEncoder().encodeToString(contents.getBytes())
-            f.write(encoded)
-        }
-
-        /**
          * Run a changelog with labels
          */
         void runChangelog(String changeLogPath, String labels) {
@@ -927,7 +917,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private ConsoleUIService consoleUIService
 
         TestUIWithAnswers(String[] answers) {
-            ConsoleUIService.ConsoleWrapper consoleWrapper = new CannedConsoleWrapper(answers)
+            ConsoleUIService.ConsoleWrapper consoleWrapper = new CannedConsoleWrapper(answers, getOutput())
             consoleUIService = new ConsoleUIServiceWrapper(consoleWrapper)
             consoleUIService.setAllowPrompt(true)
         }
@@ -955,11 +945,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     //
     static class CannedConsoleWrapper extends ConsoleUIService.ConsoleWrapper {
         private String[] answers
+        private Writer output
         private int count
 
-        CannedConsoleWrapper(String[] answers) {
+        CannedConsoleWrapper(String[] answers, Writer output) {
             super(null)
             this.answers = answers
+            this.output = output
         }
 
         @Override
@@ -969,6 +961,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             //
             String answer = answers[count]
             count++
+            output.println(answer);
             return answer
         }
 
