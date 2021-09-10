@@ -26,6 +26,8 @@ import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import java.util.*;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * This scope object is used to hold configuration and other parameters within a call without needing complex method signatures.
  * It also allows new parameters to be added by extensions without affecting standard method signatures.
@@ -123,7 +125,14 @@ public class Scope {
     private Scope() {
     }
 
+    /**
+     * @param parent The new Scopes parent in the hierarchy of Scopes, not null. 
+     * @param scopeValues The values for the new Scope.
+     */
     protected Scope(Scope parent, Map<String, Object> scopeValues) {
+        if (parent == null) {
+            throw new UnexpectedLiquibaseException("Cannot pass a null parent to a new Scope. Use Scope.child to correctly create a nested scope");
+        }
         this.parent = parent;
         if (scopeValues != null) {
             for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
