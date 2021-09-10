@@ -122,8 +122,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     }
 
     private String getContextsColumn(ChangeSet changeSet) {
-        return ((changeSet.getContexts() == null) || changeSet.getContexts()
-                .isEmpty()) ? null : buildFullContext(changeSet);
+        return buildFullContext(changeSet);
     }
 
     private String getLabelsColumn(ChangeSet changeSet) {
