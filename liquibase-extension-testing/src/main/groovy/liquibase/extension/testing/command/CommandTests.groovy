@@ -37,7 +37,6 @@ import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.Assert
 import org.junit.Assume
 import org.junit.ComparisonFailure
-import org.junit.Test
 import spock.lang.Specification
 import spock.lang.Unroll
 
