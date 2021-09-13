@@ -33,8 +33,12 @@ Optional Args:
     Default: null
   excludeObjects (String) Objects to exclude from diff
     Default: null
+  includeCatalog (Boolean) If true, the catalog will be included in generated changeSets
+    Default: false
   includeObjects (String) Objects to include in diff
     Default: null
+  includeSchema (Boolean) If true, the schema will be included in generated changeSets
+    Default: false
   password (String) The target database password
     Default: null
     OBFUSCATED
