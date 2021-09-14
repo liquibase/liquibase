@@ -689,12 +689,25 @@ public class LiquibaseCommandLine {
                         argDisplaySuffix = "\n[deprecated: --" + camelCaseArg + "]";
                     }
 
-                    String description =
+                    //
+                    // Determine if this is a group command and set the property/environment display strings accordingly
+                    //
+                    String description;
+                    if (commandDefinition.getName().length > 1) {
+                        String propertyStringToPresent = "\n(liquibase.command." +
+                            StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")";
+                        String envStringToPresent =
+                            toEnvVariable("\n(liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
+                            "." + def.getName()) + ")" + argDisplaySuffix;
+                        description = propertyStringToPresent + envStringToPresent;
+                    } else {
+                        description =
                         "\n(liquibase.command." + def.getName() + " OR liquibase.command." +
                             StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
                         "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " +
                             toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
                                 "." + def.getName()) + ")" + argDisplaySuffix;
+                    }
 
                     if (def.getDefaultValue() != null) {
                         if (def.getDefaultValueDescription() == null) {
