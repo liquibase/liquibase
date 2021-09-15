@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -22,6 +23,7 @@ import java.util.regex.Pattern;
 public class StringUtil {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
+    private static final Pattern spacePattern = Pattern.compile(" ");
     private static final SecureRandom rnd = new SecureRandom();
 
     /**
@@ -174,6 +176,105 @@ public class StringUtil {
                 return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches("[\\s\n\r]*"+endDelimiter.toLowerCase());
             }
         }
+    }
+
+    /**
+     *
+     * Add new lines to the input string to cause output to wrap.  Optional line padding
+     * can be passed in for the additional lines that are created
+     *
+     * @param    inputStr                The string to split and wrap
+     * @param    wrapPoint               The point at which to split the lines
+     * @param    extraLinePadding        Any additional spaces to add
+     * @return   String                  Output string with new lines
+     *
+     */
+    public static String wrap(final String inputStr, int wrapPoint, int extraLinePadding) {
+        //
+        // Just return
+        //
+        if (inputStr == null) {
+            return null;
+        }
+
+        int inputLineLength = inputStr.length();
+        int ptr = 0;
+        int sizeOfMatch = -1;
+        StringBuilder resultLine = new StringBuilder();
+        while (ptr < inputLineLength) {
+            Integer spaceToWrapAt = null;
+            int min = ptr + wrapPoint + 1;
+            Matcher matcher = spacePattern.matcher(inputStr.substring(ptr, Math.min(min, inputLineLength)));
+            if (matcher.find()) {
+                int matcherStart = matcher.start();
+                if (matcherStart == 0) {
+                    sizeOfMatch = matcher.end();
+                    if (sizeOfMatch != 0) {
+                        ptr += sizeOfMatch;
+                        continue;
+                    }
+                    ptr += 1;
+                }
+                spaceToWrapAt = matcherStart + ptr;
+            }
+
+            //
+            // Break because we do not have enough characters left to need to wrap
+            //
+            if (inputLineLength - ptr <= wrapPoint) {
+                break;
+            }
+
+            //
+            // Advance through all the spaces
+            //
+            while (matcher.find()) {
+                spaceToWrapAt = matcher.start() + ptr;
+            }
+
+            if (spaceToWrapAt != null && spaceToWrapAt >= ptr) {
+                resultLine.append(inputStr, ptr, spaceToWrapAt);
+                resultLine.append(System.lineSeparator());
+                for (int i=0; i < extraLinePadding; i++) {
+                    resultLine.append(" ");
+                }
+                ptr = spaceToWrapAt + 1;
+            } else {
+                matcher = spacePattern.matcher(inputStr.substring(ptr + wrapPoint));
+                if (matcher.find()) {
+                    int matcherStart = matcher.start();
+                    sizeOfMatch = matcher.end() - matcherStart;
+                    spaceToWrapAt = matcherStart + ptr + wrapPoint;
+                }
+
+                if (sizeOfMatch == 0 && ptr != 0) {
+                    ptr--;
+                }
+                if (spaceToWrapAt != null && spaceToWrapAt >= 0) {
+                    resultLine.append(inputStr, ptr, spaceToWrapAt);
+                    resultLine.append(System.lineSeparator());
+                    for (int i=0; i < extraLinePadding; i++) {
+                        resultLine.append(" ");
+                    }
+                    ptr = spaceToWrapAt + 1;
+                } else {
+                    resultLine.append(inputStr, ptr, inputStr.length());
+                    ptr = inputLineLength;
+                    sizeOfMatch = -1;
+                }
+            }
+        }
+
+        if (sizeOfMatch == 0 && ptr < inputLineLength) {
+            ptr--;
+        }
+
+        //
+        // Add the rest
+        //
+        resultLine.append(inputStr, ptr, inputLineLength);
+
+        return resultLine.toString();
     }
 
     /**
