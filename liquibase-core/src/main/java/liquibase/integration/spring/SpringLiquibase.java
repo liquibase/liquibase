@@ -1,6 +1,8 @@
 package liquibase.integration.spring;
 
 import liquibase.*;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
+import liquibase.changelog.ChangeSet;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -22,6 +24,7 @@ import javax.sql.DataSource;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -266,7 +269,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             c = getDataSource().getConnection();
             liquibase = createLiquibase(c);
             generateRollbackFile(liquibase);
-            performUpdate(liquibase);
+            performUpdateIfNeeded(liquibase);
         } catch (SQLException e) {
         	throw new DatabaseException(e);
         } finally {
@@ -274,6 +277,19 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 liquibase.close();
             }
         }
+    }
+
+    protected void performUpdateIfNeeded(Liquibase liquibase) throws LiquibaseException {
+        if (updateNeeded(liquibase, new Contexts(getContexts()), new LabelExpression(getLabels()))) {
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(liquibase.getDatabase()).reset();
+            performUpdate(liquibase);
+        } else {
+            log.info("No new changeSets have found.");
+        }
+    }
+
+    private boolean updateNeeded(final Liquibase liquibase, final Contexts contexts, final LabelExpression labelExpression) throws LiquibaseException {
+        return !liquibase.listUnrunChangeSets(contexts, labelExpression).isEmpty();
     }
 
     private void generateRollbackFile(Liquibase liquibase) throws LiquibaseException {
