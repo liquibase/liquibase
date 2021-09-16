@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
+@SuppressWarnings("java:S2755")
 public class DefaultXmlWriter implements XmlWriter {
 
     @Override
@@ -28,10 +29,10 @@ public class DefaultXmlWriter implements XmlWriter {
             Transformer transformer = factory.newTransformer();
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.ENCODING, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+            transformer.setOutputProperty(OutputKeys.ENCODING, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
 
             //need to nest outputStreamWriter to get around JDK 5 bug.  See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6296446
-            OutputStreamWriter writer = new OutputStreamWriter(outputStream, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+            OutputStreamWriter writer = new OutputStreamWriter(outputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
             transformer.transform(new DOMSource(doc), new StreamResult(writer));
             writer.flush();
             writer.close();

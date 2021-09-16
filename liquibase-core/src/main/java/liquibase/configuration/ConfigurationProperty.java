@@ -44,7 +44,7 @@ public class ConfigurationProperty {
      * @deprecated
      */
     public Class getType() {
-        return definition.getType();
+        return definition.getDataType();
     }
 
     /**
@@ -52,7 +52,7 @@ public class ConfigurationProperty {
      * @deprecated
      */
     protected Object valueOf(Object value) {
-        Class type = definition.getType();
+        Class type = definition.getDataType();
         if (value == null) {
             return value;
         } else if (type.isAssignableFrom(value.getClass())) {
@@ -89,8 +89,8 @@ public class ConfigurationProperty {
      * @deprecated
      */
     public <T> T getValue(Class<T> type) {
-        if (!this.definition.getType().isAssignableFrom(type)) {
-            throw new UnexpectedLiquibaseException("Property "+definition.getType()+" on is of type "+this.definition.getType().getSimpleName()+", not "+type.getSimpleName());
+        if (!this.definition.getDataType().isAssignableFrom(type)) {
+            throw new UnexpectedLiquibaseException("Property "+definition.getDataType()+" on is of type "+this.definition.getDataType().getSimpleName()+", not "+type.getSimpleName());
         }
 
         return (T) definition.getCurrentValue();
@@ -162,7 +162,7 @@ public class ConfigurationProperty {
      * @deprecated
      */
     public boolean getWasOverridden() {
-        return !ConfigurationDefinition.wasDefaultValueUsed(this.definition.getCurrentConfiguredValue());
+        return !this.definition.getCurrentConfiguredValue().wasDefaultValueUsed();
     }
 
     /**

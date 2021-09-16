@@ -496,7 +496,7 @@ return console.askYesNo(message, true);
   </installerGui>
   <mediaSets>
     <windows name="Windows" id="153">
-      <jreBundle jreBundleSource="preCreated" includedJre="../../../target/downloaded/adopt-openjdk-windows-amd64-jre-11.0.10.9.tar.gz" manualJreEntry="true">
+      <jreBundle jreBundleSource="preCreated" includedJre="../../../target/downloaded/OpenJDK11U-jre_x64_windows_hotspot_11.0.11_9.tar.gz" manualJreEntry="true">
         <modules>
           <defaultModules set="jre" />
         </modules>
@@ -507,7 +507,7 @@ return console.askYesNo(message, true);
         <launcher id="156" />
         <launcher id="158" />
       </excludedLaunchers>
-      <jreBundle jreBundleSource="preCreated" includedJre="../../../target/downloaded/adopt-openjdk-macos-amd64-jre-11.0.10.9.tar.gz" manualJreEntry="true">
+      <jreBundle jreBundleSource="preCreated" includedJre="../../../target/downloaded/OpenJDK11U-jre_x64_mac_hotspot_11.0.11_9.tar.gz" manualJreEntry="true">
         <modules>
           <defaultModules set="jre" />
         </modules>

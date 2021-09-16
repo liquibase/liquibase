@@ -1,17 +1,12 @@
 package liquibase.command;
 
 import liquibase.Scope;
-import liquibase.configuration.AbstractMapConfigurationValueProvider;
-import liquibase.configuration.ConfigurationDefinition;
-import liquibase.configuration.ConfiguredValue;
+import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.util.StringUtil;
 
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * The primary facade used for executing commands.
@@ -28,7 +23,14 @@ public class CommandScope {
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
     private final CommandScopeValueProvider commandScopeValueProvider = new CommandScopeValueProvider();
 
+    /**
+     * Config key including the command name. Example `liquibase.command.update`
+     */
     private final String completeConfigPrefix;
+
+    /**
+     * Config key without the command name. Example `liquibase.command`
+     */
     private final String shortConfigPrefix;
 
     private OutputStream outputStream;
@@ -85,9 +87,14 @@ public class CommandScope {
      * for settings of liquibase.command.${commandName(s)}.${argumentName} or liquibase.command.${argumentName}
      */
     public <T> ConfiguredValue<T> getConfiguredValue(CommandArgumentDefinition<T> argument) {
-        final ConfigurationDefinition<T> configDef = createConfigurationDefinition(argument);
+        ConfigurationDefinition<T> configDef = createConfigurationDefinition(argument, true);
+        ConfiguredValue<T> providedValue = configDef.getCurrentConfiguredValue();
 
-        final ConfiguredValue<T> providedValue = configDef.getCurrentConfiguredValue();
+        if (!providedValue.found()) {
+            configDef = createConfigurationDefinition(argument, false);
+            providedValue = configDef.getCurrentConfiguredValue();
+        }
+
 
         providedValue.override(commandScopeValueProvider.getProvidedValue(configDef.getKey(), argument.getName()));
 
@@ -96,11 +103,11 @@ public class CommandScope {
 
     /**
      * Convenience method for {@link #getConfiguredValue(CommandArgumentDefinition)}, returning {@link ConfiguredValue#getValue()} along with any
-     * {@link CommandArgumentDefinition#getValueHandler()} applied
+     * {@link CommandArgumentDefinition#getValueConverter()} applied
      */
     public <T> T getArgumentValue(CommandArgumentDefinition<T> argument) {
         final T value = getConfiguredValue(argument).getValue();
-        return argument.getValueHandler().convert(value);
+        return argument.getValueConverter().convert(value);
     }
 
     /**
@@ -120,15 +127,23 @@ public class CommandScope {
     public CommandResults execute() throws CommandExecutionException {
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
 
+        for (ConfigurationValueProvider provider : Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getProviders()) {
+            provider.validate(this);
+        }
+
         for (CommandArgumentDefinition<?> definition : commandDefinition.getArguments().values()) {
             definition.validate(this);
         }
 
-        for (CommandStep step : commandDefinition.getPipeline()) {
+        final List<CommandStep> pipeline = commandDefinition.getPipeline();
+
+        Scope.getCurrentScope().getLog(getClass()).fine("Pipeline for command '" + StringUtil.join(commandDefinition.getName(), " ") + ": " + StringUtil.join(pipeline, " then ", obj -> obj.getClass().getName()));
+
+        for (CommandStep step : pipeline) {
             step.validate(this);
         }
         try {
-            for (CommandStep command : commandDefinition.getPipeline()) {
+            for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
             }
         } catch (Exception e) {
@@ -148,17 +163,22 @@ public class CommandScope {
         return resultsBuilder.build();
     }
 
-    private <T> ConfigurationDefinition<T> createConfigurationDefinition(CommandArgumentDefinition<T> argument) {
-        return new ConfigurationDefinition.Builder(completeConfigPrefix)
+    private <T> ConfigurationDefinition<T> createConfigurationDefinition(CommandArgumentDefinition<T> argument, boolean includeCommandName) {
+        final String key;
+        if (includeCommandName) {
+            key = completeConfigPrefix;
+        } else {
+            key = shortConfigPrefix;
+        }
+
+        return new ConfigurationDefinition.Builder(key)
                 .define(argument.getName(), argument.getDataType())
-                .addAliasKey(shortConfigPrefix + "." + argument.getName())
                 .setDefaultValue(argument.getDefaultValue())
                 .setDescription(argument.getDescription())
-                .setValueHandler(argument.getValueHandler())
+                .setValueHandler(argument.getValueConverter())
                 .setValueObfuscator(argument.getValueObfuscator())
                 .buildTemporary();
     }
-
 
     private class CommandScopeValueProvider extends AbstractMapConfigurationValueProvider {
 

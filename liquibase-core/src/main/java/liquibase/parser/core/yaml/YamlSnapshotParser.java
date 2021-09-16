@@ -66,7 +66,7 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
         Map parsedYaml;
         try (
             InputStreamReader inputStreamReader = new InputStreamReader(
-                stream, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()
+                stream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()
             );
         ) {
             parsedYaml = (Map) yaml.load(inputStreamReader);

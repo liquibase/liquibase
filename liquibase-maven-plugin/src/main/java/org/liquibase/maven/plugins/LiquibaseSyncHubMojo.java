@@ -6,6 +6,9 @@ import liquibase.command.core.InternalSyncHubCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
+
+import java.util.UUID;
 
 /**
  * <p>Syncs all changes in change log with Hub.</p>
@@ -20,6 +23,7 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.hubConnectionId"
      */
+    @PropertyElement
     protected String hubConnectionId;
 
     /**
@@ -27,6 +31,7 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.hubProjectId"
      */
+    @PropertyElement
     protected String hubProjectId;
 
     @Override
@@ -45,10 +50,10 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
         syncHub
                 .addArgumentValue(InternalSyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(InternalSyncHubCommandStep.URL_ARG, database.getConnection().getURL())
-                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
-                .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId)
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_CONNECTION_ID_ARG, (hubConnectionId != null ? UUID.fromString(hubConnectionId) : null))
+                .addArgumentValue(InternalSyncHubCommandStep.HUB_PROJECT_ID_ARG, (hubProjectId != null ? UUID.fromString(hubProjectId) : null))
                 .addArgumentValue(InternalSyncHubCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_ONLINE_ARG, false);
+                .addArgumentValue(InternalSyncHubCommandStep.FAIL_IF_OFFLINE_ARG, false);
 
         syncHub.execute();
     }

@@ -11,7 +11,7 @@ class LiquibaseConfigurationTest extends Specification {
         def currentValue = Scope.child(["test.currentValue": "From scope"], new Scope.ScopedRunnerWithReturn<ConfiguredValue>() {
             @Override
             ConfiguredValue run() throws Exception {
-                return Scope.currentScope.getSingleton(LiquibaseConfiguration).getCurrentConfiguredValue("test.currentValue")
+                return Scope.currentScope.getSingleton(LiquibaseConfiguration).getCurrentConfiguredValue(null, null, "test.currentValue")
             }
         })
 
@@ -22,12 +22,12 @@ class LiquibaseConfigurationTest extends Specification {
 
     def "getCurrentConfiguredValue with no value found"() {
         when:
-        def currentValue = Scope.currentScope.getSingleton(LiquibaseConfiguration).getCurrentConfiguredValue("test.unknownValue")
+        def currentValue = Scope.currentScope.getSingleton(LiquibaseConfiguration).getCurrentConfiguredValue(null, null, "test.unknownValue")
 
         then:
         currentValue != null
         currentValue.getValue() == null
-        currentValue.getProvidedValue().sourceDescription == "No configuration or default value found"
+        currentValue.getProvidedValue().sourceDescription == "No configured value found"
         currentValue.getProvidedValue().requestedKey == "test.unknownValue"
         currentValue.getProvidedValue().provider != null
     }
@@ -40,7 +40,7 @@ class LiquibaseConfigurationTest extends Specification {
 
     def "autoRegisters definitions"() {
         expect:
-        Scope.getCurrentScope().getSingleton(LiquibaseConfiguration).getRegisteredDefinitions().size() > 10
+        Scope.getCurrentScope().getSingleton(LiquibaseConfiguration).getRegisteredDefinitions(false).size() > 10
     }
 
     def "getRegisteredDefinition for a key"() {

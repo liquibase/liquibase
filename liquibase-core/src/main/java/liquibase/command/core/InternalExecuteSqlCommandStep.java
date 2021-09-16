@@ -34,9 +34,16 @@ public class InternalExecuteSqlCommandStep extends AbstractCommandStep {
     }
 
     @Override
-    public String[] getName() {
-        return COMMAND_NAME;
+    public String[][] defineCommandNames() {
+        return new String[][] { COMMAND_NAME };
     }
+
+    @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        super.adjustCommandDefinition(commandDefinition);
+        commandDefinition.setInternal(true);
+    }
+
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
@@ -58,7 +65,7 @@ public class InternalExecuteSqlCommandStep extends AbstractCommandStep {
         }
 
         String out = "";
-        String[] sqlStrings = StringUtil.processMutliLineSQL(sqlText, true, true, commandScope.getArgumentValue(DELIMITER_ARG));
+        String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, commandScope.getArgumentValue(DELIMITER_ARG));
         for (String sqlString : sqlStrings) {
             if (sqlString.toLowerCase().matches("\\s*select .*")) {
                 List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sqlString));

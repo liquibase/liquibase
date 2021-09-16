@@ -24,6 +24,7 @@ import java.util.List;
  * Implements the necessary logic to choose how the SQL string should be parsed to generate the statements.
  *
  */
+@SuppressWarnings("java:S5998")
 public abstract class AbstractSQLChange extends AbstractChange implements DbmsTargetedChange {
 
     private boolean stripComments;
@@ -193,7 +194,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
 
             if (sql != null) {
-                stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue())
+                stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())
                 );
             }
 
@@ -234,12 +235,9 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
             return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
         }
-        for (String statement : StringUtil.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
+        for (String statement : StringUtil.processMultiLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
                 statement = statement.replaceAll("\\n", "\r\n");
-            }
-            if (database instanceof PostgresDatabase) {
-                statement = statement.replaceAll("(^|[^\\?])\\?(?!\\?)(?=([^']*'[^']*')*[^']*$)", "$1??");
             }
 
             String escapedStatement = statement;
@@ -290,7 +288,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         public NormalizingStream(String endDelimiter, Boolean splitStatements, Boolean stripComments, InputStream stream) {
             this.stream = new PushbackInputStream(stream, 2048);
             try {
-                this.headerStream = new ByteArrayInputStream((endDelimiter+":"+splitStatements+":"+stripComments+":").getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
+                this.headerStream = new ByteArrayInputStream((endDelimiter+":"+splitStatements+":"+stripComments+":").getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
             } catch (UnsupportedEncodingException e) {
                 throw new UnexpectedLiquibaseException(e);
             }

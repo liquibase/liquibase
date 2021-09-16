@@ -235,7 +235,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                     }
 
                     if (path != null) {
-                        basePath = basePath.resolve(path);
+                        basePath = basePath.resolve(path).normalize();
                     }
 
                     Files.walkFileTree(basePath, Collections.singleton(FileVisitOption.FOLLOW_LINKS), maxDepth, fileVisitor);
