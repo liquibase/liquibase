@@ -325,6 +325,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     protected ProcessBuilder createProcessBuilder(Database database) {
+
+
         ProcessBuilder pb = new ProcessBuilder(finalCommandArray);
         pb.redirectErrorStream(true);
         return pb;
