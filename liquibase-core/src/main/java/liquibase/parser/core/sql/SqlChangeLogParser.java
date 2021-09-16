@@ -14,6 +14,7 @@ import liquibase.util.StreamUtil;
 import java.io.IOException;
 import java.io.InputStream;
 
+@SuppressWarnings("java:S2583")
 public class SqlChangeLogParser implements ChangeLogParser {
 
     @Override
