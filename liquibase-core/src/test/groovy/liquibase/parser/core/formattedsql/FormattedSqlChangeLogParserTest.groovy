@@ -27,7 +27,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
  --changeset nvoxland:1
 select * from table1;
 
---changeset nvoxland:2 (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
+--changeset "n voxland":"change 2" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
 create table table1 (
     id int primary key
 );
@@ -126,8 +126,8 @@ select 1
         changeLog.getChangeSets().get(0).getDbmsSet() == null
 
 
-        changeLog.getChangeSets().get(1).getAuthor() == "nvoxland"
-        changeLog.getChangeSets().get(1).getId() == "2"
+        changeLog.getChangeSets().get(1).getAuthor() == "n voxland"
+        changeLog.getChangeSets().get(1).getId() == "change 2"
         changeLog.getChangeSets().get(1).getChanges().size() == 1
         ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getSql().replace("\r\n", "\n") == "create table table1 (\n    id int primary key\n);"
         ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getEndDelimiter() == "X"
