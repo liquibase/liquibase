@@ -67,20 +67,20 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     }
 
     @Override
-    public <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
+    public <T> T prompt(String prompt, T valueIfNoEntry, InputHandler<T> inputHandler, Class<T> type) {
         //
         // Check the allowPrompt flag
         //
         Logger log = Scope.getCurrentScope().getLog(getClass());
         if (! allowPrompt) {
             log.fine("No prompt for input is allowed at this time");
-            return defaultValue;
+            return valueIfNoEntry;
         }
         final ConsoleWrapper console = getConsole();
 
         if (!console.supportsInput()) {
-            log.fine("No console attached. Skipping interactive prompt: '" + prompt + "'. Using default value '" + defaultValue + "'");
-            return defaultValue;
+            log.fine("No console attached. Skipping interactive prompt: '" + prompt + "'. Using default value '" + valueIfNoEntry + "'");
+            return valueIfNoEntry;
         }
 
         if (inputHandler == null) {
@@ -88,8 +88,8 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
         }
 
         String initialMessage = prompt;
-        if (defaultValue != null) {
-            initialMessage += " (default \"" + defaultValue + "\")";
+        if (valueIfNoEntry != null) {
+            initialMessage += " [" + valueIfNoEntry + "]";
         }
         this.sendMessage(initialMessage + ": ");
 
@@ -98,7 +98,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             try {
                 if (input == null) {
                     if (inputHandler.shouldAllowEmptyInput()) {
-                        return defaultValue;
+                        return valueIfNoEntry;
                     } else {
                         throw new IllegalArgumentException("Empty values are not permitted.");
                     }
