@@ -937,6 +937,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             return consoleUIService.prompt(prompt, defaultValue, inputHandler, type)
         }
 
+        @Override
+        def <T> T prompt(String prompt, T defaultValue, T currentValue, InputHandler<T> inputHandler, Class<T> type) {
+            return consoleUIService.prompt(prompt, defaultValue, currentValue, inputHandler, type)
+        }
+
         class ConsoleUIServiceWrapper extends ConsoleUIService {
             ConsoleUIServiceWrapper(ConsoleUIService.ConsoleWrapper console) {
                 super(console)
@@ -1027,6 +1032,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         @Override
         def <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
+            return defaultValue
+        }
+
+        @Override
+        def <T> T prompt(String prompt, T defaultValue, T currentValue, InputHandler<T> inputHandler, Class<T> type) {
             return defaultValue
         }
 

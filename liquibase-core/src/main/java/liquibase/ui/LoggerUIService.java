@@ -56,6 +56,11 @@ public class LoggerUIService extends AbstractExtensibleObject implements UIServi
         return defaultValue;
     }
 
+    @Override
+    public <T> T prompt(String prompt, T defaultValue, T currentValue, InputHandler<T> inputHandler, Class<T> type) {
+        return defaultValue;
+    }
+
     public Level getStandardLogLevel() {
         return standardLogLevel;
     }

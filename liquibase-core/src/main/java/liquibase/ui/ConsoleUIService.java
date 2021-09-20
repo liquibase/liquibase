@@ -68,6 +68,11 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
 
     @Override
     public <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
+        return prompt(prompt, defaultValue, null, inputHandler, type);
+    }
+
+    @Override
+    public <T> T prompt(String prompt, T defaultValue, T currentValue, InputHandler<T> inputHandler, Class<T> type) {
         //
         // Check the allowPrompt flag
         //
@@ -87,9 +92,14 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             inputHandler = new DefaultInputHandler<>();
         }
 
+        T valueIfEnterHit = null;
         String initialMessage = prompt;
-        if (defaultValue != null) {
+        if (currentValue != null) {
+            initialMessage += " (current \"" + currentValue + "\")";
+            valueIfEnterHit = currentValue;
+        } else if (defaultValue != null) {
             initialMessage += " (default \"" + defaultValue + "\")";
+            valueIfEnterHit = defaultValue;
         }
         this.sendMessage(initialMessage + ": ");
 
@@ -98,7 +108,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             try {
                 if (input == null) {
                     if (inputHandler.shouldAllowEmptyInput()) {
-                        return defaultValue;
+                        return valueIfEnterHit;
                     } else {
                         throw new IllegalArgumentException("Empty values are not permitted.");
                     }
