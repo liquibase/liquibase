@@ -67,39 +67,29 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     }
 
     @Override
-    public <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
-        return prompt(prompt, defaultValue, null, inputHandler, type);
-    }
-
-    @Override
-    public <T> T prompt(String prompt, T defaultValue, T currentValue, InputHandler<T> inputHandler, Class<T> type) {
+    public <T> T prompt(String prompt, T valueIfNoEntry, InputHandler<T> inputHandler, Class<T> type) {
         //
         // Check the allowPrompt flag
         //
         Logger log = Scope.getCurrentScope().getLog(getClass());
         if (! allowPrompt) {
             log.fine("No prompt for input is allowed at this time");
-            return defaultValue;
+            return valueIfNoEntry;
         }
         final ConsoleWrapper console = getConsole();
 
         if (!console.supportsInput()) {
-            log.fine("No console attached. Skipping interactive prompt: '" + prompt + "'. Using default value '" + defaultValue + "'");
-            return defaultValue;
+            log.fine("No console attached. Skipping interactive prompt: '" + prompt + "'. Using default value '" + valueIfNoEntry + "'");
+            return valueIfNoEntry;
         }
 
         if (inputHandler == null) {
             inputHandler = new DefaultInputHandler<>();
         }
 
-        T valueIfEnterHit = null;
         String initialMessage = prompt;
-        if (currentValue != null) {
-            initialMessage += " (current \"" + currentValue + "\")";
-            valueIfEnterHit = currentValue;
-        } else if (defaultValue != null) {
-            initialMessage += " (default \"" + defaultValue + "\")";
-            valueIfEnterHit = defaultValue;
+        if (valueIfNoEntry != null) {
+            initialMessage += " [" + valueIfNoEntry + "]";
         }
         this.sendMessage(initialMessage + ": ");
 
@@ -108,7 +98,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             try {
                 if (input == null) {
                     if (inputHandler.shouldAllowEmptyInput()) {
-                        return valueIfEnterHit;
+                        return valueIfNoEntry;
                     } else {
                         throw new IllegalArgumentException("Empty values are not permitted.");
                     }
