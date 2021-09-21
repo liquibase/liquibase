@@ -18,7 +18,7 @@ import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
-import liquibase.util.FilenameUtils;
+import liquibase.util.FilenameUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -569,7 +569,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         String relativeBaseFileName = this.getPhysicalFilePath();
         if (isRelativePath) {
-            fileName =  FilenameUtils.concat(FilenameUtils.getDirectory(relativeBaseFileName), fileName);
+            fileName =  FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
         }
 
         fileName = fileName.replaceFirst("classpath:", "");

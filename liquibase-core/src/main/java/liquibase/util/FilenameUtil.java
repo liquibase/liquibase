@@ -23,7 +23,7 @@ import java.nio.file.Paths;
 /**
  * General filename and filepath manipulation utilities.
  */
-public class FilenameUtils {
+public class FilenameUtil {
 
     /**
      * Normalizes a path, removing double and single dot path steps as well as standardizing on "/" for a slash.

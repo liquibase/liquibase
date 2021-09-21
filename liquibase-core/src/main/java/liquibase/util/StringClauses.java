@@ -460,6 +460,19 @@ public class StringClauses {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StringClauses that = (StringClauses) o;
+        return Objects.equals(separator, that.separator) && Objects.equals(start, that.start) && Objects.equals(end, that.end) && Objects.equals(clauses, that.clauses);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(separator, start, end, clauses);
+    }
+
+    @Override
     public String toString() {
         if (clauses.isEmpty()) {
             return "";

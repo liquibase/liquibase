@@ -30,7 +30,7 @@ import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
-import liquibase.util.BooleanParser;
+import liquibase.util.BooleanUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -358,10 +358,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             // columnConfig did not match a specific type
                             valueConfig.setValue(value);
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.BOOLEAN) {
-                            if (value == null) { // TODO getDefaultValueBoolean should use BooleanParser.parseBoolean also for consistent behaviour
+                            if (value == null) { // TODO getDefaultValueBoolean should use BooleanUtil.parseBoolean also for consistent behaviour
                                 valueConfig.setValueBoolean(columnConfig.getDefaultValueBoolean());
                             } else {
-                                valueConfig.setValueBoolean(BooleanParser.parseBoolean(value));
+                                valueConfig.setValueBoolean(BooleanUtil.parseBoolean(value));
                             }
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.NUMERIC) {
                             if (value != null) {

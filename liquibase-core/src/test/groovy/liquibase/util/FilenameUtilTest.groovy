@@ -4,12 +4,12 @@ import org.junit.Assume
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class FilenameUtilsTest extends Specification {
+class FilenameUtilTest extends Specification {
 
     @Unroll
     def "normalize"() {
         expect:
-        FilenameUtils.normalize(filename) == expected
+        FilenameUtil.normalize(filename) == expected
 
         where:
         filename              | expected
@@ -35,7 +35,7 @@ class FilenameUtilsTest extends Specification {
         Assume.assumeTrue(SystemUtil.isWindows())
 
         expect:
-        FilenameUtils.normalize(filename) == expected
+        FilenameUtil.normalize(filename) == expected
 
         where:
         filename           | expected
@@ -46,7 +46,7 @@ class FilenameUtilsTest extends Specification {
     @Unroll
     def "concat"() {
         expect:
-        FilenameUtils.concat(basePath, filename) == expected
+        FilenameUtil.concat(basePath, filename) == expected
 
         where:
         basePath       | filename                       | expected
@@ -61,7 +61,7 @@ class FilenameUtilsTest extends Specification {
     @Unroll
     def "sanitizeFileName"() {
         expect:
-        FilenameUtils.sanitizeFileName(filename) == expected
+        FilenameUtil.sanitizeFileName(filename) == expected
 
         where:
         filename                         | expected
@@ -73,7 +73,7 @@ class FilenameUtilsTest extends Specification {
     @Unroll
     def "getFullPath"() {
         expect:
-        FilenameUtils.getDirectory(filename) == expected
+        FilenameUtil.getDirectory(filename) == expected
 
         where:
         filename | expected
@@ -89,7 +89,7 @@ class FilenameUtilsTest extends Specification {
         Assume.assumeTrue(SystemUtil.isWindows())
 
         expect:
-        FilenameUtils.getDirectory(filename) == expected
+        FilenameUtil.getDirectory(filename) == expected
 
         where:
         filename          | expected

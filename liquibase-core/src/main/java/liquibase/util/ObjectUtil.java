@@ -58,6 +58,9 @@ public class ObjectUtil {
      * @return the class name of the return type if the reading method is found, null if it is not found.
      */
     public static Class getPropertyType(Object object, String propertyName) {
+        if (object == null) {
+            return null;
+        }
         Method readMethod = getReadMethod(object, propertyName);
         if (readMethod == null) {
             return null;

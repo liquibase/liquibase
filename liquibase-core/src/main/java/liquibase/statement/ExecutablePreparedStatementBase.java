@@ -14,9 +14,9 @@ import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.FilenameUtils;
+import liquibase.util.FilenameUtil;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -87,7 +87,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 } catch (IOException ignore) {
                 }
             }
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
         }
     }
 
@@ -350,7 +350,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private String getFileName(String fileName) {
         String relativeBaseFileName = changeSet.getChangeLog().getPhysicalFilePath();
 
-        return FilenameUtils.concat(FilenameUtils.getDirectory(relativeBaseFileName), fileName);
+        return FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
     }
 
     @Override
