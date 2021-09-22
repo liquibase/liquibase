@@ -8,7 +8,7 @@ BENEFIT OF YOUR EMPLOYER OR A THIRD PARTY, THEN YOU REPRESENT AND WARRANT THAT
 YOU HAVE THE NECESSARY AUTHORITY TO AGREE TO THIS AGREEMENT ON YOUR EMPLOYER'S 
 OR THAT THIRD PARTY'S BEHALF.
 
-This agreement is between Datical, Inc. a Delaware corporation (Datical) and 
+This agreement is between Liquibase, Inc. a Delaware corporation (Datical) and
 you, the customer entering into this agreement (Customer). The LiquibasePro 
 software, updates, documentation and license keys provided to Customer 
 (Software) are licensed and are not sold. 
