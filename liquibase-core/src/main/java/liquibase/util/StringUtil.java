@@ -7,13 +7,7 @@ import liquibase.Scope;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,6 +36,7 @@ public class StringUtil {
     /**
      * Returns the trimmed (left and right) form of the input string. If the string is empty after trimming (or null
      * was passed in the first place), null is returned, i.e. the input string is reduced to nothing.
+     *
      * @param string the string to trim
      * @return the trimmed string or null
      */
@@ -58,13 +53,11 @@ public class StringUtil {
     }
 
     /**
-     *
      * Removes any comments from multiple line SQL using {@link #stripComments(String)}
-     *  and then extracts each individual statement using {@link #splitSQL(String, String)}.
+     * and then extracts each individual statement using {@link #splitSQL(String, String)}.
      *
-     * @param multiLineSQL A String containing all the SQL statements
+     * @param multiLineSQL  A String containing all the SQL statements
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
-     *
      */
     public static String[] processMultiLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
 
@@ -104,14 +97,12 @@ public class StringUtil {
     }
 
     /**
-     *
      * Removes any comments from multiple line SQL using {@link #stripComments(String)}
-     *  and then extracts each individual statement using {@link #splitSQL(String, String)}.
+     * and then extracts each individual statement using {@link #splitSQL(String, String)}.
      *
-     * @param       multiLineSQL   A String containing all the SQL statements
-     * @param       stripComments  If true then comments will be stripped, if false then they will be left in the code
-     * @deprecated  The new method is {@link #processMultiLineSQL(String, boolean, boolean, String)} (String)}
-     *
+     * @param multiLineSQL  A String containing all the SQL statements
+     * @param stripComments If true then comments will be stripped, if false then they will be left in the code
+     * @deprecated The new method is {@link #processMultiLineSQL(String, boolean, boolean, String)} (String)}
      */
     public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
         return processMultiLineSQL(multiLineSQL, stripComments, splitStatements, endDelimiter);
@@ -156,14 +147,15 @@ public class StringUtil {
     /**
      * Returns true if the input is a delimiter in one of the popular RDBMSs. Recognized delimiters are: semicolon (;),
      * a slash (as the only content) or the word GO (as the only content).
-     * @param piece the input line to test
+     *
+     * @param piece         the input line to test
      * @param previousPiece the characters in the input stream that came before piece
-     * @param endDelimiter ??? (need to see this in a debugger to find out)
+     * @param endDelimiter  ??? (need to see this in a debugger to find out)
      */
     protected static boolean isDelimiter(String piece, String previousPiece, String endDelimiter) {
         if (endDelimiter == null) {
             return ";".equals(piece) || (("go".equalsIgnoreCase(piece) || "/".equals(piece)) && ((previousPiece ==
-                null) || previousPiece.endsWith("\n")));
+                    null) || previousPiece.endsWith("\n")));
         } else {
             if (endDelimiter.length() == 1) {
                 if ("/".equals(endDelimiter)) {
@@ -173,21 +165,19 @@ public class StringUtil {
                 }
                 return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
             } else {
-                return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches("[\\s\n\r]*"+endDelimiter.toLowerCase());
+                return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece + piece).toLowerCase().matches("[\\s\n\r]*" + endDelimiter.toLowerCase());
             }
         }
     }
 
     /**
-     *
      * Add new lines to the input string to cause output to wrap.  Optional line padding
      * can be passed in for the additional lines that are created
      *
-     * @param    inputStr                The string to split and wrap
-     * @param    wrapPoint               The point at which to split the lines
-     * @param    extraLinePadding        Any additional spaces to add
-     * @return   String                  Output string with new lines
-     *
+     * @param inputStr         The string to split and wrap
+     * @param wrapPoint        The point at which to split the lines
+     * @param extraLinePadding Any additional spaces to add
+     * @return String                  Output string with new lines
      */
     public static String wrap(final String inputStr, int wrapPoint, int extraLinePadding) {
         //
@@ -235,7 +225,7 @@ public class StringUtil {
             if (spaceToWrapAt != null && spaceToWrapAt >= ptr) {
                 resultLine.append(inputStr, ptr, spaceToWrapAt);
                 resultLine.append(System.lineSeparator());
-                for (int i=0; i < extraLinePadding; i++) {
+                for (int i = 0; i < extraLinePadding; i++) {
                     resultLine.append(" ");
                 }
                 ptr = spaceToWrapAt + 1;
@@ -253,7 +243,7 @@ public class StringUtil {
                 if (spaceToWrapAt != null && spaceToWrapAt >= 0) {
                     resultLine.append(inputStr, ptr, spaceToWrapAt);
                     resultLine.append(System.lineSeparator());
-                    for (int i=0; i < extraLinePadding; i++) {
+                    for (int i = 0; i < extraLinePadding; i++) {
                         resultLine.append(" ");
                     }
                     ptr = spaceToWrapAt + 1;
@@ -289,7 +279,7 @@ public class StringUtil {
      * any comments that are between \/**\/ or anything that matches
      * SP--SP<text>\n (to support the ANSI standard commenting of --
      * at the end of a line).
-     * 
+     *
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {
@@ -323,7 +313,7 @@ public class StringUtil {
         if (collection.isEmpty()) {
             return "";
         }
-        
+
         StringBuilder buffer = new StringBuilder();
         for (Object val : collection) {
             buffer.append(formatter.toString(val)).append(delimiter);
@@ -359,12 +349,12 @@ public class StringUtil {
     public static String join(Map map, String delimiter, StringUtilFormatter formatter) {
         List<String> list = new ArrayList<>();
         for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
-            list.add(entry.getKey().toString()+"="+formatter.toString(entry.getValue()));
+            list.add(entry.getKey().toString() + "=" + formatter.toString(entry.getValue()));
         }
         return join(list, delimiter);
     }
 
-   public static String join(ExtensibleObject extensibleObject, String delimiter) {
+    public static String join(ExtensibleObject extensibleObject, String delimiter) {
         return join(extensibleObject, delimiter, new ToStringFormatter());
     }
 
@@ -406,11 +396,10 @@ public class StringUtil {
         }
 
         int[] ints = new int[array.length];
-        for (int i=0; i < ints.length; i++)
-        {
+        for (int i = 0; i < ints.length; i++) {
             ints[i] = array[i];
         }
-	return StringUtil.join(ints, delimiter);
+        return StringUtil.join(ints, delimiter);
     }
 
     public static String join(int[] array, String delimiter) {
@@ -440,7 +429,7 @@ public class StringUtil {
             return null;
         }
         String pad = StringUtil.repeat(" ", padding);
-        return pad+(string.replaceAll("\n", "\n" + pad));
+        return pad + (string.replaceAll("\n", "\n" + pad));
     }
 
     public static String lowerCaseFirst(String string) {
@@ -451,7 +440,7 @@ public class StringUtil {
             return string.toLowerCase();
         }
 
-        return string.substring(0, 1).toLowerCase()+string.substring(1);
+        return string.substring(0, 1).toLowerCase() + string.substring(1);
     }
 
     public static String upperCaseFirst(String string) {
@@ -461,7 +450,7 @@ public class StringUtil {
         if (string.length() < 2) {
             return string.toUpperCase();
         }
-        return string.substring(0, 1).toUpperCase()+string.substring(1);
+        return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
 
     public static boolean hasUpperCase(String string) {
@@ -500,6 +489,7 @@ public class StringUtil {
 
     /**
      * Returns true if ch is a "7-bit-clean" ASCII character (ordinal number < 128).
+     *
      * @param ch the character to test
      * @return true if 7 bit-clean, false otherwise.
      */
@@ -530,7 +520,8 @@ public class StringUtil {
     /**
      * Adds spaces to the right of the input value until the string has reached the given length. Nothing is done
      * if the string already has the given length or if the string is even longer.
-     * @param value The string to pad (if necessary)
+     *
+     * @param value  The string to pad (if necessary)
      * @param length the desired length
      * @return the input string, padded if necessary.
      */
@@ -546,7 +537,8 @@ public class StringUtil {
     /**
      * Adds spaces to the left of the input value until the string has reached the given length. Nothing is done
      * if the string already has the given length or if the string is even longer.
-     * @param value The string to pad (if necessary)
+     *
+     * @param value  The string to pad (if necessary)
      * @param length the desired length
      * @return the input string, padded if necessary.
      */
@@ -581,12 +573,13 @@ public class StringUtil {
 
     /**
      * Checks if <code>value</code> starts with <code>startsWith</code>.
+     *
      * @param value
      * @param startsWith
      * @return true if <code>value</code> starts with <code>startsWith</code>, otherwise false. If any of arguments is null returns false
      */
     public static boolean startsWith(String value, String startsWith) {
-        if((value == null) || (startsWith == null)){
+        if ((value == null) || (startsWith == null)) {
             return false;
         }
 
@@ -595,6 +588,7 @@ public class StringUtil {
 
     /**
      * Returns true if the given string only consists of whitespace characters (null-safe)
+     *
      * @param string the string to test
      * @return true if the string is null or only consists of whitespaces.
      */
@@ -648,15 +642,16 @@ public class StringUtil {
 
     /**
      * Produce a random identifer of the given length, consisting only of uppercase letters.
+     *
      * @param len desired length of the string
      * @return an identifier of the desired length
      */
     public static String randomIdentifer(int len) {
         final String AB = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-        StringBuilder sb = new StringBuilder( len );
+        StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++)
-            sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
+            sb.append(AB.charAt(rnd.nextInt(AB.length())));
         return sb.toString();
     }
 
@@ -674,7 +669,7 @@ public class StringUtil {
 
         StringBuilder outString = new StringBuilder();
         char[] charString = string.toCharArray();
-        for (int i=0; i<charString.length; i++) {
+        for (int i = 0; i < charString.length; i++) {
             char letter = charString[i];
             if (i == 0) {
                 outString.append(Character.toLowerCase(letter));
@@ -731,7 +726,7 @@ public class StringUtil {
         }
     }
 
-  public static class DefaultFormatter implements StringUtilFormatter {
+    public static class DefaultFormatter implements StringUtilFormatter {
         @Override
         public String toString(Object obj) {
             if (obj == null) {
@@ -784,6 +779,7 @@ public class StringUtil {
     /**
      * Trims {@link Character#isWhitespace(char) whitespace} characters from the
      * end of specified <code>string</code>
+     *
      * @param string String to trim
      * @return new String without the whitespace at the end
      */
@@ -792,15 +788,14 @@ public class StringUtil {
             return null;
         }
 
-        int i = string.length()-1;
+        int i = string.length() - 1;
         while (i >= 0 && Character.isWhitespace(string.charAt(i))) {
             i--;
         }
-        return string.substring(0,i+1);
+        return string.substring(0, i + 1);
     }
 
     /**
-     *
      * @param sqlString
      * @return the last block comment from a Sql string if any
      */
@@ -821,7 +816,7 @@ public class StringUtil {
                     if (s == '*') {
                         idxClosingLastChar = i;
                     }
-                } else if (!Character.isWhitespace(c)){
+                } else if (!Character.isWhitespace(c)) {
                     // does not look like it ends with block comment, return null
                     return null;
                 }
@@ -848,7 +843,6 @@ public class StringUtil {
     }
 
     /**
-     *
      * @param sqlString
      * @return the last line comment from a Sql string if any
      */
@@ -889,6 +883,7 @@ public class StringUtil {
 
     /**
      * Strips the comments and whitespaces from the end of given sql string.
+     *
      * @param sqlString
      * @return
      */
@@ -904,7 +899,7 @@ public class StringUtil {
             // since line comments could be inside block comments, we want to
             // remove them first.
             String lastBlockComment = getLastBlockComment(str.toString());
-            if (lastBlockComment != null && ! lastBlockComment.isEmpty()) {
+            if (lastBlockComment != null && !lastBlockComment.isEmpty()) {
                 str.setLength(str.length() - lastBlockComment.length());
                 // we just modified the end of the string,
                 // do another loop to check for next block or line comments
@@ -912,7 +907,7 @@ public class StringUtil {
             }
             // now check for the line comments
             String lastLineComment = getLastLineComment(str.toString());
-            if (lastLineComment != null && ! lastLineComment.isEmpty()) {
+            if (lastLineComment != null && !lastLineComment.isEmpty()) {
                 str.setLength(str.length() - lastLineComment.length());
                 // we just modified the end of the string,
                 // do another loop to check for next block or line comments
@@ -942,17 +937,17 @@ public class StringUtil {
         if (string.length() > 1 &&
                 (string.charAt(0) == '"' || string.charAt(0) == '\'') &&
                 string.charAt(0) == string.charAt(string.length() - 1)) {
-            return substring(string, 1, string.length() - 1);
-        }
-        else {
+            return string.substring(1, string.length() - 1);
+        } else {
             return string;
         }
     }
 
 
-
-    /** Check whether the value is 'null' (case insensitive) */
-    public static boolean equalsWordNull(String value){
+    /**
+     * Check whether the value is 'null' (case insensitive)
+     */
+    public static boolean equalsWordNull(String value) {
         return "NULL".equalsIgnoreCase(value);
     }
 
@@ -965,28 +960,11 @@ public class StringUtil {
      * immediately preceding a token of type {@code Character.LOWERCASE_LETTER}
      * will belong to the following token rather than to the preceding, if any,
      * {@code Character.UPPERCASE_LETTER} token.
-     *
+     * <p>
      * This code originated from the StringUtils class of https://github.com/apache/commons-lang
-     *
-     * Licensed to the Apache Software Foundation (ASF) under one or more
-     * contributor license agreements.  See the NOTICE file distributed with
-     * this work for additional information regarding copyright ownership.
-     * The ASF licenses this file to You under the Apache License, Version 2.0
-     * (the "License"); you may not use this file except in compliance with
-     * the License.  You may obtain a copy of the License at
-     *
-     *      http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-     *
      * @param str       the String to split, may be {@code null}
      * @param camelCase whether to use so-called "camel-case" for letter types
      * @return an array of parsed Strings, {@code null} if null String input
-     * @since 2.4
      */
     public static String[] splitByCharacterType(final String str, final boolean camelCase) {
         if (str == null) {
@@ -1021,14 +999,17 @@ public class StringUtil {
     }
 
     public static byte[] getBytesWithEncoding(String string) {
+        if (string == null) {
+            return null;
+        }
+
         String encoding = null;
         try {
             encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentConfiguredValue().getValue();
             if (encoding != null) {
                 return string.getBytes(encoding);
             }
-        }
-        catch (UnsupportedEncodingException uoe) {
+        } catch (UnsupportedEncodingException uoe) {
             // Consume and fall through
             Scope.getCurrentScope().getLog(StringUtil.class).warning("Error using encoding " + encoding);
         }

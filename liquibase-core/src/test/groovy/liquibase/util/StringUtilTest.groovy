@@ -614,4 +614,43 @@ class StringUtilTest extends Specification {
         "\"testValue"   | "\"testValue"
     }
 
+    @Unroll
+    def "wrap"() {
+        expect:
+        StringUtil.wrap(input, point, padding) == expected
+
+        where:
+        input           | point | padding | expected
+        null            | 5     | 3       | null
+        "a b c d e f g" | 5     | 3       | "a b c${System.lineSeparator()}   d e f${System.lineSeparator()}   g"
+        "abcdefg"       | 5     | 3       | "abcdefg"
+        "abc defg"      | 5     | 3       | "abc${System.lineSeparator()}   defg"
+    }
+
+    @Unroll
+    def "splitByCharacterType"() {
+        expect:
+        StringUtil.splitByCharacterType(input, camel) == expected
+
+        where:
+        input    | camel | expected
+        null     | true  | null
+        null     | false | null
+        ""       | true  | []
+        "abc"    | true  | ["abc"]
+        "abCDef" | true  | ["ab", "C", "Def"]
+        "abCDef" | false | ["ab", "CD", "ef"]
+    }
+
+    @Unroll
+    def getBytesWithEncoding() {
+        expect:
+        StringUtil.getBytesWithEncoding(input) == expected
+
+        where:
+        input | expected
+        null  | null
+        "abc" | [97, 98, 99] as byte[]
+
+    }
 }
