@@ -628,18 +628,19 @@ class StringUtilTest extends Specification {
     }
 
     @Unroll
-    def "splitByCharacterType"() {
+    def "splitCamelCase"() {
         expect:
-        StringUtil.splitByCharacterType(input, camel) == expected
+        StringUtil.splitCamelCase(input) == expected
 
         where:
-        input    | camel | expected
-        null     | true  | null
-        null     | false | null
-        ""       | true  | []
-        "abc"    | true  | ["abc"]
-        "abCDef" | true  | ["ab", "C", "Def"]
-        "abCDef" | false | ["ab", "CD", "ef"]
+        input       | camel | expected
+        null        | true  | null
+        null        | false | null
+        ""          | true  | []
+        "abc"       | true  | ["abc"]
+        "aBc"       | true  | ["a", "Bc"]
+        "aBcdeFghI" | true  | ["a", "Bcde", "Fgh", "I"]
+        "abCDef"    | true  | ["ab", "C", "Def"]
     }
 
     @Unroll

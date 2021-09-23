@@ -13,6 +13,8 @@ import liquibase.statement.SequenceNextValueFunction
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.beans.PropertyDescriptor
+
 class ObjectUtilTest extends Specification {
 
     @Unroll
@@ -156,4 +158,19 @@ class ObjectUtilTest extends Specification {
         null  | "2"   | "2"
         null  | null  | null
     }
+
+    def "getDescriptors"() {
+        when:
+        def descriptors = ObjectUtil.getDescriptors(CreateTableChange)
+
+        def descriptorsMap = new HashMap<String, PropertyDescriptor>()
+        for (def descriptor : descriptors) {
+            descriptorsMap[descriptor.name] = descriptor
+        }
+
+        then:
+        descriptorsMap["columns"].readMethod.name == "getColumns"
+        descriptorsMap["columns"].writeMethod.name == "setColumns"
+    }
+
 }

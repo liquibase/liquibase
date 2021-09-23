@@ -952,21 +952,13 @@ public class StringUtil {
     }
 
     /**
-     * <p>Splits a String by Character type as returned by
-     * {@code java.lang.Character.getType(char)}. Groups of contiguous
-     * characters of the same type are returned as complete tokens, with the
-     * following exception: if {@code camelCase} is {@code true},
-     * the character of type {@code Character.UPPERCASE_LETTER}, if any,
-     * immediately preceding a token of type {@code Character.LOWERCASE_LETTER}
-     * will belong to the following token rather than to the preceding, if any,
-     * {@code Character.UPPERCASE_LETTER} token.
+     * <p>Splits a camel-case string into words based on the came casing.
      * <p>
      * This code originated from the StringUtils class of https://github.com/apache/commons-lang
      * @param str       the String to split, may be {@code null}
-     * @param camelCase whether to use so-called "camel-case" for letter types
      * @return an array of parsed Strings, {@code null} if null String input
      */
-    public static String[] splitByCharacterType(final String str, final boolean camelCase) {
+    public static String[] splitCamelCase(final String str) {
         if (str == null) {
             return null;
         }
@@ -982,7 +974,7 @@ public class StringUtil {
             if (type == currentType) {
                 continue;
             }
-            if (camelCase && type == Character.LOWERCASE_LETTER && currentType == Character.UPPERCASE_LETTER) {
+            if (type == Character.LOWERCASE_LETTER && currentType == Character.UPPERCASE_LETTER) {
                 final int newTokenStart = pos - 1;
                 if (newTokenStart != tokenStart) {
                     list.add(new String(c, tokenStart, newTokenStart - tokenStart));
