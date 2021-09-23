@@ -26,6 +26,8 @@ Optional Args:
     Default: null
   includeObjects (String) Objects to include in diff
     Default: null
+  includeTablespace (String) Include the tablespace attribute in the changelog
+    Default: null
   overwriteOutputFile (String) Flag to allow overwriting of output changelog file
     Default: null
   password (String) Password to use to connect to the database

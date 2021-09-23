@@ -77,7 +77,8 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         // it may still not be a MySQL, but a MariaDB.
         return (
                 (PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName()))
-                        && (!conn.getDatabaseProductVersion().toLowerCase().contains("mariadb"))
+                        && (!conn.getDatabaseProductVersion().toLowerCase().contains("mariadb") &&
+                            !conn.getDatabaseProductVersion().toLowerCase().contains("clustrix"))
         );
     }
 
