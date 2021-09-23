@@ -224,17 +224,6 @@ public class StringClauses {
         return replaceImpl(key, StringUtil.trimToEmpty(newValue));
     }
 
-    /**
-     * Replaces the given key with a new string. If the existing key does not exist, throws IllegalArgumentException
-     */
-    public StringClauses replaceIfExists(String key, String newValue) throws IllegalArgumentException {
-        if (contains(key)) {
-            return replaceImpl(key, StringUtil.trimToEmpty(newValue));
-        } else {
-            return this;
-        }
-    }
-
     public boolean contains(String key) {
         return clauses.containsKey(key.toLowerCase());
     }

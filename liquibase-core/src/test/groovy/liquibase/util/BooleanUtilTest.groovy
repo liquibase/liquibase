@@ -13,7 +13,6 @@ class BooleanUtilTest extends Specification {
         input         | expected
         Boolean.TRUE  | true
         Boolean.FALSE | false
-        null          | false
         true          | true
         false         | false
     }

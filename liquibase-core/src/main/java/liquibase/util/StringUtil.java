@@ -331,23 +331,46 @@ public class StringUtil {
     }
 
     public static String indent(String string, int padding) {
+        if (string == null) {
+            return null;
+        }
         String pad = StringUtil.repeat(" ", padding);
         return pad+(string.replaceAll("\n", "\n" + pad));
     }
 
     public static String lowerCaseFirst(String string) {
+        if (string == null) {
+            return null;
+        }
+        if (string.length() < 2) {
+            return string.toLowerCase();
+        }
+
         return string.substring(0, 1).toLowerCase()+string.substring(1);
     }
 
     public static String upperCaseFirst(String string) {
+        if (string == null) {
+            return null;
+        }
+        if (string.length() < 2) {
+            return string.toUpperCase();
+        }
         return string.substring(0, 1).toUpperCase()+string.substring(1);
     }
 
     public static boolean hasUpperCase(String string) {
+        if (string == null) {
+            return false;
+        }
         return upperCasePattern.matcher(string).matches();
     }
 
     public static boolean hasLowerCase(String string) {
+
+        if (string == null) {
+            return false;
+        }
         return lowerCasePattern.matcher(string).matches();
     }
 
@@ -380,6 +403,10 @@ public class StringUtil {
     }
 
     public static String escapeHtml(String str) {
+        if (str == null) {
+            return null;
+        }
+
         StringBuilder out = new StringBuilder();
         int len = str.length();
         for (int i = 0; i < len; i++) {
@@ -485,6 +512,9 @@ public class StringUtil {
      */
     public static boolean isMinimumVersion(String minimumVersion, int candidateMajor, int candidateMinor,
                                            int candidatePatch) {
+        if (minimumVersion == null) {
+            return true;
+        }
         String[] parts = minimumVersion.split("\\.", 3);
         int minMajor = Integer.parseInt(parts[0]);
         int minMinor = (parts.length > 1) ? Integer.parseInt(parts[1]) : 0;
@@ -502,6 +532,9 @@ public class StringUtil {
     }
 
     public static String limitSize(String string, int maxLength) {
+        if (string == null) {
+            return null;
+        }
         if (string.length() > maxLength) {
             return string.substring(0, maxLength - 3) + "...";
         }
@@ -650,6 +683,10 @@ public class StringUtil {
      * @return new String without the whitespace at the end
      */
     public static String trimRight(String string) {
+        if (string == null) {
+            return null;
+        }
+
         int i = string.length()-1;
         while (i >= 0 && Character.isWhitespace(string.charAt(i))) {
             i--;
@@ -780,116 +817,6 @@ public class StringUtil {
         return trimRight(str.toString());
     }
 
-    
-    /**
-     * From commonslang3 -> StringUtil
-     * <p>Gets a substring from the specified String avoiding exceptions.</p>
-     *
-     * <p>A negative start position can be used to start/end {@code n}
-     * characters from the end of the String.</p>
-     *
-     * <p>The returned substring starts with the character in the {@code start}
-     * position and ends before the {@code end} position. All position counting is
-     * zero-based -- i.e., to start at the beginning of the string use
-     * {@code start = 0}. Negative start and end positions can be used to
-     * specify offsets relative to the end of the String.</p>
-     *
-     * <p>If {@code start} is not strictly to the left of {@code end}, ""
-     * is returned.</p>
-     *
-     * <pre>
-     * StringUtil.substring(null, *, *)    = null
-     * StringUtil.substring("", * ,  *)    = "";
-     * StringUtil.substring("abc", 0, 2)   = "ab"
-     * StringUtil.substring("abc", 2, 0)   = ""
-     * StringUtil.substring("abc", 2, 4)   = "c"
-     * StringUtil.substring("abc", 4, 6)   = ""
-     * StringUtil.substring("abc", 2, 2)   = ""
-     * StringUtil.substring("abc", -2, -1) = "b"
-     * StringUtil.substring("abc", -4, 2)  = "ab"
-     * </pre>
-     *
-     * @param str  the String to get the substring from, may be null
-     * @param start  the position to start from, negative means
-     *  count back from the end of the String by this many characters
-     * @param end  the position to end at (exclusive), negative means
-     *  count back from the end of the String by this many characters
-     * @return substring from start position to end position,
-     *  {@code null} if null String input
-     */
-    public static String substring(final String str, int start, int end) {
-        if (str == null) {
-            return null;
-        }
-
-        // handle negatives
-        if (end < 0) {
-            end = str.length() + end; // remember end is negative
-        }
-        if (start < 0) {
-            start = str.length() + start; // remember start is negative
-        }
-
-        // check length next
-        if (end > str.length()) {
-            end = str.length();
-        }
-
-        // if start is greater than end, return ""
-        if (start > end) {
-            return "";
-        }
-
-        if (start < 0) {
-            start = 0;
-        }
-        if (end < 0) {
-            end = 0;
-        }
-
-        return str.substring(start, end);
-    }
-
-    //from https://stackoverflow.com/a/48588062/45756
-    public static String escapeXml(CharSequence s) {
-        StringBuilder sb = new StringBuilder();
-        int len = s.length();
-        for (int i=0;i<len;i++) {
-            int c = s.charAt(i);
-            if (c >= 0xd800 && c <= 0xdbff && i + 1 < len) {
-                c = ((c-0xd7c0)<<10) | (s.charAt(++i)&0x3ff);    // UTF16 decode
-            }
-            if (c < 0x80) {      // ASCII range: test most common case first
-                if (c < 0x20 && (c != '\t' && c != '\r' && c != '\n')) {
-                    // Illegal XML character, even encoded. Skip or substitute
-                    sb.append("&#xfffd;");   // Unicode replacement character
-                } else {
-                    switch(c) {
-                        case '&':  sb.append("&amp;"); break;
-                        case '>':  sb.append("&gt;"); break;
-                        case '<':  sb.append("&lt;"); break;
-                        // Uncomment next two if encoding for an XML attribute
-//                  case '\''  sb.append("&apos;"); break;
-//                  case '\"'  sb.append("&quot;"); break;
-                        // Uncomment next three if you prefer, but not required
-//                  case '\n'  sb.append("&#10;"); break;
-//                  case '\r'  sb.append("&#13;"); break;
-//                  case '\t'  sb.append("&#9;"); break;
-
-                        default:   sb.append((char)c);
-                    }
-                }
-            } else if ((c >= 0xd800 && c <= 0xdfff) || c == 0xfffe || c == 0xffff) {
-                // Illegal XML character, even encoded. Skip or substitute
-                sb.append("&#xfffd;");   // Unicode replacement character
-            } else {
-                sb.append("&#x");
-                sb.append(Integer.toHexString(c));
-                sb.append(';');
-            }
-        }
-        return sb.toString();
-    }
     /**
      * Concatenates the addition string to the baseString string, adjusting the case of "addition" to match the base string.
      * If the string is all caps, append addition in all caps. If all lower case, append in all lower case. If baseString is mixed case, make no changes to addition.
