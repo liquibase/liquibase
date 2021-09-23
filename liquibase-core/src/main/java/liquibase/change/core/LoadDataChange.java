@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import com.opencsv.CSVReaderBuilder;
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.change.*;
@@ -571,7 +572,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             if (null != reader) {
                 try {
                     reader.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     // Do nothing
                 }
             }
