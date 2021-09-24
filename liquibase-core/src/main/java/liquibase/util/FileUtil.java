@@ -59,13 +59,18 @@ public class FileUtil {
     }
 
     public static void write(String contents, File file) throws IOException {
+        write(contents, file, false);
+    }
+
+    public static void write(String contents, File file, boolean append) throws IOException {
         file.getParentFile().mkdirs();
-        
+
         try (
-            FileOutputStream output = new FileOutputStream(file);
+                FileOutputStream output = new FileOutputStream(file, append)
         ){
             StreamUtil.copy(new ByteArrayInputStream(contents.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())), output);
         }
+
     }
 
     public static String getFileNotFoundMessage(String physicalChangeLogLocation) {

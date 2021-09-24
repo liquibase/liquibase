@@ -20,14 +20,12 @@ import liquibase.logging.core.JavaLogService;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.ui.ConsoleUIService;
+import liquibase.ui.UIService;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -416,7 +414,7 @@ public class LiquibaseCommandLine {
         return returnList.toArray(new String[0]);
     }
 
-    private List<ConfigurationValueProvider> registerValueProviders(String[] args) {
+    private List<ConfigurationValueProvider> registerValueProviders(String[] args) throws IOException {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
         List<ConfigurationValueProvider> returnList = new ArrayList<>();
 
@@ -431,10 +429,18 @@ public class LiquibaseCommandLine {
             liquibaseConfiguration.registerProvider(fileProvider);
             returnList.add(fileProvider);
         } else {
-            Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
-            if (!defaultsFileConfig.wasDefaultValueUsed()) {
-                //can't use UI since it's not configured correctly yet
-                System.err.println("Could not find defaults file " + defaultsFile.getAbsolutePath());
+            final InputStream defaultsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
+            if (defaultsStream == null) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
+                if (!defaultsFileConfig.wasDefaultValueUsed()) {
+                    //can't use UI since it's not configured correctly yet
+                    System.err.println("Could not find defaults file " + defaultsFileConfig.getValue());
+                }
+            } else {
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File in classpath "+defaultsFileConfig.getValue());
+                liquibaseConfiguration.registerProvider(fileProvider);
+                returnList.add(fileProvider);
+
             }
         }
 
@@ -469,7 +475,18 @@ public class LiquibaseCommandLine {
         returnMap.putAll(configureLogging());
         returnMap.putAll(configureResourceAccessor(classLoader));
 
-        ConsoleUIService ui = new ConsoleUIService();
+        ConsoleUIService ui = null;
+        List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
+        for (UIService uiService : uiServices) {
+            if (uiService instanceof ConsoleUIService) {
+                ui = (ConsoleUIService) uiService;
+                break;
+            }
+        }
+        if (ui == null) {
+            ui = new ConsoleUIService();
+        }
+
         ui.setAllowPrompt(true);
         ui.setOutputStream(System.err);
         returnMap.put(Scope.Attr.ui.name(), ui);
@@ -627,6 +644,16 @@ public class LiquibaseCommandLine {
 
             configureHelp(subCommandSpec, false);
 
+            //
+            // Add to the usageMessage footer if the CommandDefinition has a footer
+            //
+            if (commandDefinition.getHelpFooter() != null) {
+                String[] usageMessageFooter = subCommandSpec.usageMessage().footer();
+                List<String> list = new ArrayList<>(Arrays.asList(usageMessageFooter));
+                list.add(commandDefinition.getHelpFooter());
+                subCommandSpec.usageMessage().footer(list.toArray(new String[0]));
+            }
+
             String shortDescription = commandDefinition.getShortDescription();
             String displayDescription = shortDescription;
             String legacyCommand = commandName[commandName.length-1];
@@ -662,12 +689,25 @@ public class LiquibaseCommandLine {
                         argDisplaySuffix = "\n[deprecated: --" + camelCaseArg + "]";
                     }
 
-                    String description =
+                    //
+                    // Determine if this is a group command and set the property/environment display strings accordingly
+                    //
+                    String description;
+                    if (commandDefinition.getName().length > 1) {
+                        String propertyStringToPresent = "\n(liquibase.command." +
+                            StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")";
+                        String envStringToPresent =
+                            toEnvVariable("\n(liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
+                            "." + def.getName()) + ")" + argDisplaySuffix;
+                        description = propertyStringToPresent + envStringToPresent;
+                    } else {
+                        description =
                         "\n(liquibase.command." + def.getName() + " OR liquibase.command." +
                             StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
                         "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " +
                             toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
                                 "." + def.getName()) + ")" + argDisplaySuffix;
+                    }
 
                     if (def.getDefaultValue() != null) {
                         if (def.getDefaultValueDescription() == null) {
@@ -804,7 +844,12 @@ public class LiquibaseCommandLine {
         final CommandLine.Model.CommandSpec groupSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(null, defaultFactory);
 
         configureHelp(groupSpec, false);
-
+        if (commandDefinition.getHelpFooter() != null) {
+            String[] usageMessageFooter = groupSpec.usageMessage().footer();
+            List<String> list = new ArrayList<>(Arrays.asList(usageMessageFooter));
+            list.add(commandDefinition.getHelpFooter());
+            groupSpec.usageMessage().footer(list.toArray(new String[0]));
+        }
 
         groupSpec.optionsCaseInsensitive(true);
         groupSpec.subcommandsCaseInsensitive(true);
