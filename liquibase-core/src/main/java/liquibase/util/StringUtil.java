@@ -1,7 +1,11 @@
 package liquibase.util;
 
 import liquibase.ExtensibleObject;
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -18,6 +23,7 @@ import java.util.regex.Pattern;
 public class StringUtil {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
+    private static final Pattern spacePattern = Pattern.compile(" ");
     private static final SecureRandom rnd = new SecureRandom();
 
     /**
@@ -170,6 +176,105 @@ public class StringUtil {
                 return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches("[\\s\n\r]*"+endDelimiter.toLowerCase());
             }
         }
+    }
+
+    /**
+     *
+     * Add new lines to the input string to cause output to wrap.  Optional line padding
+     * can be passed in for the additional lines that are created
+     *
+     * @param    inputStr                The string to split and wrap
+     * @param    wrapPoint               The point at which to split the lines
+     * @param    extraLinePadding        Any additional spaces to add
+     * @return   String                  Output string with new lines
+     *
+     */
+    public static String wrap(final String inputStr, int wrapPoint, int extraLinePadding) {
+        //
+        // Just return
+        //
+        if (inputStr == null) {
+            return null;
+        }
+
+        int inputLineLength = inputStr.length();
+        int ptr = 0;
+        int sizeOfMatch = -1;
+        StringBuilder resultLine = new StringBuilder();
+        while (ptr < inputLineLength) {
+            Integer spaceToWrapAt = null;
+            int min = ptr + wrapPoint + 1;
+            Matcher matcher = spacePattern.matcher(inputStr.substring(ptr, Math.min(min, inputLineLength)));
+            if (matcher.find()) {
+                int matcherStart = matcher.start();
+                if (matcherStart == 0) {
+                    sizeOfMatch = matcher.end();
+                    if (sizeOfMatch != 0) {
+                        ptr += sizeOfMatch;
+                        continue;
+                    }
+                    ptr += 1;
+                }
+                spaceToWrapAt = matcherStart + ptr;
+            }
+
+            //
+            // Break because we do not have enough characters left to need to wrap
+            //
+            if (inputLineLength - ptr <= wrapPoint) {
+                break;
+            }
+
+            //
+            // Advance through all the spaces
+            //
+            while (matcher.find()) {
+                spaceToWrapAt = matcher.start() + ptr;
+            }
+
+            if (spaceToWrapAt != null && spaceToWrapAt >= ptr) {
+                resultLine.append(inputStr, ptr, spaceToWrapAt);
+                resultLine.append(System.lineSeparator());
+                for (int i=0; i < extraLinePadding; i++) {
+                    resultLine.append(" ");
+                }
+                ptr = spaceToWrapAt + 1;
+            } else {
+                matcher = spacePattern.matcher(inputStr.substring(ptr + wrapPoint));
+                if (matcher.find()) {
+                    int matcherStart = matcher.start();
+                    sizeOfMatch = matcher.end() - matcherStart;
+                    spaceToWrapAt = matcherStart + ptr + wrapPoint;
+                }
+
+                if (sizeOfMatch == 0 && ptr != 0) {
+                    ptr--;
+                }
+                if (spaceToWrapAt != null && spaceToWrapAt >= 0) {
+                    resultLine.append(inputStr, ptr, spaceToWrapAt);
+                    resultLine.append(System.lineSeparator());
+                    for (int i=0; i < extraLinePadding; i++) {
+                        resultLine.append(" ");
+                    }
+                    ptr = spaceToWrapAt + 1;
+                } else {
+                    resultLine.append(inputStr, ptr, inputStr.length());
+                    ptr = inputLineLength;
+                    sizeOfMatch = -1;
+                }
+            }
+        }
+
+        if (sizeOfMatch == 0 && ptr < inputLineLength) {
+            ptr--;
+        }
+
+        //
+        // Add the rest
+        //
+        resultLine.append(inputStr, ptr, inputLineLength);
+
+        return resultLine.toString();
     }
 
     /**
@@ -922,5 +1027,84 @@ public class StringUtil {
     /** Check whether the value is 'null' (case insensitive) */
     public static boolean equalsWordNull(String value){
         return "NULL".equalsIgnoreCase(value);
+    }
+
+    /**
+     * <p>Splits a String by Character type as returned by
+     * {@code java.lang.Character.getType(char)}. Groups of contiguous
+     * characters of the same type are returned as complete tokens, with the
+     * following exception: if {@code camelCase} is {@code true},
+     * the character of type {@code Character.UPPERCASE_LETTER}, if any,
+     * immediately preceding a token of type {@code Character.LOWERCASE_LETTER}
+     * will belong to the following token rather than to the preceding, if any,
+     * {@code Character.UPPERCASE_LETTER} token.
+     *
+     * This code originated from the StringUtils class of https://github.com/apache/commons-lang
+     *
+     * Licensed to the Apache Software Foundation (ASF) under one or more
+     * contributor license agreements.  See the NOTICE file distributed with
+     * this work for additional information regarding copyright ownership.
+     * The ASF licenses this file to You under the Apache License, Version 2.0
+     * (the "License"); you may not use this file except in compliance with
+     * the License.  You may obtain a copy of the License at
+     *
+     *      http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     *
+     * @param str       the String to split, may be {@code null}
+     * @param camelCase whether to use so-called "camel-case" for letter types
+     * @return an array of parsed Strings, {@code null} if null String input
+     * @since 2.4
+     */
+    public static String[] splitByCharacterType(final String str, final boolean camelCase) {
+        if (str == null) {
+            return null;
+        }
+        if (str.isEmpty()) {
+            return new String[0];
+        }
+        final char[] c = str.toCharArray();
+        final List<String> list = new ArrayList<>();
+        int tokenStart = 0;
+        int currentType = Character.getType(c[tokenStart]);
+        for (int pos = tokenStart + 1; pos < c.length; pos++) {
+            final int type = Character.getType(c[pos]);
+            if (type == currentType) {
+                continue;
+            }
+            if (camelCase && type == Character.LOWERCASE_LETTER && currentType == Character.UPPERCASE_LETTER) {
+                final int newTokenStart = pos - 1;
+                if (newTokenStart != tokenStart) {
+                    list.add(new String(c, tokenStart, newTokenStart - tokenStart));
+                    tokenStart = newTokenStart;
+                }
+            } else {
+                list.add(new String(c, tokenStart, pos - tokenStart));
+                tokenStart = pos;
+            }
+            currentType = type;
+        }
+        list.add(new String(c, tokenStart, c.length - tokenStart));
+        return list.toArray(new String[0]);
+    }
+
+    public static byte[] getBytesWithEncoding(String string) {
+        String encoding = null;
+        try {
+            encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentConfiguredValue().getValue();
+            if (encoding != null) {
+                return string.getBytes(encoding);
+            }
+        }
+        catch (UnsupportedEncodingException uoe) {
+            // Consume and fall through
+            Scope.getCurrentScope().getLog(StringUtil.class).warning("Error using encoding " + encoding);
+        }
+        return string.getBytes(StandardCharsets.UTF_8);
     }
 }

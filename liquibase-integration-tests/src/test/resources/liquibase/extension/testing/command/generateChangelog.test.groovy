@@ -30,6 +30,8 @@ Optional Args:
     Default: null
   includeSchema (Boolean) If true, the schema will be included in generated changeSets
     Default: false
+  includeTablespace (String) Include the tablespace attribute in the changelog
+    Default: null
   overwriteOutputFile (String) Flag to allow overwriting of output changelog file
     Default: null
   password (String) Password to use to connect to the database

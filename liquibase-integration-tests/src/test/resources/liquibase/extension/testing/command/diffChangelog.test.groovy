@@ -39,6 +39,8 @@ Optional Args:
     Default: null
   includeSchema (Boolean) If true, the schema will be included in generated changeSets
     Default: false
+  includeTablespace (String) Include the tablespace attribute in the changelog
+    Default: null
   password (String) The target database password
     Default: null
     OBFUSCATED
