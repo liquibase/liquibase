@@ -53,13 +53,6 @@ public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedState
     }
 
     @Override
-    protected String generateSql(List<ColumnConfig> cols) {
-        // By convention, all of the statements are the same except the bind values. So it is sufficient to simply
-        // return the first collected statement for generation.
-        return collectedStatements.get(0).generateSql(cols);
-    }
-
-    @Override
     protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
         int updateCounts[] = stmt.executeBatch();
         long sumUpdateCounts = 0;

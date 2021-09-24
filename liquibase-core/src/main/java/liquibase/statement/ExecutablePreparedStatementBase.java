@@ -14,6 +14,14 @@ import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
+import liquibase.sql.ParameterizedSql;
+import liquibase.sql.Sql;
+import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.sqlgenerator.core.AbstractSqlGenerator;
+import liquibase.sqlgenerator.core.InsertGenerator;
+import liquibase.statement.core.InsertStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StreamUtil;
 import liquibase.util.file.FilenameUtils;
@@ -63,16 +71,25 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     public void execute(PreparedStatementFactory factory) throws DatabaseException {
 
         // build the sql statement
-        List<ColumnConfig> cols = new ArrayList<>(getColumns().size());
-
-        String sql = generateSql(cols);
-        for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
-            listener.writeSqlWillRun(sql);
+        SqlGenerator<ExecutablePreparedStatementBase> generator = getGenerator(this.database);
+        if (generator == null) {
+            // TODO: double-check
+            return;
         }
+
+        Sql[] generatedStatements = generator.generateSql(this, database, new SqlGeneratorChain<>(new TreeSet<>()));
+        if (generatedStatements.length == 0) {
+            return;
+        }
+        ParameterizedSql sql = (ParameterizedSql) generatedStatements[0];
+        for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+            listener.writeSqlWillRun(sql.toSql());
+        }
+        List<ColumnConfig> cols = sql.getColumns();
         Scope.getCurrentScope().getLog(getClass()).fine("Number of columns = " + cols.size());
 
         // create prepared statement
-        PreparedStatement stmt = factory.create(sql);
+        PreparedStatement stmt = factory.create(sql.toSql());
 
         try {
             attachParams(cols, stmt);
@@ -89,6 +106,14 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             }
             JdbcUtils.closeStatement(stmt);
         }
+    }
+
+    protected SqlGenerator<ExecutablePreparedStatementBase> getGenerator(Database database) {
+        SortedSet<SqlGenerator> generators = SqlGeneratorFactory.getInstance().getGenerators(this, database);
+        if ((generators == null) || generators.isEmpty()) {
+            return null;
+        }
+        return (SqlGenerator<ExecutablePreparedStatementBase>) generators.iterator().next();
     }
 
     protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
@@ -111,8 +136,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             i++;
         }
     }
-
-    protected abstract String generateSql(List<ColumnConfig> cols);
 
     /**
      * Sets a single bind variable for a statement to its designated value

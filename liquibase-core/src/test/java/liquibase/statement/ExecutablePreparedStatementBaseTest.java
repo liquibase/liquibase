@@ -43,11 +43,6 @@ public class ExecutablePreparedStatementBaseTest {
             public boolean continueOnError() {
                 return false;
             }
-            
-            @Override
-            protected String generateSql(List<ColumnConfig> cols) {
-                return null;
-            }
         };
         
         DummyPreparedStatement stmt;
