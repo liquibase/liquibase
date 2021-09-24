@@ -17,6 +17,7 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
     public static final CommandArgumentDefinition<String> DATA_OUTPUT_DIRECTORY;
     public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
+    public static final CommandArgumentDefinition<String> INCLUDE_TABLESPACE_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> DIFF_TYPES_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
@@ -45,6 +46,8 @@ public class GenerateChangelogCommandStep extends AbstractCliWrapperCommandStep 
                 .description("Objects to exclude from diff").build();
         INCLUDE_OBJECTS_ARG = builder.argument("includeObjects", String.class)
                 .description("Objects to include in diff").build();
+        INCLUDE_TABLESPACE_ARG = builder.argument("includeTablespace", String.class)
+                .description("Include the tablespace attribute in the changelog").build();
         SCHEMAS_ARG = builder.argument("schemas", String.class)
                 .description("Schemas to include in diff").build();
         DIFF_TYPES_ARG = builder.argument("diffTypes", String.class)
