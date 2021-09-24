@@ -146,10 +146,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String propertyProviderClass;
+
     /**
      * Controls whether users are prompted before executing changeSet to a non-local database.
      *
      * @parameter property="liquibase.promptOnNonLocalDatabase" default-value="true"
+     * @deprecated No longer prompts
      */
     @PropertyElement
     protected boolean promptOnNonLocalDatabase;
@@ -524,8 +526,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected abstract void performLiquibaseTask(Liquibase liquibase)
             throws LiquibaseException;
 
+    /**
+     * @deprecated no longer prompts
+     */
     protected boolean isPromptOnNonLocalDatabase() {
-        return promptOnNonLocalDatabase;
+        return false;
     }
 
     private void displayMojoSettings() {
@@ -662,7 +667,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         getLog().info(indent + "use empty password: " + emptyPassword);
         getLog().info(indent + "properties file: " + propertyFile);
         getLog().info(indent + "properties file will override? " + propertyFileWillOverride);
-        getLog().info(indent + "prompt on non-local database? " + promptOnNonLocalDatabase);
         getLog().info(indent + "clear checksums? " + clearCheckSums);
     }
 

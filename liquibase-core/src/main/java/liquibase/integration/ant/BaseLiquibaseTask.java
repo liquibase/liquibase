@@ -40,7 +40,6 @@ public abstract class BaseLiquibaseTask extends Task {
     private Path classpath;
     private DatabaseType databaseType;
     private ChangeLogParametersType changeLogParameters;
-    private boolean promptOnNonLocalDatabase;
 
     public BaseLiquibaseTask() {
         super();
@@ -217,11 +216,16 @@ public abstract class BaseLiquibaseTask extends Task {
         changeLogParameters.setRefid(changeLogParametersRef);
     }
 
+    /**
+     * @deprecated no longer prompts
+     */
     public boolean isPromptOnNonLocalDatabase() {
-        return promptOnNonLocalDatabase;
+        return false;
     }
 
+    /**
+     * @deprecated no longer prompts
+     */
     public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
-        this.promptOnNonLocalDatabase = promptOnNonLocalDatabase;
     }
 }
