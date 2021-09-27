@@ -967,6 +967,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             //
             // Get the answer, increment the counter
             //
+            if (answers.size() <= count) {
+                throw new Exception("The test specified " + answers.size() + " prompt response(s), but the CLI is asking for an additional prompt response. Something is broken.")
+            }
             String answer = answers[count]
             count++
             return answer
