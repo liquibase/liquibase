@@ -6,6 +6,7 @@ import liquibase.change.Change;
 import liquibase.change.core.*;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
@@ -76,6 +77,9 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
             }
             if (control.getIncludeSchema()) {
                 change.setSchemaName(column.getSchema().getName());
+            }
+            if (comparisonDatabase instanceof MySQLDatabase) {
+                change.setColumnDataType(column.getType().toString());
             }
             change.setTableName(column.getRelation().getName());
             change.setColumnName(column.getName());
