@@ -614,6 +614,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public int getDefaultFractionalDigitsForTimestamp() {
+        return 7;
+    }
+
+    @Override
     protected String getQuotingEndReplacement() {
         return "]]";
     }
