@@ -1115,11 +1115,7 @@
 		</xsd:complexType>
 	</xsd:element>
 
-    <xsd:element name="empty">
-        <xsd:complexType>
-            <xsd:attributeGroup ref="changeAttributes" />
-        </xsd:complexType>
-    </xsd:element>
+    <xsd:element name="empty"/>
 
     <xsd:element name="output">
         <xsd:complexType mixed="true" >
