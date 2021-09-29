@@ -16,6 +16,7 @@ import liquibase.serializer.LiquibaseSerializable.SerializationType;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -479,7 +480,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 firstAttribute = false;
             }
         }
-        String textContent = StringUtil.trimToEmpty(node.getTextContent());
+        String textContent = StringUtil.trimToEmpty(XMLUtil.getTextContent(node));
         textContent = escapeXml(textContent);
         buffer.append(">").append(textContent);
 
