@@ -143,7 +143,8 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
                     ChangelogRewriter.addChangeLogId(changeLogFile, hubChangeLog.getId().toString(), databaseChangeLog);
             if (changeLogRewriterResult.success) {
                 Scope.getCurrentScope().getLog(RegisterChangelogCommandStep.class).info(changeLogRewriterResult.message);
-                output.println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been registered");
+                output.println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been " +
+                        "registered to Project "+project.getName() );
                 resultsBuilder.addResult("statusCode", 0);
                 resultsBuilder.addResult(REGISTERED_CHANGELOG_ID.getName(), hubChangeLog.getId().toString());
             }
@@ -159,27 +160,27 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
         boolean done = false;
         String input = null;
         while (!done) {
-                input = readProjectFromConsole(projects, commandScope);
+            input = readProjectFromConsole(projects, commandScope);
             try {
                 if (input.equalsIgnoreCase("C")) {
                     String projectName = readProjectNameFromConsole();
                     if (StringUtil.isEmpty(projectName)) {
-                            ui.sendMessage("\nNo project created\n");
+                        ui.sendMessage("\nNo project created\n");
                         continue;
                     } else if (projectName.length() > 255) {
-                            ui.sendMessage("\nThe project COMMAND_NAME you entered is longer than 255 characters\n");
+                        ui.sendMessage("\nThe project COMMAND_NAME you entered is longer than 255 characters\n");
                         continue;
                     }
                     project = service.createProject(new Project().setName(projectName));
                     if (project == null) {
-                            throw new CommandExecutionException("Unable to create project '" + projectName + "'.\n\n");
+                        throw new CommandExecutionException("Unable to create project '" + projectName + "'.\n\n");
                     }
-                        ui.sendMessage("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n");
+                    ui.sendMessage("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n");
                     projects = getProjectsFromHub();
                     done = true;
                     continue;
                 } else if (input.equalsIgnoreCase("N")) {
-                        throw new CommandExecutionException("Your changelog " + changeLogFile + " was not registered to any Liquibase Hub project. You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.  Learn more at https://hub.liquibase.com.");
+                    throw new CommandExecutionException("Your changelog " + changeLogFile + " was not registered to any Liquibase Hub project. You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.  Learn more at https://hub.liquibase.com.");
                 }
                 int projectIdx = Integer.parseInt(input);
                 if (projectIdx > 0 && projectIdx <= projects.size()) {
@@ -188,10 +189,10 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
                         done = true;
                     }
                 } else {
-                        ui.sendMessage("\nInvalid project '" + projectIdx + "' selected\n");
+                    ui.sendMessage("\nInvalid project '" + projectIdx + "' selected\n");
                 }
             } catch (NumberFormatException nfe) {
-                    ui.sendMessage("\nInvalid selection '" + input + "'\n");
+                ui.sendMessage("\nInvalid selection '" + input + "'\n");
             }
         }
         return project;

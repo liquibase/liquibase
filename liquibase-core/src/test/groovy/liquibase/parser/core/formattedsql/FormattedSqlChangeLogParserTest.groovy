@@ -27,7 +27,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
  --changeset nvoxland:1
 select * from table1;
 
---changeset nvoxland:2 (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
+--changeset "n voxland":"change 2" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
 create table table1 (
     id int primary key
 );
@@ -89,7 +89,6 @@ select 1
             "--precondition-invalid-type 123\n" +
             "select 1;"
 
-
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
@@ -127,8 +126,8 @@ select 1
         changeLog.getChangeSets().get(0).getDbmsSet() == null
 
 
-        changeLog.getChangeSets().get(1).getAuthor() == "nvoxland"
-        changeLog.getChangeSets().get(1).getId() == "2"
+        changeLog.getChangeSets().get(1).getAuthor() == "n voxland"
+        changeLog.getChangeSets().get(1).getId() == "change 2"
         changeLog.getChangeSets().get(1).getChanges().size() == 1
         ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getSql().replace("\r\n", "\n") == "create table table1 (\n    id int primary key\n);"
         ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getEndDelimiter() == "X"
@@ -225,6 +224,21 @@ select 1
 
         changeLog.getChangeSets().get(9).getContexts().toString() == "a or b"
 
+    }
+
+    def parse_startsWithSpace() throws Exception {
+        when:
+        String changeLogWithSpace = "   \n\n" +
+                "--liquibase formatted sql\n\n" +
+                "--changeset John Doe:12345\n" +
+                "create table test (id int);\n"
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithSpace).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 1
+        changeLog.getChangeSets().get(0).getAuthor() == "John Doe"
+        changeLog.getChangeSets().get(0).getId() == "12345"
     }
 
     def parse_authorWithSpace() throws Exception {

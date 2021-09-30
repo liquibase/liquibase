@@ -26,6 +26,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
 import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
@@ -387,10 +389,17 @@ public class StandardLockService implements LockService {
                     locked = (Boolean) lockedValue;
                 }
                 if ((locked != null) && locked) {
+                    Object lockGranted = columnMap.get("LOCKGRANTED");
+                    final Date castedLockGranted;
+                    if (lockGranted instanceof LocalDateTime) {
+                        castedLockGranted = Date.from(((LocalDateTime) lockGranted).atZone(ZoneId.systemDefault()).toInstant());
+                    } else {
+                        castedLockGranted = (Date)lockGranted;
+                    }
                     allLocks.add(
                             new DatabaseChangeLogLock(
                                     ((Number) columnMap.get("ID")).intValue(),
-                                    (Date) columnMap.get("LOCKGRANTED"),
+                                    castedLockGranted,
                                     (String) columnMap.get("LOCKEDBY")
                             )
                     );
