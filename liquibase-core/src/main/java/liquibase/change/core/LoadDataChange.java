@@ -70,6 +70,7 @@ import static liquibase.change.ChangeParameterMetaData.ALL;
                 "If UUID type is used UUID value is stored as string and NULL in cell is supported.",
         priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table",
         since = "1.7")
+@SuppressWarnings("java:S2583")
 public class LoadDataChange extends AbstractTableChange implements ChangeWithColumns<LoadDataColumnConfig> {
     /**
      * CSV Lines starting with that sign(s) will be treated as comments by default
@@ -259,12 +260,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public SqlStatement[] generateStatements(Database database) {
         boolean databaseSupportsBatchUpdates = false;
         try {
-            if (database instanceof PostgresDatabase) {
-                databaseSupportsBatchUpdates = false;
-            }
-            else {
-                databaseSupportsBatchUpdates = database.supportsBatchUpdates();
-            }
+            databaseSupportsBatchUpdates = database.supportsBatchUpdates();
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -292,7 +288,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 throw new UnexpectedLiquibaseException(e);
             }
 
-            List<ExecutablePreparedStatementBase> batchedStatements = new ArrayList<>();
+            List<ExecutablePreparedStatementBase> preparedStatements = new ArrayList<>();
             boolean anyPreparedStatements = false;
             String[] line;
             // Start at '1' to take into account the header (already processed):
@@ -321,10 +317,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                     );
                 }
 
-                boolean needsPreparedStatement = true;
-                if (usePreparedStatements != null && !usePreparedStatements) {
-                    needsPreparedStatement = false;
-                }
+                boolean needsPreparedStatement = false;
 
                 List<LoadDataColumnConfig> columnsFromCsv = new ArrayList<>();
                 for (int i = 0; i < headers.length; i++) {
@@ -471,16 +464,27 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 //     of whether the 'usePreparedStatement' is set to false
                 // 2. The database supports batched statements (for improved performance) AND we are not in an
                 //    "SQL" mode (i.e. we generate an SQL file instead of actually modifying the database).
-                if
-                ((needsPreparedStatement && (databaseSupportsBatchUpdates && ! isLoggingExecutor(database))) &&
-                        hasPreparedStatementsImplemented()) {
+                // BUT: if the user specifically requests usePreparedStatement=false, then respect that
+                boolean actuallyUsePreparedStatements = false;
+                if (hasPreparedStatementsImplemented()) {
+                    if (usePreparedStatements != null) {
+                        if (!usePreparedStatements && needsPreparedStatement) {
+                            throw new UnexpectedLiquibaseException("loadData is requesting usePreparedStatements=false but prepared statements are required");
+                        }
+                        actuallyUsePreparedStatements = usePreparedStatements;
+                    } else {
+                        actuallyUsePreparedStatements = needsPreparedStatement || (databaseSupportsBatchUpdates && !isLoggingExecutor(database));
+                    }
+                }
+
+                if (actuallyUsePreparedStatements) {
                     anyPreparedStatements = true;
                     ExecutablePreparedStatementBase stmt =
                         this.createPreparedStatement(
                             database, getCatalogName(), getSchemaName(), getTableName(), columnsFromCsv,
                             getChangeSet(), Scope.getCurrentScope().getResourceAccessor()
                         );
-                    batchedStatements.add(stmt);
+                    preparedStatements.add(stmt);
                 } else {
                     InsertStatement insertStatement =
                         this.createStatement(getCatalogName(), getSchemaName(), getTableName());
@@ -508,14 +512,19 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
             if (anyPreparedStatements) {
                 // If we have only prepared statements and the database supports batching, let's roll
-                if (databaseSupportsBatchUpdates && statements.isEmpty() && (!batchedStatements.isEmpty())) {
-                    return new SqlStatement[] {
+                if (databaseSupportsBatchUpdates && statements.isEmpty() && (!preparedStatements.isEmpty())) {
+                    if (database instanceof PostgresDatabase) {
+                        // we don't do batch updates for Postgres but we still send as a prepared statement, see LB-744
+                        return preparedStatements.toArray(new SqlStatement[preparedStatements.size()]);
+                    } else {
+                        return new SqlStatement[] {
                             new BatchDmlExecutablePreparedStatement(
                                     database, getCatalogName(), getSchemaName(),
                                     getTableName(), columns,
                                     getChangeSet(), Scope.getCurrentScope().getResourceAccessor(),
-                                    batchedStatements)
+                                    preparedStatements)
                     };
+                    }
                 } else {
                     return statements.toArray(new SqlStatement[statements.size()]);
                 }

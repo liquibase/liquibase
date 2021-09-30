@@ -106,6 +106,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private String filePath = "UNKNOWN CHANGE LOG";
 
+
+    /**
+     * A logicalFilePath if defined
+     */
+    private String logicalFilePath;
+
     /**
      * File path stored in the databasechangelog table. It should be the same as filePath, but not always.
      */
@@ -255,8 +261,23 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.dbmsSet = DatabaseList.toDbmsSet(dbmsList);
     }
 
+    /**
+     * @return either this object's logicalFilePath or the changelog's filepath (logical or physical) if not.
+     */
     public String getFilePath() {
         return filePath;
+    }
+
+    /**
+     * The logical file path defined directly on this node. Return null if not set.
+     * @return
+     */
+    public String getLogicalFilePath() {
+        return logicalFilePath;
+    }
+
+    public void setLogicalFilePath(String logicalFilePath) {
+        this.logicalFilePath = logicalFilePath;
     }
 
     public String getStoredFilePath() {
@@ -331,7 +352,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             this.objectQuotingStrategy = ObjectQuotingStrategy.LEGACY;
         }
 
-        this.filePath = StringUtil.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
+        this.logicalFilePath = StringUtil.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
+
+        this.filePath = logicalFilePath;
         if (filePath == null) {
             if (changeLog != null) {
                 filePath = changeLog.getFilePath();
@@ -1093,7 +1116,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 Arrays.asList(
                         "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
                         "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
-                        "objectQuotingStrategy", "created"
+                "logicalFilePath", "created"
                 )
         );
     }
@@ -1176,6 +1199,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         if ("created".equals(field)) {
             return getCreated();
+        }
+
+        if ("logicalFilePath".equals(field)) {
+        	return getLogicalFilePath();
         }
 
         if ("rollback".equals(field)) {
