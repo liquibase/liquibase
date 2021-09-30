@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
+@SuppressWarnings("java:S2755")
 public class DefaultXmlWriter implements XmlWriter {
 
     @Override

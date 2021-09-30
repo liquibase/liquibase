@@ -64,6 +64,9 @@ public class Main {
     //set by new CLI to signify it is handling some of the configuration
     public static boolean runningFromNewCli;
 
+    //temporary work-around to pass -D changelog parameters from new CLI to here
+    public static Map<String, String> newCliChangelogParameters;
+
     private static PrintStream outputStream = System.out;
 
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
@@ -1523,7 +1526,11 @@ public class Main {
                     this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
                     this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
                     this.databaseChangeLogLockTableName);
-            database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+            if (this.databaseChangeLogTablespaceName != null) {
+                database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+            } else {
+                database.setLiquibaseTablespaceName(GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentConfiguredValue().getValue());
+            }
         }
 
         try {
@@ -1674,6 +1681,11 @@ public class Main {
             }
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            if (Main.newCliChangelogParameters != null) {
+                for (Map.Entry<String, String> param : Main.newCliChangelogParameters.entrySet()) {
+                    liquibase.setChangeLogParameter(param.getKey(), param.getValue());
+                }
+            }
             try {
                 if (hubConnectionId != null) {
                     try {
@@ -1806,23 +1818,12 @@ public class Main {
                 executeSyncHub(database, liquibase);
                 return;
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
-                String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
-                HubConfiguration.HubMode hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
-                if (liquibaseHubApiKey != null && hubMode != HubConfiguration.HubMode.OFF) {
-                    if (hubConnectionId == null && changeLogFile == null) {
-                        String warningMessage =
-                                "The dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +
-                                        "can send reports to your Hub project. To enable this, please add the \n" +
-                                        "'--hubConnectionId=<hubConnectionId>' parameter to the CLI, or ensure\n" +
-                                        "a registered changelog file is passed in your defaults file or in the CLI.\n" +
-                                        "Learn more at https://hub.liquibase.com";
-                        Scope.getCurrentScope().getUI().sendMessage("\nWARNING: " + warningMessage);
-                        LOG.warning("\n" + warningMessage);
-                    }
-                }
                 CommandScope dropAllCommand = new CommandScope("internalDropAll");
                 if (hubConnectionId != null) {
                     dropAllCommand.addArgumentValue(InternalDropAllCommandStep.HUB_CONNECTION_ID_ARG, UUID.fromString(hubConnectionId));
+                }
+                if (hubProjectId != null) {
+                    dropAllCommand.addArgumentValue(InternalDropAllCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
                 }
                 dropAllCommand
                         .addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, liquibase.getDatabase())
