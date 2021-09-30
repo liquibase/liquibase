@@ -3,9 +3,7 @@ package liquibase.command;
 import liquibase.Scope;
 import liquibase.util.StringUtil;
 
-import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -55,6 +53,10 @@ public class CommandResultsBuilder {
      */
     public <T> CommandResultsBuilder addResult(CommandResultDefinition<T> definition, T value) {
         return addResult(definition.getName(), value);
+    }
+
+    public CommandFailedException commandFailed(String message, int exitCode) {
+        return new CommandFailedException(this.build(), exitCode, message);
     }
 
     /**
