@@ -148,9 +148,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected String propertyProviderClass;
 
     /**
-     * Controls whether users are prompted before executing changeSet to a non-local database.
+     * (DEPRECATED) Controls whether users are prompted before executing changeSet to a non-local database.
      *
-     * @parameter property="liquibase.promptOnNonLocalDatabase" default-value="true"
+     * @parameter property="liquibase.promptOnNonLocalDatabase" default-value="false"
      * @deprecated No longer prompts
      */
     @PropertyElement
@@ -465,6 +465,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                         getLog().info("Executing on Database: " + url);
 
+                        if (isPromptOnNonLocalDatabase()) {
+                            getLog().info("NOTE: The promptOnLocalDatabase functionality has been removed");
+                        }
                         setupBindInfoPackage();
                         performLiquibaseTask(liquibase);
                     } catch (LiquibaseException e) {

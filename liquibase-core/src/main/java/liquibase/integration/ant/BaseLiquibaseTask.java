@@ -227,5 +227,6 @@ public abstract class BaseLiquibaseTask extends Task {
      * @deprecated no longer prompts
      */
     public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
+        log("NOTE: The promptOnLocalDatabase functionality has been removed", Project.MSG_INFO);
     }
 }
