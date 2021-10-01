@@ -147,6 +147,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.1.1</version>
                 <configuration>
+                    <tarLongFileMode>posix</tarLongFileMode>
                     <finalName>liquibase-${liquibase.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                     <attach>false</attach>
