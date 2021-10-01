@@ -167,7 +167,7 @@ public class StringUtil {
         } else {
             if (endDelimiter.length() == 1) {
                 if ("/".equals(endDelimiter)) {
-                    if (previousPiece != null && !previousPiece.endsWith("\n")) {
+                    if (previousPiece != null && previousPiece.endsWith("*")) {
                         return false;
                     }
                 }
@@ -289,7 +289,7 @@ public class StringUtil {
      * any comments that are between \/**\/ or anything that matches
      * SP--SP<text>\n (to support the ANSI standard commenting of --
      * at the end of a line).
-     * 
+     *
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {
@@ -323,7 +323,7 @@ public class StringUtil {
         if (collection.isEmpty()) {
             return "";
         }
-        
+
         StringBuilder buffer = new StringBuilder();
         for (Object val : collection) {
             buffer.append(formatter.toString(val)).append(delimiter);
@@ -364,7 +364,7 @@ public class StringUtil {
         return join(list, delimiter);
     }
 
-   public static String join(ExtensibleObject extensibleObject, String delimiter) {
+    public static String join(ExtensibleObject extensibleObject, String delimiter) {
         return join(extensibleObject, delimiter, new ToStringFormatter());
     }
 
@@ -410,7 +410,7 @@ public class StringUtil {
         {
             ints[i] = array[i];
         }
-	return StringUtil.join(ints, delimiter);
+        return StringUtil.join(ints, delimiter);
     }
 
     public static String join(int[] array, String delimiter) {
@@ -698,7 +698,7 @@ public class StringUtil {
         }
     }
 
-  public static class DefaultFormatter implements StringUtilFormatter {
+    public static class DefaultFormatter implements StringUtilFormatter {
         @Override
         public String toString(Object obj) {
             if (obj == null) {
@@ -885,7 +885,7 @@ public class StringUtil {
         return trimRight(str.toString());
     }
 
-    
+
     /**
      * From commonslang3 -> StringUtil
      * <p>Gets a substring from the specified String avoiding exceptions.</p>
@@ -1013,8 +1013,8 @@ public class StringUtil {
 
     public static String stripEnclosingQuotes(String string) {
         if (string.length() > 1 &&
-                (string.charAt(0) == '"' || string.charAt(0) == '\'') &&
-                string.charAt(0) == string.charAt(string.length() - 1)) {
+            (string.charAt(0) == '"' || string.charAt(0) == '\'') &&
+            string.charAt(0) == string.charAt(string.length() - 1)) {
             return substring(string, 1, string.length() - 1);
         }
         else {

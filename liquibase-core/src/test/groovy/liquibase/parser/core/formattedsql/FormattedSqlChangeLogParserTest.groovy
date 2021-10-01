@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.configuration.LiquibaseConfiguration
+import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
@@ -81,6 +82,23 @@ create table my_table (
 select 1
 """.trim()
 
+    private static final String END_DELIMITER_CHANGELOG = """
+--liquibase formatted sql
+
+-- changeset abcd:1 runOnChange:true endDelimiter:/
+CREATE OR REPLACE PROCEDURE any_procedure_name is
+BEGIN
+    DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);
+END reany_procedure_name;
+/
+
+
+grant /*Beware, this comment should not be seen as a delimiter! */
+    execute on any_procedure_name to ANY_USER1/
+grant execute on any_procedure_name to ANY_USER2/
+grant execute on any_procedure_name to ANY_USER3/
+-- rollback drop PROCEDURE refresh_all_fos_permission_views/
+"""
 
     private static final String INVALID_CHANGELOG = "select * from table1"
     private static final String INVALID_CHANGELOG_INVALID_PRECONDITION = "--liquibase formatted sql\n" +
@@ -292,6 +310,24 @@ select 1
         "--liquibase formatted sql\n\n--changeset John Doe:12345 dbms:db2, db2i\ncreate table test (id int);\n" | ["db2"]
         "--liquibase formatted sql\n\n--changeset John Doe:12345 dbms:db2,\ncreate table test (id int);\n"      | ["db2"]
         "--liquibase formatted sql\n\n--changeset John Doe:12345 dbms:,db2,\ncreate table test (id int);\n"     | null
+    }
+
+    def parse_withEndDelimiter() throws Exception {
+        expect:
+        ChangeLogParameters params = new ChangeLogParameters()
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(END_DELIMITER_CHANGELOG).parse("asdf.sql", params, new JUnitResourceAccessor())
+
+        changeLog.getLogicalFilePath() == "asdf.sql"
+        changeLog.getChangeSets().size() == 1
+        changeLog.getChangeSets().get(0).getChanges().size() == 1
+        def statements = changeLog.getChangeSets().get(0).getChanges().get(0).generateStatements(new MockDatabase())
+        statements.size() == 4
+        statements[0].toString() == "CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n" +
+                "    DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);\n" +
+                "END reany_procedure_name;"
+        statements[1].toString() == "grant \n    execute on any_procedure_name to ANY_USER1"
+        statements[2].toString() == "grant execute on any_procedure_name to ANY_USER2"
+        statements[3].toString() == "grant execute on any_procedure_name to ANY_USER3"
     }
 
     @Unroll("#featureName: #example")
