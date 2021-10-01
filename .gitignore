@@ -1,3 +1,6 @@
 /liquibase-biqquery.iml
 /.idea/
 /target/
+derby.log
+liquibase-bigquery.iml
+src/test/java/BigqueryIT.java
