@@ -38,7 +38,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
         }
 
-        if (isPostgreWithoutAsDatatypeSupport(database)) {
+        if (isDatabaseWithoutAsDatatypeSupport(database)) {
             validationErrors.checkDisallowedField("AS", statement.getDataType(), database, PostgresDatabase.class);
         }
 
@@ -71,7 +71,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
             queryStringBuilder.append(" AS BIGINT ");
         } else if (statement.getDataType() != null) {
-            if (!(database instanceof H2Database) && !(database instanceof CockroachDatabase)) {
+            if (!(database instanceof H2Database || database instanceof CockroachDatabase)) {
                 queryStringBuilder.append(" AS " + statement.getDataType());
             }
         }
@@ -132,9 +132,9 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
                 && ((H2Database) database).supportsMinMaxForSequences();
     }
 
-    private boolean isPostgreWithoutAsDatatypeSupport(Database database) {
+    private boolean isDatabaseWithoutAsDatatypeSupport(Database database) {
         try {
-            return database instanceof PostgresDatabase && database.getDatabaseMajorVersion() < 10;
+            return database instanceof CockroachDatabase || (database instanceof PostgresDatabase && database.getDatabaseMajorVersion() < 10);
         } catch (DatabaseException e) {
             // we can't determinate the PostgreSQL version so we shouldn't throw validation error as it might work for this DB
             return false;
