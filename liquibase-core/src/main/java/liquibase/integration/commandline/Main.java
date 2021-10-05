@@ -1064,9 +1064,6 @@ public class Main {
             return;
         }
 
-        if (props.containsKey("strict")) {
-            strict = Boolean.valueOf(props.getProperty("strict"));
-        }
 
         //
         // Load property values into
@@ -1234,6 +1231,14 @@ public class Main {
                 throw new CommandLineParsingException(
                         String.format(coreBundle.getString("unexpected.value"), arg));
             }
+        }
+
+        //
+        // Check for strict setting
+        //
+        Boolean strictArg = GlobalConfiguration.STRICT.getCurrentValue();
+        if (strictArg != null) {
+            strict = strictArg;
         }
 
         // Now apply default values from the default property files. We waited with this until this point
