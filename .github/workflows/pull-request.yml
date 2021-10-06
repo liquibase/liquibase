@@ -31,7 +31,7 @@ jobs:
         java-version: ${{ matrix.java }}
         distribution: 'adopt'
     - name: Run Unit Tests With Maven
-      run: mvn -B clean test --file pom.xml
+      run: mvn -B clean test package --file pom.xml
 
     - name: Archive Test Results
       if: ${{ always() }}
