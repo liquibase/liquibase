@@ -1,0 +1,29 @@
+name: Release Extension to Sonatype
+
+on:
+  release:
+    types: [published]
+
+jobs:
+    release:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+
+        - name: Set up Java for publishing to Maven Central Repository
+          uses: actions/setup-java@v2
+          with:
+            java-version: '11'
+            distribution: 'adopt'
+            server-id: sonatype-nexus-staging
+            server-username: MAVEN_USERNAME
+            server-password: MAVEN_PASSWORD
+            gpg-private-key: ${{ secrets.GPG_SECRET }}
+            gpg-passphrase: GPG_PASSPHRASE
+
+        - name: Publish to the Maven Central Repository
+          run: mvn -B clean deploy -Dmaven.test.skip -P release
+          env:
+            MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+            MAVEN_PASSWORD: ${{ secrets.SONATYPE_TOKEN }}
+            GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
