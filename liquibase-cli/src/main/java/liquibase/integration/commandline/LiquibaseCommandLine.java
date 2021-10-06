@@ -820,6 +820,11 @@ public class LiquibaseCommandLine {
                 parent = addSubcommandGroup(groupName, commandDefinition, parent);
             } else {
                 parent = commandGroup.getCommandSpec();
+                if (commandDefinition.getGroupHelpFooter() != null) {
+                    List<String> list = new ArrayList<>();
+                    list.add(commandDefinition.getHelpFooter());
+                    parent.usageMessage().footer(list.toArray(new String[0]));
+                }
             }
             configureSubcommandGroup(parent, groupName, commandDefinition);
         }
