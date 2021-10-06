@@ -298,6 +298,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         if (testDef.expectedResults.size() > 0 && (results == null || results.getResults().isEmpty())) {
             throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
         }
+        if (testDef.setup != null) {
+            for (def setup : testDef.setup) {
+                setup.cleanup()
+            }
+        }
 
         then:
         checkOutput("Command Output", outputStream.toString(), testDef.expectedOutput)
