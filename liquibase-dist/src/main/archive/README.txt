@@ -2,7 +2,7 @@ Liquibase Version ${liquibase.version}
 
 Introduction
 --------------------------------------------
-Thanks for downloading and installing Liquibase ${liquibase.version} from Datical.
+Thanks for downloading and installing Liquibase ${liquibase.version} from Liquibase.
 By using the installer, you already have all the dependencies, directories, config, 
 and properties files to get started exploring the Liquibase examples provided.
 
