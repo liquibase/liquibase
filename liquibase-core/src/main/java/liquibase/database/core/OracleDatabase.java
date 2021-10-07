@@ -20,7 +20,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.lang.reflect.Method;
@@ -167,7 +167,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     //noinspection HardCodedStringLiteral
                     Scope.getCurrentScope().getLog(getClass()).info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
                 } finally {
-                    JdbcUtils.closeStatement(statement);
+                    JdbcUtil.closeStatement(statement);
                 }
 
 
@@ -613,7 +613,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     this.canAccessDbaRecycleBin = false;
                 }
             } finally {
-                JdbcUtils.close(null, statement);
+                JdbcUtil.close(null, statement);
             }
         }
 
