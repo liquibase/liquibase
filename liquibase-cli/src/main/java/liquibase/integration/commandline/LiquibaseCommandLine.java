@@ -13,6 +13,7 @@ import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
 import liquibase.hub.HubConfiguration;
+import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.LogMessageFilter;
 import liquibase.logging.LogService;
@@ -298,7 +299,13 @@ public class LiquibaseCommandLine {
                     if (!wasHelpOrVersionRequested()) {
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
                         Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion()));
-                        Scope.getCurrentScope().getUI().sendMessage(Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService().getLicenseInfo());
+
+                        final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+                        if (licenseService == null) {
+                            Scope.getCurrentScope().getUI().sendMessage("WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.");
+                        } else {
+                            Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                        }
                     }
 
                     CommandLine.ParseResult subcommandParseResult = commandLine.getParseResult();
@@ -499,6 +506,13 @@ public class LiquibaseCommandLine {
     }
 
     private void configureVersionInfo() {
+        final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+        String licenseInfo = "";
+        if (licenseService == null) {
+            licenseInfo = "WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.";
+        } else {
+            licenseInfo = licenseService.getLicenseInfo();
+        }
         getRootCommand(this.commandLine).getCommandSpec().version(
                 CommandLineUtils.getBanner(),
                 String.format("Running Java under %s (Version %s)",
@@ -507,7 +521,7 @@ public class LiquibaseCommandLine {
                 ),
                 "",
                 "Liquibase Version: " + LiquibaseUtil.getBuildVersion(),
-                Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService().getLicenseInfo()
+                licenseInfo
         );
     }
 
