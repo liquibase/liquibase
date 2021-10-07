@@ -14,9 +14,9 @@ import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.file.FilenameUtils;
+import liquibase.util.FilenameUtil;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -87,7 +87,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 } catch (IOException ignore) {
                 }
             }
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
         }
     }
 
@@ -348,36 +348,9 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     private String getFileName(String fileName) {
-        //  Most of this method were copy-pasted from XMLChangeLogSAXHandler#handleIncludedChangeLog()
-
         String relativeBaseFileName = changeSet.getChangeLog().getPhysicalFilePath();
 
-        // workaround for FilenameUtils.normalize() returning null for relative paths like ../conf/liquibase.xml
-        String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeBaseFileName), fileName);
-        if (tempFile != null) {
-            fileName = tempFile;
-        } else {
-            fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;
-        }
-
-        return fileName;
-    }
-
-    /**
-     * Gets absolute and normalized path for path.
-     * If path is relative, absolute path is calculated relative to change log file.
-     *
-     * @param path Absolute or relative path.
-     * @return Absolute and normalized path.
-     */
-    public String getAbsolutePath(String path) {
-        String p = path;
-        File f = new File(p);
-        if (!f.isAbsolute()) {
-            String basePath = FilenameUtils.getFullPath(changeSet.getChangeLog().getPhysicalFilePath());
-            p = FilenameUtils.normalize(basePath + p);
-        }
-        return p;
+        return FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
     }
 
     @Override

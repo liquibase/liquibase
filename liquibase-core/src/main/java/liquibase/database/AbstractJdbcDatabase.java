@@ -299,7 +299,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        if ((quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
+        if ((getObjectQuotingStrategy() == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
                 ( objectName == null) || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
             return objectName;
         } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {

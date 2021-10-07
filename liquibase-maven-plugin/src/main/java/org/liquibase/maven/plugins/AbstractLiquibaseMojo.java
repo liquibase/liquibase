@@ -1,20 +1,19 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.CommandLineUtils;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
-import liquibase.util.ui.UIFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -147,10 +146,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String propertyProviderClass;
+
     /**
-     * Controls whether users are prompted before executing changeSet to a non-local database.
+     * (DEPRECATED) Controls whether users are prompted before executing changeSet to a non-local database.
      *
-     * @parameter property="liquibase.promptOnNonLocalDatabase" default-value="true"
+     * @parameter property="liquibase.promptOnNonLocalDatabase" default-value="false"
+     * @deprecated No longer prompts
      */
     @PropertyElement
     protected boolean promptOnNonLocalDatabase;
@@ -465,11 +466,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         getLog().info("Executing on Database: " + url);
 
                         if (isPromptOnNonLocalDatabase()) {
-                            if (!liquibase.isSafeToRunUpdate()) {
-                                if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                                    throw new LiquibaseException("User decided not to run against non-local database");
-                                }
-                            }
+                            getLog().info("NOTE: The promptOnLocalDatabase functionality has been removed");
                         }
                         setupBindInfoPackage();
                         performLiquibaseTask(liquibase);
@@ -532,8 +529,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected abstract void performLiquibaseTask(Liquibase liquibase)
             throws LiquibaseException;
 
+    /**
+     * @deprecated no longer prompts
+     */
     protected boolean isPromptOnNonLocalDatabase() {
-        return promptOnNonLocalDatabase;
+        return false;
     }
 
     private void displayMojoSettings() {
@@ -670,7 +670,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         getLog().info(indent + "use empty password: " + emptyPassword);
         getLog().info(indent + "properties file: " + propertyFile);
         getLog().info(indent + "properties file will override? " + propertyFileWillOverride);
-        getLog().info(indent + "prompt on non-local database? " + promptOnNonLocalDatabase);
         getLog().info(indent + "clear checksums? " + clearCheckSums);
     }
 
