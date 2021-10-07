@@ -141,7 +141,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setCommonlyUsed(true)
                 .build();
         STRICT = builder.define("strict", Boolean.class)
-                .setDescription("Should all Liquibase arguments have to match exactly?")
+                .setDescription("Be stricter on allowed Liquibase configuration and setup?")
                 .setDefaultValue(true)
                 .build();
     }
