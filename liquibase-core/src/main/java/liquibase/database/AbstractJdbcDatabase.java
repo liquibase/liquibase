@@ -1440,7 +1440,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         getDefaultDatabaseProductName()));
             }
             String sequenceName = databaseFunction.getValue();
-            String sequenceSchemaName = ((SequenceNextValueFunction) databaseFunction).getSequenceSchemaName();
+            String sequenceSchemaName = databaseFunction.getSchemaName();
 
             sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
             if (sequenceNextValueFunction.contains("'")) {
@@ -1458,7 +1458,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         getDefaultDatabaseProductName()));
             }
 
-            String sequenceSchemaName = ((SequenceCurrentValueFunction) databaseFunction).getSequenceSchemaName();
+            String sequenceSchemaName = databaseFunction.getSchemaName();
             String sequenceName = databaseFunction.getValue();
             sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
 

@@ -544,11 +544,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         if ((databaseFunction != null) && "current_timestamp".equalsIgnoreCase(databaseFunction.toString())) {
             return databaseFunction.toString();
         }
-        if ((databaseFunction instanceof SequenceNextValueFunction) || (databaseFunction instanceof
-                SequenceCurrentValueFunction)) {
+        if ((databaseFunction instanceof SequenceNextValueFunction)
+                || (databaseFunction instanceof SequenceCurrentValueFunction)) {
             String quotedSeq = super.generateDatabaseFunctionValue(databaseFunction);
+
             // replace "myschema.my_seq".nextval with "myschema"."my_seq".nextval
-            return quotedSeq.replaceFirst("\"([^\\.\"]+)\\.([^\\.\"]+)\"", "\"$1\".\"$2\"");
+            return quotedSeq.replaceFirst("\"([^.\"]+)\\.([^.\"]+)\"", "\"$1\".\"$2\"");
 
         }
 
