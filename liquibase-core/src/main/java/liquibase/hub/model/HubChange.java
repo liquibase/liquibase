@@ -1,5 +1,6 @@
 package liquibase.hub.model;
 
+import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.util.ISODateFormat;
@@ -40,7 +41,7 @@ public class HubChange implements HubModel {
         this.labels = ranChangeSet.getLabels().toString();
         this.contexts = ranChangeSet.getContextExpression().toString();
         this.orderExecuted = ranChangeSet.getOrderExecuted();
-        this.md5sum = ranChangeSet.getLastCheckSum().toString();
+        this.md5sum = (ranChangeSet.getLastCheckSum() != null ? ranChangeSet.getLastCheckSum().toString() : null);
         this.execType = ranChangeSet.getExecType().value;
         this.deploymentId = ranChangeSet.getDeploymentId();
         this.dateExecuted = ranChangeSet.getDateExecuted();
@@ -55,7 +56,8 @@ public class HubChange implements HubModel {
         this.labels = changeSet.getLabels().toString();
         this.contexts = changeSet.getContexts().toString();
         this.orderExecuted = 0;
-        this.md5sum = changeSet.generateCheckSum().toString();
+        CheckSum checkSum = changeSet.generateCheckSum();
+        this.md5sum = (checkSum != null ? checkSum.toString() : null);
         this.execType = "EXECUTED";
         ISODateFormat iso = new ISODateFormat();
         try {
