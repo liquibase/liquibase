@@ -1,6 +1,54 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.5.0(2021.09.21)
+
+There is a new family of commands to use to run quality checks:
+- liquibase checks show to list the available quality checks
+- liquibase checks run to run the available quality checks
+along with enable, disable, customize, copy, reset, and delete options, and liquibase checks --help to learn more.
+The following is a list of changes related to Liquibase Quality Checks:
+- Implement checks enable/disable subcommands 
+- Implement checks run subcommand for dynamic rules 
+- Implement checks customize subcommand 
+- Implement checks copy subcommand 
+- Implement checks reset subcommand 
+- Implement checks show subcommand for dynamic rules
+- Implement checks delete subcommand
+- STATIC CHECK :: Changeset Must Have A Label
+- STATIC CHECK :: Changeset Must Have A Context
+- STATIC CHECK :: Changeset Must Have A Comment
+- STATIC CHECK :: Warn When "DROP TABLE" Detected
+- STATIC CHECK :: Warn When "DROP COLUMN" Detected
+- STATIC CHECK :: Warn When Data Type Modification is Detected
+- STATIC CHECK :: Warn when 'GRANT' Statement Detected
+- STATIC CHECK :: Warn when 'REVOKE' Statement Detected
+- DYNAMIC CHECK :: Warn when Tables have more than n columns
+- Fail when creating a Scope with a null-parent #1354
+- Improve synchronization of LockServiceFactory reset #1991
+- Fix createSequence for h2 when dataType is specified #1992
+- GenerateChangeLog on an Oracle db ignores diffIncludeTablespace when creating MissingTableChange #1812
+- Fix OSGiResourceAccessor failing due to javax.activation #1534
+- Ensure that the root scope is initialized correctly regardless of whether a scope manager has been configured yet or not #1768
+- Manage parent directory relative to changelog in IncludeAll #1968
+- Fix UniqueConstraint snapshot query on db2z #1771
+- Fixes Postgresql bit column support #1468 
+- fixed usage of computed values in prepared insert/update changes #1590 
+- Get Set deleteCascade for serializer mapping #1837 
+- Add support for changeset ids and authors with spaces in formattedsql changelogs. #1845 
+- More efficient XML resource loading #1860
+- Too many open files error on application server: LiquibaseEntityResolver opens too many file descriptors and never closes them #1815 
+- Classpath scan time lapse for every included changelog file #1913 
+- Postgresql: Preserve existing search_path when setting the defaultSchemaName #1864
+- Cannot call extension function from migration #1823 
+- Fixed postgresql addPrimaryKey cluster handling #1880
+- PostgresDatabase should ignore addPrimaryKey clustered false #1779 
+- CLI no longer reading defaultsFile from classpath #1893
+- [PRO] Pro Enhancement Request: set 'splitStatements' to 'false' for Stored Logic changesets when generating a Formatted SQL changelog 
+- [PRO] Allow users to indicate names and location of their spool files when using runWith:sqlplus 
+- [PRO] Cannot update MariaDB expand based storage after first liquibase update 
+- [PRO] Liquibase PRO generateChangeLog error on Postgresql functions that have long signatures containing any '()' characters 
+
 Changes in version 4.4.3 (2021.08.05)
 
 - Do not worry about FileSystemAlreadyExistsException errors #1885

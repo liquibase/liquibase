@@ -36,13 +36,6 @@ public class LiquibaseFutureRollbackSQL extends LiquibaseRollback {
     private Writer outputWriter;
 
     @Override
-    protected boolean isPromptOnNonLocalDatabase() {
-        // Always run on an non-local database as we are not actually modifying
-        // the database when run on it.
-        return false;
-    }
-
-    @Override
     protected Liquibase createLiquibase(Database db)
             throws MojoExecutionException {
         Liquibase liquibase = super.createLiquibase(db);

@@ -6,6 +6,29 @@ import spock.lang.Unroll
 
 class StreamUtilTest extends Specification {
 
+    @Unroll
+    def copy() {
+        when:
+        def input = new ByteArrayInputStream(testString.getBytes())
+        def output = new ByteArrayOutputStream()
+
+        StreamUtil.copy(input, output)
+
+        then:
+        output.toString() == testString
+
+        where:
+        testString << [
+                "",
+                "short string",
+                "long string |" * 1000
+        ]
+    }
+
+    def readStream() {
+        expect:
+        StreamUtil.readStream(new ByteArrayInputStream("a string".getBytes())) == "a string".getBytes()
+    }
 
     @Unroll
     def readStreamAsString() throws IOException {

@@ -346,9 +346,4 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
             referencePassword = "";
         }
     }
-
-    @Override
-    protected boolean isPromptOnNonLocalDatabase() {
-        return false;
-  }
 }
