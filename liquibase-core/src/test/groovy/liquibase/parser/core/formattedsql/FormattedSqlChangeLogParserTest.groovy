@@ -5,7 +5,6 @@ import liquibase.change.core.RawSQLChange
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
-import liquibase.configuration.LiquibaseConfiguration
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
@@ -301,10 +300,13 @@ select 1
 
         then:
         ((RawSQLChange) changeLog.changeSets[0].changes[0]).sql.replace("\r\n", "\n") == expected
+        changeLog.changeSets[0].author == "John Doe"
+        changeLog.changeSets[0].id == "12345"
 
         where:
-        example                                                                                                  | expected
-        "--liquibase formatted sql\n--changeset John Doe:12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/" | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
+        example                                                                                                       | expected
+        "--liquibase formatted sql\n--changeset John Doe:12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"      | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
+        "--liquibase formatted sql\n--changeset John Doe: 12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/" | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
     }
 
     @LiquibaseService(skip = true)
