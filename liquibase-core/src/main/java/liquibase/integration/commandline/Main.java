@@ -104,7 +104,6 @@ public class Main {
     protected String changeExecListenerPropertiesFile;
     protected Boolean promptForNonLocalDatabase;
     protected Boolean includeSystemClasspath;
-    protected Boolean strict;
     protected String defaultsFile = "liquibase.properties";
     protected String diffTypes;
     protected String changeSetAuthor;
@@ -1048,7 +1047,7 @@ public class Main {
      * Reads various execution parameters from an InputStream and sets our internal state according to the values
      * found.
      *
-     * @param propertiesInputStream an InputStream from a Java properties file
+     * @param  propertiesInputStream       an InputStream from a Java properties file
      * @throws IOException                 if there is a problem reading the InputStream
      * @throws CommandLineParsingException if an invalid property is encountered
      */
@@ -1064,6 +1063,7 @@ public class Main {
             return;
         }
 
+        boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
 
         //
         // Load property values into
@@ -1231,14 +1231,6 @@ public class Main {
                 throw new CommandLineParsingException(
                         String.format(coreBundle.getString("unexpected.value"), arg));
             }
-        }
-
-        //
-        // Check for strict setting
-        //
-        Boolean strictArg = GlobalConfiguration.STRICT.getCurrentValue();
-        if (strict == null) {
-            strict = strictArg;
         }
 
         // Now apply default values from the default property files. We waited with this until this point
