@@ -104,7 +104,7 @@ public class Main {
     protected String changeExecListenerPropertiesFile;
     protected Boolean promptForNonLocalDatabase;
     protected Boolean includeSystemClasspath;
-    protected Boolean strict = Boolean.TRUE;
+    protected Boolean strict;
     protected String defaultsFile = "liquibase.properties";
     protected String diffTypes;
     protected String changeSetAuthor;
@@ -1237,7 +1237,7 @@ public class Main {
         // Check for strict setting
         //
         Boolean strictArg = GlobalConfiguration.STRICT.getCurrentValue();
-        if (strictArg != null) {
+        if (strict == null) {
             strict = strictArg;
         }
 

@@ -1,5 +1,6 @@
 package liquibase.integration.commandline;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.util.StringUtil;
@@ -473,6 +474,7 @@ public class MainTest {
     @Test
     public void propertiesFileParsingShouldIgnoreUnknownArgumentsIfStrictFalseIsInFile() throws Exception {
         Main cli = new Main();
+        cli.strict = false;
 
         Properties props = new Properties();
         props.setProperty("driver", "DRIVER");
@@ -528,7 +530,9 @@ public class MainTest {
     @Test(expected = CommandLineParsingException.class)
     public void propertiesFileParsingShouldFailOnUnknownArgumentsIfStrictMode() throws Exception {
         Main cli = new Main();
+        String[] args = new String[]{"--strict=true"};
 
+        cli.parseOptions(args);
         Properties props = new Properties();
         props.setProperty("driver", "DRIVER");
         props.setProperty("unknown.property", "UnknownValue");
@@ -562,6 +566,7 @@ public class MainTest {
     @Test(expected = CommandLineParsingException.class)
     public void propertiesFileWithBadArgs() throws Exception {
         Main cli = new Main();
+        cli.strict = true;
 
         Properties props = new Properties();
         props.setProperty("driver", "DRIVER");
