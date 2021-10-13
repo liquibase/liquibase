@@ -1,9 +1,7 @@
 package liquibase.integration.commandline;
 
 import liquibase.Scope;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandDefinition;
-import liquibase.command.CommandFactory;
+import liquibase.command.*;
 import liquibase.command.core.*;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueProvider;
@@ -229,7 +227,7 @@ public class LiquibaseCommandLine {
 
         boolean printUsage = false;
         try (final StringWriter suggestionWriter = new StringWriter();
-             PrintWriter suggestionsPrintWriter = new PrintWriter(suggestionWriter)) {
+            PrintWriter suggestionsPrintWriter = new PrintWriter(suggestionWriter)) {
             if (exception instanceof CommandLine.ParameterException) {
                 if (exception instanceof CommandLine.UnmatchedArgumentException) {
                     System.err.println("Unexpected argument(s): " + StringUtil.join(((CommandLine.UnmatchedArgumentException) exception).getUnmatched(), ", "));
@@ -271,7 +269,10 @@ public class LiquibaseCommandLine {
         } catch (IOException e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Error closing stream: " + e.getMessage(), e);
         }
-
+        if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
+            CommandFailedException cfe = (CommandFailedException) exception.getCause();
+            return cfe.getExitCode();
+        }
         return 1;
     }
 
@@ -833,6 +834,11 @@ public class LiquibaseCommandLine {
                 parent = addSubcommandGroup(groupName, commandDefinition, parent);
             } else {
                 parent = commandGroup.getCommandSpec();
+                if (commandDefinition.getGroupHelpFooter() != null) {
+                    List<String> list = new ArrayList<>();
+                    list.add(commandDefinition.getHelpFooter());
+                    parent.usageMessage().footer(list.toArray(new String[0]));
+                }
             }
             configureSubcommandGroup(parent, groupName, commandDefinition);
         }
