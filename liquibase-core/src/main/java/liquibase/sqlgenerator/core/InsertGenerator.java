@@ -22,10 +22,6 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         validationErrors.checkRequiredField("tableName", insertStatement.getTableName());
         validationErrors.checkRequiredField("columns", insertStatement.getColumnValues());
 
-//        if (insertStatement.getSchemaName() != null && !database.supportsSchemas()) {
-//           validationErrors.addError("Database does not support schemas");
-//       }
-
         return validationErrors;
     }
 
@@ -99,8 +95,6 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         }
 
         sql.append(")");
-        
-        
     }
 
 

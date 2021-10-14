@@ -11,6 +11,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtil;
 
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 @DataTypeInfo(name = "boolean", aliases = {"java.sql.Types.BOOLEAN", "java.lang.Boolean", "bit", "bool"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BooleanType extends LiquibaseDataType {
@@ -71,6 +72,13 @@ public class BooleanType extends LiquibaseDataType {
             } else if ("false".equals(((String) value).toLowerCase(Locale.US)) || "0".equals(value) || "b'0'".equals(
                     ((String) value).toLowerCase(Locale.US)) || "f".equals(((String) value).toLowerCase(Locale.US)) || ((String) value).toLowerCase(Locale.US).equals(this.getFalseBooleanValue(database).toLowerCase(Locale.US))) {
                 returnValue = this.getFalseBooleanValue(database);
+            } else if (database instanceof PostgresDatabase && Pattern.matches("b?([01])\\1*(::bit|::\"bit\")?", (String) value)) {
+                returnValue = "b'" 
+                        + value.toString()
+                                .replace("b", "")
+                                .replace("\"", "")
+                                .replace("::it", "")
+                        + "'::\"bit\"";
             } else {
                 throw new UnexpectedLiquibaseException("Unknown boolean value: " + value);
             }
