@@ -527,7 +527,7 @@ public class MainTest {
         cli.command = "migrate";
         assertEquals(0, cli.checkSetup().size());
 
-        String[] noArgCommand = { "migrate", "migrateSQL", "update", "updateSQL",
+        String[] noArgCommand = {"migrate", "migrateSQL", "update", "updateSQL",
                 "updateTestingRollback", "listLocks",
                 "releaseLocks", "validate", "help",
                 "clearCheckSums", "changelogSync", "changelogSyncSQL"
@@ -537,7 +537,7 @@ public class MainTest {
         cli.commandParams.add("--logLevel=debug");
 
         // verify unexpected parameter
-        for(int i=0; i<noArgCommand.length; i++) {
+        for (int i = 0; i < noArgCommand.length; i++) {
             cli.command = noArgCommand[i];
             assertEquals("Command " + cli.command, 1, cli.checkSetup().size());
         }
@@ -551,18 +551,18 @@ public class MainTest {
 
         // verify normal case - comand w/o command parameters
         cli.commandParams.clear();
-        for(int i=0; i<noArgCommand.length; i++) {
+        for (int i = 0; i < noArgCommand.length; i++) {
             cli.command = noArgCommand[i];
             assertEquals(0, cli.checkSetup().size());
         }
 
-        String[] singleArgCommand = { "updateCount", "updateCountSQL",
+        String[] singleArgCommand = {"updateCount", "updateCountSQL",
                 "tag", "dbDoc"
         };
 
         // verify unexpected parameter for single arg commands
         cli.commandParams.add("--logLevel=debug");
-        for(int i=0; i<singleArgCommand.length; i++) {
+        for (int i = 0; i < singleArgCommand.length; i++) {
             cli.command = singleArgCommand[i];
             assertEquals(1, cli.checkSetup().size());
         }
@@ -570,7 +570,7 @@ public class MainTest {
         // verify normal case - comand with string command parameter
         cli.commandParams.clear();
         cli.commandParams.add("someCommandValue");
-        for(int i=0; i<singleArgCommand.length; i++) {
+        for (int i = 0; i < singleArgCommand.length; i++) {
             cli.command = singleArgCommand[i];
             assertEquals(0, cli.checkSetup().size());
         }
@@ -588,17 +588,17 @@ public class MainTest {
         cli.commandParams.add("--logLevel=debug");
         assertEquals(1, cli.checkSetup().size());
 
-        String[] multiArgCommand = { "diff", "diffChangeLog" };
+        String[] multiArgCommand = {"diff", "diffChangeLog"};
 
         //first verify diff cmds w/o args
         cli.commandParams.clear();
-        for(int i=0; i<multiArgCommand.length; i++) {
+        for (int i = 0; i < multiArgCommand.length; i++) {
             cli.command = multiArgCommand[i];
             assertEquals(0, cli.checkSetup().size());
         }
 
         // next verify with all parms
-        String[] cmdParms = { "--referenceUsername=USERNAME", "--referencePassword=PASSWORD",
+        String[] cmdParms = {"--referenceUsername=USERNAME", "--referencePassword=PASSWORD",
                 "--referenceUrl=URL", "--referenceDriver=DRIVER"};
         // load all parms
         for (String param : cmdParms) {
@@ -609,23 +609,6 @@ public class MainTest {
         // now add an unexpected parm
         cli.commandParams.add("--logLevel=debug");
         assertEquals(1, cli.checkSetup().size());
-    }
-
-    @Test
-    public void printHelp() throws Exception {
-        final int MAXIMUM_LENGTH = 80;
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Main cli = new Main();
-        cli.printHelp(new PrintStream(stream));
-
-        BufferedReader reader = new BufferedReader(new StringReader(new String(stream.toByteArray())));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.length() > MAXIMUM_LENGTH) {
-                fail("'" + line + String.format("' is longer than %d chars", MAXIMUM_LENGTH));
-            }
-        }
     }
 
     @Test

@@ -3,7 +3,7 @@ package liquibase.database.core;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,7 +37,7 @@ public class CockroachDatabase extends PostgresDatabase {
                 if (stmt != null) {
                     try (ResultSet rs = stmt.executeQuery("select version()")) {
                         if (rs.next()) {
-                            return ((String) JdbcUtils.getResultSetValue(rs, 1)).startsWith("CockroachDB");
+                            return ((String) JdbcUtil.getResultSetValue(rs, 1)).startsWith("CockroachDB");
                         }
                     }
                 }

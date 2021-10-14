@@ -34,8 +34,6 @@ import liquibase.ui.ConsoleUIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.xml.XMLResourceBundle;
-import liquibase.util.xml.XmlResourceBundleControl;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -72,8 +70,6 @@ public class Main {
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
     private static final Logger LOG = Scope.getCurrentScope().getLog(Main.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    private static XMLResourceBundle commandLineHelpBundle = ((XMLResourceBundle) getBundle
-            ("liquibase/i18n/liquibase-commandline-helptext", new XmlResourceBundleControl()));
 
     protected ClassLoader classLoader;
     protected String driver;
@@ -1165,7 +1161,7 @@ public class Main {
     protected void printHelp(PrintStream stream) {
         this.logLevel = Level.WARNING.toString();
 
-        String helpText = commandLineHelpBundle.getString("commandline-helptext");
+        String helpText = "Help not available when running liquibase.integration.commandline.Main directly. Use liquibase.integration.commandline.LiquibaseCommandLine";
         stream.println(helpText);
     }
 
