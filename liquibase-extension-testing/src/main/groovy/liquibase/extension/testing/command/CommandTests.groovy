@@ -443,7 +443,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     }
                 } else if (expectedOutputCheck instanceof Pattern) {
                     String patternString = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern()))
-                    //expectedOutputCheck = Pattern.compile(patternString, Pattern.MULTILINE | Pattern.DOTALL)
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
                     assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
