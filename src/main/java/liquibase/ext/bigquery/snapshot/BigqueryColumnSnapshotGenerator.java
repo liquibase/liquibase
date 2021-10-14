@@ -1,19 +1,13 @@
 package liquibase.ext.bigquery.snapshot;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.ext.bigquery.database.BigqueryDatabase;
 import liquibase.snapshot.CachedRow;
-import liquibase.snapshot.SnapshotGenerator;
 import liquibase.snapshot.jvm.ColumnSnapshotGenerator;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
@@ -23,15 +17,22 @@ import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
+import java.sql.*;
+
+import static liquibase.ext.bigquery.database.BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
+
 /**
  * Implements the Bigquery-specific parts of column snapshotting.
  */
 public class BigqueryColumnSnapshotGenerator extends ColumnSnapshotGenerator {
 
+    public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+        return database instanceof BigqueryDatabase ? BIGQUERY_PRIORITY_DATABASE : super.getPriority(objectType, database);
+    }
 
     @Override
     protected Column readColumn(CachedRow columnMetadataResultSet, Relation table, Database database)
-        throws SQLException, DatabaseException {
+            throws SQLException, DatabaseException {
         String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
         String rawColumnName = (String) columnMetadataResultSet.get("COLUMN_NAME");
         String rawSchemaName = StringUtil.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
@@ -167,7 +168,7 @@ public class BigqueryColumnSnapshotGenerator extends ColumnSnapshotGenerator {
         // TODO Is uppercasing the potential function name always a good idea?
         // In theory, we could get a quoted function name (inprobable, but not impossible)
         if ((defaultValue != null) && (defaultValue instanceof DatabaseFunction) && ((DatabaseFunction) defaultValue)
-            .getValue().matches("\\w+")) {
+                .getValue().matches("\\w+")) {
             defaultValue = new DatabaseFunction(((DatabaseFunction) defaultValue).getValue().toUpperCase());
         }
         column.setDefaultValue(defaultValue);
