@@ -77,7 +77,7 @@
         <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
 
         <h2.version>1.4.200</h2.version>
-        <hsqldb.version>2.4.0</hsqldb.version>
+        <hsqldb.version>2.6.0</hsqldb.version>
         <postgresql.version>42.2.15</postgresql.version>
         <mssql.version>8.4.0.jre8</mssql.version>
         <mysql.version>8.0.21</mysql.version>
