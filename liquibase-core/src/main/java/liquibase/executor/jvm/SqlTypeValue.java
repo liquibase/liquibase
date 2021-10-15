@@ -1,6 +1,6 @@
 package liquibase.executor.jvm;
 
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 
 import java.sql.PreparedStatement;
 
@@ -27,7 +27,7 @@ interface SqlTypeValue {
      *
      * @see java.sql.Types
      */
-    int TYPE_UNKNOWN = JdbcUtils.TYPE_UNKNOWN;
+    int TYPE_UNKNOWN = JdbcUtil.TYPE_UNKNOWN;
 
 
     /**

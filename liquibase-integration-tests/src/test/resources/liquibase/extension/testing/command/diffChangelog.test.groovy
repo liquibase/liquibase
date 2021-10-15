@@ -35,6 +35,8 @@ Optional Args:
     Default: null
   includeObjects (String) Objects to include in diff
     Default: null
+  includeTablespace (String) Include the tablespace attribute in the changelog
+    Default: null
   password (String) The target database password
     Default: null
     OBFUSCATED

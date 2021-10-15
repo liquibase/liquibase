@@ -239,9 +239,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             if (database instanceof MSSQLDatabase) {
                 statement = statement.replaceAll("\\n", "\r\n");
             }
-            if (database instanceof PostgresDatabase) {
-                statement = statement.replaceAll("(^|[^\\?])\\?(?!\\?)(?=([^']*'[^']*')*[^']*$)", "$1??");
-            }
 
             String escapedStatement = statement;
             try {

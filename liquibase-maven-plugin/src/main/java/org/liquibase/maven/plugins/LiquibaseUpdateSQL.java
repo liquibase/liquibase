@@ -37,14 +37,6 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 	private Writer outputWriter;
 
 	@Override
-	protected boolean isPromptOnNonLocalDatabase() {
-		// Always run on an non-local database as we are not actually modifying
-		// the database
-		// when run on it.
-		return false;
-	}
-
-	@Override
 	protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
 		if (changesToApply > 0) {
 			liquibase.update(changesToApply, new Contexts(contexts), new LabelExpression(labels), outputWriter);

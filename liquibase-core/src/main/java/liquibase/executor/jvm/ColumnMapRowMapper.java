@@ -1,6 +1,6 @@
 package liquibase.executor.jvm;
 
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -69,7 +69,7 @@ public class ColumnMapRowMapper implements RowMapper {
      * @return the Object returned
      */
     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
-        return JdbcUtils.getResultSetValue(rs, index);
+        return JdbcUtil.getResultSetValue(rs, index);
     }
 
 }

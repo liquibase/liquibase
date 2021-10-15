@@ -23,6 +23,7 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     private String shortDescription = null;
     private boolean internal;
     private boolean hidden;
+    private String footer;
 
     private Map<String, String> groupLongDescription = new HashMap<>();
     private Map<String, String> groupShortDescription = new HashMap<>();
@@ -164,6 +165,10 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     public void setLongDescription(String longDescription) {
         this.longDescription = longDescription;
     }
+
+    public String getHelpFooter() { return footer; }
+
+    public void setHelpFooter(String footer) { this.footer = footer; }
 
     void add(CommandStep step) {
         this.pipeline.add(step);
