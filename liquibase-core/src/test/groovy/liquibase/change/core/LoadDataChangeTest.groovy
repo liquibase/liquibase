@@ -489,38 +489,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         "TABLE_NAME" == ((ExecutablePreparedStatementBase) sqlStatements[1]).getTableName()
 
     }
-    def "DB NO Batch Update Support usePrepared True produces InsertSetStatement"() throws Exception {
-        when:
-        LoadDataChange loadDataChange = new LoadDataChange();
-        loadDataChange.setSchemaName("SCHEMA_NAME");
-        loadDataChange.setTableName("TABLE_NAME");
-        loadDataChange.setUsePreparedStatements(Boolean.TRUE);
-        loadDataChange.setFile("liquibase/change/core/sample.data1.csv");
 
-        SqlStatement[] sqlStatement = loadDataChange.generateStatements(new MSSQLDatabase());
-
-        then:
-        sqlStatement.length == 1
-        assert sqlStatement[0] instanceof InsertSetStatement
-
-        when:
-        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
-
-        then:
-        sqlStatements.length == 2
-        assert sqlStatements[0] instanceof InsertStatement
-        assert sqlStatements[1] instanceof InsertStatement
-
-        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
-        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
-        "Bob Johnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("name")
-        "bjohnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("username")
-
-        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
-        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
-        "John Doe" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
-        "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
-    }
     def "DB Batch Update Support usePrepared False produces InsertSetStatement"() throws Exception {
         when:
         LoadDataChange loadDataChange = new LoadDataChange();
@@ -694,39 +663,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         columnValue(sqlStatements[2], Col.bool) == Boolean.TRUE
     }
 
-    def "string with space + DB def"() {
-        when:
-        Table table = newTable("t");
-        Cols2.values().each {
-            addColumns(table, new ColDef(it, "varchar(123)"))
-        }
-        LoadDataChange change = new LoadDataChange()
-
-        change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
-                file     : "liquibase/change/core/strings.csv",
-                tableName: table.name, quotchar: "'"]), new ClassLoaderResourceAccessor())
-
-        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
-
-        SqlStatement[] sqlStatements = change.generateStatements(mockDB);
-
-        then:
-        columnValue(sqlStatements[i], Cols2.regular) == regular
-        columnValue(sqlStatements[i], Cols2.space_left) == left
-        columnValue(sqlStatements[i], Cols2.space_right) == right
-        columnValue(sqlStatements[i], Cols2.space_both) == both
-        columnValue(sqlStatements[i], Cols2.empty) == ""
-
-        where:
-        i | regular | left    | right   | both
-        0 | "NULL"  | ""      | " "     | ""
-        1 | "NULL"  | " null" | "null " | " null "   // NULL variants
-        2 | ""      | " '"    | "' "    | " ' "      // quoted empty string
-        3 | " "     | " ' "   | " ' "   | " ' ' "    // quoted space
-        4 | "a"     | " a"    | "a "    | " a "      // a
-        5 | "a"     | " 'a"   | "a' "   | " 'a' "    // quoted a
-    }
-
     def "inconsistent NULL handling"() {
         when:
         LoadDataChange change = new LoadDataChange()
@@ -782,7 +718,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
                 file     : "liquibase/change/core/sample.data1.csv",
                 tableName: ""
         ]).setValue([
-                [column: [name: "a", header:"", index:1, type: "STRING"]],
+                [column: [name: "a", header:"", index:1, type: "STRING", defaultValue: ""]],
                 [column: [name: "", type: ""]],
                 [column: []]
         ]), new ClassLoaderResourceAccessor())

@@ -18,9 +18,8 @@ import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
-import liquibase.util.file.FilenameUtils;
+import liquibase.util.FilenameUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -475,6 +474,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                 break;
             }
+            default:
+                // we want to exclude child nodes that are not changesets or the other things
+                // and avoid failing when encountering "child" nodes of the databaseChangeLog which are just
+                // XML node attributes (like schemaLocation). If you don't understand, remove the if and run the tests
+                // and look at the error output or review the "node" object here with a debugger.
+                if (node.getChildren() != null && !node.getChildren().isEmpty()) {
+                    throw new ParsedNodeException("Unexpected node found under databaseChangeLog: " + nodeName);
+                }
         }
     }
 
@@ -505,7 +512,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
             pathName = pathName.replace('\\', '/');
 
-            if (!(pathName.endsWith("/"))) {
+            if (StringUtil.isNotEmpty(pathName) && !(pathName.endsWith("/"))) {
                 pathName = pathName + '/';
             }
             LOG.fine("includeAll for " + pathName);
@@ -562,13 +569,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         String relativeBaseFileName = this.getPhysicalFilePath();
         if (isRelativePath) {
-            // workaround for FilenameUtils.normalize() returning null for relative paths like ../conf/liquibase.xml
-            String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeBaseFileName), fileName);
-            if (tempFile != null && new File(tempFile).exists() == true) {
-                fileName = tempFile;
-            } else {
-                fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;
-            }
+            fileName =  FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
         }
 
         fileName = fileName.replaceFirst("classpath:", "");

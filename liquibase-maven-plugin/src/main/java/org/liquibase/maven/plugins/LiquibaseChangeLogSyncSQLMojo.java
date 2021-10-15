@@ -18,6 +18,7 @@ import java.io.Writer;
  * @author JAmes Atwill
  * @goal changelogSyncSQL
  */
+@SuppressWarnings("java:S2095")
 public class LiquibaseChangeLogSyncSQLMojo extends
 		AbstractLiquibaseChangeLogMojo {
 
@@ -57,14 +58,6 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 	}
 
 	@Override
-	protected boolean isPromptOnNonLocalDatabase() {
-		// Always run on an non-local database as we are not actually modifying
-		// the database
-		// when run on it.
-		return false;
-	}
-
-	@Override
 	protected Liquibase createLiquibase(Database db)
 			throws MojoExecutionException {
 		Liquibase liquibase = super.createLiquibase(db);
@@ -81,7 +74,7 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 									+ migrationSqlOutputFile.getAbsolutePath());
 				}
 			}
-			outputWriter = getOutputWriter(migrationSqlOutputFile);;
+			outputWriter = getOutputWriter(migrationSqlOutputFile);
 		} catch (IOException e) {
 			getLog().error(e);
 			throw new MojoExecutionException(

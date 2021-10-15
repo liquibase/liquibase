@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -65,6 +66,13 @@ public class BigIntType extends LiquibaseDataType {
                 }
                 if (majorVersion < 10) {
                     return new DatabaseDataType("BIGSERIAL");
+                } else {
+                    if (GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue() || this.getRawDefinition() == null) {
+                        return new DatabaseDataType("BIGINT");
+                    } else {
+                        return new DatabaseDataType(this.getRawDefinition());
+                    }
+
                 }
             }
         }
