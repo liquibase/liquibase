@@ -254,7 +254,7 @@ public class CommandLineUtils {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-        myVersion = LiquibaseUtil.getBuildVersion();
+        myVersion = LiquibaseUtil.getBuildVersionInfo();
         buildTimeString = LiquibaseUtil.getBuildTime();
 
         StringBuilder banner = new StringBuilder();
