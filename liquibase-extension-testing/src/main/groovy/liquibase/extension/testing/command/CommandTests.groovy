@@ -8,6 +8,7 @@ import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.command.CommandArgumentDefinition
 import liquibase.command.CommandFactory
+import liquibase.command.CommandFailedException
 import liquibase.command.CommandResults
 import liquibase.command.CommandScope
 import liquibase.command.core.InternalSnapshotCommandStep
@@ -262,7 +263,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
 
-        boolean exceptionThrown = false
+        Exception savedException = null
         def results = Scope.child([
                 (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name)               : MockHubService,
@@ -278,7 +279,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 return returnValue
             }
             catch (Exception e) {
-                exceptionThrown = true
+                savedException = e
                 if (testDef.expectedException == null) {
                     throw e
                 } else {
@@ -290,6 +291,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 }
             }
         } as Scope.ScopedRunnerWithReturn<CommandResults>)
+
+        if (savedException != null && savedException.getCause() != null && savedException.getCause() instanceof CommandFailedException) {
+            CommandFailedException cfe = (CommandFailedException) savedException.getCause()
+            results = cfe.getResults()
+        }
 
         //
         // Check to see if there was supposed to be an exception
@@ -319,10 +325,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
         if (testDef.expectFileToExist != null) {
-            assert testDef.expectFileToExist.exists(): "File '${testDef.expectFileToExist.getName()}' should exist"
+            assert testDef.expectFileToExist.exists(): "File '${testDef.expectFileToExist.getAbsolutePath()}' should exist"
         }
         if (testDef.expectFileToNotExist != null) {
-            assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getName()}' should not exist"
+            assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getAbsolutePath()}' should not exist"
         }
 
         where:
