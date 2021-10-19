@@ -198,7 +198,7 @@
                     <xsd:element name="includeAll" minOccurs="0" maxOccurs="unbounded">
                         <xsd:complexType>
                             <xsd:attribute name="path" type="xsd:string" use="required"/>
-                            <xsd:attribute name="errorIfMissingOrEmpty" type="booleanExp" default="false"/>
+                            <xsd:attribute name="errorIfMissingOrEmpty" type="booleanExp" default="true"/>
                             <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
                             <xsd:attribute name="resourceComparator" type="xsd:string"/>
                             <xsd:attribute name="filter" type="xsd:string"/>
