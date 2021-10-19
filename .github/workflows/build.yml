@@ -209,6 +209,13 @@ jobs:
           name: liquibase-artifacts
           path: artifacts/*
 
+## convenience zip for faster download
+      - name: Archive Zip
+        uses: actions/upload-artifact@v2
+        with:
+          name: liquibase-0-SNAPSHOT
+          path: liquibase-dist/target/liquibase-0-SNAPSHOT/*
+
   finish:
     name: Finish Build
     runs-on: ubuntu-latest
