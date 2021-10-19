@@ -6,5 +6,5 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public interface XmlWriter {
-    public void write(Document doc, OutputStream outputStream) throws IOException;
+    void write(Document doc, OutputStream outputStream) throws IOException;
 }

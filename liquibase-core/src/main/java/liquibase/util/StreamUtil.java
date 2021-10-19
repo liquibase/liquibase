@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Utilities for working with streams.
  */
-public class StreamUtil {
+public abstract class StreamUtil {
 
     public static String getLineSeparator() {
         return GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getCurrentValue();

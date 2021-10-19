@@ -9,7 +9,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
-import liquibase.util.BooleanUtils;
+import liquibase.util.BooleanUtil;
 
 import java.util.Locale;
 import java.util.Set;
@@ -31,10 +31,10 @@ public class ColumnComparator implements DatabaseObjectComparator {
         if (column.getRelation() != null) {
             hash += ":" + column.getRelation().getName();
         }
-        if (BooleanUtils.isTrue(column.getComputed())) {
+        if (BooleanUtil.isTrue(column.getComputed())) {
             hash += ":computed";
         }
-        if (BooleanUtils.isTrue(column.getDescending())) {
+        if (BooleanUtil.isTrue(column.getDescending())) {
             hash += ":descending";
         }
         return new String[] {hash.toLowerCase(Locale.US)};
@@ -58,11 +58,11 @@ public class ColumnComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        if (BooleanUtils.isTrue(thisColumn.getComputed()) != BooleanUtils.isTrue(otherColumn.getComputed())) {
+        if (BooleanUtil.isTrue(thisColumn.getComputed()) != BooleanUtil.isTrue(otherColumn.getComputed())) {
             return false;
         }
 
-        if (BooleanUtils.isTrue(thisColumn.getDescending()) != BooleanUtils.isTrue(otherColumn.getDescending())) {
+        if (BooleanUtil.isTrue(thisColumn.getDescending()) != BooleanUtil.isTrue(otherColumn.getDescending())) {
             return false;
         }
 
