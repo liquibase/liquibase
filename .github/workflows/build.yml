@@ -139,7 +139,7 @@ jobs:
             ./**/target/surefire-reports
 
   package:
-    name: Build Artifacts
+    name: Package Artifacts
     runs-on: ubuntu-latest
     needs: [ setup, build ]
     steps:
