@@ -81,7 +81,9 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: 'adopt'
       - name: Build & Test
-        run: mvn -B -Dbuild.branch=${{ github.event.pull_request.head.ref }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ github.event.pull_request.head.sha }} -pl '!liquibase-dist' clean test package
+        run: |
+          mvn -B -Dbuild.branch=${{ github.event.pull_request.head.ref }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ github.event.pull_request.head.sha }} -pl '!liquibase-dist' clean test package
+          find . -name original-*.jar -exec rm {} \;
       - name: Archive Test Results
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
@@ -96,7 +98,6 @@ jobs:
           name: liquibase-modules
           path: |
             */target/*-0-SNAPSHOT.jar
-            !*/target/original-*.jar
 
   integration-test:
     name: Integration Test
@@ -188,6 +189,8 @@ jobs:
         run: |
           mvn -B -pl liquibase-dist -P liquibase-pro package
           (cd liquibase-dist && src/main/package/package-install4j.sh 0-SNAPSHOT)
+
+          find . -name original-*.jar -exec rm {} \;
 
           mkdir -p artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz* artifacts
