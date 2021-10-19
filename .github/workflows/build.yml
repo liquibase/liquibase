@@ -188,6 +188,8 @@ jobs:
           mvn -B -pl liquibase-dist -P liquibase-pro package
           (cd liquibase-dist && src/main/package/package-install4j.sh 0-SNAPSHOT)
 
+          find . -name original-*.jar -exec rm {} \;
+
           mkdir -p artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz* artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip* artifacts
