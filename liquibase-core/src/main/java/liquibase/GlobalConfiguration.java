@@ -29,6 +29,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
     public static final ConfigurationDefinition<Boolean> FILTER_LOG_MESSAGES;
     public static final ConfigurationDefinition<Boolean> HEADLESS;
+    public static final ConfigurationDefinition<Boolean> GIT_BASH;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -135,9 +136,15 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         HEADLESS = builder.define("headless", Boolean.class)
-                .setDescription("Force liquibase think it has no access to a keyboard?")
+                .setDescription("Force liquibase to think it has no access to a keyboard")
                 .setDefaultValue(false)
                 .setCommonlyUsed(true)
                 .build();
+
+        GIT_BASH = builder.define("gitBash", Boolean.class)
+            .setDescription("Force liquibase to read user input without using the system console")
+            .setDefaultValue(false)
+            .setCommonlyUsed(false)
+            .build();
     }
 }

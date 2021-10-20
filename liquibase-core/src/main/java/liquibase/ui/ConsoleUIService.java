@@ -1,15 +1,14 @@
 package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
-import liquibase.Scope;
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 
-import java.io.Console;
-import java.io.PrintStream;
+import java.io.*;
 
 /**
  * {@link UIService} implementation that sends messages to stdout and stderr.
@@ -124,6 +123,8 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
      */
     protected ConsoleWrapper getConsole() {
         if (console == null) {
+            final ConfiguredValue<Boolean> gitBashValue = GlobalConfiguration.GIT_BASH.getCurrentConfiguredValue();
+            boolean gitBashConfigValue = gitBashValue.getValue();
             final ConfiguredValue<Boolean> headlessValue = GlobalConfiguration.HEADLESS.getCurrentConfiguredValue();
             boolean headlessConfigValue = headlessValue.getValue();
             boolean wasHeadlessOverridden = !headlessValue.wasDefaultValueUsed();
@@ -132,11 +133,11 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
 
             if (headlessConfigValue) {
                 log.fine("Not prompting for user input because liquibase.headless=true. Set to 'false' in liquibase.properties to change this behavior.");
-                console = new ConsoleWrapper(null);
+                console = new ConsoleWrapper(null, false);
             } else {
                 final Console systemConsole = System.console();
 
-                this.console = new ConsoleWrapper(systemConsole);
+                this.console = new ConsoleWrapper(systemConsole, gitBashConfigValue);
 
                 if (systemConsole == null) {
                     log.fine("No system console detected for user input");
@@ -193,15 +194,27 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
      */
     public static class ConsoleWrapper {
 
-        private final Console console;
+        private Console console;
+        private final boolean gitBashConfigValue;
 
-        public ConsoleWrapper(Console console) {
+        public ConsoleWrapper(Console console, boolean gitBashConfigValue) {
             this.console = console;
+            this.gitBashConfigValue = gitBashConfigValue;
         }
 
         public String readLine() {
             if (console == null) {
-                return "";
+                if (! gitBashConfigValue) {
+                    return "";
+                }
+                try {
+                    return new BufferedReader(new InputStreamReader(System.in)).readLine();
+                } catch (IOException ioe) {
+                    //
+                    // Throw an exception if we can't read
+                    //
+                    throw new RuntimeException("Unable to read from the system input stream");
+                }
             }
             return console.readLine();
         }
