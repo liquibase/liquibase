@@ -16,7 +16,7 @@ import java.io.InputStream;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
-    public static final String LIQUIBASE_SCHEMA_VERSION = "4.5";
+    public static final String LIQUIBASE_SCHEMA_VERSION = "4.1";
     private SAXParserFactory saxParserFactory;
 
     private final LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
