@@ -211,7 +211,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
                     return "";
                 }
                 try {
-                    return readLineWrapper();
+                    return new BufferedReader(new InputStreamReader(System.in)).readLine();
                 } catch (IOException ioe) {
                     //
                     // Throw an exception if we can't read
@@ -220,27 +220,6 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
                 }
             }
             return console.readLine();
-        }
-
-        private String readLineWrapper() throws IOException {
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            Deque<Character> queue = new LinkedList<Character>();
-            String line = br.readLine();
-            for (int i = 0; i < line.length(); i++) {
-                char c = line.charAt(i);
-                System.out.println(c);
-                if (c == '<' || c == '~') {
-                    queue.removeLast();
-                }
-                else {
-                    queue.add(c);
-                }
-            }
-            StringBuilder returnString = new StringBuilder();
-            for (Character character : queue) {
-                returnString.append(character);
-            }
-            return returnString.toString();
         }
 
         public boolean supportsInput() {
