@@ -243,7 +243,7 @@ public class LiquibaseCommandLine {
                 System.err.println("Error parsing command line: " + bestMessage);
                 printUsage = true;
             } else {
-                System.err.println("Unexpected error running Liquibase: " + bestMessage);
+                System.err.println("\nUnexpected error running Liquibase: " + bestMessage);
                 System.err.println();
 
                 if (Level.OFF.equals(this.configuredLogLevel)) {
