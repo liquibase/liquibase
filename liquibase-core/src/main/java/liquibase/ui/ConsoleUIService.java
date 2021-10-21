@@ -194,7 +194,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
      */
     public static class ConsoleWrapper {
 
-        private Console console;
+        private final Console console;
         private final boolean gitBashConfigValue;
 
         public ConsoleWrapper(Console console, boolean gitBashConfigValue) {
@@ -213,14 +213,14 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
                     //
                     // Throw an exception if we can't read
                     //
-                    throw new RuntimeException("Unable to read from the system input stream");
+                    throw new RuntimeException("Unable to read from the system input stream", ioe);
                 }
             }
             return console.readLine();
         }
 
         public boolean supportsInput() {
-            return console != null;
+            return console != null || gitBashConfigValue;
         }
     }
 }
