@@ -23,6 +23,8 @@ public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<String> INCLUDE_TABLESPACE_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
+    public static final CommandArgumentDefinition<Boolean> INCLUDE_SCHEMA_ARG;
+    public static final CommandArgumentDefinition<Boolean> INCLUDE_CATALOG_ARG;
     public static final CommandArgumentDefinition<String> DIFF_TYPES_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
@@ -66,6 +68,12 @@ public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
             .description("Include the tablespace attribute in the changelog").build();
         SCHEMAS_ARG = builder.argument("schemas", String.class)
                 .description("Schemas to include in diff").build();
+        INCLUDE_SCHEMA_ARG = builder.argument("includeSchema", Boolean.class)
+                .defaultValue(false)
+                .description("If true, the schema will be included in generated changeSets").build();
+        INCLUDE_CATALOG_ARG = builder.argument("includeCatalog", Boolean.class)
+                .defaultValue(false)
+                .description("If true, the catalog will be included in generated changeSets").build();
         DIFF_TYPES_ARG = builder.argument("diffTypes", String.class)
                 .description("Types of objects to compare").build();
     }
