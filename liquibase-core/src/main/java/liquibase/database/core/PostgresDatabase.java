@@ -15,7 +15,7 @@ import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
@@ -195,7 +195,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             } catch (SQLException | DatabaseException e) {
                 LOG.info("Cannot check pg_settings", e);
             } finally {
-                JdbcUtils.close(resultSet, statement);
+                JdbcUtil.close(resultSet, statement);
             }
         }
 
@@ -413,12 +413,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         }
 
         throw new DatabaseException("Connection set to Postgres type we don't support !");
-    }
-
-    @Override
-    public void rollback() throws DatabaseException {
-        super.rollback();
-        DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
     }
 
     /**

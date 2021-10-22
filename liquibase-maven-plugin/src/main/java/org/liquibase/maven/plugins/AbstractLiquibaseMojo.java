@@ -1,20 +1,19 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.CommandLineUtils;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
-import liquibase.util.ui.UIFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -24,6 +23,7 @@ import org.apache.maven.plugin.descriptor.Parameter;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.liquibase.maven.property.PropertyElement;
 
 import javax.xml.bind.annotation.XmlSchema;
 import java.io.*;
@@ -44,6 +44,7 @@ import java.util.*;
  * that it would had if it was ran inside test phase
  * @requiresDependencyResolution test
  */
+@SuppressWarnings("java:S2583")
 public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     /**
@@ -56,6 +57,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.driver"
      */
+    @PropertyElement
     protected String driver;
 
     /**
@@ -63,6 +65,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.url"
      */
+    @PropertyElement
     protected String url;
 
     /**
@@ -78,12 +81,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.username"
      */
+    @PropertyElement
     protected String username;
     /**
      * Specifies the database password for database connection.
      *
      * @parameter property="liquibase.password"
      */
+    @PropertyElement
     protected String password;
 
     /**
@@ -93,18 +98,21 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter property="liquibase.emptyPassword" default-value="false"
      * @deprecated Use an empty or null value for the password instead.
      */
+    @PropertyElement
     protected boolean emptyPassword;
     /**
      * Specifies whether to ignore the schema name.
      *
      * @parameter property="liquibase.outputDefaultSchema" default-value="false"
      */
+    @PropertyElement
     protected boolean outputDefaultSchema;
     /**
      * Specifies whether to ignore the catalog/database name.
      *
      * @parameter property="liquibase.outputDefaultCatalog" default-value="false"
      */
+    @PropertyElement
     protected boolean outputDefaultCatalog;
 
     /**
@@ -112,6 +120,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.defaultCatalogName"
      */
+    @PropertyElement
     protected String defaultCatalogName;
 
     /**
@@ -119,6 +128,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.defaultSchemaName"
      */
+    @PropertyElement
     protected String defaultSchemaName;
 
     /**
@@ -126,6 +136,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.databaseClass"
      */
+    @PropertyElement
     protected String databaseClass;
 
     /**
@@ -133,12 +144,16 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.propertyProviderClass"
      */
+    @PropertyElement
     protected String propertyProviderClass;
+
     /**
-     * Controls whether users are prompted before executing changeSet to a non-local database.
+     * (DEPRECATED) Controls whether users are prompted before executing changeSet to a non-local database.
      *
-     * @parameter property="liquibase.promptOnNonLocalDatabase" default-value="true"
+     * @parameter property="liquibase.promptOnNonLocalDatabase" default-value="false"
+     * @deprecated No longer prompts
      */
+    @PropertyElement
     protected boolean promptOnNonLocalDatabase;
 
     /**
@@ -146,12 +161,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.includeArtifact" default-value="true"
      */
+    @PropertyElement
     protected boolean includeArtifact;
     /**
      * Includes the Maven test output directory in the class loader which obtains the liquibase.properties and changelog files.
      *
      * @parameter property="liquibase.includeTestOutputDirectory" default-value="true"
      */
+    @PropertyElement
     protected boolean includeTestOutputDirectory;
 
     /**
@@ -159,6 +176,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.verbose" default-value="false"
      */
+    @PropertyElement
     protected boolean verbose;
 
     /**
@@ -167,12 +185,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.logging" default-value="INFO"
      */
+    @PropertyElement
     protected String logging;
     /**
      * Specifies the <i>liquibase.properties</i> you want to use to configure Liquibase.
      *
      * @parameter property="liquibase.propertyFile"
      */
+    @PropertyElement
     protected String propertyFile;
     /**
      * A flag which indicates you want the <i>liquibase.properties</i> file to override any settings provided in the Maven plugin configuration.
@@ -181,6 +201,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.propertyFileWillOverride" default-value="false"
      */
+    @PropertyElement
     protected boolean propertyFileWillOverride;
 
     /**
@@ -188,12 +209,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.clearCheckSums" default-value="false"
      */
+    @PropertyElement
     protected boolean clearCheckSums;
     /**
      * Specifies a list of system properties you want to to pass to the database.
      *
      * @parameter
      */
+    @PropertyElement
     protected Properties systemProperties;
     /**
      * The Maven project that plugin is running under.
@@ -210,6 +233,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.skip" default-value="false"
      */
+    @PropertyElement
     protected boolean skip;
 
     /**
@@ -217,6 +241,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.outputFileEncoding"
      */
+    @PropertyElement
     protected String outputFileEncoding;
 
     /**
@@ -224,6 +249,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.changelogCatalogName"
      */
+    @PropertyElement
     protected String changelogCatalogName;
 
     /**
@@ -231,18 +257,21 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.changelogSchemaName"
      */
+    @PropertyElement
     protected String changelogSchemaName;
     /**
      * Specifies the table name to use for the DATABASECHANGELOG table.
      *
      * @parameter property="liquibase.databaseChangeLogTableName"
      */
+    @PropertyElement
     protected String databaseChangeLogTableName;
     /**
      * Specifies the table name to use for the DATABASECHANGELOGLOCK table.
      *
      * @parameter property="liquibase.databaseChangeLogLockTableName"
      */
+    @PropertyElement
     protected String databaseChangeLogLockTableName;
 
     /**
@@ -250,10 +279,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.server"
      */
+    @PropertyElement
     private String server;
     /**
      * The {@link Liquibase} object used modify the database.
      */
+    @PropertyElement
     private Liquibase liquibase;
 
     /**
@@ -284,6 +315,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter property="liquibase.liquibaseProLicenseKey"
      */
+    @PropertyElement
     protected String liquibaseProLicenseKey;
 
     protected String commandName;
@@ -434,11 +466,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         getLog().info("Executing on Database: " + url);
 
                         if (isPromptOnNonLocalDatabase()) {
-                            if (!liquibase.isSafeToRunUpdate()) {
-                                if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                                    throw new LiquibaseException("User decided not to run against non-local database");
-                                }
-                            }
+                            getLog().info("NOTE: The promptOnLocalDatabase functionality has been removed");
                         }
                         setupBindInfoPackage();
                         performLiquibaseTask(liquibase);
@@ -501,8 +529,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected abstract void performLiquibaseTask(Liquibase liquibase)
             throws LiquibaseException;
 
+    /**
+     * @deprecated no longer prompts
+     */
     protected boolean isPromptOnNonLocalDatabase() {
-        return promptOnNonLocalDatabase;
+        return false;
     }
 
     private void displayMojoSettings() {
@@ -639,7 +670,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         getLog().info(indent + "use empty password: " + emptyPassword);
         getLog().info(indent + "properties file: " + propertyFile);
         getLog().info(indent + "properties file will override? " + propertyFileWillOverride);
-        getLog().info(indent + "prompt on non-local database? " + promptOnNonLocalDatabase);
         getLog().info(indent + "clear checksums? " + clearCheckSums);
     }
 

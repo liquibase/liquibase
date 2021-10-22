@@ -20,7 +20,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.lang.reflect.Method;
@@ -35,7 +35,7 @@ import static java.util.ResourceBundle.getBundle;
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
-	private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
+	public static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
     public static final String PRODUCT_NAME = "oracle";
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -85,6 +85,17 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 Method method = con.getClass().getMethod("openProxySession", int.class, Properties.class);
                 method.setAccessible(true);
                 method.invoke(con, 1, props);
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
+                return;
+            }
+            try {
+                Method method = con.getClass().getMethod("isProxySession");
+                method.setAccessible(true);
+                boolean b = (boolean)method.invoke(con);
+                if (! b) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Proxy session not established on OracleDatabase: ");
+                }
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
             }
@@ -156,7 +167,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     //noinspection HardCodedStringLiteral
                     Scope.getCurrentScope().getLog(getClass()).info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
                 } finally {
-                    JdbcUtils.closeStatement(statement);
+                    JdbcUtil.closeStatement(statement);
                 }
 
 
@@ -533,11 +544,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         if ((databaseFunction != null) && "current_timestamp".equalsIgnoreCase(databaseFunction.toString())) {
             return databaseFunction.toString();
         }
-        if ((databaseFunction instanceof SequenceNextValueFunction) || (databaseFunction instanceof
-                SequenceCurrentValueFunction)) {
+        if ((databaseFunction instanceof SequenceNextValueFunction)
+                || (databaseFunction instanceof SequenceCurrentValueFunction)) {
             String quotedSeq = super.generateDatabaseFunctionValue(databaseFunction);
+
             // replace "myschema.my_seq".nextval with "myschema"."my_seq".nextval
-            return quotedSeq.replaceFirst("\"([^\\.\"]+)\\.([^\\.\"]+)\"", "\"$1\".\"$2\"");
+            return quotedSeq.replaceFirst("\"([^.\"]+)\\.([^.\"]+)\"", "\"$1\".\"$2\"");
 
         }
 
@@ -601,7 +613,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     this.canAccessDbaRecycleBin = false;
                 }
             } finally {
-                JdbcUtils.close(null, statement);
+                JdbcUtil.close(null, statement);
             }
         }
 

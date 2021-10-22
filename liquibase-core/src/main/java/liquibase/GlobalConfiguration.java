@@ -29,6 +29,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
     public static final ConfigurationDefinition<Boolean> FILTER_LOG_MESSAGES;
     public static final ConfigurationDefinition<Boolean> HEADLESS;
+    public static final ConfigurationDefinition<Boolean> STRICT;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -57,7 +58,9 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(10L)
                 .build();
 
-        LIQUIBASE_TABLESPACE_NAME = builder.define("tablespaceName", String.class)
+        LIQUIBASE_TABLESPACE_NAME = builder.define("liquibaseTablespaceName", String.class)
+                .addAliasKey("liquibase.liquibaseTableSpaceName")
+                .addAliasKey("liquibase.databaseChangeLogTablespaceName")
                 .setDescription("Tablespace to use for Liquibase objects")
                 .build();
 
@@ -136,6 +139,10 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDescription("Force liquibase think it has no access to a keyboard?")
                 .setDefaultValue(false)
                 .setCommonlyUsed(true)
+                .build();
+        STRICT = builder.define("strict", Boolean.class)
+                .setDescription("Be stricter on allowed Liquibase configuration and setup?")
+                .setDefaultValue(true)
                 .build();
     }
 }

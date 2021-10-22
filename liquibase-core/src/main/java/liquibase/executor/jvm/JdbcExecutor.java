@@ -21,7 +21,7 @@ import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.CompoundStatement;
 import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.CallableStatement;
@@ -85,7 +85,7 @@ public class JdbcExecutor extends AbstractExecutor {
         catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
             stmt = null;
             String url;
             if (con.isClosed()) {
@@ -96,7 +96,7 @@ public class JdbcExecutor extends AbstractExecutor {
             throw new DatabaseException("Error executing SQL " + StringUtil.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ url)+": "+ex.getMessage(), ex);
         }
         finally {
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
         }
     }
 
@@ -121,12 +121,12 @@ public class JdbcExecutor extends AbstractExecutor {
         catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
             stmt = null;
             throw new DatabaseException("Error executing SQL " + StringUtil.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ con.getURL())+": "+ex.getMessage(), ex);
         }
         finally {
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
         }
     }
 
@@ -179,7 +179,7 @@ public class JdbcExecutor extends AbstractExecutor {
     public Object queryForObject(SqlStatement sql, RowMapper rowMapper, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         List results = query(sql, rowMapper, sqlVisitors);
         try {
-            return JdbcUtils.requiredSingleResult(results);
+            return JdbcUtil.requiredSingleResult(results);
         } catch (DatabaseException e) {
             throw new DatabaseException("Expected single row from " + sql + " but got "+results.size(), e);
         }
@@ -317,7 +317,7 @@ public class JdbcExecutor extends AbstractExecutor {
                         resultSet = call.executeQuery();
                         checkCallStatus(resultSet, ((CallableSql) sql).getExpectedStatus());
                     } finally {
-                        JdbcUtils.close(resultSet, call);
+                        JdbcUtil.close(resultSet, call);
                     }
                 } else {
                     Statement stmt = null;
@@ -326,7 +326,7 @@ public class JdbcExecutor extends AbstractExecutor {
                         stmt.execute(sql.toSql());
                         con.commit();
                     } finally {
-                        JdbcUtils.closeStatement(stmt);
+                        JdbcUtil.closeStatement(stmt);
                     }
                 }
             } catch (Exception e) {
@@ -468,7 +468,7 @@ public class JdbcExecutor extends AbstractExecutor {
             }
             finally {
                 if (rs != null) {
-                        JdbcUtils.closeResultSet(rs);
+                        JdbcUtil.closeResultSet(rs);
                 }
             }
         }
@@ -499,7 +499,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 return rse.extractData(rs);
             }
             finally {
-                JdbcUtils.closeResultSet(rs);
+                JdbcUtil.closeResultSet(rs);
             }
         }
 

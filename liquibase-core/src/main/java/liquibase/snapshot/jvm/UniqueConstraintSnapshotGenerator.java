@@ -163,7 +163,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             snapshot.setScratchData(queryCountKey, columnQueryCount + 1);
 
             if ((database instanceof MySQLDatabase) || (database instanceof HsqlDatabase)) {
-                sql = "select const.CONSTRAINT_NAME, COLUMN_NAME, const.constraint_schema as CONSTRAINT_CONTAINER "
+                sql = "select const.CONSTRAINT_NAME, const.TABLE_NAME, COLUMN_NAME, const.constraint_schema as CONSTRAINT_CONTAINER "
                         + "from " + database.getSystemSchema() + ".table_constraints const "
                         + "join " + database.getSystemSchema() + ".key_column_usage col "
                         + "on const.constraint_schema=col.constraint_schema "
@@ -325,6 +325,14 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 //does not support bulkQuery,  supportsBulkQuery should return false()
 
                 sql = getUniqueConstraintsSqlInformix((InformixDatabase) database, schema, name);
+            } else if (database instanceof Db2zDatabase) {
+                sql = "select KC.TBCREATOR as CONSTRAINT_CONTAINER, KC.CONSTNAME as CONSTRAINT_NAME, KC.COLNAME as COLUMN_NAME from SYSIBM.SYSKEYCOLUSE KC, SYSIBM.SYSTABCONST TC "
+                        + "where KC.CONSTNAME = TC.CONSTNAME "
+                        + "and KC.TBCREATOR = TC.TBCREATOR "
+                        + "and TC.TYPE='U' "
+                        + (bulkQuery? "" : "and KC.CONSTNAME='" + database.correctObjectName(name, UniqueConstraint.class) + "' ")
+                        + "and TC.TBCREATOR = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
+                        + "order by KC.COLSEQ";
             } else {
                 // If we do not have a specific handler for the RDBMS, we assume that the database has an
                 // INFORMATION_SCHEMA we can use. This is a last-resort measure and might fail.
@@ -357,7 +365,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 columnCache = new HashMap<>();
                 snapshot.setScratchData(cacheKey, columnCache);
                 for (Map<String, ?> row : rows) {
-                    String key = row.get("CONSTRAINT_CONTAINER") + "_" + row.get("CONSTRAINT_NAME");
+                    String key = getCacheKey(row, database);
                     List<Map<String, ?>> constraintRows = columnCache.get(key);
                     if (constraintRows == null) {
                         constraintRows = new ArrayList<>();
@@ -371,7 +379,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 return rows;
             }
         } else {
-            String lookupKey = schema.getName() + "_" + example.getName();
+            String lookupKey = getCacheKey(example, database);
             List<Map<String, ?>> rows = columnCache.get(lookupKey);
             if (rows == null) {
                 rows = new ArrayList<>();
@@ -380,6 +388,45 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
 
+    }
+
+    /**
+     * Should the given database include the table name in the key?
+     * Databases that need to include the table names are ones where unique constraint names do not have to be unique
+     * within the schema.
+     *
+     * Currently only mysql is known to have non-unique constraint names.
+     *
+     * If this returns true, the database-specific query in {@link #listColumns(UniqueConstraint, Database, DatabaseSnapshot)} must include
+     * a TABLE_NAME column in the results for {@link #getCacheKey(Map, Database)} to use.
+     */
+    protected boolean includeTableNameInCacheKey(Database database) {
+        return database instanceof MySQLDatabase;
+    }
+
+
+    /**
+     * Return the cache key for the given UniqueConstraint. Must return the same result as {@link #getCacheKey(Map, Database)}.
+     * Default implementation uses {@link #includeTableNameInCacheKey(Database)} to determine if the table name should be included in the key or not.
+     */
+    protected String getCacheKey(UniqueConstraint example, Database database) {
+        if (includeTableNameInCacheKey(database)) {
+            return example.getSchema().getName() + "_" + example.getRelation() + "_" + example.getName();
+        } else {
+            return example.getSchema().getName() + "_" + example.getName();
+        }
+    }
+
+    /**
+     * Return the cache key for the given query row. Must return the same result as {@link #getCacheKey(UniqueConstraint, Database)}
+     * Default implementation uses {@link #includeTableNameInCacheKey(Database)} to determine if the table name should be included in the key or not.
+     */
+    protected String getCacheKey(Map<String, ?> row, Database database) {
+        if (includeTableNameInCacheKey(database)) {
+            return row.get("CONSTRAINT_CONTAINER") + "_" + row.get("TABLE_NAME") + "_" + row.get("CONSTRAINT_NAME");
+        } else {
+            return row.get("CONSTRAINT_CONTAINER") + "_" + row.get("CONSTRAINT_NAME");
+        }
     }
 
     /**

@@ -81,10 +81,10 @@ public class LockServiceFactory {
         return openLockServices.get(database);
     }
 
-    public synchronized void resetAll() {
+    public void resetAll() {
         for (LockService lockService : registry) {
             lockService.reset();
         }
-        instance = null;
+        reset();
     }
 }

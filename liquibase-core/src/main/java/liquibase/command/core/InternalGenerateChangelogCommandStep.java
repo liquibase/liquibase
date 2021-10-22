@@ -23,8 +23,9 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
 
     private static final String INFO_MESSAGE =
             "When generating formatted SQL changelogs, it is important to decide if batched statements\n" +
-                    "should be split (splitStatements:true is the default behavior) or not (splitStatements:false).\n" +
-                    "See http://liquibase.org for additional documentation.";
+            "should be split or not.  For storedlogic objects, the default behavior is 'splitStatements:false'\n." +
+            "All other objects default to 'splitStatements:true'.  See https://docs.liquibase.org for additional information.";
+
 
     public static final CommandArgumentDefinition<String> AUTHOR_ARG;
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;
