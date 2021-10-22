@@ -4,14 +4,10 @@ import liquibase.AbstractExtensibleObject;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.configuration.ConfiguredValue;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 
 import java.io.*;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 /**
  * {@link UIService} implementation that sends messages to stdout and stderr.
@@ -24,6 +20,9 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     private boolean allowPrompt = false;
 
     private ConsoleWrapper console;
+
+    public static final String TERM_PROGRAM = "TERM_PROGRAM";
+    public static final String MINTTY = "mintty";
 
     public ConsoleUIService() {
     }
@@ -126,8 +125,6 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
      */
     protected ConsoleWrapper getConsole() {
         if (console == null) {
-            final ConfiguredValue<Boolean> gitBashValue = GlobalConfiguration.GIT_BASH.getCurrentConfiguredValue();
-            boolean gitBashConfigValue = gitBashValue.getValue();
             final ConfiguredValue<Boolean> headlessValue = GlobalConfiguration.HEADLESS.getCurrentConfiguredValue();
             boolean headlessConfigValue = headlessValue.getValue();
             boolean wasHeadlessOverridden = !headlessValue.wasDefaultValueUsed();
@@ -138,14 +135,22 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
                 log.fine("Not prompting for user input because liquibase.headless=true. Set to 'false' in liquibase.properties to change this behavior.");
                 console = new ConsoleWrapper(null, false);
             } else {
+                //
+                // If no system console and headless was not overridden as headless=false
+                // then check the TERM_PROGRAM environment variable setting
+                // to detect whether we need to read from stdin
+                //
                 final Console systemConsole = System.console();
-
-                this.console = new ConsoleWrapper(systemConsole, gitBashConfigValue);
+                boolean useStdIn = wasHeadlessOverridden;
+                if (systemConsole == null && ! useStdIn) {
+                    useStdIn = (System.getenv(TERM_PROGRAM).equalsIgnoreCase(MINTTY));
+                }
+                this.console = new ConsoleWrapper(systemConsole, useStdIn);
 
                 if (systemConsole == null) {
                     log.fine("No system console detected for user input");
-                    if (wasHeadlessOverridden) {
-                        throw new UnexpectedLiquibaseException("liquibase.headless was set to false, but Liquibase was run in an environment with no system console");
+                    if (useStdIn) {
+                        log.fine("Input will be from stdin");
                     }
                 } else {
                     log.fine("A system console was detected for user input");
@@ -198,16 +203,16 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     public static class ConsoleWrapper {
 
         private final Console console;
-        private final boolean gitBashConfigValue;
+        private final boolean useStdin;
 
-        public ConsoleWrapper(Console console, boolean gitBashConfigValue) {
-            this.console = null;
-            this.gitBashConfigValue = gitBashConfigValue;
+        public ConsoleWrapper(Console console, boolean useStdInParam) {
+            this.console = console;
+            this.useStdin = useStdInParam;
         }
 
         public String readLine() {
             if (console == null) {
-                if (! gitBashConfigValue) {
+                if (! useStdin) {
                     return "";
                 }
                 try {
@@ -223,7 +228,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
         }
 
         public boolean supportsInput() {
-            return console != null || gitBashConfigValue;
+            return console != null || useStdin;
         }
     }
 }
