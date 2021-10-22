@@ -290,6 +290,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     return
                 }
             }
+            finally {
+                if (testDef.setup != null) {
+                    for (def setup : testDef.setup) {
+                        setup.cleanup()
+                    }
+                }
+            }
         } as Scope.ScopedRunnerWithReturn<CommandResults>)
 
         if (savedException != null && savedException.getCause() != null && savedException.getCause() instanceof CommandFailedException) {
@@ -300,10 +307,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         //
         // Check to see if there was supposed to be an exception
         //
-
         if (testDef.expectedResults.size() > 0 && (results == null || results.getResults().isEmpty())) {
             throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
         }
+
 
         then:
         checkOutput("Command Output", outputStream.toString(), testDef.expectedOutput)
@@ -436,7 +443,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     }
                 } else if (expectedOutputCheck instanceof Pattern) {
                     String patternString = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern()))
-                    //expectedOutputCheck = Pattern.compile(patternString, Pattern.MULTILINE | Pattern.DOTALL)
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
                     assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
