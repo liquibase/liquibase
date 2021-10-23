@@ -13,6 +13,7 @@ import liquibase.exception.DatabaseException;
 public class BigqueryDatabase extends AbstractJdbcDatabase {
 
   public static final String PRODUCT_NAME = "Google BigQuery";
+  public static final int BIGQUERY_PRIORITY_DATABASE = 510;
   private String liquibaseSchemaName;
 
   public BigqueryDatabase() {
