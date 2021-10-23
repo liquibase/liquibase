@@ -58,6 +58,19 @@ public class BigqueryConnection extends JdbcConnection {
     }
 
     @Override
+    public Connection getUnderlyingConnection() {
+        Connection con = super.getUnderlyingConnection();
+        try {
+            String url = con.getMetaData().getURL();
+            String location = getUrlParamValue(url, "Location", "US");
+            Scope.getCurrentScope().getLog(this.getClass()).fine(String.format("Returning connection, url %s  Location=%s", url, location));
+        } catch (SQLException e) {
+            //
+        }
+        return con;
+    }
+
+    @Override
     public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
         if (driverProperties.stringPropertyNames().contains("Location")) {
             this.location = driverProperties.getProperty("Location");
