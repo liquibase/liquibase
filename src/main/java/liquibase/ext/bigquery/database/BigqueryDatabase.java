@@ -5,10 +5,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -48,31 +45,6 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
     @Override
     public String getCurrentDateTimeFunction() {
         return "CURRENT_DATETIME()";
-    }
-
-    @Override
-    public boolean isLiquibaseObject(DatabaseObject object) {
-        if (object instanceof Table) {
-            Schema liquibaseSchema = new Schema(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName());
-            return DatabaseObjectComparatorFactory.getInstance()
-                    .isSameObject(
-                            object, (new Table())
-                                    .setName(this.getDatabaseChangeLogTableName())
-                                    .setSchema(liquibaseSchema),
-                            null, this
-                    ) || DatabaseObjectComparatorFactory.getInstance()
-                    .isSameObject(object,
-                            (new Table())
-                                    .setName(this.getDatabaseChangeLogLockTableName())
-                                    .setSchema(liquibaseSchema),
-                            null, this);
-        } else if (object instanceof Column) {
-            return this.isLiquibaseObject(((Column) object).getRelation());
-        } else if (object instanceof Index) {
-            return this.isLiquibaseObject(((Index) object).getRelation());
-        } else {
-            return object instanceof PrimaryKey && this.isLiquibaseObject(((PrimaryKey) object).getTable());
-        }
     }
 
     @Override
