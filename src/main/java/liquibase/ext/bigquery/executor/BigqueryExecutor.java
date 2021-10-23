@@ -1,8 +1,13 @@
 package liquibase.ext.bigquery.executor;
 
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.JdbcExecutor;
 import liquibase.ext.bigquery.database.BigqueryDatabase;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.statement.SqlStatement;
+
+import java.util.List;
 
 import static liquibase.ext.bigquery.database.BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
 
@@ -18,14 +23,13 @@ public class BigqueryExecutor extends JdbcExecutor {
         return database instanceof BigqueryDatabase;
     }
 
-//    @Override
-//    public void execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
-//        Scope.getCurrentScope().getLog(this.getClass()).info(String.format("Executing %s  sqlVisitors=%s", sql, sqlVisitors));
-//
-//        DatabaseConnection con = database.getConnection();
-//        Statement stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
-//
-//        super.execute(sql,sqlVisitors);
-//    }
+    @Override
+    public void execute(SqlStatement sql) throws DatabaseException {
+        super.execute(sql);
+    }
 
+    @Override
+    public void execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        super.execute(sql, sqlVisitors);
+    }
 }
