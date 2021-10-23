@@ -25,8 +25,11 @@ public class BigqueryConnection extends JdbcConnection {
     public BigqueryConnection() {
     }
 
-    public BigqueryConnection(Connection delegate) {
-        super(delegate);
+    public BigqueryConnection(Connection conn) throws SQLException {
+        super(conn);
+        String url = conn.getMetaData().getURL();
+        this.location = getUrlParamValue(url, "Location", "US");
+        Scope.getCurrentScope().getLog(this.getClass()).info(String.format("Setting connection to %s  Location=%s", url, location));
     }
 
     protected static List<NameValuePair> getUrlParams(String url) {
