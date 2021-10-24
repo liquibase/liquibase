@@ -1,6 +1,8 @@
 package liquibase.ext.bigquery.database;
 
+import com.simba.googlebigquery.googlebigquery.client.BQClient;
 import com.simba.googlebigquery.googlebigquery.core.BQConnection;
+import com.simba.googlebigquery.googlebigquery.core.BQConnectionOptions;
 import com.simba.googlebigquery.jdbc.jdbc42.S42Connection;
 import liquibase.Scope;
 import liquibase.database.jvm.JdbcConnection;
@@ -74,6 +76,16 @@ public class BigqueryConnection extends JdbcConnection {
     public String getUnderlyingBQConnectionLocation() {
         BQConnection bc = getUnderlyingBQConnection();
         return bc == null ? "" : bc.getSettings().m_location;
+    }
+
+    public BQClient getUnderlyingBQClient() {
+        BQConnection bc = getUnderlyingBQConnection();
+        return bc == null ? null : bc.getClient();
+    }
+
+    public BQConnectionOptions getUnderlyingBQConnectionOptions() {
+        BQConnection bc = getUnderlyingBQConnection();
+        return bc == null ? null : bc.getSettings();
     }
 
     @Override
