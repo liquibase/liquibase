@@ -72,6 +72,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected boolean dropFirst;
 	protected boolean clearCheckSums;
 	protected boolean shouldRun = true;
+	protected boolean replacePlaceholderWithEnv = true;
 	protected File rollbackFile;
 
 	protected boolean testRollbackOnUpdate = false;
@@ -99,6 +100,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	public void setShouldRun(boolean shouldRun) {
 		this.shouldRun = shouldRun;
 	}
+
+    public boolean isReplacePlaceholderWithEnv() {
+        return replacePlaceholderWithEnv;
+    }
+
+    public void setReplacePlaceholderWithEnv(boolean replacePlaceholderWithEnv) {
+        this.replacePlaceholderWithEnv = replacePlaceholderWithEnv;
+    }
 
 	@java.lang.SuppressWarnings("squid:S2095")
 	public String getDatabaseProductName() throws DatabaseException {
@@ -319,7 +328,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	@java.lang.SuppressWarnings("squid:S2095")
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
 		SpringResourceAccessor resourceAccessor = createResourceOpener();
-		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
+		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor), this.isReplacePlaceholderWithEnv());
 		if (parameters != null) {
 			for (Map.Entry<String, String> entry : parameters.entrySet()) {
 				liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());

@@ -97,7 +97,21 @@ public class Liquibase implements AutoCloseable {
      */
     public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn)
             throws LiquibaseException {
-        this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+        this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn), true);
+    }
+
+    /**
+     * Creates a Liquibase instance for a given DatabaseConnection.The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
+     *
+     * @see DatabaseConnection
+     * @see Database
+     * @see #Liquibase(String, liquibase.resource.ResourceAccessor, liquibase.database.Database)
+     * @see ResourceAccessor
+     * @throws liquibase.exception.LiquibaseException
+     */
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn, boolean replacePlaceholderWithEnv)
+            throws LiquibaseException {
+        this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn), replacePlaceholderWithEnv);
     }
 
     /**
@@ -110,17 +124,34 @@ public class Liquibase implements AutoCloseable {
      * @see ResourceAccessor
      */
     public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) {
+        this(changeLogFile, resourceAccessor, database, true);
+    }
+
+    /**
+     * Creates a Liquibase instance. The changeLogFile parameter must be a path that can be resolved by the passed
+     * ResourceAccessor. If windows style path separators are used for the changeLogFile, they will be standardized to
+     * unix style for better cross-system compatibility.
+     *
+     * @see DatabaseConnection
+     * @see Database
+     * @see ResourceAccessor
+     */
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database, boolean replacePlaceholderWithEnv) {
         if (changeLogFile != null) {
             // Convert to STANDARD / if using absolute path on windows:
             this.changeLogFile = changeLogFile.replace('\\', '/');
         }
 
         this.resourceAccessor = resourceAccessor;
-        this.changeLogParameters = new ChangeLogParameters(database);
+        this.changeLogParameters = new ChangeLogParameters(database, replacePlaceholderWithEnv);
         this.database = database;
     }
-
+    
     public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database) {
+        this(changeLog, resourceAccessor, database, true);
+    }
+
+    public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database, boolean replacePlaceholderWithEnv) {
         this.databaseChangeLog = changeLog;
 
         if (changeLog != null) {
@@ -132,7 +163,7 @@ public class Liquibase implements AutoCloseable {
         }
         this.resourceAccessor = resourceAccessor;
         this.database = database;
-        this.changeLogParameters = new ChangeLogParameters(database);
+        this.changeLogParameters = new ChangeLogParameters(database, replacePlaceholderWithEnv);
     }
 
     public UUID getHubConnectionId() {

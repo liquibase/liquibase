@@ -4,7 +4,6 @@ import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Labels;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
@@ -24,21 +23,26 @@ public class ChangeLogParameters {
     private LabelExpression currentLabelExpression;
 
     public ChangeLogParameters() {
-        this(null);
+        this(null, true);
+    }
+    
+    public ChangeLogParameters(Database database) {
+        this(database, true);
     }
 
-    public ChangeLogParameters(Database database) {
-    	LinkedHashMap<Object, Object> externalParameters = new LinkedHashMap<>();
-    	// First add environment variables
-    	externalParameters.putAll(System.getenv());
-    	
-    	// Next add system properties; they have higher precedence than / overwrite environment variables
-    	externalParameters.putAll((Properties) System.getProperties().clone());
-        
-    	for (Map.Entry entry : externalParameters.entrySet()) {
-            changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
-        }
+    public ChangeLogParameters(Database database, boolean replacePlaceholderWithEnv) {
+        if (replacePlaceholderWithEnv) {
+            LinkedHashMap<Object, Object> externalParameters = new LinkedHashMap<>();
+            // First add environment variables
+            externalParameters.putAll(System.getenv());
 
+            // Next add system properties; they have higher precedence than / overwrite environment variables
+            externalParameters.putAll((Properties) System.getProperties().clone());
+
+            for (Map.Entry entry : externalParameters.entrySet()) {
+                changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
+            }
+        }
         if (database != null) {
             this.set("database.autoIncrementClause", database.getAutoIncrementClause(null, null, null, null));
             this.set("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
