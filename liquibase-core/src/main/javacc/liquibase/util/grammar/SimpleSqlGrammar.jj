@@ -79,9 +79,7 @@ TOKEN:
 /*
 Built list from http://stackoverflow.com/a/37668315/45756
 */
-| < #UNICODE_LETTERS: ["\u00AA",
-    "\u00B5",
-    "\u00BA",
+| < #UNICODE_LETTERS: [
     "\u00C0"-"\u00D6",
     "\u00D8"-"\u00F6",
     "\u00F8"-"\u02C1",
@@ -507,13 +505,7 @@ TOKEN: /* symbols */
 /*
 Built list from http://stackoverflow.com/a/37668315/45756 list of punctuation
 */
-    "\u00A1",
-    "\u00A7",
-    "\u00AB",
-    "\u00B6",
-    "\u00B7",
-    "\u00BB",
-    "\u00BF",
+    "\u00A1"-"\u00BF",
     "\u037E",
     "\u0387",
     "\u055A"-"\u055F",
@@ -588,6 +580,7 @@ Built list from http://stackoverflow.com/a/37668315/45756 list of punctuation
     "\u207E",
     "\u208D",
     "\u208E",
+    "\u20A0"-"\u20BF", //Currency symbols https://www.Sutf8-chartable.de/unicode-utf8-table.pl
     "\u2308"-"\u230B",
     "\u2329",
     "\u232A",
