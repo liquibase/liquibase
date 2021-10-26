@@ -1007,4 +1007,31 @@ public class StringUtil {
         }
         return string.getBytes(StandardCharsets.UTF_8);
     }
+
+    /**
+     * <p>Splits a camel-case string into words based on the came casing.
+     * <p>
+     * This code originated from the StringUtils class of https://github.com/apache/commons-lang
+     * @param cs the arg to check if it is numeric
+     * @return true if convertible to numeric and false otherwise
+     */
+    public static boolean isNumeric(CharSequence cs) {
+        if (isEmpty(cs)) {
+            return false;
+        } else {
+            int sz = cs.length();
+
+            for(int i = 0; i < sz; ++i) {
+                if (!Character.isDigit(cs.charAt(i))) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    public static boolean isEmpty(CharSequence cs) {
+        return cs == null || cs.length() == 0;
+    }
 }
