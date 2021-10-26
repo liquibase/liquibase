@@ -909,7 +909,7 @@
             <xsd:attribute name="catalogName" type="xsd:string"/>
             <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string" use="required"/>
-            <xsd:attribute name="columnName" type="xsd:string" use="required"/>
+            <xsd:attribute name="columnName" type="xsd:string"/>
             <xsd:attribute name="columnDataType" type="xsd:string"/>
             <xsd:attribute name="constraintName" type="xsd:string"/>
         </xsd:complexType>

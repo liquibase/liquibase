@@ -39,7 +39,18 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("tableName", setNullableStatement.getTableName());
-        validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
+
+        if (setNullableStatement.isNullable()) {
+            if (database instanceof OracleDatabase) {
+                if (setNullableStatement.getConstraintName() == null && setNullableStatement.getColumnName() == null) {
+                    validationErrors.addError("Oracle requires either constraintName or columnName to be set");
+                }
+            } else {
+                validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
+            }
+        } else {
+            validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
+        }
 
         if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof InformixDatabase)) {
             validationErrors.checkRequiredField("columnDataType", setNullableStatement.getColumnDataType());
