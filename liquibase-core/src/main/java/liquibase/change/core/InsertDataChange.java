@@ -97,6 +97,12 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
             if (column.getValueClobFile() != null) {
                 needsPreparedStatement = true;
             }
+            if (LoadDataChange.LOAD_DATA_TYPE.BLOB.name().equalsIgnoreCase(column.getType())) {
+                needsPreparedStatement = true;
+            }
+            if (LoadDataChange.LOAD_DATA_TYPE.CLOB.name().equalsIgnoreCase(column.getType())) {
+                needsPreparedStatement = true;
+            }
 
             if (!needsPreparedStatement && (database instanceof InformixDatabase)) {
                 if (column.getValue() != null) {

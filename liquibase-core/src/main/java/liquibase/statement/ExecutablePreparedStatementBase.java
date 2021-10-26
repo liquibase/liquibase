@@ -5,6 +5,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
@@ -134,6 +135,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 stmt.setObject(i, col.getValue(), Types.OTHER);
             } else if (LoadDataChange.LOAD_DATA_TYPE.BLOB.name().equalsIgnoreCase(col.getType())) {
                 stmt.setBlob(i, new ByteArrayInputStream(Base64.getDecoder().decode(col.getValue())));
+            } else if (!(database instanceof PostgresDatabase) && LoadDataChange.LOAD_DATA_TYPE.CLOB.name().equalsIgnoreCase(col.getType())) {
+                // PostgreSQL's JDBC driver does not have the .createClob() call implemented yet
+                Clob clobValue = stmt.getConnection().createClob();
+                clobValue.setString(1, col.getValue());
+                stmt.setClob(i, clobValue);
             } else {
                 stmt.setString(i, col.getValue());
             }
