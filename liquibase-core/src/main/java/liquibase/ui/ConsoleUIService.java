@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.GlobalConfiguration;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.WrongSeverityInputFormatException;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 
@@ -104,7 +105,10 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
                     }
                 }
                 return inputHandler.parseInput(input, type);
-            } catch (IllegalArgumentException e) {
+            } catch (WrongSeverityInputFormatException e) {
+                this.sendMessage(e.getMessage());
+                this.sendMessage(prompt + ": ");
+            }  catch (IllegalArgumentException e) {
                 String message;
                 if (e.getCause() != null && e.getCause().getMessage() != null) {
                     message = "Invalid value: '" + input + "': " + e.getCause().getMessage();
