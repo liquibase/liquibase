@@ -33,7 +33,7 @@ public class BigqueryConnection extends JdbcConnection {
     public BigqueryConnection(Connection conn) throws SQLException {
         this.con = (S42Connection) conn;
         String url = conn.getMetaData().getURL();
-        Scope.getCurrentScope().getLog(this.getClass()).info(String.format("Setting connection to %s  Location=%s", url, getUnderlyingBQConnectionLocation()));
+        Scope.getCurrentScope().getLog(this.getClass()).fine(String.format("Setting connection to %s  Location=%s", url, getUnderlyingBQConnectionLocation()));
     }
 
     protected static List<NameValuePair> getUrlParams(String url) {
@@ -108,9 +108,8 @@ public class BigqueryConnection extends JdbcConnection {
             driverProperties.setProperty("Location", this.location);
         }
 
-        Scope.getCurrentScope().getLog(this.getClass()).info(String.format("Opening connection to %s  driverProperties=%s", url, driverProperties));
+        Scope.getCurrentScope().getLog(this.getClass()).fine(String.format("Opening connection to %s  driverProperties=%s", url, driverProperties));
         this.openConn(url, driverObject, driverProperties);
-        //test(url, driverObject, driverProperties);
     }
 
     public void openConn(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
