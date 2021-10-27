@@ -26,6 +26,7 @@ import static liquibase.ext.bigquery.database.BigqueryDatabase.BIGQUERY_PRIORITY
  */
 public class BigqueryColumnSnapshotGenerator extends ColumnSnapshotGenerator {
 
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         return database instanceof BigqueryDatabase ? BIGQUERY_PRIORITY_DATABASE : super.getPriority(objectType, database);
     }
@@ -63,11 +64,7 @@ public class BigqueryColumnSnapshotGenerator extends ColumnSnapshotGenerator {
         }
         if (database instanceof OracleDatabase) {
             String nullable = columnMetadataResultSet.getString("NULLABLE");
-            if ("Y".equals(nullable)) {
-                column.setNullable(true);
-            } else {
-                column.setNullable(false);
-            }
+            column.setNullable("Y".equals(nullable));
         } else {
             Integer nullable = columnMetadataResultSet.getInt("NULLABLE");
             if (nullable != null) {
@@ -112,7 +109,7 @@ public class BigqueryColumnSnapshotGenerator extends ColumnSnapshotGenerator {
                         } else if (isAutoincrement.equals("NO")) {
                             column.setAutoIncrementInformation(null);
                         } else if (isAutoincrement.equals("")) {
-                            Scope.getCurrentScope().getLog(getClass()).info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
+                            Scope.getCurrentScope().getLog(getClass()).info("Unknown auto increment state for column " + column + ". Assuming not auto increment");
                             column.setAutoIncrementInformation(null);
                         } else {
                             throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");

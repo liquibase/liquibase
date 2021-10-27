@@ -1,6 +1,7 @@
 package liquibase.ext.bigquery.database;
 
 import com.simba.googlebigquery.googlebigquery.core.BQDriver;
+import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.AbstractJdbcDatabase;
@@ -131,6 +132,17 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
     @Override
     public void setLiquibaseSchemaName(String schemaName) {
         this.liquibaseSchemaName = schemaName;
+    }
+
+    @Override
+    public String getJdbcCatalogName(final CatalogAndSchema schema) {
+        DatabaseConnection connection = getConnection();
+        try {
+            return connection.getCatalog();
+        } catch (DatabaseException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
