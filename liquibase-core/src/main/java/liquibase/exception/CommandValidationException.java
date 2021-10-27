@@ -9,4 +9,7 @@ public class CommandValidationException extends CommandExecutionException {
         super("Invalid argument '" + argument + "': " + message);
     }
 
+    public CommandValidationException(String message) {
+        super(message);
+    }
 }
