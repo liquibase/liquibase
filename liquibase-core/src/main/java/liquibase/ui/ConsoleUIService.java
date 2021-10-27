@@ -206,6 +206,17 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
         private final Console console;
         private final boolean useStdin;
 
+        /**
+         *
+         * This constructor is used for extensions that provide UIService implementations
+         *
+         * @param   console    the console to use
+         *
+         */
+        public ConsoleWrapper(Console console) {
+            this(console, false);
+        }
+
         public ConsoleWrapper(Console console, boolean useStdInParam) {
             this.console = console;
             this.useStdin = useStdInParam;
