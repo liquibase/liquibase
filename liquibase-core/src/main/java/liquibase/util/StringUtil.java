@@ -1009,9 +1009,11 @@ public class StringUtil {
     }
 
     /**
-     * <p>Splits a camel-case string into words based on the came casing.
+     * <p>Checks whether the char sequence is numeric by checking that all chars in the sequence are
+     * numbers, so (-1, 1.0 and 1F) will return false
      * <p>
      * This code originated from the StringUtils class of https://github.com/apache/commons-lang
+     *
      * @param cs the arg to check if it is numeric
      * @return true if convertible to numeric and false otherwise
      */
