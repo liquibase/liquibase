@@ -1,7 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import static org.junit.Assert.assertEquals;
-
 import java.math.BigInteger;
 
 import com.example.liquibase.change.UniqueConstraintConfig;
@@ -30,6 +28,8 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
+
+import static org.junit.Assert.*;
 
 public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTableStatement> {
 
@@ -68,6 +68,21 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
         for (Database database : TestContext.getInstance().getAllDatabases()) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
                 statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("int(11) unsigned", database));
+        }
+    }
+
+    @Test
+    public void testWithDeferredPKs() {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+            statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("int", database),
+                    new PrimaryKeyConstraint().addColumns(COLUMN_NAME1).setDeferrable(true).setInitiallyDeferred(true));
+
+            if (database.supportsInitiallyDeferrableColumns()) {
+                assertTrue(this.generatorUnderTest.generateSql(statement, database, null)[0].toSql().contains("DEFERRABLE"));
+            } else {
+                assertFalse(this.generatorUnderTest.generateSql(statement, database, null)[0].toSql().contains("DEFERRABLE"));
+            }
         }
     }
 

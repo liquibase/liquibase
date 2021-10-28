@@ -379,7 +379,7 @@
     <changeSet id="correct-mysql-timestamp" author="nvoxland">
         <createTable tableName="timestampusage">
             <column name="id" type="int"/>
-            <column name="test" type="timestamp">
+            <column name="test" type="timestamp" defaultValueDate="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </createTable>
