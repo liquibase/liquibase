@@ -13,7 +13,19 @@ public class DefaultInputHandler<ReturnType> implements InputHandler<ReturnType>
         try {
             return ObjectUtil.convert(input, returnType);
         } catch (IllegalArgumentException e) {
-            throw UiIllegalArgumentExceptionMessageHandler.addPrefixToExceptionMessage(e, input);
+            throw addPrefixToExceptionMessage(e, input);
         }
+    }
+
+    protected IllegalArgumentException addPrefixToExceptionMessage(IllegalArgumentException ex, String input) {
+        if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+            return new IllegalArgumentException(
+                    String.format("Invalid value: '%s': %s", input, ex.getCause().getMessage()), ex);
+        }
+        if (ex.getMessage() != null) {
+            return new IllegalArgumentException(
+                    String.format("Invalid value: '%s': %s", input, ex.getMessage()), ex);
+        }
+        return ex;
     }
 }
