@@ -136,10 +136,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         HEADLESS = builder.define("headless", Boolean.class)
-                .setDescription("Force liquibase think it has no access to a keyboard?")
+                .setDescription("Force liquibase to think it has no access to a keyboard")
                 .setDefaultValue(false)
                 .setCommonlyUsed(true)
                 .build();
+
         STRICT = builder.define("strict", Boolean.class)
                 .setDescription("Be stricter on allowed Liquibase configuration and setup?")
                 .setDefaultValue(true)
