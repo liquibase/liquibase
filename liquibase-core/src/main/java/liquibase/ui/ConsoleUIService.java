@@ -105,12 +105,10 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
                     }
                 }
                 return inputHandler.parseInput(input, type);
-            } catch (IllegalArgumentException e) {
+            }  catch (IllegalArgumentException e) {
                 String message;
-                if (e.getCause() != null && e.getCause().getMessage() != null) {
-                    message = "Invalid value: '" + input + "': " + e.getCause().getMessage();
-                } else if (e.getMessage() != null) {
-                    message = "Invalid value: '" + input + "': " + e.getMessage();
+                if (e.getMessage() != null) {
+                    message = e.getMessage();
                 } else {
                     message = "Invalid value: \"" + input + "\"";
                 }
