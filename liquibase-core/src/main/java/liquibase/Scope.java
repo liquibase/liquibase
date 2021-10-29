@@ -20,13 +20,9 @@ import liquibase.ui.UIService;
 import liquibase.util.SmartMap;
 import liquibase.util.StringUtil;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import java.util.*;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * This scope object is used to hold configuration and other parameters within a call without needing complex method signatures.
@@ -52,6 +48,10 @@ public class Scope {
         executeMode,
         lineSeparator,
         serviceLocator,
+
+        /**
+         * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
+         */
         fileEncoding,
         databaseChangeLog,
         changeSet,
@@ -99,7 +99,7 @@ public class Scope {
         return scopeManager.getCurrentScope();
     }
 
-    public static void setScopeManager(ScopeManager scopeManager)  {
+    public static void setScopeManager(ScopeManager scopeManager) {
         Scope currentScope = getCurrentScope();
         if (currentScope == null) {
             currentScope = new Scope();
@@ -126,7 +126,7 @@ public class Scope {
     }
 
     /**
-     * @param parent The new Scopes parent in the hierarchy of Scopes, not null. 
+     * @param parent      The new Scopes parent in the hierarchy of Scopes, not null.
      * @param scopeValues The values for the new Scope.
      */
     protected Scope(Scope parent, Map<String, Object> scopeValues) {
@@ -172,14 +172,14 @@ public class Scope {
         child(listener, null, runner);
     }
 
-    public static void child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunner runner) throws Exception{
+    public static void child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunner runner) throws Exception {
         child(listener, scopeValues, () -> {
             runner.run();
             return null;
         });
     }
 
-    public static <T> T child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunnerWithReturn<T> runner) throws Exception{
+    public static <T> T child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunnerWithReturn<T> runner) throws Exception {
         String scopeId = enter(listener, scopeValues);
 
         try {
@@ -218,12 +218,13 @@ public class Scope {
 
     /**
      * Exits the scope started with {@link #enter(LiquibaseListener, Map)}
+     *
      * @param scopeId The id of the scope to exit. Throws an exception if the name does not match the current scope.
      */
     public static void exit(String scopeId) throws Exception {
         Scope currentScope = getCurrentScope();
         if (!currentScope.scopeId.equals(scopeId)) {
-            throw new RuntimeException("Cannot end scope "+scopeId+" when currently at scope "+currentScope.scopeId);
+            throw new RuntimeException("Cannot end scope " + scopeId + " when currently at scope " + currentScope.scopeId);
         }
 
         scopeManager.setCurrentScope(currentScope.getParent());
@@ -366,6 +367,9 @@ public class Scope {
         return get(Attr.lineSeparator, System.lineSeparator());
     }
 
+    /**
+     * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
+     */
     public Charset getFileEncoding() {
         return get(Attr.fileEncoding, Charset.defaultCharset());
     }
@@ -413,6 +417,7 @@ public class Scope {
     public interface ScopedRunner<T> {
         void run() throws Exception;
     }
+
     public interface ScopedRunnerWithReturn<T> {
         T run() throws Exception;
     }
