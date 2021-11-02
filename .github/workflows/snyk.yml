@@ -1,5 +1,5 @@
 # Run Snyk nightly to scan and report security issues.
-name: Nightly Snyk Scan
+name: Snyk Scan
 
 # Job will run nightly at 02:05 EDT / 01:05 CDT
 # Time below is UTC
@@ -16,7 +16,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
-          java-version: 8
+          java-version: 11
           distribution: 'adopt'
 
       - name: Checkout Master Branch
