@@ -242,8 +242,10 @@ public class LiquibaseCommandLine {
                     || exception instanceof CommandLineParsingException) {
                 System.err.println("Error parsing command line: " + bestMessage);
                 printUsage = true;
+            } else if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
+                System.err.println(bestMessage);
             } else {
-                System.err.println("Unexpected error running Liquibase: " + bestMessage);
+                System.err.println("\nUnexpected error running Liquibase: " + bestMessage);
                 System.err.println();
 
                 if (Level.OFF.equals(this.configuredLogLevel)) {
