@@ -13,12 +13,6 @@ jobs:
     name: Snyk Security Scan
     runs-on: ubuntu-latest
     steps:
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: 11
-          distribution: 'adopt'
-
       - name: Checkout Master Branch
         uses: actions/checkout@v2
 
