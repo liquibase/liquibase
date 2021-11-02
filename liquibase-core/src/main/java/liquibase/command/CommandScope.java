@@ -90,11 +90,14 @@ public class CommandScope {
         ConfigurationDefinition<T> configDef = createConfigurationDefinition(argument, true);
         ConfiguredValue<T> providedValue = configDef.getCurrentConfiguredValue();
 
-        if (!providedValue.found()) {
-            configDef = createConfigurationDefinition(argument, false);
-            providedValue = configDef.getCurrentConfiguredValue();
+        if (!providedValue.found() || providedValue.wasDefaultValueUsed()) {
+            ConfigurationDefinition<T> noCommandConfigDef = createConfigurationDefinition(argument, false);
+            ConfiguredValue<T> noCommandNameProvidedValue = noCommandConfigDef.getCurrentConfiguredValue();
+            if (noCommandNameProvidedValue.found() && !noCommandNameProvidedValue.wasDefaultValueUsed()) {
+                configDef = noCommandConfigDef;
+                providedValue = noCommandNameProvidedValue;
+            }
         }
-
 
         providedValue.override(commandScopeValueProvider.getProvidedValue(configDef.getKey(), argument.getName()));
 

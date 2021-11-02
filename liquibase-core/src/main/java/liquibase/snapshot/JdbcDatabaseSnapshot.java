@@ -22,7 +22,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
@@ -292,7 +292,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             userDefinedTypes.add(resultSet.getString("name").toLowerCase());
                         }
                     } finally {
-                        JdbcUtils.close(resultSet, stmt);
+                        JdbcUtil.close(resultSet, stmt);
                     }
                 }
             }
@@ -957,7 +957,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         cachedRowList.add(new CachedRow(row));
                     }
                 } finally {
-                    JdbcUtils.closeResultSet(resultSet);
+                    JdbcUtil.closeResultSet(resultSet);
                 }
                 return cachedRowList;
 

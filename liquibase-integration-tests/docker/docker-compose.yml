@@ -29,21 +29,21 @@ services:
     volumes:
       - "./postgres-init.sh:/docker-entrypoint-initdb.d/postgres-init.sh"
 
-#  cockroachdb:
-#    image: cockroachdb/cockroach-unstable:v20.2.0-rc.3
-#    command: start-single-node --logtostderr --insecure
-#    ports:
-#      - "26257:26257"
-#      - "8080:8080"
+  #  cockroachdb:
+  #    image: cockroachdb/cockroach-unstable:v20.2.0-rc.3
+  #    command: start-single-node --logtostderr --insecure
+  #    ports:
+  #      - "26257:26257"
+  #      - "8080:8080"
 
   mssql:
-    image: mcr.microsoft.com/mssql/server:2017-latest
+    container_name: sql-server-db-2019
+    image: mcr.microsoft.com/mssql/server:2019-latest
     ports:
-      - "1433:1433"
-    restart: always
+      - "14333:1433"
     environment:
-      ACCEPT_EULA: Y
-      SA_PASSWORD: LiquibasePass1
+      SA_PASSWORD: "LiquibasePass1"
+      ACCEPT_EULA: "Y"
     networks:
       - integration
     volumes:

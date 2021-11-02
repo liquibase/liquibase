@@ -663,39 +663,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         columnValue(sqlStatements[2], Col.bool) == Boolean.TRUE
     }
 
-    def "string with space + DB def"() {
-        when:
-        Table table = newTable("t");
-        Cols2.values().each {
-            addColumns(table, new ColDef(it, "varchar(123)"))
-        }
-        LoadDataChange change = new LoadDataChange()
-
-        change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
-                file     : "liquibase/change/core/strings.csv",
-                tableName: table.name, quotchar: "'"]), new ClassLoaderResourceAccessor())
-
-        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
-
-        SqlStatement[] sqlStatements = change.generateStatements(mockDB);
-
-        then:
-        columnValue(sqlStatements[i], Cols2.regular) == regular
-        columnValue(sqlStatements[i], Cols2.space_left) == left
-        columnValue(sqlStatements[i], Cols2.space_right) == right
-        columnValue(sqlStatements[i], Cols2.space_both) == both
-        columnValue(sqlStatements[i], Cols2.empty) == ""
-
-        where:
-        i | regular | left    | right   | both
-        0 | "NULL"  | ""      | " "     | ""
-        1 | "NULL"  | " null" | "null " | " null "   // NULL variants
-        2 | ""      | " '"    | "' "    | " ' "      // quoted empty string
-        3 | " "     | " ' "   | " ' "   | " ' ' "    // quoted space
-        4 | "a"     | " a"    | "a "    | " a "      // a
-        5 | "a"     | " 'a"   | "a' "   | " 'a' "    // quoted a
-    }
-
     def "inconsistent NULL handling"() {
         when:
         LoadDataChange change = new LoadDataChange()
