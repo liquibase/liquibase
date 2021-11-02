@@ -24,7 +24,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --fail-on=all --severity-threshold=high --all-projects --org=datical
+          args: --fail-on=all --severity-threshold=high --org=datical
 
       - name: Run Snyk Monitor
         uses: snyk/actions/maven@master
