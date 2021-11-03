@@ -27,8 +27,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           SNYK_ORG: datical
         run: |
-          mvn -B install -DskipTests
-          mvn -B snyk:test -DskipTests
+          mvn -B test snyk:test -DskipTests
 
       - name: Run Snyk Monitor
         uses: snyk/actions/maven@master
