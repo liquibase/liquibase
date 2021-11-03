@@ -31,6 +31,7 @@ jobs:
         uses: snyk/actions/maven@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_ORG: datical
         with:
           command: monitor
           args: --all-projects --org=datical
