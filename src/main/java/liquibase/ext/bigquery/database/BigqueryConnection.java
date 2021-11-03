@@ -8,13 +8,11 @@ import liquibase.Scope;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
 import static liquibase.ext.bigquery.database.BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
@@ -36,20 +34,25 @@ public class BigqueryConnection extends JdbcConnection {
         Scope.getCurrentScope().getLog(this.getClass()).fine(String.format("Setting connection to %s  Location=%s", url, getUnderlyingBQConnectionLocation()));
     }
 
-    protected static List<NameValuePair> getUrlParams(String url) {
-        return URLEncodedUtils.parse(url, StandardCharsets.UTF_8);
-    }
-
     protected static String getUrlParamValue(String url, String paramName) {
         return getUrlParamValue(url, paramName, null);
     }
 
     protected static String getUrlParamValue(String url, String paramName, String defaultValue) {
-        return getUrlParams(url).stream()
-                .filter(param -> param.getName().equalsIgnoreCase(paramName))
-                .map(NameValuePair::getValue)
-                .findFirst()
-                .orElse(defaultValue);
+        if (url == null) {
+            return null;
+        }
+        // read dataset, DefaultDataset
+        String[] uriArgs = url.replace(" ", "").split(";");
+        Optional<String> defaultDatasetStr = Arrays.stream(uriArgs)
+                .filter(x -> x.startsWith(paramName + "="))
+                .findFirst();
+
+        if (!defaultDatasetStr.isPresent()) {
+            return defaultValue;
+        }
+        String[] defaultDatasetArr = defaultDatasetStr.get().split("=");
+        return defaultDatasetArr[1];
     }
 
     @Override
