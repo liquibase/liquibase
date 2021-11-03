@@ -34,15 +34,15 @@ jobs:
           command: monitor
           args: --all-projects --org=datical
 
-      - name: Slack Notification
-        if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_CHANNEL: team-liquibase
-          SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
-          SLACK_MESSAGE: "${{ github.job }}: ${{ job.status }} @here"
-          SLACK_USERNAME: "liquibot"
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          MSG_MINIMAL: actions url
-          SLACK_ICON_EMOJI: ':liquibase:'
-          SLACK_LINK_NAMES: true
+#      - name: Slack Notification
+#        if: ${{ failure() }}
+#        uses: rtCamp/action-slack-notify@v2
+#        env:
+#          SLACK_CHANNEL: team-liquibase
+#          SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
+#          SLACK_MESSAGE: "${{ github.job }}: ${{ job.status }} @here"
+#          SLACK_USERNAME: "liquibot"
+#          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+#          MSG_MINIMAL: actions url
+#          SLACK_ICON_EMOJI: ':liquibase:'
+#          SLACK_LINK_NAMES: true
