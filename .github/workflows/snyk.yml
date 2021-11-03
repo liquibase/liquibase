@@ -17,13 +17,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run Snyk Test to check for vulnerabilities
-        id: compile test
+        id: test
         uses: snyk/actions/maven@master
         timeout-minutes: 10
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          command: test
+          command: compile test
           args: --fail-on=all --severity-threshold=high --org=datical
 
       - name: Run Snyk Monitor
