@@ -21,10 +21,25 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
     protected static final String SEQUENCE_NAME = "SEQUENCE_NAME";
     protected static final String CATALOG_NAME = "CATALOG_NAME";
     protected static final String SCHEMA_NAME = "SCHEMA_NAME";
-
+//	private DatabaseConnection mockedUnsupportedMinMaxSequenceConnection;
+//    private DatabaseConnection mockedSupportedMinMaxSequenceConnection;
     public AlterSequenceGeneratorTest() throws Exception {
         super(new AlterSequenceGenerator());
     }
+
+//    @Before
+//    public void setUpMocks() throws DatabaseException {
+//
+//        mockedUnsupportedMinMaxSequenceConnection = mock(DatabaseConnection.class);
+//        when(mockedUnsupportedMinMaxSequenceConnection.getDatabaseMajorVersion()).thenReturn(1);
+//        when(mockedUnsupportedMinMaxSequenceConnection.getDatabaseMinorVersion()).thenReturn(3);
+//        when(mockedUnsupportedMinMaxSequenceConnection.getDatabaseProductVersion()).thenReturn("1.3.174 (2013-10-19)");
+//
+//        mockedSupportedMinMaxSequenceConnection = mock(DatabaseConnection.class);
+//        when(mockedSupportedMinMaxSequenceConnection.getDatabaseMajorVersion()).thenReturn(1);
+//        when(mockedSupportedMinMaxSequenceConnection.getDatabaseMinorVersion()).thenReturn(3);
+//        when(mockedSupportedMinMaxSequenceConnection.getDatabaseProductVersion()).thenReturn("1.3.175 (2014-01-18)");
+//    }
 
     @Test
     public void testAlterSequenceDatabase(){
@@ -40,6 +55,54 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
         }
     }
 
+//    @Test
+//	public void h2DatabaseSupportsSequenceMaxValue() throws Exception {
+//
+//		H2Database h2Database = new H2Database();
+//        h2Database.setConnection(mockedSupportedMinMaxSequenceConnection);
+//
+//		AlterSequenceStatement alterSequenceStatement = createSampleSqlStatement();
+//		alterSequenceStatement.setMaxValue(new BigInteger("1000"));
+//
+//		assertFalse(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+//	}
+
+//    @Test
+//    public void h2DatabaseDoesNotSupportsSequenceMaxValue() throws Exception {
+//
+//        H2Database h2Database = new H2Database();
+//        h2Database.setConnection(mockedUnsupportedMinMaxSequenceConnection);
+//
+//        AlterSequenceStatement alterSequenceStatement = createSampleSqlStatement();
+//        alterSequenceStatement.setMaxValue(new BigInteger("1000"));
+//
+//        assertTrue(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+//    }
+
+//	@Test
+//	public void h2DatabaseSupportsSequenceMinValue() throws Exception {
+//
+//		H2Database h2Database = new H2Database();
+//        h2Database.setConnection(mockedSupportedMinMaxSequenceConnection);
+//
+//		AlterSequenceStatement alterSequenceStatement = createSampleSqlStatement();
+//		alterSequenceStatement.setMinValue(new BigInteger("10"));
+//
+//		assertFalse(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+//	}
+//
+//    @Test
+//    public void h2DatabaseDoesNotSupportsSequenceMinValue() throws Exception {
+//
+//        H2Database h2Database = new H2Database();
+//        h2Database.setConnection(mockedUnsupportedMinMaxSequenceConnection);
+//
+//        AlterSequenceStatement alterSequenceStatement = createSampleSqlStatement();
+//        alterSequenceStatement.setMinValue(new BigInteger("10"));
+//
+//        assertTrue(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+//    }
+
     @Test
     public void testAlterSequenceCycleDatabase() {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
@@ -47,7 +110,7 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
             statement.setCycle(false);
             Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
             if (database instanceof OracleDatabase) {
-                assertEquals("ALTER SEQUENCE CATALOG_NAME.SEQUENCE_NAME NO CYCLE", generatedSql[0].toSql());
+                assertEquals("ALTER SEQUENCE CATALOG_NAME.SEQUENCE_NAME NOCYCLE", generatedSql[0].toSql());
             } else if (database instanceof PostgresDatabase || database instanceof CockroachDatabase) {
                 assertEquals("ALTER SEQUENCE SCHEMA_NAME.SEQUENCE_NAME NO CYCLE", generatedSql[0].toSql());
             }
