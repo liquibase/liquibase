@@ -25,6 +25,7 @@ jobs:
       - name: Run Snyk Test to check for vulnerabilities
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_ORG: datical
         run: mvn -B compile snyk:test -DskipTests
 
       - name: Run Snyk Monitor
