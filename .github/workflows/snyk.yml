@@ -16,15 +16,16 @@ jobs:
       - name: Checkout Master Branch
         uses: actions/checkout@v2
 
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: 'adopt'
+
       - name: Run Snyk Test to check for vulnerabilities
-        id: test
-        uses: snyk/actions/maven@master
-        timeout-minutes: 10
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: compile test
-          args: --fail-on=all --severity-threshold=high --org=datical
+        run: mvn -B compile snyk:test -DskipTests
 
       - name: Run Snyk Monitor
         uses: snyk/actions/maven@master
