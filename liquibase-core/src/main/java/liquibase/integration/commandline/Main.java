@@ -4,6 +4,7 @@ import liquibase.*;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.command.CommandFailedException;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
@@ -1043,7 +1044,7 @@ public class Main {
      * Reads various execution parameters from an InputStream and sets our internal state according to the values
      * found.
      *
-     * @param  propertiesInputStream       an InputStream from a Java properties file
+     * @param propertiesInputStream an InputStream from a Java properties file
      * @throws IOException                 if there is a problem reading the InputStream
      * @throws CommandLineParsingException if an invalid property is encountered
      */
@@ -1709,18 +1710,18 @@ public class Main {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.forceReleaseLock();
                 Scope.getCurrentScope().getUI().sendMessage(String.format(
-                        coreBundle.getString("successfully.released.database.change.log.locks"),
-                        liquibase.getDatabase().getConnection().getConnectionUserName() +
-                                "@" + liquibase.getDatabase().getConnection().getURL()
+                                coreBundle.getString("successfully.released.database.change.log.locks"),
+                                liquibase.getDatabase().getConnection().getConnectionUserName() +
+                                        "@" + liquibase.getDatabase().getConnection().getURL()
                         )
                 );
                 return;
             } else if (COMMANDS.TAG.equalsIgnoreCase(command)) {
                 liquibase.tag(getCommandArgument());
                 Scope.getCurrentScope().getUI().sendMessage(String.format(
-                        coreBundle.getString("successfully.tagged"), liquibase.getDatabase()
-                                .getConnection().getConnectionUserName() + "@" +
-                                liquibase.getDatabase().getConnection().getURL()
+                                coreBundle.getString("successfully.tagged"), liquibase.getDatabase()
+                                        .getConnection().getConnectionUserName() + "@" +
+                                        liquibase.getDatabase().getConnection().getURL()
                         )
                 );
                 return;
@@ -1729,14 +1730,14 @@ public class Main {
                 boolean exists = liquibase.tagExists(tag);
                 if (exists) {
                     Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("tag.exists"), tag,
-                            liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
-                                    liquibase.getDatabase().getConnection().getURL()
+                                    liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
+                                            liquibase.getDatabase().getConnection().getURL()
                             )
                     );
                 } else {
                     Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("tag.does.not.exist"), tag,
-                            liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
-                                    liquibase.getDatabase().getConnection().getURL()
+                                    liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
+                                            liquibase.getDatabase().getConnection().getURL()
                             )
                     );
                 }
@@ -1843,12 +1844,7 @@ public class Main {
                 liquibase.reportUnexpectedChangeSets(runVerbose, contexts, getOutputWriter());
                 return;
             } else if (COMMANDS.VALIDATE.equalsIgnoreCase(command)) {
-                try {
-                    liquibase.validate();
-                } catch (ValidationFailedException e) {
-                    e.printDescriptiveError(System.err);
-                    return;
-                }
+                liquibase.validate();
                 Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("no.validation.errors.found"));
                 return;
             } else if (COMMANDS.CLEAR_CHECKSUMS.equalsIgnoreCase(command)) {
