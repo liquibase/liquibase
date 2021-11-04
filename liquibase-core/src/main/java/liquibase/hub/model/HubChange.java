@@ -29,6 +29,54 @@ public class HubChange implements HubModel {
     public HubChange() {
     }
 
+    public HubChange(RanChangeSet ranChangeSet) {
+        this.changesetId = ranChangeSet.getId();
+        this.changesetAuthor = ranChangeSet.getAuthor();
+        this.changesetFilename = ranChangeSet.getChangeLog();
+        this.description = ranChangeSet.getDescription();
+        this.comments = ranChangeSet.getComments();
+        this.tag = ranChangeSet.getTag();
+        this.liquibase = ranChangeSet.getLiquibaseVersion();
+        this.orderExecuted = ranChangeSet.getOrderExecuted();
+        this.execType = ranChangeSet.getExecType().value;
+        this.deploymentId = ranChangeSet.getDeploymentId();
+        this.dateExecuted = ranChangeSet.getDateExecuted();
+        if (ranChangeSet.getContextExpression() != null) {
+            this.contexts = ranChangeSet.getContextExpression().toString();
+        }
+        if (ranChangeSet.getLabels() != null) {
+            this.labels = ranChangeSet.getLabels().toString();
+        }
+        if (ranChangeSet.getLastCheckSum() != null) {
+            this.md5sum = ranChangeSet.getLastCheckSum().toString();
+        }
+    }
+
+    public HubChange(ChangeSet changeSet) {
+        this.changesetId = changeSet.getId();
+        this.changesetAuthor = changeSet.getAuthor();
+        this.changesetFilename = changeSet.getFilePath();
+        this.description = changeSet.getDescription();
+        this.comments = changeSet.getComments();
+        // Contexts can't be null because of ChangeSet constructor logic
+        this.contexts = changeSet.getContexts().toString();
+        this.orderExecuted = 0;
+        // CheckSum can't be null because of ChangeSet generateCheckSum logic
+        this.md5sum = changeSet.generateCheckSum().toString();
+        this.execType = "EXECUTED";
+
+        if (changeSet.getLabels() != null) {
+            this.labels = changeSet.getLabels().toString();
+        }
+
+        ISODateFormat iso = new ISODateFormat();
+        try {
+            this.dateExecuted = iso.parse(new Date().toString());
+        } catch (ParseException pe) {
+            this.dateExecuted = new Date();
+        }
+    }
+
     @Override
     public UUID getId() {
         return id;

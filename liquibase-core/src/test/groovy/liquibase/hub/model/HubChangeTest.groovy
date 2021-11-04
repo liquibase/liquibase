@@ -10,7 +10,7 @@ import spock.lang.Specification
 
 import static liquibase.changelog.ChangeSet.ExecType.EXECUTED
 
-class HubChangeMapperTest extends Specification {
+class HubChangeTest extends Specification {
 
     private static final String ID = "id"
     private static final String AUTHOR = "author"
@@ -38,7 +38,7 @@ class HubChangeMapperTest extends Specification {
         ranChangeSet.setOrderExecuted(ORDER_EXECUTED)
 
         when:
-        def hubChange = HubChangeMapper.mapToHubChange(ranChangeSet)
+        def hubChange = new HubChange(ranChangeSet)
 
         then:
         hubChange.getChangesetId() == ID
@@ -65,7 +65,7 @@ class HubChangeMapperTest extends Specification {
         ranChangeSet.setOrderExecuted(ORDER_EXECUTED)
 
         when:
-        def hubChange = HubChangeMapper.mapToHubChange(ranChangeSet)
+        def hubChange = new HubChange(ranChangeSet)
 
         then:
         hubChange.getChangesetId() == ID
@@ -93,7 +93,7 @@ class HubChangeMapperTest extends Specification {
         changeSet.clearCheckSum()
 
         when:
-        def hubChange = HubChangeMapper.mapToHubChange(changeSet)
+        def hubChange = new HubChange(changeSet)
 
         then:
         hubChange.getChangesetId() == ID
@@ -119,7 +119,7 @@ class HubChangeMapperTest extends Specification {
         changeSet.clearCheckSum()
 
         when:
-        def hubChange = HubChangeMapper.mapToHubChange(changeSet)
+        def hubChange = new HubChange(changeSet)
 
         then:
         hubChange.getChangesetId() == ID

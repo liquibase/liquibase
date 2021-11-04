@@ -250,7 +250,7 @@ public class StandardHubService implements HubService {
     public void setRanChangeSets(Connection connection, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         List<HubChange> hubChangeList = new ArrayList<>();
         for (RanChangeSet ranChangeSet : ranChangeSets) {
-            hubChangeList.add(HubChangeMapper.mapToHubChange(ranChangeSet));
+            hubChangeList.add(new HubChange(ranChangeSet));
         }
 
         http.doPut("/api/v1/organizations/" + getOrganization().getId() + "/connections/" + connection.getId() + "/changes", hubChangeList, ArrayList.class);
@@ -550,7 +550,7 @@ public class StandardHubService implements HubService {
     public void sendOperationChanges(OperationChange operationChange) throws LiquibaseHubException {
         List<HubChange> hubChangeList = new ArrayList<>();
         for (ChangeSet changeSet : operationChange.getChangeSets()) {
-            hubChangeList.add(HubChangeMapper.mapToHubChange(changeSet));
+            hubChangeList.add(new HubChange(changeSet));
         }
 
         http.doPost("/api/v1" +
