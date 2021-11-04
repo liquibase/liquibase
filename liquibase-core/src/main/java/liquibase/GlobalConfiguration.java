@@ -32,6 +32,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> FILTER_LOG_MESSAGES;
     public static final ConfigurationDefinition<Boolean> HEADLESS;
     public static final ConfigurationDefinition<Boolean> STRICT;
+    public static final ConfigurationDefinition<Integer> DDL_LOCK_TIMEOUT;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -166,6 +167,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         STRICT = builder.define("strict", Boolean.class)
                 .setDescription("Be stricter on allowed Liquibase configuration and setup?")
                 .setDefaultValue(true)
+                .build();
+
+        DDL_LOCK_TIMEOUT = builder.define("ddlLockTimeout", Integer.class)
+                .addAliasKey("liquibase.ddlLockTimeout")
+                .setDescription("The DDL_LOCK_TIMEOUT parameter indicates the number of seconds a DDL command should wait for the locks to become available before throwing the resource busy error message. This applies only to Oracle databases.")
                 .build();
     }
 }
