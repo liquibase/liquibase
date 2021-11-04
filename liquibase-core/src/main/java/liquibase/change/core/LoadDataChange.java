@@ -361,8 +361,22 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             // columnConfig did not specify a type
                             valueConfig.setValue(value);
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UNKNOWN) {
-                            // columnConfig did not match a specific type
-                            valueConfig.setValue(value);
+                            if (isTimestampWithZone( columnConfig ) && database instanceof PostgresDatabase ) {
+                                try {
+                                    // Need the column type for handling 'NOW' or 'TODAY' type column value
+                                    valueConfig.setType(columnConfig.getType());
+                                    if (value != null) {
+                                        valueConfig.setValueDate(value);
+                                    } else {
+                                        valueConfig.setValueDate(columnConfig.getDefaultValueDate());
+                                    }
+                                } catch (DateParseException e) {
+                                    throw new UnexpectedLiquibaseException(e);
+                                }
+                            } else {
+                                // columnConfig did not match a specific type
+                                valueConfig.setValue( value );
+                            }
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.BOOLEAN) {
                             if (value == null) { // TODO getDefaultValueBoolean should use BooleanUtil.parseBoolean also for consistent behaviour
                                 valueConfig.setValueBoolean(columnConfig.getDefaultValueBoolean());
@@ -584,6 +598,14 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 }
             }
         }
+    }
+
+    private boolean isTimestampWithZone( ColumnConfig columnConfig ) {
+        final String type = columnConfig.getType();
+        if( type == null ) {
+            return false;
+        }
+        return type.toLowerCase().matches( "timestamp.* with .*zone" );
     }
 
     private boolean isLoggingExecutor(Database database) {

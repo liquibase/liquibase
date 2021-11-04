@@ -1,6 +1,7 @@
 package liquibase.util;
 
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -13,12 +14,22 @@ import java.util.Date;
 public class ISODateFormat {
 
     private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
-    private final SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
-    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
-    private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat(TIME_FORMAT_STRING);
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
 
+    private static final String ISO_DATE_REGEX = "\\d{4}-\\d{2}-\\d{2}";
+    private static final String ISO_TIME_REGEX = "\\d{2}:\\d{2}:\\d{2}";
+    private static final String NANOS_SUFFIX_REGEX = "[.]\\d+";
+    private static final String ZONE_SUFFIX_REGEX = "(Z|([-+]?\\d{2}:\\d{2}))";
+
+    private static final String DATE_TIME_REGEX = ISO_DATE_REGEX + "T" + ISO_TIME_REGEX;
+    private static final String DATE_TIME_WITH_NANOS_REGEX = DATE_TIME_REGEX + NANOS_SUFFIX_REGEX;
+    private static final String DATE_TIME_WITH_ZONE_REGEX = DATE_TIME_REGEX + ZONE_SUFFIX_REGEX;
+    private static final String DATE_TIME_WITH_NANOS_AND_ZONE_REGEX = DATE_TIME_WITH_NANOS_REGEX + ZONE_SUFFIX_REGEX;
+
+    private static final String TIME_FORMAT_STRING = "HH:mm:ss";
+    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd";
+    private static final String DATE_TIME_FORMAT_STRING = DATE_FORMAT_STRING + "'T'" + TIME_FORMAT_STRING;
 
     public String format(java.sql.Date date) {
         return dateFormat.format(date);
@@ -55,10 +66,8 @@ public class ISODateFormat {
             return format(((java.sql.Time) date));
         } else if (date instanceof java.sql.Timestamp) {
             return format(((java.sql.Timestamp) date));
-        } else if (date instanceof java.util.Date) {
-            return format(new java.sql.Timestamp(date.getTime()));
         } else {
-            throw new RuntimeException("Unknown type: "+date.getClass().getName());
+            return format(new java.sql.Timestamp(date.getTime()));
         }
     }
 
@@ -66,57 +75,53 @@ public class ISODateFormat {
         if (dateAsString == null) {
             return null;
         }
-        int length = dateAsString.length();
-        switch (length) {
-        case 8:
+        final int length = dateAsString.length();
+        if (length == 8) {
             return new java.sql.Time(timeFormat.parse(dateAsString).getTime());
-        case 10:
-            return new java.sql.Date(dateFormat.parse(dateAsString).getTime());
-        case 19:
-            if (dateAsString.contains(" ")) {
-                return new java.sql.Timestamp(dateTimeFormatWithSpace.parse(dateAsString).getTime());
-            } else {
-                return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
-            }
-        default:
-            if ((length < 19) || (dateAsString.charAt(19) != '.')) {
-                throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
-            }
-            long time = 0;
-            if (dateAsString.contains(" ")) {
-                time = dateTimeFormatWithSpace.parse(dateAsString.substring(0, 19)).getTime();
-            } else {
-                time = dateTimeFormat.parse(dateAsString.substring(0,19)).getTime();
-            }
-
-            ZonedDateTime zonedDateTime;
-            int nanos;
-            try {
-                OffsetDateTime odt = OffsetDateTime.parse(dateAsString);
-                zonedDateTime = odt.toZonedDateTime();
-                nanos = zonedDateTime.getNano();
-            }
-            catch (DateTimeParseException dtpe) {
-                if (dateAsString.contains(" ")) {
-                    dateAsString = dateAsString.replaceAll(" ", "T");
-                }
-                DateTimeFormatter formatter =
-                           new DateTimeFormatterBuilder()
-                                .appendPattern(DATE_TIME_FORMAT_STRING)
-                                .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 9, true)
-                                .toFormatter();
-                nanos = Integer.parseInt(dateAsString.substring(20));
-                for (; length < 29; length++) {
-                    nanos *= 10;
-                }
-            }
-
-
-            /*
-            */
-            java.sql.Timestamp timestamp = new java.sql.Timestamp(time);
-            timestamp.setNanos(nanos);
-            return timestamp;
         }
+
+        if (length == 10) {
+            return new java.sql.Date(dateFormat.parse(dateAsString).getTime());
+        }
+
+        final String dateAsStringFixed = dateAsString.replace(" ", "T");
+        if (dateAsStringFixed.matches(DATE_TIME_WITH_NANOS_AND_ZONE_REGEX)) {
+            return parseZonedDateTime(dateAsStringFixed);
+        }
+
+        if (dateAsStringFixed.matches(DATE_TIME_WITH_NANOS_REGEX)) {
+            return parseLocalDateTimeWithNanos(dateAsStringFixed + "+00:00");
+        }
+
+        if (dateAsStringFixed.matches(DATE_TIME_WITH_ZONE_REGEX)) {
+            return parseZonedDateTime(dateAsStringFixed);
+        }
+
+        if (dateAsStringFixed.matches(DATE_TIME_REGEX)) {
+            return new java.sql.Timestamp(dateTimeFormat.parse(dateAsStringFixed).getTime());
+        }
+
+        throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
+    }
+
+    private static Timestamp parseLocalDateTimeWithNanos(String dateAsString) {
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateAsString)
+                        .withZoneSameLocal(ZoneId.systemDefault());
+
+        return toTimestamp(zonedDateTime);
+    }
+
+    private static Timestamp parseZonedDateTime(String dateAsString) {
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateAsString)
+                        .withZoneSameInstant(ZoneId.systemDefault());
+
+        return toTimestamp(zonedDateTime);
+    }
+
+    private static Timestamp toTimestamp(ZonedDateTime zonedDateTime) {
+        long millis = 1000L * zonedDateTime.toEpochSecond();
+        Timestamp timestamp = new Timestamp( millis );
+        timestamp.setNanos( zonedDateTime.getNano() );
+        return timestamp;
     }
 }
