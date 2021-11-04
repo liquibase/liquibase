@@ -29,44 +29,6 @@ public class HubChange implements HubModel {
     public HubChange() {
     }
 
-    public HubChange(RanChangeSet ranChangeSet) {
-        this.changesetId = ranChangeSet.getId();
-        this.changesetAuthor = ranChangeSet.getAuthor();
-        this.changesetFilename = ranChangeSet.getChangeLog();
-        this.description = ranChangeSet.getDescription();
-        this.comments = ranChangeSet.getComments();
-        this.tag = ranChangeSet.getTag();
-        this.liquibase = ranChangeSet.getLiquibaseVersion();
-        this.labels = ranChangeSet.getLabels().toString();
-        this.contexts = ranChangeSet.getContextExpression().toString();
-        this.orderExecuted = ranChangeSet.getOrderExecuted();
-        this.md5sum = ranChangeSet.getLastCheckSum().toString();
-        this.execType = ranChangeSet.getExecType().value;
-        this.deploymentId = ranChangeSet.getDeploymentId();
-        this.dateExecuted = ranChangeSet.getDateExecuted();
-    }
-
-    public HubChange(ChangeSet changeSet) {
-        this.changesetId = changeSet.getId();
-        this.changesetAuthor = changeSet.getAuthor();
-        this.changesetFilename = changeSet.getFilePath();
-        this.description = changeSet.getDescription();
-        this.comments = changeSet.getComments();
-        this.labels = changeSet.getLabels().toString();
-        this.contexts = changeSet.getContexts().toString();
-        this.orderExecuted = 0;
-        this.md5sum = changeSet.generateCheckSum().toString();
-        this.execType = "EXECUTED";
-        ISODateFormat iso = new ISODateFormat();
-        try {
-            this.dateExecuted = iso.parse(new Date().toString());
-        }
-        catch (ParseException pe) {
-            this.dateExecuted = new Date();
-        }
-    }
-
-
     @Override
     public UUID getId() {
         return id;
