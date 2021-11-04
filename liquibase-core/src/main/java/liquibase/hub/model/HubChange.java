@@ -6,6 +6,7 @@ import liquibase.util.ISODateFormat;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 public class HubChange implements HubModel {
@@ -41,15 +42,9 @@ public class HubChange implements HubModel {
         this.execType = ranChangeSet.getExecType().value;
         this.deploymentId = ranChangeSet.getDeploymentId();
         this.dateExecuted = ranChangeSet.getDateExecuted();
-        if (ranChangeSet.getContextExpression() != null) {
-            this.contexts = ranChangeSet.getContextExpression().toString();
-        }
-        if (ranChangeSet.getLabels() != null) {
-            this.labels = ranChangeSet.getLabels().toString();
-        }
-        if (ranChangeSet.getLastCheckSum() != null) {
-            this.md5sum = ranChangeSet.getLastCheckSum().toString();
-        }
+        this.contexts = Objects.toString(ranChangeSet.getContextExpression(), null);
+        this.labels = Objects.toString(ranChangeSet.getLabels(), null);
+        this.md5sum = Objects.toString(ranChangeSet.getLastCheckSum(), null);
     }
 
     public HubChange(ChangeSet changeSet) {
@@ -58,16 +53,13 @@ public class HubChange implements HubModel {
         this.changesetFilename = changeSet.getFilePath();
         this.description = changeSet.getDescription();
         this.comments = changeSet.getComments();
+        this.labels = Objects.toString(changeSet.getLabels(), null);
         // Contexts can't be null because of ChangeSet constructor logic
         this.contexts = changeSet.getContexts().toString();
         this.orderExecuted = 0;
         // CheckSum can't be null because of ChangeSet generateCheckSum logic
         this.md5sum = changeSet.generateCheckSum().toString();
         this.execType = "EXECUTED";
-
-        if (changeSet.getLabels() != null) {
-            this.labels = changeSet.getLabels().toString();
-        }
 
         ISODateFormat iso = new ISODateFormat();
         try {
