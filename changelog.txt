@@ -2,7 +2,7 @@ Liquibase Core Changelog
 ===========================================
 Changes in version 4.6.1(2021.11.04)
 
-- Fixed the liquibase-pro-4.6.xsa
+- Fixed the liquibase-pro-4.6.xsd
 
 Changes in version 4.6.0(2021.11.04)
 
