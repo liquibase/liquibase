@@ -171,6 +171,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         DDL_LOCK_TIMEOUT = builder.define("ddlLockTimeout", Integer.class)
                 .addAliasKey("liquibase.ddlLockTimeout")
+                .addAliasKey("ddl_lock_timeout")
+                .addAliasKey("liquibase.ddl_lock_timeout")
                 .setDescription("The DDL_LOCK_TIMEOUT parameter indicates the number of seconds a DDL command should wait for the locks to become available before throwing the resource busy error message. This applies only to Oracle databases.")
                 .build();
     }
