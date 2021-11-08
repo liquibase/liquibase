@@ -112,6 +112,10 @@ public class StandardLockService implements LockService {
                     //hit a race condition where the table got created by another node.
                     Scope.getCurrentScope().getLog(getClass()).fine("Database lock table already appears to exist " +
                             "due to exception: " + e.getMessage() + ". Continuing on");
+                    // If another node already created the table, then we need to commit this current transaction,
+                    // otherwise servers like Postgres will not allow continued use of the same connection, failing with
+                    // a message like "current transaction is aborted, commands ignored until end of transaction block"
+                    database.commit();
                 }  else {
                     throw e;
                 }
