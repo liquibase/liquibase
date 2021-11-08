@@ -13,7 +13,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.ResultSet;
@@ -99,7 +99,7 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
         } catch (Exception e) {
             throw new RuntimeException("Could not determine current schema", e);
         } finally {
-            JdbcUtils.close(rs, stmt);
+            JdbcUtil.close(rs, stmt);
         }
 
         return defaultSchemaName;

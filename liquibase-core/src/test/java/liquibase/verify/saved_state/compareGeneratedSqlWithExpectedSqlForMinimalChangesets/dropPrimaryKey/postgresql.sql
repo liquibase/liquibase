@@ -6,5 +6,5 @@ BEGIN
     FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
     WHERE CONSTRAINT_TYPE = 'PRIMARY KEY'
       AND TABLE_NAME = 'person' AND TABLE_SCHEMA = 'null';
-    EXECUTE 'alter table null.person drop constraint ' || constraint_name;
+    EXECUTE 'alter table null.person drop constraint "' || constraint_name || '"';
 END $$;;
