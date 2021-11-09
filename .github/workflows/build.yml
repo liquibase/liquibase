@@ -53,7 +53,7 @@ jobs:
             github.rest.repos.createCommitStatus({
               "owner": "liquibase",
               "repo": "liquibase",
-              "sha": "${{ github.event.pull_request.head.sha }}",
+              "sha": helper.getCurrentSha(),
               "state": (proFailed ? "failure" : "success"),
               "target_url": branch.runHtmlUrl,
               "context": "Stable Liquibase Pro",
@@ -86,7 +86,7 @@ jobs:
           distribution: 'adopt'
       - name: Build & Test
         run: |
-          mvn -B -Dbuild.branch=${{ github.event.pull_request.head.ref }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ github.event.pull_request.head.sha }} -pl '!liquibase-dist' clean test package
+          mvn -B -Dbuild.branch=${{ github.event.pull_request.head.ref ||  github.event.ref }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ github.event.pull_request.head.sha || github.event.sha }} -pl '!liquibase-dist' clean test package
           find . -name original-*.jar -exec rm {} \;
       - name: Archive Test Results
         if: ${{ always() }}
@@ -170,28 +170,28 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
-#      - name: Download liquibase-pro
-#        uses: dawidd6/action-download-artifact@v2
-#        with:
-#          github_token: ${{ secrets.BOT_TOKEN }}
-#          workflow: build.yml
-#          workflow_conclusion: success
-#          branch: "${{ needs.setup.outputs.proBranchName }}"
-#          name: liquibase-pro-modules
-#          path: download/liquibase-pro
-#          repo: liquibase/liquibase-pro
+      - name: Download liquibase-pro
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{ secrets.BOT_TOKEN }}
+          workflow: build.yml
+          workflow_conclusion: success
+          branch: "${{ needs.setup.outputs.proBranchName }}"
+          name: liquibase-pro-modules
+          path: download/liquibase-pro
+          repo: liquibase/liquibase-pro
 
       - name: Install Built Modules
         run: |
           (find . -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
-#          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-pro/liquibase-pro-0-SNAPSHOT.jar
+          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-pro/liquibase-pro-0-SNAPSHOT.jar
 
       - name: Build & Sign Artifacts
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          mvn -B -pl liquibase-dist -P !liquibase-pro package
+          mvn -B -pl liquibase-dist -P liquibase-pro package
           (cd liquibase-dist && src/main/package/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
@@ -230,7 +230,7 @@ jobs:
 
       - name: Coordinate Liquibase-Pro
         uses: actions/github-script@v5
-        if: "false" # ${{ needs.setup.outputs.standAlonePR == 'false' }}
+        if: ${{ needs.setup.outputs.standAlonePR == 'false' }}
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
@@ -310,7 +310,7 @@ jobs:
                 "workflow_id": "test.yml",
                 "ref": testsBranch.name,
                 "inputs": {
-                  "liquibaseCommit": "${{ github.event.pull_request.head.sha }}",
+                  "liquibaseCommit": helper.getCurrentSha(),
                   "databases": "[\"oracleproxy:12.2\"]"
                 }
               });
@@ -319,7 +319,7 @@ jobs:
             await github.rest.repos.createCommitStatus({
               "owner": "liquibase",
               "repo": "liquibase",
-              "sha": "${{ github.event.pull_request.head.sha }}",
+              "sha": helper.getCurrentSha(),
               "state": markFunctionalTestsStatus,
               "context": "Run Functional Tests",
               "description": markFunctionalTestsDescription
