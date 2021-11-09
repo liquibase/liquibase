@@ -7,33 +7,31 @@ on:
         required: true
 
 jobs:
-  say_hello:
+  trigger-release:
+    name: "Trigger Releases"
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        extension:
+          - liquibase-postgresql
+          - liquibase-oracle
+          - liquibase-cassandra
+          - liquibase-hanadb
+          - liquibase-hibernate
     steps:
-      - run: echo "Releasing ${{ github.event.inputs.version }} extensions"
-
-      - name: Trigger Extension Builds
+      - name: Release liquibase/${{ matrix.extension }} v${{ github.event.inputs.version }}
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
-            const extensions = [
-              "liquibase-postgresql",
-              "liquibase-oracle",
-              "liquibase-cassandra",
-              "liquibase-hanadb",
-              "liquibase-hibernate"
-            ];
+            console.log("Sending liquibase-release event to liquibase/${{ matrix.extension }}");
 
-            for (extension of extensions) {
-              console.log("Sending liquibase-release event to "+extension);
-
-              github.repos.createDispatchEvent({
-                 "owner": "liquibase",
-                 "repo": extension,
-                 "event_type": "liquibase-release",
-                 "client_payload": {
-                    "liquibaseVersion": "${{ github.event.inputs.version }}"
-                  }
-               });
-            }
+            await github.repos.createDispatchEvent({
+               "owner": "liquibase",
+               "repo": ${{ matrix.java }},
+               "event_type": "liquibase-release",
+               "client_payload": {
+                  "liquibaseVersion": "${{ github.event.inputs.version }}"
+                }
+             });
