@@ -8,6 +8,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.exception.DatabaseException;
@@ -25,6 +26,7 @@ import liquibase.statement.core.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
+import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -45,6 +47,7 @@ public class StandardLockService implements LockService {
     private Boolean hasDatabaseChangeLogLockTable;
     private boolean isDatabaseChangeLogLockTableInitialized;
     private ObjectQuotingStrategy quotingStrategy;
+    private final SecureRandom random = new SecureRandom();
 
 
     public StandardLockService() {
@@ -94,76 +97,96 @@ public class StandardLockService implements LockService {
         boolean createdTable = false;
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc",  database);
 
-        if (!hasDatabaseChangeLogLockTable()) {
+        int maxIterations = 10;
+        for (int i = 0; i < maxIterations; i++) {
             try {
-                executor.comment("Create Database Lock Table");
-                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-                database.commit();
-                Scope.getCurrentScope().getLog(getClass()).fine(
-                        "Created database lock table with name: " +
-                                database.escapeTableName(
+                if (!hasDatabaseChangeLogLockTable(true)) {
+                    try {
+                        executor.comment("Create Database Lock Table");
+                        executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+                        database.commit();
+                        Scope.getCurrentScope().getLog(getClass()).fine(
+                                "Created database lock table with name: " +
+                                        database.escapeTableName(
+                                                database.getLiquibaseCatalogName(),
+                                                database.getLiquibaseSchemaName(),
+                                                database.getDatabaseChangeLogLockTableName()
+                                        )
+                        );
+                        this.hasDatabaseChangeLogLockTable = true;
+                        createdTable = true;
+                        hasDatabaseChangeLogLockTable = true;
+                    } catch (DatabaseException e) {
+                        if ((e.getMessage() != null) && e.getMessage().contains("exist")) {
+                            //hit a race condition where the table got created by another node.
+                            Scope.getCurrentScope().getLog(getClass()).fine("Database lock table already appears to exist " +
+                                    "due to exception: " + e.getMessage() + ". Continuing on");
+                            // If another node already created the table, then we need to rollback this current transaction,
+                            // otherwise servers like Postgres will not allow continued use of the same connection, failing with
+                            // a message like "current transaction is aborted, commands ignored until end of transaction block"
+                            if (database instanceof PostgresDatabase) {
+                                database.rollback();
+                            }
+                        }  else {
+                            throw e;
+                        }
+                    }
+                }
+
+                if (!isDatabaseChangeLogLockTableInitialized(createdTable, true)) {
+                    executor.comment("Initialize Database Lock Table");
+                    executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
+                    database.commit();
+                }
+
+                if (executor.updatesDatabase() && (database instanceof DerbyDatabase) && ((DerbyDatabase) database)
+                        .supportsBooleanDataType() || database.getClass().isAssignableFrom(DB2Database.class) && ((DB2Database) database)
+                        .supportsBooleanDataType()) {
+                    //check if the changelog table is of an old smallint vs. boolean format
+                    String lockTable = database.escapeTableName(
+                            database.getLiquibaseCatalogName(),
+                            database.getLiquibaseSchemaName(),
+                            database.getDatabaseChangeLogLockTableName()
+                    );
+                    Object obj = executor.queryForObject(
+                            new RawSqlStatement(
+                                    "SELECT MIN(locked) AS test FROM " + lockTable + " FETCH FIRST ROW ONLY"
+                            ), Object.class
+                    );
+                    if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
+                        executor.execute(
+                                new DropTableStatement(
                                         database.getLiquibaseCatalogName(),
                                         database.getLiquibaseSchemaName(),
-                                        database.getDatabaseChangeLogLockTableName()
+                                        database.getDatabaseChangeLogLockTableName(),
+                                        false
                                 )
-                );
-            } catch (DatabaseException e) {
-                if ((e.getMessage() != null) && e.getMessage().contains("exists")) {
-                    //hit a race condition where the table got created by another node.
-                    Scope.getCurrentScope().getLog(getClass()).fine("Database lock table already appears to exist " +
-                            "due to exception: " + e.getMessage() + ". Continuing on");
-                    // If another node already created the table, then we need to commit this current transaction,
-                    // otherwise servers like Postgres will not allow continued use of the same connection, failing with
-                    // a message like "current transaction is aborted, commands ignored until end of transaction block"
-                    database.commit();
-                }  else {
+                        );
+                        executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+                        executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
+                    }
+                }
+            } catch (Exception e) {
+                if (i == maxIterations - 1) {
                     throw e;
+                } else {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Failed to create or initialize the lock table, trying again, iteration " + (i + 1) + " of " + maxIterations, e);
+                    try {
+                        Thread.sleep(random.nextInt(1000));
+                    } catch (InterruptedException ex) {
+                        Scope.getCurrentScope().getLog(getClass()).warning("Lock table retry loop thread sleep interrupted", ex);
+                    }
                 }
             }
-            this.hasDatabaseChangeLogLockTable = true;
-            createdTable = true;
-            hasDatabaseChangeLogLockTable = true;
         }
-
-        if (!isDatabaseChangeLogLockTableInitialized(createdTable)) {
-            executor.comment("Initialize Database Lock Table");
-            executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
-            database.commit();
-        }
-
-        if (executor.updatesDatabase() && (database instanceof DerbyDatabase) && ((DerbyDatabase) database)
-                .supportsBooleanDataType() || database.getClass().isAssignableFrom(DB2Database.class) && ((DB2Database) database)
-    			.supportsBooleanDataType()) {
-            //check if the changelog table is of an old smallint vs. boolean format
-            String lockTable = database.escapeTableName(
-                    database.getLiquibaseCatalogName(),
-                    database.getLiquibaseSchemaName(),
-                    database.getDatabaseChangeLogLockTableName()
-            );
-            Object obj = executor.queryForObject(
-                    new RawSqlStatement(
-                            "SELECT MIN(locked) AS test FROM " + lockTable + " FETCH FIRST ROW ONLY"
-                    ), Object.class
-            );
-            if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
-                executor.execute(
-                        new DropTableStatement(
-                                database.getLiquibaseCatalogName(),
-                                database.getLiquibaseSchemaName(),
-                                database.getDatabaseChangeLogLockTableName(),
-                                false
-                        )
-                );
-                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-                executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
-            }
-        }
-
     }
 
-
-    public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated) throws DatabaseException {
-        if (!isDatabaseChangeLogLockTableInitialized) {
+    /**
+     * Determine whether the databasechangeloglock table has been initialized.
+     * @param forceRecheck if true, do not use any cached information, and recheck the actual database
+     */
+    public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated, final boolean forceRecheck) {
+        if (!isDatabaseChangeLogLockTableInitialized || forceRecheck) {
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
 
             try {
@@ -193,8 +216,12 @@ public class StandardLockService implements LockService {
         return hasChangeLogLock;
     }
 
-    public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
-        if (hasDatabaseChangeLogLockTable == null) {
+    /**
+     * Check whether the databasechangeloglock table exists in the database.
+     * @param forceRecheck if true, do not use any cached information and check the actual database
+     */
+    public boolean hasDatabaseChangeLogLockTable(boolean forceRecheck) {
+        if (forceRecheck || hasDatabaseChangeLogLockTable == null) {
             try {
                 hasDatabaseChangeLogLockTable = SnapshotGeneratorFactory.getInstance()
                         .hasDatabaseChangeLogLockTable(database);
@@ -205,6 +232,9 @@ public class StandardLockService implements LockService {
         return hasDatabaseChangeLogLockTable;
     }
 
+    public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
+        return hasDatabaseChangeLogLockTable(false);
+    }
 
     @Override
     public void waitForLock() throws LockException {
