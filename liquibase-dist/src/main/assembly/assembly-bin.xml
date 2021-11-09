@@ -50,7 +50,7 @@
     </fileSets>
     <files>
         <file>
-            <source>${project.build.directory}/liquibase-${liquibase.version}.jar</source>
+            <source>${project.build.directory}/liquibase-0-SNAPSHOT.jar</source>
             <destName>liquibase.jar</destName>
             <fileMode>0644</fileMode>
         </file>
