@@ -18,7 +18,11 @@ jobs:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
             const extensions = [
-              "liquibase-postgresql"
+              "liquibase-postgresql",
+              "liquibase-oracle",
+              "liquibase-cassandra",
+              "liquibase-hanadb",
+              "liquibase-hibernate"
             ];
 
             for (extension of extensions) {
