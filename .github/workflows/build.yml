@@ -230,7 +230,7 @@ jobs:
 
       - name: Coordinate Liquibase-Pro
         uses: actions/github-script@v5
-        if: ${{ needs.setup.outputs.standAlonePR == 'false' }}
+        if: "false" # ${{ needs.setup.outputs.standAlonePR == 'false' }}
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
