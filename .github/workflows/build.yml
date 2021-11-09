@@ -35,7 +35,11 @@ jobs:
 
             let proStatusMessage = "success";
             let proFailed = false;
-            if ( branch.runStatus != "completed") {
+
+            if (!branch.workflowId) {
+              proStatusMessage = "does not have a ran workflow";
+              proFailed = true
+            } else if ( branch.runStatus != "completed") {
               proStatusMessage = "build is "+ branch.runStatus;
               proFailed = true
             } else if ( branch.runConclusion != "success") {
@@ -166,28 +170,28 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Download liquibase-pro
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          github_token: ${{ secrets.BOT_TOKEN }}
-          workflow: build.yml
-          workflow_conclusion: success
-          branch: "${{ needs.setup.outputs.proBranchName }}"
-          name: liquibase-pro-modules
-          path: download/liquibase-pro
-          repo: liquibase/liquibase-pro
+#      - name: Download liquibase-pro
+#        uses: dawidd6/action-download-artifact@v2
+#        with:
+#          github_token: ${{ secrets.BOT_TOKEN }}
+#          workflow: build.yml
+#          workflow_conclusion: success
+#          branch: "${{ needs.setup.outputs.proBranchName }}"
+#          name: liquibase-pro-modules
+#          path: download/liquibase-pro
+#          repo: liquibase/liquibase-pro
 
       - name: Install Built Modules
         run: |
           (find . -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
-          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-pro/liquibase-pro-0-SNAPSHOT.jar
+#          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-pro/liquibase-pro-0-SNAPSHOT.jar
 
       - name: Build & Sign Artifacts
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          mvn -B -pl liquibase-dist -P liquibase-pro package
+          mvn -B -pl liquibase-dist -P !liquibase-pro package
           (cd liquibase-dist && src/main/package/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
