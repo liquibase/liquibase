@@ -116,7 +116,7 @@ public class StandardLockService implements LockService {
                     throw e;
                 }
             }
-            this.hasDatabaseChangeLogLockTable = true;
+            
             createdTable = true;
             hasDatabaseChangeLogLockTable = true;
         }
