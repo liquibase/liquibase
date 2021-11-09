@@ -47,7 +47,6 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
 
     @Override
     public void validate(CommandScope commandScope) throws IllegalArgumentException {
-        Scope.getCurrentScope().getUI().sendMessage("Source of STRICT value: " + GlobalConfiguration.STRICT.getCurrentConfiguredValue().getProvidedValue().getSourceDescription());
         boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
         SortedSet<String> invalidKeys = new TreeSet<>();
         for (Map.Entry<Object, Object> entry : this.properties.entrySet()) {
@@ -101,7 +100,6 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
                     + "' command in " + StringUtil.lowerCaseFirst(sourceDescription) + "':\n"
                     + StringUtil.join(invalidKeys, "\n")
                     + "\nTo define keys that could apply to any command, prefix it with 'liquibase.command.'\nTo disable strict checking, remove 'strict' from the file.";
-                Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
                 throw new IllegalArgumentException(message);
             } else {
                 Scope.getCurrentScope().getLog(getClass()).warning("Potentially ignored key(s) in " + StringUtil.lowerCaseFirst(sourceDescription) + "\n" + StringUtil.join(invalidKeys, "\n"));
