@@ -120,8 +120,12 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                         continue;
                     }
 
-                    for (Object key : ((Map) value).keySet()) {
+                    for (Object key : new HashSet<>(((Map) value).keySet())) {
                         Object mapValue = ((Map) value).get(key);
+                        if (mapValue == null) {
+                            ((Map) value).remove(key);
+                        }
+
                         if (mapValue instanceof LiquibaseSerializable) {
                             ((Map) value).put(key, toMap((LiquibaseSerializable) mapValue));
                         } else if (mapValue instanceof Collection) {
