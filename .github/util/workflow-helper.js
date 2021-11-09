@@ -6,7 +6,18 @@ module.exports = ({github, context}) => {
 
     return {
         getCurrentBranch: function() {
-            return context.payload.pull_request.head.ref;
+            if (context.payload.pull_request) {
+                return this.cleanBranchRef(context.payload.pull_request.head.ref);
+            } else {
+                return this.cleanBranchRef(context.payload.ref);
+            }
+        },
+        getCurrentSha: function() {
+            if (context.payload.pull_request) {
+                return this.cleanBranchRef(context.payload.pull_request.head.sha);
+            } else {
+                return this.cleanBranchRef(context.payload.after);
+            }
         },
 
         cleanBranchRef: function(branch) {
@@ -17,7 +28,11 @@ module.exports = ({github, context}) => {
 
         findMatchingBranch: async function (owner, repo, branchesToCheck) {
             if (!branchesToCheck) {
-                branchesToCheck = [context.payload.pull_request.head.ref, context.payload.pull_request.base.ref, "main", "master"]
+                if (context.payload.pull_request) {
+                    branchesToCheck = [context.payload.pull_request.head.ref, context.payload.pull_request.base.ref, "main", "master"]
+                } else {
+                    branchesToCheck = [context.payload.ref, "main", "master"]
+                }
             }
 
             for (let branchName of branchesToCheck) {
