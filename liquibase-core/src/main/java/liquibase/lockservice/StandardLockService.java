@@ -27,6 +27,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
 import java.security.SecureRandom;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
