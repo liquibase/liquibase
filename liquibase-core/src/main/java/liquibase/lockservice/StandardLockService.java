@@ -158,9 +158,7 @@ public class StandardLockService implements LockService {
                     // If another node already created the table, then we need to rollback this current transaction,
                     // otherwise servers like Postgres will not allow continued use of the same connection, failing with
                     // a message like "current transaction is aborted, commands ignored until end of transaction block"
-                    if (database instanceof PostgresDatabase) {
-                        database.rollback();
-                    }
+                    database.rollback();
                     try {
                         Thread.sleep(random.nextInt(1000));
                     } catch (InterruptedException ex) {
