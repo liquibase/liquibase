@@ -220,7 +220,7 @@ public class StandardLockService implements LockService {
      * Check whether the databasechangeloglock table exists in the database.
      * @param forceRecheck if true, do not use any cached information and check the actual database
      */
-    public boolean hasDatabaseChangeLogLockTable(boolean forceRecheck) {
+    private boolean hasDatabaseChangeLogLockTable(boolean forceRecheck) {
         if (forceRecheck || hasDatabaseChangeLogLockTable == null) {
             try {
                 hasDatabaseChangeLogLockTable = SnapshotGeneratorFactory.getInstance()
