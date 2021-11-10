@@ -101,36 +101,20 @@ public class StandardLockService implements LockService {
         for (int i = 0; i < maxIterations; i++) {
             try {
                 if (!hasDatabaseChangeLogLockTable(true)) {
-                    try {
-                        executor.comment("Create Database Lock Table");
-                        executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-                        database.commit();
-                        Scope.getCurrentScope().getLog(getClass()).fine(
-                                "Created database lock table with name: " +
-                                        database.escapeTableName(
-                                                database.getLiquibaseCatalogName(),
-                                                database.getLiquibaseSchemaName(),
-                                                database.getDatabaseChangeLogLockTableName()
-                                        )
-                        );
-                        this.hasDatabaseChangeLogLockTable = true;
-                        createdTable = true;
-                        hasDatabaseChangeLogLockTable = true;
-                    } catch (DatabaseException e) {
-                        if ((e.getMessage() != null) && e.getMessage().contains("exist")) {
-                            //hit a race condition where the table got created by another node.
-                            Scope.getCurrentScope().getLog(getClass()).fine("Database lock table already appears to exist " +
-                                    "due to exception: " + e.getMessage() + ". Continuing on");
-                            // If another node already created the table, then we need to rollback this current transaction,
-                            // otherwise servers like Postgres will not allow continued use of the same connection, failing with
-                            // a message like "current transaction is aborted, commands ignored until end of transaction block"
-                            if (database instanceof PostgresDatabase) {
-                                database.rollback();
-                            }
-                        }  else {
-                            throw e;
-                        }
-                    }
+                    executor.comment("Create Database Lock Table");
+                    executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+                    database.commit();
+                    Scope.getCurrentScope().getLog(getClass()).fine(
+                            "Created database lock table with name: " +
+                                    database.escapeTableName(
+                                            database.getLiquibaseCatalogName(),
+                                            database.getLiquibaseSchemaName(),
+                                            database.getDatabaseChangeLogLockTableName()
+                                    )
+                    );
+                    this.hasDatabaseChangeLogLockTable = true;
+                    createdTable = true;
+                    hasDatabaseChangeLogLockTable = true;
                 }
 
                 if (!isDatabaseChangeLogLockTableInitialized(createdTable, true)) {
@@ -171,6 +155,12 @@ public class StandardLockService implements LockService {
                     throw e;
                 } else {
                     Scope.getCurrentScope().getLog(getClass()).fine("Failed to create or initialize the lock table, trying again, iteration " + (i + 1) + " of " + maxIterations, e);
+                    // If another node already created the table, then we need to rollback this current transaction,
+                    // otherwise servers like Postgres will not allow continued use of the same connection, failing with
+                    // a message like "current transaction is aborted, commands ignored until end of transaction block"
+                    if (database instanceof PostgresDatabase) {
+                        database.rollback();
+                    }
                     try {
                         Thread.sleep(random.nextInt(1000));
                     } catch (InterruptedException ex) {
