@@ -14,11 +14,27 @@ jobs:
       fail-fast: false
       matrix:
         extension:
-          - liquibase-postgresql
-          - liquibase-oracle
+          - docker
+          - liquibase-bigquery
+          - liquibase-cache
           - liquibase-cassandra
+          - liquibase-cosmosdb
+          - liquibase-db2i
+          - liquibase-filechangelog
           - liquibase-hanadb
           - liquibase-hibernate
+          - liquibase-maxdb
+          - liquibase-modify-column
+          - liquibase-mongodb
+          - liquibase-mssql
+          - liquibase-oracle
+          - liquibase-postgresql
+          - liquibase-redshift
+          - liquibase-snowflake
+          - liquibase-sqlfire
+          - liquibase-teradata
+          - liquibase-vertica
+          - liquibase-yugabytedb
     steps:
       - name: Release liquibase/${{ matrix.extension }} v${{ github.event.inputs.version }}
         uses: actions/github-script@v4
