@@ -85,9 +85,15 @@ jobs:
           mvn -B versions:use-dep-version -Dincludes=org.liquibase:liquibase-core -DdepVersion=${{ needs.setup.outputs.liquibaseVersion }} -DforceVersion=true
 
           git add pom.xml
-          git commit -m "Version Bumped to ${{ needs.setup.outputs.extensionVersion }}"
+          if git diff-index --cached --quiet HEAD --
+          then
+            echo "Nothing new to commit"
+          else
+            git commit -m "Version Bumped to ${{ needs.setup.outputs.extensionVersion }}"
+          fi
           git tag -a -m "Version Bumped to ${{ needs.setup.outputs.extensionVersion }}" liquibase-bigquery-${{ needs.setup.outputs.extensionVersion }}
           git push "https://liquibot:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:${{ github.ref }} --follow-tags --tags
+
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
 
