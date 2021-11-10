@@ -113,7 +113,6 @@ jobs:
     name: Integration Test
     runs-on: ubuntu-latest
     needs: build
-    if: false #disabled during development
     steps:
       - uses: actions/checkout@v2
 
