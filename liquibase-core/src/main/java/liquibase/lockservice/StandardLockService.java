@@ -181,11 +181,15 @@ public class StandardLockService implements LockService {
         }
     }
 
+    public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated) {
+        return isDatabaseChangeLogLockTableInitialized(tableJustCreated, false);
+    }
+
     /**
      * Determine whether the databasechangeloglock table has been initialized.
      * @param forceRecheck if true, do not use any cached information, and recheck the actual database
      */
-    public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated, final boolean forceRecheck) {
+    private boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated, final boolean forceRecheck) {
         if (!isDatabaseChangeLogLockTableInitialized || forceRecheck) {
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
 
