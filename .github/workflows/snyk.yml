@@ -32,7 +32,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: monitor
-          args: --all-projects --org=datical --policy-path=.snyk
+          args: --all-projects --org=datical
 
       # - name: Set up JDK
       #   uses: actions/setup-java@v2
