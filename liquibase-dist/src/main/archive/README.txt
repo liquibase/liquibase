@@ -76,6 +76,6 @@ Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here:
 
 ----------------------------------------
 The program is subject to the license agreement, copyright, trademark, patent, and other laws.
-Copyright 2020 Liquibase, Inc. All rights reserved.
+Copyright 2021 Liquibase, Inc. All rights reserved.
 
 

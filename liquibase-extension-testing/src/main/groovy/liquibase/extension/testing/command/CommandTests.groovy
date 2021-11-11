@@ -970,7 +970,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private int count
 
         CannedConsoleWrapper(String[] answers) {
-            super(null)
+            super(null, false)
             this.answers = answers
         }
 

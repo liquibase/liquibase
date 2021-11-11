@@ -1,5 +1,60 @@
 Liquibase Core Changelog
 ===========================================
+Changes in version 4.6.1(2021.11.04)
+
+- Fixed the liquibase-pro-4.6.xsd
+
+Changes in version 4.6.0(2021.11.04)
+
+Windows and Mac/Linux Liquibase installers and the .tar.gz and .zip installation files include the most common JDBC drivers in the installation package:
+ - DB2
+ - Firebird
+ - H2
+ - HSQLDB
+ - PostgreSQL
+ - MariaDB
+ - MSSQL
+ - Oracle
+ - SQLite
+
+**Note:** Since Liquibase 4.6.0 provides driver jar files, the size of the installation package is bigger than the size of the installation package in earlier versions.
+ - Quality checks have configurable severity and exit codes
+ - The quality checks bulk-set command
+ - New Quality checks
+	- Static check: Warn when a table truncation is detected
+	- Dynamic check: Warn when granting specific privileges
+	- Static check: Warn when the `GRANT WITH ADMIN OPTION` statement is detected
+	- Static check: Warn when the `GRANT WITH GRANT OPTION` statement is detected
+ - The `liquibase.checks-settings.conf` file is unencoded in version 4.6.0 and later versions for easier inspection that allows you to resolve a merge conflict in source control. Liquibase backs up encoded files in the working directory, and you can still use previous versions by specifying the `--checks-settings-file` parameter in the CLI, as an environment variable, or as a property in the liquibase.properties file.
+ - Changed the XSD default `errorOnMissingOrEmpty` attribute to `true` for the `includeAll` attribute in the XML _changelog_ file (#1960)
+ - Added support for deferrable primary keys in the `createTable` Change Type. (#1597)
+ - Added support for the `constraintName` attribute in the `dropNotNullConstraint` attribute. Updated the `addNotNullConstraint` rollback logic to pass the constraint name to the generated `dropNotNullConstraint` change (#1492)
+ - Improved code and added tests in the `liquibase.util` package
+ - Changed the default encoding to UTF-8. Added a new global `liquibase.fileEncoding` setting, which you can set as `--file-encoding=ASCII` in the CLI, `liquibase.fileEncoding: ASCII` in the liquibase.properties file, and `LIQUIBASE_FILE_ENCODING=ASCII` as an environment variable (#1445)
+
+ - [PRO] Added a message to warn Liquibase Pro users when they have noncompliant Liquibase environment variables if the `strict` attribute is set to `true`
+ - [PRO] Fixed the issue with Liquibase 4.4.0 and later versions to prompt if the Liquibase Pro license key is expired or invalid.
+ - [PRO] Fixed Liquibase Pro SQL Plus _changesets_ failures with the Kerberos setup
+ - [PRO] Fixed the `snapshot` command using for CockroachDB with Liquibase Pro license key
+ - Fixed an issue with running quality checks on Windows when using a configuration file created on Linux/macOS
+ - Fixed the `ChangesetCommentCheck` check to handle a lack of comments in the `tagDatabase` Change Type
+ - Fixed the default severity for the existing `liquibase.checks-settings.conf` files
+ - Fixed the `checks customize` and `checks copy` commands to handle directories with spaces
+ - Fixed the `schemas` and `includeSchema` attributes for the `generateChangeLog` command in Liquibase 4.4 and later versions
+ - Fixed the quality checks customization issue when using Git Bash
+ - Fixed the message for the quality checks severity customization
+ - Fixed the quality checks halting execution when the checks settings file contains entries for rules which do not exist in the system. Liquibase skips unknown checks and continues the execution
+ - Fixed the quality checks customization issue when using Git Bash
+ - Fixed the issue with Liquibase inserting a wrong default datetime value into MySQL. The PR fixes (#1395)
+ - Fixed the `insert` Change Type with the `valueSequenceNext` and `valueSequenceCurrent` attributes to use the schema specified on a statement level of a _changeset_ (#1304)
+ - Fixed the issue with Liquibase not handling case-sensitive primary key names in the `dropPrimaryKey` attribute for PostgreSQL (#1933)
+ - Fixed the `sqlFile` Change Type to handle the `encoding` attribute(#1760)
+ - Fixed the issue with Liquibase throwing a null pointer exception in the CLI if the `LicenseService` interface cannot be loaded because of the missing `jaxb` dependencies
+ - Fixed the `UniqueConstraintSnapshotGenerator` class switching to a bulk query after four unique constraints (#1996)
+ - Fixed the issue with Liquibase formatted SQL _changesets_ that are skipped if there is a space in the `--changeset` line (#1919)
+ - Fixed the `dropAll` command failing in the PostgreSQL database when the Liquibase-Cassandra extension is in the `liquibase/lib` directory (#47)
+ - Fixed Liquibase not reading the `liquibaseSchemaName` and `liquibaseCatalogName` configuration settings (#2000)
+ - Fixed the issue with Liquibase incorrectly inserting a long CLOB value in the database. Added integration tests.
 
 Changes in version 4.5.0(2021.09.21)
 

@@ -109,7 +109,7 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
                 }
             } else if (hubProjectName != null) {
                 if (hubProjectName.length() > 255) {
-                    throw new CommandExecutionException("\nThe project COMMAND_NAME you gave is longer than 255 characters\n\n");
+                    throw new CommandExecutionException("\nThe project name you gave is longer than 255 characters\n\n");
                 }
                 project = service.createProject(new Project().setName(hubProjectName));
                 if (project == null) {
@@ -168,7 +168,7 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
                         ui.sendMessage("\nNo project created\n");
                         continue;
                     } else if (projectName.length() > 255) {
-                        ui.sendMessage("\nThe project COMMAND_NAME you entered is longer than 255 characters\n");
+                        ui.sendMessage("\nThe project name you entered is longer than 255 characters\n");
                         continue;
                     }
                     project = service.createProject(new Project().setName(projectName));
@@ -219,7 +219,7 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
         final UIService ui = Scope.getCurrentScope().getUI();
 
         String hubUrl = HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue();
-        String input = ui.prompt("Please enter your Project COMMAND_NAME and press [enter].  This is editable in your Liquibase Hub account at " + hubUrl, null, null, String.class);
+        String input = ui.prompt("Please enter your Project name and press [enter].  This is editable in your Liquibase Hub account at " + hubUrl, null, null, String.class);
         return StringUtil.trimToEmpty(input);
     }
 
