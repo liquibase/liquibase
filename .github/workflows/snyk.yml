@@ -16,36 +16,18 @@ jobs:
       - name: Checkout Master Branch
         uses: actions/checkout@v2
 
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: 'adopt'
+
       - name: Run Snyk Test to check for vulnerabilities
-        id: test
-        uses: snyk/actions/maven@master
-        timeout-minutes: 10
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-          args: --fail-on=all --severity-threshold=high --all-projects --org=datical
-
-      - name: Run Snyk Monitor
-        uses: snyk/actions/maven@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: monitor
-          args: --all-projects --org=datical
-
-      # - name: Set up JDK
-      #   uses: actions/setup-java@v2
-      #   with:
-      #     java-version: 11
-      #     distribution: 'adopt'
-
-      # - name: Run Snyk Test to check for vulnerabilities
-      #   env:
-      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #     SNYK_ORG: datical
-      #   run: |
-      #     mvn -B test snyk:test -DskipTests
+          SNYK_ORG: datical
+        run: |
+          mvn -B test snyk:test -DskipTests
 
       # - name: Run Snyk Monitor
       #   uses: snyk/actions/maven@master
