@@ -1,12 +1,11 @@
 package liquibase.util
 
-import org.hamcrest.MatcherAssert
+
 import org.hamcrest.Matchers
 import spock.lang.Specification
 import spock.lang.Unroll
-import spock.util.matcher.HamcrestMatchers
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat
 
 class CollectionUtilTest extends Specification {
 
@@ -38,7 +37,7 @@ class CollectionUtilTest extends Specification {
         }
 
         where:
-        original | expected
+        original        | expected
         []              | [[]]
         ['a']           | [[], ['a']]
         ['a', 'b']      | [[], ['a'], ['b'], ['a', 'b']]
@@ -54,9 +53,9 @@ class CollectionUtilTest extends Specification {
         permutations Matchers.containsInAnyOrder(expected.toArray())
 
         where:
-        original | expected
-        new HashMap() | []
-        null | []
+        original                                   | expected
+        new HashMap()                              | []
+        null                                       | []
         ["a": [1, 2, 3]]                           | [["a": 1], ["a": 2], ["a": 3]]
         ["a": [1, 2, 3], "b": [5, 6]]              | [["a": 1, "b": 5], ["a": 2, "b": 5], ["a": 3, "b": 5],
                                                       ["a": 1, "b": 6], ["a": 2, "b": 6], ["a": 3, "b": 6]]
@@ -65,5 +64,4 @@ class CollectionUtilTest extends Specification {
                                                       ["a": 1, "b": 5, "c": 9], ["a": 2, "b": 5, "c": 9], ["a": 3, "b": 5, "c": 9],
                                                       ["a": 1, "b": 6, "c": 9], ["a": 2, "b": 6, "c": 9], ["a": 3, "b": 6, "c": 9]]
     }
-
 }

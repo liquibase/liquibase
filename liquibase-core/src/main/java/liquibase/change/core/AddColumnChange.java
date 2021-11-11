@@ -130,6 +130,16 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     if (constraintsConfig.getValidateForeignKey()!=null && !constraintsConfig.getValidateForeignKey()) {
                         foreignKeyConstraint.setValidateForeignKey(false);
                     }
+
+                    if (constraintsConfig.isDeleteCascade() != null) {
+                        foreignKeyConstraint.setDeleteCascade(constraintsConfig.isDeleteCascade());
+                    }
+                    if (constraintsConfig.isDeferrable() != null) {
+                        foreignKeyConstraint.setDeferrable(constraintsConfig.isDeferrable());
+                    }
+                    if (constraintsConfig.isInitiallyDeferred() != null) {
+                        foreignKeyConstraint.setInitiallyDeferred(constraintsConfig.isInitiallyDeferred());
+                    }
                     constraints.add(foreignKeyConstraint);
                 }
             }

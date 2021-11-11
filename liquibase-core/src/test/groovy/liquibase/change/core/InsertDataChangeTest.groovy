@@ -6,6 +6,8 @@ import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.statement.SequenceNextValueFunction
+import liquibase.statement.core.InsertStatement
 
 public class InsertDataChangeTest extends StandardChangeTest {
 
@@ -60,5 +62,22 @@ public class InsertDataChangeTest extends StandardChangeTest {
         then:
         assert change.checkStatus(database).status == ChangeStatus.Status.unknown
         assert change.checkStatus(database).message == "Cannot check insertData status"
+    }
+
+    def "generateStatements adds schema to nested sequences"() {
+        when:
+        def change = new InsertDataChange(
+                schemaName: "my_schema",
+                tableName: "my_table",
+                columns: [
+                        new ColumnConfig(name: "id", type: "int", valueSequenceNext: new SequenceNextValueFunction("my_sequence")),
+                        new ColumnConfig(name: "name", type: "varchar(50)"),
+                ],
+        )
+        def statements = change.generateStatements(new MockDatabase())
+
+        then:
+        ((SequenceNextValueFunction) ((InsertStatement) statements[0]).getColumnValue("id")).schemaName == "my_schema"
+
     }
 }

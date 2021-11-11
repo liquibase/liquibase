@@ -34,8 +34,6 @@ import liquibase.ui.ConsoleUIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.xml.XMLResourceBundle;
-import liquibase.util.xml.XmlResourceBundleControl;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -72,8 +70,6 @@ public class Main {
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
     private static final Logger LOG = Scope.getCurrentScope().getLog(Main.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    private static XMLResourceBundle commandLineHelpBundle = ((XMLResourceBundle) getBundle
-            ("liquibase/i18n/liquibase-commandline-helptext", new XmlResourceBundleControl()));
 
     protected ClassLoader classLoader;
     protected String driver;
@@ -104,7 +100,6 @@ public class Main {
     protected String changeExecListenerPropertiesFile;
     protected Boolean promptForNonLocalDatabase;
     protected Boolean includeSystemClasspath;
-    protected Boolean strict = Boolean.TRUE;
     protected String defaultsFile = "liquibase.properties";
     protected String diffTypes;
     protected String changeSetAuthor;
@@ -1048,7 +1043,7 @@ public class Main {
      * Reads various execution parameters from an InputStream and sets our internal state according to the values
      * found.
      *
-     * @param propertiesInputStream an InputStream from a Java properties file
+     * @param  propertiesInputStream       an InputStream from a Java properties file
      * @throws IOException                 if there is a problem reading the InputStream
      * @throws CommandLineParsingException if an invalid property is encountered
      */
@@ -1064,9 +1059,7 @@ public class Main {
             return;
         }
 
-        if (props.containsKey("strict")) {
-            strict = Boolean.valueOf(props.getProperty("strict"));
-        }
+        boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
 
         //
         // Load property values into
@@ -1168,7 +1161,7 @@ public class Main {
     protected void printHelp(PrintStream stream) {
         this.logLevel = Level.WARNING.toString();
 
-        String helpText = commandLineHelpBundle.getString("commandline-helptext");
+        String helpText = "Help not available when running liquibase.integration.commandline.Main directly. Use liquibase.integration.commandline.LiquibaseCommandLine";
         stream.println(helpText);
     }
 
