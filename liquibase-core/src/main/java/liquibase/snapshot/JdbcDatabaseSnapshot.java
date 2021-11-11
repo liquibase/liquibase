@@ -213,7 +213,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         sql += "ORDER BY i.NAME, k.COLSEQ";
 
                         returnList.addAll(executeAndExtract(sql, database));
-                    } else if (database instanceof MySQLDatabase) {
+                    } else if (!(database instanceof MariaDBDatabase) && database instanceof MySQLDatabase) {
 
                         //mysql 8.0.13 introduced support for indexes on `lower(first_name)` which comes back in an "expression" column
                         String filterConditionValue = "NULL";
