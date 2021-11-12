@@ -314,8 +314,7 @@ jobs:
                 "workflow_id": "test.yml",
                 "ref": testsBranch.name,
                 "inputs": {
-                  "liquibaseCommit": helper.getCurrentSha(),
-                  "databases": "[\"oracleproxy:12.2\"]"
+                  "liquibaseCommit": helper.getCurrentSha()
                 }
               });
             }
