@@ -80,13 +80,15 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if ((statement.getCycle() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase)) {
+        if ((statement.getCycle() != null) &&
+                (database instanceof OracleDatabase || database instanceof PostgresDatabase
+                || database instanceof PostgresDatabase || database instanceof MSSQLDatabase)) {
             if (statement.getCycle()) {
                 buffer.append(" CYCLE ");
             } else {
-                if(database instanceof OracleDatabase) {
+                if(database instanceof OracleDatabase || database instanceof MariaDBDatabase) {
                     buffer.append(" NOCYCLE ");
-                } else {
+                } else if(database instanceof PostgresDatabase || database instanceof MSSQLDatabase) {
                     buffer.append(" NO CYCLE ");
                 }
             }
