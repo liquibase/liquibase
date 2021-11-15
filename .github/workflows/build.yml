@@ -1,12 +1,15 @@
 name: Build and Test
 
-## Temporarily moved to pull_request so branch builds from this
 on:
   pull_request:
     types:
       - opened
       - reopened
       - synchronize
+  push:
+    branches:
+      - master
+      - main
 
 jobs:
   setup:
