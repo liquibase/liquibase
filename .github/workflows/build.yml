@@ -95,14 +95,16 @@ jobs:
           distribution: 'adopt'
       - name: Build & Test
         run: |
-          mvn -B -Dbuild.branch=${{ github.event.pull_request.head.ref ||  github.event.ref }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ github.event.pull_request.head.sha || github.event.sha }} -pl '!liquibase-dist' clean test package
+          mvn -B -Dbuild.branch=${{ github.event.pull_request.head.ref ||  github.event.ref }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ github.event.pull_request.head.sha || github.event.sha }} -pl '!liquibase-dist' clean test package surefire-report:report
           find . -name original-*.jar -exec rm {} \;
       - name: Archive Test Results
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: liquibase-test-results-jdk${{ matrix.java }}
-          path: ./**/target/surefire-reports
+          path: |
+            ./**/target/surefire-reports
+            ./**/target/site
 
       - name: Archive Modules
         if: ${{ matrix.java == 8}}
