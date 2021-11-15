@@ -11,7 +11,7 @@ class LiquibaseUtilTest extends Specification {
     }
 
     @Unroll
-    def getBuildVersionInfo() {
+    def "getBuildVersionInfo from mock data"() {
         when:
         LiquibaseUtil.liquibaseBuildProperties = new Properties()
         LiquibaseUtil.liquibaseBuildProperties.put("build.version", version)
@@ -40,5 +40,16 @@ class LiquibaseUtilTest extends Specification {
         "DEV"   | false      | false   | "[Core: test-branch/524/7904bb/2021-09-17 14:06+0000]"
         "DEV"   | true       | true    | "[local build]"
         "DEV"   | true       | false   | "[local build]"
+    }
+
+    def "getBuildVersionInfo actuallyRead"() {
+        when:
+        LiquibaseUtil.liquibaseBuildProperties = null
+
+        then:
+        //ensures no exceptions are thrown
+        LiquibaseUtil.getBuildVersionInfo() != null
+
+
     }
 }
