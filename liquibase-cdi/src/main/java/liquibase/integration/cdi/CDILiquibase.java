@@ -96,7 +96,7 @@ public class CDILiquibase implements Extension {
     public void onStartup() {
         Logger log = Scope.getCurrentScope().getLog(getClass());
 
-        log.info("Booting Liquibase " + LiquibaseUtil.getBuildVersion());
+        log.info("Booting Liquibase " + LiquibaseUtil.getBuildVersionInfo());
         String hostName;
         try {
             hostName = NetUtil.getLocalHostName();

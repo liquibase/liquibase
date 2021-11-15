@@ -301,7 +301,7 @@ public class LiquibaseCommandLine {
 
                     if (!wasHelpOrVersionRequested()) {
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
-                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion()));
+                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersionInfo()));
 
                         final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                         if (licenseService == null) {
@@ -523,7 +523,7 @@ public class LiquibaseCommandLine {
                         System.getProperty("java.version")
                 ),
                 "",
-                "Liquibase Version: " + LiquibaseUtil.getBuildVersion(),
+                "Liquibase Version: " + LiquibaseUtil.getBuildVersionInfo(),
                 licenseInfo
         );
     }
