@@ -95,7 +95,7 @@ jobs:
           distribution: 'adopt'
       - name: Build & Test
         run: |
-          mvn -B -Dbuild.branch=${{ github.event.pull_request.head.ref ||  github.event.ref }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ github.event.pull_request.head.sha || github.event.sha }} -pl '!liquibase-dist' clean test package surefire-report:report
+          mvn -B -Dbuild.branch=${{ github.event.pull_request.head.ref ||  github.event.ref }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ github.event.pull_request.head.sha || github.event.sha }} -DtrimStackTrace=false -pl '!liquibase-dist' clean test package surefire-report:report
           find . -name original-*.jar -exec rm {} \;
       - name: Archive Test Results
         if: ${{ always() }}
@@ -141,7 +141,7 @@ jobs:
       - name: Start Docker Databases
         run: docker-compose -f ./liquibase-integration-tests/docker/docker-compose.yml up -d
       - name: Run Tests
-        run: mvn -B jar:jar jar:test-jar surefire:test
+        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false
       - name: Stop Docker Databases
         run: docker-compose -f ./liquibase-integration-tests/docker/docker-compose.yml down
       - name: Archive Test Results
