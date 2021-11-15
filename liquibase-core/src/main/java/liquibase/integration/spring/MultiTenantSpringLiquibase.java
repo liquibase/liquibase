@@ -7,6 +7,7 @@ import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.Logger;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 
@@ -14,8 +15,10 @@ import javax.naming.*;
 import javax.sql.DataSource;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A wrapper of Liquibase suitable in multi-tenant environments where multiple
@@ -41,7 +44,10 @@ import java.util.Map;
  * @author ladislav.gazo
  */
 public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoaderAware {
-    private final List<DataSource> dataSources = new ArrayList<>();
+	private final List<DataSource> dataSources = new ArrayList<>();
+	@Autowired(required = false)
+	private Set<MountRegistrable> mountRegistrable = Collections.emptySet();
+
 
     /** Defines the location of data sources suitable for multi-tenant environment. */
 	private String jndiBase;
@@ -151,6 +157,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
             log.info("Initializing Liquibase for schema " + schema);
             SpringLiquibase liquibase = getSpringLiquibase(dataSource);
 			liquibase.setDefaultSchema(schema);
+			liquibase.setMountRegistrable(mountRegistrable);
 			liquibase.afterPropertiesSet();
             log.info("Liquibase ran for schema " + schema);
         }
@@ -309,5 +316,11 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		this.dataSource = dataSource;
 	}
 
-	
+	public Set<MountRegistrable> getMountRegistrable() {
+		return mountRegistrable;
+	}
+
+	public void setMountRegistrable(Set<MountRegistrable> mountRegistrable) {
+		this.mountRegistrable = mountRegistrable;
+	}
 }

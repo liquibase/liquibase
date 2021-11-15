@@ -1,9 +1,9 @@
 package liquibase.lockservice;
 
+import liquibase.integration.spring.Registrable;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,11 +11,11 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author John Sanda
  */
-public class LockServiceFactory {
+public class LockServiceFactory implements Registrable<LockService> {
 
     private static LockServiceFactory instance;
 
-	  private List<LockService> registry = new ArrayList<>();
+	  private final Set<LockService> registry = new HashSet<>();
 
 	  private Map<Database, LockService> openLockServices = new ConcurrentHashMap<>();
 
@@ -47,8 +47,9 @@ public class LockServiceFactory {
         }
 	  }
 
+    @Override
     public void register(LockService lockService) {
-        registry.add(0, lockService);
+        registry.add(lockService);
     }
 
     public LockService getLockService(Database database) {

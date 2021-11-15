@@ -15,14 +15,19 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A Spring-ified wrapper for Liquibase.
@@ -75,6 +80,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected File rollbackFile;
 
 	protected boolean testRollbackOnUpdate = false;
+
+    @Autowired(required = false)
+    private Set<MountRegistrable> mountRegistrable = Collections.emptySet();
 
 	public SpringLiquibase() {
 		super();
@@ -263,6 +271,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		Connection c = null;
 		Liquibase liquibase = null;
         try {
+            doMountRegistrable(mountRegistrable);
             c = getDataSource().getConnection();
             liquibase = createLiquibase(c);
             generateRollbackFile(liquibase);
@@ -275,6 +284,25 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             }
         }
     }
+
+    void doMountRegistrable(Set<MountRegistrable> mountRegistrables) {
+        if (CollectionUtils.isEmpty(mountRegistrables)) {
+            return;
+        }
+
+        mountRegistrables.
+                forEach(mr -> {
+                    final Class<Registrable> registerPoint = mr.registerPoint();
+                    final Registrable registrableFactory = RegistrableFactoryHandler.fromFactoryClz(registerPoint);
+                    if (Objects.nonNull(registrableFactory)) {
+                        mr.register(registrableFactory);
+                    } else {
+                        Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not find target factory" + registerPoint + "to mount."
+                        );
+                    }
+                });
+    }
+
 
     private void generateRollbackFile(Liquibase liquibase) throws LiquibaseException {
         if (rollbackFile != null) {
@@ -332,6 +360,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 		return liquibase;
 	}
+
+    private void loadCustomLockServiceRegisters() {
+    }
 
 	/**
 	 * Subclasses may override this method add change some database settings such as
@@ -430,6 +461,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
 
 	}
+
+    public Set<MountRegistrable> getMountRegistrable() {
+        return mountRegistrable;
+    }
+
+    public void setMountRegistrable(Set<MountRegistrable> mountRegistrable) {
+        this.mountRegistrable = mountRegistrable;
+    }
 
 	@Override
     public String toString() {

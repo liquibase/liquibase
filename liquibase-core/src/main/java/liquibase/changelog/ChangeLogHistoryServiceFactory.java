@@ -3,12 +3,13 @@ package liquibase.changelog;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.spring.Registrable;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ChangeLogHistoryServiceFactory {
+public class ChangeLogHistoryServiceFactory implements Registrable<ChangeLogHistoryService> {
 
     private static ChangeLogHistoryServiceFactory instance;
 
@@ -46,6 +47,7 @@ public class ChangeLogHistoryServiceFactory {
         }
     }
 
+    @Override
     public void register(ChangeLogHistoryService changeLogHistoryService) {
         registry.add(0, changeLogHistoryService);
     }
