@@ -207,7 +207,7 @@ jobs:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          mvn -B -pl liquibase-dist -P liquibase-pro package
+          mvn -B -pl liquibase-dist package
           (cd liquibase-dist && src/main/package/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
