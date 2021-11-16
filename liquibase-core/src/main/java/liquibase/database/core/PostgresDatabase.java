@@ -136,8 +136,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 String.format(
                     "Your PostgreSQL software version (%d.%d) seems to indicate that your software is " +
                         "older than %d.%d. This means that you might encounter strange behaviour and " +
-                        "incorrect error messages.",
-                    majorVersion, minorVersion, majorVersion, minorVersion));
+                        "incorrect error messages.", majorVersion, minorVersion, majorVersion, minorVersion));
             return true;
         }
 
