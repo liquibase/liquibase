@@ -175,7 +175,10 @@ public class TableOutput {
     // can be used as a multi-line cell in an output table.
     //
     private static String padColumn(String col, int maxWidth) {
-        if (col == null || col.length() <= maxWidth) {
+        // If the column is null or shorter than the maxWidth AND the column does not contain a line separator,
+        // return it unmodified. If it contains a line separator, then it does not matter if it is shorter than the max
+        // width, because it must be split on the line separator to flow into multiple lines.
+        if ((col == null || col.length() <= maxWidth) && (col != null && !col.contains(System.lineSeparator()))) {
             return col;
         }
         String[] parts = col.split(" ");
