@@ -187,7 +187,6 @@ jobs:
 
       - name: Download liquibase-pro
         uses: dawidd6/action-download-artifact@v2
-        if: "false" # ${{ always() }}
         with:
           github_token: ${{ secrets.BOT_TOKEN }}
           workflow: build.yml
@@ -200,14 +199,14 @@ jobs:
       - name: Install Built Modules
         run: |
           (find . -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
-#          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-pro/liquibase-pro-0-SNAPSHOT.jar
+          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-pro/liquibase-pro-0-SNAPSHOT.jar
 
       - name: Build & Sign Artifacts
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          mvn -B -pl liquibase-dist package
+          mvn -B -pl liquibase-dist -P liquibase-pro package
           (cd liquibase-dist && src/main/package/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
@@ -240,7 +239,7 @@ jobs:
     name: Finish Build
     runs-on: ubuntu-latest
     needs: [ setup, build, integration-test, package ]
-    if: "false" # ${{ always() }}
+    if: ${{ always() }}
     steps:
       - uses: actions/checkout@v2
 
