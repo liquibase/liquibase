@@ -98,6 +98,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
           distribution: 'adopt'
+          cache: 'maven'
       - name: Build & Test
         run: |
           mvn -B -Dbuild.branch=${{ needs.setup.outputs.thisBranchName }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ needs.setup.outputs.thisSha }} -DtrimStackTrace=false -pl '!liquibase-dist' clean test package surefire-report:report
@@ -131,6 +132,7 @@ jobs:
         with:
           java-version: '8'
           distribution: 'adopt'
+          cache: 'maven'
       - name: Restore Built Code Cache
         uses: actions/cache@v2
         with:
@@ -182,6 +184,7 @@ jobs:
           distribution: 'adopt'
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
+          cache: 'maven'
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 

@@ -21,6 +21,10 @@ module.exports = ({github, context}) => {
         },
 
         cleanBranchRef: function(branch) {
+            if (!branch) {
+                return branch;
+            }
+
             return branch.replace("refs/heads/", "")
                 .replace("refs/heads/tags", "");
 
@@ -65,6 +69,12 @@ module.exports = ({github, context}) => {
 
                     if (pulls.data.length === 0) {
                         console.log(`No pull request for branch ${branchName}`);
+
+                        if (branchName === "master" || branchName === "main") {
+                            console.log(`Expect no pull request for ${branchName}`);
+                        } else {
+                            continue;
+                        }
                     } else {
                         console.log(`Found PR for branch ${branchName}`);
 
