@@ -147,7 +147,7 @@
         <dependency> <!-- enables mocking of classes (in addition to interfaces) -->
             <groupId>cglib</groupId>
             <artifactId>cglib-nodep</artifactId>
-            <version>3.1</version>
+            <version>3.3.0</version>
             <scope>test</scope>
         </dependency>
         <dependency> <!-- enables mocking of classes without default constructor (together with CGLIB) -->
@@ -454,6 +454,8 @@
             </activation>
             <properties>
                 <maven.compiler.release>8</maven.compiler.release>
+                <!-- CDILiquibaseTest is currently failing without this setting -->
+                <argLine>--illegal-access=permit</argLine>
             </properties>
         </profile>
         <profile>
