@@ -34,7 +34,7 @@ import java.util.Map;
 public class CreateProcedureChange extends AbstractChange implements DbmsTargetedChange {
     private String comments;
     private String catalogName;
-    private String schemaName;
+    private String schemaNam
     private String procedureName;
     private String procedureText;
     private String dbms;
