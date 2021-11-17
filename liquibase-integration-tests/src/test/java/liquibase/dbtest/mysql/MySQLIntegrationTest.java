@@ -17,8 +17,7 @@ import org.junit.Test;
 
 import java.sql.SQLSyntaxErrorException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -55,6 +54,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Override
     public void testRunChangeLog() throws Exception {
+        fail("Testing");
         super.testRunChangeLog();    //To change body of overridden methods use File | Settings | File Templates.
     }
 
