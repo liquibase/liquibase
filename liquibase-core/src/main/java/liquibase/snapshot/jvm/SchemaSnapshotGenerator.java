@@ -12,7 +12,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -129,7 +129,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
         try {
             schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas();
             while (schemas.next()) {
-                returnList.add(JdbcUtils.getValueForColumn(schemas, "TABLE_SCHEM", database));
+                returnList.add(JdbcUtil.getValueForColumn(schemas, "TABLE_SCHEM", database));
             }
         } finally {
             if (schemas != null) {

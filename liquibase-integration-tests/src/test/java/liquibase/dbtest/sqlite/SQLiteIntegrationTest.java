@@ -73,4 +73,17 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
         assertTrue(true);
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        try {
+            String url = getDatabase().getConnection().getURL()
+                    .replaceFirst("jdbc:sqlite:", ""); // remove the prefix of the URL jdbc:sqlite:C:\path\to\tmp\dir\liquibase.db
+            Scope.getCurrentScope().getLog(getClass()).info("Marking SQLite database as delete on exit: " + url);
+            // Want to delete the sqlite db on jvm exit so that future runs are not using stale data.
+            new File(url).deleteOnExit();
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).warning("Failed to mark SQLite database as delete on exit.", e);
+        }
+    }
 }

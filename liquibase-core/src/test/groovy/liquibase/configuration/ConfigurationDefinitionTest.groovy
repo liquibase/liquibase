@@ -1,6 +1,7 @@
 package liquibase.configuration
 
 import liquibase.Scope
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -36,7 +37,7 @@ class ConfigurationDefinitionTest extends Specification {
                 .build()
 
         then:
-        assert Scope.currentScope.getSingleton(LiquibaseConfiguration).getRegisteredDefinitions().contains(definition)
+        assert Scope.currentScope.getSingleton(LiquibaseConfiguration).getRegisteredDefinitions(false).contains(definition)
         definition.key == "test.canBuild.testProperty"
         definition.defaultValue == "Default Value"
         definition.description == "A description here"
@@ -63,13 +64,13 @@ class ConfigurationDefinitionTest extends Specification {
         then:
         currentValue.value == expectedValue
         currentValue.getProvidedValue().describe() == expectedSource
-        ConfigurationDefinition.wasDefaultValueUsed(currentValue) == defaultValueUsed
+        currentValue.wasDefaultValueUsed() == defaultValueUsed
 
         where:
         key            | defaultValue         | expectedValue        | expectedSource                                              | defaultValueUsed
         "currentValue" | "Default Value"      | "From scope"         | "Scoped value 'test.currentValue'"                          | false
         "unsetValue"   | "Configured Default" | "Configured Default" | "Default value 'test.unsetValue'"                           | true
-        "unsetValue"   | null                 | null                 | "No configuration or default value found 'test.unsetValue'" | false
+        "unsetValue"   | null                 | null                 | "No configured value found 'test.unsetValue'" | false
 
     }
 
@@ -182,7 +183,7 @@ class ConfigurationDefinitionTest extends Specification {
     @Unroll
     def equalsKey() {
         expect:
-        liquibase.GlobalConfiguration.SHOULD_RUN.equalsKey(input) == expected
+        LiquibaseCommandLineConfiguration.SHOULD_RUN.equalsKey(input) == expected
 
         where:
         input                  | expected

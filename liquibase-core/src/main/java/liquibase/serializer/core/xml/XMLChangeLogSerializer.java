@@ -48,6 +48,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     private Document currentChangeLogFileDOM;
 
     private static final String XML_VERSION = "1.1";
+    private final LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
 
     public XMLChangeLogSerializer() {
         try {
@@ -97,7 +98,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-        documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
+        documentBuilder.setEntityResolver(resolver);
 
         Document doc = documentBuilder.newDocument();
         doc.setXmlVersion(XML_VERSION);
@@ -167,7 +168,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             } else {
                 existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
 
-                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue())), out);
+                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())), out);
             }
             out.flush();
         }

@@ -11,7 +11,7 @@ import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -318,7 +318,7 @@ public class H2Database extends AbstractJdbcDatabase {
                 } catch (SQLException e) {
                     Scope.getCurrentScope().getLog(getClass()).info("Could not read current schema name: "+e.getMessage());
                 } finally {
-                    JdbcUtils.close(resultSet, statement);
+                    JdbcUtil.close(resultSet, statement);
                 }
             }
         }

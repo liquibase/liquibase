@@ -4,13 +4,13 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.integration.cdi.annotations.LiquibaseType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
@@ -96,7 +96,7 @@ public class CDILiquibase implements Extension {
     public void onStartup() {
         Logger log = Scope.getCurrentScope().getLog(getClass());
 
-        log.info("Booting Liquibase " + LiquibaseUtil.getBuildVersion());
+        log.info("Booting Liquibase " + LiquibaseUtil.getBuildVersionInfo());
         String hostName;
         try {
             hostName = NetUtil.getLocalHostName();
@@ -106,10 +106,10 @@ public class CDILiquibase implements Extension {
             return;
         }
 
-        if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
+        if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
             log.info(String.format("Liquibase did not run on %s because %s was set to false.",
                     hostName,
-                GlobalConfiguration.SHOULD_RUN.getKey()
+                LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey()
             ));
             return;
         }

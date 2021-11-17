@@ -25,7 +25,10 @@ import liquibase.statement.core.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
+import java.sql.SQLException;
 import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
@@ -106,7 +109,7 @@ public class StandardLockService implements LockService {
                                 )
                 );
             } catch (DatabaseException e) {
-                if ((e.getMessage() != null) && e.getMessage().contains("exists")) {
+                if (isLockTableExistsException(e)) {
                     //hit a race condition where the table got created by another node.
                     Scope.getCurrentScope().getLog(getClass()).fine("Database lock table already appears to exist " +
                             "due to exception: " + e.getMessage() + ". Continuing on");
@@ -155,6 +158,21 @@ public class StandardLockService implements LockService {
 
     }
 
+    /**
+     * @return true if the given exception is because the lock table already exists. Used for better logging and handling of race conditions.
+     */
+    protected boolean isLockTableExistsException(final DatabaseException e) {
+        final Throwable cause = e.getCause();
+        if (cause instanceof SQLException) {
+            // now database specific error code evaluation can follow, currently for sqlserver, only
+            if (database instanceof MSSQLDatabase) {
+                // see https://docs.microsoft.com/en-us/sql/relational-databases/errors-events/database-engine-events-and-errors?view=sql-server-ver15
+                return ((SQLException) cause).getErrorCode() == 2714;
+            }
+        }
+        // fallback to default
+        return e.getMessage() != null && e.getMessage().toLowerCase().contains("exists");
+    }
 
     public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated) throws DatabaseException {
         if (!isDatabaseChangeLogLockTableInitialized) {
@@ -387,10 +405,17 @@ public class StandardLockService implements LockService {
                     locked = (Boolean) lockedValue;
                 }
                 if ((locked != null) && locked) {
+                    Object lockGranted = columnMap.get("LOCKGRANTED");
+                    final Date castedLockGranted;
+                    if (lockGranted instanceof LocalDateTime) {
+                        castedLockGranted = Date.from(((LocalDateTime) lockGranted).atZone(ZoneId.systemDefault()).toInstant());
+                    } else {
+                        castedLockGranted = (Date)lockGranted;
+                    }
                     allLocks.add(
                             new DatabaseChangeLogLock(
                                     ((Number) columnMap.get("ID")).intValue(),
-                                    (Date) columnMap.get("LOCKGRANTED"),
+                                    castedLockGranted,
                                     (String) columnMap.get("LOCKEDBY")
                             )
                     );

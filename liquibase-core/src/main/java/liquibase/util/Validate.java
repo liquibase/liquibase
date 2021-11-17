@@ -8,7 +8,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
  */
 public class Validate {
 
-
     /**
      * Throws exception if passed object is null
      */

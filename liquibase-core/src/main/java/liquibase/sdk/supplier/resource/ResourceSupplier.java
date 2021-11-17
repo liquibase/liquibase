@@ -35,7 +35,7 @@ public class ResourceSupplier {
         @Override
         public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
             InputStream stream = null;
-            String encoding = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
             if (streamPath.toLowerCase().endsWith("csv")) {
                 stream = new ByteArrayInputStream(USERS_CSV.getBytes(encoding));
             } else if (streamPath.toLowerCase().endsWith("my-logic.sql")) {

@@ -249,7 +249,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 procedureText = "";
             }
 
-            String encoding = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
             if (procedureText != null) {
                 try {
                     stream = new ByteArrayInputStream(procedureText.getBytes(encoding));

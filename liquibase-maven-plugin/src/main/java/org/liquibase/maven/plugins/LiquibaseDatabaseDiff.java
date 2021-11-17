@@ -4,7 +4,6 @@ package org.liquibase.maven.plugins;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
-import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
@@ -19,6 +18,7 @@ import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.liquibase.maven.property.PropertyElement;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
@@ -41,6 +41,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.referenceDriver"
      */
+    @PropertyElement
     protected String referenceDriver;
 
     /**
@@ -48,6 +49,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.referenceUrl"
      */
+    @PropertyElement
     protected String referenceUrl;
 
     /**
@@ -55,6 +57,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.referenceUsername"
      */
+    @PropertyElement
     protected String referenceUsername;
 
     /**
@@ -63,6 +66,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.referencePassword"
      */
+    @PropertyElement
     protected String referencePassword;
 
     /**
@@ -70,6 +74,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.referenceDefaultCatalogName"
      */
+    @PropertyElement
     protected String referenceDefaultCatalogName;
 
     /**
@@ -77,6 +82,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.referenceDefaultSchemaName"
      */
+    @PropertyElement
     protected String referenceDefaultSchemaName;
     /**
      * If this parameter is set, the changelog needed to "fix" differences between the two databases is output. If the file exists, it is appended to.
@@ -84,24 +90,28 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.diffChangeLogFile"
      */
+    @PropertyElement
     protected String diffChangeLogFile;
     /**
      * Include the catalog in the diff output? If this is null then the catalog will not be included
      *
      * @parameter property="liquibase.diffIncludeCatalog"
      */
+    @PropertyElement
     protected boolean diffIncludeCatalog;
     /**
      * Include the schema in the diff output? If this is null then the schema will not be included
      *
      * @parameter property="liquibase.diffIncludeSchema"
      */
+    @PropertyElement
     protected boolean diffIncludeSchema;
     /**
      * Include the tablespace in the diff output? If this is null then the tablespace will not be included
      *
      * @parameter property="liquibase.diffIncludeTablespace"
      */
+    @PropertyElement
     protected boolean diffIncludeTablespace;
     /**
      * List of diff types to include in Change Log expressed as a comma separated list from: tables, views, columns, indexes, foreignkeys, primarykeys, uniqueconstraints, data.
@@ -109,24 +119,28 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.diffTypes"
      */
+    @PropertyElement
     protected String diffTypes;
     /**
      * Objects to be excluded from the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
      *
      * @parameter property="liquibase.diffExcludeObjects"
      */
+    @PropertyElement
     protected String diffExcludeObjects;
     /**
      * Objects to be included in the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
      *
      * @parameter property="liquibase.diffIncludeObjects"
      */
+    @PropertyElement
     protected String diffIncludeObjects;
     /**
      * The server id in settings.xml to use when authenticating with.
      *
      * @parameter property="liquibase.referenceServer"
      */
+    @PropertyElement
     protected String referenceServer;
 
     /**
@@ -136,6 +150,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      * @parameter property="liquibase.schemas"
      *
      */
+    @PropertyElement
     protected String schemas;
 
     /**
@@ -145,6 +160,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      * @parameter property="liquibase.referenceSchemas"
      *
      */
+    @PropertyElement
     protected String referenceSchemas;
 
     /**
@@ -154,6 +170,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      * @parameter property="liquibase.outputSchemas"
      *
      */
+    @PropertyElement
     protected String outputSchemas;
 
     /**
@@ -163,6 +180,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      * @parameter property="liquibase.outputFile"
      *
      */
+    @PropertyElement
     protected String outputFile;
 
     /**
@@ -171,6 +189,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.format"
      */
+    @PropertyElement
     protected String format;
 
     @Override
@@ -200,7 +219,8 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
             boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
             if (!hasProLicense) {
                 throw new LiquibaseException("The command 'diff --format=" + format +
-                        "' requires a Liquibase Pro License, available at https://www.liquibase.org/download or sales@liquibase.com");
+                        "' requires a Liquibase Pro License, available at https://www.liquibase.org/download or sales@liquibase.com." +
+                        " Options include the liquibase.pro.licenseKey in the defaults file, adding a flag in the CLI, and more. Learn more at https://docs.liquibase.com");
             }
         }
         ClassLoader cl = null;
@@ -247,14 +267,29 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         } else {
             PrintStream printStream = createPrintStream();
             if (isFormattedDiff()) {
-                CommandScope liquibaseCommand = new CommandScope("formattedDiff");
+                CommandScope liquibaseCommand = new CommandScope("internalDiff");
                 CommandScope diffCommand =
                         CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtil.trimToNull(diffTypes),
                                 schemaComparisons, objectChangeFilter, printStream);
+                CompareControl compareControl = new CompareControl(schemaComparisons, diffTypes);
 
                 liquibaseCommand.addArgumentValue("format", format);
                 liquibaseCommand.addArgumentValue("diffCommand", diffCommand);
-                liquibaseCommand.execute();
+                liquibaseCommand.addArgumentValue("targetDatabase", db);
+                liquibaseCommand.addArgumentValue("referenceDatabase", referenceDatabase);
+                liquibaseCommand.addArgumentValue("compareControl", compareControl);
+                liquibaseCommand.addArgumentValue("objectChangeFilter", objectChangeFilter);
+                if (StringUtil.isEmpty(diffTypes)) {
+                    liquibaseCommand.addArgumentValue("snapshotTypes", new Class[0]);
+                } else {
+                    liquibaseCommand.addArgumentValue("snapshotTypes", diffTypes);
+                }
+
+                CommandScope formattedDiffCommand = new CommandScope("internalFormattedDiff");
+                formattedDiffCommand.addArgumentValue("format", format);
+                formattedDiffCommand.addArgumentValue("diffCommand", liquibaseCommand);
+
+                formattedDiffCommand.execute();
             } else {
                 CommandLineUtils.doDiff(referenceDatabase, db, StringUtil.trimToNull(diffTypes), schemaComparisons, objectChangeFilter, printStream);
             }
@@ -292,8 +327,8 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         super.printSettings(indent);
         getLog().info(indent + "referenceDriver: " + referenceDriver);
         getLog().info(indent + "referenceUrl: " + referenceUrl);
-        getLog().info(indent + "referenceUsername: " + referenceUsername);
-        getLog().info(indent + "referencePassword: " + referencePassword);
+        getLog().info(indent + "referenceUsername: " + "*****");
+        getLog().info(indent + "referencePassword: " + "*****");
         getLog().info(indent + "referenceDefaultSchema: " + referenceDefaultSchemaName);
         getLog().info(indent + "diffChangeLogFile: " + diffChangeLogFile);
     }
@@ -311,9 +346,4 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
             referencePassword = "";
         }
     }
-
-    @Override
-    protected boolean isPromptOnNonLocalDatabase() {
-        return false;
-  }
 }

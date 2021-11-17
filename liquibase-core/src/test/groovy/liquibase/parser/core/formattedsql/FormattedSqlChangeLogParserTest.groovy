@@ -5,7 +5,6 @@ import liquibase.change.core.RawSQLChange
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
-import liquibase.configuration.LiquibaseConfiguration
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
@@ -27,7 +26,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
  --changeset nvoxland:1
 select * from table1;
 
---changeset nvoxland:2 (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
+--changeset "n voxland":"change 2" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
 create table table1 (
     id int primary key
 );
@@ -89,7 +88,6 @@ select 1
             "--precondition-invalid-type 123\n" +
             "select 1;"
 
-
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
@@ -127,8 +125,8 @@ select 1
         changeLog.getChangeSets().get(0).getDbmsSet() == null
 
 
-        changeLog.getChangeSets().get(1).getAuthor() == "nvoxland"
-        changeLog.getChangeSets().get(1).getId() == "2"
+        changeLog.getChangeSets().get(1).getAuthor() == "n voxland"
+        changeLog.getChangeSets().get(1).getId() == "change 2"
         changeLog.getChangeSets().get(1).getChanges().size() == 1
         ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getSql().replace("\r\n", "\n") == "create table table1 (\n    id int primary key\n);"
         ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getEndDelimiter() == "X"
@@ -227,6 +225,21 @@ select 1
 
     }
 
+    def parse_startsWithSpace() throws Exception {
+        when:
+        String changeLogWithSpace = "   \n\n" +
+                "--liquibase formatted sql\n\n" +
+                "--changeset John Doe:12345\n" +
+                "create table test (id int);\n"
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithSpace).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 1
+        changeLog.getChangeSets().get(0).getAuthor() == "John Doe"
+        changeLog.getChangeSets().get(0).getId() == "12345"
+    }
+
     def parse_authorWithSpace() throws Exception {
         when:
         String changeLogWithSpace = "--liquibase formatted sql\n\n" +
@@ -287,10 +300,13 @@ select 1
 
         then:
         ((RawSQLChange) changeLog.changeSets[0].changes[0]).sql.replace("\r\n", "\n") == expected
+        changeLog.changeSets[0].author == "John Doe"
+        changeLog.changeSets[0].id == "12345"
 
         where:
-        example                                                                                                  | expected
-        "--liquibase formatted sql\n--changeset John Doe:12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/" | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
+        example                                                                                                       | expected
+        "--liquibase formatted sql\n--changeset John Doe:12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"      | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
+        "--liquibase formatted sql\n--changeset John Doe: 12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/" | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
     }
 
     @LiquibaseService(skip = true)

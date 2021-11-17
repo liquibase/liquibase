@@ -28,7 +28,7 @@ public class MD5Util {
         MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");
-            digest.update(input.getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
+            digest.update(input.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -46,6 +46,10 @@ public class MD5Util {
     }
 
     public static String computeMD5(InputStream stream) {
+        if (stream == null) {
+            return null;
+        }
+
         MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");
