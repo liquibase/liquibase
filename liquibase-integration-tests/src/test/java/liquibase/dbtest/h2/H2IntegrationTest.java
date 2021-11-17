@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.PrintStream;
 import java.sql.SQLException;
 
+import static org.junit.Assert.fail;
+
 public class H2IntegrationTest extends AbstractIntegrationTest {
 
     private static final String H2_SQLSTATE_OBJECT_ALREADY_EXISTS = "90078";
@@ -40,6 +42,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void diffToPrintStream() throws Exception{
+        fail("Testing");
         if (getDatabase() == null) {
             return;
         }

@@ -54,7 +54,6 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Override
     public void testRunChangeLog() throws Exception {
-        fail("Testing");
         super.testRunChangeLog();    //To change body of overridden methods use File | Settings | File Templates.
     }
 
