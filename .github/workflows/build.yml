@@ -6,10 +6,14 @@ on:
       - opened
       - reopened
       - synchronize
+    branches-ignore:
+      - github-action-* #to allow testing of build logic in branches, don't do PR builds for github-action-* branches and instead use branch builds
+
   push:
     branches:
       - master
       - main
+      - github-action-*
 
 jobs:
   setup:
@@ -219,12 +223,21 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
           mkdir -p artifacts
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz* artifacts
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip* artifacts
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar* artifacts
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip artifacts
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts
           cp liquibase-dist/target/liquibase-*-installer-* artifacts
+
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-sources.jar artifacts
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar artifacts
+
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts
+          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-sources.jar artifacts
+          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-javadoc.jar artifacts
+
+          cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts
 
           liquibase-dist/src/main/package/sign-artifacts.sh artifacts
 
