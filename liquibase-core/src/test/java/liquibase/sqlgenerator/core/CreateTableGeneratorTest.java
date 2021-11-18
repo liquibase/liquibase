@@ -1159,4 +1159,24 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
                 "CONSTRAINT DIFFERENT UNIQUE (SINGLE_UNIQUE_KEY))";
         assertEquals(expectedSql, generatedSql[0].toSql());
     }
+    @Test
+    public void testGeneratedAlwaysPostgresDatabase() throws Exception {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database instanceof PostgresDatabase) {
+                MockDatabaseConnection conn = new MockDatabaseConnection();
+                conn.setDatabaseMajorVersion(9);
+                database.setConnection(conn);
+                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+                statement.addColumn(
+                        COLUMN_NAME1,
+                        DataTypeFactory.getInstance().fromDescription("int", database),
+                        new ColumnConfig().setDefaultValue("GENERATED ALWAYS AS (rank_1 / 2) STORED").getDefaultValueObject()
+                );
+
+                Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+
+                assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME INTEGER GENERATED ALWAYS AS (rank_1 / 2) STORED)", generatedSql[0].toSql());
+            }
+        }
+    }
 }
