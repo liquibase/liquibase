@@ -224,17 +224,6 @@ public class StringClauses {
         return replaceImpl(key, StringUtil.trimToEmpty(newValue));
     }
 
-    /**
-     * Replaces the given key with a new string. If the existing key does not exist, throws IllegalArgumentException
-     */
-    public StringClauses replaceIfExists(String key, String newValue) throws IllegalArgumentException {
-        if (contains(key)) {
-            return replaceImpl(key, StringUtil.trimToEmpty(newValue));
-        } else {
-            return this;
-        }
-    }
-
     public boolean contains(String key) {
         return clauses.containsKey(key.toLowerCase());
     }
@@ -457,6 +446,19 @@ public class StringClauses {
 
     public ClauseIterator getClauseIterator() {
         return new ClauseIterator(clauses);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StringClauses that = (StringClauses) o;
+        return Objects.equals(separator, that.separator) && Objects.equals(start, that.start) && Objects.equals(end, that.end) && Objects.equals(clauses, that.clauses);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(separator, start, end, clauses);
     }
 
     @Override

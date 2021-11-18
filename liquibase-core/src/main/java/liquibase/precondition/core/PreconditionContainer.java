@@ -274,6 +274,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         this.setOnErrorMessage(parsedNode.getChildValue(null, "onErrorMessage", String.class));
         this.setOnFail(parsedNode.getChildValue(null, "onFail", String.class));
         this.setOnFailMessage(parsedNode.getChildValue(null, "onFailMessage", String.class));
+        this.setOnSqlOutput(parsedNode.getChildValue(null, "onSqlOutput", String.class));
 
         super.load(parsedNode, resourceAccessor);
     }

@@ -2,22 +2,27 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.liquibase</groupId>
-		<artifactId>liquibase-base-module</artifactId>
-		<version>${liquibase.version}</version>
-		<relativePath>../base-module.pom.xml</relativePath>
-	</parent>
+    <parent>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase</artifactId>
+        <version>0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>liquibase-extension-examples</artifactId>
+    <artifactId>liquibase-extension-examples</artifactId>
 	<packaging>jar</packaging>
 	<description>Liquibase Examples</description>
 
 	<properties>
 		<targetMavenVersion>3.3.9</targetMavenVersion>
 	</properties>
+
 	<dependencies>
-  </dependencies>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
 	<build>
       <resources>

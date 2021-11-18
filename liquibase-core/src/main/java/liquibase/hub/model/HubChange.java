@@ -6,6 +6,7 @@ import liquibase.util.ISODateFormat;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 public class HubChange implements HubModel {
@@ -37,13 +38,13 @@ public class HubChange implements HubModel {
         this.comments = ranChangeSet.getComments();
         this.tag = ranChangeSet.getTag();
         this.liquibase = ranChangeSet.getLiquibaseVersion();
-        this.labels = ranChangeSet.getLabels().toString();
-        this.contexts = ranChangeSet.getContextExpression().toString();
         this.orderExecuted = ranChangeSet.getOrderExecuted();
-        this.md5sum = ranChangeSet.getLastCheckSum().toString();
         this.execType = ranChangeSet.getExecType().value;
         this.deploymentId = ranChangeSet.getDeploymentId();
         this.dateExecuted = ranChangeSet.getDateExecuted();
+        this.contexts = Objects.toString(ranChangeSet.getContextExpression(), null);
+        this.labels = Objects.toString(ranChangeSet.getLabels(), null);
+        this.md5sum = Objects.toString(ranChangeSet.getLastCheckSum(), null);
     }
 
     public HubChange(ChangeSet changeSet) {
@@ -52,20 +53,21 @@ public class HubChange implements HubModel {
         this.changesetFilename = changeSet.getFilePath();
         this.description = changeSet.getDescription();
         this.comments = changeSet.getComments();
-        this.labels = changeSet.getLabels().toString();
+        this.labels = Objects.toString(changeSet.getLabels(), null);
+        // Contexts can't be null because of ChangeSet constructor logic
         this.contexts = changeSet.getContexts().toString();
         this.orderExecuted = 0;
+        // CheckSum can't be null because of ChangeSet generateCheckSum logic
         this.md5sum = changeSet.generateCheckSum().toString();
         this.execType = "EXECUTED";
+
         ISODateFormat iso = new ISODateFormat();
         try {
             this.dateExecuted = iso.parse(new Date().toString());
-        }
-        catch (ParseException pe) {
+        } catch (ParseException pe) {
             this.dateExecuted = new Date();
         }
     }
-
 
     @Override
     public UUID getId() {

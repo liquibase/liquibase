@@ -18,7 +18,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.BooleanUtils;
+import liquibase.util.BooleanUtil;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtil;
 
@@ -49,7 +49,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
-        if (BooleanUtils.isTrue(((Column) example).getComputed()) || BooleanUtils.isTrue(((Column) example).getDescending())) {
+        if (BooleanUtil.isTrue(((Column) example).getComputed()) || BooleanUtil.isTrue(((Column) example).getDescending())) {
             return example;
         }
         Database database = snapshot.getDatabase();
