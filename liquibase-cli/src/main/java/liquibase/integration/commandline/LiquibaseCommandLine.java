@@ -242,8 +242,10 @@ public class LiquibaseCommandLine {
                     || exception instanceof CommandLineParsingException) {
                 System.err.println("Error parsing command line: " + bestMessage);
                 printUsage = true;
+            } else if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
+                System.err.println(bestMessage);
             } else {
-                System.err.println("Unexpected error running Liquibase: " + bestMessage);
+                System.err.println("\nUnexpected error running Liquibase: " + bestMessage);
                 System.err.println();
 
                 if (Level.OFF.equals(this.configuredLogLevel)) {
@@ -299,7 +301,7 @@ public class LiquibaseCommandLine {
 
                     if (!wasHelpOrVersionRequested()) {
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
-                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion()));
+                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersionInfo()));
 
                         final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                         if (licenseService == null) {
@@ -521,7 +523,7 @@ public class LiquibaseCommandLine {
                         System.getProperty("java.version")
                 ),
                 "",
-                "Liquibase Version: " + LiquibaseUtil.getBuildVersion(),
+                "Liquibase Version: " + LiquibaseUtil.getBuildVersionInfo(),
                 licenseInfo
         );
     }

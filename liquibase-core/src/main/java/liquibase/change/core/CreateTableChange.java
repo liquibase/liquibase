@@ -71,6 +71,8 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             isAutoIncrement |= columnType.isAutoIncrement();
             if ((constraints != null) && (constraints.isPrimaryKey() != null) && constraints.isPrimaryKey()) {
                 statement.addPrimaryKeyColumn(column.getName(), columnType, defaultValue, constraints.getValidatePrimaryKey(),
+                        constraints.isDeferrable() != null && constraints.isDeferrable(),
+                        constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred(),
                     constraints.getPrimaryKeyName(),constraints.getPrimaryKeyTablespace());
 
             } else {

@@ -14,7 +14,7 @@ public class UnexpectedChangesetsCommandStep extends AbstractCliWrapperCommandSt
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
-    public static final CommandArgumentDefinition<String> VERBOSE_ARG;
+    public static final CommandArgumentDefinition<Boolean> VERBOSE_ARG;
     public static final String[] COMMAND_NAME = {"unexpectedChangesets"};
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
@@ -41,7 +41,7 @@ public class UnexpectedChangesetsCommandStep extends AbstractCliWrapperCommandSt
                 .description("The root changelog").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Changeset contexts to match").build();
-        VERBOSE_ARG = builder.argument("verbose", String.class).required()
+        VERBOSE_ARG = builder.argument("verbose", Boolean.class)
                 .description("Verbose flag").build();
     }
 
