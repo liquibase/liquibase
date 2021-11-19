@@ -15,8 +15,10 @@ import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
+import liquibase.precondition.Precondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
 import liquibase.util.FilenameUtil;
 
@@ -32,7 +34,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final ThreadLocal<DatabaseChangeLog> PARENT_CHANGE_LOG = new ThreadLocal<>();
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseChangeLog.class);
 
-    private PreconditionContainer preconditionContainer = new PreconditionContainer();
+    private PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
     private String physicalFilePath;
     private String logicalFilePath;
     private String changeLogId;
@@ -92,11 +94,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     @Override
     public void setPreconditions(PreconditionContainer precond) {
-        if (precond == null) {
-            this.preconditionContainer = new PreconditionContainer();
-        } else {
-            preconditionContainer = precond;
-        }
+        this.preconditionContainer.addNestedPrecondition(precond);
     }
 
 
@@ -418,9 +416,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 break;
             }
             case "preConditions": {
-                this.preconditionContainer = new PreconditionContainer();
+                PreconditionContainer parsedContainer = new PreconditionContainer();
                 try {
-                    this.preconditionContainer.load(node, resourceAccessor);
+                    parsedContainer.load(node, resourceAccessor);
+                    this.preconditionContainer.addNestedPrecondition(parsedContainer);
+
                 } catch (ParsedNodeException e) {
                     e.printStackTrace();
                 }
@@ -655,6 +655,26 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public void clearCheckSums() {
         for (ChangeSet changeSet : getChangeSets()) {
             changeSet.clearCheckSum();
+        }
+    }
+
+    /**
+     * Holder for the PreconditionContainer for this changelog, plus any nested changelogs.
+     */
+    @LiquibaseService(skip = true)
+    private static class GlobalPreconditionContainer extends PreconditionContainer {
+
+        /**
+         * This container should always be TEST because it may contain a mix of containers which may or may not get tested during update-sql
+         */
+        @Override
+        public OnSqlOutputOption getOnSqlOutput() {
+            return OnSqlOutputOption.TEST;
+        }
+
+        @Override
+        public void addNestedPrecondition(Precondition precondition) {
+            super.addNestedPrecondition(precondition);
         }
     }
 

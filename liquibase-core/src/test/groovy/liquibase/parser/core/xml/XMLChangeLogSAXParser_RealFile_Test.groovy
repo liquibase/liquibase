@@ -194,16 +194,16 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getPhysicalFilePath() == path
 
         changeLog.getPreconditions() != null
-        changeLog.getPreconditions().getNestedPreconditions().size() == 2
+        changeLog.getPreconditions().getNestedPreconditions()[0].nestedPreconditions.size() == 2
 
-        changeLog.getPreconditions().getNestedPreconditions()[0].getName() == "runningAs"
-        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0]).getUsername() == "testUser"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions()[0].getName() == "runningAs"
+        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions()[0]).getUsername() == "testUser"
 
-        changeLog.getPreconditions().getNestedPreconditions().get(1).getName() == "or"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions()[0].getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions()[0]).getType() == "mssql"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1).getName() == "or"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions()[0].getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions()[0]).getType() == "mssql"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
 
         changeLog.getChangeSets().size() == 1
     }
