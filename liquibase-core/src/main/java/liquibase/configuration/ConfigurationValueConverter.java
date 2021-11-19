@@ -32,7 +32,7 @@ public interface ConfigurationValueConverter<DataType> {
         try {
             return Level.parse(stringLevel);
         } catch (IllegalArgumentException e) {
-            Scope.getCurrentScope().getUI().sendErrorMessage("WARNING:  Unknown log level " + stringLevel);
+            Scope.getCurrentScope().getUI().sendErrorMessage("WARNING:  Unknown log level " + stringLevel + ". Defaulting to 'INFO'");
             return Level.INFO;
         }
     };
