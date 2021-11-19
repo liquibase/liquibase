@@ -93,7 +93,7 @@ jobs:
         if: ${{ matrix.java == 8}}
         uses: actions/cache@v2
         with:
-          key: built-code-${{ github.sha }}
+          key: built-code-${{ needs.setup.outputs.thisSha }}
           path: ./**/target
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v2
@@ -140,7 +140,7 @@ jobs:
       - name: Restore Built Code Cache
         uses: actions/cache@v2
         with:
-          key: built-code-${{ github.sha }}
+          key: built-code-${{ needs.setup.outputs.thisSha }}
           path: ./**/target
 
       - name: Login to Artifactory
@@ -173,7 +173,7 @@ jobs:
       - name: Built Code Cache
         uses: actions/cache@v2
         with:
-          key: built-code-${{ github.sha }}
+          key: built-code-${{ needs.setup.outputs.thisSha }}
           path: ./**/target
       - name: Install4j Cache
         uses: actions/cache@v2
