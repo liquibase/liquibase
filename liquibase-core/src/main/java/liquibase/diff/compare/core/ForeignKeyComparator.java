@@ -45,40 +45,29 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
         ForeignKey thisForeignKey = (ForeignKey) databaseObject1;
         ForeignKey otherForeignKey = (ForeignKey) databaseObject2;
 
-        if ((thisForeignKey.getName() != null) && (otherForeignKey.getName() != null)) {
-            if (chain.isSameObject(thisForeignKey, otherForeignKey, accordingTo)) {
-                return true;
-            }
-        }
-
-        if ((thisForeignKey.getPrimaryKeyTable() == null) || (thisForeignKey.getForeignKeyTable() == null) ||
-            (otherForeignKey.getPrimaryKeyTable() == null) || (otherForeignKey.getForeignKeyTable() == null)) {
-            return false; //tables not set, have to rely on name
+        if (thisForeignKey.getForeignKeyTable() == null || otherForeignKey.getForeignKeyTable() == null) {
+            //tables not set, have to rely on name
+            return StringUtil.trimToEmpty(thisForeignKey.getName()).equalsIgnoreCase(otherForeignKey.getName());
         }
 
         if ((thisForeignKey.getForeignKeyColumns() != null) && (thisForeignKey.getPrimaryKeyColumns() != null) &&
-            (otherForeignKey.getForeignKeyColumns() != null) && (otherForeignKey.getPrimaryKeyColumns() != null)) {
-        boolean columnsTheSame;
-        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.toString(false);
-            }
-        };
+                (otherForeignKey.getForeignKeyColumns() != null) && (otherForeignKey.getPrimaryKeyColumns() != null)) {
+            boolean columnsTheSame;
+            StringUtil.StringUtilFormatter<Column> formatter = obj -> obj.toString(false);
 
-        if (accordingTo.isCaseSensitive()) {
+            if (accordingTo.isCaseSensitive()) {
                 columnsTheSame = StringUtil.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equals(StringUtil.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
                         StringUtil.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equals(StringUtil.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
-        } else {
+            } else {
                 columnsTheSame = StringUtil.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtil.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
                         StringUtil.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtil.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
+            }
+
+            return columnsTheSame &&
+                    DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getForeignKeyTable(), otherForeignKey.getForeignKeyTable(), chain.getSchemaComparisons(), accordingTo) &&
+                    DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getPrimaryKeyTable(), otherForeignKey.getPrimaryKeyTable(), chain.getSchemaComparisons(), accordingTo);
+
         }
-
-        return columnsTheSame &&
-                DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getForeignKeyTable(), otherForeignKey.getForeignKeyTable(), chain.getSchemaComparisons(), accordingTo) &&
-                DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getPrimaryKeyTable(), otherForeignKey.getPrimaryKeyTable(), chain.getSchemaComparisons(), accordingTo);
-
-    }
 
         return false;
     }
