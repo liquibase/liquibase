@@ -56,7 +56,7 @@ else
   done
   # Gather jars from a local liquibase_libs directory
   CP="$CP""$CP_SEPARATOR""liquibase_libs/"
-  for i in liquibase_lib/*.jar; do
+  for i in liquibase_libs/*.jar; do
     CP="$CP""$CP_SEPARATOR""$i"
   done
 fi
