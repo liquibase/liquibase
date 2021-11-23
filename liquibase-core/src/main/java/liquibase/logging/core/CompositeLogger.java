@@ -25,6 +25,10 @@ public class CompositeLogger extends AbstractLogger {
 
     @Override
     public void log(Level level, String message, Throwable e) {
+        if (level == Level.OFF) {
+            return;
+        }
+
         for (Logger logger : loggers) {
             logger.log(level, filterMessage(message), e);
         }
