@@ -5,6 +5,12 @@
 module.exports = ({github, context}) => {
 
     return {
+
+        getCurrentOrg: function() {
+            console.log("getCurrentOrg");
+            return "TODO";
+        },
+
         getCurrentBranch: function() {
             if (context.payload.pull_request) {
                 return this.cleanBranchRef(context.payload.pull_request.head.ref);
@@ -12,6 +18,7 @@ module.exports = ({github, context}) => {
                 return this.cleanBranchRef(context.payload.ref);
             }
         },
+
         getCurrentSha: function() {
             if (context.payload.pull_request) {
                 return this.cleanBranchRef(context.payload.pull_request.head.sha);

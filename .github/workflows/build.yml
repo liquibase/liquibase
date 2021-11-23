@@ -39,6 +39,7 @@ jobs:
 
             core.setOutput("thisSha", helper.getCurrentSha());
             core.setOutput("thisBranchName", helper.getCurrentBranch());
+            core.setOutput("thisOrgName", helper.getCurrentOrg());
 
             let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
             core.setOutput("proBranchName", branch.name);
