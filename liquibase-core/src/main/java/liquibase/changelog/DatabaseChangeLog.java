@@ -569,6 +569,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         String relativeBaseFileName = this.getPhysicalFilePath();
         if (isRelativePath) {
+            relativeBaseFileName = relativeBaseFileName.replaceFirst("classpath:", "");
             fileName =  FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
         }
 

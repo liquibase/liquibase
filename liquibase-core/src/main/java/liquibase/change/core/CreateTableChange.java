@@ -142,7 +142,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             String columnRemarks = StringUtil.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks, column.getType());
-                if (!(database instanceof MySQLDatabase) && SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
+                if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                     statements.add(remarksStatement);
                 }
             }
