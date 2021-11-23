@@ -24,6 +24,8 @@ jobs:
       proBranchSha: ${{ steps.find-branches.outputs.proBranchSha }}
       thisSha: ${{ steps.find-branches.outputs.thisSha }}
       thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
+      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
+      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
     steps:
@@ -39,7 +41,8 @@ jobs:
 
             core.setOutput("thisSha", helper.getCurrentSha());
             core.setOutput("thisBranchName", helper.getCurrentBranch());
-            core.setOutput("thisOrgName", helper.getCurrentOrg());
+            core.setOutput("thisRepoName", helper.getRepositoryName());
+            core.setOutput("thisRepoOwner", helper.getRepositoryOwner());
 
             let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
             core.setOutput("proBranchName", branch.name);
@@ -108,7 +111,7 @@ jobs:
           cache: 'maven'
       - name: Build & Test
         run: |
-          mvn -B -Dbuild.branch=${{ needs.setup.outputs.thisBranchName }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ needs.setup.outputs.thisSha }} -DtrimStackTrace=false -pl '!liquibase-dist' clean test package surefire-report:report
+          mvn -B -Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }} -Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }} -Dbuild.branch=${{ needs.setup.outputs.thisBranchName }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ needs.setup.outputs.thisSha }} -DtrimStackTrace=false -pl '!liquibase-dist' clean test package surefire-report:report
           find . -name original-*.jar -exec rm {} \;
       - name: Archive Test Results
         if: ${{ always() }}

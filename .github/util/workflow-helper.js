@@ -6,10 +6,22 @@ module.exports = ({github, context}) => {
 
     return {
 
-        getCurrentOrg: function() {
-            console.log("getCurrentOrg");
-            console.log(context.payload)
-            return "TODO";
+        getRepositoryOwner: function() {
+            if (context.payload.repository) {
+                return context.payload.repository.organization;
+            } else {
+                console.log(context.payload)
+                throw "Could not determine repository owner"
+            }
+        },
+
+        getRepositoryName: function() {
+            if (context.payload.repository) {
+                return context.payload.repository.name;
+            } else {
+                console.log(context.payload)
+                throw "Could not determine repository name"
+            }
         },
 
         getCurrentBranch: function() {
