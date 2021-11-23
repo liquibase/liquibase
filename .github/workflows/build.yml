@@ -24,6 +24,8 @@ jobs:
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Find corresponding branches
         id: find-branches
@@ -169,6 +171,8 @@ jobs:
     needs: [ setup, build ]
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Built Code Cache
         uses: actions/cache@v2
@@ -249,6 +253,8 @@ jobs:
     if: ${{ always() }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Coordinate Liquibase-Pro
         uses: actions/github-script@v5
