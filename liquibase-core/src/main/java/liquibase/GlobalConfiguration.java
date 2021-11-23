@@ -1,9 +1,10 @@
 package liquibase;
 
-import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.AutoloadedConfigurations;
+import liquibase.configuration.ConfigurationDefinition;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Configuration container for global properties.
@@ -17,6 +18,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<String> LIQUIBASE_SCHEMA_NAME;
     public static final ConfigurationDefinition<String> OUTPUT_LINE_SEPARATOR;
     public static final ConfigurationDefinition<String> OUTPUT_FILE_ENCODING;
+    public static final ConfigurationDefinition<Charset> FILE_ENCODING;
     public static final ConfigurationDefinition<Long> CHANGELOGLOCK_WAIT_TIME;
     public static final ConfigurationDefinition<Long> CHANGELOGLOCK_POLL_RATE;
     public static final ConfigurationDefinition<Boolean> CONVERT_DATA_TYPES;
@@ -30,6 +32,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> FILTER_LOG_MESSAGES;
     public static final ConfigurationDefinition<Boolean> HEADLESS;
     public static final ConfigurationDefinition<Boolean> STRICT;
+    public static final ConfigurationDefinition<Integer> DDL_LOCK_TIMEOUT;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -77,6 +80,26 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         OUTPUT_LINE_SEPARATOR = builder.define("outputLineSeparator", String.class)
                 .setDescription("Line separator for output")
                 .setDefaultValue(System.getProperty("line.separator"),"Line separator(LF or CRLF) for output. Defaults to OS default")
+                .build();
+
+        FILE_ENCODING = builder.define("fileEncoding", Charset.class)
+                .setDescription("Encoding to use when reading files. Valid values include: UTF-8, UTF-16, UTF-16BE, UTF-16LE, US-ASCII, or OS to use the system configured encoding.")
+                .setDefaultValue(StandardCharsets.UTF_8)
+                .setValueHandler(value -> {
+                    if (value == null) {
+                        return StandardCharsets.UTF_8;
+                    }
+                    if (value instanceof Charset) {
+                        return (Charset) value;
+                    }
+                    final String valueString = String.valueOf(value);
+                    if (valueString.equalsIgnoreCase("os")) {
+                        return Charset.defaultCharset();
+                    } else {
+                        return Charset.forName(valueString);
+                    }
+                })
+                .setCommonlyUsed(true)
                 .build();
 
         OUTPUT_FILE_ENCODING = builder.define("outputFileEncoding", String.class)
@@ -136,13 +159,21 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         HEADLESS = builder.define("headless", Boolean.class)
-                .setDescription("Force liquibase think it has no access to a keyboard?")
+                .setDescription("Force liquibase to think it has no access to a keyboard")
                 .setDefaultValue(false)
                 .setCommonlyUsed(true)
                 .build();
+
         STRICT = builder.define("strict", Boolean.class)
                 .setDescription("Be stricter on allowed Liquibase configuration and setup?")
-                .setDefaultValue(true)
+                .setDefaultValue(false)
+                .build();
+
+        DDL_LOCK_TIMEOUT = builder.define("ddlLockTimeout", Integer.class)
+                .addAliasKey("liquibase.ddlLockTimeout")
+                .addAliasKey("ddl_lock_timeout")
+                .addAliasKey("liquibase.ddl_lock_timeout")
+                .setDescription("The DDL_LOCK_TIMEOUT parameter indicates the number of seconds a DDL command should wait for the locks to become available before throwing the resource busy error message. This applies only to Oracle databases.")
                 .build();
     }
 }
