@@ -402,9 +402,9 @@
                 </executions>
             </plugin>
 
-            <!-- <plugin>
+            <!-- <plugin> -->
                 <!-- by default don't run snyk on all modules. On  ones that "ship", mark them as skip=false -->
-                <groupId>io.snyk</groupId>
+                <!-- <groupId>io.snyk</groupId>
                 <artifactId>snyk-maven-plugin</artifactId>
                 <version>1.2.9</version>
                 <configuration>
@@ -413,8 +413,8 @@
                     <failOnSeverity>high</failOnSeverity>
                     <org>${env.SNYK_ORG}</org>
                     <includeProvidedDependencies>false</includeProvidedDependencies>
-                </configuration>
-            </plugin> -->
+                </configuration> -->
+            <!-- </plugin> -->
 
 
             <!--        <plugin>-->
