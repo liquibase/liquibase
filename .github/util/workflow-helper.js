@@ -8,6 +8,7 @@ module.exports = ({github, context}) => {
 
         getCurrentOrg: function() {
             console.log("getCurrentOrg");
+            console.log(context.payload)
             return "TODO";
         },
 
