@@ -8,8 +8,8 @@ set LIQUIBASE_HOME="%~dp0"
 
 set CP=.
 for /R %LIQUIBASE_HOME% %%f in (liquibase*.jar) do set CP=!CP!;%%f
-for /R %LIQUIBASE_HOME%\lib %%f in (*.jar) do set CP=!CP!;%%f
 for /R liquibase_libs %%f in (*.jar) do set CP=!CP!;%%f
+for /R %LIQUIBASE_HOME%\lib %%f in (*.jar) do set CP=!CP!;%%f
 
 rem remove quotes around LIQUIBASE_HOME
 set LIQUIBASE_HOME=%LIQUIBASE_HOME:"=%
