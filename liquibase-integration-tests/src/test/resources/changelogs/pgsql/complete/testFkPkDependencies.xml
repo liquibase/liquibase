@@ -32,9 +32,6 @@
             <column name="active" type="INTEGER"/>
         </createTable>
     </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-2">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="customer_customer_id_seq" startValue="1"/>
-    </changeSet>
     <changeSet author="Steve (generated)" id="1631721131065-3">
         <createTable tableName="actor">
             <column autoIncrement="true" name="actor_id" type="INTEGER">
@@ -51,9 +48,6 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-4">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="actor_actor_id_seq" startValue="1"/>
-    </changeSet>
     <changeSet author="Steve (generated)" id="1631721131065-5">
         <createTable tableName="category">
             <column autoIncrement="true" name="category_id" type="INTEGER">
@@ -66,12 +60,6 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-    </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-6">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="category_category_id_seq" startValue="1"/>
-    </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-7">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="film_film_id_seq" startValue="1"/>
     </changeSet>
     <changeSet author="Steve (generated)" id="1631721131065-8">
         <createTable tableName="film_actor">
@@ -123,9 +111,6 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-11">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="address_address_id_seq" startValue="1"/>
-    </changeSet>
     <changeSet author="Steve (generated)" id="1631721131065-12">
         <createTable tableName="city">
             <column autoIncrement="true" name="city_id" type="INTEGER">
@@ -142,9 +127,6 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-13">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="city_city_id_seq" startValue="1"/>
-    </changeSet>
     <changeSet author="Steve (generated)" id="1631721131065-14">
         <createTable tableName="country">
             <column autoIncrement="true" name="country_id" type="INTEGER">
@@ -157,9 +139,6 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-    </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-15">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="country_country_id_seq" startValue="1"/>
     </changeSet>
     <changeSet author="Steve (generated)" id="1631721131065-16">
         <createTable tableName="inventory">
@@ -177,9 +156,6 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-17">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="inventory_inventory_id_seq" startValue="1"/>
-    </changeSet>
     <changeSet author="Steve (generated)" id="1631721131065-18">
         <createTable tableName="language">
             <column autoIncrement="true" name="language_id" type="INTEGER">
@@ -192,9 +168,6 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-    </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-19">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="language_language_id_seq" startValue="1"/>
     </changeSet>
     <changeSet author="Steve (generated)" id="1631721131065-20">
         <createTable tableName="payment">
@@ -218,9 +191,6 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-21">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="payment_payment_id_seq" startValue="1"/>
-    </changeSet>
     <changeSet author="Steve (generated)" id="1631721131065-22">
         <createTable tableName="rental">
             <column autoIncrement="true" name="rental_id" type="INTEGER">
@@ -243,9 +213,6 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-    </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-23">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="rental_rental_id_seq" startValue="1"/>
     </changeSet>
     <changeSet author="Steve (generated)" id="1631721131065-24">
         <createTable tableName="staff">
@@ -278,9 +245,6 @@
             <column name="picture" type="BYTEA"/>
         </createTable>
     </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-25">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="staff_staff_id_seq" startValue="1"/>
-    </changeSet>
     <changeSet author="Steve (generated)" id="1631721131065-26">
         <createTable tableName="store">
             <column autoIncrement="true" name="store_id" type="INTEGER">
@@ -296,9 +260,6 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-    </changeSet>
-    <changeSet author="Steve (generated)" id="1631721131065-27">
-        <createSequence cacheSize="1" cycle="false" dataType="bigint" incrementBy="1" maxValue="9223372036854775807" minValue="1" sequenceName="store_store_id_seq" startValue="1"/>
     </changeSet>
     <changeSet author="Steve (generated)" id="1631721131065-39">
         <createTable tableName="film">
