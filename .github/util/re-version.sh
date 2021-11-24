@@ -8,27 +8,23 @@ set -e
 set -x
 
 if [ -z ${1+x} ]; then
-  echo "This script requires the path to liquibase-artifacts.zip to be passed to it. Example: re-version.sh /path/to/liquibase-artifacts.zip 4.5.0";
+  echo "This script requires the path to unzipped liquibase-artifacts to be passed to it. Example: re-version.sh /path/to/liquibase-artifacts 4.5.0";
   exit 1;
 fi
 
 if [ -z ${2+x} ]; then
-  echo "This script requires the version to be passed to it. Example: re-version.sh /path/to/liquibase-artifacts.zip 4.5.0";
+  echo "This script requires the version to be passed to it. Example: re-version.sh /path/to/liquibase-artifacts 4.5.0";
   exit 1;
 fi
 
-liquibaseArtifacts=$1
+workdir=$1
 version=$2
 scriptDir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-workdir=$(pwd)/re-version/input
 outdir=$(pwd)/re-version/out
 
-rm -rf $workdir
-mkdir -p $workdir
 rm -rf outdir
 mkdir -p $outdir
-unzip -q "$liquibaseArtifacts" -d "$workdir"
 
 (cd $scriptDir && javac ManifestReversion.java)
 
