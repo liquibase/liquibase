@@ -93,7 +93,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ 8, 11, 16 ]
+        java: [ 8, 11, 17 ]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -228,7 +228,7 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           mvn -B -pl liquibase-dist -P liquibase-pro source:jar package
-          (cd liquibase-dist && ${{ github.workspace }}.github/util/package-install4j.sh 0-SNAPSHOT)
+          (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
 
