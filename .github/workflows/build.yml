@@ -224,7 +224,7 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           mvn -B -pl liquibase-dist -P liquibase-pro source:jar package
-          (cd liquibase-dist && src/main/package/package-install4j.sh 0-SNAPSHOT)
+          (cd liquibase-dist && .github/util/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
 
@@ -245,7 +245,7 @@ jobs:
 
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts
 
-          liquibase-dist/src/main/package/sign-artifacts.sh artifacts
+          .github/util/sign-artifacts.sh artifacts
 
 
       - name: Archive Packages

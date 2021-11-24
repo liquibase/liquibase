@@ -348,7 +348,7 @@
                 <configuration>
                     <attach>true</attach>
                     <author>false</author>
-                    <doctitle>Liquibase SNAPSHOT API</doctitle>
+                    <doctitle>Liquibase ${version} API</doctitle>
                     <quiet>true</quiet>
                     <doclint>none</doclint>
                     <encoding>UTF-8</encoding>
