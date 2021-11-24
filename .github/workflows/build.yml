@@ -30,6 +30,8 @@ jobs:
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Find corresponding branches
         id: find-branches
@@ -101,7 +103,7 @@ jobs:
         if: ${{ matrix.java == 8}}
         uses: actions/cache@v2
         with:
-          key: built-code-${{ github.sha }}
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v2
@@ -149,7 +151,7 @@ jobs:
       - name: Restore Built Code Cache
         uses: actions/cache@v2
         with:
-          key: built-code-${{ github.sha }}
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
       - name: Login to Artifactory
@@ -178,11 +180,13 @@ jobs:
     needs: [ setup, build ]
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Built Code Cache
         uses: actions/cache@v2
         with:
-          key: built-code-${{ github.sha }}
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
       - name: Install4j Cache
         uses: actions/cache@v2
@@ -268,6 +272,8 @@ jobs:
     if: ${{ always() }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Coordinate Liquibase-Pro
         uses: actions/github-script@v5

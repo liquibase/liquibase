@@ -1,11 +1,10 @@
 package liquibase.integration.commandline;
 
-import liquibase.Scope;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
+import liquibase.configuration.ConfigurationValueConverter;
 
 import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 /**
@@ -58,29 +57,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
 
         LOG_LEVEL = builder.define("logLevel", Level.class)
                 .setDefaultValue(Level.OFF,"Controls which logs get set to stderr AND to any log file. The CLI defaults, if log file set, to SEVERE. Others vary by integration. The official log levels are: OFF, SEVERE, WARNING, INFO, FINE")
-                .setValueHandler(value -> {
-                    if (value == null) {
-                        return null;
-                    }
-                    if (value instanceof Level) {
-                        return (Level) value;
-                    }
-                    String stringLevel = String.valueOf(value).toUpperCase();
-                    if (stringLevel.equals("DEBUG")) {
-                        return Level.FINE;
-                    } else if (stringLevel.equals("WARN")) {
-                        return Level.WARNING;
-                    } else if (stringLevel.equals("ERROR")) {
-                        return Level.SEVERE;
-                    }
-
-                    try {
-                        return Level.parse(stringLevel);
-                    } catch (IllegalArgumentException e) {
-                        Scope.getCurrentScope().getUI().sendErrorMessage("WARNING:  Unknown log level " + stringLevel);
-                        return Level.INFO;
-                    }
-                })
+                .setValueHandler(ConfigurationValueConverter.LOG_LEVEL)
                 .build();
 
         LOG_FILE = builder.define("logFile", File.class).build();

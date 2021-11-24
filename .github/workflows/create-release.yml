@@ -1,0 +1,16 @@
+name: Create Release
+on:
+  workflow_dispatch:
+    inputs:
+      liquibaseVersion:
+        description: 'Liquibase Version'
+        required: true
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup
+        with:
+          script: echo "TODO"
