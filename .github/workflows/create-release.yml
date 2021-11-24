@@ -2,15 +2,68 @@ name: Create Release
 on:
   workflow_dispatch:
     inputs:
-      liquibaseVersion:
-        description: 'Liquibase Version'
+      version:
+        description: 'Version (example: 4.8.2)'
         required: true
+      branch:
+        description: 'Branch to release (Defaults to master)'
+        required: false
 
 jobs:
   setup:
     name: Setup
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.collect-data.outputs.version }}
+      branch: ${{ steps.collect-data.outputs.branch }}
     steps:
-      - name: Setup
+      - name: Collect Data
+        id: collect-data
+        uses: actions/github-script@v4
         with:
-          script: echo "TODO"
+          script: |
+            core.setOutput("version", context.payload.inputs.version);
+            core.setOutput("branch", context.payload.inputs.branch || "master");
+
+      - run: |
+          echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }}"
+
+  draft-release:
+    needs: [ setup ]
+    name: Draft Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download liquibase-artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: build.yml
+          workflow_conclusion: success
+          branch: ${{ needs.setup.outputs.branch }}"
+          name: liquibase-artifacts
+          path: download/liquibase-artifacts
+
+
+      - name: Download Snapshot Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: liquibase-artifacts
+          path: download/liquibase-artifacts
+
+      - name: Re-version Artifacts
+        run: |
+          ls -l download/liquibase-artifacts
+          .github/util/re-version download/liquibase-artifacts ${{ needs.setup.outputs.version }}"
+
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v1
+        with:
+          target_commitish: ${{ needs.setup.outputs.branch }}
+          tag_name: v${{ needs.setup.outputs.version }}
+          draft: true
+          fail_on_unmatched_files: true
+          body: Liquibase ${{ needs.setup.outputs.version }}.
+          files: re-version/out/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

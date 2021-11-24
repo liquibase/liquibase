@@ -74,28 +74,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <author>false</author>
-                    <doctitle>Liquibase CDI ${project.version} API</doctitle>
-                    <quiet>true</quiet>
-                    <doclint>none</doclint>
-                    <encoding>UTF-8</encoding>
-                    <jarOutputDirectory>${project.basedir}/target</jarOutputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>jar-javadoc</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <artifactId>maven-install-plugin</artifactId>
                 <configuration>
                     <artifactId>${project.artifactId}</artifactId>
