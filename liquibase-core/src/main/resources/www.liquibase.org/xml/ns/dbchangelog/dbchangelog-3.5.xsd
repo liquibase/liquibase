@@ -247,8 +247,7 @@
     </xsd:group>
 
     <!-- Attributes for DatabaseInfo -->
-    <xsd:attributeGroup name="DatabaseInfoAttributes">
-        <xsd:attribute name="type" type="xsd:string"/>
+    <xsd:attribute name="type" type="xsd:string"/>
         <xsd:attribute name="version" type="xsd:string"/>
         <xsd:attribute name="username" type="xsd:string"/>
         <xsd:attribute name="password" type="xsd:string"/>
