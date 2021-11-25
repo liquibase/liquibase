@@ -5,7 +5,7 @@
             xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.8"
             elementFormDefault="qualified">
 
-    <!-- This is the main (root) part of the xsd -->
+    <!-- This is the main (root) part of the xsd --> 
     <xsd:element name="databaseChangeLog">
         <xsd:complexType>
             <xsd:sequence>
