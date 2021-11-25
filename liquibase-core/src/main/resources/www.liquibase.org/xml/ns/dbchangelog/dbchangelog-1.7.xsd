@@ -6,7 +6,7 @@
             elementFormDefault="qualified">
 
     <!-- This is the main (root) part of the xsd -->
-    <xsd:element name="databaseChangeLog">
+    <xsd:element name="databaseChangeLog"> 
         <xsd:complexType>
             <xsd:sequence>
                     <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
