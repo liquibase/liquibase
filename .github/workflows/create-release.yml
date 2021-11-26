@@ -44,13 +44,6 @@ jobs:
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
-
-      - name: Download Snapshot Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: liquibase-artifacts
-          path: download/liquibase-artifacts
-
       - name: Re-version Artifacts
         run: |
           ls -l download/liquibase-artifacts
