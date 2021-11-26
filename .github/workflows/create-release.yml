@@ -1,4 +1,4 @@
-name: Create Release
+name: Create Release ${{ inputs.version }}
 on:
   workflow_dispatch:
     inputs:
