@@ -46,8 +46,7 @@ jobs:
 
       - name: Re-version Artifacts
         run: |
-          ls -l download/liquibase-artifacts
-          .github/util/re-version download/liquibase-artifacts ${{ needs.setup.outputs.version }}"
+          .github/util/re-version download/liquibase-artifacts "${{ needs.setup.outputs.version }}"
 
       - name: Create Draft Release
         uses: softprops/action-gh-release@v1
