@@ -49,6 +49,7 @@ jobs:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
+          ls -l
           .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}"
 
       - name: Create Draft Release

@@ -88,7 +88,7 @@ gzip $outdir/liquibase-$version.tar
 ##### Rebuild installers
 mkdir -p liquibase-dist/target/liquibase-$version
 (cd liquibase-dist/target/liquibase-$version && tar xfz $outdir/liquibase-$version.tar.gz)
-$scriptDir/package-install4j.sh $version
+(cd liquibase-dist && $scriptDir/package-install4j.sh $version)
 
 ##Sign Files
 $scriptDir/sign-artifacts.sh $outdir
