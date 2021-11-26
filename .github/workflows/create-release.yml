@@ -45,6 +45,9 @@ jobs:
           path: download/liquibase-artifacts
 
       - name: Re-version Artifacts
+        env:
+          INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}"
 
