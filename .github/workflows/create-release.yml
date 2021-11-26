@@ -44,12 +44,21 @@ jobs:
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
+      - name: Set up JDK for GPG
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-passphrase: GPG_PASSPHRASE
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+
       - name: Re-version Artifacts
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          ls -l
           .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}"
 
       - name: Create Draft Release
