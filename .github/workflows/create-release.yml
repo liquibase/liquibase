@@ -40,7 +40,7 @@ jobs:
         with:
           workflow: build.yml
           workflow_conclusion: success
-          branch: ${{ needs.setup.outputs.branch }}"
+          branch: ${{ needs.setup.outputs.branch }}
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
