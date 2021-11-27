@@ -30,7 +30,7 @@ jobs:
 
   draft-release:
     needs: [ setup ]
-    name: Draft Release
+    name: Draft Release ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -69,7 +69,6 @@ jobs:
       - name: Create Draft Release
         uses: softprops/action-gh-release@v1
         with:
-          target_commitish: v${{ needs.setup.outputs.version }}
           tag_name: v${{ needs.setup.outputs.version }}
           draft: true
           fail_on_unmatched_files: true
