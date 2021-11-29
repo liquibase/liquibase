@@ -6,10 +6,14 @@ on:
       - opened
       - reopened
       - synchronize
+    branches-ignore:
+      - github-action-* #to allow testing of build logic in branches, don't do PR builds for github-action-* branches and instead use branch builds
+
   push:
     branches:
       - master
       - main
+      - github-action-*
 
 jobs:
   setup:
@@ -20,10 +24,14 @@ jobs:
       proBranchSha: ${{ steps.find-branches.outputs.proBranchSha }}
       thisSha: ${{ steps.find-branches.outputs.thisSha }}
       thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
+      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
+      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Find corresponding branches
         id: find-branches
@@ -35,6 +43,8 @@ jobs:
 
             core.setOutput("thisSha", helper.getCurrentSha());
             core.setOutput("thisBranchName", helper.getCurrentBranch());
+            core.setOutput("thisRepoName", helper.getRepositoryName());
+            core.setOutput("thisRepoOwner", helper.getRepositoryOwner());
 
             let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
             core.setOutput("proBranchName", branch.name);
@@ -93,7 +103,7 @@ jobs:
         if: ${{ matrix.java == 8}}
         uses: actions/cache@v2
         with:
-          key: built-code-${{ github.sha }}
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v2
@@ -103,7 +113,7 @@ jobs:
           cache: 'maven'
       - name: Build & Test
         run: |
-          mvn -B -Dbuild.branch=${{ needs.setup.outputs.thisBranchName }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ needs.setup.outputs.thisSha }} -DtrimStackTrace=false -pl '!liquibase-dist' clean test package surefire-report:report
+          mvn -B -Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }} -Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }} -Dbuild.branch=${{ needs.setup.outputs.thisBranchName }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ needs.setup.outputs.thisSha }} -DtrimStackTrace=false -pl '!liquibase-dist' clean test package surefire-report:report
           find . -name original-*.jar -exec rm {} \;
       - name: Archive Test Results
         if: ${{ always() }}
@@ -140,7 +150,7 @@ jobs:
       - name: Restore Built Code Cache
         uses: actions/cache@v2
         with:
-          key: built-code-${{ github.sha }}
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
       - name: Login to Artifactory
@@ -169,17 +179,19 @@ jobs:
     needs: [ setup, build ]
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Built Code Cache
         uses: actions/cache@v2
         with:
-          key: built-code-${{ github.sha }}
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
       - name: Install4j Cache
         uses: actions/cache@v2
         with:
           key: install4j8-
-          path: ~/.install4j
+          path: ~/.install4j/**
 
       - name: Set up JDK 8
         uses: actions/setup-java@v2
@@ -206,6 +218,7 @@ jobs:
       - name: Install Built Modules
         run: |
           (find . -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
+          (find . -name *-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dclassifier=sources -Dfile={} \;)
           mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-pro/liquibase-pro-0-SNAPSHOT.jar
 
       - name: Build & Sign Artifacts
@@ -213,20 +226,29 @@ jobs:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          mvn -B -pl liquibase-dist -P liquibase-pro package
-          (cd liquibase-dist && src/main/package/package-install4j.sh 0-SNAPSHOT)
+          mvn -B -pl liquibase-dist -P liquibase-pro source:jar package
+          (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
 
           mkdir -p artifacts
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz* artifacts
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip* artifacts
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar* artifacts
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip artifacts
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts
           cp liquibase-dist/target/liquibase-*-installer-* artifacts
-          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts
-          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts
 
-          liquibase-dist/src/main/package/sign-artifacts.sh artifacts
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-sources.jar artifacts
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar artifacts
+
+          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts
+          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-sources.jar artifacts
+          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-javadoc.jar artifacts
+
+          cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts
+
+          .github/util/sign-artifacts.sh artifacts
 
 
       - name: Archive Packages
@@ -239,7 +261,7 @@ jobs:
       - name: Archive Zip
         uses: actions/upload-artifact@v2
         with:
-          name: liquibase-0-SNAPSHOT
+          name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
           path: liquibase-dist/target/liquibase-0-SNAPSHOT/*
 
   finish:
@@ -249,6 +271,8 @@ jobs:
     if: ${{ always() }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Coordinate Liquibase-Pro
         uses: actions/github-script@v5
