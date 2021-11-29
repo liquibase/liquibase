@@ -1,4 +1,4 @@
-name: Create Release
+name: Create Draft Release
 on:
   workflow_dispatch:
     inputs:
