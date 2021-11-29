@@ -57,9 +57,26 @@ jobs:
       - name: Re-version Artifacts
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
+          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
+          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
+          mkdir -p liquibase-dist/target/keys
+          echo INSTALL4J_APPLE_KEY | base64 -d > liquibase-dist/target/keys/datical_apple.p12
+          echo INSTALL4J_WINDOWS_KEY | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
+
           .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}"
+
+          mkdir re-version/final
+          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.jar re-version/final
+          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
+          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
+          mv re-version/out/liquibase-macos-installer-${{ needs.setup.outputs.version }}.dmg re-version/final
+          mv re-version/out/liquibase-windows-x64-installer-${{ needs.setup.outputs.version }}.exe re-version/final
+
+          (cd re-version/out/ && zip liquibase-extra-${{ needs.setup.outputs.version }}.zip *)
+          mv re-version/out/liquibase-extra*.zip re-version/final
+
 
       - name: Tag repository
         run: |
@@ -74,6 +91,6 @@ jobs:
           fail_on_unmatched_files: true
           body: Liquibase ${{ needs.setup.outputs.version }}
           generate_release_notes: true
-          files: re-version/out/*
+          files: re-version/final/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
