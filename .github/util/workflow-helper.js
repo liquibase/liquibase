@@ -108,23 +108,37 @@ module.exports = ({github, context}) => {
                             "repo": repo,
                             "workflow_id": "build.yml",
                             "branch": branchName,
-                            "per_page": 1,
+                            "per_page": 20,
                             "page": 1,
                         });
 
-                        if (runs.data.workflow_runs.length === 0) {
-                            console.log(`No build for branch ${branchName}`);
-                        } else {
-                            console.log(`Found build for branch ${branchName}`);
+                        if (runs.data.workflow_runs.length !== 0) {
+                            for (let run of runs.data.workflow_runs) {
+                                if (run.event === 'pull_request_target') {
+                                    if (!returnData.pullRequestId) {
+                                        console.log("Skipping pull_request_target from non-pull-request build "+run.html_url);
+                                        continue;
+                                    }
+                                    if (run.head_repository && run.head_repository.fork) {
+                                        console.log("Skipping pull_request_target from fork "+run.head_repository.full_name);
+                                        continue;
+                                    }
+                                }
+                                console.log(`Found build for branch ${branchName}`);
 
-                            let run = runs.data.workflow_runs[0];
-
-                            returnData.workflowId = run.id;
-                            returnData.runNumber = run.run_number;
-                            returnData.runStatus = run.status;
-                            returnData.runConclusion = run.conclusion;
-                            returnData.runHtmlUrl = run.html_url;
+                                returnData.workflowId = run.id;
+                                returnData.runNumber = run.run_number;
+                                returnData.runStatus = run.status;
+                                returnData.runConclusion = run.conclusion;
+                                returnData.runHtmlUrl = run.html_url;
+                                break;
+                            }
                         }
+
+                        if (!returnData.workflowId) {
+                            console.log(`No build for branch ${branchName}`);
+                        }
+
                     } catch (error) {
                         if (error.status === 404) {
                             console.log(`Cannot get build info for ${branchName}`);
@@ -142,6 +156,7 @@ module.exports = ({github, context}) => {
                         //try next branch
                         console.log(`No branch ${branchName}`);
                     } else {
+                        console.log(error)
                         throw (`Checking branch ${branchName} returned ${error.status}`);
                     }
                 }
