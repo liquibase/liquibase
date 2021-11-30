@@ -61,12 +61,12 @@ jobs:
           INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          mkdir -p liquibase-dist/target/keys
+          mkdir -p target/keys
           echo "Saving apple key"
-          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
+          echo "$INSTALL4J_APPLE_KEY" | base64 -d > target/keys/datical_apple.p12
 
           echo "Saving windows key"
-          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
+          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > target/keys/datical_windows.pfx
 
           .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}"
 
