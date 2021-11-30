@@ -80,6 +80,7 @@ cp $workdir/liquibase-0-SNAPSHOT.zip $outdir/liquibase-$version.zip
 cp $workdir/liquibase-0-SNAPSHOT.tar.gz $outdir/liquibase-$version.tar.gz
 
 gzip -df $outdir/liquibase-$version.tar.gz
+(cd $workdir && tar --delete --file $outdir/liquibase-$version.tar liquibase.jar)
 (cd $workdir && tar -uf $outdir/liquibase-$version.tar liquibase.jar)
 (cd $workdir && jar -uf $outdir/liquibase-$version.zip liquibase.jar)
 
