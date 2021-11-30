@@ -5,7 +5,7 @@
 ###################################################################
 
 set -e
-set -x
+#set -x
 
 if [ -z ${1+x} ]; then
   echo "This script requires the version to be passed to it. Example: package-install4j.sh 4.5.0";
@@ -39,7 +39,6 @@ if [ ! -e target/keys ]; then
   INSTALL4J_ARGS="$INSTALL4J_ARGS --disable-signing"
 else
   INSTALL4J_ARGS="$INSTALL4J_ARGS --win-keystore-password=$INSTALL4J_WINDOWS_KEY_PASSWORD --mac-keystore-password=$INSTALL4J_APPLE_KEY_PASSWORD"
-
 fi
 
 "$install4jc" --license=$INSTALL4J_LICENSE
