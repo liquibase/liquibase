@@ -37,9 +37,9 @@ do
   unzip -q $workdir/$jar META-INF/* -d $workdir
 
   java -cp $scriptDir ManifestReversion $workdir/META-INF/MANIFEST.MF $version
-  find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
-  find $workdir/META-INF -name pom.properties -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
-  find $workdir/META-INF -name plugin.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
+  find $workdir/META-INF -r -name pom.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
+  find $workdir/META-INF -r -name pom.properties -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
+  find $workdir/META-INF -r -name plugin.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
   (cd $workdir && jar -uMf $jar META-INF)
   rm -rf $workdir/META-INF
 
@@ -65,7 +65,7 @@ do
   mkdir $workdir/rebuild
   unzip -q $workdir/$jar -d $workdir/rebuild
 
-  find $workdir/rebuild -name *.html -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
+  find $workdir/rebuild -r -name *.html -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
   (cd $workdir/rebuild && jar -uf ../$jar *)
   rm -rf $workdir/rebuild
 
@@ -80,7 +80,7 @@ cp $outdir/liquibase-$version.jar $workdir/liquibase.jar ##save versioned jar as
 mkdir $workdir/tgz-repackage
 (cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-0-SNAPSHOT.tar.gz)
 cp $workdir/liquibase.jar $workdir/tgz-repackage/liquibase.jar
-find $workdir/tgz-repackage -name *.txt -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
+find $workdir/tgz-repackage -r -name *.txt -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
 (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
 (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
 
