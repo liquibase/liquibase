@@ -33,7 +33,7 @@ jobs:
           repository: "liquibase/liquibase"
           tag: "v${{ needs.setup.outputs.version }}"
           filename: "*"
-          output-file-path: "assets"
+          out-file-path: "assets"
 
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v2
