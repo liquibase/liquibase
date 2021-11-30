@@ -80,7 +80,7 @@ cp $outdir/liquibase-$version.jar $workdir/liquibase.jar ##save versioned jar as
 mkdir $workdir/tgz-repackage
 (cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-0-SNAPSHOT.tar.gz)
 cp $workdir/liquibase.jar $workdir/tgz-repackage/liquibase.jar
-find $workdir/tgz-repackage -name *.txt -exec sed -i -e "s/0-SNAPSHOT/$version" {} \;
+find $workdir/tgz-repackage -name *.txt -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
 (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
 (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
 
