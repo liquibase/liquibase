@@ -77,14 +77,15 @@ done
 cp $outdir/liquibase-$version.jar $workdir/liquibase.jar ##save versioned jar as unversioned to include in zip/tar
 
 cp $workdir/liquibase-0-SNAPSHOT.zip $outdir/liquibase-$version.zip
-cp $workdir/liquibase-0-SNAPSHOT.tar.gz $outdir/liquibase-$version.tar.gz
 
-gzip -df $outdir/liquibase-$version.tar.gz
-(cd $workdir && tar --delete --file $outdir/liquibase-$version.tar liquibase.jar)
-(cd $workdir && tar -uf $outdir/liquibase-$version.tar liquibase.jar)
+## tar --delete was corrupting snakeyaml, so have to fully extract and rebuild tar.gz
+mkdir $workdir/tgz-repackage
+(cd $workdir/tgz-repackage && tar -xzf ../liquibase-0-SNAPSHOT.tar.gz)
+cp $outdir/liquibase-$version.tar $workdir/tgz-repackage/liquibase.jar
+(cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
+
+## Zip can be updated with jar -u
 (cd $workdir && jar -uf $outdir/liquibase-$version.zip liquibase.jar)
-
-gzip $outdir/liquibase-$version.tar
 
 ##### Rebuild installers
 mkdir -p liquibase-dist/target/liquibase-$version
