@@ -34,7 +34,7 @@ fi
 
 INSTALL4J_ARGS="$INSTALL4J_ARGS --release=$version -D liquibaseVersion=$version"
 
-if [ ! -e liquibase-dist/target/keys ]; then
+if [ ! -e target/keys ]; then
   echo "WARNING: not signing installer because target/keys directory does not exist."
   INSTALL4J_ARGS="$INSTALL4J_ARGS --disable-signing"
 fi
