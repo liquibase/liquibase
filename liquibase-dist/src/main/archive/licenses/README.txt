@@ -1,5 +1,5 @@
 Liquibase License Information
-Version: ${liquibase.version}
+Version: ${project.version}
 
 Liquibase ships with 3rd party components using the following licenses:
 

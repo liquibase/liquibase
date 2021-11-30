@@ -1,8 +1,8 @@
-Liquibase Version ${liquibase.version}
+Liquibase Version ${project.version}
 
 Introduction
 --------------------------------------------
-Thanks for downloading and installing Liquibase ${liquibase.version} from Liquibase.
+Thanks for downloading and installing Liquibase ${project.version} from Liquibase.
 By using the installer, you already have all the dependencies, directories, config, 
 and properties files to get started exploring the Liquibase examples provided.
 
