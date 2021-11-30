@@ -7,14 +7,31 @@ on:
         required: true
 
 jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.collect-data.outputs.version }}
+    steps:
+      - name: Collect Data
+        id: collect-data
+        uses: actions/github-script@v4
+        with:
+          script: |
+            core.setOutput("version", context.payload.inputs.version);
+
+      - run: |
+          echo "Publishing version ${{ steps.collect-data.outputs.version }}"
+
   deploy_maven:
+    needs: [ setup ]
     runs-on: ubuntu-latest
     steps:
       - name: Download release assets
         uses: robinraju/release-downloader@v1.2
         with:
           repository: "liquibase/liquibase"
-          tag: "v${{ context.payload.inputs.version }}"
+          tag: "v${{ needs.setup.outputs.version }}"
           filename: "*"
           output-file-path: "assets"
 
