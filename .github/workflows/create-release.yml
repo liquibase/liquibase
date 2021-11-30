@@ -77,8 +77,7 @@ jobs:
           mv re-version/out/liquibase-macos-installer-${{ needs.setup.outputs.version }}.dmg re-version/final
           mv re-version/out/liquibase-windows-x64-installer-${{ needs.setup.outputs.version }}.exe re-version/final
 
-          (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
-          mv re-version/out/liquibase-extra*.zip re-version/final
+          (cd re-version/out/ && zip ../final/liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
 
 
       - name: Tag repository
