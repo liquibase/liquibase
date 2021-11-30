@@ -35,6 +35,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - uses: actions/checkout@v2
+        name: Checkout liquibase-pro
+        with:
+          repository: liquibase/liquibase-pro
+          ref: "${{ needs.setup.outputs.liquibaseBranchName }}"
+          path: download/repo/liquibase-pro
+
+
       - name: Download liquibase-artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
@@ -90,6 +98,9 @@ jobs:
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
+
+          (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
+          (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
       - name: Create Draft Release
         uses: softprops/action-gh-release@v1
