@@ -2,8 +2,8 @@ name: Release Published
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Liquibase Version'
+      tag:
+        description: 'Release Tag'
         required: true
 
 jobs:
@@ -11,17 +11,17 @@ jobs:
     name: Setup
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.collect-data.outputs.version }}
+      tag: ${{ steps.collect-data.outputs.tag }}
     steps:
       - name: Collect Data
         id: collect-data
         uses: actions/github-script@v4
         with:
           script: |
-            core.setOutput("version", context.payload.inputs.version);
+            core.setOutput("tag", context.payload.inputs.tag);
 
       - run: |
-          echo "Publishing version ${{ steps.collect-data.outputs.version }}"
+          echo "Publishing ${{ steps.collect-data.outputs.tag }}"
 
   deploy_maven:
     needs: [ setup ]
@@ -31,7 +31,7 @@ jobs:
         uses: robinraju/release-downloader@v1.2
         with:
           repository: "liquibase/liquibase"
-          tag: "v${{ needs.setup.outputs.version }}"
+          tag: "${{ needs.setup.outputs.tag }}"
           filename: "*"
           out-file-path: "assets"
 
@@ -49,3 +49,4 @@ jobs:
       - name: Publish to Maven Central
         run: |
           ls -l assets
+          unzip assets/liquibase-additional-*.zip
