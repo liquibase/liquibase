@@ -57,6 +57,6 @@ jobs:
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
-            -Dfile=liquibase-${version}.jar \
-            -Dsources=liquibase-${version}-sources.jar \
-            -Djavadoc=liquibase-${version}-javadoc.jar
+            -Dfile=assets/liquibase-${version}.jar \
+            -Dsources=assets/liquibase-${version}-sources.jar \
+            -Djavadoc=assets/liquibase-${version}-javadoc.jar
