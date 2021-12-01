@@ -80,7 +80,7 @@ jobs:
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
             -DpomFile=liquibase-${version}.pom \
-            -DgeneratePom=false
+            -DgeneratePom=false \
             -Dfile=liquibase-${version}.jar \
             -Dsources=liquibase-${version}-sources.jar \
             -Djavadoc=liquibase-${version}-javadoc.jar \
@@ -92,7 +92,7 @@ jobs:
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
             -DpomFile=liquibase-maven-plugin-${version}.pom \
-            -DgeneratePom=false
+            -DgeneratePom=false \
             -Dfile=liquibase-maven-plugin-${version}.jar \
             -Dsources=liquibase-maven-plugin-${version}-sources.jar \
             -Djavadoc=liquibase-maven-plugin-${version}-javadoc.jar \
@@ -104,7 +104,7 @@ jobs:
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
             -DpomFile=liquibase-cdi-${version}.pom \
-            -DgeneratePom=false
+            -DgeneratePom=false \
             -Dfile=liquibase-cdi-${version}.jar \
             -Dsources=liquibase-cdi-${version}-sources.jar \
             -Djavadoc=liquibase-cdi-${version}-javadoc.jar \
