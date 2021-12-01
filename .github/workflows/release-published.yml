@@ -116,6 +116,8 @@ jobs:
 
           ## Release repository
           ## Have to find the stagingRepositoryId that was auto-generated
+          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DnexusUrl=https://oss.sonatype.org/ -DserverId=sonatype-nexus-staging
+
           rsList=$(mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DnexusUrl=https://oss.sonatype.org/ -DserverId=sonatype-nexus-staging)
 
           echo "got rc-list of:"
