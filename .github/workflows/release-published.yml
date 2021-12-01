@@ -69,6 +69,7 @@ jobs:
             -Dsources=assets/liquibase-${version}-sources.jar \
             -Djavadoc=assets/liquibase-${version}-javadoc.jar \
             -Dfiles=assets/liquibase-${version}.jar.asc,assets/liquibase-${version}-sources.jar.asc,assets/liquibase-${version}-javadoc.jar.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc
             -Dclassifiers=jar,sources,javadoc
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
