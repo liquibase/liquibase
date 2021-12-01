@@ -46,10 +46,13 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
           server-id: sonatype-nexus-staging
-          server-username: ${{ secrets.SONATYPE_USERNAME }}
-          server-password: ${{ secrets.SONATYPE_TOKEN }}
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
 
       - name: Publish to Maven Central
+        env:
+          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.SONATYPE_TOKEN }}
         run: |
           version=${{ needs.setup.outputs.version }}
 
