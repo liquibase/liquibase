@@ -56,6 +56,9 @@ jobs:
         run: |
           version=${{ needs.setup.outputs.version }}
 
+          ls -l ~/.m2
+          cat ~/.m2/settings.xml
+
           (cd assets && unzip liquibase-additional-*.zip)
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/ \
