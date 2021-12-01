@@ -76,7 +76,7 @@ jobs:
             -DrepositoryId=sonatype-nexus-staging \
             -Dfile=assets/liquibase-maven-plugin-${version}.jar \
             -Dsources=assets/liquibase-maven-plugin-${version}-sources.jar \
-            -Djavadoc=assets/liquibase-maven-plugin-${version}-javadoc.jar
+            -Djavadoc=assets/liquibase-maven-plugin-${version}-javadoc.jar \
             -Dfiles=assets/liquibase-maven-plugin-${version}.jar.asc,assets/liquibase-maven-plugin-${version}-sources.jar.asc,assets/liquibase-maven-plugin-${version}-javadoc.jar.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc \
             -Dclassifiers=,sources,javadoc
@@ -86,7 +86,7 @@ jobs:
             -DrepositoryId=sonatype-nexus-staging \
             -Dfile=assets/liquibase-cdi-${version}.jar \
             -Dsources=assets/liquibase-cdi-${version}-sources.jar \
-            -Djavadoc=assets/liquibase-cdi-${version}-javadoc.jar
+            -Djavadoc=assets/liquibase-cdi-${version}-javadoc.jar \
             -Dfiles=assets/liquibase-cdi-${version}.jar.asc,assets/liquibase-cdi-${version}-sources.jar.asc,assets/liquibase-cdi-${version}-javadoc.jar.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc \
             -Dclassifiers=,sources,javadoc
