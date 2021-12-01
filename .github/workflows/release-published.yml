@@ -48,5 +48,5 @@ jobs:
 
       - name: Publish to Maven Central
         run: |
-          unzip assets/liquibase-additional-*.zip
+          (cd assets && unzip liquibase-additional-*.zip)
           ls -l assets
