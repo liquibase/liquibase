@@ -20,7 +20,7 @@ jobs:
         with:
           script: |
             let tag = context.payload.inputs.tag;
-            let version = tag.replace(/^v//);
+            let version = tag.replace(/^v/, "");
 
             core.setOutput("tag", tag);
             core.setOutput("version", version);
