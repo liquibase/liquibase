@@ -113,3 +113,13 @@ jobs:
             -Dfiles=liquibase-cdi-${version}.jar.asc,liquibase-cdi-${version}-sources.jar.asc,liquibase-cdi-${version}-javadoc.jar.asc,liquibase-cdi-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
             -Dclassifiers=,sources,javadoc,
+
+          ## Release repository
+          ## Have to find the stagingRepositoryId that was auto-generated
+          rsList=$(mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DnexusUrl=https://oss.sonatype.org/ -DserverId=sonatype-nexus-staging)
+
+          echo "got rc-list of:"
+          echo $rcList
+
+
+          #mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:close -DautoReleaseAfterClose=true -DserverId=sonatype-nexus-staging
