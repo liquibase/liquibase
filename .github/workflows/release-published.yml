@@ -63,6 +63,6 @@ jobs:
           mvn -B -X org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
-            -Dfile=assets/liquibase-${version}.jar \
-            -Dsources=assets/liquibase-${version}-sources.jar \
-            -Djavadoc=assets/liquibase-${version}-javadoc.jar
+            -Dfile=assets/liquibase-${version}.jar,assets/liquibase-${version}.jar.asc,assets/liquibase-maven-plugin-${version}.jar,assets/liquibase-maven-plugin-${version}.jar.asc,assets/liquibase-cdi-${version}.jar,assets/liquibase-cdi-${version}.jar.asc \
+            -Dsources=assets/liquibase-${version}-sources.jar,assets/liquibase-${version}-sources.jar.asc,assets/liquibase-maven-plugin-${version}-sources.jar,assets/liquibase-maven-plugin-${version}-sources.jar.asc,assets/liquibase-cdi-${version}-sources.jar,assets/liquibase-cdi-${version}-sources.jar.asc \
+            -Djavadoc=assets/liquibase-${version}-javadoc.jar,assets/liquibase-${version}-javadoc.jar.asc,assets/liquibase-maven-plugin-${version}.jar-javadoc,assets/liquibase-maven-plugin-${version}.jar-javadoc.asc,assets/liquibase-cdi-${version}-javadoc.jar,assets/liquibase-cdi-${version}-javadoc.jar.asc
