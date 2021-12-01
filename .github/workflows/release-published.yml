@@ -12,16 +12,21 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.collect-data.outputs.tag }}
+      version: ${{ steps.collect-data.outputs.version }}
     steps:
       - name: Collect Data
         id: collect-data
         uses: actions/github-script@v4
         with:
           script: |
-            core.setOutput("tag", context.payload.inputs.tag);
+            tag=context.payload.inputs.tag
+            version=${tag/^v/}
+
+            core.setOutput("tag", tag);
+            core.setOutput("version", version);
 
       - run: |
-          echo "Publishing ${{ steps.collect-data.outputs.tag }}"
+          echo "Publishing version ${{ steps.collect-data.outputs.tag }} from ${{ steps.collect-data.outputs.tag }}"
 
   deploy_maven:
     needs: [ setup ]
@@ -43,10 +48,15 @@ jobs:
           server-id: sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_SECRET }}
-          gpg-passphrase: GPG_PASSPHRASE
 
       - name: Publish to Maven Central
         run: |
+          version=${{ needs.setup.outputs.tag }}
+
           (cd assets && unzip liquibase-additional-*.zip)
-          ls -l assets
+          mvn org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/ \
+            -DrepositoryId=sonatype-nexus-staging \
+            -Dfile=liquibase-${version}.jar \
+            -Dsources=liquibase-${version}-sources.jar \
+            -Djavadoc=liquibase-${version}-javadoc.jar
