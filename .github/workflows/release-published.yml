@@ -26,7 +26,7 @@ jobs:
             core.setOutput("version", version);
 
       - run: |
-          echo "Publishing version ${{ steps.collect-data.outputs.tag }} from ${{ steps.collect-data.outputs.tag }}"
+          echo "Publishing version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.tag }}"
 
   deploy_maven:
     needs: [ setup ]
@@ -45,16 +45,17 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
+          cache: 'maven'
           server-id: sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
       - name: Publish to Maven Central
         run: |
-          version=${{ needs.setup.outputs.tag }}
+          version=${{ needs.setup.outputs.version }}
 
           (cd assets && unzip liquibase-additional-*.zip)
-          mvn org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
             -Dfile=liquibase-${version}.jar \
