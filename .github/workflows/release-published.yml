@@ -48,45 +48,66 @@ jobs:
           server-id: sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-passphrase: GPG_PASSPHRASE
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Publish to Maven Central
         env:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_TOKEN }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           version=${{ needs.setup.outputs.version }}
 
-          ls -l ~/.m2
-          cat ~/.m2/settings.xml
+          unzip liquibase-additional-*.zip
 
-          (cd assets && unzip liquibase-additional-*.zip)
+          ##extracts and sign poms
+          unzip -j liquibase-${version}.jar META-INF/maven/org.liquibase/liquibase-core/pom.xml
+          mv pom.xml liquibase-${version}.pom
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-${version}.pom
 
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
-            -Dfile=assets/liquibase-${version}.jar \
-            -Dsources=assets/liquibase-${version}-sources.jar \
-            -Djavadoc=assets/liquibase-${version}-javadoc.jar \
-            -Dfiles=assets/liquibase-${version}.jar.asc,assets/liquibase-${version}-sources.jar.asc,assets/liquibase-${version}-javadoc.jar.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc \
-            -Dclassifiers=,sources,javadoc
+          unzip -j liquibase-maven-plugin-${version}.jar META-INF/maven/org.liquibase/liquibase-maven-plugin/pom.xml
+          mv pom.xml liquibase-maven-plugin-${version}.pom
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-maven-plugin-${version}.pom
 
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
-            -Dfile=assets/liquibase-maven-plugin-${version}.jar \
-            -Dsources=assets/liquibase-maven-plugin-${version}-sources.jar \
-            -Djavadoc=assets/liquibase-maven-plugin-${version}-javadoc.jar \
-            -Dfiles=assets/liquibase-maven-plugin-${version}.jar.asc,assets/liquibase-maven-plugin-${version}-sources.jar.asc,assets/liquibase-maven-plugin-${version}-javadoc.jar.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc \
-            -Dclassifiers=,sources,javadoc
+          unzip -j liquibase-cdi-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi/pom.xml
+          mv pom.xml liquibase-cdi-${version}.pom
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-${version}.pom
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
-            -Dfile=assets/liquibase-cdi-${version}.jar \
-            -Dsources=assets/liquibase-cdi-${version}-sources.jar \
-            -Djavadoc=assets/liquibase-cdi-${version}-javadoc.jar \
-            -Dfiles=assets/liquibase-cdi-${version}.jar.asc,assets/liquibase-cdi-${version}-sources.jar.asc,assets/liquibase-cdi-${version}-javadoc.jar.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc \
-            -Dclassifiers=,sources,javadoc
+            -DpomFile=liquibase-${version}.pom \
+            -DgeneratePom=false
+            -Dfile=liquibase-${version}.jar \
+            -Dsources=liquibase-${version}-sources.jar \
+            -Djavadoc=liquibase-${version}-javadoc.jar \
+            -Dfiles=liquibase-${version}.jar.asc,liquibase-${version}-sources.jar.asc,liquibase-${version}-javadoc.jar.asc,liquibase-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
+
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
+            -DrepositoryId=sonatype-nexus-staging \
+            -DpomFile=liquibase-maven-plugin-${version}.pom \
+            -DgeneratePom=false
+            -Dfile=liquibase-maven-plugin-${version}.jar \
+            -Dsources=liquibase-maven-plugin-${version}-sources.jar \
+            -Djavadoc=liquibase-maven-plugin-${version}-javadoc.jar \
+            -Dfiles=liquibase-maven-plugin-${version}.jar.asc,liquibase-maven-plugin-${version}-sources.jar.asc,liquibase-maven-plugin-${version}-javadoc.jar.asc,liquibase-maven-plugin-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
+
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
+            -DrepositoryId=sonatype-nexus-staging \
+            -DpomFile=liquibase-cdi-${version}.pom \
+            -DgeneratePom=false
+            -Dfile=liquibase-cdi-${version}.jar \
+            -Dsources=liquibase-cdi-${version}-sources.jar \
+            -Djavadoc=liquibase-cdi-${version}-javadoc.jar \
+            -Dfiles=liquibase-cdi-${version}.jar.asc,liquibase-cdi-${version}-sources.jar.asc,liquibase-cdi-${version}-javadoc.jar.asc,liquibase-cdi-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
