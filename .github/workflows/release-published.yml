@@ -73,3 +73,21 @@ jobs:
             -Dfile=assets/liquibase-maven-plugin-${version}.jar \
             -Dsources=assets/liquibase-maven-plugin-${version}-sources.jar \
             -Djavadoc=assets/liquibase-maven-plugin-${version}-javadoc.jar
+
+          mvn -B -X org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
+            -DrepositoryId=sonatype-nexus-staging \
+            -Dfile=assets/liquibase-cdi-${version}.jar \
+            -Dsources=assets/liquibase-cdi-${version}-sources.jar \
+            -Djavadoc=assets/liquibase-cdi-${version}-javadoc.jar
+
+          mvn -B -X org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
+            -DrepositoryId=sonatype-nexus-staging \
+            -Dpackaging=jar.asc
+            -DgroupId=org.liquibase
+            -DartifactId=liquibase-core
+            -Dversion=${version}
+            -Dfile=assets/liquibase-${version}.jar.asc \
+            -Dsources=assets/liquibase-${version}-sources.jar.asc \
+            -Djavadoc=assets/liquibase-${version}-javadoc.jar.asc
