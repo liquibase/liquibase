@@ -19,8 +19,8 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            tag=context.payload.inputs.tag
-            version=${tag/^v/}
+            let tag = context.payload.inputs.tag;
+            let version = tag.replace(/^v//);
 
             core.setOutput("tag", tag);
             core.setOutput("version", version);
