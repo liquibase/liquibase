@@ -61,7 +61,6 @@ jobs:
 
           (cd assets && unzip liquibase-additional-*.zip)
 
-          ##deploy main artifacts
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
@@ -70,7 +69,7 @@ jobs:
             -Djavadoc=assets/liquibase-${version}-javadoc.jar \
             -Dfiles=assets/liquibase-${version}.jar.asc,assets/liquibase-${version}-sources.jar.asc,assets/liquibase-${version}-javadoc.jar.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc \
-            -Dclassifiers=jar,sources,javadoc
+            -Dclassifiers=,sources,javadoc
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
@@ -78,6 +77,9 @@ jobs:
             -Dfile=assets/liquibase-maven-plugin-${version}.jar \
             -Dsources=assets/liquibase-maven-plugin-${version}-sources.jar \
             -Djavadoc=assets/liquibase-maven-plugin-${version}-javadoc.jar
+            -Dfiles=assets/liquibase-maven-plugin-${version}.jar.asc,assets/liquibase-maven-plugin-${version}-sources.jar.asc,assets/liquibase-maven-plugin-${version}-javadoc.jar.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc \
+            -Dclassifiers=,sources,javadoc
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
@@ -85,3 +87,6 @@ jobs:
             -Dfile=assets/liquibase-cdi-${version}.jar \
             -Dsources=assets/liquibase-cdi-${version}-sources.jar \
             -Djavadoc=assets/liquibase-cdi-${version}-javadoc.jar
+            -Dfiles=assets/liquibase-cdi-${version}.jar.asc,assets/liquibase-cdi-${version}-sources.jar.asc,assets/liquibase-cdi-${version}-javadoc.jar.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc \
+            -Dclassifiers=,sources,javadoc
