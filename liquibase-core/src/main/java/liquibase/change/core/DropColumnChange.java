@@ -3,7 +3,6 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -11,7 +10,6 @@ import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.DropColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
@@ -35,8 +33,7 @@ import java.util.stream.Collectors;
         "columnName are specified as attributes. To drop several columns, specify the tableName " +
         "as an attribute, and then specify a set of nested <column> tags. If nested <column> tags " +
         "are present, the columnName attribute will be ignored.",
-        priority = ChangeMetaData
-.PRIORITY_DEFAULT, appliesTo = "column")
+        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
     
     private String catalogName;
@@ -51,11 +48,6 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             return true;
         }
         return super.generateStatementsVolatile(database);
-    }
-    
-    @Override
-    public boolean supports(Database database) {
-        return database instanceof SQLiteDatabase || !(database instanceof Db2zDatabase) && super.supports(database);
     }
     
     @Override
@@ -79,8 +71,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     public void setColumnName(String columnName) {
         this.columnName = columnName;
     }
-    
-    
+
     @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column.relation.schema.catalog")
     public String getCatalogName() {
         return catalogName;
@@ -179,7 +170,6 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         } catch (InvalidExampleException|DatabaseException e) {
             return new ChangeStatus().unknown(e);
         }
-    
     }
     
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) throws DatabaseException {
