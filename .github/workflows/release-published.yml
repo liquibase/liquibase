@@ -61,7 +61,7 @@ jobs:
 
           (cd assets && unzip liquibase-additional-*.zip)
           mvn -B -X org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/ \
+            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
             -Dfile=assets/liquibase-${version}.jar \
             -Dsources=assets/liquibase-${version}-sources.jar \
