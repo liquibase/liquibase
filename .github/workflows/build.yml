@@ -229,11 +229,11 @@ jobs:
           mvn -B -pl liquibase-dist -P liquibase-pro source:jar package
 
           ## extract tar content for other artifacts
-          mkdir -p liquibase-dist/target/liquibase-$version
-          (cd liquibase-dist/target/liquibase-$version && tar xfz ../liquibase-$version.tar.gz)
+          mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
+          (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz ../liquibase-0-SNAPSHOT.tar.gz)
 
           ##create zip file from tar content
-          (cd liquibase-dist/target/liquibase-$version && zip -X -r ../liquibase-$version.zip *)
+          (cd liquibase-dist/target/liquibase-0-SNAPSHOT && zip -X -r ../liquibase-0-SNAPSHOT.zip *)
 
           ##create installers
           (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
