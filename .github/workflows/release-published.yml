@@ -20,7 +20,7 @@ jobs:
         with:
           script: |
             let tag;
-            if (context.payload.input) {
+            if (context.payload.inputs) {
               tag = context.payload.inputs.tag;
             } else {
               tag = context.payload.release.tag_name;
