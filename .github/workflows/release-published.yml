@@ -128,4 +128,4 @@ jobs:
             exit 1
           fi
 
-          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close -DautoReleaseAfterClose=true -DserverId=sonatype-nexus-staging -DstagingRepositoryId=$stagingRepositoryId
+          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close -DautoReleaseAfterClose=true -DnexusUrl=https://oss.sonatype.org/ -DserverId=sonatype-nexus-staging -DstagingRepositoryId=$stagingRepositoryId
