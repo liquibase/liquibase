@@ -19,7 +19,13 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            let tag = context.payload.inputs.tag;
+            let tag;
+            if (context.payload.input) {
+              tag = context.payload.inputs.tag;
+            } else {
+              tag = context.payload.release.tag_name;
+            }
+
             let version = tag.replace(/^v/, "");
 
             core.setOutput("tag", tag);
@@ -128,4 +134,9 @@ jobs:
             exit 1
           fi
 
-          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close -DautoReleaseAfterClose=true -DnexusUrl=https://oss.sonatype.org/ -DserverId=sonatype-nexus-staging -DstagingRepositoryId=$stagingRepositoryId
+          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close \
+            -DautoReleaseAfterClose=true  \
+            -DnexusUrl=https://oss.sonatype.org/ \
+            -DserverId=sonatype-nexus-staging \
+            -DstagingRepositoryId=$stagingRepositoryId \
+            -DstagingProgressTimeoutMinutes=10
