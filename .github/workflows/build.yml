@@ -263,6 +263,9 @@ jobs:
           mkdir liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT
           (cd liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT && unzip ../liquibase-maven-plugin-0-SNAPSHOT.jar)
 
+          mkdir liquibase-dist/target/liquibase-jar-0-SNAPSHOT
+          (cd liquibase-dist/target/liquibase-jar-0-SNAPSHOT && unzip ../liquibase-0-SNAPSHOT.jar)
+
 
       - name: Archive Packages
         uses: actions/upload-artifact@v2
@@ -288,6 +291,12 @@ jobs:
         with:
           name: liquibase-tgz-${{ needs.setup.outputs.thisBranchName }}
           path: liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz
+
+      - name: Archive Jar
+        uses: actions/upload-artifact@v2
+        with:
+          name: liquibase-jar-${{ needs.setup.outputs.thisBranchName }}
+          path: liquibase-dist/target/liquibase-jar-0-SNAPSHOT/*
 
   finish:
     name: Finish Build
