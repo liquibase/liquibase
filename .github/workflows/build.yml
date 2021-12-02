@@ -233,7 +233,7 @@ jobs:
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz ../liquibase-0-SNAPSHOT.tar.gz)
 
           ##create zip file from tar content
-          (cd liquibase-dist/target/liquibase-0-SNAPSHOT && zip -X -r ../liquibase-0-SNAPSHOT.zip *)
+          (cd liquibase-dist/target/liquibase-0-SNAPSHOT && zip -r ../liquibase-0-SNAPSHOT.zip *)
 
           ##create installers
           (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
