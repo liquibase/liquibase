@@ -227,6 +227,15 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           mvn -B -pl liquibase-dist -P liquibase-pro source:jar package
+
+          ## extract tar content for other artifacts
+          mkdir -p liquibase-dist/target/liquibase-$version
+          (cd liquibase-dist/target/liquibase-$version && tar xfz ../liquibase-$version.tar.gz)
+
+          ##create zip file from tar content
+          (cd liquibase-dist/target/liquibase-$version && zip -X -r ../liquibase-$version.zip *)
+
+          ##create installers
           (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
@@ -250,6 +259,10 @@ jobs:
 
           .github/util/sign-artifacts.sh artifacts
 
+          ##prepare convenience artifact directories
+          mkdir liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT
+          (cd liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT && unzip ../liquibase-maven-plugin-0-SNAPSHOT.jar)
+
 
       - name: Archive Packages
         uses: actions/upload-artifact@v2
@@ -263,6 +276,18 @@ jobs:
         with:
           name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
           path: liquibase-dist/target/liquibase-0-SNAPSHOT/*
+
+      - name: Archive Maven Plugin
+        uses: actions/upload-artifact@v2
+        with:
+          name: liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchName }}
+          path: liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT/*
+
+      - name: Archive Tarfile
+        uses: actions/upload-artifact@v2
+        with:
+          name: liquibase-tgz-${{ needs.setup.outputs.thisBranchName }}
+          path: liquibase-dist/target/liquibase-0-SNAPSHOT.tgz
 
   finish:
     name: Finish Build
