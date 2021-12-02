@@ -45,7 +45,7 @@ jobs:
 
             await github.repos.createDispatchEvent({
                "owner": "liquibase",
-               "repo": ${{ matrix.extension }},
+               "repo": "${{ matrix.extension }}",
                "event_type": "liquibase-release",
                "client_payload": {
                   "liquibaseVersion": "${{ github.event.inputs.version }}"
