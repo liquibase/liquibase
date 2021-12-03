@@ -124,17 +124,19 @@ module.exports = ({github, context}) => {
                                         continue;
                                     }
                                 }
-                            console.log(`Found build for branch ${branchName}`);
+                                console.log(`Found build for branch ${branchName}`);
 
                                 if (!returnData.workflowId) {
-                            returnData.workflowId = run.id;
+                                returnData.workflowId = run.id;
                                 }
 
                                 if (!returnData.runNumber) {
-                            returnData.runNumber = run.run_number;
-                            returnData.runStatus = run.status;
-                            returnData.runConclusion = run.conclusion;
-                            returnData.runHtmlUrl = run.html_url;
+                                returnData.runNumber = run.run_number;
+                                returnData.runStatus = run.status;
+                                returnData.runConclusion = run.conclusion;
+                                returnData.runHtmlUrl = run.html_url;
+                                break;
+                            }
                         }
 
                                 if (run.status === "completed" && run.conclusion === "success") {

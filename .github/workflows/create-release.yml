@@ -1,4 +1,4 @@
-name: Create Release
+name: Create Draft Release
 on:
   workflow_dispatch:
     inputs:
@@ -30,40 +30,84 @@ jobs:
 
   draft-release:
     needs: [ setup ]
-    name: Draft Release
+    name: Draft Release ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - uses: actions/checkout@v2
+        name: Checkout liquibase-pro
+        with:
+          repository: liquibase/liquibase-pro
+          ref: "${{ needs.setup.outputs.branch }}"
+          path: download/repo/liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
+
 
       - name: Download liquibase-artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: build.yml
           workflow_conclusion: success
-          branch: ${{ needs.setup.outputs.branch }}"
+          branch: ${{ needs.setup.outputs.branch }}
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
-
-      - name: Download Snapshot Artifacts
-        uses: actions/download-artifact@v2
+      - name: Set up JDK for GPG
+        uses: actions/setup-java@v2
         with:
-          name: liquibase-artifacts
-          path: download/liquibase-artifacts
+          java-version: '8'
+          distribution: 'adopt'
+          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-passphrase: GPG_PASSPHRASE
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Re-version Artifacts
+        env:
+          INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
+          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
+          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
+          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
+          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          ls -l download/liquibase-artifacts
-          .github/util/re-version download/liquibase-artifacts ${{ needs.setup.outputs.version }}"
+          mkdir -p liquibase-dist/target/keys
+          echo "Saving apple key"
+          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
+
+          echo "Saving windows key"
+          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
+
+          .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}"
+
+          mkdir re-version/final
+          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.jar re-version/final
+          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
+          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
+          mv re-version/out/liquibase-macos-installer-${{ needs.setup.outputs.version }}.dmg re-version/final
+          mv re-version/out/liquibase-windows-x64-installer-${{ needs.setup.outputs.version }}.exe re-version/final
+
+          (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
+          mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
+
+
+      - name: Tag repository
+        run: |
+          git tag -f v${{ needs.setup.outputs.version }}
+          git push -f origin v${{ needs.setup.outputs.version }}
+
+          (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
+          (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
       - name: Create Draft Release
         uses: softprops/action-gh-release@v1
         with:
-          target_commitish: ${{ needs.setup.outputs.branch }}
           tag_name: v${{ needs.setup.outputs.version }}
           draft: true
           fail_on_unmatched_files: true
-          body: Liquibase ${{ needs.setup.outputs.version }}.
-          files: re-version/out/*
+          body: Liquibase ${{ needs.setup.outputs.version }}
+          generate_release_notes: true
+          files: re-version/final/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
