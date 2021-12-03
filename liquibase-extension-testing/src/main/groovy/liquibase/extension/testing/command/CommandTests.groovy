@@ -21,6 +21,7 @@ import liquibase.database.jvm.JdbcConnection
 import liquibase.extension.testing.TestDatabaseConnections
 import liquibase.extension.testing.TestFilter
 import liquibase.extension.testing.setup.*
+import liquibase.extension.testing.setup.SetupCleanResources.CleanupMode
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
@@ -290,13 +291,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     return
                 }
             }
-            finally {
-                if (testDef.setup != null) {
-                    for (def setup : testDef.setup) {
-                        setup.cleanup()
-                    }
-                }
-            }
         } as Scope.ScopedRunnerWithReturn<CommandResults>)
 
         if (savedException != null && savedException.getCause() != null && savedException.getCause() instanceof CommandFailedException) {
@@ -311,35 +305,43 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
         }
 
-
         then:
-        checkOutput("Command Output", outputStream.toString(), testDef.expectedOutput)
-        checkOutput("UI Output", uiOutputWriter.toString(), testDef.expectedUI)
-        checkOutput("UI Error Output", uiErrorWriter.toString(), testDef.expectedUIErrors)
-        checkOutput("Log Messages", logService.getLogAsString(Level.FINE), testDef.expectedLogs)
+            try {
+                checkOutput("Command Output", outputStream.toString(), testDef.expectedOutput)
+                checkOutput("UI Output", uiOutputWriter.toString(), testDef.expectedUI)
+                checkOutput("UI Error Output", uiErrorWriter.toString(), testDef.expectedUIErrors)
+                checkOutput("Log Messages", logService.getLogAsString(Level.FINE), testDef.expectedLogs)
 
-        checkFileContent(testDef.expectedFileContent, "Command File Content")
-        checkDatabaseContent(testDef.expectedDatabaseContent, database, "Database snapshot content")
+                checkFileContent(testDef.expectedFileContent, "Command File Content")
+                checkDatabaseContent(testDef.expectedDatabaseContent, database, "Database snapshot content")
 
-        if (!testDef.expectedResults.isEmpty()) {
-            for (def returnedResult : results.getResults().entrySet()) {
-                def expectedResult = testDef.expectedResults.get(returnedResult.getKey())
-                def expectedValue = expectedResult instanceof Closure ? expectedResult.call() : String.valueOf(expectedResult)
-                def seenValue = String.valueOf(returnedResult.getValue())
+                if (!testDef.expectedResults.isEmpty()) {
+                    for (def returnedResult : results.getResults().entrySet()) {
+                        def expectedResult = testDef.expectedResults.get(returnedResult.getKey())
+                        def expectedValue = expectedResult instanceof Closure ? expectedResult.call() : String.valueOf(expectedResult)
+                        def seenValue = String.valueOf(returnedResult.getValue())
 
-                assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
-                assert seenValue == expectedValue
+                        assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
+                        assert seenValue == expectedValue
+                    }
+                }
+                if (testDef.expectFileToExist != null) {
+                    assert testDef.expectFileToExist.exists(): "File '${testDef.expectFileToExist.getAbsolutePath()}' should exist"
+                }
+                if (testDef.expectFileToNotExist != null) {
+                    assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getAbsolutePath()}' should not exist"
+                }
+            } finally {
+                if (testDef.setup != null) {
+                    for (def setup : testDef.setup) {
+                        setup.cleanup()
+                    }
+                }
             }
-        }
-        if (testDef.expectFileToExist != null) {
-            assert testDef.expectFileToExist.exists(): "File '${testDef.expectFileToExist.getAbsolutePath()}' should exist"
-        }
-        if (testDef.expectFileToNotExist != null) {
-            assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getAbsolutePath()}' should not exist"
-        }
 
-        where:
-        permutation << getAllRunTestPermutations()
+
+            where:
+            permutation << getAllRunTestPermutations()
     }
 
     static OutputCheck assertNotContains(String substring) {
@@ -836,8 +838,19 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupRunChangelog(changeLogPath, labels))
         }
 
+        /*
+         * Create files and directories
+         */
         void createTempResource(String originalFile, String newFile) {
             this.setups.add(new SetupCreateTempResources(originalFile, newFile))
+        }
+
+        void createTempResource(String originalFile, String newFile, String baseDir) {
+            this.setups.add(new SetupCreateTempResources(originalFile, newFile, baseDir))
+        }
+
+        void createTempDirectoryResource(String directory) {
+            this.setups.add(new SetupCreateDirectoryResources(directory))
         }
 
         /**
@@ -865,11 +878,22 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          *
          * Delete the specified resources
          *
-         * @param fileToDeletes
+         * @param filesToDelete
          *
          */
         void cleanResources(String... filesToDelete) {
             this.setups.add(new SetupCleanResources(filesToDelete))
+        }
+
+        /**
+         *
+         * Delete the specified resources at possibly setup and cleanup
+         *
+         * @param filesToDelete
+         *
+         */
+        void cleanResources(CleanupMode cleanOnSetup, String... filesToDelete) {
+            this.setups.add(new SetupCleanResources(cleanOnSetup, filesToDelete))
         }
 
         /**

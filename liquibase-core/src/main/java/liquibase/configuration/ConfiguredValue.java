@@ -56,15 +56,9 @@ public class ConfiguredValue<DataType> {
         return getProvidedValues().get(0);
     }
 
-
     public boolean wasDefaultValueUsed() {
-        for (ProvidedValue providedValue : this.getProvidedValues()) {
-            if (providedValue.getProvider() != null && providedValue.getProvider() instanceof ConfigurationDefinition.DefaultValueProvider) {
-                return true;
-            }
-        }
-
-        return false;
+        ProvidedValue winningProvidedValue = getProvidedValue();
+        return winningProvidedValue != null && winningProvidedValue.getProvider() instanceof ConfigurationDefinition.DefaultValueProvider;
     }
 
     /**
