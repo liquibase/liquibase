@@ -46,7 +46,15 @@ jobs:
             core.setOutput("thisRepoName", helper.getRepositoryName());
             core.setOutput("thisRepoOwner", helper.getRepositoryOwner());
 
+            let proStatusMessage = "success";
+            let proFailed = false;
+
             let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
+            if (!branch.lastSuccessfulRunNumber) {
+              proFailed = true;
+              proStatusMessage = "Matching pro branch has never passed. Falling back to master"
+              branch = await helper.findMatchingBranch("liquibase", "liquibase-pro", "main", "master")
+            }
             core.setOutput("proBranchName", branch.name);
             core.setOutput("proBranchSha", branch.sha);
 
@@ -57,18 +65,17 @@ jobs:
               core.setOutput("standAlonePR", true);
             }
 
-            let proStatusMessage = "success";
-            let proFailed = false;
-
-            if (!branch.workflowId) {
-              proStatusMessage = "does not have a ran workflow";
-              proFailed = true
-            } else if ( branch.runStatus != "completed") {
-              proStatusMessage = "build is "+ branch.runStatus;
-              proFailed = true
-            } else if ( branch.runConclusion != "success") {
-              proStatusMessage = "build conclusion was "+branch.runConclusion;
-              proFailed = true
+            if (!proFailed) {
+              if (!branch.workflowId) {
+                proStatusMessage = "does not have a ran workflow";
+                proFailed = true
+              } else if ( branch.runStatus != "completed") {
+                proStatusMessage = "build is "+ branch.runStatus;
+                proFailed = true
+              } else if ( branch.runConclusion != "success") {
+                proStatusMessage = "build conclusion was "+branch.runConclusion;
+                proFailed = true
+              }
             }
 
             statusMessage = "liquibase/liquibase-pro:"+branch.name+"@" + branch.sha.substring(0, 7) + " " + proStatusMessage;
