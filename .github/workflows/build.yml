@@ -284,18 +284,6 @@ jobs:
           path: artifacts-named/*
 
 
-      - name: Archive Tarfile
-        uses: actions/upload-artifact@v2
-        with:
-          name: liquibase-tgz-${{ needs.setup.outputs.thisBranchName }}
-          path: liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz
-
-      - name: Archive Jar
-        uses: actions/upload-artifact@v2
-        with:
-          name: liquibase-jar-${{ needs.setup.outputs.thisBranchName }}
-          path: liquibase-dist/target/liquibase-jar-0-SNAPSHOT/*
-
   finish:
     name: Finish Build
     runs-on: ubuntu-latest
