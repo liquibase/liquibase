@@ -59,6 +59,8 @@
         <build.number>0</build.number>
         <build.commit>unknown</build.commit>
         <build.branch>unknown</build.branch>
+        <build.repository.name>unknown</build.repository.name>
+        <build.repository.owner>unknown</build.repository.owner>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring.version>5.0.12.RELEASE</spring.version>
@@ -342,27 +344,31 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.1</version>
                 <configuration>
+                    <attach>true</attach>
                     <author>false</author>
+                    <doctitle>Liquibase ${version} API</doctitle>
+                    <quiet>true</quiet>
+                    <doclint>none</doclint>
+                    <encoding>UTF-8</encoding>
+
                     <includeDependencySources>false</includeDependencySources>
-<!--                    <doctitle>Liquibase ${project.version} API</doctitle>-->
-<!--                    <dependencySourceIncludes>-->
-<!--                        <dependencySourceInclude>org.liquibase:*</dependencySourceInclude>-->
-<!--                    </dependencySourceIncludes>-->
-<!--                    <excludePackageNames>org.liquibase.*,com.datical.*</excludePackageNames>-->
-<!--                    <quiet>true</quiet>-->
-<!--                    <doclint>none</doclint>-->
-<!--                    <encoding>UTF-8</encoding>-->
-<!--                    <finalName>liquibase-${project.version}</finalName>-->
-<!--                    <jarOutputDirectory>${project.build.directory}</jarOutputDirectory>-->
+                    <excludePackageNames>com.datical.*,*.pro,*.pro.*</excludePackageNames>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>javadoc-aggregate</id>
+                        <id>javadoc-default</id>
                         <goals>
-<!--                            <goal>aggregate-jar</goal>-->
                             <goal>jar</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                    <execution>
+                        <id>javadoc-aggregate</id>
+                        <inherited>false</inherited>
+                        <goals>
+                            <goal>aggregate-jar</goal>
                         </goals>
                         <phase>package</phase>
                     </execution>

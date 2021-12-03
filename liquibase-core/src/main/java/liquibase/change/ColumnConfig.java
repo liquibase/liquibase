@@ -308,7 +308,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     /**
      * Set the valueBoolean based on a given string.
-     * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a boolean.
+     * If the passed value cannot be parsed as a boolean, it is assumed to be a function that returns a boolean.
      * If the string "null" or an empty string is passed, it will set a null value.
      * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
      */
@@ -581,7 +581,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     /**
      * Set the defaultValueBoolean based on a given string.
-     * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a boolean.
+     * If the passed value cannot be parsed as a boolean, it is assumed to be a function that returns a boolean.
      * If the string "null" or an empty string is passed, it will set a null value.
      * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
      */

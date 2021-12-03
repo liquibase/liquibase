@@ -621,7 +621,7 @@ public class DiffToChangeLog {
             });
 
             //get schema -> base object dependencies
-            sql += " UNION SELECT SCHEMA_NAME(SCHEMA_ID) as referencing_schema_name, name as referencing_name, PARSENAME(BASE_OBJECT_NAME,1) AS referenced_name, (CASE WHEN PARSENAME(BASE_OBJECT_NAME,2) IS NULL THEN schema_name(schema_id) else PARSENAME(BASE_OBJECT_NAME,2) END) AS referenced_schema_name FROM SYS.SYNONYMS WHERE is_ms_shipped='false' AND " + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
+            sql += " UNION SELECT SCHEMA_NAME(SCHEMA_ID) as referencing_schema_name, name as referencing_name, PARSENAME(BASE_OBJECT_NAME,1) AS referenced_name, (CASE WHEN PARSENAME(BASE_OBJECT_NAME,2) IS NULL THEN schema_name(schema_id) else PARSENAME(BASE_OBJECT_NAME,2) END) AS referenced_schema_name FROM sys.synonyms WHERE is_ms_shipped='false' AND " + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
                 @Override
                 public String toString(String obj) {
                     return "SCHEMA_NAME(SCHEMA_ID)='" + obj + "'";

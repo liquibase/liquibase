@@ -5,6 +5,25 @@
 module.exports = ({github, context}) => {
 
     return {
+
+        getRepositoryOwner: function() {
+            if (context.payload.repository) {
+                return context.payload.repository.organization;
+            } else {
+                console.log(context.payload)
+                throw "Could not determine repository owner"
+            }
+        },
+
+        getRepositoryName: function() {
+            if (context.payload.repository) {
+                return context.payload.repository.name;
+            } else {
+                console.log(context.payload)
+                throw "Could not determine repository name"
+            }
+        },
+
         getCurrentBranch: function() {
             if (context.payload.pull_request) {
                 return this.cleanBranchRef(context.payload.pull_request.head.ref);
@@ -12,6 +31,7 @@ module.exports = ({github, context}) => {
                 return this.cleanBranchRef(context.payload.ref);
             }
         },
+
         getCurrentSha: function() {
             if (context.payload.pull_request) {
                 return this.cleanBranchRef(context.payload.pull_request.head.sha);
@@ -88,23 +108,53 @@ module.exports = ({github, context}) => {
                             "repo": repo,
                             "workflow_id": "build.yml",
                             "branch": branchName,
-                            "per_page": 1,
+                            "per_page": 20,
                             "page": 1,
                         });
 
-                        if (runs.data.workflow_runs.length === 0) {
-                            console.log(`No build for branch ${branchName}`);
-                        } else {
+                        if (runs.data.workflow_runs.length !== 0) {
+                            for (let run of runs.data.workflow_runs) {
+                                if (run.event === 'pull_request_target') {
+                                    if (!returnData.pullRequestId) {
+                                        console.log("Skipping pull_request_target from non-pull-request build "+run.html_url);
+                                        continue;
+                                    }
+                                    if (run.head_repository && run.head_repository.fork) {
+                                        console.log("Skipping pull_request_target from fork "+run.head_repository.full_name);
+                                        continue;
+                                    }
+                                }
                             console.log(`Found build for branch ${branchName}`);
 
-                            let run = runs.data.workflow_runs[0];
-
+                                if (!returnData.workflowId) {
                             returnData.workflowId = run.id;
+                                }
+
+                                if (!returnData.runNumber) {
                             returnData.runNumber = run.run_number;
                             returnData.runStatus = run.status;
                             returnData.runConclusion = run.conclusion;
                             returnData.runHtmlUrl = run.html_url;
                         }
+
+                                if (run.status === "completed" && run.conclusion === "success") {
+                                    console.log(`Found successful build for branch ${branchName}`);
+                                    returnData.lastSuccessfulRunNumber = run.run_number;
+                                    returnData.lastSuccessfulRunStatus = run.status;
+                                    returnData.lastSuccessfulRunConclusion = run.conclusion;
+                                    returnData.lastSuccessfulRunHtmlUrl = run.html_url;
+
+                                    break;
+                                } else {
+                                    console.log(`Found build ${run.run_number} was status: ${run.status} conclusion:${run.conclusion}`);
+                                }
+                            }
+                        }
+
+                        if (!returnData.workflowId) {
+                            console.log(`No build for branch ${branchName}`);
+                        }
+
                     } catch (error) {
                         if (error.status === 404) {
                             console.log(`Cannot get build info for ${branchName}`);
@@ -122,6 +172,7 @@ module.exports = ({github, context}) => {
                         //try next branch
                         console.log(`No branch ${branchName}`);
                     } else {
+                        console.log(error)
                         throw (`Checking branch ${branchName} returned ${error.status}`);
                     }
                 }

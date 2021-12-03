@@ -1,0 +1,13 @@
+name: Release Published
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Liquibase Version'
+        required: true
+
+jobs:
+  say_hello:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Release Published"

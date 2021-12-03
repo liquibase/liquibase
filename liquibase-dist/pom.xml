@@ -195,7 +195,7 @@
                     </filters>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <createSourcesJar>true</createSourcesJar>
-                    <createTestSourcesJar>true</createTestSourcesJar>
+                    <createTestSourcesJar>false</createTestSourcesJar>
                     <keepDependenciesWithProvidedScope>false</keepDependenciesWithProvidedScope>
                     <transformers>
                         <transformer
