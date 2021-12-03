@@ -259,13 +259,11 @@ jobs:
 
           .github/util/sign-artifacts.sh artifacts
 
-          ##prepare convenience artifact directories
-          mkdir liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT
-          (cd liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT && unzip ../liquibase-maven-plugin-0-SNAPSHOT.jar)
-
-          mkdir liquibase-dist/target/liquibase-jar-0-SNAPSHOT
-          (cd liquibase-dist/target/liquibase-jar-0-SNAPSHOT && unzip ../liquibase-0-SNAPSHOT.jar)
-
+          ##prepare branch-named convenience artifacts directories
+          mkdir artifacts-named
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.jar
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchName }}.tar.gz
 
       - name: Archive Packages
         uses: actions/upload-artifact@v2
@@ -273,18 +271,18 @@ jobs:
           name: liquibase-artifacts
           path: artifacts/*
 
-## convenience zip for faster download
-      - name: Archive Zip
+      - name: Archive Convenience Zip
         uses: actions/upload-artifact@v2
         with:
           name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
           path: liquibase-dist/target/liquibase-0-SNAPSHOT/*
 
-      - name: Archive Maven Plugin
+      - name: Archive Convenience Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchName }}
-          path: liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT/*
+          name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
+          path: artifacts-named/*
+
 
       - name: Archive Tarfile
         uses: actions/upload-artifact@v2
