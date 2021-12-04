@@ -53,7 +53,7 @@ jobs:
             if (!branch.lastSuccessfulRunNumber) {
               proFailed = true;
               proStatusMessage = "Matching pro branch has never passed. Falling back to master"
-              branch = await helper.findMatchingBranch("liquibase", "liquibase-pro", "main", "master")
+              branch = await helper.findMatchingBranch("liquibase", "liquibase-pro", ["main", "master"])
             }
             core.setOutput("proBranchName", branch.name);
             core.setOutput("proBranchSha", branch.sha);
