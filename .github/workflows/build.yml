@@ -29,6 +29,15 @@ jobs:
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
     steps:
+      - name: Failsafe
+        uses: actions/github-script@v5
+        with:
+          script: |
+            if (${{ github.run_attempt }} % 5 == 0) {
+              core.setFailed("Fail every 5 run attempts to catch accidental infinite loops");
+            }
+
+
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
@@ -50,6 +59,13 @@ jobs:
             let proFailed = false;
 
             let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
+            //count as not a stand-alone PR for branch builds on master/main, even though there are no PRs
+            if (helper.getCurrentBranch() == 'master' || helper.getCurrentBranch() == 'main' && branch.pullRequestId) {
+              core.setOutput("standAlonePR", helper.getCurrentBranch() !== branch.name);
+            } else {
+              core.setOutput("standAlonePR", true);
+            }
+
             if (!branch.lastSuccessfulRunNumber) {
               proFailed = true;
               proStatusMessage = "Matching pro branch has never passed. Falling back to master"
@@ -57,13 +73,6 @@ jobs:
             }
             core.setOutput("proBranchName", branch.name);
             core.setOutput("proBranchSha", branch.sha);
-
-            //count as not a stand-alone PR for branch builds on master/main, even though there are no PRs
-            if (helper.getCurrentBranch() == 'master' || helper.getCurrentBranch() == 'main' && branch.pullRequestId) {
-              core.setOutput("standAlonePR", helper.getCurrentBranch() !== branch.name);
-            } else {
-              core.setOutput("standAlonePR", true);
-            }
 
             if (!proFailed) {
               if (!branch.workflowId) {
