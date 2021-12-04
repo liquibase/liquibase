@@ -132,15 +132,16 @@ module.exports = ({github, context}) => {
 
                                 if (!returnData.runNumber) {
                                     returnData.runNumber = run.run_number;
+                                    returnData.runAttempt = run.run_attempt;
                                     returnData.runStatus = run.status;
                                     returnData.runConclusion = run.conclusion;
                                     returnData.runHtmlUrl = run.html_url;
-                                    break;
                                 }
 
                                 if (run.status === "completed" && run.conclusion === "success") {
                                     console.log(`Found successful build for branch ${branchName}`);
                                     returnData.lastSuccessfulRunNumber = run.run_number;
+                                    returnData.lastSuccessfulRunAttempt = run.run_attempt;
                                     returnData.lastSuccessfulRunStatus = run.status;
                                     returnData.lastSuccessfulRunConclusion = run.conclusion;
                                     returnData.lastSuccessfulRunHtmlUrl = run.html_url;
