@@ -20,6 +20,8 @@ class LiquibaseUtilTest extends Specification {
         LiquibaseUtil.liquibaseBuildProperties.put("build.branch", localBuild ? "unknown" : "test-branch")
         LiquibaseUtil.liquibaseBuildProperties.put("build.number", localBuild ? "0" : "524")
         LiquibaseUtil.liquibaseBuildProperties.put("build.commit", localBuild ? "unknown" : "7904bb98687d5ade0dae5acc467c90d572f8080f")
+        LiquibaseUtil.liquibaseBuildProperties.put("build.repository.owner", localBuild ? "unknown" : "liquibase")
+        LiquibaseUtil.liquibaseBuildProperties.put("build.repository.name", localBuild ? "unknown" : "liquibase")
 
         if (proData) {
             LiquibaseUtil.liquibaseBuildProperties.put("build.pro.timestamp", "2021-09-17T14:04:58Z")
@@ -36,8 +38,8 @@ class LiquibaseUtilTest extends Specification {
         version | localBuild | proData | expected
         "1.2.3" | false      | true    | "1.2.3"
         "1.2.3" | false      | false   | "1.2.3"
-        "DEV"   | false      | true    | "[Core: test-branch/524/7904bb/2021-09-17 14:06+0000, Pro: other-branch/58/e5195b/2021-09-17T14:04:58Z]"
-        "DEV"   | false      | false   | "[Core: test-branch/524/7904bb/2021-09-17 14:06+0000]"
+        "DEV"   | false      | true    | "[Core: liquibase/liquibase/test-branch/524/7904bb/2021-09-17 14:06+0000, Pro: other-branch/58/e5195b/2021-09-17T14:04:58Z]"
+        "DEV"   | false      | false   | "[Core: liquibase/liquibase/test-branch/524/7904bb/2021-09-17 14:06+0000]"
         "DEV"   | true       | true    | "[local build]"
         "DEV"   | true       | false   | "[local build]"
     }

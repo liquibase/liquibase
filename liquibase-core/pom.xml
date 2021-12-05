@@ -133,30 +133,6 @@
         </resources>
 
         <plugins>
-            <!-- need to build javadocs for other module javadocs to reference -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <attach>false</attach>
-                    <author>false</author>
-                    <doctitle>Liquibase ${project.version} API</doctitle>
-                    <quiet>true</quiet>
-                    <doclint>none</doclint>
-                    <encoding>UTF-8</encoding>
-                    <reportOutputDirectory>${project.build.directory}/apidocs</reportOutputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>custom-javadoc</id>
-                        <goals>
-                            <goal>javadoc</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>javacc-maven-plugin</artifactId>

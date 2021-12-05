@@ -20,9 +20,20 @@ public class ManifestReversion {
         final Attributes attributes = manifest.getMainAttributes();
 
         attributes.putValue("Liquibase-Version", version);
-        attributes.putValue("Bundle-Version", version);
-        attributes.putValue("Import-Package", attributes.getValue("Import-Package").replaceAll("version=\"\\[0\\.0,1\\)\"", "version=\"["+version+",1)"));
-        attributes.putValue("Export-Package", attributes.getValue("Export-Package").replaceAll(";version=\"0\\.0\\.0\"", ";version=\""+version+"\""));
+
+        if (attributes.containsKey("Bundle-Version")) {
+            attributes.putValue("Bundle-Version", version);
+        }
+
+        final String importPackage = attributes.getValue("Import-Package");
+        if (importPackage != null) {
+            attributes.putValue("Import-Package", importPackage.replaceAll("version=\"\\[0\\.0,1\\)\"", "version=\"[" + version + ",1)"));
+        }
+
+        final String exportPackage = attributes.getValue("Export-Package");
+        if (exportPackage != null) {
+            attributes.putValue("Export-Package", exportPackage.replaceAll(";version=\"0\\.0\\.0\"", ";version=\"" + version + "\""));
+        }
 
         try (OutputStream out = new FileOutputStream(filename)) {
             manifest.write(out);

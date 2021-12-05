@@ -41,6 +41,10 @@ public class MavenLogService extends AbstractLogService {
 
         @Override
         public void log(Level level, String message, Throwable e) {
+            if (level == Level.OFF) {
+                return;
+            }
+
             if (level.equals(Level.SEVERE)) {
                 mavenLog.error(message, e);
             } else if (level.equals(Level.WARNING)) {
