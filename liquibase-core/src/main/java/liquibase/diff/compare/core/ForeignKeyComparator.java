@@ -12,8 +12,6 @@ import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 public class ForeignKeyComparator implements DatabaseObjectComparator {
@@ -28,11 +26,16 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
 
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        Set<String> hashes = new HashSet<>();
-        hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(((ForeignKey) databaseObject).getForeignKeyTable(), null, accordingTo)));
-        hashes.addAll(Arrays.asList(chain.hash(databaseObject, accordingTo)));
-
-        return hashes.toArray(new String[hashes.size()]);
+        ForeignKey fk = (ForeignKey) databaseObject;
+        if (databaseObject.getName() == null) {
+            return DatabaseObjectComparatorFactory.getInstance().hash(fk.getForeignKeyTable(), chain.getSchemaComparisons(), accordingTo);
+        } else {
+            if ((fk.getForeignKeyTable() == null) || (fk.getForeignKeyTable().getName() == null)) {
+                return new String[]{fk.getName().toLowerCase()};
+            } else {
+                return new String[]{fk.getName().toLowerCase(), fk.getForeignKeyTable().getName().toLowerCase()};
+            }
+        }
     }
 
 
@@ -45,9 +48,26 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
         ForeignKey thisForeignKey = (ForeignKey) databaseObject1;
         ForeignKey otherForeignKey = (ForeignKey) databaseObject2;
 
-        if (thisForeignKey.getForeignKeyTable() == null || otherForeignKey.getForeignKeyTable() == null) {
-            //tables not set, have to rely on name
-            return StringUtil.trimToEmpty(thisForeignKey.getName()).equalsIgnoreCase(otherForeignKey.getName());
+        if ((thisForeignKey.getPrimaryKeyTable() == null) || (thisForeignKey.getForeignKeyTable() == null) ||
+                (otherForeignKey.getPrimaryKeyTable() == null) || (otherForeignKey.getForeignKeyTable() == null)) {
+            //not all table information is set, have to rely on name
+
+            if (thisForeignKey.getForeignKeyTable() != null && otherForeignKey.getForeignKeyTable() != null) {
+                //FK names are not necessarily unique across all tables, so first check if FK tables are different
+                if (!chain.isSameObject(thisForeignKey.getForeignKeyTable(), otherForeignKey.getForeignKeyTable(), accordingTo)) {
+                    return false;
+                }
+            }
+
+            if ((thisForeignKey.getName() != null) && (otherForeignKey.getName() != null)) {
+                if(accordingTo.isCaseSensitive()) {
+                    return thisForeignKey.getName().equals(otherForeignKey.getName());
+                } else {
+                    return thisForeignKey.getName().equalsIgnoreCase(otherForeignKey.getName());
+                }
+            } else {
+                return false;
+            }
         }
 
         if ((thisForeignKey.getForeignKeyColumns() != null) && (thisForeignKey.getPrimaryKeyColumns() != null) &&
