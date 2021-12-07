@@ -664,6 +664,8 @@ public class DiffToChangeLog {
 
     private String queryForDependenciesPostgreSql(List<String> schemas) {
         //SQL adapted from https://wiki.postgresql.org/wiki/Pg_depend_display
+        //We filter out PK and FK in this query so that they are not added to the dependency graph
+        //they get added later in the flow, after the table is guaranteed to have been created
         return "WITH RECURSIVE preference AS (\n" +
                 "    SELECT 10 AS max_depth  -- The deeper the recursion goes, the slower it performs.\n" +
                 "         , 16384 AS min_oid -- user objects only\n" +
@@ -734,7 +736,7 @@ public class DiffToChangeLog {
                         return " REFERENCED_NAME like '" + obj + ".%' OR REFERENCED_NAME NOT LIKE '%.%'";
                     }
                 }) + ")\n" +
-                " AND CONTYPE::text != 'p'\n" +
+                " AND (CONTYPE::text != 'p' AND CONTYPE::text != 'f')\n" +
                 " AND referencing_schema_name is not null and referencing_name is not null";
     }
 
