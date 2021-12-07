@@ -48,9 +48,16 @@ class SetupCleanResources extends TestSetup {
                 f = new File(url.toURI())
             }
 
+            if (f.isFile()) {
+                f.delete()
+            } else {
+                f.deleteDir()
+            }
+
             //
             // This will handle files and directories
             //
+            /*
             if (f.exists()) {
                 Path path = FileSystems.getDefault().getPath(f.getAbsolutePath());
                 Files.walk(path)
@@ -58,6 +65,7 @@ class SetupCleanResources extends TestSetup {
                      .map({ p -> p.toFile() })
                      .forEach({ file -> file.delete() })
             }
+             */
         }
     }
 }
