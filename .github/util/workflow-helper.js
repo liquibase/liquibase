@@ -6,7 +6,7 @@ module.exports = ({github, context}) => {
 
     return {
 
-        getRepositoryOwner: function() {
+        getRepositoryOwner: function () {
             if (context.payload.repository) {
                 return context.payload.repository.organization;
             } else {
@@ -15,7 +15,7 @@ module.exports = ({github, context}) => {
             }
         },
 
-        getRepositoryName: function() {
+        getRepositoryName: function () {
             if (context.payload.repository) {
                 return context.payload.repository.name;
             } else {
@@ -24,7 +24,7 @@ module.exports = ({github, context}) => {
             }
         },
 
-        getCurrentBranch: function() {
+        getCurrentBranch: function () {
             if (context.payload.pull_request) {
                 return this.cleanBranchRef(context.payload.pull_request.head.ref);
             } else {
@@ -32,7 +32,7 @@ module.exports = ({github, context}) => {
             }
         },
 
-        getCurrentSha: function() {
+        getCurrentSha: function () {
             if (context.payload.pull_request) {
                 return this.cleanBranchRef(context.payload.pull_request.head.sha);
             } else {
@@ -40,7 +40,7 @@ module.exports = ({github, context}) => {
             }
         },
 
-        cleanBranchRef: function(branch) {
+        cleanBranchRef: function (branch) {
             if (!branch) {
                 return branch;
             }
@@ -116,22 +116,40 @@ module.exports = ({github, context}) => {
                             for (let run of runs.data.workflow_runs) {
                                 if (run.event === 'pull_request_target') {
                                     if (!returnData.pullRequestId) {
-                                        console.log("Skipping pull_request_target from non-pull-request build "+run.html_url);
+                                        console.log("Skipping pull_request_target from non-pull-request build " + run.html_url);
                                         continue;
                                     }
                                     if (run.head_repository && run.head_repository.fork) {
-                                        console.log("Skipping pull_request_target from fork "+run.head_repository.full_name);
+                                        console.log("Skipping pull_request_target from fork " + run.head_repository.full_name);
                                         continue;
                                     }
                                 }
                                 console.log(`Found build for branch ${branchName}`);
 
-                                returnData.workflowId = run.id;
-                                returnData.runNumber = run.run_number;
-                                returnData.runStatus = run.status;
-                                returnData.runConclusion = run.conclusion;
-                                returnData.runHtmlUrl = run.html_url;
-                                break;
+                                if (!returnData.workflowId) {
+                                    returnData.workflowId = run.id;
+                                }
+
+                                if (!returnData.runNumber) {
+                                    returnData.runNumber = run.run_number;
+                                    returnData.runAttempt = run.run_attempt;
+                                    returnData.runStatus = run.status;
+                                    returnData.runConclusion = run.conclusion;
+                                    returnData.runHtmlUrl = run.html_url;
+                                }
+
+                                if (run.status === "completed" && run.conclusion === "success") {
+                                    console.log(`Found successful build for branch ${branchName}`);
+                                    returnData.lastSuccessfulRunNumber = run.run_number;
+                                    returnData.lastSuccessfulRunAttempt = run.run_attempt;
+                                    returnData.lastSuccessfulRunStatus = run.status;
+                                    returnData.lastSuccessfulRunConclusion = run.conclusion;
+                                    returnData.lastSuccessfulRunHtmlUrl = run.html_url;
+
+                                    break;
+                                } else {
+                                    console.log(`Found build ${run.run_number} was status: ${run.status} conclusion:${run.conclusion}`);
+                                }
                             }
                         }
 
@@ -151,7 +169,8 @@ module.exports = ({github, context}) => {
                     console.log(returnData);
 
                     return returnData
-                } catch (error) {
+                } catch
+                    (error) {
                     if (error.status === 404) {
                         //try next branch
                         console.log(`No branch ${branchName}`);
