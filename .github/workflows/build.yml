@@ -374,7 +374,7 @@ jobs:
                 "ref": testsBranch.name,
                 "inputs": {
                   "liquibaseCommit": helper.getCurrentSha(),
-                  "runDescription: "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
+                  "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
                   "runDetails": JSON.stringify({
                     "liquibaseBranch": liquibaseBranch,
                   })
