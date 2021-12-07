@@ -368,7 +368,8 @@ jobs:
 
               let notifications = [];
               if (context.payload.pull_request) {
-                notifications = ["Triggered by PR " + context.payload.pull_request.html_url];
+                console.log("Sending pull request information"):
+                notices = ["Triggered by PR " + context.payload.pull_request.html_url];
               }
               console.log("Trigger functional tests");
               let workflowDispatch = await github.rest.actions.createWorkflowDispatch({
