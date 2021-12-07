@@ -19,7 +19,7 @@ if [ -z ${GPG_PASSWORD+x} ]; then
   exit 1
 fi
 
-declare -a file_patterns=("*.jar" "*-installer-*")
+declare -a file_patterns=("*.jar" "*-installer-*" "*.zip" "*.tar.gz")
 
 for file_pattern in "${file_patterns[@]}"
 do

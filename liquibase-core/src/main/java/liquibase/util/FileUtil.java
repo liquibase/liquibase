@@ -30,7 +30,9 @@ public class FileUtil {
     }
 
     public static void write(String contents, File file, boolean append) throws IOException {
-        file.getParentFile().mkdirs();
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
+        }
 
         try (
                 FileOutputStream output = new FileOutputStream(file, append)
