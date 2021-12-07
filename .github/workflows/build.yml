@@ -51,7 +51,6 @@ jobs:
             const helper = require('./.github/util/workflow-helper.js')({github, context});
 
             console.log(context);
-            core.fail("testing");
 
             core.setOutput("thisSha", helper.getCurrentSha());
             core.setOutput("thisBranchName", helper.getCurrentBranch());
@@ -209,7 +208,7 @@ jobs:
       - name: Install4j Cache
         uses: actions/cache@v2
         with:
-          key: install4j-${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
+          key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**
 
       - name: Set up JDK 8
@@ -375,6 +374,7 @@ jobs:
                 "ref": testsBranch.name,
                 "inputs": {
                   "liquibaseCommit": helper.getCurrentSha(),
+                  "runDescription: "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
                   "runDetails": JSON.stringify({
                     "liquibaseBranch": liquibaseBranch,
                   })
