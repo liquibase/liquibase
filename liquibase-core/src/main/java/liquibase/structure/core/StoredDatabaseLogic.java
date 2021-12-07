@@ -15,7 +15,7 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
 
     @Override
     public boolean snapshotByDefault() {
-        if (LicenseServiceUtils.checkForValidLicense("Liquibase Pro")) {
+        if (LicenseServiceUtils.isProLicenseValid()) {
             return true;
         } else {
             return false;

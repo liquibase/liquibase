@@ -7,15 +7,15 @@ import org.w3c.dom.Text;
 /**
  * Various utility methods for working with XML.
  */
-public class XMLUtil {
+public abstract class XMLUtil {
     /**
      * Extracts the text from the given element.
-     * Element.getTextContent() is java5 specific, so we need to use this until we drop 1.4 support.
+     * {@link Node#getTextContent()} returns the text from ALL children, this returns the text only for this element.
      */
     public static String getTextContent(Node element) {
         StringBuilder text = new StringBuilder();
         NodeList childNodes = element.getChildNodes();
-        for (int i=0; i< childNodes.getLength(); i++) {
+        for (int i = 0; i < childNodes.getLength(); i++) {
             Node child = childNodes.item(i);
             if (child instanceof Text) {
                 text.append(child.getNodeValue());

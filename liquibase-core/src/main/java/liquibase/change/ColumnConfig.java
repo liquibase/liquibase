@@ -10,11 +10,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.UniqueConstraint;
+import liquibase.structure.core.*;
 import liquibase.util.*;
 
 import java.math.BigInteger;
@@ -68,8 +64,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig(Column columnSnapshot) {
         setName(columnSnapshot.getName());
-        setComputed(BooleanUtils.isTrue(columnSnapshot.getComputed()) ? Boolean.TRUE : null);
-        setDescending(BooleanUtils.isTrue(columnSnapshot.getDescending()) ? Boolean.TRUE : null);
+        setComputed(BooleanUtil.isTrue(columnSnapshot.getComputed()) ? Boolean.TRUE : null);
+        setDescending(BooleanUtil.isTrue(columnSnapshot.getDescending()) ? Boolean.TRUE : null);
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
         }
@@ -153,6 +149,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                             "(" +
                             fk.getPrimaryKeyColumns().get(0).getName() +
                             ")");
+                        constraints.setDeleteCascade(fk.getDeleteRule() != null && fk.getDeleteRule() == ForeignKeyConstraintType.importedKeyCascade);
                         nonDefaultConstraints = true;
                     }
                 }
@@ -311,7 +308,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     /**
      * Set the valueBoolean based on a given string.
-     * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a boolean.
+     * If the passed value cannot be parsed as a boolean, it is assumed to be a function that returns a boolean.
      * If the string "null" or an empty string is passed, it will set a null value.
      * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
      */
@@ -584,7 +581,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     /**
      * Set the defaultValueBoolean based on a given string.
-     * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a boolean.
+     * If the passed value cannot be parsed as a boolean, it is assumed to be a function that returns a boolean.
      * If the string "null" or an empty string is passed, it will set a null value.
      * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
      */

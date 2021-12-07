@@ -3,16 +3,78 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-base</artifactId>
-        <version>${liquibase.version}</version>
-        <relativePath>base.pom.xml</relativePath>
-    </parent>
-
-    <artifactId>liquibase-root</artifactId>
-    <version>${liquibase.version}</version>
+    <groupId>org.liquibase</groupId>
+    <artifactId>liquibase</artifactId>
+    <version>0-SNAPSHOT</version>
     <packaging>pom</packaging>
+
+    <url>http://www.liquibase.org</url>
+
+    <organization>
+        <name>Liquibase.org</name>
+        <url>http://www.liquibase.org</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>nvoxland</id>
+            <name>Nathan Voxland</name>
+            <email>nathan.voxland@liquibase.org</email>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <name>Apache License, Version 2.0</name>
+        </license>
+    </licenses>
+
+    <issueManagement>
+        <url>https://github.com/liquibase/liquibase/issues</url>
+    </issueManagement>
+
+    <ciManagement>
+        <url>https://github.com/liquibase/liquibase/actions</url>
+    </ciManagement>
+
+
+    <scm>
+        <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
+        <url>scm:git:git@github.com:liquibase/liquibase.git</url>
+        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
+    </scm>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.enforcer.requireMavenVersion>3.6</maven.enforcer.requireMavenVersion>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mmZ</maven.build.timestamp.format>
+        <build.timestamp>${maven.build.timestamp}</build.timestamp>
+        <build.number>0</build.number>
+        <build.commit>unknown</build.commit>
+        <build.branch>unknown</build.branch>
+        <build.repository.name>unknown</build.repository.name>
+        <build.repository.owner>unknown</build.repository.owner>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <spring.version>5.0.12.RELEASE</spring.version>
+        <sonar.projectKey>org.liquibase:liquibase-parent</sonar.projectKey>
+        <sonar.organization>liquibase-core</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
+        <groovy.version>2.4.17</groovy.version>
+        <dependency.spock.version>1.3-groovy-2.4</dependency.spock.version>
+        <junit.version>4.12</junit.version>
+
+        <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
+    </properties>
+
 
     <modules>
         <module>liquibase-core</module>
@@ -25,57 +87,286 @@
         <module>liquibase-extension-testing</module>
     </modules>
 
-    <ciManagement>
-        <system>Travis</system>
-        <url>https://travis-ci.com/github/liquibase/liquibase</url>
-    </ciManagement>
+    <dependencies>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.27</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.13.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>3.3.3</version>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency> <!-- use a specific Groovy version rather than the one specified by spock-core -->
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>${groovy.version}</version>
+            <scope>test</scope>
+            <type>pom</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-testng</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-core</artifactId>
+            <version>${dependency.spock.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency> <!-- enables mocking of classes (in addition to interfaces) -->
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId>
+            <version>3.3.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency> <!-- enables mocking of classes without default constructor (together with CGLIB) -->
+            <groupId>org.objenesis</groupId>
+            <artifactId>objenesis</artifactId>
+            <version>2.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.200</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.4.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>6.0.6</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>8.2.2.jre8</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.12</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>2.7.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- needed for newer java versions -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.3.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.3.0</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>                <executions>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
                     <execution>
-                        <id>root-source-aggregate</id>
+                        <id>enforce-maven</id>
                         <goals>
-                            <goal>aggregate</goal>
+                            <goal>enforce</goal>
                         </goals>
-                        <phase>package</phase>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>${maven.enforcer.requireMavenVersion}</version>
+                                    <message>This POM requires Maven ${maven.enforcer.requireMavenVersion}.</message>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>1.6.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>addSources</goal>
+                            <goal>addTestSources</goal>
+                            <goal>compile</goal>
+                            <goal>compileTests</goal>
+                            <goal>removeStubs</goal>
+                            <goal>removeTestStubs</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+<!--            <plugin>-->
+<!--                <groupId>org.jacoco</groupId>-->
+<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
+<!--                <version>0.8.5</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>prepare-agent</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>report</id>-->
+<!--                        <phase>test</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>report</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.1</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit4</artifactId>
+                        <version>2.22.1</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
-                    <outputDirectory>${project.build.directory}</outputDirectory>
-                    <finalName>liquibase-${liquibase.version}</finalName>
-                    <attach>true</attach>
-                    <excludes>
-                        <exclude>com/datical/**</exclude>
-                        <exclude>**/pro/**</exclude>
-                        <exclude>*.ks</exclude>
-                    </excludes>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.3.1</version>
                 <configuration>
+                    <attach>true</attach>
                     <author>false</author>
-                    <includeDependencySources>false</includeDependencySources>
-                    <doctitle>Liquibase ${project.version} API</doctitle>
-                    <dependencySourceIncludes>
-                        <dependencySourceInclude>org.liquibase:*</dependencySourceInclude>
-                    </dependencySourceIncludes>
-                    <excludePackageNames>org.liquibase.*,com.datical.*</excludePackageNames>
+                    <doctitle>Liquibase ${version} API</doctitle>
                     <quiet>true</quiet>
                     <doclint>none</doclint>
                     <encoding>UTF-8</encoding>
-                    <finalName>liquibase-${version}</finalName>
-                    <jarOutputDirectory>${project.build.directory}</jarOutputDirectory>
+
+                    <includeDependencySources>false</includeDependencySources>
+                    <excludePackageNames>com.datical.*,*.pro,*.pro.*</excludePackageNames>
                 </configuration>
                 <executions>
                     <execution>
+                        <id>javadoc-default</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                    <execution>
                         <id>javadoc-aggregate</id>
+                        <inherited>false</inherited>
                         <goals>
                             <goal>aggregate-jar</goal>
                         </goals>
@@ -84,39 +375,97 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.1.0</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <outputDirectory>${project.build.directory}/flattened-pom</outputDirectory>
+                    <flattenedPomFilename>release.pom.xml</flattenedPomFilename>
+                    <pomElements>
+                        <profiles>remove</profiles>
+                        <organization/>
+                        <issueManagement/>
+                    </pomElements>
+                    <flattenMode>ossrh</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <!-- by default don't run snyk on all modules. On  ones that "ship", mark them as skip=false -->
+                <groupId>io.snyk</groupId>
+                <artifactId>snyk-maven-plugin</artifactId>
+                <version>1.2.9</version>
+                <configuration>
+                    <skip>true</skip>
+                    <apiToken>${env.SNYK_API_TOKEN}</apiToken>
+                    <failOnSeverity>high</failOnSeverity>
+                    <org>${env.SNYK_ORG}</org>
+                    <includeProvidedDependencies>false</includeProvidedDependencies>
+                </configuration>
+            </plugin>
 
 
-            <!--            <plugin>-->
-<!--                <artifactId>maven-install-plugin</artifactId>-->
-<!--                <version>2.5.2</version>-->
-<!--                <configuration>-->
-<!--                    <skip>true</skip>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-<!--            <plugin>-->
-<!--                <artifactId>maven-deploy-plugin</artifactId>-->
-<!--                <version>2.8.2</version>-->
-<!--                <configuration>-->
-<!--                    <skip>true</skip>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
+            <!--        <plugin>-->
+            <!--            <artifactId>maven-install-plugin</artifactId>-->
+            <!--            <version>2.5.2</version>-->
+            <!--            <configuration>-->
+            <!--                <skip>true</skip>-->
+            <!--            </configuration>-->
+            <!--        </plugin>-->
 
         </plugins>
-<!--        <pluginManagement>-->
-<!--            <plugins>-->
-<!--                <plugin>-->
-<!--                    <groupId>org.jacoco</groupId>-->
-<!--                    <artifactId>jacoco-maven-plugin</artifactId>-->
-<!--                    <version>0.8.5</version>-->
-<!--                </plugin>-->
-<!--            </plugins>-->
-<!--        </pluginManagement>-->
+        <!--        <pluginManagement>-->
+        <!--            <plugins>-->
+        <!--                <plugin>-->
+        <!--                    <groupId>org.jacoco</groupId>-->
+        <!--                    <artifactId>jacoco-maven-plugin</artifactId>-->
+        <!--                    <version>0.8.5</version>-->
+        <!--                </plugin>-->
+        <!--            </plugins>-->
+        <!--        </pluginManagement>-->
 
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
     <profiles>
         <profile>
-            <id>liquibase-pro</id>
+            <id>non-jdk-8</id>
+            <activation>
+                <jdk>!1.8</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>8</maven.compiler.release>
+                <!-- CDILiquibaseTest is currently failing without this setting -->
+                <argLine>--illegal-access=permit</argLine>
+            </properties>
+        </profile>
+        <profile>
+            <id>liquibase-pro-submodule</id>
             <activation>
                 <file>
                     <exists>../liquibase-pro/pom.xml</exists>
@@ -125,6 +474,31 @@
             <modules>
                 <module>../liquibase-pro</module>
             </modules>
+        </profile>
+        <profile>
+            <id>gpg-sign</id>
+            <activation>
+                <property>
+                    <name>env.GPG_PASSPHRASE</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <configuration>
+                            <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+                            <gpgArguments>
+                                <arg>--batch</arg>
+                                <!-- This is necessary for gpg to not try to use the pinentry programs -->
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

@@ -39,7 +39,18 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("tableName", setNullableStatement.getTableName());
-        validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
+
+        if (setNullableStatement.isNullable()) {
+            if (database instanceof OracleDatabase) {
+                if (setNullableStatement.getConstraintName() == null && setNullableStatement.getColumnName() == null) {
+                    validationErrors.addError("Oracle requires either constraintName or columnName to be set");
+                }
+            } else {
+                validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
+            }
+        } else {
+            validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
+        }
 
         if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof InformixDatabase)) {
             validationErrors.checkRequiredField("columnDataType", setNullableStatement.getColumnDataType());
@@ -54,8 +65,12 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         String nullableString = statement.isNullable()?" NULL":" NOT NULL";
 
         if ((database instanceof OracleDatabase) && (statement.getConstraintName() != null)) {
-            nullableString += !statement.isValidate() ? " ENABLE NOVALIDATE " : "";
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " CONSTRAINT " + statement.getConstraintName() + nullableString;
+            if (!statement.isNullable()) {
+                nullableString += !statement.isValidate() ? " ENABLE NOVALIDATE " : "";
+                sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " CONSTRAINT " + statement.getConstraintName() + nullableString;
+            } else {
+                sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + statement.getConstraintName();
+            }
         } else if ((database instanceof OracleDatabase) || (database instanceof SybaseDatabase) || (database
             instanceof SybaseASADatabase)) {
             nullableString += (database instanceof OracleDatabase)&&(!statement.isValidate()) ? " ENABLE NOVALIDATE " : "";

@@ -22,7 +22,23 @@ public class InsertOrUpdateGeneratorPostgresTest {
         InsertGenerator generator = new InsertGenerator();
         InsertStatement statement = new InsertStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
         ColumnConfig columnConfig = new ColumnConfig();
-        columnConfig.setValueSequenceNext(new SequenceNextValueFunction(SEQUENCE_NAME, SCHEMA_NAME));
+        columnConfig.setValueSequenceNext(new SequenceNextValueFunction(SCHEMA_NAME, SEQUENCE_NAME));
+        columnConfig.setName("col3");
+        statement.addColumn(columnConfig);
+
+        Sql[] sql = generator.generateSql( statement, postgresDatabase,  null);
+        String theSql = sql[0].toSql();
+        assertEquals(String.format("INSERT INTO %s.%s (col3) VALUES (nextval('%s.%s'))",SCHEMA_NAME,TABLE_NAME,SCHEMA_NAME,SEQUENCE_NAME)
+                ,theSql);
+    }
+
+    @Test
+    public void testInsertSequenceValWithSchemaInWholeStatement(){
+        PostgresDatabase postgresDatabase = new PostgresDatabase();
+        InsertGenerator generator = new InsertGenerator();
+        InsertStatement statement = new InsertStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+        ColumnConfig columnConfig = new ColumnConfig();
+        columnConfig.setValueSequenceNext(new SequenceNextValueFunction(SCHEMA_NAME, SEQUENCE_NAME));
         columnConfig.setName("col3");
         statement.addColumn(columnConfig);
 
