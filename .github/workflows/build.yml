@@ -203,11 +203,13 @@ jobs:
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
+
+##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
         uses: actions/cache@v2
         with:
-          key: install4j8-
-          path: ~/.install4j/**
+          key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
+          path: ~/.install4j8/**
 
       - name: Set up JDK 8
         uses: actions/setup-java@v2
@@ -364,6 +366,10 @@ jobs:
             if (runFunctionalTests) {
               let testsBranch = await helper.findMatchingBranch("liquibase", "liquibase-pro-tests");
 
+              let notifications = [];
+              if (context.payload.pull_request) {
+                notifications = ["Triggered by PR " + context.payload.pull_request.html_url];
+              }
               console.log("Trigger functional tests");
               let workflowDispatch = await github.rest.actions.createWorkflowDispatch({
                 "owner": "liquibase",
@@ -371,7 +377,12 @@ jobs:
                 "workflow_id": "test.yml",
                 "ref": testsBranch.name,
                 "inputs": {
-                  "liquibaseCommit": helper.getCurrentSha()
+                  "liquibaseCommit": helper.getCurrentSha(),
+                  "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
+                  "runDetails": JSON.stringify({
+                    "liquibaseBranch": helper.getCurrentBranch(),
+                    "notifications": notifications
+                  })
                 }
               });
             }
