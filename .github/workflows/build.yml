@@ -206,7 +206,7 @@ jobs:
       - name: Install4j Cache
         uses: actions/cache@v2
         with:
-          key: install4j8-
+          key: install4j-${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j/**
 
       - name: Set up JDK 8
