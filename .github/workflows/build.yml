@@ -376,7 +376,7 @@ jobs:
                   "liquibaseCommit": helper.getCurrentSha(),
                   "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
                   "runDetails": JSON.stringify({
-                    "liquibaseBranch": liquibaseBranch,
+                    "liquibaseBranch": helper.getCurrentBranch()
                   })
                 }
               });
