@@ -55,6 +55,7 @@ public class Scope {
         fileEncoding,
         databaseChangeLog,
         changeSet,
+        osgiPlatform
     }
 
     private static ScopeManager scopeManager;
@@ -95,6 +96,7 @@ public class Scope {
             }
 
             rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
+            rootScope.values.put(Attr.osgiPlatform.name(),Activator.OSGIContainerChecker.isOsgiPlatform());
         }
         return scopeManager.getCurrentScope();
     }
