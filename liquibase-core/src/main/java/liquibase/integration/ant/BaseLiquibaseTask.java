@@ -1,17 +1,16 @@
 package liquibase.integration.ant;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.ui.UIFactory;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -41,7 +40,6 @@ public abstract class BaseLiquibaseTask extends Task {
     private Path classpath;
     private DatabaseType databaseType;
     private ChangeLogParametersType changeLogParameters;
-    private boolean promptOnNonLocalDatabase;
 
     public BaseLiquibaseTask() {
         super();
@@ -73,11 +71,7 @@ public abstract class BaseLiquibaseTask extends Task {
                 if (changeLogParameters != null) {
                     changeLogParameters.applyParameters(liquibase);
                 }
-                if (isPromptOnNonLocalDatabase() && !liquibase.isSafeToRunUpdate() &&
-                        UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                    log("User chose not to run task against a non-local database.", Project.MSG_INFO);
-                    return;
-                }
+
                 if (shouldRun()) {
                     executeWithLiquibaseClassloader();
                 }
@@ -222,11 +216,17 @@ public abstract class BaseLiquibaseTask extends Task {
         changeLogParameters.setRefid(changeLogParametersRef);
     }
 
+    /**
+     * @deprecated no longer prompts
+     */
     public boolean isPromptOnNonLocalDatabase() {
-        return promptOnNonLocalDatabase;
+        return false;
     }
 
+    /**
+     * @deprecated no longer prompts
+     */
     public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
-        this.promptOnNonLocalDatabase = promptOnNonLocalDatabase;
+        log("NOTE: The promptOnLocalDatabase functionality has been removed", Project.MSG_INFO);
     }
 }
