@@ -243,6 +243,26 @@
                 </executions>
             </plugin>
 
+            <!-- install the shaded jar as liquibase-core like the final artifact ends up as -->
+            <plugin>
+                <artifactId>maven-install-plugin</artifactId>
+                <configuration>
+                    <artifactId>liquibase-core</artifactId>
+                    <file>${project.build.directory}/liquibase-${project.version}.jar</file>
+                    <sources>${project.build.directory}/liquibase-${project.version}-sources.jar</sources>
+                    <pomFile>${project.build.directory}/flattened-pom/release.pom.xml</pomFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>custom-install</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
 <!--            <plugin>-->
 <!--                <groupId>org.jacoco</groupId>-->
 <!--                <artifactId>jacoco-maven-plugin</artifactId>-->
