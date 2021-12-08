@@ -1,10 +1,10 @@
-package liquibase;
+package liquibase.osgi;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import liquibase.Activator.LiquibaseBundle;
+import liquibase.osgi.Activator.LiquibaseBundle;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

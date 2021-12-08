@@ -2,8 +2,8 @@ package liquibase.util;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import liquibase.Activator;
-import liquibase.Activator.LiquibaseBundle;
+import liquibase.osgi.Activator;
+import liquibase.osgi.Activator.LiquibaseBundle;
 
 public final class OsgiUtil {
 
@@ -13,7 +13,7 @@ public final class OsgiUtil {
     /**
      * try to load a class under OSGI environment. It will try to load the class
      * from all liquibase bundles registered via
-     * {@link liquibase.Activator Activator}
+     * {@link Activator Activator}
      *
      * @param <T>
      * @param className name of class
@@ -42,7 +42,7 @@ public final class OsgiUtil {
 
     /**
      *
-     * @param className
+     * @param clazz
      * @return true is a class is allowed
      * @throws java.lang.ClassNotFoundException
      */
