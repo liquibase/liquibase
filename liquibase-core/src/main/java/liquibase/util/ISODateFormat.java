@@ -12,13 +12,12 @@ import java.util.Date;
 
 public class ISODateFormat {
 
-    private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
-    private SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
-    private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
+    private final SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
-    private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE_AND_NANOS = "yyyy-MM-dd HH:mm:ss.SS";
 
 
     public String format(java.sql.Date date) {
@@ -41,7 +40,7 @@ public class ISODateFormat {
                 }
             }
             sb.append('.');
-            sb.append(nanosString.substring(0, lastNotNullIndex + 1));
+            sb.append(nanosString, 0, lastNotNullIndex + 1);
         }
         return sb.toString();
     }

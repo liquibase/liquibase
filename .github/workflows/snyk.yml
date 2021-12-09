@@ -1,0 +1,54 @@
+# Run Snyk nightly to scan and report security issues.
+name: Nightly Snyk Scan
+
+# Job will run nightly at 02:05 EDT / 01:05 CDT
+# Time below is UTC
+on:
+  schedule:
+    - cron: "5 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    name: Snyk Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8
+          distribution: 'adopt'
+
+      - name: Checkout Master Branch
+        uses: actions/checkout@v2
+
+      - name: Run Snyk Test to check for vulnerabilities
+        id: test
+        uses: snyk/actions/maven@master
+        timeout-minutes: 10
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --fail-on=all --severity-threshold=high --all-projects --org=datical
+
+      - name: Run Snyk Monitor
+        uses: snyk/actions/maven@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: --all-projects --org=datical
+
+      - name: Slack Notification
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: team-liquibase
+          SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
+          SLACK_MESSAGE: "${{ github.job }}: ${{ job.status }} @here"
+          SLACK_USERNAME: "liquibot"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          MSG_MINIMAL: actions url
+          SLACK_ICON_EMOJI: ':liquibase:'
+          SLACK_LINK_NAMES: true

@@ -119,7 +119,7 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
         stmt.setDataType("INT");
         errors = new CreateSequenceGenerator().validate(stmt, new H2Database(), new MockSqlGeneratorChain());
         assertThat(errors.getErrorMessages()).isEmpty();
-        assertEquals("H2 only crates BIGINT sequences. Ignoring requested type INT", errors.getWarningMessages().get(0));
+        assertEquals("H2 only creates BIGINT sequences. Ignoring requested type INT", errors.getWarningMessages().get(0));
         assertEquals("CREATE SEQUENCE test_seq", new CreateSequenceGenerator().generateSql(stmt, new H2Database(), new MockSqlGeneratorChain())[0].toSql());
 
     }

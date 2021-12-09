@@ -10,7 +10,6 @@ Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog
   url (String) The JDBC database connection URL
-  verbose (String) Verbose flag
 Optional Args:
   contexts (String) Changeset contexts to match
     Default: null
@@ -26,6 +25,8 @@ Optional Args:
     Default: null
     OBFUSCATED
   username (String) Username to use to connect to the database
+    Default: null
+  verbose (Boolean) Verbose flag
     Default: null
 """
 

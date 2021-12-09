@@ -71,6 +71,8 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             isAutoIncrement |= columnType.isAutoIncrement();
             if ((constraints != null) && (constraints.isPrimaryKey() != null) && constraints.isPrimaryKey()) {
                 statement.addPrimaryKeyColumn(column.getName(), columnType, defaultValue, constraints.getValidatePrimaryKey(),
+                        constraints.isDeferrable() != null && constraints.isDeferrable(),
+                        constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred(),
                     constraints.getPrimaryKeyName(),constraints.getPrimaryKeyTablespace());
 
             } else {
@@ -140,7 +142,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             String columnRemarks = StringUtil.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks, column.getType());
-                if (!(database instanceof MySQLDatabase) && SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
+                if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                     statements.add(remarksStatement);
                 }
             }

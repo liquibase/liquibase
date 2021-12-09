@@ -8,59 +8,37 @@ import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.datatype.core.BigIntType;
-import liquibase.datatype.core.BlobType;
-import liquibase.datatype.core.BooleanType;
-import liquibase.datatype.core.CharType;
-import liquibase.datatype.core.ClobType;
-import liquibase.datatype.core.DateTimeType;
-import liquibase.datatype.core.DateType;
-import liquibase.datatype.core.DecimalType;
-import liquibase.datatype.core.DoubleType;
-import liquibase.datatype.core.FloatType;
-import liquibase.datatype.core.IntType;
-import liquibase.datatype.core.NCharType;
-import liquibase.datatype.core.NVarcharType;
-import liquibase.datatype.core.NumberType;
-import liquibase.datatype.core.SmallIntType;
-import liquibase.datatype.core.TimeType;
-import liquibase.datatype.core.TimestampType;
-import liquibase.datatype.core.TinyIntType;
-import liquibase.datatype.core.VarcharType;
+import liquibase.datatype.core.*;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 
 import java.math.BigDecimal;
 import java.sql.Types;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SqlUtil {
-
-    private SqlUtil() {
-        throw new IllegalStateException("This utility class must not be instantiated. Sorry.");
-    }
+public abstract class SqlUtil {
 
     public static boolean isNumeric(int dataType) {
-        List<Integer> numericTypes = Arrays.asList(
-                Types.BIGINT,
-                Types.BIT,
-                Types.INTEGER,
-                Types.SMALLINT,
-                Types.TINYINT,
-                Types.DECIMAL,
-                Types.DOUBLE,
-                Types.FLOAT,
-                Types.NUMERIC,
-                Types.REAL
-        );
-
-        return numericTypes.contains(dataType);
+        switch (dataType) {
+            case Types.BIGINT:
+            case Types.BIT:
+            case Types.INTEGER:
+            case Types.SMALLINT:
+            case Types.TINYINT:
+            case Types.DECIMAL:
+            case Types.DOUBLE:
+            case Types.FLOAT:
+            case Types.NUMERIC:
+            case Types.REAL:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public static boolean isBoolean(int dataType) {
@@ -68,13 +46,16 @@ public class SqlUtil {
     }
 
     public static boolean isDate(int dataType) {
-        List<Integer> validTypes = Arrays.asList(
-                Types.DATE,
-                Types.TIME,
-                Types.TIMESTAMP
-        );
-
-        return validTypes.contains(dataType);
+        switch (dataType) {
+            case Types.DATE:
+            case Types.TIME:
+            case Types.TIMESTAMP:
+            case Types.TIME_WITH_TIMEZONE:
+            case Types.TIMESTAMP_WITH_TIMEZONE:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public static Object parseValue(Database database, Object val, DataType type) {

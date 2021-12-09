@@ -11,8 +11,8 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.beans.PropertyUtils;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
@@ -293,7 +293,7 @@ public class ChangeParameterMetaData {
 
         try {
             readMethodRef = Optional.empty();
-            for (PropertyDescriptor descriptor : PropertyUtils.getInstance().getDescriptors(change.getClass())) {
+            for (PropertyDescriptor descriptor : ObjectUtil.getDescriptors(change.getClass())) {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method readMethod = descriptor.getReadMethod();
                     if (readMethod == null) {
@@ -362,7 +362,7 @@ public class ChangeParameterMetaData {
 
         try {
             writeMethodRef = Optional.empty();
-            for (PropertyDescriptor descriptor : PropertyUtils.getInstance().getDescriptors(change.getClass())) {
+            for (PropertyDescriptor descriptor : ObjectUtil.getDescriptors(change.getClass())) {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method writeMethod = descriptor.getWriteMethod();
                     if (writeMethod == null) {
@@ -408,7 +408,7 @@ public class ChangeParameterMetaData {
         if (exampleValues != null) {
             Object exampleValue = null;
 
-            for (Map.Entry<String, Object> entry: exampleValues.entrySet()) {
+            for (Map.Entry<String, Object> entry : exampleValues.entrySet()) {
                 if (ALL.equalsIgnoreCase(entry.getKey())) {
                     exampleValue = entry.getValue();
                 } else if (DatabaseList.definitionMatches(entry.getKey(), database, false)) {
@@ -438,14 +438,13 @@ public class ChangeParameterMetaData {
         standardExamples.put("primaryKey", "pk_id");
 
 
-
         if (standardExamples.containsKey(parameterName)) {
             return standardExamples.get(parameterName);
         }
 
-        for (String prefix : new String[] {"base", "referenced", "new", "old"}) {
+        for (String prefix : new String[]{"base", "referenced", "new", "old"}) {
             if (parameterName.startsWith(prefix)) {
-                String mainName = StringUtil.lowerCaseFirst(parameterName.replaceFirst("^"+prefix, ""));
+                String mainName = StringUtil.lowerCaseFirst(parameterName.replaceFirst("^" + prefix, ""));
                 if (standardExamples.containsKey(mainName)) {
                     return standardExamples.get(mainName);
                 }

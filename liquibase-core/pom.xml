@@ -5,9 +5,8 @@
 
     <parent>
         <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-base</artifactId>
-        <version>${liquibase.version}</version>
-        <relativePath>../base.pom.xml</relativePath>
+        <artifactId>liquibase</artifactId>
+        <version>0-SNAPSHOT</version>
     </parent>
 
     <artifactId>liquibase-core</artifactId>
@@ -116,6 +115,13 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.5.2</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
@@ -127,30 +133,6 @@
         </resources>
 
         <plugins>
-            <!-- need to build javadocs for other module javadocs to reference -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <attach>false</attach>
-                    <author>false</author>
-                    <doctitle>Liquibase ${project.version} API</doctitle>
-                    <quiet>true</quiet>
-                    <doclint>none</doclint>
-                    <encoding>UTF-8</encoding>
-                    <reportOutputDirectory>${project.build.directory}/apidocs</reportOutputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>custom-javadoc</id>
-                        <goals>
-                            <goal>javadoc</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>javacc-maven-plugin</artifactId>
@@ -200,16 +182,48 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.opencsv:*</include>
+                                    <include>org.apache.commons:commons-lang3</include>
+                                    <include>org.apache.commons:commons-text</include>
+                                    <include>org.apache.commons:commons-collections4</include>
+                                </includes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.apache</pattern>
+                                    <shadedPattern>liquibase.repackaged.org.apache</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.opencsv</pattern>
+                                    <shadedPattern>liquibase.repackaged.com.opencsv</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.1</version>
                 <configuration>
                     <archive>
                         <manifest>
-                            <addClasspath>true</addClasspath>
-                            <Main-Class>liquibase.integration.commandline.Main</Main-Class>
+                            <addClasspath>false</addClasspath>
                         </manifest>
                         <manifestEntries>
-                            <Liquibase-Package>liquibase.change,liquibase.command,liquibase.changelog,liquibase.database,liquibase.parser,liquibase.precondition,liquibase.datatype,liquibase.serializer,liquibase.sqlgenerator,liquibase.executor,liquibase.snapshot,liquibase.logging,liquibase.diff,liquibase.structure,liquibase.structurecompare,liquibase.lockservice,liquibase.sdk.database,liquibase.ext,liquibase.pro,com.datical.liquibase</Liquibase-Package>
                             <Build-Time>${build.timestamp}</Build-Time>
                             <Build-Number>${build.number}</Build-Number>
                             <Liquibase-Version>${project.version}</Liquibase-Version>
@@ -223,6 +237,20 @@
                         <goals>
                             <goal>test-jar</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <!-- liquibase-core jar is actually the one from liquibase-dist. So don't install just this sub-module -->
+                <artifactId>maven-install-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-install</id>
+                        <phase>none</phase>
                     </execution>
                 </executions>
             </plugin>

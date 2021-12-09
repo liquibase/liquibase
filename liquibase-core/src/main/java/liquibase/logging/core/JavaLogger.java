@@ -20,6 +20,10 @@ public class JavaLogger extends AbstractLogger {
 
     @Override
     public void log(Level level, String message, Throwable e) {
+        if (level.equals(Level.OFF)) {
+            return;
+        }
+
         if (!logger.isLoggable(level)) {
             return;
         }

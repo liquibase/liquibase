@@ -1,7 +1,8 @@
 package liquibase.executor.jvm;
 
-import liquibase.util.JdbcUtils;
-import liquibase.util.NumberUtils;
+import liquibase.util.JdbcUtil;
+import liquibase.util.NumberUtil;
+import liquibase.util.ObjectUtil;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -183,7 +184,7 @@ class SingleColumnRowMapper implements RowMapper {
      * @return the Object value
      */
     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
-        return JdbcUtils.getResultSetValue(rs, index);
+        return JdbcUtil.getResultSetValue(rs, index);
     }
 
     /**
@@ -207,10 +208,10 @@ class SingleColumnRowMapper implements RowMapper {
         } else if (Number.class.isAssignableFrom(this.requiredType)) {
             if (value instanceof Number) {
                 // Convert original Number to target Number class.
-                return NumberUtils.convertNumberToTargetClass(((Number) value), this.requiredType);
+                return ObjectUtil.convert(value, this.requiredType);
             } else {
                 // Convert stringified value to target Number class.
-                return NumberUtils.parseNumber(value.toString(), this.requiredType);
+                return NumberUtil.parseNumber(value.toString(), this.requiredType);
             }
         } else {
             throw new IllegalArgumentException(

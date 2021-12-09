@@ -21,6 +21,10 @@ public final class AntTaskLogger extends AbstractLogger {
 
     @Override
     public void log(Level level, String message, Throwable e) {
+        if (level == Level.OFF) {
+            return;
+        }
+
         int antLevel;
         if (level.intValue() == Level.SEVERE.intValue()) {
             antLevel = Project.MSG_ERR;

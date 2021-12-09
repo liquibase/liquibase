@@ -13,8 +13,8 @@ import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.beans.PropertyUtils;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -64,7 +64,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             }
 
             Set<ChangeParameterMetaData> params = new HashSet<>();
-            for (PropertyDescriptor property : PropertyUtils.getInstance().getDescriptors(getClass())) {
+            for (PropertyDescriptor property : ObjectUtil.getDescriptors(getClass())) {
                 if (isInvalidProperty(property)) {
                     continue;
                 }
@@ -115,7 +115,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
         try {
             PropertyDescriptor property = null;
-            for (PropertyDescriptor prop : PropertyUtils.getInstance().getDescriptors(getClass())) {
+            for (PropertyDescriptor prop : ObjectUtil.getDescriptors(getClass())) {
                 if (prop.getDisplayName().equals(parameterName)) {
                     property = prop;
                     break;

@@ -65,10 +65,11 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
                                     context, labels, global);
                         }
                     }
-                }
-                else if (((Map) obj).containsKey("changeLogId")) {
-                    String changeLogId = (String)((Map)obj).get("changeLogId");
-                    changeLog.setChangeLogId(changeLogId);
+
+                    if (((Map) obj).containsKey("changeLogId")) {
+                        String changeLogId = (String)((Map)obj).get("changeLogId");
+                        changeLog.setChangeLogId(changeLogId);
+                    }
                 }
             }
 

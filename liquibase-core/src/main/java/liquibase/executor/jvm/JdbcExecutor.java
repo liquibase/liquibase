@@ -1,6 +1,7 @@
 package liquibase.executor.jvm;
 
 import liquibase.Scope;
+import liquibase.sql.SqlConfiguration;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
@@ -20,8 +21,7 @@ import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.CompoundStatement;
 import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.DropTableStatement;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.CallableStatement;
@@ -31,6 +31,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Class to simplify execution of SqlStatements.  Based heavily on <a href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>.
@@ -84,7 +85,7 @@ public class JdbcExecutor extends AbstractExecutor {
         catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
             stmt = null;
             String url;
             if (con.isClosed()) {
@@ -95,7 +96,7 @@ public class JdbcExecutor extends AbstractExecutor {
             throw new DatabaseException("Error executing SQL " + StringUtil.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ url)+": "+ex.getMessage(), ex);
         }
         finally {
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
         }
     }
 
@@ -120,12 +121,12 @@ public class JdbcExecutor extends AbstractExecutor {
         catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
             stmt = null;
             throw new DatabaseException("Error executing SQL " + StringUtil.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ con.getURL())+": "+ex.getMessage(), ex);
         }
         finally {
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
         }
     }
 
@@ -178,7 +179,7 @@ public class JdbcExecutor extends AbstractExecutor {
     public Object queryForObject(SqlStatement sql, RowMapper rowMapper, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         List results = query(sql, rowMapper, sqlVisitors);
         try {
-            return JdbcUtils.requiredSingleResult(results);
+            return JdbcUtil.requiredSingleResult(results);
         } catch (DatabaseException e) {
             throw new DatabaseException("Expected single row from " + sql + " but got "+results.size(), e);
         }
@@ -316,7 +317,7 @@ public class JdbcExecutor extends AbstractExecutor {
                         resultSet = call.executeQuery();
                         checkCallStatus(resultSet, ((CallableSql) sql).getExpectedStatus());
                     } finally {
-                        JdbcUtils.close(resultSet, call);
+                        JdbcUtil.close(resultSet, call);
                     }
                 } else {
                     Statement stmt = null;
@@ -325,7 +326,7 @@ public class JdbcExecutor extends AbstractExecutor {
                         stmt.execute(sql.toSql());
                         con.commit();
                     } finally {
-                        JdbcUtils.closeStatement(stmt);
+                        JdbcUtil.closeStatement(stmt);
                     }
                 }
             } catch (Exception e) {
@@ -380,6 +381,9 @@ public class JdbcExecutor extends AbstractExecutor {
                     listener.writeSqlWillRun(String.format("%s", statement));
                 }
 
+                Level sqlLogLevel = SqlConfiguration.SHOW_AT_LOG_LEVEL.getCurrentValue();
+
+                log.log(sqlLogLevel, statement, null);
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -387,7 +391,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     //if execute returns false, we can retrieve the affected rows count
                     // (true used when resultset is returned)
                     if (!stmt.execute(statement)) {
-                        log.fine(Integer.toString(stmt.getUpdateCount()) + " row(s) affected");
+                        log.log(sqlLogLevel, stmt.getUpdateCount() + " row(s) affected", null);
                     }
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: " + getErrorCode(e) + statement+"]", e);
@@ -399,7 +403,7 @@ public class JdbcExecutor extends AbstractExecutor {
                         if (!stmt.getMoreResults()) {
                             updateCount = stmt.getUpdateCount();
                             if (updateCount != -1)
-                                log.fine(Integer.toString(updateCount) + " row(s) affected");
+                                log.log(sqlLogLevel, updateCount + " row(s) affected", null);
                         }
                     } while (updateCount != -1);
 
@@ -464,7 +468,7 @@ public class JdbcExecutor extends AbstractExecutor {
             }
             finally {
                 if (rs != null) {
-                        JdbcUtils.closeResultSet(rs);
+                        JdbcUtil.closeResultSet(rs);
                 }
             }
         }
@@ -495,7 +499,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 return rse.extractData(rs);
             }
             finally {
-                JdbcUtils.closeResultSet(rs);
+                JdbcUtil.closeResultSet(rs);
             }
         }
 

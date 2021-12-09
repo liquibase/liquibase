@@ -1,8 +1,8 @@
-Liquibase Version ${liquibase.version}
+Liquibase Version ${project.version}
 
 Introduction
 --------------------------------------------
-Thanks for downloading and installing Liquibase ${liquibase.version} from Datical.
+Thanks for downloading and installing Liquibase ${project.version} from Liquibase.
 By using the installer, you already have all the dependencies, directories, config, 
 and properties files to get started exploring the Liquibase examples provided.
 
@@ -76,6 +76,6 @@ Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here:
 
 ----------------------------------------
 The program is subject to the license agreement, copyright, trademark, patent, and other laws.
-Copyright 2020 Datical, Inc. All rights reserved.
+Copyright 2021 Liquibase, Inc. All rights reserved.
 
 
