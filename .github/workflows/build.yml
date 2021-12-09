@@ -366,9 +366,9 @@ jobs:
             if (runFunctionalTests) {
               let testsBranch = await helper.findMatchingBranch("liquibase", "liquibase-pro-tests");
 
-              let notifications = [];
+              let notices = [];
               if (context.payload.pull_request) {
-                console.log("Sending pull request information"):
+                console.log("Sending pull request information");
                 notices = ["Triggered by PR " + context.payload.pull_request.html_url];
               }
               console.log("Trigger functional tests");
@@ -382,7 +382,7 @@ jobs:
                   "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
                   "runDetails": JSON.stringify({
                     "liquibaseBranch": helper.getCurrentBranch(),
-                    "notifications": notifications
+                    "notices": notices
                   })
                 }
               });

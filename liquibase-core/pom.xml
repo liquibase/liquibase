@@ -241,6 +241,20 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <!-- liquibase-core jar is actually the one from liquibase-dist. So don't install just this sub-module -->
+                <artifactId>maven-install-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-install</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 </project>
