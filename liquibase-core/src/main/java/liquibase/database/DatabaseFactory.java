@@ -244,6 +244,7 @@ public class DatabaseFactory {
 
             return new JdbcConnection(connection);
         } catch (Exception e) {
+            log.severe("Connection error to " + username + "@" + url);
             throw new DatabaseException(e);
         }
     }
