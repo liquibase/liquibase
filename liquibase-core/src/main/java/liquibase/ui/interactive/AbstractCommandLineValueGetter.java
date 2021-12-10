@@ -118,7 +118,7 @@ public abstract class AbstractCommandLineValueGetter<T> {
      * @return the message
      */
     private String getMessage(InteractivePromptableCustomizationWrapper<?> parameter) {
-        return parameter.getParameter().getUiMessage() + " (options: " + parameter.getParameter().getOptions() + ") ";
+        return parameter.getParameter().getUiMessage() + " (options: " + parameter.getParameter().getOptions() + ")";
     }
 
     /**

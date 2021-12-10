@@ -2,11 +2,14 @@ package liquibase.command;
 
 import liquibase.Scope;
 import liquibase.configuration.*;
+import liquibase.configuration.core.InteractivePromptingValueProvider;
 import liquibase.exception.CommandExecutionException;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.OutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The primary facade used for executing commands.
@@ -132,6 +135,46 @@ public class CommandScope {
 
         for (ConfigurationValueProvider provider : Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getProviders()) {
             provider.validate(this);
+        }
+
+        // if the command has some arguments which are interactively promptable and which do not have values provided for them, ignore the defaults for those parameters and go into a prompting session
+        boolean initProjectModeOn = true;
+
+        if (initProjectModeOn) {
+            // Determine if the command has ANY parameters which are interactively promptable.
+            boolean commandHasAnyInteractivelyPromptableParameters = commandDefinition.getArguments().values().stream().anyMatch(CommandArgumentDefinition::isInteractivelyPromptable);
+            if (commandHasAnyInteractivelyPromptableParameters) {
+                // If the command does have any interactively promptable parameters, then generate a list of parameters which
+                // are interactively promptable and for which the user did not explicitly provide a value.
+//                SortedSet<ConfigurationDefinition<?>> registeredDefinitions = LiquibaseConfiguration.getInstance().getRegisteredDefinitions(true);
+                List<CommandArgumentDefinition<?>> interactivelyPromptableParametersWithDefaultValue =
+                        commandDefinition.getArgumentsInInsertionOrder().values().stream().filter(cad -> (getConfiguredValue(cad).wasDefaultValueUsed() || !getConfiguredValue(cad).found()) && cad.isInteractivelyPromptable())
+                                .collect(Collectors.toList());
+
+                if (!interactivelyPromptableParametersWithDefaultValue.isEmpty()) {
+                    String response = Scope.getCurrentScope().getUI().prompt("No Liquibase project files detected in <cwd>. Setup new liquibase.properties and sample changelog in this directory? Enter (Y)es with defaults, yes with (C)ustomization, or (N)o. [Y]:", null, (input, type) -> {
+                        List<String> permissibleEntries = Arrays.asList("y", "yes", "n", "no", "c", "custom", "customize");
+                        if (input == null || permissibleEntries.stream().noneMatch(pe -> pe.equalsIgnoreCase(input))) {
+                            throw new IllegalArgumentException();
+                        } else {
+                            return input;
+                        }
+                    }, String.class);
+                    if (StringUtils.containsIgnoreCase(response, "c")) {
+                        for (CommandArgumentDefinition<?> definition : interactivelyPromptableParametersWithDefaultValue) {
+                            Object o = definition.interactivelyPrompt(InteractivePromptingValueProvider.values);
+                            if (o != null) {
+                                // Only add it if they did not accept the default value. This is so that the provider
+                                // remains the defaults value provider if they accept the default, so that
+                                // wasDefaultValueUsed() will continue to work.
+                                if (definition.getDefaultValue() == null || !definition.getDefaultValue().equals(o)) {
+                                    InteractivePromptingValueProvider.values.put(completeConfigPrefix + "." + definition.getName(), o);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         for (CommandArgumentDefinition<?> definition : commandDefinition.getArguments().values()) {

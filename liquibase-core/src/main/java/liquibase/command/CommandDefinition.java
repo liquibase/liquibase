@@ -17,7 +17,7 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
      */
     private final SortedSet<CommandStep> pipeline;
 
-    private final SortedMap<String, CommandArgumentDefinition<?>> arguments = new TreeMap<>();
+    private final Map<String, CommandArgumentDefinition<?>> arguments = new LinkedHashMap<>();
 
     private String longDescription = null;
     private String shortDescription = null;
@@ -97,7 +97,16 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
      * Returns the arguments for this command.
      */
     public SortedMap<String, CommandArgumentDefinition<?>> getArguments() {
-        return Collections.unmodifiableSortedMap(this.arguments);
+        return Collections.unmodifiableSortedMap(new TreeMap<>(this.arguments));
+    }
+
+    /**
+     * Returns the arguments for this command in the order that they were created. Maintaining insertion order can be
+     * useful for things like interactive prompting, which should occur in a very specific order (as some arguments
+     * might depend on the values provided for prior arguments).
+     */
+    public Map<String, CommandArgumentDefinition<?>> getArgumentsInInsertionOrder() {
+        return Collections.unmodifiableMap(this.arguments);
     }
 
     /**

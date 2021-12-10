@@ -13,7 +13,7 @@ import java.util.*;
 public class CommandFactory implements SingletonObject {
     private Collection<CommandStep> allInstances;
 
-    private final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new HashMap<>();
+    private final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new LinkedHashMap<>();
 
     /**
      * @deprecated. Use {@link Scope#getSingleton(Class)}
@@ -95,7 +95,7 @@ public class CommandFactory implements SingletonObject {
     protected void register(String[] commandName, CommandArgumentDefinition<?> definition) {
         String commandNameKey = StringUtil.join(commandName, " ");
         if (!commandArgumentDefinitions.containsKey(commandNameKey)) {
-            commandArgumentDefinitions.put(commandNameKey, new TreeSet<>());
+            commandArgumentDefinitions.put(commandNameKey, new LinkedHashSet<>());
         }
 
         if (commandArgumentDefinitions.get(commandNameKey).contains(definition)) {

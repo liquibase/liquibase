@@ -18,15 +18,17 @@ public class InteractivePromptableCustomizationWrapper<T> {
     private final Function<List<DynamicRuleParameter>, Boolean> shouldPrompt;
 
     public InteractivePromptableCustomizationWrapper(IInteractivelyPromptableEnum parameter) {
-        this.parameter = parameter;
-        this.validationCallbackOverride = null;
-        this.shouldPrompt = null;
+        this(parameter, null, null);
     }
 
     public InteractivePromptableCustomizationWrapper(IInteractivelyPromptableEnum parameter, BiFunction<T, List<DynamicRuleParameter>, Boolean> validationCallbackOverride, Function<List<DynamicRuleParameter>, Boolean> shouldPrompt) {
         this.parameter = parameter;
         this.validationCallbackOverride = validationCallbackOverride;
         this.shouldPrompt = shouldPrompt;
+    }
+
+    public InteractivePromptableCustomizationWrapper(IInteractivelyPromptableEnum parameter, Function<List<DynamicRuleParameter>, Boolean> shouldPrompt) {
+        this(parameter, null, shouldPrompt);
     }
 
     public Object getDefaultValue() {
