@@ -19,7 +19,7 @@ class FilenameGetterTest extends Specification {
 
     def "Validate files with illegal characters are not allowed" () {
         when:
-        new FilenameGetter().validate("hello*.txt")
+        new FilenameGetter().validate("hello/.txt")
 
         then:
         thrown(IllegalArgumentException)
