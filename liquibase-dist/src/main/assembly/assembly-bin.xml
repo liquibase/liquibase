@@ -4,8 +4,6 @@
     <id>liquibase-bin</id>
     <formats>
         <format>tar.gz</format>
-        <format>zip</format>
-        <format>dir</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
