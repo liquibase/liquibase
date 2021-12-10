@@ -18,7 +18,7 @@ class FilenameGetterTest extends Specification {
     }
 
     @Unroll
-    def "Can't have path elements"(String dir) {
+    def "Can't have path elements #dir"(String dir) {
         when:
         new FilenameGetter().validate(dir)
 
