@@ -17,6 +17,14 @@ class FilenameGetterTest extends Specification {
         thrown(IllegalArgumentException)
     }
 
+    def "Validate files with illegal characters are not allowed" () {
+        when:
+        new FilenameGetter().validate("hello*.txt")
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
     @Unroll
     def "Can't have path elements #dir"(String dir) {
         when:
@@ -28,6 +36,5 @@ class FilenameGetterTest extends Specification {
         where:
         dir | _
         "path/hello.txt" | _
-        "path\\hello.txt" | _
     }
 }
