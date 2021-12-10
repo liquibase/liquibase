@@ -1,6 +1,5 @@
 package liquibase.ui.interactive.getter
 
-import jdk.nashorn.internal.objects.annotations.Where
 import liquibase.util.StringUtil
 import spock.lang.Specification
 import spock.lang.Unroll
