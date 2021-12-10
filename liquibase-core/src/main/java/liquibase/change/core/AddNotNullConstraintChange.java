@@ -4,12 +4,16 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.BooleanType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
+import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -133,10 +137,19 @@ public class AddNotNullConstraintChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<>();
 
-        if (defaultNullValue != null) {
-            Object parsedDefaultNullValue = parseDefaultNullValue();
+        if (defaultNullValue != null && !defaultNullValue.equalsIgnoreCase("null")) {
+            final String columnDataType = this.getColumnDataType();
+
+            Object finalDefaultNullValue = defaultNullValue;
+            if (columnDataType != null) {
+                final LiquibaseDataType datatype = DataTypeFactory.getInstance().fromDescription(columnDataType, database);
+                if (datatype instanceof BooleanType) {
+                    finalDefaultNullValue = BooleanUtil.parseBoolean(defaultNullValue);
+                }
+            }
+
             statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
-                                   .addNewColumnValue(getColumnName(), parsedDefaultNullValue)
+                                   .addNewColumnValue(getColumnName(), finalDefaultNullValue)
                                    .setWhereClause(database.escapeObjectName(getColumnName(), Column.class) +
                                    " IS NULL"));
         }
@@ -149,23 +162,6 @@ public class AddNotNullConstraintChange extends AbstractChange {
         }
         
         return statements.toArray(new SqlStatement[statements.size()]);
-    }
-
-    private Object parseDefaultNullValue() {
-        if (isABooleanColumnDataType()) {
-            return parseDefaultNullValueToBoolean();
-        }
-
-        return defaultNullValue;
-    }
-
-    private boolean isABooleanColumnDataType() {
-        return
-            "BOOLEAN".equalsIgnoreCase(columnDataType) || "BIT(1)".equalsIgnoreCase(columnDataType);
-    }
-
-    private boolean parseDefaultNullValueToBoolean() {
-        return Boolean.parseBoolean(defaultNullValue) || "1".equals(defaultNullValue);
     }
 
     @Override
