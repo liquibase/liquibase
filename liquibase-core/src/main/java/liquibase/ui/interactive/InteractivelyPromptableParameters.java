@@ -15,10 +15,10 @@ import static liquibase.integration.commandline.LiquibaseCommandLineConfiguratio
 public enum InteractivelyPromptableParameters implements IInteractivelyPromptableEnum {
     PROJECT_DIR(null, "Enter a relative path to desired project directory, or (n) to cancel:", ".", (String)null, new DirectoryGetter()),
     DEFAULTS_FILENAME(null, "Enter name for defaults file to be created or (s)kip", DEFAULTS_FILE.getDefaultValue(), (String) null, new FilenameGetter()),
-    JDBC_URL(null, "Enter the JDBC url without username or password to be used (What is this? <url>)", "jdbc:h2:tcp://localhost:9090/mem:dev", (String) null, new StringGetter(false)),
+    JDBC_URL(null, "Enter the JDBC url without username or password to be used (What is a JDBC url? <url>)", "jdbc:h2:tcp://localhost:9090/mem:dev", (String) null, new StringGetter(false)),
     USERNAME(null, "Enter username to connect to JDBC url", "dbuser", (String) null, new StringGetter(false)),
     PASSWORD(null, "Enter password to connect to JDBC url", "letmein", (String) null, new StringGetter(false)),
-    FILETYPE(null, "Enter your preferred changelog filetype", FileTypeEnum.sql, FileTypeEnum.values(), new EnumGetter<>(FileTypeEnum.class)),
+    FILETYPE(null, "Enter your preferred changelog format", FileTypeEnum.sql, FileTypeEnum.values(), new EnumGetter<>(FileTypeEnum.class)),
     SAMPLE_CHANGELOG_NAME(null, "Enter name for sample changelog file to be created or (s)kip", "example-changelog." + FILETYPE.defaultValue, (String) null, new FilenameGetter());
 
 

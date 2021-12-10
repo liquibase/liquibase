@@ -152,7 +152,7 @@ public class CommandScope {
                                 .collect(Collectors.toList());
 
                 if (!interactivelyPromptableParametersWithDefaultValue.isEmpty()) {
-                    String response = Scope.getCurrentScope().getUI().prompt("No Liquibase project files detected in <cwd>. Setup new liquibase.properties and sample changelog in this directory? Enter (Y)es with defaults, yes with (C)ustomization, or (N)o. [Y]:", null, (input, type) -> {
+                    String response = Scope.getCurrentScope().getUI().prompt("Setup new liquibase.properties and sample changelog? Enter (Y)es with defaults, yes with (C)ustomization, or (N)o.", "Y", (input, type) -> {
                         List<String> permissibleEntries = Arrays.asList("y", "yes", "n", "no", "c", "custom", "customize");
                         if (input == null || permissibleEntries.stream().noneMatch(pe -> pe.equalsIgnoreCase(input))) {
                             throw new IllegalArgumentException();
