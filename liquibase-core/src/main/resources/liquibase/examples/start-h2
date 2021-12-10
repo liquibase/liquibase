@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+if [ -z "${LIQUIBASE_HOME}" ]; then
+  #liquibase home is not set
+
+  LIQUIBASE_PATH="$(which liquibase)"
+
+  if [ -z "${LIQUIBASE_PATH}" ]; then
+    echo "Must set LIQUIBASE_HOME environment variable, or have liquibase in your PATH"
+    exit 1
+  fi
+
+  LIQUIBASE_HOME=$(dirname "$(which liquibase)")
+fi
+
+if [ -z "${JAVA_HOME}" ]; then
+  #JAVA_HOME not set, try to find a bundled version
+  if [ -d "${LIQUIBASE_HOME}/jre" ]; then
+    JAVA_HOME="$LIQUIBASE_HOME/jre"
+  elif [ -d "${LIQUIBASE_HOME}/.install4j/jre.bundle/Contents/Home" ]; then
+    JAVA_HOME="${LIQUIBASE_HOME}/.install4j/jre.bundle/Contents/Home"
+  fi
+fi
+
+if [ -z "${JAVA_HOME}" ]; then
+  JAVA_PATH="$(which java)"
+
+  if [ -z "${JAVA_PATH}" ]; then
+    echo "Cannot find java in your path. Install java or use the JAVA_HOME environment variable"
+
+    exit 1
+  fi
+else
+    #Use path in JAVA_HOME
+    JAVA_PATH="${JAVA_HOME}/bin/java"
+fi
+
+
+# echo "${JAVA_PATH}" -cp "${LIQUIBASE_HOME}/lib/h2-1.4.200.jar:${LIQUIBASE_HOME}/liquibase.jar" liquibase.example.StartH2Main
+
+"${JAVA_PATH}" -cp "${LIQUIBASE_HOME}/lib/h2-1.4.200.jar:${LIQUIBASE_HOME}/liquibase.jar" liquibase.example.StartH2Main

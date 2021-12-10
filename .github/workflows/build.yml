@@ -245,6 +245,15 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           mvn -B -pl liquibase-dist -P liquibase-pro source:jar package
+
+          ## extract tar content for other artifacts
+          mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
+          (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz ../liquibase-0-SNAPSHOT.tar.gz)
+
+          ##create zip file from tar content
+          (cd liquibase-dist/target/liquibase-0-SNAPSHOT && zip -r ../liquibase-0-SNAPSHOT.zip *)
+
+          ##create installers
           (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
@@ -268,6 +277,11 @@ jobs:
 
           .github/util/sign-artifacts.sh artifacts
 
+          ##prepare branch-named convenience artifacts directories
+          mkdir artifacts-named
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.jar
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchName }}.jar
 
       - name: Archive Packages
         uses: actions/upload-artifact@v2
@@ -275,12 +289,18 @@ jobs:
           name: liquibase-artifacts
           path: artifacts/*
 
-## convenience zip for faster download
-      - name: Archive Zip
+      - name: Archive Convenience Zip
         uses: actions/upload-artifact@v2
         with:
           name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
           path: liquibase-dist/target/liquibase-0-SNAPSHOT/*
+
+      - name: Archive Convenience Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
+          path: artifacts-named/*
+
 
   finish:
     name: Finish Build
@@ -366,9 +386,10 @@ jobs:
             if (runFunctionalTests) {
               let testsBranch = await helper.findMatchingBranch("liquibase", "liquibase-pro-tests");
 
-              let notifications = [];
+              let notices = [];
               if (context.payload.pull_request) {
-                notifications = ["Triggered by PR " + context.payload.pull_request.html_url];
+                console.log("Sending pull request information");
+                notices = ["Triggered by PR " + context.payload.pull_request.html_url];
               }
               console.log("Trigger functional tests");
               let workflowDispatch = await github.rest.actions.createWorkflowDispatch({
@@ -381,7 +402,7 @@ jobs:
                   "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
                   "runDetails": JSON.stringify({
                     "liquibaseBranch": helper.getCurrentBranch(),
-                    "notifications": notifications
+                    "notices": notices
                   })
                 }
               });
