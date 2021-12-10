@@ -1,5 +1,4 @@
 databaseChangeLog:
-- changeLogId: 455d447e-d2c9-42f1-b283-0cc524934a51
 - changeSet:
       id:  1
       author:  your.name

@@ -1,0 +1,18 @@
+{ "databaseChangeLog": [
+  "changeset": {
+     "id": "1",
+     "author": "your.name",
+     "changes": [
+        {
+        }
+     ]
+  },
+  "changeset": {
+     "id": "2",
+     "author": "your.name",
+     "changes": [
+        {
+        }
+     ]
+  }
+]}
