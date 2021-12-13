@@ -6,13 +6,13 @@
       "changes": [
         {
           "createTable": {
-            "tablename": "person",
+            "tableName": "person",
             "columns": [
               {
                 "column": {
                   "name": "id",
                   "type": "int",
-                  "autoincrement": true,
+                  "autoIncrement": true,
                   "constraints": {
                     "primarykey": true,
                     "nullable": false
@@ -45,22 +45,23 @@
               }
             ]
           }
-        }
-      ]
-    },
+        }]
+    }
+  },
+  {
     "changeSet": {
       "id": "2",
       "author": "your.name",
       "changes": [
         {
           "createTable": {
-            "tablename": "company",
+            "tableName": "company",
             "columns": [
               {
                 "column": {
                   "name": "id",
                   "type": "int",
-                  "autoincrement": true,
+                  "autoIncrement": true,
                   "constraints": {
                     "primarykey": true,
                     "nullable": false
@@ -93,9 +94,10 @@
               }
             ]
           }
-        }
-      ]
-    },
+        }]
+    }
+  },
+  {
     "changeSet": {
       "id": "3",
       "author": "your.name",
@@ -112,8 +114,7 @@
               }
             ]
           }
-        }
-      ]
+        }]
     }
   }
 ]}
