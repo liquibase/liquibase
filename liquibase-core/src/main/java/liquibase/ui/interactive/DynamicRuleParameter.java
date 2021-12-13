@@ -21,7 +21,7 @@ public class DynamicRuleParameter {
     public DynamicRuleParameter() {
     }
 
-    public DynamicRuleParameter(IInteractivelyPromptableEnum parameter, Object value) {
+    public DynamicRuleParameter(InteractivelyPromptableEnum parameter, Object value) {
         Objects.requireNonNull(parameter);
         this.parameter = parameter.toString();
         this.value = value;

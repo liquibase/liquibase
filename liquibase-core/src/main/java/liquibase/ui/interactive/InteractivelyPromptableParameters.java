@@ -12,7 +12,7 @@ import static liquibase.integration.commandline.LiquibaseCommandLineConfiguratio
 /**
  *
  */
-public enum InteractivelyPromptableParameters implements IInteractivelyPromptableEnum {
+public enum InteractivelyPromptableParameters implements InteractivelyPromptableEnum {
     PROJECT_DIR(null, "Enter a relative path to desired project directory, or (n) to cancel:", ".", (String)null, new DirectoryGetter()),
     DEFAULTS_FILENAME(null, "Enter name for defaults file to be created or (s)kip", DEFAULTS_FILE.getDefaultValue(), (String) null, new FilenameGetter()),
     JDBC_URL(null, "Enter the JDBC url without username or password to be used (What is a JDBC url? <url>)", "jdbc:h2:tcp://localhost:9090/mem:dev", (String) null, new StringGetter(false)),

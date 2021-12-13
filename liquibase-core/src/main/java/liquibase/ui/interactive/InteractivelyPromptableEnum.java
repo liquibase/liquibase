@@ -1,7 +1,7 @@
 package liquibase.ui.interactive;
 
 
-public interface IInteractivelyPromptableEnum {
+public interface InteractivelyPromptableEnum {
     /**
      * Description of the parameter to be used in the UI output.
      */

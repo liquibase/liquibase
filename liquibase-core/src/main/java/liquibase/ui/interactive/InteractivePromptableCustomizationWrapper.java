@@ -13,21 +13,21 @@ import java.util.function.Function;
  * affecting all others).
  */
 public class InteractivePromptableCustomizationWrapper<T> {
-    private final IInteractivelyPromptableEnum parameter;
+    private final InteractivelyPromptableEnum parameter;
     private final BiFunction<T, List<DynamicRuleParameter>, Boolean> validationCallbackOverride;
     private final Function<List<DynamicRuleParameter>, Boolean> shouldPrompt;
 
-    public InteractivePromptableCustomizationWrapper(IInteractivelyPromptableEnum parameter) {
+    public InteractivePromptableCustomizationWrapper(InteractivelyPromptableEnum parameter) {
         this(parameter, null, null);
     }
 
-    public InteractivePromptableCustomizationWrapper(IInteractivelyPromptableEnum parameter, BiFunction<T, List<DynamicRuleParameter>, Boolean> validationCallbackOverride, Function<List<DynamicRuleParameter>, Boolean> shouldPrompt) {
+    public InteractivePromptableCustomizationWrapper(InteractivelyPromptableEnum parameter, BiFunction<T, List<DynamicRuleParameter>, Boolean> validationCallbackOverride, Function<List<DynamicRuleParameter>, Boolean> shouldPrompt) {
         this.parameter = parameter;
         this.validationCallbackOverride = validationCallbackOverride;
         this.shouldPrompt = shouldPrompt;
     }
 
-    public InteractivePromptableCustomizationWrapper(IInteractivelyPromptableEnum parameter, Function<List<DynamicRuleParameter>, Boolean> shouldPrompt) {
+    public InteractivePromptableCustomizationWrapper(InteractivelyPromptableEnum parameter, Function<List<DynamicRuleParameter>, Boolean> shouldPrompt) {
         this(parameter, null, shouldPrompt);
     }
 
@@ -35,7 +35,7 @@ public class InteractivePromptableCustomizationWrapper<T> {
         return parameter.getDefaultValue();
     }
 
-    public IInteractivelyPromptableEnum getParameter() {
+    public InteractivelyPromptableEnum getParameter() {
         return parameter;
     }
 
