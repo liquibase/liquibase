@@ -80,4 +80,8 @@ public enum InteractivelyPromptableParameters implements InteractivelyPromptable
     public String getOptions() {
         return options;
     }
+
+    public enum FileTypeEnum {
+        sql, xml, json, yml, yaml
+    }
 }
