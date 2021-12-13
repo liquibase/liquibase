@@ -2,6 +2,7 @@ package liquibase.ui.interactive;
 
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -14,20 +15,20 @@ import java.util.function.Function;
  */
 public class InteractivePromptableCustomizationWrapper<T> {
     private final InteractivelyPromptableEnum parameter;
-    private final BiFunction<T, List<DynamicRuleParameter>, Boolean> validationCallbackOverride;
-    private final Function<List<DynamicRuleParameter>, Boolean> shouldPrompt;
+    private final BiFunction<T, Map<String, Object>, Boolean> validationCallbackOverride;
+    private final Function<Map<String, Object>, Boolean> shouldPrompt;
 
     public InteractivePromptableCustomizationWrapper(InteractivelyPromptableEnum parameter) {
         this(parameter, null, null);
     }
 
-    public InteractivePromptableCustomizationWrapper(InteractivelyPromptableEnum parameter, BiFunction<T, List<DynamicRuleParameter>, Boolean> validationCallbackOverride, Function<List<DynamicRuleParameter>, Boolean> shouldPrompt) {
+    public InteractivePromptableCustomizationWrapper(InteractivelyPromptableEnum parameter, BiFunction<T, Map<String, Object>, Boolean> validationCallbackOverride, Function<Map<String, Object>, Boolean> shouldPrompt) {
         this.parameter = parameter;
         this.validationCallbackOverride = validationCallbackOverride;
         this.shouldPrompt = shouldPrompt;
     }
 
-    public InteractivePromptableCustomizationWrapper(InteractivelyPromptableEnum parameter, Function<List<DynamicRuleParameter>, Boolean> shouldPrompt) {
+    public InteractivePromptableCustomizationWrapper(InteractivelyPromptableEnum parameter, Function<Map<String, Object>, Boolean> shouldPrompt) {
         this(parameter, null, shouldPrompt);
     }
 
@@ -43,11 +44,11 @@ public class InteractivePromptableCustomizationWrapper<T> {
         return parameter.getInteractiveCommandLineValueGetter();
     }
 
-    public BiFunction<T, List<DynamicRuleParameter>, Boolean> getValidationCallbackOverride() {
+    public BiFunction<T, Map<String, Object>, Boolean> getValidationCallbackOverride() {
         return validationCallbackOverride;
     }
 
-    public Function<List<DynamicRuleParameter>, Boolean> getShouldPrompt() {
+    public Function<Map<String, Object>, Boolean> getShouldPrompt() {
         return shouldPrompt;
     }
 
@@ -61,7 +62,7 @@ public class InteractivePromptableCustomizationWrapper<T> {
      * @param existingNewValues the values already provided in the checks customize session
      * @return true if the prompt should occur for this parameter, false if not
      */
-    public boolean shouldPrompt(List<DynamicRuleParameter> existingNewValues) {
+    public boolean shouldPrompt(Map<String, Object> existingNewValues) {
         boolean resp = true;
         if (shouldPrompt != null) {
             resp = shouldPrompt.apply(existingNewValues);

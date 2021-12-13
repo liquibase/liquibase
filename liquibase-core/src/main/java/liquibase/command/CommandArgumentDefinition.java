@@ -5,13 +5,11 @@ import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandValidationException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.ui.interactive.DynamicRuleParameter;
 import liquibase.ui.interactive.InteractivePromptableCustomizationWrapper;
 import liquibase.util.ObjectUtil;
 
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Defines a known, type-safe argument for a specific {@link CommandStep}.
@@ -158,8 +156,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      * signifies that this prompt should not occur
      */
     public DataType interactivelyPrompt(Map<String, Object> previouslyPromptedValues) {
-        List<DynamicRuleParameter> collect = previouslyPromptedValues.entrySet().stream().map(v -> new DynamicRuleParameter(v.getKey(), v.getValue())).collect(Collectors.toList());
-        if (interactivePrompt.shouldPrompt(collect)) {
+        if (interactivePrompt.shouldPrompt(previouslyPromptedValues)) {
             return (DataType) interactivePrompt.getParameter().getInteractiveCommandLineValueGetter().prompt(interactivePrompt, null, null);
         }
         return null;

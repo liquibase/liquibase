@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.ui.InputHandler;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents the basis for prompts to the user to input values, and should be used as part of the process
@@ -31,7 +32,7 @@ public abstract class AbstractCommandLineValueGetter<T> {
      * @param newParameterValues a list of the values that have already been entered by the user during this interactive CLI parameter prompting situation
      * @return the value entered by the user
      */
-    public final T prompt(InteractivePromptableCustomizationWrapper<T> parameter, List<DynamicRuleParameter> newParameterValues, Object currentValue) {
+    public final T prompt(InteractivePromptableCustomizationWrapper<T> parameter, Map<String, Object> newParameterValues, Object currentValue) {
         // determine which value should be displayed in square brackets as the value that will be selected if user presses enter
         Object valueToPromptAsDefault;
         if (currentValue != null) {
@@ -65,7 +66,7 @@ public abstract class AbstractCommandLineValueGetter<T> {
         return prompt;
     }
 
-    private T doPrompt(InteractivePromptableCustomizationWrapper<T> parameter, List<DynamicRuleParameter> newParameterValues, Object valueToPromptAsDefault, boolean shouldAllowEmptyValues) {
+    private T doPrompt(InteractivePromptableCustomizationWrapper<T> parameter, Map<String, Object> newParameterValues, Object valueToPromptAsDefault, boolean shouldAllowEmptyValues) {
         return Scope.getCurrentScope().getUI().prompt(getMessage(parameter), (T) valueToPromptAsDefault, new InputHandler<T>() {
             @Override
             public T parseInput(String input, Class<T> type) throws IllegalArgumentException {
@@ -104,7 +105,7 @@ public abstract class AbstractCommandLineValueGetter<T> {
         }, clazz);
     }
 
-    private boolean doValidate(InteractivePromptableCustomizationWrapper<T> parameter, List<DynamicRuleParameter> newParameterValues, T convert) throws IllegalArgumentException {
+    private boolean doValidate(InteractivePromptableCustomizationWrapper<T> parameter, Map<String, Object> newParameterValues, T convert) throws IllegalArgumentException {
         if (parameter.getValidationCallbackOverride() != null) {
             return parameter.getValidationCallbackOverride().apply(convert, newParameterValues);
         } else {
