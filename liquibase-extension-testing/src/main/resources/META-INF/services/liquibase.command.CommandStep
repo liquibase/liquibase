@@ -1,0 +1,2 @@
+liquibase.extension.testing.environment.command.EnvironmentShowCommand
+liquibase.extension.testing.environment.command.EnvironmentUpCommand

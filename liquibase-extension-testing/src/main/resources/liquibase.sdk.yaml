@@ -1,0 +1,24 @@
+liquibase:
+  sdk:
+    env:
+      default:
+        username: lbuser
+        password: LiquibasePass1
+        envClass: liquibase.extension.testing.environment.core.TestcontainerEnvironment
+
+      db2:
+        containerClass: org.testcontainers.containers.Db2Container
+        imageName: ibmcom/db2
+        imageVersion: 11.5
+
+      mysql:
+        containerClass: org.testcontainers.containers.MySQLContainer
+        imageName: mysql
+        imageVersion: 5.7
+
+      postgresql:
+        containerClass: org.testcontainers.containers.PostgreSQLContainer
+        imageName: postgres
+        imageVersion: 9.6
+
+
