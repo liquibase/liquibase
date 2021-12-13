@@ -26,7 +26,10 @@ public class EnterpriseDBDatabase extends PostgresDatabase {
 
     @Override
     public String getDefaultDriver(String url) {
-        return "com.edb.Driver";
+        if (url.startsWith("jdbc:edb:")) {
+            return "com.edb.Driver";
+        }
+        return null;
     }
 
     @Override
