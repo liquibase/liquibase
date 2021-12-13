@@ -17,7 +17,8 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
      */
     private final SortedSet<CommandStep> pipeline;
 
-    private final Map<String, CommandArgumentDefinition<?>> arguments = new LinkedHashMap<>();
+    private final SortedMap<String, CommandArgumentDefinition<?>> arguments = new TreeMap<>();
+    private final List<CommandArgumentDefinition<?>> interactivePromptOrder = new ArrayList<>();
 
     private String longDescription = null;
     private String shortDescription = null;
@@ -100,13 +101,12 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
         return Collections.unmodifiableSortedMap(new TreeMap<>(this.arguments));
     }
 
-    /**
-     * Returns the arguments for this command in the order that they were created. Maintaining insertion order can be
-     * useful for things like interactive prompting, which should occur in a very specific order (as some arguments
-     * might depend on the values provided for prior arguments).
-     */
-    public Map<String, CommandArgumentDefinition<?>> getArgumentsInInsertionOrder() {
-        return Collections.unmodifiableMap(this.arguments);
+    public List<CommandArgumentDefinition<?>> getArgumentsInPromptOrder() {
+        if (!this.interactivePromptOrder.isEmpty()) {
+            return this.interactivePromptOrder;
+        } else {
+            return new ArrayList<>(this.arguments.values());
+        }
     }
 
     /**
@@ -228,4 +228,9 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
         return Arrays.equals(getName(), commandName);
     }
 
+    public void addArgumentsToInteractivePromptOrder(List<CommandArgumentDefinition<?>> commandArgumentDefinitions) {
+        if (commandArgumentDefinitions != null) {
+            interactivePromptOrder.addAll(commandArgumentDefinitions);
+        }
+    }
 }

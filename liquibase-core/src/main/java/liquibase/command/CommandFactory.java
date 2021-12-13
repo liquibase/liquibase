@@ -13,7 +13,8 @@ import java.util.*;
 public class CommandFactory implements SingletonObject {
     private Collection<CommandStep> allInstances;
 
-    private final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new LinkedHashMap<>();
+    private final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new HashMap<>();
+    private final Map<String, List<CommandArgumentDefinition<?>>> interactivePromptOrder = new HashMap<>();
 
     /**
      * @deprecated. Use {@link Scope#getSingleton(Class)}
@@ -43,13 +44,16 @@ public class CommandFactory implements SingletonObject {
             throw new IllegalArgumentException("Unknown command '" + StringUtil.join(commandName, " ") + "'");
         }
 
-        final Set<CommandArgumentDefinition<?>> stepArguments = this.commandArgumentDefinitions.get(StringUtil.join(commandDefinition.getName(), " "));
+        final String commandKey = StringUtil.join(commandDefinition.getName(), " ");
+        final Set<CommandArgumentDefinition<?>> stepArguments = this.commandArgumentDefinitions.get(commandKey);
 
         if (stepArguments != null) {
             for (CommandArgumentDefinition<?> commandArg : stepArguments) {
                 commandDefinition.add(commandArg);
             }
         }
+
+        commandDefinition.addArgumentsToInteractivePromptOrder(this.interactivePromptOrder.get(commandKey));
 
         for (CommandStep step : pipeline) {
             step.adjustCommandDefinition(commandDefinition);
@@ -95,13 +99,23 @@ public class CommandFactory implements SingletonObject {
     protected void register(String[] commandName, CommandArgumentDefinition<?> definition) {
         String commandNameKey = StringUtil.join(commandName, " ");
         if (!commandArgumentDefinitions.containsKey(commandNameKey)) {
-            commandArgumentDefinitions.put(commandNameKey, new LinkedHashSet<>());
+            commandArgumentDefinitions.put(commandNameKey, new TreeSet<>());
         }
 
         if (commandArgumentDefinitions.get(commandNameKey).contains(definition)) {
            throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
         }
         this.commandArgumentDefinitions.get(commandNameKey).add(definition);
+    }
+
+    /**
+     * Register a list of command argument definitions, indicating the order that they should be interactively
+     * prompted in for the given command name.
+     */
+    protected void registerInteractivePromptOrder(String[] commandName, List<CommandArgumentDefinition<?>> promptOrder) {
+        String commandNameKey = StringUtil.join(commandName, " ");
+
+        interactivePromptOrder.put(commandNameKey, promptOrder);
     }
 
     /**

@@ -148,7 +148,7 @@ public class CommandScope {
                 // are interactively promptable and for which the user did not explicitly provide a value.
 //                SortedSet<ConfigurationDefinition<?>> registeredDefinitions = LiquibaseConfiguration.getInstance().getRegisteredDefinitions(true);
                 List<CommandArgumentDefinition<?>> interactivelyPromptableParametersWithDefaultValue =
-                        commandDefinition.getArgumentsInInsertionOrder().values().stream().filter(cad -> (getConfiguredValue(cad).wasDefaultValueUsed() || !getConfiguredValue(cad).found()) && cad.isInteractivelyPromptable())
+                        commandDefinition.getArgumentsInPromptOrder().stream().filter(cad -> (getConfiguredValue(cad).wasDefaultValueUsed() || !getConfiguredValue(cad).found()) && cad.isInteractivelyPromptable())
                                 .collect(Collectors.toList());
 
                 if (!interactivelyPromptableParametersWithDefaultValue.isEmpty()) {
