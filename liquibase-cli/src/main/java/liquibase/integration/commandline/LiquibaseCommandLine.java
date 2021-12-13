@@ -98,7 +98,7 @@ public class LiquibaseCommandLine {
         this.legacyPositionalArguments.put("futurerollbackcountsql", FutureRollbackCountSqlCommandStep.COUNT_ARG.getName());
         this.legacyPositionalArguments.put("futurerollbackfromtagsql", FutureRollbackFromTagSqlCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("tag", TagCommandStep.TAG_ARG.getName());
-        this.legacyPositionalArguments.put("tagExists", TagExistsCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("tagexists", TagExistsCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollback", RollbackCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollbacksql", RollbackSqlCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollbacktodate", RollbackToDateCommandStep.DATE_ARG.getName());
