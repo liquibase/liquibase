@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install modules
+      - name: Install modules so snyk finds dependencies
         run: |
           mvn -B -pl '!liquibase-dist' install -DskipTests=true
 

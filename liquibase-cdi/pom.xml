@@ -20,14 +20,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se</artifactId>
             <version>1.1.8.Final</version>
