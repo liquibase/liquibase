@@ -1,6 +1,5 @@
 package liquibase.hub.model;
 
-import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.util.ISODateFormat;
