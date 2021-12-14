@@ -28,7 +28,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --fail-on=all --severity-threshold=high --all-projects --org=datical --policy-path=.snyk -- -B -Dscope=compile -pl '!liquibase-integration-tests'
+          args: --fail-on=all --severity-threshold=high --all-projects --org=datical --policy-path=.snyk -- -B -Dscope=compile
 
 #      - name: Run Snyk Monitor
 #        uses: snyk/actions/maven@master
