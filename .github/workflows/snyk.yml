@@ -13,8 +13,11 @@ jobs:
     name: Snyk Security Scan
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Master Branch
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+
+      - name: Install modules
+        run: |
+          mvn -B -pl liquibase-dist -P liquibase-pro package -DskipTests=true
 
       - name: Run Snyk Test to check for vulnerabilities
         id: test
