@@ -33,8 +33,6 @@ public class JUnitJDBCDriverClassLoader extends URLClassLoader {
         try {
             List<URL> urls = new ArrayList<URL>();
 
-            addUrlsFromPath(urls,  "jdbc-drivers/all");
-
             return urls.toArray(new URL[urls.size()]);
         } catch (Exception e) {
             throw new RuntimeException(e);

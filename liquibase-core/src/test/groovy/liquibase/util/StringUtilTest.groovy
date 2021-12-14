@@ -654,4 +654,31 @@ class StringUtilTest extends Specification {
         "abc" | [97, 98, 99] as byte[]
 
     }
+
+    @Unroll
+    def "isNumeric"() {
+        expect:
+        StringUtil.isNumeric(input) == expected
+
+        where:
+        input  | expected
+        null   | false
+        ""     | false
+        "1.0s" | false
+        "-1"   | false
+        "1.0"  | false
+        "1"    | true
+    }
+
+    @Unroll
+    def "isEmpty"() {
+        expect:
+        StringUtil.isEmpty(input) == expected
+
+        where:
+        input | expected
+        null  | true
+        ""    | true
+        "s"   | false
+    }
 }

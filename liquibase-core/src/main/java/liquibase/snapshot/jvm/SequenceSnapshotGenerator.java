@@ -103,7 +103,9 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         seq.setIncrementBy(toBigInteger(sequenceRow.get("INCREMENT_BY"), database));
         seq.setWillCycle(toBoolean(sequenceRow.get("WILL_CYCLE"), database));
         seq.setOrdered(toBoolean(sequenceRow.get("IS_ORDERED"), database));
-        seq.setDataType((String) sequenceRow.get("SEQ_TYPE"));
+        if (! (database instanceof CockroachDatabase)) {
+            seq.setDataType((String) sequenceRow.get("SEQ_TYPE"));
+        }
         seq.setAttribute("liquibase-complete", true);
 
         return seq;

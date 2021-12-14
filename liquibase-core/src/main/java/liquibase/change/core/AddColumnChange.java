@@ -15,10 +15,7 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Adds a column to an existing table.
@@ -88,6 +85,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         List<SqlStatement> sql = new ArrayList<>();
         List<AddColumnStatement> addColumnStatements = new ArrayList<>();
         List<UpdateStatement> addColumnUpdateStatements = new ArrayList<>();
+        List<SqlStatement> addNotNullConstraintStatements = new ArrayList<>();
 
         if (getColumns().isEmpty()) {
             return new SqlStatement[] {
@@ -100,12 +98,13 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             ConstraintsConfig constraintsConfig =column.getConstraints();
             if (constraintsConfig != null) {
                 if ((constraintsConfig.isNullable() != null) && !constraintsConfig.isNullable()) {
-                    NotNullConstraint notNullConstraint = new NotNullConstraint();
-                    if (constraintsConfig.getValidateNullable()!=null && !constraintsConfig.getValidateNullable()) {
-                        notNullConstraint.setValidateNullable(false);
+                    if (column.getValueObject() != null) {
+                        List<SqlStatement> sqlStatements = generateAddNotNullConstraintStatements(column, database);
+                        addNotNullConstraintStatements.addAll(sqlStatements);
+                    } else {
+                        NotNullConstraint notNullConstraint = createNotNullConstraint(constraintsConfig);
+                        constraints.add(notNullConstraint);
                     }
-                    notNullConstraint.setConstraintName(constraintsConfig.getNotNullConstraintName());
-                    constraints.add(notNullConstraint);
                 }
                 if (constraintsConfig.isUnique() != null && constraintsConfig.isUnique()) {
                     UniqueConstraint uniqueConstraint = new UniqueConstraint(constraintsConfig.getUniqueConstraintName());
@@ -129,6 +128,16 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                         constraintsConfig.getReferencedColumnNames());
                     if (constraintsConfig.getValidateForeignKey()!=null && !constraintsConfig.getValidateForeignKey()) {
                         foreignKeyConstraint.setValidateForeignKey(false);
+                    }
+
+                    if (constraintsConfig.isDeleteCascade() != null) {
+                        foreignKeyConstraint.setDeleteCascade(constraintsConfig.isDeleteCascade());
+                    }
+                    if (constraintsConfig.isDeferrable() != null) {
+                        foreignKeyConstraint.setDeferrable(constraintsConfig.isDeferrable());
+                    }
+                    if (constraintsConfig.isInitiallyDeferred() != null) {
+                        foreignKeyConstraint.setInitiallyDeferred(constraintsConfig.isInitiallyDeferred());
                     }
                     constraints.add(foreignKeyConstraint);
                 }
@@ -181,6 +190,8 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
       } else {
           sql.add(0, new AddColumnStatement(addColumnStatements));
       }
+
+      sql.addAll(addNotNullConstraintStatements);
 
       for (ColumnConfig column : getColumns()) {
           String columnRemarks = StringUtil.trimToNull(column.getRemarks());
@@ -262,4 +273,26 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    private NotNullConstraint createNotNullConstraint(ConstraintsConfig constraintsConfig) {
+        NotNullConstraint notNullConstraint = new NotNullConstraint();
+        if (constraintsConfig.getValidateNullable() != null && !constraintsConfig.getValidateNullable()) {
+            notNullConstraint.setValidateNullable(false);
+        }
+        notNullConstraint.setConstraintName(constraintsConfig.getNotNullConstraintName());
+        return notNullConstraint;
+    }
+
+    private List<SqlStatement> generateAddNotNullConstraintStatements(AddColumnConfig column, Database database) {
+        AddNotNullConstraintChange addNotNullConstraintChange = createAddNotNullConstraintChange(column);
+        return Arrays.asList(addNotNullConstraintChange.generateStatements(database));
+    }
+
+    private AddNotNullConstraintChange createAddNotNullConstraintChange(AddColumnConfig column) {
+        AddNotNullConstraintChange addNotNullConstraintChange = new AddNotNullConstraintChange();
+        addNotNullConstraintChange.setCatalogName(getCatalogName());
+        addNotNullConstraintChange.setTableName(getTableName());
+        addNotNullConstraintChange.setColumnName(column.getName());
+        addNotNullConstraintChange.setColumnDataType(column.getType());
+        return addNotNullConstraintChange;
+    }
 }

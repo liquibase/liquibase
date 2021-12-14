@@ -8,6 +8,7 @@ import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.command.CommandArgumentDefinition
 import liquibase.command.CommandFactory
+import liquibase.command.CommandFailedException
 import liquibase.command.CommandResults
 import liquibase.command.CommandScope
 import liquibase.command.core.InternalSnapshotCommandStep
@@ -262,7 +263,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
 
-        boolean exceptionThrown = false
+        Exception savedException = null
         def results = Scope.child([
                 (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name)               : MockHubService,
@@ -278,7 +279,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 return returnValue
             }
             catch (Exception e) {
-                exceptionThrown = true
+                savedException = e
                 if (testDef.expectedException == null) {
                     throw e
                 } else {
@@ -289,15 +290,27 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     return
                 }
             }
+            finally {
+                if (testDef.setup != null) {
+                    for (def setup : testDef.setup) {
+                        setup.cleanup()
+                    }
+                }
+            }
         } as Scope.ScopedRunnerWithReturn<CommandResults>)
+
+        if (savedException != null && savedException.getCause() != null && savedException.getCause() instanceof CommandFailedException) {
+            CommandFailedException cfe = (CommandFailedException) savedException.getCause()
+            results = cfe.getResults()
+        }
 
         //
         // Check to see if there was supposed to be an exception
         //
-
         if (testDef.expectedResults.size() > 0 && (results == null || results.getResults().isEmpty())) {
             throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
         }
+
 
         then:
         checkOutput("Command Output", outputStream.toString(), testDef.expectedOutput)
@@ -319,10 +332,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
         if (testDef.expectFileToExist != null) {
-            assert testDef.expectFileToExist.exists(): "File '${testDef.expectFileToExist.getName()}' should exist"
+            assert testDef.expectFileToExist.exists(): "File '${testDef.expectFileToExist.getAbsolutePath()}' should exist"
         }
         if (testDef.expectFileToNotExist != null) {
-            assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getName()}' should not exist"
+            assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getAbsolutePath()}' should not exist"
         }
 
         where:
@@ -430,7 +443,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     }
                 } else if (expectedOutputCheck instanceof Pattern) {
                     String patternString = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern()))
-                    //expectedOutputCheck = Pattern.compile(patternString, Pattern.MULTILINE | Pattern.DOTALL)
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
                     assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
@@ -958,7 +970,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private int count
 
         CannedConsoleWrapper(String[] answers) {
-            super(null)
+            super(null, false)
             this.answers = answers
         }
 

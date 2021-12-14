@@ -31,4 +31,4 @@ jacoco.exec
 original-pom.xml
 **/logback-test.xml
 **/*.swp
-liquibase-core/dependency-reduced-pom.xml
+**/dependency-reduced-pom.xml

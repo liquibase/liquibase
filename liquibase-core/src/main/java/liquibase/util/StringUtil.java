@@ -1007,4 +1007,33 @@ public class StringUtil {
         }
         return string.getBytes(StandardCharsets.UTF_8);
     }
+
+    /**
+     * <p>Checks whether the char sequence is numeric by checking that all chars in the sequence are
+     * numbers, so (-1, 1.0 and 1F) will return false
+     * <p>
+     * This code originated from the StringUtils class of https://github.com/apache/commons-lang
+     *
+     * @param cs the arg to check if it is numeric
+     * @return true if convertible to numeric and false otherwise
+     */
+    public static boolean isNumeric(CharSequence cs) {
+        if (isEmpty(cs)) {
+            return false;
+        } else {
+            int sz = cs.length();
+
+            for(int i = 0; i < sz; ++i) {
+                if (!Character.isDigit(cs.charAt(i))) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    public static boolean isEmpty(CharSequence cs) {
+        return cs == null || cs.length() == 0;
+    }
 }

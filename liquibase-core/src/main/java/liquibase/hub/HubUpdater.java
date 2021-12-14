@@ -435,7 +435,7 @@ public class HubUpdater {
         String input = Scope.getCurrentScope().getUI().prompt(promptString, "S", (input1, returnType) -> {
             input1 = input1.trim().toLowerCase();
             if (!(input1.equals("s") || input1.equals("n") || input1.contains("@"))) {
-                throw new IllegalArgumentException("Invalid input '" + input1 + "'");
+                throw new IllegalArgumentException(String.format("Invalid value: '%s'", input1));
             }
             return input1;
         }, String.class);

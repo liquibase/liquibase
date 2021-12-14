@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabase;
@@ -40,7 +41,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
      */
     static final int PGSQL_PK_BYTES_LIMIT = 63;
     static final String PGSQL_PK_SUFFIX = "_pkey";
-    static final Charset CHARSET = Scope.getCurrentScope().getFileEncoding();
 
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
     private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
@@ -75,7 +75,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 "UNIQUE", "USER", "USING", "VARIADIC", "VERBOSE", "WHEN", "WHERE", "WINDOW", "WITH"));
         super.sequenceNextValueFunction = "nextval('%s')";
         super.sequenceCurrentValueFunction = "currval('%s')";
-        super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text", "int2[]", "int4[]", "int8[]", "float4[]", "float8[]", "bool[]", "varchar[]", "text[]"));
+        super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text", "int2[]", "int4[]", "int8[]", "float4[]", "float8[]", "bool[]", "varchar[]", "text[]", "numeric[]"));
         super.unquotedObjectsAreUppercased=false;
     }
 
@@ -136,8 +136,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 String.format(
                     "Your PostgreSQL software version (%d.%d) seems to indicate that your software is " +
                         "older than %d.%d. This means that you might encounter strange behaviour and " +
-                        "incorrect error messages.",
-                    majorVersion, minorVersion, majorVersion, minorVersion));
+                        "incorrect error messages.", majorVersion, minorVersion, MINIMUM_DBMS_MAJOR_VERSION, MINIMUM_DBMS_MINOR_VERSION));
             return true;
         }
 
@@ -350,8 +349,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
      */
     @Override
     public String generatePrimaryKeyName(final String tableName) {
-        final byte[] tableNameBytes = tableName.getBytes(CHARSET);
-        final int pkNameBaseAllowedBytesCount = PGSQL_PK_BYTES_LIMIT - PGSQL_PK_SUFFIX.getBytes(CHARSET).length;
+        final Charset charset = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
+
+        final byte[] tableNameBytes = tableName.getBytes(charset);
+        final int pkNameBaseAllowedBytesCount = PGSQL_PK_BYTES_LIMIT - PGSQL_PK_SUFFIX.getBytes(charset).length;
 
         if (tableNameBytes.length <= pkNameBaseAllowedBytesCount) {
             return tableName + PGSQL_PK_SUFFIX;
@@ -359,7 +360,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
         // As symbols could be encoded with more than 1 byte, the last symbol bytes couldn't be identified precisely.
         // To avoid the last symbol being the invalid one, just truncate it.
-        final String baseName = new String(tableNameBytes, 0, pkNameBaseAllowedBytesCount, CHARSET);
+        final String baseName = new String(tableNameBytes, 0, pkNameBaseAllowedBytesCount, charset);
         return baseName.substring(0, baseName.length() - 1) + PGSQL_PK_SUFFIX;
     }
 

@@ -79,6 +79,24 @@ public class DatabaseTestContext {
     }
 
     /**
+     * Insert the temp dir path and ensure our replacement ends with /
+     */
+    private static String replaceTempDirPlaceholder(String givenUrl) {
+        String tempDir = System.getProperty("java.io.tmpdir");
+        if (!tempDir.endsWith(System.getProperty("file.separator")))
+            tempDir += System.getProperty("file.separator");
+
+        return givenUrl.replace("***TEMPDIR***/", tempDir);
+    }
+
+    /**
+     * Replace the ***RANDOM*** placeholder in a database jdbc url with a random string.
+     */
+    private static String replaceRandomPlaceholder(String givenUrl) {
+        return givenUrl.replace("***RANDOM***", UUID.randomUUID().toString());
+    }
+
+    /**
      * Returns a DatabaseConnection for a givenUrl is one is already open. If not, attempts to create it, but only
      * if a previous attempt at creating the connection has NOT failed (to prevent unnecessary connection attempts
      * during the integration tests).
@@ -91,13 +109,7 @@ public class DatabaseTestContext {
      */
     private DatabaseConnection openConnection(final String givenUrl,
                                               final String username, final String password) throws Exception {
-        // Insert the temp dir path and ensure our replacement ends with /
-        String tempDir = System.getProperty("java.io.tmpdir");
-        if (!tempDir.endsWith(System.getProperty("file.separator")))
-            tempDir += System.getProperty("file.separator");
-
-        String tempUrl = givenUrl.replace("***TEMPDIR***/", tempDir);
-        final String url = tempUrl;
+        final String url = replaceRandomPlaceholder(replaceTempDirPlaceholder(givenUrl));
 
         if (connectionsAttempted.containsKey(url)) {
             JdbcConnection connection = (JdbcConnection) connectionsByUrl.get(url);

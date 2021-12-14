@@ -1,5 +1,6 @@
 package liquibase.integration.commandline;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.util.StringUtil;
@@ -471,24 +472,6 @@ public class MainTest {
     }
 
     @Test
-    public void propertiesFileParsingShouldIgnoreUnknownArgumentsIfStrictFalseIsInFile() throws Exception {
-        Main cli = new Main();
-
-        Properties props = new Properties();
-        props.setProperty("driver", "DRIVER");
-        props.setProperty("unknown.property", "UnknownValue");
-        props.setProperty("strict", "false");
-
-        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
-        props.store(propFile, "");
-
-        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
-
-        assertEquals("DRIVER", cli.driver);
-
-    }
-
-    @Test
     public void propertiesFileChangeLogParameters() throws Exception {
         Main cli = new Main();
 
@@ -503,41 +486,6 @@ public class MainTest {
 
         assertEquals("Changelog parameter in properties file is recognized", "parameterValue",
             cli.changeLogParameters.get("some_changelog_parameter"));
-
-    }
-
-    @Test
-    public void propertiesFileParsingShouldIgnoreUnknownArgumentsIfStrictModeIsFalse() throws Exception {
-        Main cli = new Main();
-        String[] args = new String[]{"--strict=false"};
-
-        cli.parseOptions(args);
-        Properties props = new Properties();
-        props.setProperty("driver", "DRIVER");
-        props.setProperty("unknown.property", "UnknownValue");
-
-        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
-        props.store(propFile, "");
-
-        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
-
-        assertEquals("DRIVER", cli.driver);
-
-    }
-
-    @Test(expected = CommandLineParsingException.class)
-    public void propertiesFileParsingShouldFailOnUnknownArgumentsIfStrictMode() throws Exception {
-        Main cli = new Main();
-
-        Properties props = new Properties();
-        props.setProperty("driver", "DRIVER");
-        props.setProperty("unknown.property", "UnknownValue");
-        props.setProperty("strict", "true");
-
-        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
-        props.store(propFile, "");
-
-        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
 
     }
 
@@ -557,21 +505,6 @@ public class MainTest {
         cli.applyDefaults();
         assertEquals("Correct default value for --promptForNonLocalDatabase", Boolean.FALSE, cli.promptForNonLocalDatabase);
 
-    }
-
-    @Test(expected = CommandLineParsingException.class)
-    public void propertiesFileWithBadArgs() throws Exception {
-        Main cli = new Main();
-
-        Properties props = new Properties();
-        props.setProperty("driver", "DRIVER");
-        props.setProperty("username", "USERNAME");
-        props.setProperty("badArg", "ARG");
-
-        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
-        props.store(propFile, "");
-
-        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
     }
 
     @Test
