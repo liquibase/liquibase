@@ -4,21 +4,22 @@ liquibase:
       default:
         username: lbuser
         password: LiquibasePass1
+        catalog: lbcat
         envClass: liquibase.extension.testing.environment.core.TestcontainerEnvironment
+
+      cockroachdb:
+        containerClass: org.testcontainers.containers.CockroachContainer
 
       db2:
         containerClass: org.testcontainers.containers.Db2Container
-        imageName: ibmcom/db2
-        imageVersion: 11.5
+
+      h2:
+        envClass: liquibase.extension.testing.environment.core.H2Environment
 
       mysql:
         containerClass: org.testcontainers.containers.MySQLContainer
-        imageName: mysql
-        imageVersion: 5.7
 
       postgresql:
         containerClass: org.testcontainers.containers.PostgreSQLContainer
-        imageName: postgres
-        imageVersion: 9.6
 
 

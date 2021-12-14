@@ -25,8 +25,8 @@ public class TestcontainerEnvironment extends TestEnvironment {
         super(env);
 
         Class containerClass = getProperty(env, "containerClass", Class.class, true);
-        String imageName = getProperty(env, "imageName", String.class, true);
-        String imageVersion = getProperty(env, "imageVersion", String.class, true);
+        String imageName = getProperty(env, "imageName", String.class);
+        String imageVersion = getProperty(env, "imageVersion", String.class);
 
         try {
             container = (GenericContainer) containerClass.newInstance();
@@ -34,7 +34,16 @@ public class TestcontainerEnvironment extends TestEnvironment {
             throw new UnexpectedLiquibaseException("Cannot instantiate "+containerClass.getName()+" for "+env+": "+e.getMessage(), e);
         }
 
-        container.setDockerImageName(imageName + ":" + imageVersion);
+        if (imageName != null || imageVersion != null) {
+            final String[] docker = container.getDockerImageName().split(":");
+            if (imageName != null) {
+                docker[0] = imageName;
+            }
+            if (imageVersion != null) {
+                docker[1] = imageVersion;
+            }
+            container.setDockerImageName(docker[0] + ":" + docker[1]);
+        }
 
         int[] ports = getProperty(env, "ports", value -> {
             if (value == null) {
@@ -66,6 +75,13 @@ public class TestcontainerEnvironment extends TestEnvironment {
         if (container instanceof JdbcDatabaseContainer) {
             ((JdbcDatabaseContainer) container).withUsername(getProperty(env, "username", String.class));
             ((JdbcDatabaseContainer) container).withPassword(getProperty(env, "password", String.class));
+
+            final String catalog = getProperty(env, "catalog", String.class);
+            if (catalog != null) {
+                ((JdbcDatabaseContainer) container).withDatabaseName(catalog);
+            }
+
+            ((JdbcDatabaseContainer<?>) container).withInitScript(getProperty(env, "initScript", String.class));
         }
     }
 
