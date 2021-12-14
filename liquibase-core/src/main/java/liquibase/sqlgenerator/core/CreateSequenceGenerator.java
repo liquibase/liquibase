@@ -114,7 +114,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
                 }
             }
         }
-        if (!(database instanceof MariaDBDatabase) && statement.getCycle() != null) {
+        if (statement.getCycle() != null) {
             if (statement.getCycle()) {
                 queryStringBuilder.append(" CYCLE");
             }

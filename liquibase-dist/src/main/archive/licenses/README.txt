@@ -1,5 +1,5 @@
 Liquibase License Information
-Version: ${liquibase.version}
+Version: ${project.version}
 
 Liquibase ships with 3rd party components using the following licenses:
 
@@ -21,7 +21,6 @@ Apache 2.0 License
 - doxia:doxia-sink-api
 - javax.enterprise:cdi-api
 - javax.inject:javax.inject
-- log4j:log4j
 - org.apache.ant:ant
 - org.apache.ant:ant-launcher
 - org.apache.maven:maven-artifact

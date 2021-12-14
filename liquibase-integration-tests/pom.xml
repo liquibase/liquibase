@@ -4,19 +4,31 @@
 
     <parent>
         <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-base-module</artifactId>
-        <version>${liquibase.version}</version>
-        <relativePath>../base-module.pom.xml</relativePath>
+        <artifactId>liquibase</artifactId>
+        <version>0-SNAPSHOT</version>
     </parent>
-
 
     <artifactId>liquibase-integration-tests</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.liquibase</groupId>
             <artifactId>liquibase-extension-testing</artifactId>
-            <version>${liquibase.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

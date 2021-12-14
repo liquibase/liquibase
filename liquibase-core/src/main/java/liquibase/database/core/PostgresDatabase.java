@@ -75,7 +75,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 "UNIQUE", "USER", "USING", "VARIADIC", "VERBOSE", "WHEN", "WHERE", "WINDOW", "WITH"));
         super.sequenceNextValueFunction = "nextval('%s')";
         super.sequenceCurrentValueFunction = "currval('%s')";
-        super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text", "int2[]", "int4[]", "int8[]", "float4[]", "float8[]", "bool[]", "varchar[]", "text[]"));
+        super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text", "int2[]", "int4[]", "int8[]", "float4[]", "float8[]", "bool[]", "varchar[]", "text[]", "numeric[]"));
         super.unquotedObjectsAreUppercased=false;
     }
 
@@ -136,8 +136,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 String.format(
                     "Your PostgreSQL software version (%d.%d) seems to indicate that your software is " +
                         "older than %d.%d. This means that you might encounter strange behaviour and " +
-                        "incorrect error messages.",
-                    majorVersion, minorVersion, majorVersion, minorVersion));
+                        "incorrect error messages.", majorVersion, minorVersion, MINIMUM_DBMS_MAJOR_VERSION, MINIMUM_DBMS_MINOR_VERSION));
             return true;
         }
 
