@@ -15,10 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-#      - name: Install sub-modules so snyk finds the dependencies
-#        run: |
-#          mvn -B -pl '!liquibase-dist' install -DskipTests=true
-#          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=liquibase-core/target/liquibase-core-0-SNAPSHOT-tests.jar -Dpackaging=test-jar -Dclassifier=tests
+      - name: Install sub-modules so snyk finds the dependencies
+        run: |
+          mvn -B -pl '!liquibase-dist' install -DskipTests=true
+          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=liquibase-core/target/liquibase-core-0-SNAPSHOT-tests.jar -Dpackaging=jar -Dclassifier=tests
 
       - name: Run Snyk Test to check for vulnerabilities
         id: test
