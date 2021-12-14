@@ -1,5 +1,5 @@
 # Run Snyk nightly to scan and report security issues.
-name: Nightly Snyk Scan
+name: Snyk Scan
 
 # Job will run nightly at 02:05 EDT / 01:05 CDT
 # Time below is UTC
@@ -13,12 +13,6 @@ jobs:
     name: Snyk Security Scan
     runs-on: ubuntu-latest
     steps:
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: 8
-          distribution: 'adopt'
-
       - name: Checkout Master Branch
         uses: actions/checkout@v2
 
@@ -30,7 +24,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --fail-on=all --severity-threshold=high --all-projects --org=datical
+          args: --fail-on=all --severity-threshold=high --all-projects --org=datical --policy-path=.snyk
 
       - name: Run Snyk Monitor
         uses: snyk/actions/maven@master
@@ -38,7 +32,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: monitor
-          args: --all-projects --org=datical
+          args: --all-projects --org=datical --policy-path=.snyk
 
       - name: Slack Notification
         if: ${{ failure() }}
