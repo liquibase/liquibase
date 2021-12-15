@@ -18,6 +18,7 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>2.14.0</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
