@@ -11,7 +11,7 @@ import java.util.TreeMap;
  */
 public class InteractivePromptingValueProvider extends AbstractMapConfigurationValueProvider {
 
-    public static final SortedMap<String, Object> values = new TreeMap<>();
+    private final SortedMap<String, Object> values = new TreeMap<>();
 
     @Override
     protected Map<?, ?> getMap() {
@@ -26,5 +26,9 @@ public class InteractivePromptingValueProvider extends AbstractMapConfigurationV
     @Override
     public int getPrecedence() {
         return 500;
+    }
+
+    public void addValue(String key, Object value) {
+        values.put(key, value);
     }
 }

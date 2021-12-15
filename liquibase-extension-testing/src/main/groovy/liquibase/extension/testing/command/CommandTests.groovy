@@ -53,6 +53,7 @@ class CommandTests extends Specification {
     public static final PATTERN_FLAGS = Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE
 
     private ConfigurationValueProvider propertiesProvider
+    private ConfigurationValueProvider interactivePromptingProvider;
 
     def setup() {
         def properties = new Properties()
@@ -87,11 +88,13 @@ class CommandTests extends Specification {
         }
 
         Scope.currentScope.getSingleton(LiquibaseConfiguration).registerProvider(propertiesProvider)
-        Scope.currentScope.getSingleton(LiquibaseConfiguration).registerProvider(new InteractivePromptingValueProvider())
+        interactivePromptingProvider = new InteractivePromptingValueProvider();
+        Scope.currentScope.getSingleton(LiquibaseConfiguration).registerProvider(interactivePromptingProvider)
     }
 
     def cleanup() {
         Scope.currentScope.getSingleton(LiquibaseConfiguration).unregisterProvider(propertiesProvider)
+        Scope.currentScope.getSingleton(LiquibaseConfiguration).unregisterProvider(interactivePromptingProvider)
     }
 
     @Unroll("#featureName: #commandTestDefinition.testFile.name")
