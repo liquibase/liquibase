@@ -29,15 +29,16 @@ jobs:
         with:
           command: test
           #Do not want --all-projects despite the "Tip: Detected multiple supported manifests" because the root pom.xml includes the others
+          #Skipping liquibase-integration-tests because we couldn't get snyk to follow the dependency on liquibase-core:tests
           args: --fail-on=all --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile -pl '!liquibase-integration-tests'
 
-#      - name: Run Snyk Monitor
-#        uses: snyk/actions/maven@master
-#        env:
-#          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-#        with:
-#          command: monitor
-#          args: --all-projects --org=datical --policy-path=.snyk
+      - name: Run Snyk Monitor
+        uses: snyk/actions/maven@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: --org=datical --policy-path=.snyk -- -B  -pl '!liquibase-integration-tests'
 #
 #      - name: Slack Notification
 #        if: ${{ failure() }}
