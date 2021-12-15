@@ -15,10 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install sub-modules so snyk finds the dependencies
-        run: |
-          mvn -B -pl '!liquibase-dist' install -DskipTests=true
-          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=liquibase-core/target/liquibase-core-0-SNAPSHOT-tests.jar -Dpackaging=jar -Dclassifier=tests -DgroupId=org.liquibase -DartifactId=liquibase-core
+#      - name: Install sub-modules so snyk finds the dependencies
+#        run: |
+#          mvn -B -pl '!liquibase-dist' install -DskipTests=true
+#          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=liquibase-core/target/liquibase-core-0-SNAPSHOT-tests.jar -Dpackaging=jar -Dclassifier=tests -DgroupId=org.liquibase -DartifactId=liquibase-core
 
       - name: Run Snyk Test to check for vulnerabilities
         id: test
@@ -30,7 +30,7 @@ jobs:
           command: test
           #Do not want --all-projects despite the "Tip: Detected multiple supported manifests" because the root pom.xml includes the others
           #Skipping liquibase-integration-tests because we couldn't get snyk to follow the dependency on liquibase-core:tests
-          args: --fail-on=all --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile -pl '!liquibase-integration-tests'
+          args: --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile -DskipTests=true install
 
       - name: Run Snyk Monitor
         uses: snyk/actions/maven@master
