@@ -24,7 +24,8 @@ jobs:
 
       - name: Install snyk
         run: |
-          wget -nv -nc https://static.snyk.io/cli/latest/snyk-linux -o snyk
+          curl -s https://static.snyk.io/cli/latest/snyk-linux -o snyk
+          ls -l snyk
           chmod 755 snyk
 
       - name: Install modules
