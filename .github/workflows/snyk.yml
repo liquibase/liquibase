@@ -31,6 +31,7 @@ jobs:
       - name: Install modules
         run: |
           mvn -B -pl '!liquibase-dist' test-compile install -DskipTests=true
+          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=liquibase-core/target/liquibase-core-0-SNAPSHOT-tests.jar -Dpackaging=jar -Dclassifier=tests -DgroupId=org.liquibase -DartifactId=liquibase-core
 
       - name: Run Snyk Test to check for vulnerabilities
         env:
