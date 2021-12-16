@@ -37,20 +37,15 @@ jobs:
           mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=liquibase-core/target/liquibase-core-0-SNAPSHOT-tests.jar -Dpackaging=jar -Dclassifier=tests -DgroupId=org.liquibase -DartifactId=liquibase-core
 
       - name: Run Snyk Test to check for vulnerabilities
-
-        #Do not want --all-projects despite the "Tip: Detected multiple supported manifests" because the root pom.xml includes the others
-        #Skipping liquibase-integration-tests because we couldn't get snyk to follow the dependency on liquibase-core:tests
-        #          ./snyk test --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
+        ## snyk test requires --all-projects because otherwise it does not fail the run when a problem is found. It just prints "no direct upgrade or path" and contiues on
+        ## only include -Dscope=compile in order to report only on shipped modules, not test or provided ones
         run: |
-          ./snyk test --fail-on=all --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
+          ./snyk test --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
 
-#      - name: Run Snyk Monitor
-#        uses: snyk/actions/maven@master
-#        env:
-#          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-#        with:
-#          command: monitor
-#          args: --org=datical --policy-path=.snyk -- -B  -pl '!liquibase-integration-tests'
+      - name: Run Snyk Monitor
+        uses: snyk/actions/maven@master
+        run: |
+          ./snyk monitor --org=datical --policy-path=.snyk -- -B -Dscope=compile
 #
 #      - name: Slack Notification
 #        if: ${{ failure() }}
