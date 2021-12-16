@@ -39,6 +39,7 @@ jobs:
         #Skipping liquibase-integration-tests because we couldn't get snyk to follow the dependency on liquibase-core:tests
 #          ./snyk config set api="$SNYK_TOKEN"
         run: |
+          echo "Running snyk test"
           ./snyk test --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
 
 #      - name: Run Snyk Monitor
