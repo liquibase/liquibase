@@ -43,6 +43,7 @@ jobs:
           ./snyk test --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
 
       - name: Run Snyk Monitor
+        if: ${{ always() }}
         run: |
           ./snyk monitor --org=datical --policy-path=.snyk -- -B -Dscope=compile
 #
