@@ -25,6 +25,7 @@ jobs:
       - name: Install snyk
         run: |
           wget -nv -nc https://static.snyk.io/cli/latest/snyk-linux -o snyk
+          chmod 755 snyk
 
       - name: Install modules
         run: |
@@ -33,9 +34,10 @@ jobs:
       - name: Run Snyk Test to check for vulnerabilities
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+        #Do not want --all-projects despite the "Tip: Detected multiple supported manifests" because the root pom.xml includes the others
+        #Skipping liquibase-integration-tests because we couldn't get snyk to follow the dependency on liquibase-core:tests
         run: |
-          #Do not want --all-projects despite the "Tip: Detected multiple supported manifests" because the root pom.xml includes the others
-          #Skipping liquibase-integration-tests because we couldn't get snyk to follow the dependency on liquibase-core:tests
           ./snyk config set api=$SNYK_TOKEN
           ./snyk test --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
 
