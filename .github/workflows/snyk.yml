@@ -15,30 +15,36 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-#      - name: Install sub-modules so snyk finds the dependencies
-#        run: |
-#          mvn -B -pl '!liquibase-dist' install -DskipTests=true
-#          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=liquibase-core/target/liquibase-core-0-SNAPSHOT-tests.jar -Dpackaging=jar -Dclassifier=tests -DgroupId=org.liquibase -DartifactId=liquibase-core
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8
+          distribution: 'adopt'
+          cache: 'maven'
+
+      - name: Install snyk
+        run: |
+          wget -nv -nc https://static.snyk.io/cli/latest/snyk-linux -o snyk
+
+      - name: Install modules
+        run: |
+          mvn -B -pl '!liquibase-dist' install -DskipTests=true
 
       - name: Run Snyk Test to check for vulnerabilities
-        id: test
-        uses: snyk/actions/maven@master
-        timeout-minutes: 10
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-          #Do not want --all-projects despite the "Tip: Detected multiple supported manifests" because the root pom.xml includes the others
-          #Skipping liquibase-integration-tests because we couldn't get snyk to follow the dependency on liquibase-core:tests
-          args: --fail-on=all --all-projects --exclude=liquibase-integration-tests --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
+        run: |
+#Do not want --all-projects despite the "Tip: Detected multiple supported manifests" because the root pom.xml includes the others
+#Skipping liquibase-integration-tests because we couldn't get snyk to follow the dependency on liquibase-core:tests
+          ./snyk test --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
 
-      - name: Run Snyk Monitor
-        uses: snyk/actions/maven@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: monitor
-          args: --org=datical --policy-path=.snyk -- -B  -pl '!liquibase-integration-tests'
+#      - name: Run Snyk Monitor
+#        uses: snyk/actions/maven@master
+#        env:
+#          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+#        with:
+#          command: monitor
+#          args: --org=datical --policy-path=.snyk -- -B  -pl '!liquibase-integration-tests'
 #
 #      - name: Slack Notification
 #        if: ${{ failure() }}
