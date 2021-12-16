@@ -45,7 +45,7 @@ jobs:
       - name: Run Snyk Monitor
         if: ${{ always() }}
         run: |
-          ./snyk monitor --org=datical --policy-path=.snyk -- -B -Dscope=compile
+          ./snyk monitor --all-projects --org=datical --policy-path=.snyk -- -B -Dscope=compile
 #
 #      - name: Slack Notification
 #        if: ${{ failure() }}
