@@ -40,8 +40,8 @@ jobs:
 
         #Do not want --all-projects despite the "Tip: Detected multiple supported manifests" because the root pom.xml includes the others
         #Skipping liquibase-integration-tests because we couldn't get snyk to follow the dependency on liquibase-core:tests
+        #          ./snyk test --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
         run: |
-#          ./snyk test --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
           ./snyk test --fail-on=all --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
 
 #      - name: Run Snyk Monitor
