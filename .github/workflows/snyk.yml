@@ -23,10 +23,13 @@ jobs:
           cache: 'maven'
 
       - name: Install snyk
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           curl -s https://static.snyk.io/cli/latest/snyk-linux -o snyk
           ls -l snyk
           chmod 755 snyk
+          ./snyk config set api="$SNYK_TOKEN"
 
       - name: Install modules
         run: |
@@ -34,15 +37,12 @@ jobs:
           mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=liquibase-core/target/liquibase-core-0-SNAPSHOT-tests.jar -Dpackaging=jar -Dclassifier=tests -DgroupId=org.liquibase -DartifactId=liquibase-core
 
       - name: Run Snyk Test to check for vulnerabilities
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
         #Do not want --all-projects despite the "Tip: Detected multiple supported manifests" because the root pom.xml includes the others
         #Skipping liquibase-integration-tests because we couldn't get snyk to follow the dependency on liquibase-core:tests
-#          ./snyk config set api="$SNYK_TOKEN"
         run: |
-          echo "Running snyk test"
-          ./snyk test --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
+#          ./snyk test --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
+          ./snyk test --fail-on=all --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
 
 #      - name: Run Snyk Monitor
 #        uses: snyk/actions/maven@master
