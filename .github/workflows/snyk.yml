@@ -30,7 +30,7 @@ jobs:
 
       - name: Install modules
         run: |
-          mvn -B -pl '!liquibase-dist' install -DskipTests=true
+          mvn -B -pl '!liquibase-dist' test-compile install -DskipTests=true
 
       - name: Run Snyk Test to check for vulnerabilities
         env:
