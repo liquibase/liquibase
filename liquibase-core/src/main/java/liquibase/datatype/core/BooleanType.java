@@ -19,7 +19,7 @@ public class BooleanType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
-        if ((database instanceof Firebird3Database)) {
+        if ((database instanceof FirebirdDatabase) && ! ((FirebirdDatabase)database).isVersion2()) {
             return new DatabaseDataType("BOOLEAN");
         }
 
@@ -110,7 +110,7 @@ public class BooleanType extends LiquibaseDataType {
     }
 
     protected boolean isNumericBoolean(Database database) {
-        if (database instanceof Firebird3Database) {
+        if ((database instanceof FirebirdDatabase) && ! ((FirebirdDatabase)database).isVersion2()) {
             return false;
         }
         if (database instanceof DerbyDatabase) {
