@@ -34,8 +34,8 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
-#Do not want --all-projects despite the "Tip: Detected multiple supported manifests" because the root pom.xml includes the others
-#Skipping liquibase-integration-tests because we couldn't get snyk to follow the dependency on liquibase-core:tests
+          #Do not want --all-projects despite the "Tip: Detected multiple supported manifests" because the root pom.xml includes the others
+          #Skipping liquibase-integration-tests because we couldn't get snyk to follow the dependency on liquibase-core:tests
           ./snyk config set api=$SNYK_TOKEN
           ./snyk test --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
 
