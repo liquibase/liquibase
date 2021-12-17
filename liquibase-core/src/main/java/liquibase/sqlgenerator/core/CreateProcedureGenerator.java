@@ -11,6 +11,7 @@ import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
@@ -20,6 +21,8 @@ import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedureStatement> {
     @Override
@@ -90,9 +93,31 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             procedureText = procedureText.replace("OR REPLACE", "");
             procedureText = procedureText.replaceAll("[\\s]{2,}", " ");
         }
-        sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
+        if (database instanceof MSSQLDatabase) {
+            CreateProcedureGenerator.getSqlStatementsWithSet(sql, procedureText, statement);
+        } else {
+            sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
+        }
         surroundWithSchemaSets(sql, statement.getSchemaName(), database);
         return sql.toArray(new Sql[sql.size()]);
+    }
+
+    public static void getSqlStatementsWithSet(List<Sql> sql, String procedureText, CreateProcedureStatement statement) {
+        String IS_SET_REGEX = "SET\\s(\\w)+\\s(ON|OFF);?";
+        Pattern hasSetPattern = Pattern.compile(IS_SET_REGEX);
+        Matcher hasSetMatcher = hasSetPattern.matcher(procedureText);
+        if (hasSetMatcher.find()) {
+            String procedureTextClean = procedureText;
+            hasSetMatcher.reset(); // reset to start to make the find and replace fit in a single loop
+            while (hasSetMatcher.find()) {
+                String curSetSql = hasSetMatcher.group();
+                sql.add(new UnparsedSql(curSetSql, statement.getEndDelimiter());
+                procedureTextClean= procedureTextClean.replace(curSetSql, "");
+            }
+            sql.add(new UnparsedSql(procedureTextClean, statement.getEndDelimiter());
+        } else {
+            sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
+        }
     }
 
     public static String removeTrailingDelimiter(String procedureText, String endDelimiter) {
