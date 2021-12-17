@@ -144,7 +144,13 @@ public class AddNotNullConstraintChange extends AbstractChange {
             if (columnDataType != null) {
                 final LiquibaseDataType datatype = DataTypeFactory.getInstance().fromDescription(columnDataType, database);
                 if (datatype instanceof BooleanType) {
-                    finalDefaultNullValue = BooleanUtil.parseBoolean(defaultNullValue);
+                    //need to detect a boolean type and handle it correctly sometimes or it is not converted to the correct datatype
+                    finalDefaultNullValue = datatype.objectToSql(finalDefaultNullValue, database);
+                    if (finalDefaultNullValue.equals("0")) {
+                        finalDefaultNullValue = 0;
+                    } else if (finalDefaultNullValue.equals("1")) {
+                        finalDefaultNullValue = 1;
+                    }
                 }
             }
 
