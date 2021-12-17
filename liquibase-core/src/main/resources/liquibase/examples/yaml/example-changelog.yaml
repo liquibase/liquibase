@@ -43,5 +43,5 @@ databaseChangeLog:
             tableName:  company
             columns:
               - column:
-                  name:  id
+                  name:  country
                   type:  varchar(2) 

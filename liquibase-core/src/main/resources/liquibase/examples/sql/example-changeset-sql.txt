@@ -1,4 +1,4 @@
-(example-changeset.sql)
+(example-changeset-sql.txt)
 
 --changeset dev:1
 create table test1(
