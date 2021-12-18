@@ -33,11 +33,6 @@ public class SqlParser {
                         }
                         clauses.append(new StringClauses.Comment(comment));
                     }
-                    /**
-                     * QUOTED IDENTIFIER ON will ensure that "" -> IDENTIFIER and '' are for literal
-                     * OFF no quotation for IDENTIFIER "" literal
-                     * Do we need to make changes here?
-                     */
                 } else if (token.kind == SimpleSqlGrammarConstants.QUOTED_IDENTIFIER) {
                     clauses.append(new StringClauses.QuotedIdentifier(token.image));
                 } else if (token.kind == SimpleSqlGrammarConstants.QUOTED_STRING) {

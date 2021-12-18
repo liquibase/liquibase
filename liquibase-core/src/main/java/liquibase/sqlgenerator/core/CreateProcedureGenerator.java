@@ -11,6 +11,7 @@ import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.core.util.MSSQLUtil;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.structure.core.Schema;
@@ -94,7 +95,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             procedureText = procedureText.replaceAll("[\\s]{2,}", " ");
         }
         if (database instanceof MSSQLDatabase) {
-            CreateProcedureGenerator.getSqlStatementsWithSet(sql, procedureText, statement);
+            MSSQLUtil.addSqlStatementsToList(sql, procedureText, statement.getEndDelimiter());
         } else {
             sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
         }
@@ -102,23 +103,6 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         return sql.toArray(new Sql[sql.size()]);
     }
 
-    public static void getSqlStatementsWithSet(List<Sql> sql, String procedureText, CreateProcedureStatement statement) {
-        String IS_SET_REGEX = "SET\\s(\\w)+\\s(ON|OFF);?";
-        Pattern hasSetPattern = Pattern.compile(IS_SET_REGEX);
-        Matcher hasSetMatcher = hasSetPattern.matcher(procedureText);
-        if (hasSetMatcher.find()) {
-            String procedureTextClean = procedureText;
-            hasSetMatcher.reset(); // reset to start to make the find and replace fit in a single loop
-            while (hasSetMatcher.find()) {
-                String curSetSql = hasSetMatcher.group();
-                sql.add(new UnparsedSql(curSetSql, statement.getEndDelimiter());
-                procedureTextClean= procedureTextClean.replace(curSetSql, "");
-            }
-            sql.add(new UnparsedSql(procedureTextClean, statement.getEndDelimiter());
-        } else {
-            sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
-        }
-    }
 
     public static String removeTrailingDelimiter(String procedureText, String endDelimiter) {
         if (procedureText == null) {
