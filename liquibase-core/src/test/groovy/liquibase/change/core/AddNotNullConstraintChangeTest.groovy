@@ -76,7 +76,7 @@ public class AddNotNullConstraintChangeTest extends StandardChangeTest {
         def update = (UpdateStatement) output[0]
         update.getTableName() == "FOO"
         update.getNewColumnValues().size() == 1
-        update.getNewColumnValues().get("BAR") == false
+        update.getNewColumnValues().get("BAR") == 0
         update.getWhereClause() == "BAR IS NULL"
 
         output[1] instanceof SetNullableStatement
@@ -101,7 +101,7 @@ public class AddNotNullConstraintChangeTest extends StandardChangeTest {
         def update = (UpdateStatement) output[0]
         update.getTableName() == "xxx"
         update.getNewColumnValues().size() == 1
-        update.getNewColumnValues().get("col_name") == true
+        update.getNewColumnValues().get("col_name") == 1
         update.getWhereClause() == "col_name IS NULL"
 
         output[1] instanceof SetNullableStatement
