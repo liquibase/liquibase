@@ -13,15 +13,7 @@ import java.util.regex.Pattern;
  * Additional utility methods can be added here
  */
 public class MSSQLUtil {
-    public static String IS_SET_REGEX = "SET\\s(ANSI_NULL|QUOTED_IDENTIFIER)\\s(ON|OFF);?";
-
-    public static boolean isSetQuotedEnabled (String sql) {
-        return false;
-    }
-
-    public static boolean isAnsiNullPresent(String sql) {
-        return false;
-    }
+    public static String IS_SET_REGEX = "SET\\s(ANSI_NULLS|QUOTED_IDENTIFIER)\\s(ON|OFF)(\\s*\\t*\\n*);?";
 
     /**
      * General add Sql Statement Util
@@ -66,7 +58,6 @@ public class MSSQLUtil {
             sql.add(new UnparsedSql(sqlText, relation));
         }
     }
-
 
     public static Matcher getMatcher(String sqlText) {
         Pattern hasSetPattern = Pattern.compile(IS_SET_REGEX);
