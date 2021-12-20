@@ -43,6 +43,7 @@ import org.junit.ComparisonFailure
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.regex.Pattern
 
@@ -291,6 +292,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                         checkOutput("Exception message", e.getMessage(), Collections.singletonList(testDef.expectedExceptionMessage))
                     }
                     return
+                }
+            } finally {
+                if (testDef.commandTestDefinition.afterMethodInvocation != null) {
+                    testDef.commandTestDefinition.afterMethodInvocation.call()
                 }
             }
         } as Scope.ScopedRunnerWithReturn<CommandResults>)
@@ -554,6 +559,12 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         List<RunTestDefinition> runTests = new ArrayList<>()
 
         String signature
+        /**
+         * An optional method that will be called after the execution of each run command. This is executed within
+         * the same scope as the command that is run for the test. This method will always be called, regardless of
+         * exceptions thrown from within the test.
+         */
+        Callable<Void> afterMethodInvocation
 
         void run(@DelegatesTo(RunTestDefinition) Closure testClosure) {
             run(null, testClosure)

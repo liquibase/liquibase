@@ -48,6 +48,9 @@ class SetupCleanResources extends TestSetup {
                 f = new File(url.toURI())
             }
 
+            if (! f.exists()) {
+                continue
+            }
             if (f.isFile()) {
                 f.delete()
             } else {
