@@ -43,7 +43,7 @@ jobs:
       ## Run monitor before test, so that we report results even if the test step fails
       - name: Report snyk status to web UI
         run: |
-          ./snyk monitor --all-sub-projects --org=datical --policy-path=.snyk -- -B -Dscope=compile
+          ./snyk monitor --all-projects --org=datical --policy-path=.snyk -- -B -Dscope=compile
 
       ## snyk test requires --all-projects because otherwise it does not fail the run when a problem is found. It just prints "no direct upgrade or path" and continues on
       ## Running with -Dscope=compile in order to report only on shipped modules, not "test" or "provided" scope ones
