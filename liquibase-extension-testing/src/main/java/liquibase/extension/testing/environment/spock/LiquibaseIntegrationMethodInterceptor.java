@@ -48,7 +48,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         return returnList;
     }
 
-    private static void startContainers(List<FieldInfo> containers, IMethodInvocation invocation) {
+    private static void startContainers(List<FieldInfo> containers, IMethodInvocation invocation) throws Exception {
         for (FieldInfo field : containers) {
             TestEnvironment env = readContainerFromField(field, invocation);
             env.start();

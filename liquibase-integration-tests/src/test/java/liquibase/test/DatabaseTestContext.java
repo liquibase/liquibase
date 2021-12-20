@@ -24,7 +24,7 @@ public class DatabaseTestContext {
     public static final String ALT_TABLESPACE = "LIQUIBASE2";
     private static final String TEST_DATABASES_PROPERTY = "test.databases";
     private static DatabaseTestContext instance = new DatabaseTestContext();
-    private final DatabaseTestURL[] DEFAULT_TEST_DATABASES = new DatabaseTestURL[]{
+//    private final DatabaseTestURL[] DEFAULT_TEST_DATABASES = new DatabaseTestURL[]{
             /* @todo Extract all remaining connection string examples into liquibase.integrationtest.properties, then delete this code block. */
             /*
                     new DatabaseTestURL("Cache","jdbc:Cache://"+AbstractIntegrationTest.getDatabaseServerHostname("Cache")+":1972/liquibase"),
@@ -43,7 +43,7 @@ public class DatabaseTestContext {
                     new DatabaseTestURL("SQLite","jdbc:sqlite:/liquibase.db"),
                     new DatabaseTestURL("SybaseJtds","jdbc:sybase:Tds:"+AbstractIntegrationTest.getDatabaseServerHostname("sybase")+":9810/servicename=prior")
                     */
-    };
+//    };
     private Set<Database> availableDatabases = new HashSet<Database>();
     private Set<Database> allDatabases;
     private Set<DatabaseConnection> availableConnections;
@@ -244,81 +244,8 @@ public class DatabaseTestContext {
         return new JdbcConnection(connection);
     }
 
-    public DatabaseTestURL[] getTestUrls() {
-        return DEFAULT_TEST_DATABASES;
-    }
-
-    public Set<Database> getAllDatabases() {
-        if (allDatabases == null) {
-            allDatabases = new HashSet<Database>();
-
-            allDatabases.addAll(DatabaseFactory.getInstance().getImplementedDatabases());
-
-            List<Database> toRemove = new ArrayList<Database>();
-            for (Database database : allDatabases) {
-                if ((database instanceof SQLiteDatabase) //todo: re-enable sqlite testing
-                        || (database instanceof MockDatabase) || (database instanceof ExampleCustomDatabase)) {
-                    toRemove.add(database);
-                }
-            }
-            allDatabases.removeAll(toRemove);
-        }
-        return allDatabases;
-    }
-
-    public Set<Database> getAvailableDatabases() throws Exception {
-        if (availableDatabases.isEmpty()) {
-            for (DatabaseConnection conn : getAvailableConnections()) {
-                availableDatabases.add(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
-            }
-        }
-        //Check to don't return closed databases
-        Iterator<Database> iter = availableDatabases.iterator();
-        while (iter.hasNext()) {
-            Database database = iter.next();
-            if (database.getConnection().isClosed())
-                iter.remove();
-        }
-
-
-        return availableDatabases;
-    }
-
-
-    public Set<DatabaseConnection> getAvailableConnections() throws Exception {
-        if (availableConnections == null) {
-            availableConnections = new HashSet<DatabaseConnection>();
-            for (DatabaseTestURL url : getTestUrls()) {
-                DatabaseConnection connection = openConnection(url.getUrl(), url.getUsername(), url.getPassword());
-
-                if (connection != null) {
-                    availableConnections.add(connection);
-                }
-            }
-        }
-
-        //Check to don't return closed connections
-        Iterator<DatabaseConnection> iter = availableConnections.iterator();
-        while (iter.hasNext()) {
-            DatabaseConnection connection = iter.next();
-            if (connection.isClosed())
-                iter.remove();
-        }
-
-        return availableConnections;
-    }
 
     public DatabaseConnection getConnection(String url, String username, String password) throws Exception {
         return openConnection(url, username, password);
-    }
-
-    public String getTestUrl(Database database) throws Exception {
-        for (DatabaseTestURL turl : getTestUrls()) {
-            String url = turl.getUrl();
-            if (database.getDefaultDriver(url) != null) {
-                return url;
-            }
-        }
-        throw new RuntimeException("Could not find url for " + database);
     }
 }

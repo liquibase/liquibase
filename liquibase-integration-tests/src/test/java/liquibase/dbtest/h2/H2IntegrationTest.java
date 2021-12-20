@@ -105,7 +105,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
         //run again to test changelog testing logic
         liquibase = createLiquibase("changelogs/yaml/common.tests.changelog.yaml");
-        liquibase.setChangeLogParameter("loginuser", getUsername());
+        liquibase.setChangeLogParameter("loginuser", testEnvironment.getUsername());
 
         try {
             liquibase.update(this.contexts);
@@ -128,7 +128,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
         //run again to test changelog testing logic
         liquibase = createLiquibase("changelogs/json/common.tests.changelog.json");
-        liquibase.setChangeLogParameter("loginuser", getUsername());
+        liquibase.setChangeLogParameter("loginuser", testEnvironment.getUsername());
 
         try {
             liquibase.update(this.contexts);

@@ -16,10 +16,10 @@ import java.util.stream.Stream;
 
 public class TestEnvironmentConfigurationValueProvider extends AbstractMapConfigurationValueProvider {
 
-    private final Properties properties;
+    private final Map<String, Object> properties;
 
     public TestEnvironmentConfigurationValueProvider() {
-        properties = new Properties();
+        properties = new HashMap<>();
         Yaml yaml = new Yaml(new SafeConstructor());
         try {
             for (URL url : Collections.list(this.getClass().getClassLoader().getResources("liquibase.sdk.yaml"))) {
@@ -59,13 +59,13 @@ public class TestEnvironmentConfigurationValueProvider extends AbstractMapConfig
                 String envKey = splitKey[0];
                 keySuffix = splitKey[1];
 
-                ProvidedValue value = super.lookupProvidedValue("liquibase.sdk.env." + envKey + "." + keySuffix);
-                if (value != null) {
-                    return value;
+                final String dbKey = "liquibase.sdk.env." + envKey + "." + keySuffix;
+                if (properties.containsKey(dbKey)) {
+                    return super.lookupProvidedValue(dbKey);
                 }
 
                 //fall back to "default" setup
-                value = super.lookupProvidedValue("liquibase.sdk.env.default." + keySuffix);
+                ProvidedValue value = super.lookupProvidedValue("liquibase.sdk.env.default." + keySuffix);
                 if (value != null) {
                     return value;
                 }

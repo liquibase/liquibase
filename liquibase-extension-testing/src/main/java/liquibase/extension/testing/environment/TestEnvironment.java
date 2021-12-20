@@ -5,14 +5,19 @@ import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.MultipleFailureException;
+import org.junit.runners.model.Statement;
 import org.spockframework.runtime.extension.IMethodInvocation;
 import org.spockframework.runtime.model.ErrorInfo;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
-public abstract class TestEnvironment {
+public abstract class TestEnvironment implements TestRule {
 
     private final String env;
 
@@ -20,10 +25,37 @@ public abstract class TestEnvironment {
         this.env = env;
     }
 
+    @Override
+    public Statement apply(Statement base, Description description) {
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                List<Throwable> errors = new ArrayList<Throwable>();
+
+                try {
+                    TestEnvironment.this.start();
+                    base.evaluate();
+//                    succeeded(description);
+                } catch (Throwable e) {
+                    errors.add(e);
+//                    failed(e, description);
+                } finally {
+//                    finished(description);
+                }
+
+                MultipleFailureException.assertEmpty(errors);
+            }
+        };
+    }
+
 
     public String getEnv() {
         return env;
     }
+
+    public abstract String getUsername();
+    public abstract String getPassword();
+    public abstract String getUrl();
 
     public static String getPropertyName(String env, String propertyName) {
         return "liquibase.sdk.env." + env + '.' + propertyName;
@@ -60,7 +92,7 @@ public abstract class TestEnvironment {
         return null;
     }
 
-    public abstract void start();
+    public abstract void start() throws SQLException, Exception;
 
     public abstract void stop();
 

@@ -10,5 +10,6 @@ class TestEnvironmentConfigurationValueProviderTest extends Specification {
 
         then:
         provider.getProvidedValue("liquibase.sdk.env.postgresql.username").getValue() == "lbuser"
+        provider.getProvidedValue("liquibase.sdk.env.mssql.username") == null //overriden at database level
     }
 }

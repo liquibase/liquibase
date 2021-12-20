@@ -119,22 +119,22 @@ public abstract class AbstractExecuteTest {
         }
 
         resetAvailableDatabases();
-        for (Database availableDatabase : DatabaseTestContext.getInstance().getAvailableDatabases()) {
-            Statement statement = ((JdbcConnection) availableDatabase.getConnection()).getUnderlyingConnection().createStatement();
-            if (shouldTestDatabase(availableDatabase, includeDatabases, excludeDatabases)) {
-                String sqlToRun = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, availableDatabase)[0].toSql();
-                try {
-                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
-                        listener.writeSqlWillRun(sqlToRun);
-                    }
-                    statement.execute(sqlToRun);
-                } catch (Exception e) {
-                    System.out.println("Failed to execute against " + availableDatabase.getShortName() + ": " + sqlToRun);
-                    throw e;
-
-                }
-            }
-        }
+//        for (Database availableDatabase : DatabaseTestContext.getInstance().getAvailableDatabases()) {
+//            Statement statement = ((JdbcConnection) availableDatabase.getConnection()).getUnderlyingConnection().createStatement();
+//            if (shouldTestDatabase(availableDatabase, includeDatabases, excludeDatabases)) {
+//                String sqlToRun = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, availableDatabase)[0].toSql();
+//                try {
+//                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+//                        listener.writeSqlWillRun(sqlToRun);
+//                    }
+//                    statement.execute(sqlToRun);
+//                } catch (Exception e) {
+//                    System.out.println("Failed to execute against " + availableDatabase.getShortName() + ": " + sqlToRun);
+//                    throw e;
+//
+//                }
+//            }
+//        }
     }
 
     private String replaceStandardTypes(String convertedSql, Database database) {
@@ -200,52 +200,52 @@ public abstract class AbstractExecuteTest {
     }
 
     public void resetAvailableDatabases() throws Exception {
-        for (Database database : DatabaseTestContext.getInstance().getAvailableDatabases()) {
-            DatabaseConnection connection = database.getConnection();
-            Statement connectionStatement = ((JdbcConnection) connection).getUnderlyingConnection().createStatement();
-
-            try {
-                database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
-            }
-            try {
-                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
-            } catch (SQLException e) {
-            }
-            connection.commit();
-            try {
-                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
-            } catch (SQLException e) {
-            }
-            connection.commit();
-
-            if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
-                connection.commit();
-
-                try {
-                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
-                } catch (SQLException e) {
-                    //ok
-                }
-                connection.commit();
-                try {
-                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
-                } catch (SQLException e) {
-                    //ok
-                }
-                connection.commit();
-            }
-
-            List<? extends SqlStatement> setupStatements = setupStatements(database);
-            if (setupStatements != null) {
-                for (SqlStatement statement : setupStatements) {
-                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(statement);
-                }
-            }
-            connectionStatement.close();
-        }
+//        for (Database database : DatabaseTestContext.getInstance().getAvailableDatabases()) {
+//            DatabaseConnection connection = database.getConnection();
+//            Statement connectionStatement = ((JdbcConnection) connection).getUnderlyingConnection().createStatement();
+//
+//            try {
+//                database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+//            } catch (Exception e) {
+//                throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
+//            }
+//            try {
+//                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+//            } catch (SQLException e) {
+//            }
+//            connection.commit();
+//            try {
+//                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+//            } catch (SQLException e) {
+//            }
+//            connection.commit();
+//
+//            if (database.supportsSchemas()) {
+//                database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
+//                connection.commit();
+//
+//                try {
+//                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
+//                } catch (SQLException e) {
+//                    //ok
+//                }
+//                connection.commit();
+//                try {
+//                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
+//                } catch (SQLException e) {
+//                    //ok
+//                }
+//                connection.commit();
+//            }
+//
+//            List<? extends SqlStatement> setupStatements = setupStatements(database);
+//            if (setupStatements != null) {
+//                for (SqlStatement statement : setupStatements) {
+//                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(statement);
+//                }
+//            }
+//            connectionStatement.close();
+//        }
     }
 
 }

@@ -10,18 +10,6 @@
 
     <artifactId>liquibase-integration-tests</artifactId>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>1.16.2</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>
@@ -41,20 +29,6 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-extension-testing</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-
-
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mysql</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>spock</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
