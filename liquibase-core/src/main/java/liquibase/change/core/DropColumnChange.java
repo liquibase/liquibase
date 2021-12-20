@@ -55,7 +55,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     
     @Override
     public boolean supports(Database database) {
-        return database instanceof SQLiteDatabase || !(database instanceof Db2zDatabase) && super.supports(database);
+        return database instanceof SQLiteDatabase && super.supports(database);
     }
     
     @Override
