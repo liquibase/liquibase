@@ -113,7 +113,7 @@ public class ClobType extends LiquibaseDataType {
                 return new DatabaseDataType("MEDIUMTEXT");
             } else if (originalDefinition.toLowerCase(Locale.US).startsWith("nclob")) {
                 DatabaseDataType type = new DatabaseDataType("LONGTEXT");
-                type.addAdditionalInformation("CHARACTER SET utf8");
+                type.addAdditionalInformation("CHARACTER SET utf8mb4");
                 return type;
             } else {
                 return new DatabaseDataType("LONGTEXT");
