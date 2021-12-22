@@ -1079,6 +1079,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         @Override
         def <T> T prompt(String prompt, T valueIfNoEntry, InputHandler<T> inputHandler, Class<T> type) {
+            this.sendMessage(prompt + ": ");
             return valueIfNoEntry
         }
 
