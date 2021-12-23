@@ -404,7 +404,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: "+statement+"]", e);
                 }
             }
-            return null;
+            return stmt.getUpdateCount();
         }
 
         @Override
