@@ -3,15 +3,19 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.exception.DatabaseException;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.BooleanType;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
+import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -135,9 +139,41 @@ public class AddNotNullConstraintChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<>();
 
-        if (defaultNullValue != null) {
+        if (defaultNullValue != null && !defaultNullValue.equalsIgnoreCase("null")) {
+            final String columnDataType = this.getColumnDataType();
+
+            Object finalDefaultNullValue = defaultNullValue;
+            if (columnDataType != null) {
+                final LiquibaseDataType datatype = DataTypeFactory.getInstance().fromDescription(columnDataType, database);
+                if (datatype instanceof BooleanType) {
+                    //need to detect a boolean or bit type and handle it correctly sometimes or it is not converted to the correct datatype
+                    finalDefaultNullValue = datatype.objectToSql(finalDefaultNullValue, database);
+                    if (finalDefaultNullValue.equals("0")) {
+                        finalDefaultNullValue = 0;
+                    } else if (finalDefaultNullValue.equals("1")) {
+                        finalDefaultNullValue = 1;
+                    }
+
+                    if (columnDataType.toLowerCase().contains("bit")) {
+                        if (BooleanUtil.parseBoolean(finalDefaultNullValue.toString())) {
+                            finalDefaultNullValue = 1;
+                        } else {
+                            finalDefaultNullValue = 0;
+                        }
+                    }
+
+                    if (database instanceof PostgresDatabase) {
+                        if (finalDefaultNullValue.equals(0)) {
+                            finalDefaultNullValue = new DatabaseFunction( "B'0'");
+                        } else if (finalDefaultNullValue.equals(1)) {
+                            finalDefaultNullValue = new DatabaseFunction( "B'1'");
+                        }
+                    }
+                }
+            }
+
             statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
-                                   .addNewColumnValue(getColumnName(), defaultNullValue)
+                                   .addNewColumnValue(getColumnName(), finalDefaultNullValue)
                                    .setWhereClause(database.escapeObjectName(getColumnName(), Column.class) +
                                    " IS NULL"));
         }
