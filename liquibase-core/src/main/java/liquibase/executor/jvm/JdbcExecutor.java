@@ -1,10 +1,8 @@
 package liquibase.executor.jvm;
 
-import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
-import liquibase.database.core.DB2Database;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -16,10 +14,12 @@ import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.*;
+import liquibase.statement.CallableSqlStatement;
+import liquibase.statement.CompoundStatement;
+import liquibase.statement.ExecutablePreparedStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtil;
 import liquibase.util.StringUtils;
 
 import java.sql.CallableStatement;
@@ -420,13 +420,13 @@ public class JdbcExecutor extends AbstractExecutor {
         }
 
         private boolean isDmlStatement(String sql) {
-            if (StringUtil.isEmpty(sql)) {
+            if (StringUtils.isEmpty(sql)) {
                 return false;
             }
             String trimmedAndLowerCaseSql = sql.trim().toLowerCase();
-            return StringUtil.startsWith(trimmedAndLowerCaseSql, "update")
-                    || StringUtil.startsWith(trimmedAndLowerCaseSql, "insert")
-                    || StringUtil.startsWith(trimmedAndLowerCaseSql, "delete");
+            return StringUtils.startsWith(trimmedAndLowerCaseSql, "update")
+                    || StringUtils.startsWith(trimmedAndLowerCaseSql, "insert")
+                    || StringUtils.startsWith(trimmedAndLowerCaseSql, "delete");
         }
 
     }
