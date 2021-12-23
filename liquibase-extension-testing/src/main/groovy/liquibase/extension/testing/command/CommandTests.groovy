@@ -15,6 +15,7 @@ import liquibase.command.core.InternalSnapshotCommandStep
 import liquibase.configuration.AbstractMapConfigurationValueProvider
 import liquibase.configuration.ConfigurationValueProvider
 import liquibase.configuration.LiquibaseConfiguration
+import liquibase.configuration.core.InteractivePromptingValueProvider
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
@@ -87,6 +88,7 @@ class CommandTests extends Specification {
         }
 
         Scope.currentScope.getSingleton(LiquibaseConfiguration).registerProvider(propertiesProvider)
+        Scope.currentScope.getSingleton(LiquibaseConfiguration).registerProvider(new InteractivePromptingValueProvider())
     }
 
     def cleanup() {
@@ -1077,6 +1079,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         @Override
         def <T> T prompt(String prompt, T valueIfNoEntry, InputHandler<T> inputHandler, Class<T> type) {
+            this.sendMessage(prompt + ": ");
             return valueIfNoEntry
         }
 

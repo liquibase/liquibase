@@ -8,6 +8,7 @@ import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
+import liquibase.configuration.core.InteractivePromptingValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
 import liquibase.hub.HubConfiguration;
@@ -467,7 +468,7 @@ public class LiquibaseCommandLine {
         } else {
             Scope.getCurrentScope().getLog(getClass()).fine("Cannot find local defaultsFile " + defaultsFile.getAbsolutePath());
         }
-
+        liquibaseConfiguration.registerProvider(new InteractivePromptingValueProvider());
 
         return returnList;
     }
