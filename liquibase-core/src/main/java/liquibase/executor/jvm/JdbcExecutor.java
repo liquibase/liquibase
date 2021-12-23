@@ -19,6 +19,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.util.JdbcUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.StringUtils;
 
 import java.sql.CallableStatement;
@@ -387,6 +388,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
         @Override
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
+            Integer updateCount = null;
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 if (database instanceof OracleDatabase) {
                     while (statement.matches("(?s).*[\\s\\r\\n]*/[\\s\\r\\n]*$")) { //all trailing /'s
@@ -394,7 +396,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     }
                 }
 
-                log.debug("Executing EXECUTE database command: "+statement);
+                log.debug("Executing EXECUTE database command: " + statement);
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -403,14 +405,30 @@ public class JdbcExecutor extends AbstractExecutor {
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: "+statement+"]", e);
                 }
+                updateCount = stmt.getUpdateCount();
+                if (isDmlStatement(statement)) {
+                    log.debug(updateCount + " rows affected");
+                }
             }
-            return stmt.getUpdateCount();
+
+            return updateCount;
         }
 
         @Override
         public SqlStatement getStatement() {
             return sql;
         }
+
+        private boolean isDmlStatement(String sql) {
+            if (StringUtil.isEmpty(sql)) {
+                return false;
+            }
+            String trimmedAndLowerCaseSql = sql.trim().toLowerCase();
+            return StringUtil.startsWith(trimmedAndLowerCaseSql, "update")
+                    || StringUtil.startsWith(trimmedAndLowerCaseSql, "insert")
+                    || StringUtil.startsWith(trimmedAndLowerCaseSql, "delete");
+        }
+
     }
 
     private class QueryStatementCallback implements StatementCallback {
