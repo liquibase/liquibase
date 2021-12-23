@@ -24,6 +24,7 @@ jobs:
       proBranchSha: ${{ steps.find-branches.outputs.proBranchSha }}
       thisSha: ${{ steps.find-branches.outputs.thisSha }}
       thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
+      thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
       thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
       thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
       standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
@@ -52,6 +53,7 @@ jobs:
 
             core.setOutput("thisSha", helper.getCurrentSha());
             core.setOutput("thisBranchName", helper.getCurrentBranch());
+            core.setOutput("thisBranchFileName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_]/g, "_"));
             core.setOutput("thisRepoName", helper.getRepositoryName());
             core.setOutput("thisRepoOwner", helper.getRepositoryOwner());
 
@@ -279,10 +281,10 @@ jobs:
 
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}.jar
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.tar.gz
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
 
       - name: Archive Packages
         uses: actions/upload-artifact@v2
@@ -293,13 +295,13 @@ jobs:
       - name: Archive Convenience Zip
         uses: actions/upload-artifact@v2
         with:
-          name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
+          name: liquibase-zip-${{ needs.setup.outputs.thisBranchFileName }}
           path: liquibase-dist/target/liquibase-0-SNAPSHOT/*
 
       - name: Archive Convenience Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
+          name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchFileName }}
           path: artifacts-named/*
 
 
