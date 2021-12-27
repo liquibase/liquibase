@@ -860,6 +860,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupCreateTempResources(originalFile, newFile, baseDir))
         }
 
+        /**
+         * @param fileLastModifiedDate if not null, the newly created file's last modified date will be set to this value
+         */
+        void createTempResource(String originalFile, String newFile, String baseDir, Date fileLastModifiedDate) {
+            this.setups.add(new SetupCreateTempResources(originalFile, newFile, baseDir, fileLastModifiedDate))
+        }
+
         void createTempDirectoryResource(String directory) {
             this.setups.add(new SetupCreateDirectoryResources(directory))
         }
