@@ -14,6 +14,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.ObjectUtil;
 
 import java.util.*;
+import liquibase.util.OsgiUtil;
 
 /**
  * Adapts CustomChange implementations to the standard change system used by Liquibase.
@@ -69,16 +70,21 @@ public class CustomChangeWrapper extends AbstractChange {
             return this;
         }
         this.className = className;
-            try {
+        try {
+           Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
+           if (Boolean.TRUE.equals(osgiPlatform)) {
+              customChange = (CustomChange)OsgiUtil.loadClass(className).getConstructor().newInstance();
+           } else {
+              try {
+                  customChange = (CustomChange) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+              } catch (ClassCastException e) { //fails in Ant in particular
                 try {
-                    customChange = (CustomChange) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
-                } catch (ClassCastException e) { //fails in Ant in particular
-                    try {
-                        customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).getConstructor().newInstance();
-                    } catch (ClassNotFoundException e1) {
-                        customChange = (CustomChange) Class.forName(className).getConstructor().newInstance();
-                    }
+                  customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).getConstructor().newInstance();
+                } catch (ClassNotFoundException e1) {
+                  customChange = (CustomChange) Class.forName(className).getConstructor().newInstance();
                 }
+              }
+           }
         } catch (Exception e) {
             throw new CustomChangeException(e);
         }
@@ -316,7 +322,12 @@ public class CustomChangeWrapper extends AbstractChange {
 
         CustomChange customChange = null;
         try {
-            customChange = (CustomChange) Class.forName(className, false, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+            Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
+            if (Boolean.TRUE.equals(osgiPlatform)) {
+                customChange = (CustomChange)OsgiUtil.loadClass(className).getConstructor().newInstance();
+            } else {
+                customChange = (CustomChange) Class.forName(className, false, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+            }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

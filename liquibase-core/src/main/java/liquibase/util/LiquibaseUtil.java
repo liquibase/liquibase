@@ -1,6 +1,8 @@
 package liquibase.util;
 
 import liquibase.Scope;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,19 +56,37 @@ public class LiquibaseUtil {
     // the jar file.
     private static String getBuildInfo(String propertyId) {
         if (liquibaseBuildProperties == null) {
-            try {
-                liquibaseBuildProperties = new Properties();
-                final Enumeration<URL> propertiesUrls = Scope.getCurrentScope().getClassLoader().getResources("liquibase.build.properties");
-                while (propertiesUrls.hasMoreElements()) {
-                    final URL url = propertiesUrls.nextElement();
-                    try (InputStream buildProperties = url.openStream()) {
+            Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
+            if (Boolean.TRUE.equals(osgiPlatform)) {
+                Bundle bundle = FrameworkUtil.getBundle(LiquibaseUtil.class);
+                URL propURL = bundle.getEntry("liquibase.build.properties");
+                if (propURL == null) {
+                    Scope.getCurrentScope().getLog(LiquibaseUtil.class).severe("Cannot read liquibase.build.properties");
+                } else {
+                    try (InputStream buildProperties = propURL.openStream()) {
+                        liquibaseBuildProperties = new Properties();
                         if (buildProperties != null) {
                             liquibaseBuildProperties.load(buildProperties);
                         }
+                    } catch (IOException e) {
+                        Scope.getCurrentScope().getLog(LiquibaseUtil.class).severe("Cannot read liquibase.build.properties", e);
                     }
                 }
-            } catch (IOException e) {
-                Scope.getCurrentScope().getLog(LiquibaseUtil.class).severe("Cannot read liquibase.build.properties", e);
+            } else {
+                try {
+                    liquibaseBuildProperties = new Properties();
+                    final Enumeration<URL> propertiesUrls = Scope.getCurrentScope().getClassLoader().getResources("liquibase.build.properties");
+                    while (propertiesUrls.hasMoreElements()) {
+                        final URL url = propertiesUrls.nextElement();
+                        try (InputStream buildProperties = url.openStream()) {
+                            if (buildProperties != null) {
+                                liquibaseBuildProperties.load(buildProperties);
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    Scope.getCurrentScope().getLog(LiquibaseUtil.class).severe("Cannot read liquibase.build.properties", e);
+                }
             }
         }
 
