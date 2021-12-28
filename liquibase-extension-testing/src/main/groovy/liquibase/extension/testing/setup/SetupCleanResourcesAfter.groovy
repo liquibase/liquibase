@@ -58,11 +58,14 @@ class SetupCleanResourcesAfter extends TestSetup {
 
     void deleteResourcesThatMatch() {
         for (String resourceName : resourcesToDelete) {
-            URL url = Thread.currentThread().getContextClassLoader().getResource(resourceName)
-            if (url == null) {
-                continue
+            File directory = new File(resourceName)
+            if (! directory.isAbsolute()) {
+                URL url = Thread.currentThread().getContextClassLoader().getResource(resourceName)
+                if (url == null) {
+                    continue
+                }
+                directory = new File(url.toURI())
             }
-            File directory = new File(url.toURI())
             assert directory.isDirectory(): "The resource '$resourceName' is not a directory"
             String[] listOfFiles = directory.list(filter)
             for (String s : listOfFiles) {
