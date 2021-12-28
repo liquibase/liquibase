@@ -805,7 +805,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     protected String getRelativeTo() {
         String relativeTo = null;
         if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
-            relativeTo = getChangeSet().getFilePath();
+            relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
         }
         return relativeTo;
     }
