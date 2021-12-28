@@ -9,11 +9,6 @@ import liquibase.dbtest.AbstractIntegrationTest;
 
 public class DB2zIntegrationTest extends AbstractIntegrationTest {
 
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        return false;
-    }
-
     public DB2zIntegrationTest() throws Exception {
         super("db2z", DatabaseFactory.getInstance().getDatabase("db2z"));
     }

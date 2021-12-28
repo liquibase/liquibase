@@ -1,8 +1,7 @@
 package liquibase.integrationtest.mysql
 
-import liquibase.extension.testing.environment.TestEnvironment
-import liquibase.extension.testing.environment.TestEnvironmentFactory
-import liquibase.extension.testing.environment.spock.LiquibaseIntegrationTest
+import liquibase.extension.testing.testsystem.TestSystem
+import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -12,7 +11,7 @@ import java.sql.Connection
 class H2NewIntegrationTest extends Specification {
 
     @Shared
-    TestEnvironment h2 = TestEnvironmentFactory.getEnvironment("h2");
+    TestSystem h2 = TestEnvironmentFactory.getTestSystem("h2");
 
     def "run test"() {
         when:

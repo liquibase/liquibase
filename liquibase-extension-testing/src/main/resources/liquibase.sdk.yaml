@@ -1,69 +1,57 @@
 liquibase:
   sdk:
-    env:
+    testSystem:
       default:
         username: lbuser
         password: LiquibasePass1
-        catalog:
-          default: lbcat
+        catalog: lbcat
+        altCatalog: lbcat2
+        altSchema: lbschem2
+        altTablespace: liquibase2
         envClass: liquibase.extension.testing.environment.core.TestcontainerEnvironment
 
-      hub:
-        envClass: liquibase.extension.testing.environment.core.MockHubEnvironment
+      test: hub,h2,hsql,sqlite
 
       cockroachdb:
-        containerClass: org.testcontainers.containers.CockroachContainer
+        version: latest-v20.1
+        imageName: cockroachdb/cockroach
+        password: ""
+        setup:
+          username: root
 
       db2:
-        containerClass: org.testcontainers.containers.Db2Container
+        imageName: ibmcom/db2
+        version: 11.5.6.0a
 
-      h2:
-        envClass: liquibase.extension.testing.environment.core.H2Environment
+      mariadb:
+        imageName: mariadb
+        version: 10.3
+        setup:
+          username: root
 
       mssql:
-        containerClass: org.testcontainers.containers.MSSQLServerContainer
-        username: null
-        password: null
-        catalog:
-          default: null
-        init:
-          script: |
-            CREATE LOGIN [lbuser] with password=N'LiquibasePass1', CHECK_EXPIRATION=OFF;
-
-            CREATE DATABASE lbcat;
-            EXEC lbcat..sp_addsrvrolemember @loginame = N'lbuser', @rolename = N'sysadmin';
-
-            USE [lbcat];
-            ALTER DATABASE [lbcat] MODIFY FILEGROUP [PRIMARY] DEFAULT;
-            ALTER DATABASE [lbcat] ADD FILEGROUP [liquibase2];
-
-            ALTER DATABASE [lbcat] ADD FILE ( NAME = N'liquibase2', FILENAME = N'/tmp/liquibase2.ndf' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [liquibase2];
-            CREATE SCHEMA [lbcat2] AUTHORIZATION [dbo];
+        imageName: mcr.microsoft.com/mssql/server
+        version: 2017-CU12
+        setup:
+          username: SA
+          password: A_Str0ng_Required_Password
 
 
       mysql:
-        containerClass: org.testcontainers.containers.MySQLContainer
-        init:
+        version: 5.7
+        imageName: mysql
+        setup:
           username: root
-          password: LiquibasePass1
-          script: |
-            create database lbcat2;
 
-            GRANT ALL PRIVILEGES ON lbcat.* TO 'lbuser'@'%';
-            GRANT ALL PRIVILEGES ON lbcat2.* TO 'lbuser'@'%';
+      oracle:
+        imageName: gvenzl/oracle-xe
+        version: 18-slim
+        setup:
+          username: system
 
       postgresql:
-        containerClass: org.testcontainers.containers.PostgreSQLContainer
-        init:
-          script: |
-            CREATE DATABASE lbcat2;
-            CREATE SCHEMA lbcat2;
-
-            COPY (SELECT 1) TO PROGRAM 'mkdir -p /tmp/liquibase2';
-            CREATE TABLESPACE liquibase2 OWNER lbuser LOCATION '/tmp/liquibase2';
-            GRANT ALL PRIVILEGES ON DATABASE lbcat TO lbuser;
-            GRANT ALL PRIVILEGES ON DATABASE lbcat2 TO lbuser;
-            GRANT ALL PRIVILEGES ON SCHEMA lbcat2 TO lbuser;
+        imageName: postgres
+        version: 9.6
 
 
 

@@ -4,12 +4,12 @@ import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.statement.core.CreateTableStatement;
-import liquibase.test.DatabaseTestContext;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         statements.add(table);
 
         if (database.supportsSchemas()) {
-            table = new CreateTableStatement(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
+            table = new CreateTableStatement(AbstractIntegrationTest.ALT_CATALOG, AbstractIntegrationTest.ALT_SCHEMA, TABLE_NAME);
             table
                     .addColumn("id", DataTypeFactory.getInstance().fromDescription("int", database), null, new ColumnConstraint[]{  new NotNullConstraint() })
                     .addColumn(COLUMN_NAME, DataTypeFactory.getInstance().fromDescription("int", database), null,  new ColumnConstraint[]{ new NotNullConstraint() });
@@ -126,8 +126,8 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     @Test
     public void execute_withSchema() throws Exception {
         statementUnderTest = new AddUniqueConstraintStatement(
-                DatabaseTestContext.ALT_CATALOG,
-                DatabaseTestContext.ALT_SCHEMA,
+                AbstractIntegrationTest.ALT_CATALOG,
+                AbstractIntegrationTest.ALT_SCHEMA,
                 TABLE_NAME,
                 new ColumnConfig[]
                         {new ColumnConfig().setName(COLUMN_NAME)},

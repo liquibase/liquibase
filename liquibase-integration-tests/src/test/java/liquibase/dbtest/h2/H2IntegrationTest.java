@@ -32,12 +32,6 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         this.dbmsExcludeChangelog = "changelogs/h2/complete/dbms.exclude.changelog.xml";
     }
 
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        // H2 is an in-process database
-        return true;
-    }
-
     @Test
     public void diffToPrintStream() throws Exception{
         if (getDatabase() == null) {
@@ -105,7 +99,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
         //run again to test changelog testing logic
         liquibase = createLiquibase("changelogs/yaml/common.tests.changelog.yaml");
-        liquibase.setChangeLogParameter("loginuser", testEnvironment.getUsername());
+        liquibase.setChangeLogParameter("loginuser", testSystem.getUsername());
 
         try {
             liquibase.update(this.contexts);
@@ -128,7 +122,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
         //run again to test changelog testing logic
         liquibase = createLiquibase("changelogs/json/common.tests.changelog.json");
-        liquibase.setChangeLogParameter("loginuser", testEnvironment.getUsername());
+        liquibase.setChangeLogParameter("loginuser", testSystem.getUsername());
 
         try {
             liquibase.update(this.contexts);

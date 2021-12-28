@@ -1,18 +1,11 @@
 package liquibase.statementexecute;
 
-import liquibase.CatalogAndSchema;
-import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.example.ExampleCustomDatabase;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutorService;
-import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.database.core.MockDatabase;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -20,12 +13,9 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.core.Table;
-import liquibase.test.DatabaseTestContext;
 import liquibase.test.TestContext;
 import org.junit.After;
 
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;

@@ -1,1 +1,1 @@
-liquibase.extension.testing.environment.configuration.TestEnvironmentConfigurationValueProvider
+liquibase.extension.testing.LiquibaseSdkConfigurationValueProvider
