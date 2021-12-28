@@ -15,11 +15,11 @@ import liquibase.resource.FileSystemResourceAccessor
 
 import java.nio.file.Paths
 
-class SetupCleanResources extends TestSetup {
+class SetupCleanResourcesBefore extends TestSetup {
 
     private final List<String> resourcesToDelete = new ArrayList<>()
 
-    SetupCleanResources(String[] resourcesToDelete) {
+    SetupCleanResourcesBefore(String[] resourcesToDelete) {
         this.resourcesToDelete.addAll(resourcesToDelete as Set)
     }
 
