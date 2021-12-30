@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
  * MSSQL Util for generator to handle SET methods for now.
  * Additional utility methods can be added here
  */
-public class MSSQLUtil {
-    public static String IS_SET_REGEX = "(?i)SET\\s+(?i)(ANSI_NULLS|QUOTED_IDENTIFIER)\\s(?i)(ON|OFF)(\\s*\\t*\\n*);?";
+public class SqlGeneratorMSSQLUtil {
+    public static String IS_SET_REGEX = "(?i)SET\\s+(?i)(ANSI_NULLS|QUOTED_IDENTIFIER)\\s+(?i)(ON|OFF)(\\s*\\t*\\n*);?";
 
     /**
      * General add Sql Statement Util

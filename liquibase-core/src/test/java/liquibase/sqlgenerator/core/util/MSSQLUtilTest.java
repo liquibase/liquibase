@@ -1,7 +1,6 @@
 package liquibase.sqlgenerator.core.util;
 
 import liquibase.sql.Sql;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.View;
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,7 +40,7 @@ public class MSSQLUtilTest {
     @Test
     public void addSqlStatementWithOneSet() {
         List<Sql> sqlList = new ArrayList<>();
-        MSSQLUtil.addSqlStatementsToList(sqlList, data_amy, ";");
+        SqlGeneratorMSSQLUtil.addSqlStatementsToList(sqlList, data_amy, ";");
         Assert.assertEquals(sqlList.size(), 2);
         Assert.assertTrue(sqlList.get(0).toSql().contains("SET QUOTED_IDENTIFIER"));
         Assert.assertTrue(sqlList.get(1).toSql().contains("CREATE PROCEDURE"));
@@ -50,7 +49,7 @@ public class MSSQLUtilTest {
     @Test
     public void addSqlStatementWithOneSet_testProc() {
         List<Sql> sqlList = new ArrayList<>();
-        MSSQLUtil.addSqlStatementsToList(sqlList, test_proc, ";");
+        SqlGeneratorMSSQLUtil.addSqlStatementsToList(sqlList, test_proc, ";");
         Assert.assertEquals(sqlList.size(), 3);
         Assert.assertTrue(sqlList.get(0).toSql().contains("SET"));
         Assert.assertTrue(sqlList.get(1).toSql().contains("SET"));
@@ -64,7 +63,7 @@ public class MSSQLUtilTest {
     @Test
     public void addSqlStatementWithOneSet_relationFunction() {
         List<Sql> sqlList = new ArrayList<>();
-        MSSQLUtil.addSqlStatementsToList(sqlList, data_amy, new View("abc", "bcd", "efg"));
+        SqlGeneratorMSSQLUtil.addSqlStatementsToList(sqlList, data_amy, new View("abc", "bcd", "efg"));
         System.out.println("--------------------------------");
         System.out.println("#### SIZE AMY: " + sqlList.size());
         Assert.assertEquals(sqlList.size(), 2);
@@ -76,14 +75,14 @@ public class MSSQLUtilTest {
     @Test
     public void addSqlStatementsWithTwoSet() {
         List<Sql> sqlList = new ArrayList<>();
-        MSSQLUtil.addSqlStatementsToList(sqlList, data1_quoted_ansi, ";");
+        SqlGeneratorMSSQLUtil.addSqlStatementsToList(sqlList, data1_quoted_ansi, ";");
         Assert.assertEquals(sqlList.size(), 3);
     }
 
     @Test
     public void addSqlStatementsWithTwoSet_relationFunction() {
         List<Sql> sqlList = new ArrayList<>();
-        MSSQLUtil.addSqlStatementsToList(sqlList, data1_quoted_ansi, new View("abc", "bcd", "efg"));
+        SqlGeneratorMSSQLUtil.addSqlStatementsToList(sqlList, data1_quoted_ansi, new View("abc", "bcd", "efg"));
         System.out.println("--------------------------------------");
         System.out.println("Data1_QUOTED_ANSI" + sqlList.size());
         System.out.println("--------------------------------------");
