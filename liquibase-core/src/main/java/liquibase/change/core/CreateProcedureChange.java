@@ -37,6 +37,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     private String procedureName;
     private String procedureText;
     private String dbms;
+    private boolean allowSetQuotedIdentifier;
+    private boolean allowSetAnsiNulls;
 
     private String path;
     private Boolean relativeToChangelogFile;
@@ -128,6 +130,16 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     @DatabaseChangeProperty(isChangeProperty = false)
     public String getProcedureText() {
         return procedureText;
+    }
+
+    @DatabaseChangeProperty(isChangeProperty = false)
+    public boolean getAllowSetQuotedIdentifier() {
+        return allowSetQuotedIdentifier;
+    }
+
+    @DatabaseChangeProperty(isChangeProperty = false)
+    public boolean getAllowSetAnsiNulls() {
+        return allowSetAnsiNulls;
     }
 
     public void setProcedureText(String procedureText) {
