@@ -3,12 +3,12 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
     <changeSet id="1" author="testuser">
-        <insert tableName="users">
+        <insert tableName="test_users">
             <column name="first_name" value="test"/>
             <column name="last_name" value="name"/>
         </insert>
         <rollback>
-            DELETE FROM users WHERE first_name = 'test' AND last_name = 'name' LIMIT 1;
+            DELETE FROM test_users WHERE first_name = 'test' AND last_name = 'name' LIMIT 1;
         </rollback>
     </changeSet>
 </databaseChangeLog>

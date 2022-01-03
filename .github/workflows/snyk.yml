@@ -10,6 +10,9 @@ on:
 
 jobs:
   security-scan:
+    # This workflow only runs on the main liquibase repo, not in forks
+    if: github.repository == 'liquibase/liquibase'
+
     name: Snyk Security Scan
     runs-on: ubuntu-latest
     steps:

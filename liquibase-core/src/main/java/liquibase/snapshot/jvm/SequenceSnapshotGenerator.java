@@ -173,7 +173,14 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof FirebirdDatabase) {
             return "SELECT TRIM(RDB$GENERATOR_NAME) AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0";
         } else if (database instanceof H2Database) {
-            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
+            try {
+                if (database.getDatabaseMajorVersion() <= 1) {
+                    return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
+                }
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine h2 version in order to generate sequence snapshot query");
+            }
+            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
         } else if (database instanceof HsqlDatabase) {
             return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
         } else if (database instanceof InformixDatabase) {

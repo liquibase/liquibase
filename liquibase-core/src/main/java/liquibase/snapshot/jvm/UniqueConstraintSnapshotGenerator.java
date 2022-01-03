@@ -330,9 +330,33 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         + "where KC.CONSTNAME = TC.CONSTNAME "
                         + "and KC.TBCREATOR = TC.TBCREATOR "
                         + "and TC.TYPE='U' "
-                        + (bulkQuery? "" : "and KC.CONSTNAME='" + database.correctObjectName(name, UniqueConstraint.class) + "' ")
+                        + (bulkQuery ? "" : "and KC.CONSTNAME='" + database.correctObjectName(name, UniqueConstraint.class) + "' ")
                         + "and TC.TBCREATOR = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
                         + "order by KC.COLSEQ";
+            } else if (database instanceof H2Database && database.getDatabaseMajorVersion() >= 2) {
+                String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
+                String schemaName = database.correctObjectName(schema.getName(), Schema.class);
+                String constraintName = database.correctObjectName(name, UniqueConstraint.class);
+                String tableName = database.correctObjectName(table.getName(), Table.class);
+                sql = "select table_constraints.CONSTRAINT_NAME, index_columns.COLUMN_NAME, table_constraints.constraint_schema as CONSTRAINT_CONTAINER "
+                        + "from information_schema.table_constraints " +
+                        "join information_schema.index_columns on index_columns.index_name=table_constraints.index_name "
+                        + "where constraint_type='UNIQUE' ";
+                if (catalogName != null) {
+                    sql += "and constraint_catalog='" + catalogName + "' ";
+                }
+                if (schemaName != null) {
+                    sql += "and constraint_schema='" + schemaName + "' ";
+                }
+
+                if (!bulkQuery) {
+                    if (tableName != null) {
+                        sql += "and table_constraints.table_name='" + tableName + "' ";
+                    }
+                    if (constraintName != null) {
+                        sql += "and constraint_name='" + constraintName + "'";
+                    }
+                }
             } else {
                 // If we do not have a specific handler for the RDBMS, we assume that the database has an
                 // INFORMATION_SCHEMA we can use. This is a last-resort measure and might fail.
