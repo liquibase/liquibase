@@ -1062,8 +1062,6 @@
             <xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
             <xsd:attribute name="dbms" type="xsd:string" />
             <xsd:attribute name="replaceIfExists" type="xsd:boolean" />
-			<xsd:attribute name="allowSetQuotedIdentifier" type="xsd:boolean" />
-			<xsd:attribute name="allowAnsiNulls" type="xsd:boolean" />
         </xsd:complexType>
 	</xsd:element>
 

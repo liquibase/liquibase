@@ -88,6 +88,4 @@ public class MSSQLUtilTest {
         System.out.println("--------------------------------------");
         Assert.assertEquals(sqlList.size(), 3);
     }
-
-
 }
