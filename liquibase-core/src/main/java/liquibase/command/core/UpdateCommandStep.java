@@ -26,7 +26,7 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME, LEGACY_COMMAND_NAME);
 
         URL_ARG = builder.argument("url", String.class).required()
-                .description("The JDBC database connection URL").build();
+            .description("The JDBC database connection URL").build();
         DEFAULT_SCHEMA_NAME = builder.argument("defaultSchemaName", String.class)
                 .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
