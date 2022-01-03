@@ -194,7 +194,7 @@ jobs:
           password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - name: Run Tests
-        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=hub,${{ matrix.testSystem }}
+        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=hub,${{ matrix.testSystem }} -Dtest=*IntegrationTest
       - name: Archive Test Results
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
