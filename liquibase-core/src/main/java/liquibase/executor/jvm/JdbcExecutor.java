@@ -1,10 +1,8 @@
 package liquibase.executor.jvm;
 
-import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
-import liquibase.database.core.DB2Database;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -16,7 +14,10 @@ import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.*;
+import liquibase.statement.CallableSqlStatement;
+import liquibase.statement.CompoundStatement;
+import liquibase.statement.ExecutablePreparedStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
@@ -387,6 +388,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
         @Override
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
+            Integer updateCount = null;
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 if (database instanceof OracleDatabase) {
                     while (statement.matches("(?s).*[\\s\\r\\n]*/[\\s\\r\\n]*$")) { //all trailing /'s
@@ -394,7 +396,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     }
                 }
 
-                log.debug("Executing EXECUTE database command: "+statement);
+                log.debug("Executing EXECUTE database command: " + statement);
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -403,14 +405,30 @@ public class JdbcExecutor extends AbstractExecutor {
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: "+statement+"]", e);
                 }
+                updateCount = stmt.getUpdateCount();
+                if (isDmlStatement(statement)) {
+                    log.debug(updateCount + " rows affected");
+                }
             }
-            return null;
+
+            return updateCount;
         }
 
         @Override
         public SqlStatement getStatement() {
             return sql;
         }
+
+        private boolean isDmlStatement(String sql) {
+            if (StringUtils.isEmpty(sql)) {
+                return false;
+            }
+            String trimmedAndLowerCaseSql = sql.trim().toLowerCase();
+            return StringUtils.startsWith(trimmedAndLowerCaseSql, "update")
+                    || StringUtils.startsWith(trimmedAndLowerCaseSql, "insert")
+                    || StringUtils.startsWith(trimmedAndLowerCaseSql, "delete");
+        }
+
     }
 
     private class QueryStatementCallback implements StatementCallback {
