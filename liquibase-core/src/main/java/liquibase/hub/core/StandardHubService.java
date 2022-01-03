@@ -561,6 +561,11 @@ public class StandardHubService implements HubService {
                 hubChangeList, ArrayList.class);
     }
 
+    @Override
+    public CoreInitOnboardingResponse validateOnboardingToken(String token) throws LiquibaseHubException {
+        return http.doPost("/api/v1/init", Collections.singletonMap("onboardingToken", token), CoreInitOnboardingResponse.class);
+    }
+
     /**
      * Converts an object to a search string.
      * Any properties with non-null values are used as search arguments.

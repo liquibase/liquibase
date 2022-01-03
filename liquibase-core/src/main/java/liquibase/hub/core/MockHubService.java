@@ -176,6 +176,11 @@ public class MockHubService implements HubService {
         return null;
     }
 
+    @Override
+    public CoreInitOnboardingResponse validateOnboardingToken(String token) throws LiquibaseHubException {
+        return null;
+    }
+
     public void reset() {
         randomUUID = UUID.randomUUID();
 
