@@ -63,7 +63,7 @@
         <build.repository.owner>unknown</build.repository.owner>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring.version>5.0.12.RELEASE</spring.version>
+        <spring.version>5.0.20.RELEASE</spring.version>
         <sonar.projectKey>org.liquibase:liquibase-parent</sonar.projectKey>
         <sonar.organization>liquibase-core</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -71,8 +71,6 @@
         <groovy.version>2.4.17</groovy.version>
         <dependency.spock.version>1.3-groovy-2.4</dependency.spock.version>
         <junit.version>4.12</junit.version>
-
-        <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
     </properties>
 
 
@@ -162,7 +160,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.200</version>
+            <version>2.0.202</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -408,21 +406,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <!-- by default don't run snyk on all modules. On  ones that "ship", mark them as skip=false -->
-                <groupId>io.snyk</groupId>
-                <artifactId>snyk-maven-plugin</artifactId>
-                <version>1.2.9</version>
-                <configuration>
-                    <skip>true</skip>
-                    <apiToken>${env.SNYK_API_TOKEN}</apiToken>
-                    <failOnSeverity>high</failOnSeverity>
-                    <org>${env.SNYK_ORG}</org>
-                    <includeProvidedDependencies>false</includeProvidedDependencies>
-                </configuration>
-            </plugin>
-
-
             <!--        <plugin>-->
             <!--            <artifactId>maven-install-plugin</artifactId>-->
             <!--            <version>2.5.2</version>-->
@@ -474,31 +457,6 @@
             <modules>
                 <module>../liquibase-pro</module>
             </modules>
-        </profile>
-        <profile>
-            <id>gpg-sign</id>
-            <activation>
-                <property>
-                    <name>env.GPG_PASSPHRASE</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <configuration>
-                            <passphrase>${env.GPG_PASSPHRASE}</passphrase>
-                            <gpgArguments>
-                                <arg>--batch</arg>
-                                <!-- This is necessary for gpg to not try to use the pinentry programs -->
-                                <arg>--pinentry-mode</arg>
-                                <arg>loopback</arg>
-                            </gpgArguments>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
     </profiles>
 </project>

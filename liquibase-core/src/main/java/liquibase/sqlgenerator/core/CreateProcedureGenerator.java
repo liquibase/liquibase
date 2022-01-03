@@ -156,8 +156,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 }
 
                 if (!originalSearchPath.equals(schemaName) && !originalSearchPath.startsWith(schemaName + ",") && !originalSearchPath.startsWith("\"" + schemaName + "\",")) {
-                    PostgresDatabase.DbTypes dbType = ((PostgresDatabase) database).getDbType();
-                    if (PostgresDatabase.DbTypes.EDB.equals(dbType)){
+                    if (database instanceof EnterpriseDBDatabase){
                         sql.add(0, new UnparsedSql("ALTER SESSION SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchema, Schema.class) + ", " + originalSearchPath));
                         sql.add(new UnparsedSql("ALTER SESSION SET CURRENT SCHEMA " + originalSearchPath));
                     } else {

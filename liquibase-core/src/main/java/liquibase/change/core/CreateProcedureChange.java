@@ -212,7 +212,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             String relativeTo = null;
             final Boolean isRelative = isRelativeToChangelogFile();
             if (isRelative != null && isRelative) {
-                relativeTo = getChangeSet().getFilePath();
+                relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
             }
             return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {

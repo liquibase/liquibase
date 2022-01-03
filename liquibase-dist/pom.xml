@@ -19,7 +19,7 @@
         <deploy.repositoryId>github</deploy.repositoryId>
         <deploy.url>https://maven.pkg.github.com/liquibase</deploy.url>
 
-        <h2.version>1.4.200</h2.version>
+        <h2.version>2.0.202</h2.version>
         <hsqldb.version>2.5.2</hsqldb.version>
         <postgresql.version>42.2.15</postgresql.version>
         <mssql.version>8.4.0.jre8</mssql.version>
@@ -149,14 +149,6 @@
 
         <plugins>
             <plugin>
-                <groupId>io.snyk</groupId>
-                <artifactId>snyk-maven-plugin</artifactId>
-                <configuration>
-                    <skip>false</skip>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.2.1</version>
@@ -243,6 +235,26 @@
                 </executions>
             </plugin>
 
+            <!-- install the shaded jar as liquibase-core like the final artifact ends up as -->
+            <plugin>
+                <artifactId>maven-install-plugin</artifactId>
+                <configuration>
+                    <artifactId>liquibase-core</artifactId>
+                    <file>${project.build.directory}/liquibase-${project.version}.jar</file>
+                    <sources>${project.build.directory}/liquibase-${project.version}-sources.jar</sources>
+                    <pomFile>${project.build.directory}/flattened-pom/release.pom.xml</pomFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>custom-install</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
 <!--            <plugin>-->
 <!--                <groupId>org.jacoco</groupId>-->
 <!--                <artifactId>jacoco-maven-plugin</artifactId>-->
@@ -282,62 +294,6 @@
                     <version>${project.version}</version>
                 </dependency>
             </dependencies>
-        </profile>
-
-        <profile>
-            <id>gpg-sign</id>
-            <activation>
-                <property>
-                    <name>env.GPG_PASSPHRASE</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <configuration>
-                            <passphrase>${env.GPG_PASSPHRASE}</passphrase>
-                            <gpgArguments>
-                                <arg>--batch</arg>
-                                <arg>--no-tty</arg>
-                                <!-- This is necessary for gpg to not try to use the pinentry programs -->
-                                <arg>--pinentry-mode</arg>
-                                <arg>loopback</arg>
-                            </gpgArguments>
-
-                            <skip>false</skip>
-                            <repositoryId>${deploy.repositoryId}</repositoryId>
-                            <artifactId>liquibase-core</artifactId>
-                            <version>${project.version}</version>
-                            <url>${deploy.url}</url>
-                            <file>${project.build.directory}/liquibase-${project.version}.jar</file>
-                            <files>
-                                target/liquibase-${project.version}.tar.gz,target/liquibase-0-SNAPSHOT.zip
-                            </files>
-                            <types>
-                                tar.gz,zip
-                            </types>
-                            <classifiers>
-                                <!-- need empty classifier so deployed zip/tar files do not have appended "-bin" etc. suffixes -->
-                                ,
-                            </classifiers>
-                            <sources>${project.basedir}/../target/liquibase-${project.version}-sources.jar</sources>
-                            <javadoc>${project.basedir}/../target/liquibase-${project.version}-javadoc.jar</javadoc>
-                            <pomFile>${project.build.directory}/release.pom.xml</pomFile>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>custom-deploy</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>sign-and-deploy-file</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
     </profiles>
 

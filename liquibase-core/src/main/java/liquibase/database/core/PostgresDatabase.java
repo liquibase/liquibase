@@ -45,15 +45,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
     private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
 
-    /**
-     * Represents Postgres DB types.
-     * Note: As we know COMMUNITY, RDS and AWS AURORA have the same Postgres engine. We use just COMMUNITY for those 3
-     *       If we need we can extend this ENUM in future
-     */
-    public enum DbTypes {
-        EDB, COMMUNITY, RDS, AURORA
-    }
-
     private Set<String> systemTablesAndViews = new HashSet<>();
 
     private Set<String> reservedWords = new HashSet<>();
@@ -415,22 +406,4 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
         throw new DatabaseException("Connection set to Postgres type we don't support !");
     }
-
-    /**
-     * Method to get Postgres DB type
-     * @return Db types
-     * */
-    public DbTypes getDbType() {
-        boolean enterpriseDb = false;
-        try {
-            enterpriseDb = getDatabaseFullVersion().toLowerCase().contains("enterprisedb");
-        } catch (DatabaseException e) {
-            if (getConnection() != null) {
-                Scope.getCurrentScope().getLog(getClass()).severe("Can't get full version of Postgres DB. Used EDB as default", e);
-                return DbTypes.EDB;
-            }
-        }
-        return enterpriseDb ? DbTypes.EDB : DbTypes.COMMUNITY;
-    }
-
 }
