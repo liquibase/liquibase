@@ -9,7 +9,6 @@ import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.util.ISO8601Utils;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.*;
@@ -21,6 +20,7 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
     private final TestSystem testSystem;
 
     private static Set<String> alreadyRunningContainerIds = new HashSet<>();
+    private Connection connection;
 
     public DockerDatabaseWrapper(JdbcDatabaseContainer container, TestSystem testSystem) {
         this.container = container;
@@ -95,11 +95,6 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
 //                }
 //            }
 //        }
-    }
-
-    @Override
-    public Connection openConnection() throws SQLException {
-        return container.createConnection("");
     }
 
     @Override

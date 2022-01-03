@@ -25,11 +25,6 @@ public class JdbcDatabaseWrapper extends DatabaseWrapper {
     }
 
     @Override
-    public Connection openConnection() throws SQLException {
-        return connection;
-    }
-
-    @Override
     public String getUsername() {
         return username;
     }

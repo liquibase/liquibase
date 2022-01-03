@@ -1,2 +1,1 @@
-liquibase.extension.testing.testsystem.command.TestSystemsShowCommand
 liquibase.extension.testing.testsystem.command.TestSystemUpCommand

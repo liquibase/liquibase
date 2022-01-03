@@ -21,7 +21,7 @@ public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
     public TestSystem getTestSystem(String description) {
         final TestSystem plugin = super.getPlugin(description);
         if (plugin == null) {
-            throw new UnexpectedLiquibaseException("No test sytem: "+description);
+            throw new UnexpectedLiquibaseException("No test system: "+description);
         }
         return plugin;
     }

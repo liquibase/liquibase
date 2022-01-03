@@ -37,7 +37,7 @@ public abstract class TestSystem implements TestRule, Plugin {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                Assume.assumeTrue("Not running test against " + TestSystem.this.getDefinition() + ": liquibase.sdk.testSystem.test is " + StringUtil.join(testSystems, ", "), testSystems.contains(TestSystem.this.getDefinition()));
+                Assume.assumeTrue("Not running test against " + TestSystem.this.getDefinition() + ": liquibase.sdk.testSystem.test is " + StringUtil.join(testSystems, ", "), shouldTest());
 
                 List<Throwable> errors = new ArrayList<Throwable>();
 
@@ -58,6 +58,10 @@ public abstract class TestSystem implements TestRule, Plugin {
                 MultipleFailureException.assertEmpty(errors);
             }
         };
+    }
+
+    public boolean shouldTest() {
+        return testSystems.contains(TestSystem.this.getDefinition());
     }
 
     public abstract String getDefinition();

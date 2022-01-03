@@ -8,10 +8,6 @@ import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
 public class MSSQLTestSystem extends DatabaseTestSystem {
 
     public MSSQLTestSystem() {
@@ -27,7 +23,7 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
     }
 
     @Override
-    protected String getUrl() {
+    public String getUrl() {
         final JdbcDatabaseContainer container = ((DockerDatabaseWrapper) wrapper).getContainer();
 
         return "jdbc:sqlserver://" + container.getHost() + ":" + container.getMappedPort(MSSQLServerContainer.MS_SQL_SERVER_PORT)+";databaseName="+getCatalog();

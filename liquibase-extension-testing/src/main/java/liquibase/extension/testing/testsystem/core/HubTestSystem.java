@@ -4,6 +4,7 @@ import liquibase.extension.testing.testsystem.TestSystem;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class HubTestSystem extends TestSystem {
 
@@ -32,10 +33,18 @@ public class HubTestSystem extends TestSystem {
     }
 
     public String getApiKey() {
-        return null;
+        return getTestSystemProperty("apiKey", String.class);
     }
 
     public String getUrl() {
-        return null;
+        return getTestSystemProperty("url", String.class);
+    }
+
+    public String getUsername() {
+        return getTestSystemProperty("username", String.class);
+    }
+
+    public UUID getOrgId() {
+        return UUID.fromString(getTestSystemProperty("orgId", String.class));
     }
 }

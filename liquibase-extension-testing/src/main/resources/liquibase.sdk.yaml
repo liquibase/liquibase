@@ -10,7 +10,10 @@ liquibase:
         altTablespace: liquibase2
         envClass: liquibase.extension.testing.environment.core.TestcontainerEnvironment
 
-      test: hub,h2,hsql,sqlite
+      test: hub,h2,hsqldb,sqlite
+
+      hub:
+        url: http://localhost:8888
 
       cockroachdb:
         version: latest-v20.1

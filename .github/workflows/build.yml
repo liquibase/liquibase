@@ -153,7 +153,22 @@ jobs:
   integration-test:
     name: Integration Test
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        testSystem:
+          - cockroachdb
+          - db2
+          - h2
+          - hsql
+          - mariadb
+          - mssql
+          - mysql
+          - oracle
+          - postgresql
+          - sqlite
     needs: build
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v2
         with:
@@ -179,12 +194,12 @@ jobs:
           password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - name: Run Tests
-        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false
+        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=hub,${{ matrix.testSystem }}
       - name: Archive Test Results
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: liquibase-test-results-integration
+          name: liquibase-test-results-integration-${{ matrix.testSystem }}
           path: |
             ./**/target/surefire-reports
 

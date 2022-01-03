@@ -134,7 +134,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
                 CONSTRAINT_NAME
         );
 
-        assertCorrect("ALTER TABLE liquibasec.adduqtest ADD CONSTRAINT uq_test UNIQUE (coltomakeuq)", MySQLDatabase
+        assertCorrect("ALTER TABLE lbcat2.adduqtest ADD CONSTRAINT uq_test UNIQUE (coltomakeuq)", MySQLDatabase
                 .class);
         /*
          * In Informix, this test case is actually impossible. While it is allowed to cross-select data from
@@ -142,24 +142,24 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
           * different database (even if the database is on the same instance). So, even as the following
           * statement is semantically false, it is syntactically correct.
          */
-        assertCorrect("ALTER TABLE liquibasec:liquibaseb.adduqtest ADD CONSTRAINT UNIQUE (coltomakeuq) CONSTRAINT " +
+        assertCorrect("ALTER TABLE lbcat2:lbschem2.adduqtest ADD CONSTRAINT UNIQUE (coltomakeuq) CONSTRAINT " +
                 "uq_test", InformixDatabase.class);
 
-        assertCorrect("alter table liquibasec.adduqtest add constraint uq_test unique (coltomakeuq)", OracleDatabase.class);
-        assertCorrect("alter table liquibaseb.\"adduqtest\" add constraint uq_test unique (\"coltomakeuq\")", PostgresDatabase.class, CockroachDatabase.class,EnterpriseDBDatabase.class);
-        assertCorrect("alter table liquibasec.adduqtest add constraint uq_test unique (coltomakeuq)", DerbyDatabase
+        assertCorrect("alter table lbcat2.adduqtest add constraint uq_test unique (coltomakeuq)", OracleDatabase.class);
+        assertCorrect("alter table lbschem2.\"adduqtest\" add constraint uq_test unique (\"coltomakeuq\")", PostgresDatabase.class, CockroachDatabase.class,EnterpriseDBDatabase.class);
+        assertCorrect("alter table lbcat2.adduqtest add constraint uq_test unique (coltomakeuq)", DerbyDatabase
                 .class);
-        assertCorrect("alter table [liquibaseb].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])",
+        assertCorrect("alter table [lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])",
                 SybaseASADatabase.class, SybaseDatabase.class);
-        assertCorrect("alter table [liquibasec].[liquibaseb].[adduqtest] add constraint [uq_test] unique " +
+        assertCorrect("alter table [lbcat2].[lbschem2].[adduqtest] add constraint [uq_test] unique " +
                 "([coltomakeuq])", MSSQLDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", FirebirdDatabase.class, Firebird3Database.class);
 
-        assertCorrect("alter table [liquibaseb].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", HsqlDatabase.class);
-        assertCorrect("alter table \"liquibasec\".[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", DB2Database.class, Db2zDatabase.class);
-        assertCorrect("alter table [liquibaseb].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", H2Database.class);
-        assertCorrect("alter table [liquibaseb].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", Ingres9Database.class);
-        assertCorrectOnRest("alter table [liquibasec].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])");
+        assertCorrect("alter table [lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", HsqlDatabase.class);
+        assertCorrect("alter table \"lbcat2\".[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", DB2Database.class, Db2zDatabase.class);
+        assertCorrect("alter table [lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", H2Database.class);
+        assertCorrect("alter table [lbschem2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", Ingres9Database.class);
+        assertCorrectOnRest("alter table [lbcat2].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])");
 
     }
 

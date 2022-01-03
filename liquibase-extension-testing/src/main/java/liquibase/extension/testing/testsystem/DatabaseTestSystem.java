@@ -14,12 +14,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class DatabaseTestSystem extends TestSystem {
 
     protected DatabaseWrapper wrapper;
-    private Database database;
 
+    private Map<String, Connection> connections = new HashMap<>();
     private final String shortName;
 
     public DatabaseTestSystem(String shortName) {
@@ -55,9 +57,6 @@ public abstract class DatabaseTestSystem extends TestSystem {
         wrapper.start(keepRunning);
 
         setup();
-
-        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(this.openConnection()));
-
     }
 
 
@@ -75,10 +74,16 @@ public abstract class DatabaseTestSystem extends TestSystem {
     }
 
     public Connection openConnection(String username, String password) throws SQLException {
-        return DriverManager.getConnection(getUrl(), username, password);
+        final String key = username + ":" + password;
+        Connection connection = connections.get(key);
+        if (connection == null) {
+            connection = DriverManager.getConnection(getUrl(), username, password);
+            connections.put(key, connection);
+        }
+        return connection;
     }
 
-    protected String getUrl() {
+    public String getUrl() {
         return wrapper.getUrl();
     }
 
@@ -86,7 +91,7 @@ public abstract class DatabaseTestSystem extends TestSystem {
         return getTestSystemProperty("username", String.class);
     }
 
-    protected String getPassword() {
+    public String getPassword() {
         return getTestSystemProperty("password", String.class);
     }
 

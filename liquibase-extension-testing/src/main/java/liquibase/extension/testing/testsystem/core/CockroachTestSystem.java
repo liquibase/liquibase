@@ -24,7 +24,7 @@ public class CockroachTestSystem extends DatabaseTestSystem {
     }
 
     @Override
-    protected String getUrl() {
+    public String getUrl() {
         final JdbcDatabaseContainer container = ((DockerDatabaseWrapper) wrapper).getContainer();
 
         return "jdbc:postgresql://" + container.getHost() + ":" + container.getMappedPort(26257) +"/" + getCatalog();
