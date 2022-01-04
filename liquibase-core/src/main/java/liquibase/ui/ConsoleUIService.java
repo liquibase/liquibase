@@ -113,7 +113,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
                     message = "Invalid value: \"" + input + "\"";
                 }
                 this.sendMessage(message);
-                this.sendMessage(prompt + ": ");
+                this.sendMessage(initialMessage + ": ");
             }
         }
     }

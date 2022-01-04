@@ -1,0 +1,120 @@
+{ "databaseChangeLog": [
+  {
+    "changeSet": {
+      "id": "1",
+      "author": "your.name",
+      "changes": [
+        {
+          "createTable": {
+            "tableName": "person",
+            "columns": [
+              {
+                "column": {
+                  "name": "id",
+                  "type": "int",
+                  "autoIncrement": true,
+                  "constraints": {
+                    "primarykey": true,
+                    "nullable": false
+                  }
+                }
+              },
+              {
+                "column": {
+                  "name": "name",
+                  "type": "varchar(50)"
+                }
+              },
+              {
+                "column": {
+                  "name": "addresss1",
+                  "type": "varchar(50)"
+                }
+              },
+              {
+                "column": {
+                  "name": "addresss2",
+                  "type": "varchar(50)"
+                }
+              },
+              {
+                "column": {
+                  "name": "city",
+                  "type": "varchar(30)"
+                }
+              }
+            ]
+          }
+        }]
+    }
+  },
+  {
+    "changeSet": {
+      "id": "2",
+      "author": "your.name",
+      "changes": [
+        {
+          "createTable": {
+            "tableName": "company",
+            "columns": [
+              {
+                "column": {
+                  "name": "id",
+                  "type": "int",
+                  "autoIncrement": true,
+                  "constraints": {
+                    "primarykey": true,
+                    "nullable": false
+                  }
+                }
+              },
+              {
+                "column": {
+                  "name": "name",
+                  "type": "varchar(50)"
+                }
+              },
+              {
+                "column": {
+                  "name": "addresss1",
+                  "type": "varchar(50)"
+                }
+              },
+              {
+                "column": {
+                  "name": "addresss2",
+                  "type": "varchar(50)"
+                }
+              },
+              {
+                "column": {
+                  "name": "city",
+                  "type": "varchar(30)"
+                }
+              }
+            ]
+          }
+        }]
+    }
+  },
+  {
+    "changeSet": {
+      "id": "3",
+      "author": "your.name",
+      "changes": [
+        {
+          "addColumn": {
+            "tableName": "company",
+            "columns": [
+              {
+                "column": {
+                  "name": "country",
+                  "type": "varchar(2)"
+                }
+              }
+            ]
+          }
+        }]
+    }
+  }
+]}
