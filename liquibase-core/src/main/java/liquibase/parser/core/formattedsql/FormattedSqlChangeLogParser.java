@@ -1,5 +1,6 @@
 package liquibase.parser.core.formattedsql;
 
+import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.core.EmptyChange;
@@ -20,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -81,6 +83,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             ChangeSet changeSet = null;
             RawSQLChange change = null;
             Pattern changeLogPattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
+            Pattern propertyPattern = Pattern.compile("\\s*\\-\\-[\\s]*property\\s+(.*:.*)\\s+(.*:.*).*", Pattern.CASE_INSENSITIVE);
             Pattern changeSetPattern = Pattern.compile("\\s*\\-\\-[\\s]*changeset\\s+(\"[^\"]+\"|[^:]+):\\s*(\"[^\"]+\"|\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
             Pattern preconditionsPattern = Pattern.compile("\\s*\\-\\-[\\s]*preconditions(.*)", Pattern.CASE_INSENSITIVE);
@@ -114,7 +117,31 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
             String line;
             while ((line = reader.readLine()) != null) {
+                /*
+                if (((Map) obj).containsKey("property")) {
+                    Map property = (Map) ((Map) obj).get("property");
+                    ContextExpression context = new ContextExpression((String) property.get("context"));
+                    Labels labels = new Labels((String) property.get("labels"));
 
+                    Boolean global = getGlobalParam(property);
+
+                    if (property.containsKey("name")) {
+                        Object value = property.get("value");
+                        if (value != null) {
+                            value = value.toString(); // TODO: not nice...
+                        }
+
+                        changeLogParameters.set((String) property.get("name"), (String) value, context, labels, (String) property.get("dbms"), global, changeLog);
+                    } else if (property.containsKey("file")) {
+                        loadChangeLogParametersFromFile(changeLogParameters, resourceAccessor, changeLog, property,
+                            context, labels, global);
+                    }
+                 */
+                Matcher propertyPatternMatcher = propertyPattern.matcher(line);
+                if (propertyPatternMatcher.matches()) {
+                    changeLogParameters.set("test", "value");
+                    continue;
+                }
                 Matcher changeLogPatterMatcher = changeLogPattern.matcher (line);
                 if (changeLogPatterMatcher.matches ()) {
                    Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
