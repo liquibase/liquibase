@@ -1,5 +1,32 @@
 Liquibase Core Changelog
 ===========================================
+
+Changes in version 4.7.0(2022.01.07)
+
+Liquibase 4.7.0 introduces the init command with the project subcommand, which helps to build the necessary
+configuration files for using Liquibase or, if you already use Liquibase, create new project files with minimal input.[DAT-8640]
+
+Additionally, we have updated the Liquibase Getting Started tutorials and sample changelog files in the installation package.
+From now on, you can use sample SQL, XML, JSON, and YAML changelog files with the corresponding changesets.
+
+Enhancements
+- [PRO] Improved the output of the rollback-one-update command
+- [PR#2244] [szandany] Enabled the use of the jdbc:edb URL for Liquibase to recognize EnterpriseDB
+- [PR#2225] [nvoxland] [catholic-indulgence-vaper] Enabled the use of lowercase sys.synonyms objects for the generate-changelog and diff-changelog commands in Liquibase and SQL Server. The PR fixes PR#2044.
+- Added DB2 on z/OS database type and Java classes for Liquibase
+- Upgrade h2 to newer version 2.0.202
+
+Fixes
+- Fixed the generateChangeLog wrong dependency order: the addPrimaryKey Change Type appeared before its base table in PostgreSQL [DAT-8256]
+- Fixed the quality checks settings file to be created using both relative and absolute paths
+- Fixed quality checks reporting only the first failure for a changeset to report all failures in outputs
+- PR#2066] [smainz] Fixed the loadData Change Type to recognize CSV files when loading data with the path that contains a dot character ('.')
+- [PR#2071] [nhumblot] [philhinco] Fixed the addNotNullConstraint Change Type causing the "Data too long" error message. The PR fixes PR#1054.
+- [PR#2073] [smainz] Fixed the relativeToChangelogFile attribute for loadData, createProcedure, and createView Change Types
+- [PR#2228] Handle the fact that FK names are not always unique
+- [PR#2081] fix OSGI support (manifest, class loading)
+- [PR#928] addColumn should support not-null constraint
+
 Changes in version 4.6.2(2021.11.30)
 
 Liquibase 4.6.2 introduces the multiple objects name quality check that allows you to define and check the naming pattern for several objects rather than one object.

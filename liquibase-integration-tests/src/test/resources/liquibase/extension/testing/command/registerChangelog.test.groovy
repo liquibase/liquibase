@@ -2,7 +2,6 @@ package liquibase.extension.testing.command
 
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
-import liquibase.extension.testing.setup.SetupCreateTempResources
 import liquibase.hub.core.MockHubService
 
 import java.util.regex.Pattern

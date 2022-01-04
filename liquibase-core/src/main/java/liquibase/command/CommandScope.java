@@ -58,6 +58,13 @@ public class CommandScope {
         return commandDefinition;
     }
 
+    /**
+     * Returns the complete config prefix (without a trailing period) for the command in this scope.
+     * @return
+     */
+    public String getCompleteConfigPrefix() {
+        return completeConfigPrefix;
+    }
 
     /**
      * Adds the given key/value pair to the stored argument data.
