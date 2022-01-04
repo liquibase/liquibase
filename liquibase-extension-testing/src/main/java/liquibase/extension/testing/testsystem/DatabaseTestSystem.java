@@ -76,7 +76,7 @@ public abstract class DatabaseTestSystem extends TestSystem {
     public Connection openConnection(String username, String password) throws SQLException {
         final String key = username + ":" + password;
         Connection connection = connections.get(key);
-        if (connection == null) {
+        if (connection == null || connection.isClosed()) {
             connection = DriverManager.getConnection(getUrl(), username, password);
             connections.put(key, connection);
         }

@@ -33,7 +33,7 @@ public class CockroachTestSystem extends DatabaseTestSystem {
     @Override
     protected String[] getSetupSql() {
         String passwordClause = "";
-        if (getPassword() != null) {
+        if (StringUtil.trimToNull(getPassword()) != null) {
             passwordClause = " PASSWORD '" + StringUtil.trimToEmpty(getPassword()) + "'";
         }
 
