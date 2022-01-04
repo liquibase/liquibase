@@ -111,7 +111,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ 8, 11, 16 ]
+        java: [ 8, 11, 17 ]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -127,7 +127,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: ${{ matrix.java }}
-          distribution: 'adopt'
+          distribution: 'temurin'
           cache: 'maven'
       - name: Build & Test
         run: |
@@ -163,7 +163,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '8'
-          distribution: 'adopt'
+          distribution: 'temurin'
           cache: 'maven'
       - name: Restore Built Code Cache
         uses: actions/cache@v2
@@ -217,7 +217,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '8'
-          distribution: 'adopt'
+          distribution: 'temurin'
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
           cache: 'maven'
