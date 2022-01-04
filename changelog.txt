@@ -23,7 +23,9 @@ Fixes
 - PR#2066] [smainz] Fixed the loadData Change Type to recognize CSV files when loading data with the path that contains a dot character ('.')
 - [PR#2071] [nhumblot] [philhinco] Fixed the addNotNullConstraint Change Type causing the "Data too long" error message. The PR fixes PR#1054.
 - [PR#2073] [smainz] Fixed the relativeToChangelogFile attribute for loadData, createProcedure, and createView Change Types
-
+- [PR#2228] Handle the fact that FK names are not always unique
+- [PR#2081] fix OSGI support (manifest, class loading)
+- [PR#928] addColumn should support not-null constraint
 
 Changes in version 4.6.2(2021.11.30)
 
