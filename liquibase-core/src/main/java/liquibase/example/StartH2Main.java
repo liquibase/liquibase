@@ -3,6 +3,7 @@ package liquibase.example;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Wrapper around the h2 console for use in the "examples" directory
@@ -20,7 +21,13 @@ public class StartH2Main {
         System.out.println("NOTE: The database does not persist data, so stopping and restarting this process will reset it back to a blank database");
         System.out.println();
 
-        Class.forName("org.h2.Driver");
+        try {
+            Class.forName("org.h2.Driver");
+        } catch (ClassNotFoundException e) {
+            String msg = "ERROR: H2 was not configured properly. To use Liquibase and H2, you need to have the JDBC driver .jar file. Liquibase includes the H2 in-memory database and the h2-<version>.jar file in liquibase/lib. Learn more at https://docs.liquibase.com/";
+            System.out.println(msg);
+            throw e;
+        }
 
         try (Connection devConnection = DriverManager.getConnection("jdbc:h2:mem:dev", username, password);
              Connection intConnection = DriverManager.getConnection("jdbc:h2:mem:integration", username, password)) {
@@ -46,11 +53,9 @@ public class StartH2Main {
                     "  Integration Web URL: " + intUrl + System.lineSeparator());
 
 
-            long seconds = 60;
-            long millis = 1000;
             while (true) {
                 try {
-                    Thread.sleep(seconds * millis);
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(60));
                 } catch (InterruptedException interruptedException) {
                     Thread.currentThread().interrupt();
                 }
