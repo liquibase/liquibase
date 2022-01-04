@@ -449,7 +449,10 @@
             <properties>
                 <maven.compiler.release>8</maven.compiler.release>
                 <!-- CDILiquibaseTest is currently failing without this setting -->
-                <argLine>--illegal-access=permit</argLine>
+                <argLine>
+                    --illegal-access=warn
+                    --add-opens java.base/java.lang=ALL-UNNAMED
+                </argLine>
             </properties>
         </profile>
         <profile>
