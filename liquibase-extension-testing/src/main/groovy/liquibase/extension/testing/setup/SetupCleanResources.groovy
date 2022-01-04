@@ -1,11 +1,16 @@
 package liquibase.extension.testing.setup
 
+
 import liquibase.extension.testing.TestDatabaseConnections
+
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.Path
 
 class SetupCleanResources extends TestSetup {
 
     private final List<String> resourcesToDelete = new ArrayList<>()
-    enum CleanupMode { CLEAN_ON_SETUP, CLEAN_ON_CLEANUP, CLEAN_ON_BOTH}
+    public enum CleanupMode { CLEAN_ON_SETUP, CLEAN_ON_CLEANUP, CLEAN_ON_BOTH}
     private CleanupMode cleanupMode
 
     SetupCleanResources(String[] resourcesToDelete) {
@@ -33,9 +38,9 @@ class SetupCleanResources extends TestSetup {
         deleteFiles(resourcesToDelete)
     }
 
-    private static void deleteFiles(List<String> resourcesToDelete) {
+    private void deleteFiles(List<String> resourcesToDelete) {
         for (String fileToDelete : resourcesToDelete) {
-            File f
+            File f = null
             URL url = Thread.currentThread().getContextClassLoader().getResource(fileToDelete)
             if (url == null) {
                 f = new File(fileToDelete)
