@@ -4,6 +4,7 @@ import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
 import liquibase.exception.CommandValidationException
+import liquibase.extension.testing.setup.SetupCleanResources
 
 CommandTests.define {
     command = ["generateChangelog"]
@@ -51,7 +52,7 @@ Optional Args:
             changelogFile: "target/test-classes/changelog-test.xml"
         ]
         setup {
-            cleanResources("changelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "changelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
