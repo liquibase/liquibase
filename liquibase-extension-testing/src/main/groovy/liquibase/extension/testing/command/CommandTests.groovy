@@ -900,18 +900,19 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          *
          */
         void cleanResources(String... filesToDelete) {
-            this.setups.add(new SetupCleanResourcesBefore(filesToDelete))
+            this.setups.add(new SetupCleanResources(filesToDelete))
         }
 
         /**
          *
          * Delete the specified resources after the test using a FilenameFilter
          *
-         * @param fileToDeletes
+         * @param filter
+         * @param resourceDirectory
          *
          */
-        void cleanResourcesAfter(FilenameFilter filter, String... filesToDelete) {
-            this.setups.add(new SetupCleanResourcesAfter(filter, filesToDelete))
+        void cleanResourcesAfter(FilenameFilter filter, File resourceDirectory) {
+            this.setups.add(new SetupCleanResources(CleanupMode.CLEAN_ON_CLEANUP, filter, resourceDirectory))
         }
 
         /**
