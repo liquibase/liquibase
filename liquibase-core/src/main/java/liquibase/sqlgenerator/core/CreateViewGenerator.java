@@ -4,7 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
-import liquibase.sqlgenerator.core.util.SqlGeneratorMSSQLUtil;
+import liquibase.sqlgenerator.core.util.SqlGeneratorMssqlUtil;
 import liquibase.structure.core.Relation;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -95,7 +95,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             }
         }
         if (database instanceof MSSQLDatabase) {
-           SqlGeneratorMSSQLUtil.addSqlStatementsToList(sql, viewDefinition.toString(), getAffectedView(statement));
+           SqlGeneratorMssqlUtil.addSqlStatementsToList(sql, viewDefinition.toString(), getAffectedView(statement));
         } else {
             sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
         }

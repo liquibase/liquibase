@@ -11,7 +11,7 @@ import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.util.SqlGeneratorMSSQLUtil;
+import liquibase.sqlgenerator.core.util.SqlGeneratorMssqlUtil;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
@@ -92,7 +92,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             procedureText = procedureText.replaceAll("[\\s]{2,}", " ");
         }
         if (database instanceof MSSQLDatabase) {
-            SqlGeneratorMSSQLUtil.addSqlStatementsToList(sql, procedureText, statement.getEndDelimiter());
+            SqlGeneratorMssqlUtil.addSqlStatementsToList(sql, procedureText, statement.getEndDelimiter());
         } else {
             sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
         }

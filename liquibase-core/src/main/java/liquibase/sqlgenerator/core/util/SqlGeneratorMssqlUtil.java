@@ -9,20 +9,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * MSSQL Util for generator to handle SET methods for now.
+ * MssqlUtil for generator to handle SET methods for now.
  * Additional utility methods can be added here
  */
-public class SqlGeneratorMSSQLUtil {
-    public static String IS_SET_REGEX = "(?i)SET\\s+(?i)(ANSI_NULLS|QUOTED_IDENTIFIER)\\s+(?i)(ON|OFF)(\\s*\\t*\\n*);?";
+public class SqlGeneratorMssqlUtil {
+    private static final String IS_SET_REGEX = "(?i)SET\\s+(?i)(ANSI_NULLS|QUOTED_IDENTIFIER)\\s+(?i)(ON|OFF)(\\s*\\t*\\n*);?";
 
     /**
-     * General add Sql Statement Util
-     * @param sql
-     * @param sqlText
-     * @param delimiter
+     * Add sql SET QUOTED_IDENTIFIER and SET ANSI_NULLS to separate index in sql list
+     * so that the code will individually run these sql
      */
     public static void addSqlStatementsToList(List<Sql> sql, String sqlText, String delimiter) {
-        Matcher hasSetMatcher =  getMatcher(sqlText);
+        Matcher hasSetMatcher =  getSetRegexMatcher(sqlText);
         if (hasSetMatcher.find()) {
             String cleanSqlText = sqlText;
             hasSetMatcher.reset(); // reset to start to make the find and replace fit in a single loop
@@ -38,13 +36,11 @@ public class SqlGeneratorMSSQLUtil {
     }
 
     /**
-     * View Specific
-     * @param sql
-     * @param sqlText
-     * @param relation
+     * Variation of the addSqlStatementsToList() function in the class, used for
+     * a different use case
      */
     public static void addSqlStatementsToList(List<Sql> sql, String sqlText, Relation relation) {
-        Matcher hasSetMatcher = getMatcher(sqlText);
+        Matcher hasSetMatcher = getSetRegexMatcher(sqlText);
         if (hasSetMatcher.find()) {
             String cleanSqlTest = sqlText;
             hasSetMatcher.reset(); // reset to start to make the find and replace fit in a single loop
@@ -59,9 +55,11 @@ public class SqlGeneratorMSSQLUtil {
         }
     }
 
-    public static Matcher getMatcher(String sqlText) {
+    /**
+     * Prepares a regex matcher for SET QUOTED_IDENTIFIER and SET ANSI_NULLS
+     */
+    public static Matcher getSetRegexMatcher(String sqlText) {
         Pattern hasSetPattern = Pattern.compile(IS_SET_REGEX);
-        Matcher hasSetMatcher = hasSetPattern.matcher(sqlText);
-        return hasSetMatcher;
+        return  hasSetPattern.matcher(sqlText);
     }
 }
