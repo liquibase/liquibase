@@ -16,7 +16,7 @@ liquibase:
         url: http://localhost:8888
 
       cockroachdb:
-        version: latest-v20.1
+        version: latest-v21.2
         imageName: cockroachdb/cockroach
         password: ""
         setup:
