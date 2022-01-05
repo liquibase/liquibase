@@ -444,6 +444,9 @@ public class HubUpdater {
         // Re-lock before proceeding
         //
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+
+        // Reset the lockService in case other JVM instances have done things to the lock table since we had last locked it
+        lockService.reset();
         lockService.waitForLock();
 
         String defaultsFilePath = Scope.getCurrentScope().get("defaultsFile", String.class);
