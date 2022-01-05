@@ -21,18 +21,14 @@ public class SqlGeneratorMssqlUtil {
      */
     public static void addSqlStatementsToList(List<Sql> sql, String sqlText, String delimiter) {
         Matcher hasSetMatcher =  getSetRegexMatcher(sqlText);
-        if (hasSetMatcher.find()) {
-            String cleanSqlText = sqlText;
-            hasSetMatcher.reset(); // reset to start to make the find and replace fit in a single loop
-            while (hasSetMatcher.find()) {
-                String curSetSql = hasSetMatcher.group();
-                sql.add(new UnparsedSql(curSetSql, delimiter));
-                cleanSqlText = cleanSqlText.replace(curSetSql, "");
-            }
-            sql.add(new UnparsedSql(cleanSqlText, delimiter));
-        } else {
-            sql.add(new UnparsedSql(sqlText, delimiter));
+        String cleanSqlText = sqlText;
+        hasSetMatcher.reset(); // reset to start to make the find and replace fit in a single loop
+        while (hasSetMatcher.find()) {
+            String curSetSql = hasSetMatcher.group();
+            sql.add(new UnparsedSql(curSetSql, delimiter));
+            cleanSqlText = cleanSqlText.replace(curSetSql, "");
         }
+        sql.add(new UnparsedSql(cleanSqlText, delimiter));
     }
 
     /**
