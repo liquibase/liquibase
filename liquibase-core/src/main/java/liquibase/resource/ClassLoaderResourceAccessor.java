@@ -270,7 +270,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
                     try (JarFile jar = new JarFile(URLDecoder.decode(jarPath, StandardCharsets.UTF_8.name()))) {
                         String comparePath = path;
                         if (comparePath.startsWith("/")) {
-                            comparePath = "/"+comparePath;
+                            comparePath = "/" + comparePath;
                         }
                         Enumeration<JarEntry> entries = jar.entries();
                         while (entries.hasMoreElements()) {
@@ -355,16 +355,17 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
 
         return description;
     }
+
     @Override
     public void close() throws Exception {
         if (rootPaths != null) {
-          for (final FileSystem rootPath : rootPaths) {
-            try {
-              rootPath.close();
+            for (final FileSystem rootPath : rootPaths) {
+                try {
+                    rootPath.close();
+                } catch (final Exception e) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Cannot close path " + e.getMessage(), e);
+                }
             }
-            catch(final Exception ignored){
-            }
-          }
         }
-     }
+    }
 }
