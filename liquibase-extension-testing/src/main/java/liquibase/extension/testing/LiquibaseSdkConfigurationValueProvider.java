@@ -48,4 +48,9 @@ public class LiquibaseSdkConfigurationValueProvider extends AbstractMapConfigura
     protected String getSourceDescription() {
         return "liquibase.sdk.yaml file(s)";
     }
+
+    @Override
+    protected boolean isValueSet(Object value) {
+        return value != null;
+    }
 }
