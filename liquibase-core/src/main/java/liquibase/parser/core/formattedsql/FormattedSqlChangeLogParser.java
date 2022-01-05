@@ -1,6 +1,5 @@
 package liquibase.parser.core.formattedsql;
 
-import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.core.EmptyChange;
@@ -21,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,7 +94,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern validCheckSumPattern = Pattern.compile("\\-\\-[\\s]*validCheckSum:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern ignoreLinesPattern = Pattern.compile("\\-\\-[\\s]*ignoreLines:(\\w+)", Pattern.CASE_INSENSITIVE);
-            Pattern runWithPattern = Pattern.compile(".*runWith:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern runWithPattern = Pattern.compile(".*runWith:([\\w\\$\\{\\}]+).*", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -117,29 +115,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
             String line;
             while ((line = reader.readLine()) != null) {
-                /*
-                if (((Map) obj).containsKey("property")) {
-                    Map property = (Map) ((Map) obj).get("property");
-                    ContextExpression context = new ContextExpression((String) property.get("context"));
-                    Labels labels = new Labels((String) property.get("labels"));
-
-                    Boolean global = getGlobalParam(property);
-
-                    if (property.containsKey("name")) {
-                        Object value = property.get("value");
-                        if (value != null) {
-                            value = value.toString(); // TODO: not nice...
-                        }
-
-                        changeLogParameters.set((String) property.get("name"), (String) value, context, labels, (String) property.get("dbms"), global, changeLog);
-                    } else if (property.containsKey("file")) {
-                        loadChangeLogParametersFromFile(changeLogParameters, resourceAccessor, changeLog, property,
-                            context, labels, global);
-                    }
-                 */
                 Matcher propertyPatternMatcher = propertyPattern.matcher(line);
                 if (propertyPatternMatcher.matches()) {
-                    changeLogParameters.set("test", "value");
+                    handleProperty(changeLogParameters, changeLog, propertyPatternMatcher);
                     continue;
                 }
                 Matcher changeLogPatterMatcher = changeLogPattern.matcher (line);
@@ -229,21 +207,39 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     boolean failOnError = parseBoolean(failOnErrorPatternMatcher, changeSet, true);
 
                     String runWith = parseString(runWithMatcher);
+                    if (runWith != null) {
+                        runWith = changeLogParameters.expandExpressions(runWith, changeLog);
+                    }
                     String endDelimiter = parseString(endDelimiterPatternMatcher);
                     rollbackEndDelimiter = parseString(rollbackEndDelimiterPatternMatcher);
                     String context = StringUtil.trimToNull(
-                            StringUtil.trimToEmpty(parseString(contextPatternMatcher)).replaceFirst("^\"", "").replaceFirst("\"$", "") //remove surrounding quotes if they're in there
+                        StringUtil.trimToEmpty(parseString(contextPatternMatcher)).replaceFirst("^\"", "").replaceFirst("\"$", "") //remove surrounding quotes if they're in there
                     );
+                    if (context != null) {
+                        context = changeLogParameters.expandExpressions(context, changeLog);
+                    }
                     String labels = parseString(labelsPatternMatcher);
+                    if (labels != null) {
+                        labels = changeLogParameters.expandExpressions(labels, changeLog);
+                    }
                     String logicalFilePath = parseString(logicalFilePathMatcher);
                     if ((logicalFilePath == null) || "".equals(logicalFilePath)) {
-                       logicalFilePath = changeLog.getLogicalFilePath ();
+                       logicalFilePath = changeLog.getLogicalFilePath();
+                    }
+                    if (logicalFilePath != null) {
+                        logicalFilePath = changeLogParameters.expandExpressions(logicalFilePath, changeLog);
                     }
                     String dbms = parseString(dbmsPatternMatcher);
+                    if (dbms != null) {
+                        dbms = changeLogParameters.expandExpressions(dbms, changeLog);
+                    }
 
-
+                    String changeSetId =
+                        changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(changeSetPatternMatcher.group(2)), changeLog);
+                    String changeSetAuthor =
+                        changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(changeSetPatternMatcher.group(1)), changeLog);
                     changeSet =
-                       new ChangeSet(StringUtil.stripEnclosingQuotes(changeSetPatternMatcher.group(2)), StringUtil.stripEnclosingQuotes(changeSetPatternMatcher.group(1)), runAlways, runOnChange, logicalFilePath, context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
+                       new ChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange, logicalFilePath, context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
                     changeSet.setLabels(new Labels(labels));
                     changeSet.setFailOnError(failOnError);
                     changeLog.addChangeSet(changeSet);
@@ -346,7 +342,40 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         return changeLog;
     }
 
-
+    private void handleProperty(ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog, Matcher propertyPatternMatcher) {
+        String name = null;
+        String value = null;
+        String context = null;
+        String labels = null;
+        String dbms = null;
+        boolean global = false;
+        for (int i = 1; i <= propertyPatternMatcher.groupCount(); i++) {
+            String temp = propertyPatternMatcher.group(i);
+            String[] parts = temp.split(":");
+            String key = parts[0].trim();
+            switch (key) {
+                case "name":
+                    name = parts[1].trim();
+                    break;
+                case "value":
+                    value = parts[1].trim();
+                    break;
+                case "context":
+                    context = parts[1].trim();
+                    break;
+                case "labels":
+                    labels = parts[1].trim();
+                    break;
+                case "dbms":
+                    dbms = parts[1].trim();
+                    break;
+                case "global":
+                    global = Boolean.parseBoolean(parts[1].trim());
+                    break;
+            }
+        }
+        changeLogParameters.set(name, value, context, labels, dbms, global, changeLog);
+    }
 
     private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException{
         Pattern[] patterns = new Pattern[] {
