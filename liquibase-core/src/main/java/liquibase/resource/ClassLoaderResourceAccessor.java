@@ -24,7 +24,7 @@ import java.util.jar.JarFile;
  *
  * @see OSGiResourceAccessor for OSGi-based classloaders
  */
-public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
+public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implements AutoCloseable {
 
     private ClassLoader classLoader;
     protected List<FileSystem> rootPaths;
@@ -355,4 +355,16 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         return description;
     }
+    @Override
+    public void close() throws Exception {
+        if (rootPaths != null) {
+          for (final FileSystem rootPath : rootPaths) {
+            try {
+              rootPath.close();
+            }
+            catch(final Exception ignored){
+            }
+          }
+        }
+     }
 }
