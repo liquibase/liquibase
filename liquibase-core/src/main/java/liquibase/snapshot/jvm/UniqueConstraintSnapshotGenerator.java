@@ -226,7 +226,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                             "[ic].[key_ordinal]";
 
             } else if (database instanceof OracleDatabase) {
-                sql = "select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name, f.validated as constraint_validate " +
+                sql = "select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name, f.validated as constraint_validate, ucc.table_name " +
                         "from all_cons_columns ucc " +
                         "INNER JOIN all_constraints f " +
                         "ON ucc.owner = f.owner " +
