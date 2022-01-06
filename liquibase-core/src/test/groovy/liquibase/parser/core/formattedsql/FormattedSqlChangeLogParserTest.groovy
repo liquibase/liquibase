@@ -25,7 +25,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
 
 --property name:idProp value:1
 --property name:authorProp value:nvoxland
---property name:tableNameProp value:table1
+--property nAmE:tableNameProp value:table1
 --property name:runwith value: sqlplus
 
 

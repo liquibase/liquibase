@@ -352,7 +352,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         for (int i = 1; i <= propertyPatternMatcher.groupCount(); i++) {
             String temp = propertyPatternMatcher.group(i);
             String[] parts = temp.split(":");
-            String key = parts[0].trim();
+            String key = parts[0].trim().toLowerCase();
             switch (key) {
                 case "name":
                     name = parts[1].trim();
