@@ -18,6 +18,8 @@ public class MockHubService implements HubService {
     public static UUID failUUID = UUID.randomUUID();
     public static UUID notFoundChangeLogUUID = UUID.randomUUID();
     public static Date operationCreateDate;
+    public static String apiKey = UUID.randomUUID().toString();
+    public static UUID organizationId = UUID.randomUUID();
 
     public List<Project> returnProjects = new ArrayList<>();
     public List<Connection> returnConnections;
@@ -183,7 +185,15 @@ public class MockHubService implements HubService {
 
     @Override
     public CoreInitOnboardingResponse validateOnboardingToken(String token) throws LiquibaseHubException {
-        return null;
+        CoreInitOnboardingResponse response = new CoreInitOnboardingResponse();
+        ApiKey ak = new ApiKey();
+        ak.setKey(apiKey);
+        response.setApiKey(ak);
+        Organization organization = new Organization();
+        organization.setId(organizationId);
+        organization.setName("neworg");
+        response.setOrganization(organization);
+        return response;
     }
 
     public void reset() {
