@@ -402,24 +402,8 @@ public class StandardHubService implements HubService {
 
     @Override
     public Operation createOperation(String operationType, String operationCommand, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
-
-        String hostName;
-        try {
-            hostName = InetAddress.getLocalHost().getHostName();
-        } catch (Throwable e) {
-            Scope.getCurrentScope().getLog(getClass()).severe("Cannot determine hostname to send to hub", e);
-            hostName = null;
-        }
-
         final IntegrationDetails integrationDetails = Scope.getCurrentScope().get("integrationDetails", IntegrationDetails.class);
 
-        Map<String, Object> clientMetadata = new HashMap<>();
-        clientMetadata.put("liquibaseVersion", LiquibaseUtil.getBuildVersion());
-        clientMetadata.put("hostName", hostName);
-        clientMetadata.put("systemUser", System.getProperty("user.name"));
-        if (integrationDetails != null) {
-            clientMetadata.put("clientInterface", integrationDetails.getName());
-        }
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("connectionId", connection.getId());
         requestBody.put("connectionJdbcUrl", connection.getJdbcUrl());
@@ -429,7 +413,7 @@ public class StandardHubService implements HubService {
         requestBody.put("operationCommand", operationCommand);
         requestBody.put("operationStatusType", "PASS");
         requestBody.put("statusMessage", operationType);
-        requestBody.put("clientMetadata", clientMetadata);
+        requestBody.put("clientMetadata", getClientMetadata(integrationDetails));
         if (integrationDetails!=null) {
             requestBody.put("operationParameters", getCleanOperationParameters(integrationDetails.getParameters()));
         }
@@ -437,6 +421,42 @@ public class StandardHubService implements HubService {
         final Operation operation = http.doPost("/api/v1/operations", requestBody, Operation.class);
         operation.setConnection(connection);
         return operation;
+    }
+
+    private Map<String, Object> getClientMetadata(IntegrationDetails integrationDetails) {
+        String hostName;
+        try {
+            hostName = InetAddress.getLocalHost().getHostName();
+        } catch (Throwable e) {
+            Scope.getCurrentScope().getLog(getClass()).severe("Cannot determine hostname to send to hub", e);
+            hostName = null;
+        }
+
+        Map<String, Object> clientMetadata = new HashMap<>();
+        clientMetadata.put("liquibaseVersion", LiquibaseUtil.getBuildVersion());
+        clientMetadata.put("hostName", hostName);
+        clientMetadata.put("systemUser", System.getProperty("user.name"));
+        if (integrationDetails != null) {
+            clientMetadata.put("clientInterface", integrationDetails.getName());
+        }
+        return clientMetadata;
+    }
+
+    @Override
+    public Operation createOperationInOrganization(String operationType, String operationCommand, UUID organizationId) throws LiquibaseHubException {
+        final IntegrationDetails integrationDetails = Scope.getCurrentScope().get("integrationDetails", IntegrationDetails.class);
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("operationType", operationType);
+        requestBody.put("operationCommand", operationCommand);
+        requestBody.put("operationStatusType", "PASS");
+        requestBody.put("statusMessage", operationType);
+        requestBody.put("clientMetadata", getClientMetadata(integrationDetails));
+        if (integrationDetails!=null) {
+            requestBody.put("operationParameters", getCleanOperationParameters(integrationDetails.getParameters()));
+        }
+
+        return http.doPost("/api/v1/organizations/" + organizationId.toString() + "/operations", requestBody, Operation.class);
     }
 
     protected Map<String, String> getCleanOperationParameters(Map<String, String> originalParams) {
@@ -559,6 +579,11 @@ public class StandardHubService implements HubService {
                         "/operations/" + operationChange.getOperation().getId().toString() +
                         "/changes",
                 hubChangeList, ArrayList.class);
+    }
+
+    @Override
+    public CoreInitOnboardingResponse validateOnboardingToken(String token) throws LiquibaseHubException {
+        return http.doPost("/api/v1/init", Collections.singletonMap("onboardingToken", token), CoreInitOnboardingResponse.class);
     }
 
     /**
