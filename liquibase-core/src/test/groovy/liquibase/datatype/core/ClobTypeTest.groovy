@@ -33,7 +33,7 @@ class ClobTypeTest extends Specification {
         ["text"] | new MySQLDatabase()    | "TEXT"
         ["tinytext"] | new MySQLDatabase()    | "TINYTEXT"
         ["mediumtext"] | new MySQLDatabase()    | "MEDIUMTEXT"
-        ["nclob"] | new MySQLDatabase()    | "LONGTEXT CHARACTER SET utf8"
+        ["nclob"] | new MySQLDatabase()    | "LONGTEXT CHARACTER SET utf8mb4"
         [""] | new MySQLDatabase()    | "LONGTEXT"
         ["longvarchar"] | new H2Database()    | "LONGVARCHAR"
         ["java.sql.Types.LONGVARCHAR"] | new H2Database()    | "LONGVARCHAR"
