@@ -26,7 +26,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
 --property name:idProp value:1
 --property name:authorProp value:nvoxland
 --property name:tableNameProp value:table1
---property name:runWith value: sqlplus
+--property name:runwith value: sqlplus
 
 
 --changeset \${authorProp}:\${idProp}
@@ -208,7 +208,6 @@ create table table2 (
         assert changeLog.getChangeSets().get(7).getContexts().toString().contains("third")
 
         changeLog.getChangeSets().get(10).getRunWith() == "sqlplus"
-
 
         ChangeSet cs = changeLog.getChangeSets().get(8)
         cs.getAuthor() == "bboisvert"
