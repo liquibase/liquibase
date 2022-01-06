@@ -157,6 +157,11 @@ public class MockHubService implements HubService {
     }
 
     @Override
+    public Operation createOperationInOrganization(String operationType, String operationCommand, UUID organizationId) throws LiquibaseHubException {
+        return null;
+    }
+
+    @Override
     public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException {
         return null;
     }
