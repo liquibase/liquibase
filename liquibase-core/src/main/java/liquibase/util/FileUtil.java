@@ -11,7 +11,7 @@ public class FileUtil {
         throw new IllegalStateException("This utility class must not be instantiated. Sorry.");
     }
 
-   public static String getContents(File file) throws IOException {
+    public static String getContents(File file) throws IOException {
         if (!file.exists()) {
             return null;
         }

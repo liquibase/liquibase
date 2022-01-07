@@ -45,7 +45,6 @@ public class ConfiguredValue<DataType> {
         return rawValue;
     }
 
-
     /**
      * Returns the "winning" value across all the possible {@link ConfigurationValueProvider}.
      * A {@link ProvidedValue} is always returned, even if the value was not configured.
@@ -56,15 +55,16 @@ public class ConfiguredValue<DataType> {
         return getProvidedValues().get(0);
     }
 
-
+    /**
+     *
+     * Return true if a default value was the "winning" value
+     *
+     * @return   boolean
+     *
+     */
     public boolean wasDefaultValueUsed() {
-        for (ProvidedValue providedValue : this.getProvidedValues()) {
-            if (providedValue.getProvider() != null && providedValue.getProvider() instanceof ConfigurationDefinition.DefaultValueProvider) {
-                return true;
-            }
-        }
-
-        return false;
+        ProvidedValue winningProvidedValue = getProvidedValue();
+        return winningProvidedValue != null && winningProvidedValue.getProvider() instanceof ConfigurationDefinition.DefaultValueProvider;
     }
 
     /**

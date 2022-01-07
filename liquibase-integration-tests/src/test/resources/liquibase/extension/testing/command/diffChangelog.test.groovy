@@ -7,6 +7,7 @@ import liquibase.change.core.AddPrimaryKeyChange
 import liquibase.change.core.CreateTableChange
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
+import liquibase.extension.testing.setup.SetupCleanResources
 import liquibase.structure.core.Column
 
 import java.util.regex.Pattern
@@ -71,7 +72,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources("diffChangelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "diffChangelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -115,7 +116,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources("diffChangeLog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "diffChangeLog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "SharedTable",
@@ -173,7 +174,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources("diffChangelogOrder-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "diffChangelogOrder-test.xml")
             database = [
                     new CreateTableChange(
                         tableName: "person",
