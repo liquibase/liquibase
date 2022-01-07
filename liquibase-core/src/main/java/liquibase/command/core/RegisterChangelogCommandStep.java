@@ -70,10 +70,6 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
         UUID hubProjectId = commandScope.getArgumentValue(HUB_PROJECT_ID_ARG);
         String hubProjectName = commandScope.getArgumentValue(HUB_PROJECT_NAME_ARG);
 
-        doRegisterChangelog(changeLogFile, hubProjectId, hubProjectName, resultsBuilder);
-    }
-
-    public void doRegisterChangelog(String changeLogFile, UUID hubProjectId, String hubProjectName, CommandResultsBuilder resultsBuilder) throws LiquibaseException, CommandLineParsingException {
         doRegisterChangelog(changeLogFile, hubProjectId, hubProjectName, resultsBuilder, false);
     }
 
