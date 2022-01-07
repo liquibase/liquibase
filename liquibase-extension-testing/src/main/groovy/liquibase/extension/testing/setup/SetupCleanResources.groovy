@@ -1,12 +1,5 @@
 package liquibase.extension.testing.setup
 
-
-import liquibase.extension.testing.TestDatabaseConnections
-
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Path
-
 class SetupCleanResources extends TestSetup {
 
     private final List<String> resourcesToDelete = new ArrayList<>()
