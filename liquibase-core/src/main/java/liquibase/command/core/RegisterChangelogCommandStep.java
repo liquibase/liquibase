@@ -74,6 +74,10 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
     }
 
     public void doRegisterChangelog(String changeLogFile, UUID hubProjectId, String hubProjectName, CommandResultsBuilder resultsBuilder) throws LiquibaseException, CommandLineParsingException {
+        doRegisterChangelog(changeLogFile, hubProjectId, hubProjectName, resultsBuilder, false);
+    }
+
+    public void doRegisterChangelog(String changeLogFile, UUID hubProjectId, String hubProjectName, CommandResultsBuilder resultsBuilder, boolean skipPromptIfOneProject) throws LiquibaseException, CommandLineParsingException {
         try (PrintWriter output = new PrintWriter(resultsBuilder.getOutputStream())) {
 
             HubChangeLog hubChangeLog;
@@ -121,7 +125,7 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
                 }
                 output.print("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n\n");
             } else {
-                project = retrieveOrCreateProject(service, changeLogFile);
+                project = retrieveOrCreateProject(service, changeLogFile, skipPromptIfOneProject);
                 if (project == null) {
                     throw new CommandExecutionException("Your changelog " + changeLogFile + " was not registered to any Liquibase Hub project. You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.  Learn more at https://hub.liquibase.com.");
                 }
@@ -154,11 +158,14 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
         }
     }
 
-    private Project retrieveOrCreateProject(HubService service, String changeLogFile) throws CommandLineParsingException, LiquibaseException, LiquibaseHubException {
+    private Project retrieveOrCreateProject(HubService service, String changeLogFile, boolean skipPromptIfOneProject) throws CommandLineParsingException, LiquibaseException, LiquibaseHubException {
         final UIService ui = Scope.getCurrentScope().getUI();
 
         Project project = null;
         List<Project> projects = getProjectsFromHub();
+        if (skipPromptIfOneProject && projects.size() == 1) {
+            return projects.get(0);
+        }
         boolean done = false;
         String input = null;
         while (!done) {
