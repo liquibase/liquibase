@@ -105,7 +105,7 @@ public abstract class TestSystem implements TestRule, Plugin {
 
     public abstract void start(boolean keepRunning) throws SQLException, Exception;
 
-    public abstract void stop();
+    public abstract void stop() throws Exception;
 
     public void beforeTest(IMethodInvocation invocation) {
 

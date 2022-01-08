@@ -3,12 +3,12 @@ package liquibase.extension.testing.testsystem.wrapper;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.*;
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.extension.testing.testsystem.TestSystem;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.util.ISO8601Utils;
 
-import java.sql.Connection;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.*;
@@ -20,35 +20,10 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
     private final TestSystem testSystem;
 
     private static Set<String> alreadyRunningContainerIds = new HashSet<>();
-    private Connection connection;
 
     public DockerDatabaseWrapper(JdbcDatabaseContainer container, TestSystem testSystem) {
         this.container = container;
         this.testSystem = testSystem;
-        int[] ports = testSystem.getTestSystemProperty("ports", value -> {
-            if (value == null) {
-                return null;
-            }
-            final String[] portStrings = String.valueOf(value).split("\\s*,\\s*");
-
-            int[] returnValue = new int[portStrings.length];
-            for (int i = 0; i < portStrings.length; i++) {
-                returnValue[i] = Integer.parseInt(portStrings[i]);
-            }
-
-            return returnValue;
-        }, false);
-
-        if (ports != null) {
-            List<PortBinding> portBindings = new ArrayList<>();
-            for (int port : ports) {
-                portBindings.add(new PortBinding(Ports.Binding.bindPort(port), new ExposedPort(port)));
-            }
-
-            container.withCreateContainerCmdModifier((Consumer<CreateContainerCmd>) cmd ->
-                    cmd.withHostConfig(new HostConfig().withPortBindings(portBindings))
-            );
-        }
     }
 
     @Override
@@ -73,6 +48,10 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
             container.withReuse(true);
         }
 
+        if (runningContainer != null || keepRunning) {
+            mapPorts(container);
+        }
+
         container.withLabel("org.liquibase.testsystem", testSystem.getDefinition());
         container.start();
 
@@ -95,6 +74,60 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
 //                }
 //            }
 //        }
+    }
+
+    protected void mapPorts(JdbcDatabaseContainer container) {
+        int[] ports = testSystem.getTestSystemProperty("ports", value -> {
+            if (value == null) {
+                return null;
+            }
+            final String[] portStrings = String.valueOf(value).split("\\s*,\\s*");
+
+            int[] returnValue = new int[portStrings.length];
+            for (int i = 0; i < portStrings.length; i++) {
+                returnValue[i] = Integer.parseInt(portStrings[i]);
+            }
+
+            return returnValue;
+        }, false);
+
+        if (ports == null) {
+            final List<Integer> exposedPorts = container.getExposedPorts();
+            ports = new int[exposedPorts.size()];
+            for (int i=0;i<exposedPorts.size(); i++) {
+                ports[i] = exposedPorts.get(i);
+
+            }
+        }
+
+        if (ports != null) {
+            List<PortBinding> portBindings = new ArrayList<>();
+            for (int port : ports) {
+                portBindings.add(new PortBinding(Ports.Binding.bindPort(port), new ExposedPort(port)));
+            }
+
+            container.withCreateContainerCmdModifier((Consumer<CreateContainerCmd>) cmd ->
+                    cmd.withHostConfig(new HostConfig().withPortBindings(portBindings))
+            );
+        }
+    }
+
+    @Override
+    public void stop() throws Exception {
+        if (container.isRunning()) {
+            container.stop();
+        } else {
+            final DockerClient dockerClient = container.getDockerClient();
+            final List<Container> containers = dockerClient.listContainersCmd().withLabelFilter(Collections.singletonMap("org.liquibase.testsystem", testSystem.getDefinition())).exec();
+            if (containers.size() == 0) {
+                throw new UnexpectedLiquibaseException("Cannot find running container "+testSystem.getDefinition());
+            } else {
+                for (Container container : containers) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Stopping container "+container.getId());
+                    dockerClient.stopContainerCmd(container.getId()).exec();
+                }
+            }
+        }
     }
 
     @Override

@@ -27,7 +27,7 @@ public class CockroachTestSystem extends DatabaseTestSystem {
     public String getUrl() {
         final JdbcDatabaseContainer container = ((DockerDatabaseWrapper) wrapper).getContainer();
 
-        return "jdbc:postgresql://" + container.getHost() + ":" + container.getMappedPort(26257) +"/" + getCatalog();
+        return "jdbc:postgresql://" + container.getHost() + ":" + container.getMappedPort(26257) + "/" + getCatalog();
     }
 
     @Override
@@ -41,10 +41,10 @@ public class CockroachTestSystem extends DatabaseTestSystem {
                 "CREATE USER IF NOT EXISTS " + getUsername() + passwordClause,
                 "CREATE DATABASE IF NOT EXISTS " + getCatalog(),
                 "CREATE DATABASE IF NOT EXISTS " + getAltCatalog(),
-                "CREATE SCHEMA " + getAltSchema(),
+                "CREATE SCHEMA IF NOT EXISTS " + getCatalog() + "." + getAltSchema(),
                 "GRANT ALL ON DATABASE " + getCatalog() + " TO " + getUsername(),
                 "GRANT ALL ON DATABASE " + getAltCatalog() + " TO " + getUsername(),
-                "GRANT ALL ON SCHEMA " + getAltSchema() + " TO " + getUsername(),
+                "GRANT ALL ON SCHEMA " + getCatalog() + "." + getAltSchema() + " TO " + getUsername(),
         };
     }
 

@@ -28,8 +28,11 @@ public class MySQLTestSystem extends DatabaseTestSystem {
     protected String[] getSetupSql() {
         return new String[]{
                 "create database if not exists " + getAltCatalog(),
+                "create database if not exists " + getAltSchema(), //create altSchema as a catalog since some integration tests don't handle the difference
                 "GRANT ALL PRIVILEGES ON " + getCatalog() + ".* TO '" + getUsername() + "'@'%'",
-                "GRANT ALL PRIVILEGES ON " + getAltCatalog() + ".* TO '" + getUsername() + "'@'%'"
+                "GRANT ALL PRIVILEGES ON " + getAltCatalog() + ".* TO '" + getUsername() + "'@'%'",
+                "GRANT ALL PRIVILEGES ON " + getAltSchema() + ".* TO '" + getUsername() + "'@'%'"
+
         };
     }
 }

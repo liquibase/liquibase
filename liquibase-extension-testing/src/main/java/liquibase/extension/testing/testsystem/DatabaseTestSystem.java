@@ -36,7 +36,7 @@ public abstract class DatabaseTestSystem extends TestSystem {
 
     @Override
     public int getPriority(String definition) {
-        if (definition.startsWith(shortName)) {
+        if (definition.equals(shortName)) {
             return PRIORITY_DEFAULT;
         }
 
@@ -61,8 +61,12 @@ public abstract class DatabaseTestSystem extends TestSystem {
 
 
     @Override
-    public void stop() {
-
+    public void stop() throws Exception {
+        if (wrapper == null) {
+            wrapper = createWrapper();
+        }
+        wrapper.stop();
+        System.out.println(wrapper);
     }
 
     protected Connection openSetupConnection() throws SQLException {

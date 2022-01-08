@@ -157,7 +157,6 @@ jobs:
       fail-fast: false
       matrix:
         testSystem:
-          - cockroachdb
           - db2
           - h2
           - hsql

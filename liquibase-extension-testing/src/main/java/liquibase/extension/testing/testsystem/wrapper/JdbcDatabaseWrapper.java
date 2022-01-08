@@ -1,5 +1,7 @@
 package liquibase.extension.testing.testsystem.wrapper;
 
+import liquibase.exception.UnexpectedLiquibaseException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -22,6 +24,11 @@ public class JdbcDatabaseWrapper extends DatabaseWrapper {
     @Override
     public void start(boolean keepRunning) throws Exception {
 
+    }
+
+    @Override
+    public void stop() throws Exception {
+        throw new UnexpectedLiquibaseException("Cannot stop externally-managed database " + url);
     }
 
     @Override

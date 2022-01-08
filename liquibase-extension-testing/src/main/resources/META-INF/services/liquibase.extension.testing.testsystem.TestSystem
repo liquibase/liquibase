@@ -1,5 +1,6 @@
 liquibase.extension.testing.testsystem.core.CockroachTestSystem
 liquibase.extension.testing.testsystem.core.DB2TestSystem
+liquibase.extension.testing.testsystem.core.DB2zTestSystem
 liquibase.extension.testing.testsystem.core.DerbyTestSystem
 liquibase.extension.testing.testsystem.core.FirebirdTestSystem
 liquibase.extension.testing.testsystem.core.H2TestSystem

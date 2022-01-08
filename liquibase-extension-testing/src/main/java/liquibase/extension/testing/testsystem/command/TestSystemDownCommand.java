@@ -7,20 +7,17 @@ import liquibase.command.CommandResultsBuilder;
 import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.extension.testing.testsystem.TestSystemFactory;
 
-public class TestSystemUpCommand extends AbstractCommandStep {
+public class TestSystemDownCommand extends AbstractCommandStep {
 
-    public static final String[] COMMAND_NAME = {"sdk", "system", "up"};
+    public static final String[] COMMAND_NAME = {"sdk", "system", "down"};
 
     public static final CommandArgumentDefinition<String> NAME;
-    public static final CommandArgumentDefinition<String> VERSION;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
 
         NAME = builder.argument("name", String.class).required()
                 .description("The name of the system to").build();
-        VERSION = builder.argument("version", String.class)
-                .description("Override version to use").build();
     }
 
     @Override
@@ -35,8 +32,8 @@ public class TestSystemUpCommand extends AbstractCommandStep {
 
         final TestSystem env = new TestSystemFactory().getTestSystem(resultsBuilder.getCommandScope().getConfiguredValue(NAME).getValue());
 
-        env.start(true);
+        env.stop();
 
-        System.out.println("Start environment '" + env + "'");
+        System.out.println("Stopped environment '" + resultsBuilder.getCommandScope().getArgumentValue(NAME) + "'");
     }
 }

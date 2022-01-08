@@ -9,6 +9,12 @@ public class UnimplementedWrapper extends DatabaseWrapper {
     }
 
     @Override
+    public void stop() throws Exception {
+        throw new UnexpectedLiquibaseException("Unimplemented");
+
+    }
+
+    @Override
     public String getUsername() {
         throw new UnexpectedLiquibaseException("Unimplemented");
     }

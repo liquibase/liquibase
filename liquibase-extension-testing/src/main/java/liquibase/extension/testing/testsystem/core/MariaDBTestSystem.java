@@ -30,8 +30,10 @@ public class MariaDBTestSystem extends DatabaseTestSystem {
         return new String[]{
                 "create database if not exists " + getAltCatalog(),
                 "create schema if not exists " + getAltSchema(),
+                "create database if not exists " + getAltSchema(), //create altSchema as a catalog since some integration tests don't handle the difference
                 "GRANT ALL PRIVILEGES ON " + getCatalog() + ".* TO '" + getUsername() + "'@'%'",
-                "GRANT ALL PRIVILEGES ON " + getAltCatalog() + ".* TO '" + getUsername() + "'@'%'"
+                "GRANT ALL PRIVILEGES ON " + getAltCatalog() + ".* TO '" + getUsername() + "'@'%'",
+                "GRANT ALL PRIVILEGES ON " + getAltSchema() + ".* TO '" + getUsername() + "'@'%'"
         };
     }
 }
