@@ -365,7 +365,7 @@ jobs:
               console.log("See statuses");
               console.log(checks);
 
-              let checkRuns = await octokit.rest.checks.listForRef({
+              let checkRuns = await github.rest.checks.listForRef({
                 "owner": "liquibase",
                 "repo": "liquibase-pro",
                 "ref": currentBranchInfo.sha
