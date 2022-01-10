@@ -364,7 +364,7 @@ jobs:
               });
 
               let failedCheckingUs = false;
-              if (standAlonePr) {
+              if (standalonePR) {
                 for (let status of checks.data) {
                   if (status.context == "Stable Liquibase Core") {
                     console.log("Stable Liquibase Core is "+ status.state);
