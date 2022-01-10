@@ -126,8 +126,6 @@ module.exports = ({github, context}) => {
                                 }
                                 console.log(`Found build for branch ${branchName}`);
 
-                                console.log(run);
-
                                 if (!returnData.workflowId) {
                                     returnData.workflowId = run.id;
                                 }
@@ -138,6 +136,7 @@ module.exports = ({github, context}) => {
                                     returnData.runStatus = run.status;
                                     returnData.runConclusion = run.conclusion;
                                     returnData.runHtmlUrl = run.html_url;
+                                    returnData.runRerunUrl = run.rerun_url;
                                 }
 
                                 if (run.status === "completed" && run.conclusion === "success") {
@@ -147,6 +146,7 @@ module.exports = ({github, context}) => {
                                     returnData.lastSuccessfulRunStatus = run.status;
                                     returnData.lastSuccessfulRunConclusion = run.conclusion;
                                     returnData.lastSuccessfulRunHtmlUrl = run.html_url;
+                                    returnData.lastSuccessfulRunRerunUrl = run.rerun_url;
 
                                     break;
                                 } else {

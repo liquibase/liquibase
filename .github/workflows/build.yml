@@ -390,11 +390,14 @@ jobs:
 
               if (failedCheckingUs) {
                 console.log("Rerun liquibase-pro that was waiting on us");
-                await github.rest.checks.rerequestRun({
-                    "owner": "liquibase",
-                    "repo": "liquibase-pro",
-                    "check_run_id": checkRunId
-                });
+                github.request("POST "+currentBranchInfo.runRerunUrl);
+
+                //octokit removed the retryWorkflow function
+                //await github.rest.actions.retryWorkflow({
+                //    "owner": "liquibase",
+                //    "repo": "liquibase-pro",
+                //    "run_id": currentBranchInfo.workflowId
+                //});
               }
             }
 
