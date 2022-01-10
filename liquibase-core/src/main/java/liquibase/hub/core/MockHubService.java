@@ -20,6 +20,7 @@ public class MockHubService implements HubService {
     public static Date operationCreateDate;
     public static String apiKey = UUID.randomUUID().toString();
     public static UUID organizationId = UUID.randomUUID();
+    public static Integer numberOfProjectsInList = null;
 
     public List<Project> returnProjects = new ArrayList<>();
     public List<Connection> returnConnections;
@@ -66,16 +67,28 @@ public class MockHubService implements HubService {
 
     @Override
     public List<Project> getProjects() throws LiquibaseHubException {
-        Project project1 = new Project();
-        project1.setId(UUID.fromString("72e4bc5a-5404-45be-b9e1-280a80c98cbf"));
-        project1.setName("Project 1");
-        project1.setCreateDate(new Date());
+        if (numberOfProjectsInList == null) {
+            Project project1 = new Project();
+            project1.setId(UUID.fromString("72e4bc5a-5404-45be-b9e1-280a80c98cbf"));
+            project1.setName("Project 1");
+            project1.setCreateDate(new Date());
 
-        Project project2 = new Project();
-        project2.setId(UUID.randomUUID());
-        project2.setName("Project 2");
-        project2.setCreateDate(new Date());
-        return Arrays.asList(project1, project2);
+            Project project2 = new Project();
+            project2.setId(UUID.randomUUID());
+            project2.setName("Project 2");
+            project2.setCreateDate(new Date());
+            return Arrays.asList(project1, project2);
+        } else {
+            List<Project> projects = new ArrayList<>(numberOfProjectsInList);
+            for(int i = 0; i < numberOfProjectsInList; i++) {
+                Project project = new Project();
+                project.setId(UUID.randomUUID());
+                project.setName("Project " + i + 1);
+                project.setCreateDate(new Date());
+                projects.add(project);
+            }
+            return projects;
+        }
     }
 
     @Override
