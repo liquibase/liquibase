@@ -373,10 +373,10 @@ jobs:
 
               if (failedCheckingUs) {
                 console.log("Rerun liquibase-pro that was waiting on us");
-                await github.rest.actions.retryWorkflow({
+                await github.rest.checks.rerequestRun({
                     "owner": "liquibase",
                     "repo": "liquibase-pro",
-                    "run_id": currentBranchInfo.workflowId
+                    "check_run_id": currentBranchInfo.workflowId
                 });
               }
             }
