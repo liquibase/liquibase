@@ -373,6 +373,9 @@ jobs:
 
               console.log("See checks");
               console.log(checkRuns);
+              for (let checkRun of checkRuns.check_runs) {
+                console.log(checkRun);
+              }
 
               let failedCheckingUs = false;
               let checkRunId;
