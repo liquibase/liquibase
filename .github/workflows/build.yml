@@ -153,6 +153,7 @@ jobs:
   integration-test:
     name: Integration Test
     runs-on: ubuntu-latest
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -373,7 +374,7 @@ jobs:
 
               console.log("See checks");
               console.log(checkRuns);
-              for (let checkRun of checkRuns.check_runs) {
+              for (let checkRun of checkRuns.data.check_runs) {
                 console.log(checkRun);
               }
 
