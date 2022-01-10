@@ -363,36 +363,22 @@ jobs:
                 "ref": currentBranchInfo.sha
               });
 
-              console.log("See statuses");
-              console.log(checks);
-
-              let checkRuns = await github.rest.checks.listForRef({
-                "owner": "liquibase",
-                "repo": "liquibase-pro",
-                "ref": currentBranchInfo.sha
-              });
-
-              console.log("See checks");
-              console.log(checkRuns);
-              for (let checkRun of checkRuns.data.check_runs) {
-                console.log(checkRun);
-              }
-
               let failedCheckingUs = false;
-              let checkRunId;
-              for (let status of checks.data) {
-                if (status.context == "Stable Liquibase Core") {
-                  console.log("Stable Liquibase Core is "+ status.state);
-                  failedCheckingUs = (status.state == "failure");
-                  checkRunId = status.id;
+              if (standAlonePr) {
+                for (let status of checks.data) {
+                  if (status.context == "Stable Liquibase Core") {
+                    console.log("Stable Liquibase Core is "+ status.state);
+                    failedCheckingUs = (status.state == "failure");
+                  }
                 }
               }
 
               if (failedCheckingUs) {
                 console.log("Rerun liquibase-pro that was waiting on us");
-                github.request("POST "+currentBranchInfo.runRerunUrl);
 
                 //octokit removed the retryWorkflow function
+                github.request("POST "+currentBranchInfo.runRerunUrl);
+
                 //await github.rest.actions.retryWorkflow({
                 //    "owner": "liquibase",
                 //    "repo": "liquibase-pro",
