@@ -363,6 +363,7 @@ jobs:
               });
 
               console.log("See statuses");
+              console.log(checks);
               let failedCheckingUs = false;
               for (let status of checks.data) {
                 if (status.context == "Stable Liquibase Core") {
