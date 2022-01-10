@@ -52,29 +52,32 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
+        //
+        // Access the HubService
+        // Stop if we do no have a key
+        //
+        final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
+        if (!hubServiceFactory.isOnline()) {
+            throw new CommandExecutionException("The command registerChangeLog requires communication with Liquibase Hub, \nwhich is prevented by liquibase.hub.mode='off'. \nPlease set to 'all' or 'meta' and try again.  \nLearn more at https://hub.liquibase.com");
+        }
+
+        //
+        // Check for existing changeLog file
+        //
+        String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
+        UUID hubProjectId = commandScope.getArgumentValue(HUB_PROJECT_ID_ARG);
+        String hubProjectName = commandScope.getArgumentValue(HUB_PROJECT_NAME_ARG);
+
+        doRegisterChangelog(changeLogFile, hubProjectId, hubProjectName, resultsBuilder, false);
+    }
+
+    public void doRegisterChangelog(String changeLogFile, UUID hubProjectId, String hubProjectName, CommandResultsBuilder resultsBuilder, boolean skipPromptIfOneProject) throws LiquibaseException, CommandLineParsingException {
         try (PrintWriter output = new PrintWriter(resultsBuilder.getOutputStream())) {
 
-            final UIService ui = Scope.getCurrentScope().getUI();
-            CommandScope commandScope = resultsBuilder.getCommandScope();
-
-            //
-            // Access the HubService
-            // Stop if we do no have a key
-            //
-            final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
-            if (!hubServiceFactory.isOnline()) {
-                throw new CommandExecutionException("The command registerChangeLog requires communication with Liquibase Hub, \nwhich is prevented by liquibase.hub.mode='off'. \nPlease set to 'all' or 'meta' and try again.  \nLearn more at https://hub.liquibase.com");
-            }
-
-            //
-            // Check for existing changeLog file
-            //
-            final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
             HubChangeLog hubChangeLog;
-            String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
-            UUID hubProjectId = commandScope.getArgumentValue(HUB_PROJECT_ID_ARG);
-            String hubProjectName = commandScope.getArgumentValue(HUB_PROJECT_NAME_ARG);
-
+            final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
             //
             // CHeck for existing changeLog file
             //
@@ -118,7 +121,7 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
                 }
                 output.print("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n\n");
             } else {
-                project = retrieveOrCreateProject(service, commandScope);
+                project = retrieveOrCreateProject(service, changeLogFile, skipPromptIfOneProject);
                 if (project == null) {
                     throw new CommandExecutionException("Your changelog " + changeLogFile + " was not registered to any Liquibase Hub project. You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.  Learn more at https://hub.liquibase.com.");
                 }
@@ -139,8 +142,8 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
             // Add the registered changelog ID to the results so that
             // the caller can use it
             //
-            ChangelogRewriter.ChangeLogRewriterResult changeLogRewriterResult =
-                    ChangelogRewriter.addChangeLogId(changeLogFile, hubChangeLog.getId().toString(), databaseChangeLog);
+            ChangelogRewriter.ChangeLogRewriterResult changeLogRewriterResult = ChangelogRewriter.addChangeLogId(changeLogFile, hubChangeLog.getId().toString(), databaseChangeLog);
+
             if (changeLogRewriterResult.success) {
                 Scope.getCurrentScope().getLog(RegisterChangelogCommandStep.class).info(changeLogRewriterResult.message);
                 output.println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been " +
@@ -151,16 +154,18 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
         }
     }
 
-    private Project retrieveOrCreateProject(HubService service, CommandScope commandScope) throws CommandLineParsingException, LiquibaseException, LiquibaseHubException {
+    private Project retrieveOrCreateProject(HubService service, String changeLogFile, boolean skipPromptIfOneProject) throws CommandLineParsingException, LiquibaseException, LiquibaseHubException {
         final UIService ui = Scope.getCurrentScope().getUI();
-        String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
 
         Project project = null;
         List<Project> projects = getProjectsFromHub();
+        if (skipPromptIfOneProject && projects.size() == 1) {
+            return projects.get(0);
+        }
         boolean done = false;
         String input = null;
         while (!done) {
-            input = readProjectFromConsole(projects, commandScope);
+            input = readProjectFromConsole(projects, changeLogFile);
             try {
                 if (input.equalsIgnoreCase("C")) {
                     String projectName = readProjectNameFromConsole();
@@ -223,11 +228,11 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
         return StringUtil.trimToEmpty(input);
     }
 
-    private String readProjectFromConsole(List<Project> projects, CommandScope commandScope) throws CommandLineParsingException {
+    private String readProjectFromConsole(List<Project> projects, String changeLogFile) throws CommandLineParsingException {
         final UIService ui = Scope.getCurrentScope().getUI();
 
         StringBuilder prompt = new StringBuilder("Registering a changelog connects Liquibase operations to a Project for monitoring and reporting.\n");
-        prompt.append("Register changelog " + commandScope.getArgumentValue(CHANGELOG_FILE_ARG) + " to an existing Project, or create a new one.\n");
+        prompt.append("Register changelog " + changeLogFile + " to an existing Project, or create a new one.\n");
 
         prompt.append("Please make a selection:\n");
 
