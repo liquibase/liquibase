@@ -14,7 +14,7 @@ Enhancements
 - [PR#2244] [szandany] Enabled the use of the jdbc:edb URL for Liquibase to recognize EnterpriseDB
 - [PR#2225] [nvoxland] [catholic-indulgence-vaper] Enabled the use of lowercase sys.synonyms objects for the generate-changelog and diff-changelog commands in Liquibase and SQL Server. The PR fixes PR#2044.
 - Added DB2 on z/OS database type and Java classes for Liquibase
-- Upgrade h2 to newer version 2.0.202
+- Upgrade h2 to newer version 2.0.206
 
 Fixes
 - Fixed the generateChangeLog wrong dependency order: the addPrimaryKey Change Type appeared before its base table in PostgreSQL [DAT-8256]
