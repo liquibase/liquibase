@@ -126,6 +126,8 @@ module.exports = ({github, context}) => {
                                 }
                                 console.log(`Found build for branch ${branchName}`);
 
+                                console.log(run);
+
                                 if (!returnData.workflowId) {
                                     returnData.workflowId = run.id;
                                 }
