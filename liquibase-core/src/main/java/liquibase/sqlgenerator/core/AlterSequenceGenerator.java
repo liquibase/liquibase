@@ -72,7 +72,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if ((statement.getCacheSize() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase)) {
+        if ((statement.getCacheSize() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof MariaDBDatabase)) {
             if (statement.getCacheSize().equals(BigInteger.ZERO)) {
                 buffer.append(" NOCACHE ");
             } else {
