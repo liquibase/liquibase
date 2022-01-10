@@ -365,10 +365,12 @@ jobs:
               console.log("See statuses");
               console.log(checks);
               let failedCheckingUs = false;
+              let checkRunId;
               for (let status of checks.data) {
                 if (status.context == "Stable Liquibase Core") {
                   console.log("Stable Liquibase Core is "+ status.state);
                   failedCheckingUs = (status.state == "failure");
+                  checkRunId = status.id;
                 }
               }
 
@@ -377,7 +379,7 @@ jobs:
                 await github.rest.checks.rerequestRun({
                     "owner": "liquibase",
                     "repo": "liquibase-pro",
-                    "check_run_id": currentBranchInfo.workflowId
+                    "check_run_id": checkRunId
                 });
               }
             }
