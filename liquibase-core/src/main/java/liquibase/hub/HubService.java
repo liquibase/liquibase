@@ -58,6 +58,8 @@ public interface HubService extends Plugin, PrioritizedService {
      */
     String shortenLink(String url) throws LiquibaseException;
 
+    OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent, UUID organizationId) throws LiquibaseException;
+
     void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException;
 
     void sendOperationChanges(OperationChange operationChange) throws LiquibaseHubException;

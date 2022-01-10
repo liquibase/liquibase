@@ -184,6 +184,11 @@ public class MockHubService implements HubService {
     }
 
     @Override
+    public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent, UUID organizationId) throws LiquibaseException {
+        return null;
+    }
+
+    @Override
     public CoreInitOnboardingResponse validateOnboardingToken(String token) throws LiquibaseHubException {
         CoreInitOnboardingResponse response = new CoreInitOnboardingResponse();
         ApiKey ak = new ApiKey();

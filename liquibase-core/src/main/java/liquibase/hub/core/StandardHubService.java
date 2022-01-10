@@ -502,6 +502,11 @@ public class StandardHubService implements HubService {
     public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException {
         final Organization organization = getOrganization();
 
+        return sendOperationEvent(operation, operationEvent, organization.getId());
+    }
+
+    @Override
+    public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent, UUID organizationId) throws LiquibaseException {
         Map<String, Object> requestParams = new HashMap<>();
         requestParams.put("eventType", operationEvent.getEventType());
         requestParams.put("startDate", operationEvent.getStartDate());
@@ -520,8 +525,7 @@ public class StandardHubService implements HubService {
             }
         }
 
-        return http.doPost("/api/v1/organizations/" + organization.getId() + "/projects/" + operation.getConnection().getProject().getId() + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
-
+        return http.doPost("/api/v1/organizations/" + organizationId + ((operation.getConnection() == null || operation.getConnection().getProject() == null) ? "" : "/projects/" + operation.getConnection().getProject().getId()) + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
     }
 
     private Date convertDateToUTC(Date dateInString) {
