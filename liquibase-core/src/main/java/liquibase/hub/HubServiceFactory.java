@@ -163,6 +163,11 @@ public class HubServiceFactory extends AbstractPluginFactory<HubService> {
         }
 
         @Override
+        public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent, UUID organizationId) throws LiquibaseException {
+            return null;
+        }
+
+        @Override
         public void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException {
 
         }
