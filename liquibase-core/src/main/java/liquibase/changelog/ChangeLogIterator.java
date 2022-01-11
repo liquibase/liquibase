@@ -121,6 +121,7 @@ public class ChangeLogIterator {
                 }
             });
         } catch (Exception e) {
+            log.warning(e.toString());
             throw new LiquibaseException(e);
         } finally {
             databaseChangeLog.setRuntimeEnvironment(null);
