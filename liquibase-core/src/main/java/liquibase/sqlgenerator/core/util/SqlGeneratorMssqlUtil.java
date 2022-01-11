@@ -13,45 +13,66 @@ import java.util.regex.Pattern;
  * Additional utility methods can be added here
  */
 public class SqlGeneratorMssqlUtil {
-    private static final String IS_SET_REGEX = "(?i)SET\\s+(?i)(ANSI_NULLS|QUOTED_IDENTIFIER)\\s+(?i)(ON|OFF)(\\s*\\t*\\n*);?";
+    private static final String SET_REGEX = "SET\\s+(ANSI_NULLS|QUOTED_IDENTIFIER)\\s+(ON|OFF)(\\s*\\t*\\n*);?";
+    private static final String DEFAULT_END_DELIMITER = ";";
 
     /**
-     * Add sql SET QUOTED_IDENTIFIER and SET ANSI_NULLS to separate index in sql list
+     * Split out (SET QUOTED_IDENTIFIER and SET ANSI_NULLS) into list as separate sql statements
      * so that the code will individually run these sql
      */
     public static void addSqlStatementsToList(List<Sql> sql, String sqlText, String delimiter) {
         Matcher hasSetMatcher =  getSetRegexMatcher(sqlText);
+        Pattern patternToCheckIfContainsAnySql = Pattern.compile("[^\\s" + delimiter + "]");
+
         String cleanSqlText = sqlText;
-        hasSetMatcher.reset(); // reset to start to make the find and replace fit in a single loop
+        int removedFromSqlTextCount = 0;
         while (hasSetMatcher.find()) {
-            String curSetSql = hasSetMatcher.group();
-            sql.add(new UnparsedSql(curSetSql, delimiter));
-            cleanSqlText = cleanSqlText.replace(curSetSql, "");
+            String setStatementSql = hasSetMatcher.group();
+            String beforeSetSql = cleanSqlText.substring(0, hasSetMatcher.start() - removedFromSqlTextCount);
+            if (patternToCheckIfContainsAnySql.matcher(beforeSetSql).find()) {
+                sql.add(new UnparsedSql(beforeSetSql, delimiter));
+            }
+            sql.add(new UnparsedSql(setStatementSql, delimiter));
+            cleanSqlText = cleanSqlText.substring(hasSetMatcher.end() - removedFromSqlTextCount);
+            removedFromSqlTextCount = hasSetMatcher.end();
         }
-        sql.add(new UnparsedSql(cleanSqlText, delimiter));
+
+        if (patternToCheckIfContainsAnySql.matcher(cleanSqlText).find()) {
+            sql.add(new UnparsedSql(cleanSqlText, delimiter));
+        }
     }
 
     /**
-     * Variation of the addSqlStatementsToList() function in the class, used for
-     * a different use case
+     * Split out (SET QUOTED_IDENTIFIER and SET ANSI_NULLS) into list as separate sql statements
+     * so that the code will individually run these sql
      */
     public static void addSqlStatementsToList(List<Sql> sql, String sqlText, Relation relation) {
         Matcher hasSetMatcher = getSetRegexMatcher(sqlText);
-        String cleanSqlTest = sqlText;
-        hasSetMatcher.reset(); // reset to start to make the find and replace fit in a single loop
+        Pattern patternToCheckIfContainsAnySql = Pattern.compile("[^\\s;]+");
+
+        String cleanSqlText = sqlText;
+        int removedFromSqlTextCount = 0;
         while (hasSetMatcher.find()) {
-            String curSetSql = hasSetMatcher.group();
-            sql.add(new UnparsedSql(curSetSql, ";")); // adding a default end delimiter of ;
-            cleanSqlTest = cleanSqlTest.replace(curSetSql, "");
+            String setStatementSql = hasSetMatcher.group();
+            String beforeSetSql = cleanSqlText.substring(0, hasSetMatcher.start() - removedFromSqlTextCount);
+            if (patternToCheckIfContainsAnySql.matcher(beforeSetSql).find()) {
+                sql.add(new UnparsedSql(beforeSetSql, DEFAULT_END_DELIMITER, relation));
+            }
+            sql.add(new UnparsedSql(setStatementSql, DEFAULT_END_DELIMITER));
+            cleanSqlText = cleanSqlText.substring(hasSetMatcher.end() - removedFromSqlTextCount);
+            removedFromSqlTextCount = hasSetMatcher.end();
         }
-        sql.add(new UnparsedSql(cleanSqlTest, relation));
+
+        if (patternToCheckIfContainsAnySql.matcher(cleanSqlText).find()) {
+            sql.add(new UnparsedSql(cleanSqlText, DEFAULT_END_DELIMITER, relation));
+        }
     }
 
     /**
      * Prepares a regex matcher for SET QUOTED_IDENTIFIER and SET ANSI_NULLS
      */
     public static Matcher getSetRegexMatcher(String sqlText) {
-        Pattern hasSetPattern = Pattern.compile(IS_SET_REGEX);
+        Pattern hasSetPattern = Pattern.compile(SET_REGEX, Pattern.CASE_INSENSITIVE);
         return  hasSetPattern.matcher(sqlText);
     }
 }
