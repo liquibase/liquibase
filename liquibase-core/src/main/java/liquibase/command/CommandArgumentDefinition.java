@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Defines a known, type-safe argument for a specific {@link CommandStep}.
@@ -117,7 +119,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         // This is a list of the arguments which the init project command supports. The thinking here is that if the user
         // forgets to supply one of these arguments, we're going to remind them about the init project command, which
         // can help them figure out what they should be providing here.
-        final List<String> initProjectArguments = Arrays.asList(CommandArgumentNames.CHANGELOG_FILE, CommandArgumentNames.URL, CommandArgumentNames.USERNAME, CommandArgumentNames.PASSWORD);
+        final List<String> initProjectArguments = Stream.of(CommonArgumentNames.CHANGELOG_FILE, CommonArgumentNames.URL, CommonArgumentNames.USERNAME, CommonArgumentNames.PASSWORD).map(CommonArgumentNames::getArgumentName).collect(Collectors.toList());
         if (this.isRequired() && currentValue == null) {
             throw new CommandValidationException(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getCurrentValue().convert(this.getName()), "missing required argument", initProjectArguments.contains(this.getName()));
         }

@@ -33,11 +33,11 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
                 .description("The reference database password")
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
-        URL_ARG = builder.argument(CommandArgumentNames.URL, String.class).required()
+        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
                 .description("The JDBC target database connection URL").build();
-        USERNAME_ARG = builder.argument(CommandArgumentNames.USERNAME, String.class)
+        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
                 .description("The target database username").build();
-        PASSWORD_ARG = builder.argument(CommandArgumentNames.PASSWORD, String.class)
+        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
                 .description("The target database password")
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
