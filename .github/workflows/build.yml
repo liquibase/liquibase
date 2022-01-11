@@ -352,22 +352,27 @@ jobs:
                 "ref": currentBranchInfo.sha
               });
 
-              console.log("See statuses");
               let failedCheckingUs = false;
-              for (let status of checks.data) {
-                if (status.context == "Stable Liquibase Core") {
-                  console.log("Stable Liquibase Core is "+ status.state);
-                  failedCheckingUs = (status.state == "failure");
+              if (standalonePR) {
+                for (let status of checks.data) {
+                  if (status.context == "Stable Liquibase Core") {
+                    console.log("Stable Liquibase Core is "+ status.state);
+                    failedCheckingUs = (status.state == "failure");
+                  }
                 }
               }
 
               if (failedCheckingUs) {
                 console.log("Rerun liquibase-pro that was waiting on us");
-                await github.rest.actions.retryWorkflow({
-                    "owner": "liquibase",
-                    "repo": "liquibase-pro",
-                    "run_id": currentBranchInfo.workflowId
-                });
+
+                //octokit removed the retryWorkflow function
+                github.request("POST "+currentBranchInfo.runRerunUrl);
+
+                //await github.rest.actions.retryWorkflow({
+                //    "owner": "liquibase",
+                //    "repo": "liquibase-pro",
+                //    "run_id": currentBranchInfo.workflowId
+                //});
               }
             }
 
