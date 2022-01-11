@@ -117,7 +117,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         // This is a list of the arguments which the init project command supports. The thinking here is that if the user
         // forgets to supply one of these arguments, we're going to remind them about the init project command, which
         // can help them figure out what they should be providing here.
-        final List<String> initProjectArguments = Arrays.asList("changelogFile", "url", "username", "password");
+        final List<String> initProjectArguments = Arrays.asList(CommandArgumentNames.CHANGELOG_FILE, CommandArgumentNames.URL, CommandArgumentNames.USERNAME, CommandArgumentNames.PASSWORD);
         if (this.isRequired() && currentValue == null) {
             throw new CommandValidationException(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getCurrentValue().convert(this.getName()), "missing required argument", initProjectArguments.contains(this.getName()));
         }
