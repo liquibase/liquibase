@@ -5,15 +5,19 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.util.StreamUtil;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 
 /**
@@ -267,8 +271,14 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     String comparePath = urlExternalForm.substring(splitIndex+1);
                     String jarPath = urlExternalForm.substring(0, splitIndex);
 
+                    final JarInputStream jarStream;
                     final URL jarUrl = classLoader.getResource(jarPath);
-                    final JarInputStream jarStream = new JarInputStream(jarUrl.openStream());
+                    if (jarUrl != null) {
+                        jarStream = new JarInputStream(jarUrl.openStream());
+                    }
+                    else {
+                        jarStream = new JarInputStream(new FileInputStream(URLDecoder.decode(jarPath.substring(9), StandardCharsets.UTF_8.name())));
+                    }
 
                     if (comparePath.startsWith("/")) {
                         comparePath = comparePath.substring(1);
