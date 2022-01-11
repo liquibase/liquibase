@@ -10,6 +10,7 @@ import liquibase.util.ObjectUtil;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -119,9 +120,10 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         // This is a list of the arguments which the init project command supports. The thinking here is that if the user
         // forgets to supply one of these arguments, we're going to remind them about the init project command, which
         // can help them figure out what they should be providing here.
-        final List<String> initProjectArguments = Stream.of(CommonArgumentNames.CHANGELOG_FILE, CommonArgumentNames.URL, CommonArgumentNames.USERNAME, CommonArgumentNames.PASSWORD).map(CommonArgumentNames::getArgumentName).collect(Collectors.toList());
+        final Set<String> initProjectArguments = Stream.of(CommonArgumentNames.CHANGELOG_FILE, CommonArgumentNames.URL, CommonArgumentNames.USERNAME, CommonArgumentNames.PASSWORD).map(CommonArgumentNames::getArgumentName).collect(Collectors.toSet());
         if (this.isRequired() && currentValue == null) {
-            throw new CommandValidationException(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getCurrentValue().convert(this.getName()), "missing required argument", initProjectArguments.contains(this.getName()));
+            String argument = LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getCurrentValue().convert(this.getName());
+            throw new CommandValidationException("Invalid argument '" + argument + "': " + "missing required argument" + (initProjectArguments.contains(this.getName()) ? ". If you need to configure new liquibase project files and arguments, run the 'liquibase init project' command." : ""));
         }
     }
 
