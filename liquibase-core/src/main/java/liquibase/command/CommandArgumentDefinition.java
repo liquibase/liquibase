@@ -7,6 +7,8 @@ import liquibase.exception.CommandValidationException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.ObjectUtil;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -112,8 +114,12 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      */
     public void validate(CommandScope commandScope) throws CommandValidationException {
         final DataType currentValue = commandScope.getArgumentValue(this);
+        // This is a list of the arguments which the init project command supports. The thinking here is that if the user
+        // forgets to supply one of these arguments, we're going to remind them about the init project command, which
+        // can help them figure out what they should be providing here.
+        final List<String> initProjectArguments = Arrays.asList("changelogFile", "url", "username", "password");
         if (this.isRequired() && currentValue == null) {
-            throw new CommandValidationException(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getCurrentValue().convert(this.getName()), "missing required argument");
+            throw new CommandValidationException(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getCurrentValue().convert(this.getName()), "missing required argument", initProjectArguments.contains(this.getName()));
         }
     }
 

@@ -66,6 +66,7 @@ Optional Args:
                 changelogFile: ""
         ]
         expectedException = CommandValidationException.class
+        expectedExceptionMessage = "Invalid argument 'changelogFile': missing required argument. If you need to configure new liquibase project files and arguments, run the 'liquibase init project' command."
     }
 
     run "Run without any argument throws an exception", {
