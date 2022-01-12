@@ -286,8 +286,6 @@
                 </dependencies>
                 <configuration>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <!-- CDILiquibaseTest is currently failing without this setting -->
-                    <argLine>@{argLine} --illegal-access=permit</argLine>
                 </configuration>
             </plugin>
 
@@ -425,6 +423,17 @@
             <properties>
                 <maven.compiler.release>8</maven.compiler.release>
             </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <!-- CDILiquibaseTest is currently failing without this setting -->
+                            <argLine>@{argLine} --illegal-access=permit</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>liquibase-pro-submodule</id>
