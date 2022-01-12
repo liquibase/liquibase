@@ -278,9 +278,11 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "FROM SYS.SYSSEQUENCE s " +
                     "JOIN SYS.SYSUSER u ON s.OWNER = u.USER_ID "+
                     "WHERE u.USER_NAME = '" + schema.getName() + "'";
-        	} else {
+        } else if (database.getClass().getName().contains("MaxDB")) { //have to check classname as this is currently an extension
+			return "SELECT SEQUENCE_NAME, MIN_VALUE, MAX_VALUE, INCREMENT_BY, CYCLE_FLAG AS WILL_CYCLE " +
+				   "FROM sequences WHERE SCHEMANAME = '" + schema.getName() + "'";
+		} else {
             throw new UnexpectedLiquibaseException("Don't know how to query for sequences on " + database);
-        }
-
+		}
     }
 }
