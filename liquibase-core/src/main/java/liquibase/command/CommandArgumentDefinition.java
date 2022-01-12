@@ -8,13 +8,8 @@ import liquibase.exception.MissingRequiredArgumentException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.ObjectUtil;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Defines a known, type-safe argument for a specific {@link CommandStep}.
