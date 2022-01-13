@@ -165,7 +165,7 @@ jobs:
           distribution: 'adopt'
           cache: 'maven'
       - name: Cache SonarCloud packages
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
