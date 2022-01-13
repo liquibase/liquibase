@@ -10,7 +10,7 @@ public class EnterpriseDBDatabase extends PostgresDatabase {
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         final String url = conn.getURL();
-        return url.contains("edb") || (url.contains("postgres") && url.contains(":5444"));
+        return url.contains(":edb:") || (url.contains(":postgres:") && url.contains(":5444"));
     }
 
     @Override
