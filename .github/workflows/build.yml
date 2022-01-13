@@ -334,7 +334,7 @@ jobs:
   finish:
     name: Finish Build
     runs-on: ubuntu-latest
-    needs: [ setup, build, integration-test, package ]
+    needs: [ setup, build, integration-test, package, sonar ]
     if: ${{ always() }}
     steps:
       - uses: actions/checkout@v2
