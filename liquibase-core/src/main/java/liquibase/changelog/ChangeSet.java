@@ -8,6 +8,7 @@ import liquibase.change.*;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
@@ -719,7 +720,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         if (getRunWith() == null || originalExecutor instanceof LoggingExecutor) {
             return originalExecutor;
         }
-        Executor customExecutor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(getRunWith(), database);
+        String executorName = ChangeSet.lookupExecutor(getRunWith());
+        Executor customExecutor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(executorName, database);
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, customExecutor);
         List<Change> changes = getChanges();
         for (Change change : changes) {
@@ -733,6 +735,19 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
         return originalExecutor;
+    }
+
+    public static String lookupExecutor(String executorName) {
+        if (StringUtil.isEmpty(executorName)) {
+            return null;
+        }
+        String key = "liquibase." + executorName + ".executor";
+        String replacementExecutorName =
+            (String)Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, key).getValue();
+        if (replacementExecutorName != null) {
+            return replacementExecutorName;
+        }
+        return executorName;
     }
 
     public void rollback(Database database) throws RollbackFailedException {
