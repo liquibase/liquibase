@@ -1,21 +1,23 @@
 package liquibase.extension.testing.testsystem;
 
 import liquibase.Scope;
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
+import liquibase.extension.testing.util.DownloadUtil;
 import liquibase.logging.Logger;
 import liquibase.util.CollectionUtil;
 import liquibase.util.ObjectUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public abstract class DatabaseTestSystem extends TestSystem {
 
@@ -30,7 +32,7 @@ public abstract class DatabaseTestSystem extends TestSystem {
 
 
     @Override
-    public String getDefinition() {
+    public String getName() {
         return shortName;
     }
 
@@ -69,8 +71,41 @@ public abstract class DatabaseTestSystem extends TestSystem {
         System.out.println(wrapper);
     }
 
+    public String getDriver() {
+        return getTestSystemProperty("driver", String.class);
+    }
+
+    protected Connection openConnection(String url, String username, String password) throws SQLException {
+        try {
+            String driverConfig = getDriver();
+            Driver driver;
+
+            if (driverConfig == null) {
+                driver = DriverManager.getDriver(getUrl());
+            } else {
+                Path driverPath = DownloadUtil.downloadMavenArtifact(driverConfig);
+                final URLClassLoader isolatedClassloader = new URLClassLoader(new URL[]{
+                        driverPath.toUri().toURL(),
+                }, null);
+
+                final Class<?> isolatedDriverManager = Class.forName(DriverManager.class.getName(), true, isolatedClassloader);
+                final Method getDriverMethod = isolatedDriverManager.getMethod("getDriver", String.class);
+
+                final Driver driverClass = (Driver) getDriverMethod.invoke(null, url);
+                driver = (Driver) Class.forName(driverClass.getClass().getName(), true, isolatedClassloader).newInstance();
+            }
+
+            Properties properties = new Properties();
+            properties.put("user", username);
+            properties.put("password", password);
+            return driver.connect(url, properties);
+        } catch (ReflectiveOperationException | MalformedURLException e) {
+            throw new UnexpectedLiquibaseException(e.getMessage(), e);
+        }
+    }
+
     protected Connection openSetupConnection() throws SQLException {
-        return DriverManager.getConnection(wrapper.getUrl(), getSetupUsername(), getSetupPassword());
+        return openConnection(wrapper.getUrl(), getSetupUsername(), getSetupPassword());
     }
 
     public Connection openConnection() throws SQLException {
@@ -81,7 +116,7 @@ public abstract class DatabaseTestSystem extends TestSystem {
         final String key = username + ":" + password;
         Connection connection = connections.get(key);
         if (connection == null || connection.isClosed()) {
-            connection = DriverManager.getConnection(getUrl(), username, password);
+            connection = openConnection(getUrl(), username, password);
             connections.put(key, connection);
         }
         return connection;
@@ -124,11 +159,11 @@ public abstract class DatabaseTestSystem extends TestSystem {
     }
 
     protected String getVersion() {
-        return getTestSystemProperty("version", String.class, true);
+        return getTestSystemProperty("version", String.class);
     }
 
     protected String getImageName() {
-        return getTestSystemProperty("imageName", String.class, true);
+        return getTestSystemProperty("imageName", String.class);
     }
 
     protected void setup() throws SQLException {
@@ -136,7 +171,7 @@ public abstract class DatabaseTestSystem extends TestSystem {
         try (final Connection connection = openSetupConnection();
              final Statement statement = connection.createStatement()) {
             for (String sql : CollectionUtil.createIfNull(getSetupSql())) {
-                log.info("Running setup SQL: "+sql);
+                log.info("Running setup SQL: " + sql);
                 statement.execute(sql);
             }
 

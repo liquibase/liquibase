@@ -8,12 +8,17 @@ liquibase:
         altCatalog: lbcat2
         altSchema: lbschem2
         altTablespace: liquibase2
-        envClass: liquibase.extension.testing.environment.core.TestcontainerEnvironment
 
       test: hub,h2,hsqldb,sqlite
 
       hub:
         url: http://localhost:8888
+
+      h2:
+        profiles:
+          "1.4":
+            version: 1.4.200
+          "2.0":
 
       cockroachdb:
         version: latest-v21.2

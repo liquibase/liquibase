@@ -36,7 +36,7 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
         Container runningContainer = null;
         for (Container container : dockerClient.listContainersCmd().exec()) {
             final String containerTestSystem = container.getLabels().get("org.liquibase.testsystem");
-            if (containerTestSystem != null && containerTestSystem.equals(testSystem.getDefinition())) {
+            if (containerTestSystem != null && containerTestSystem.equals(testSystem.getName())) {
                 runningContainer = container;
                 break;
             }
@@ -52,7 +52,7 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
             mapPorts(container);
         }
 
-        container.withLabel("org.liquibase.testsystem", testSystem.getDefinition());
+        container.withLabel("org.liquibase.testsystem", testSystem.getName());
         container.start();
 
 //        if (newlyStarted()) { //it just started
@@ -118,9 +118,9 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
             container.stop();
         } else {
             final DockerClient dockerClient = container.getDockerClient();
-            final List<Container> containers = dockerClient.listContainersCmd().withLabelFilter(Collections.singletonMap("org.liquibase.testsystem", testSystem.getDefinition())).exec();
+            final List<Container> containers = dockerClient.listContainersCmd().withLabelFilter(Collections.singletonMap("org.liquibase.testsystem", testSystem.getName())).exec();
             if (containers.size() == 0) {
-                throw new UnexpectedLiquibaseException("Cannot find running container "+testSystem.getDefinition());
+                throw new UnexpectedLiquibaseException("Cannot find running container "+testSystem.getName());
             } else {
                 for (Container container : containers) {
                     Scope.getCurrentScope().getLog(getClass()).info("Stopping container "+container.getId());

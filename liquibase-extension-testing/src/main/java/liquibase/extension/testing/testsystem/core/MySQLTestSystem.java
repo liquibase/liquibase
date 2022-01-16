@@ -19,7 +19,9 @@ public class MySQLTestSystem extends DatabaseTestSystem {
                 new MySQLContainer(DockerImageName.parse(getImageName()).withTag(getVersion()))
                         .withUsername(getUsername())
                         .withPassword(getPassword())
-                        .withDatabaseName(getCatalog()),
+                        .withDatabaseName(getCatalog())
+                        .withUrlParam("useSSL", "false")
+                        .withUrlParam("allowPublicKeyRetrieval", "true"),
                 this
         );
     }
@@ -32,7 +34,6 @@ public class MySQLTestSystem extends DatabaseTestSystem {
                 "GRANT ALL PRIVILEGES ON " + getCatalog() + ".* TO '" + getUsername() + "'@'%'",
                 "GRANT ALL PRIVILEGES ON " + getAltCatalog() + ".* TO '" + getUsername() + "'@'%'",
                 "GRANT ALL PRIVILEGES ON " + getAltSchema() + ".* TO '" + getUsername() + "'@'%'"
-
         };
     }
 }

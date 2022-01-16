@@ -10,6 +10,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.diff.output.report.DiffToReport;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -30,6 +31,11 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         super("h2", DatabaseFactory.getInstance().getDatabase("h2"));
         this.changeSpecifyDbmsChangeLog = "changelogs/h2/complete/change.specify.dbms.changelog.xml";
         this.dbmsExcludeChangelog = "changelogs/h2/complete/dbms.exclude.changelog.xml";
+    }
+
+    @Test
+    public void tsetasd() throws DatabaseException {
+        System.out.println(getDatabase().getDatabaseProductVersion());
     }
 
     @Test

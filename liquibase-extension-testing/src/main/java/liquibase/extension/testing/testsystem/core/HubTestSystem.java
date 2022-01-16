@@ -18,7 +18,7 @@ public class HubTestSystem extends TestSystem {
     }
 
     @Override
-    public String getDefinition() {
+    public String getName() {
         return "hub";
     }
 

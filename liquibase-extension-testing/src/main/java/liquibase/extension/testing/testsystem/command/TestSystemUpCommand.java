@@ -13,6 +13,7 @@ public class TestSystemUpCommand extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<String> NAME;
     public static final CommandArgumentDefinition<String> VERSION;
+    public static final CommandArgumentDefinition<String> PROFILES;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -21,6 +22,8 @@ public class TestSystemUpCommand extends AbstractCommandStep {
                 .description("The name of the system to").build();
         VERSION = builder.argument("version", String.class)
                 .description("Override version to use").build();
+        PROFILES = builder.argument("profiles", String.class)
+                .description("Set profile(s)").build();
     }
 
     @Override
@@ -33,7 +36,18 @@ public class TestSystemUpCommand extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
 
-        final TestSystem env = new TestSystemFactory().getTestSystem(resultsBuilder.getCommandScope().getConfiguredValue(NAME).getValue());
+        final String name = resultsBuilder.getCommandScope().getConfiguredValue(NAME).getValue();
+        final String version = resultsBuilder.getCommandScope().getConfiguredValue(VERSION).getValue();
+        final String profiles = resultsBuilder.getCommandScope().getConfiguredValue(PROFILES).getValue();
+
+        String definition = name;
+        if (profiles != null) {
+            definition = name + ":" + profiles;
+        }
+        if (version != null) {
+            definition += "?version=" + version;
+        }
+        final TestSystem env = new TestSystemFactory().getTestSystem(definition);
 
         env.start(true);
 

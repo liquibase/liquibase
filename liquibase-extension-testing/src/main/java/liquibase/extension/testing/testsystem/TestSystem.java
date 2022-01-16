@@ -6,6 +6,7 @@ import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.Plugin;
+import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtil;
 import org.junit.Assume;
 import org.junit.rules.TestRule;
@@ -16,14 +17,14 @@ import org.spockframework.runtime.extension.IMethodInvocation;
 import org.spockframework.runtime.model.ErrorInfo;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public abstract class TestSystem implements TestRule, Plugin {
 
-    private static Set<String> testSystems = new HashSet<>();
+    private static SortedSet<String> testSystems = new TreeSet<>();
+    private List<String> profiles = new ArrayList<>();
+    private Map<String, String> properties = new HashMap<>();
+
 
     static {
         final ConfiguredValue<String> testSystemsValue = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test");
@@ -37,7 +38,7 @@ public abstract class TestSystem implements TestRule, Plugin {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                Assume.assumeTrue("Not running test against " + TestSystem.this.getDefinition() + ": liquibase.sdk.testSystem.test is " + StringUtil.join(testSystems, ", "), shouldTest());
+                Assume.assumeTrue("Not running test against " + TestSystem.this.getName() + ": liquibase.sdk.testSystem.test is " + StringUtil.join(testSystems, ","), shouldTest());
 
                 List<Throwable> errors = new ArrayList<Throwable>();
 
@@ -64,7 +65,19 @@ public abstract class TestSystem implements TestRule, Plugin {
         return testSystems.contains(TestSystem.this.getDefinition());
     }
 
-    public abstract String getDefinition();
+    private String getDefinition() {
+        String definition = getName();
+        if (profiles != null && profiles.size() > 0) {
+            definition = definition + ":" + StringUtil.join(profiles, ",");
+        }
+
+        if (properties != null && properties.size() > 0) {
+            definition = definition + "?" + StringUtil.join(properties, "&");
+        }
+        return definition;
+    }
+
+    public abstract String getName();
 
     public <T> T getTestSystemProperty(String propertyName, Class<T> type) {
         return getTestSystemProperty(propertyName, type, false);
@@ -82,9 +95,23 @@ public abstract class TestSystem implements TestRule, Plugin {
     }
 
     public <T> T getTestSystemProperty(String propertyName, ConfigurationValueConverter<T> converter, boolean required) {
+        if (properties != null && properties.containsKey(propertyName)) {
+            return converter.convert(properties.get(propertyName));
+        }
+
         final LiquibaseConfiguration config = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
 
-        ConfiguredValue<T> configuredValue = config.getCurrentConfiguredValue(converter, null, "liquibase.sdk.testSystem." + getDefinition() + "." + propertyName);
+        ConfiguredValue<T> configuredValue;
+        //first check profiles
+        for (String profile : CollectionUtil.createIfNull(profiles)) {
+            configuredValue = config.getCurrentConfiguredValue(converter, null, "liquibase.sdk.testSystem." + getName() + ".profiles." + profile + "." + propertyName);
+
+            if (configuredValue.found()) {
+                return configuredValue.getValue();
+            }
+        }
+
+        configuredValue = config.getCurrentConfiguredValue(converter, null, "liquibase.sdk.testSystem." + getName() + "." + propertyName);
 
         if (configuredValue.found()) {
             return configuredValue.getValue();
@@ -97,7 +124,7 @@ public abstract class TestSystem implements TestRule, Plugin {
         }
 
         if (required) {
-            throw new UnexpectedLiquibaseException("No required liquibase.sdk.testSystem configuration for " + getDefinition() + " of " + propertyName + " set");
+            throw new UnexpectedLiquibaseException("No required liquibase.sdk.testSystem configuration for " + getName() + " of " + propertyName + " set");
         }
 
         return null;
@@ -116,4 +143,23 @@ public abstract class TestSystem implements TestRule, Plugin {
     }
 
     public abstract int getPriority(String definition);
+
+    public void setProfiles(String... profiles) {
+        if (profiles == null) {
+            this.profiles = null;
+        } else {
+            this.profiles = Arrays.asList(profiles);
+        }
+    }
+
+    public void setProperties(String properties) {
+        if (properties == null) {
+            this.properties = null;
+            return;
+        }
+        for (String keyValue : properties.split("&")) {
+            final String[] split = keyValue.split("=");
+            this.properties.put(split[0], split[1]);
+        }
+    }
 }

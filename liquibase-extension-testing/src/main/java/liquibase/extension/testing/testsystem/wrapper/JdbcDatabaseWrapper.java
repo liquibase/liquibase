@@ -11,14 +11,11 @@ public class JdbcDatabaseWrapper extends DatabaseWrapper {
     private final String url;
     private final String username;
     private final String password;
-    private final Connection connection;
 
     public JdbcDatabaseWrapper(String url, String username, String password) throws SQLException {
         this.url = url;
         this.username = username;
         this.password = password;
-
-        this.connection = DriverManager.getConnection(getUrl(), getUsername(), getPassword());
     }
 
     @Override
