@@ -81,6 +81,11 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
             change.setColumnName(column.getName());
             change.setRemarks(column.getRemarks());
 
+            LiquibaseDataType columnDataType = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase);
+            if (columnDataType != null) {
+            change.setColumnDataType(columnDataType.toString());
+            }
+
             changes.add(change);
         }
 
