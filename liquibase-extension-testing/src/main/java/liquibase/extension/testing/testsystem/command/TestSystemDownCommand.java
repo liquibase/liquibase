@@ -33,7 +33,5 @@ public class TestSystemDownCommand extends AbstractCommandStep {
         final TestSystem env = new TestSystemFactory().getTestSystem(resultsBuilder.getCommandScope().getConfiguredValue(NAME).getValue());
 
         env.stop();
-
-        System.out.println("Stopped environment '" + resultsBuilder.getCommandScope().getArgumentValue(NAME) + "'");
     }
 }

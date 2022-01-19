@@ -5,20 +5,31 @@ import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
 import org.jetbrains.annotations.NotNull;
 
-public class SQLiteTestSystem  extends DatabaseTestSystem {
+import java.sql.SQLException;
+
+public class SQLiteTestSystem extends DatabaseTestSystem {
 
     public SQLiteTestSystem() {
         super("sqlite");
     }
 
+    public SQLiteTestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() throws Exception{
+    protected @NotNull DatabaseWrapper createContainerWrapper() throws Exception {
+        throw new IllegalArgumentException("Cannot create sqlite container. Use url");
+    }
+
+    @Override
+    protected @NotNull JdbcDatabaseWrapper createJdbcWrapper(String url) throws SQLException {
         return new JdbcDatabaseWrapper("jdbc:sqlite::memory:", getUsername(), getPassword());
     }
 
     @Override
     protected String[] getSetupSql() {
-        return new String[] {
+        return new String[]{
 //                "create schema "+getAltSchema(),
         };
     }

@@ -11,8 +11,12 @@ public class FirebirdTestSystem  extends DatabaseTestSystem {
         super("firebird");
     }
 
+    public FirebirdTestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() throws Exception {
+    protected DatabaseWrapper createContainerWrapper() throws Exception {
         return new UnimplementedWrapper();
     }
 

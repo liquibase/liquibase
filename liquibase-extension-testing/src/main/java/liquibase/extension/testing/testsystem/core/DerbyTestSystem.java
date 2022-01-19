@@ -3,7 +3,10 @@ package liquibase.extension.testing.testsystem.core;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
+import liquibase.extension.testing.testsystem.wrapper.UnimplementedWrapper;
 import org.jetbrains.annotations.NotNull;
+
+import java.sql.SQLException;
 
 public class DerbyTestSystem extends DatabaseTestSystem {
 
@@ -11,8 +14,17 @@ public class DerbyTestSystem extends DatabaseTestSystem {
         super("derby");
     }
 
+    public DerbyTestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() throws Exception{
+    protected @NotNull DatabaseWrapper createContainerWrapper() throws Exception{
+         throw new IllegalArgumentException("Cannot create container for derby. Use URL");
+    }
+
+    @Override
+    protected @NotNull JdbcDatabaseWrapper createJdbcWrapper(String url) throws SQLException {
         return new JdbcDatabaseWrapper("jdbc:derby:memory:"+getCatalog(), getUsername(), getPassword());
     }
 

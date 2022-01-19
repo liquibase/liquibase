@@ -5,14 +5,25 @@ import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.SQLException;
+
 public class HsqlTestSystem extends DatabaseTestSystem {
 
      public HsqlTestSystem() {
         super("hsqldb");
     }
 
+    public HsqlTestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() throws Exception{
+    protected DatabaseWrapper createContainerWrapper() throws Exception {
+        throw new IllegalArgumentException("Cannot create container for hsql. Use url");
+    }
+
+    @Override
+    protected @NotNull JdbcDatabaseWrapper createJdbcWrapper(String url) throws SQLException {
         return new JdbcDatabaseWrapper("jdbc:hsqldb:mem:"+getCatalog(), getUsername(), getPassword());
     }
 

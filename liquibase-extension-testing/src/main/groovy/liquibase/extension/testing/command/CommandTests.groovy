@@ -524,7 +524,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
                     def system = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem(database.shortName)
                     if (system.shouldTest()) {
-                        system.start(false)
+                        system.start()
                         permutation.testSetupEnvironment = new TestSetupEnvironment(system, null)
                         returnList.add(permutation)
                     }

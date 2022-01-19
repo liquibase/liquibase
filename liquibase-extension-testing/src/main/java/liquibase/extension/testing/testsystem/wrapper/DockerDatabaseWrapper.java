@@ -7,19 +7,21 @@ import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.extension.testing.testsystem.TestSystem;
 import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.util.ISO8601Utils;
 
-import java.text.ParseException;
-import java.text.ParsePosition;
 import java.util.*;
 import java.util.function.Consumer;
 
+/**
+ * Implementation of {@link DatabaseWrapper} for databases that are managed via docker in {@link JdbcDatabaseContainer}s.
+ */
 public class DockerDatabaseWrapper extends DatabaseWrapper {
+
+    public static final String TEST_SYSTEM_LABEL = "org.liquibase.testSystem";
 
     private final JdbcDatabaseContainer container;
     private final TestSystem testSystem;
 
-    private static Set<String> alreadyRunningContainerIds = new HashSet<>();
+    private static final Set<String> alreadyRunningContainerIds = new HashSet<>();
 
     public DockerDatabaseWrapper(JdbcDatabaseContainer container, TestSystem testSystem) {
         this.container = container;
@@ -27,57 +29,33 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
     }
 
     @Override
-    public void start(boolean keepRunning) throws Exception {
+    public void start() throws Exception {
         if (container.isRunning()) {
             return;
         }
 
         final DockerClient dockerClient = container.getDockerClient();
-        Container runningContainer = null;
         for (Container container : dockerClient.listContainersCmd().exec()) {
-            final String containerTestSystem = container.getLabels().get("org.liquibase.testsystem");
-            if (containerTestSystem != null && containerTestSystem.equals(testSystem.getName())) {
-                runningContainer = container;
+            final String containerTestSystem = container.getLabels().get(TEST_SYSTEM_LABEL);
+            if (containerTestSystem != null && containerTestSystem.equals(testSystem.getDefinition().toString())) {
                 break;
             }
         }
 
-        if (runningContainer == null) {
-            container.withReuse(keepRunning);
-        } else {
-            container.withReuse(true);
-        }
+        container.withReuse(testSystem.getKeepRunning());
 
-        if (runningContainer != null || keepRunning) {
+        if (testSystem.getKeepRunning()) {
             mapPorts(container);
         }
 
-        container.withLabel("org.liquibase.testsystem", testSystem.getName());
+        container.withLabel(TEST_SYSTEM_LABEL, testSystem.getDefinition().toString());
         container.start();
 
-//        if (newlyStarted()) { //it just started
-//            newlyStarted.add(container.getContainerId());
-//            final String initScript = getProperty("init.script", String.class);
-//            if (initScript != null) {
-//                final Connection connection;
-//                final String initUsername = getProperty("init.username", String.class);
-//
-//                if (initUsername == null) {
-//                    connection = openConnection();
-//                } else {
-//                    connection = openConnection(initUsername, getProperty("init.password", String.class));
-//                }
-//
-//                final Statement statement = connection.createStatement();
-//                for (String sql : StringUtil.splitSQL(initScript, ";")) {
-//                    statement.execute(sql);
-//                }
-//            }
-//        }
+        Scope.getCurrentScope().getLog(getClass()).info("Running " + testSystem.getDefinition() + " as container " + container.getContainerName());
     }
 
     protected void mapPorts(JdbcDatabaseContainer container) {
-        int[] ports = testSystem.getTestSystemProperty("ports", value -> {
+        int[] ports = testSystem.getConfiguredValue("ports", value -> {
             if (value == null) {
                 return null;
             }
@@ -94,7 +72,7 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
         if (ports == null) {
             final List<Integer> exposedPorts = container.getExposedPorts();
             ports = new int[exposedPorts.size()];
-            for (int i=0;i<exposedPorts.size(); i++) {
+            for (int i = 0; i < exposedPorts.size(); i++) {
                 ports[i] = exposedPorts.get(i);
 
             }
@@ -118,12 +96,12 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
             container.stop();
         } else {
             final DockerClient dockerClient = container.getDockerClient();
-            final List<Container> containers = dockerClient.listContainersCmd().withLabelFilter(Collections.singletonMap("org.liquibase.testsystem", testSystem.getName())).exec();
+            final List<Container> containers = dockerClient.listContainersCmd().withLabelFilter(Collections.singletonMap(TEST_SYSTEM_LABEL, testSystem.getDefinition().toString())).exec();
             if (containers.size() == 0) {
-                throw new UnexpectedLiquibaseException("Cannot find running container "+testSystem.getName());
+                throw new UnexpectedLiquibaseException("Cannot find running container " + testSystem.getDefinition().getName());
             } else {
                 for (Container container : containers) {
-                    Scope.getCurrentScope().getLog(getClass()).info("Stopping container "+container.getId());
+                    Scope.getCurrentScope().getLog(getClass()).info("Stopping container " + container.getId());
                     dockerClient.stopContainerCmd(container.getId()).exec();
                 }
             }
@@ -137,24 +115,10 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
 
     public JdbcDatabaseContainer getContainer() {
         return container;
-    };
+    }
 
     @Override
     public String getUsername() {
         return container.getUsername();
-    }
-
-    private boolean newlyStarted() {
-        if (!alreadyRunningContainerIds.add(container.getContainerId())) {
-            return false;
-        }
-
-        try {
-            final Date started = ISO8601Utils.parse(container.getCurrentContainerInfo().getCreated(), new ParsePosition(0));
-
-            return new Date().getTime() - started.getTime() < 60 * 1000;
-        } catch (ParseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
     }
 }

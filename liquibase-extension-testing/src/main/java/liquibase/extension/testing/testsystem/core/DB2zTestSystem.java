@@ -11,8 +11,12 @@ public class DB2zTestSystem extends DatabaseTestSystem {
         super("db2z");
     }
 
+    public DB2zTestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() throws Exception {
+    protected @NotNull DatabaseWrapper createContainerWrapper() throws Exception {
         return new UnimplementedWrapper();
     }
 

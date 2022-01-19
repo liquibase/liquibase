@@ -13,8 +13,12 @@ public class OracleTestSystem extends DatabaseTestSystem {
         super("oracle");
     }
 
+    public OracleTestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() {
+    protected @NotNull DatabaseWrapper createContainerWrapper() {
         return new DockerDatabaseWrapper(
                 new OracleContainer(DockerImageName.parse(getImageName()).withTag(getVersion()))
                         .withUsername(getUsername())

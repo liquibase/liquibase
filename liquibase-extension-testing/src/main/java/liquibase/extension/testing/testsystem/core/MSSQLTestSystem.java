@@ -14,8 +14,12 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
         super("mssql");
     }
 
+    public MSSQLTestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() {
+    protected @NotNull DatabaseWrapper createContainerWrapper() {
         return new DockerDatabaseWrapper(new MSSQLServerContainer(
                 DockerImageName.parse(getImageName()).withTag(getVersion())),
                 this

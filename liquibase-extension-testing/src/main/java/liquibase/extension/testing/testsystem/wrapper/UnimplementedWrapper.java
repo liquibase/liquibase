@@ -2,9 +2,14 @@ package liquibase.extension.testing.testsystem.wrapper;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 
+/**
+ * Wrapper for databases that are not yet implemented.
+ *
+ * @deprecated will remove when all TestSystems are created.
+ */
 public class UnimplementedWrapper extends DatabaseWrapper {
     @Override
-    public void start(boolean keepRunning) throws Exception {
+    public void start() throws Exception {
         throw new UnexpectedLiquibaseException("Unimplemented");
     }
 

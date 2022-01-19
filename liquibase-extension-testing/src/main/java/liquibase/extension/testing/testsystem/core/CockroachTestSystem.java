@@ -15,8 +15,12 @@ public class CockroachTestSystem extends DatabaseTestSystem {
         super("cockroachdb");
     }
 
+    public CockroachTestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() {
+    protected @NotNull DatabaseWrapper createContainerWrapper() {
         return new DockerDatabaseWrapper(new CockroachContainer(
                 DockerImageName.parse(getImageName()).withTag(getVersion())),
                 this

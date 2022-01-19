@@ -3,8 +3,9 @@ package liquibase.extension.testing.testsystem.core;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
-import liquibase.util.ObjectUtil;
 import org.jetbrains.annotations.NotNull;
+
+import java.sql.SQLException;
 
 public class H2TestSystem extends DatabaseTestSystem {
 
@@ -12,9 +13,13 @@ public class H2TestSystem extends DatabaseTestSystem {
         super("h2");
     }
 
+    public H2TestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    public String getDriver() {
-        String driver = super.getDriver();
+    public String getDriverJar() {
+        String driver = super.getDriverJar();
         if (driver == null) {
             final String version = getVersion();
             if (version != null) {
@@ -26,9 +31,13 @@ public class H2TestSystem extends DatabaseTestSystem {
     }
 
     @Override
-    protected @NotNull
-    DatabaseWrapper createWrapper() throws Exception {
-        return new JdbcDatabaseWrapper("jdbc:h2:mem:" + getTestSystemProperty("catalog", String.class), getUsername(), getPassword());
+    protected @NotNull JdbcDatabaseWrapper createJdbcWrapper(String url) throws SQLException {
+        return new JdbcDatabaseWrapper("jdbc:h2:mem:" + getConfiguredValue("catalog", String.class), getUsername(), getPassword());
+    }
+
+    @Override
+    protected DatabaseWrapper createContainerWrapper() throws Exception {
+        throw new IllegalArgumentException("Cannot create container for h2. Use url");
     }
 
     @Override

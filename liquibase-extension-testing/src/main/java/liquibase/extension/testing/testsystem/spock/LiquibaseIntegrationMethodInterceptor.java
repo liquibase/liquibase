@@ -8,7 +8,6 @@ import org.spockframework.runtime.model.SpecInfo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterceptor {
 
@@ -51,9 +50,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
     private static void startContainers(List<FieldInfo> containers, IMethodInvocation invocation) throws Exception {
         for (FieldInfo field : containers) {
             TestSystem env = readContainerFromField(field, invocation);
-            env.start(false);
-
-            env.beforeTest(invocation);
+            env.start();
 
         }
     }
@@ -61,10 +58,6 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
     private void stopContainers(List<FieldInfo> containers, IMethodInvocation invocation) throws Exception {
         for (FieldInfo field : containers) {
             TestSystem env = readContainerFromField(field, invocation);
-
-            // we assume first error is the one we want
-            final Optional<Throwable> maybeException = Optional.ofNullable(errorListener.getErrors().get(0).getException());
-            env.afterTest(invocation, errorListener.getErrors());
 
             env.stop();
 

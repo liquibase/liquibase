@@ -60,9 +60,9 @@
         </dependency>
 
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.5</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.33</version>
         </dependency>
 
         <dependency>
@@ -94,4 +94,40 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.testcontainers:*</include>
+                                    <include>org.slf4j:*</include>
+                                    <include>com.github.docker-java:*</include>
+                                    <include>org.apache.commons:*</include>
+                                    <include>junit:*</include>
+                                    <include>org.rnorth.duct-tape:*</include>
+                                    <include>net.java.dev.jna:*</include>
+                                </includes>
+                                <excludes>
+                                    <exclude>org.liquibase:*</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>deps</shadedClassifierName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

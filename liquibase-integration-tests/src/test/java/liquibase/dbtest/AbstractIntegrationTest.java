@@ -121,7 +121,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     private void openConnection() throws Exception {
-        DatabaseConnection connection = new JdbcConnection(testSystem.openConnection());
+        DatabaseConnection connection = new JdbcConnection(testSystem.getConnection());
 
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
     }
@@ -759,7 +759,7 @@ public abstract class AbstractIntegrationTest {
         }
         database.commit();
 
-        DatabaseConnection connection = new JdbcConnection(testSystem.openConnection());
+        DatabaseConnection connection = new JdbcConnection(testSystem.getConnection());
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
         database.setDefaultSchemaName("lbschem2");
         liquibase = createLiquibase(tempFile.getName());

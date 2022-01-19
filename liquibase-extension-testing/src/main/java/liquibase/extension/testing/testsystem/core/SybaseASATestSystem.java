@@ -11,8 +11,12 @@ public class SybaseASATestSystem extends DatabaseTestSystem {
         super("asany");
     }
 
+    public SybaseASATestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() throws Exception {
+    protected @NotNull DatabaseWrapper createContainerWrapper() throws Exception {
         return new UnimplementedWrapper();
     }
 

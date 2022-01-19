@@ -14,8 +14,12 @@ public class PostgresTestSystem extends DatabaseTestSystem {
         super("postgresql");
     }
 
+    public PostgresTestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() {
+    protected @NotNull DatabaseWrapper createContainerWrapper() {
         return new DockerDatabaseWrapper(new PostgreSQLContainer(
                 DockerImageName.parse(getImageName()).withTag(getVersion()))
                 .withUsername(getUsername())
@@ -29,7 +33,7 @@ public class PostgresTestSystem extends DatabaseTestSystem {
     protected String[] getSetupSql() {
         return new String[]{
                 "CREATE DATABASE " + getAltCatalog(),
-                "CREATE SCHEMA " + getAltSchema(),
+                "CREATE SCHEMA IF NOT EXISTS " + getAltSchema(),
                 "COPY (SELECT 1) TO PROGRAM 'mkdir -p /tmp/" + getAltTablespace() + "'",
                 "CREATE TABLESPACE " + getAltTablespace() + " OWNER lbuser LOCATION '/tmp/" + getAltTablespace() + "'",
                 "GRANT ALL PRIVILEGES ON DATABASE " + getCatalog() + " TO " + getUsername(),

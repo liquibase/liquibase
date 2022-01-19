@@ -1,17 +1,20 @@
 package liquibase.extension.testing.testsystem;
 
-import liquibase.Scope;
-import liquibase.configuration.ConfigurationValueConverter;
-import liquibase.configuration.ConfiguredValue;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
-import liquibase.util.StringUtil;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.lang.reflect.Constructor;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
+/**
+ * Factory for getting {@link TestSystem} implementations.
+ */
 public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
+
+    private Map<TestSystem.Definition, TestSystem> systems = new HashMap<>();
 
     @Override
     protected Class<TestSystem> getPluginClass() {
@@ -20,76 +23,45 @@ public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
 
     @Override
     protected int getPriority(TestSystem testSystem, Object... args) {
-        return testSystem.getPriority((String) args[0]);
+        return testSystem.getPriority((TestSystem.Definition) args[0]);
     }
 
-    public TestSystem getTestSystem(String description) {
-        if (description.contains(":") || description.contains("?")) {
-            final Definition definition = Definition.parse(description);
+    /**
+     * Return the {@link TestSystem} for the given {@link liquibase.extension.testing.testsystem.TestSystem.Definition}.
+     * Returns singleton instances for equal definitions.
+     */
+    public TestSystem getTestSystem(TestSystem.Definition definition) {
+        return systems.computeIfAbsent(definition, passedDefinition -> {
+            final TestSystem singleton = TestSystemFactory.this.getPlugin(passedDefinition);
 
-            final TestSystem plugin = super.getPlugin(definition.name);
-            if (plugin == null) {
-                throw new UnexpectedLiquibaseException("No test system: " + description);
+            if (singleton == null) {
+                throw new UnexpectedLiquibaseException("No test system: " + passedDefinition);
             }
-            plugin.setProfiles(definition.profiles);
-            plugin.setProperties(definition.properties);
 
-            return plugin;
-        }
-
-        final TestSystem plugin = super.getPlugin(description);
-        if (plugin == null) {
-            throw new UnexpectedLiquibaseException("No test system: " + description);
-        }
-
-        final ConfiguredValue<String> testSystemsValue = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test");
-        if (testSystemsValue != null) {
-            for (String testConfig : StringUtil.splitAndTrim(testSystemsValue.getValue(), ",")) {
-                final Definition definition = Definition.parse(testConfig);
-
-                if (!definition.name.equals(plugin.getName())) {
-                    continue;
-                }
-
-                plugin.setProfiles(definition.profiles);
-                plugin.setProperties(definition.properties);
+            try {
+                final Constructor<? extends TestSystem> pluginConstructor = singleton.getClass().getConstructor(TestSystem.Definition.class);
+                return pluginConstructor.newInstance(passedDefinition);
+            } catch (ReflectiveOperationException e) {
+                throw new UnexpectedLiquibaseException(e);
             }
-        }
-
-
-        return plugin;
+        });
     }
 
-    private static class Definition {
-        static final Pattern namePattern = Pattern.compile("^([^:?]+)");
-        static final Pattern profilePattern = Pattern.compile(":([^?]*)");
-        static final Pattern propertiesPattern = Pattern.compile("\\?(.*)");
+    /**
+     * Conveniene method for {@link #getTestSystem(TestSystem.Definition)} without having to parse the definition yourself.
+     */
+    public TestSystem getTestSystem(String definition) {
+        return getTestSystem(TestSystem.Definition.parse(definition));
+    }
 
-        private String name;
-        private String[] profiles;
-        private String properties;
+    public Set<String> getTestSystemNames() {
+        return super.findAllInstances().stream()
+                .map(testSystem -> testSystem.getDefinition().getName())
+                .collect(Collectors.toSet());
+    }
 
-        private static Definition parse(String definition) {
-            Definition returnObj = new Definition();
-
-            final Matcher nameMatcher = namePattern.matcher(definition);
-            if (!nameMatcher.find()) {
-                throw new IllegalArgumentException("Cannot parse name from " + definition);
-            }
-            returnObj.name = nameMatcher.group(1);
-
-
-            final Matcher profileMatcher = profilePattern.matcher(definition);
-            if (profileMatcher.find()) {
-                returnObj.profiles = StringUtil.splitAndTrim(profileMatcher.group(1), ",").toArray(new String[0]);
-            }
-
-            final Matcher propertiesMatcher = propertiesPattern.matcher(definition);
-            if (propertiesMatcher.find()) {
-                returnObj.properties = propertiesMatcher.group(1);
-            }
-
-            return returnObj;
-        }
+    @Override
+    protected synchronized Collection<TestSystem> findAllInstances() {
+        return super.findAllInstances();
     }
 }

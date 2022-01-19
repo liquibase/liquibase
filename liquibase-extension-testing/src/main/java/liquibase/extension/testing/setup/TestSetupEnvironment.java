@@ -21,7 +21,7 @@ public class TestSetupEnvironment {
     public String errorMessage;
 
     public TestSetupEnvironment(DatabaseTestSystem testSystem, DatabaseTestSystem altSystem) throws SQLException {
-        this.connection = testSystem.openConnection();
+        this.connection = testSystem.getConnection();
         this.url = testSystem.getUrl();
         this.username = testSystem.getUsername();
         this.password = testSystem.getPassword();

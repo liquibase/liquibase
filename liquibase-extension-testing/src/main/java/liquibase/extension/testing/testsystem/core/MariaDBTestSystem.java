@@ -14,8 +14,12 @@ public class MariaDBTestSystem extends DatabaseTestSystem {
         super("mariadb");
     }
 
+    public MariaDBTestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() {
+    protected DatabaseWrapper createContainerWrapper() throws Exception {
         return new DockerDatabaseWrapper(
                 new MariaDBContainer(DockerImageName.parse(getImageName()).withTag(getVersion()))
                         .withUsername(getUsername())

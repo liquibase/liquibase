@@ -11,8 +11,12 @@ public class InformixTestSystem  extends DatabaseTestSystem {
         super("informix");
     }
 
+    public InformixTestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() throws Exception {
+    protected DatabaseWrapper createContainerWrapper() throws Exception {
         return new UnimplementedWrapper();
     }
 

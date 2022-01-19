@@ -13,8 +13,12 @@ public class MySQLTestSystem extends DatabaseTestSystem {
         super("mysql");
     }
 
+    public MySQLTestSystem(Definition definition) {
+        super(definition);
+    }
+
     @Override
-    protected @NotNull DatabaseWrapper createWrapper() {
+    protected @NotNull DatabaseWrapper createContainerWrapper() {
         return new DockerDatabaseWrapper(
                 new MySQLContainer(DockerImageName.parse(getImageName()).withTag(getVersion()))
                         .withUsername(getUsername())

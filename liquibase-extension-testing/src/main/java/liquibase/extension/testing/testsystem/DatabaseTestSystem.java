@@ -3,6 +3,7 @@ package liquibase.extension.testing.testsystem;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
+import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
 import liquibase.extension.testing.util.DownloadUtil;
 import liquibase.logging.Logger;
 import liquibase.util.CollectionUtil;
@@ -10,80 +11,140 @@ import liquibase.util.ObjectUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
+/**
+ * Base class for {@link TestSystem}s for databases.
+ */
 public abstract class DatabaseTestSystem extends TestSystem {
+
+    private final SortedSet<String> configurationKeys = new TreeSet<>(Arrays.asList("username", "password", "setup.username", "setup.password", "driverJar",
+            "catalog", "altCatalog", "schema", "altSchema", "altTablespace", "version", "imageName", "url"));
 
     protected DatabaseWrapper wrapper;
 
-    private Map<String, Connection> connections = new HashMap<>();
-    private final String shortName;
+    private final Map<String, Connection> connections = new HashMap<>();
 
     public DatabaseTestSystem(String shortName) {
-        this.shortName = shortName;
+        super(shortName);
     }
 
-
-    @Override
-    public String getName() {
-        return shortName;
-    }
-
-    @Override
-    public int getPriority(String definition) {
-        if (definition.equals(shortName)) {
-            return PRIORITY_DEFAULT;
-        }
-
-        return PRIORITY_NOT_APPLICABLE;
+    public DatabaseTestSystem(Definition definition) {
+        super(definition);
     }
 
     @NotNull
-    protected abstract DatabaseWrapper createWrapper() throws Exception;
+    protected DatabaseWrapper createWrapper() throws Exception {
+        String url = getConfiguredValue("url", String.class);
+        String imageName = getImageName();
 
+        if (url == null && imageName == null) {
+            throw new IllegalArgumentException("Either url or imageName must be configured for " + getDefinition());
+        }
+        if (url != null && imageName != null) {
+            throw new IllegalArgumentException("Only url OR imageName must be configured for " + getDefinition() + ". Not both.");
+        }
+
+        final Logger log = Scope.getCurrentScope().getLog(getClass());
+        if (url != null) {
+            log.fine("Creating JDBC wrapper for " + url);
+            return createJdbcWrapper(url);
+        }
+
+        return createContainerWrapper();
+    }
+
+    @NotNull
+    protected JdbcDatabaseWrapper createJdbcWrapper(String url) throws SQLException {
+        return new JdbcDatabaseWrapper(url, getUsername(), getPassword());
+    }
+
+    protected abstract DatabaseWrapper createContainerWrapper() throws Exception;
+
+    /**
+     * Default implementation uses {@link #createWrapper()} to manage the external system.
+     * Multiple calls to start() will be no-ops.
+     * Calls {@link #setup()} after starting the wrapper.
+     */
     @Override
-    public void start(boolean keepRunning) throws Exception {
+    public void start() throws Exception {
         if (wrapper != null) {
             return;
         }
 
         wrapper = createWrapper();
 
-        wrapper.start(keepRunning);
+        Scope.getCurrentScope().getUI().sendMessage("Starting database: " + this.getDefinition());
 
+        Scope.getCurrentScope().getLog(getClass()).info("Starting database: " + this.getDefinition());
+        wrapper.start();
+
+        Scope.getCurrentScope().getLog(getClass()).info("Configuring database: " + this.getDefinition());
         setup();
+
+        Scope.getCurrentScope().getUI().sendMessage("Database " + getDefinition() + " available:\n" +
+                "    url: " + this.getUrl() + "\n" +
+                "    username: " + this.getUsername() + "\n" +
+                "    password: " + this.getPassword() + "\n"
+        );
     }
 
-
+    /**
+     * Default implementation uses {@link #createWrapper()} to manage the external system, and calls {@link DatabaseWrapper#stop()}
+     */
     @Override
     public void stop() throws Exception {
         if (wrapper == null) {
             wrapper = createWrapper();
         }
+
+        Scope.getCurrentScope().getUI().sendMessage("Stopping database wrapper: " + wrapper);
+        Scope.getCurrentScope().getLog(getClass()).info("Stopping database wrapper: " + wrapper);
         wrapper.stop();
-        System.out.println(wrapper);
+        Scope.getCurrentScope().getLog(getClass()).info("Stopped database wrapper: " + wrapper);
     }
 
-    public String getDriver() {
-        return getTestSystemProperty("driver", String.class);
+    /**
+     * Returns the driver library to use. Supports maven-style coordinate, like "com.h2database:h2:1.4.200".
+     * Default implementation uses the "driverJar" testSystem configuration value.
+     */
+    public String getDriverJar() {
+        return getConfiguredValue("driverJar", String.class);
     }
 
-    protected Connection openConnection(String url, String username, String password) throws SQLException {
+    /**
+     * Opens a connection to the given url, username, and password. This is not an end-user facing function because the url to use should be
+     * managed by the DatabaseWrapper, not the user.
+     */
+    protected Connection getConnection(String url, String username, String password) throws SQLException {
+        Driver driver = getDriver(url);
+
+        Properties properties = new Properties();
+        properties.put("user", username);
+        properties.put("password", password);
+        return driver.connect(url, properties);
+    }
+
+    /**
+     * @return the Driver instance to use for the given url.
+     * Default implementation uses the value in {@link #getDriverJar()} as needed and will download the library and manage the classloader as needed.
+     */
+    protected Driver getDriver(String url) throws SQLException {
         try {
-            String driverConfig = getDriver();
+            Scope.getCurrentScope().getLog(getClass()).fine("Loading driver for " + url);
+            String driverJar = getDriverJar();
             Driver driver;
 
-            if (driverConfig == null) {
-                driver = DriverManager.getDriver(getUrl());
+            if (driverJar == null) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Using driver from standard classloader");
+                driver = DriverManager.getDriver(url);
             } else {
-                Path driverPath = DownloadUtil.downloadMavenArtifact(driverConfig);
+                Scope.getCurrentScope().getLog(getClass()).fine("Using driver from " + driverJar);
+                Path driverPath = DownloadUtil.downloadMavenArtifact(driverJar);
                 final URLClassLoader isolatedClassloader = new URLClassLoader(new URL[]{
                         driverPath.toUri().toURL(),
                 }, null);
@@ -94,85 +155,139 @@ public abstract class DatabaseTestSystem extends TestSystem {
                 final Driver driverClass = (Driver) getDriverMethod.invoke(null, url);
                 driver = (Driver) Class.forName(driverClass.getClass().getName(), true, isolatedClassloader).newInstance();
             }
-
-            Properties properties = new Properties();
-            properties.put("user", username);
-            properties.put("password", password);
-            return driver.connect(url, properties);
-        } catch (ReflectiveOperationException | MalformedURLException e) {
-            throw new UnexpectedLiquibaseException(e.getMessage(), e);
+            return driver;
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
         }
     }
 
+    /**
+     * Opens a connection with valid permissions for the {@link #setup()} logic.
+     */
     protected Connection openSetupConnection() throws SQLException {
-        return openConnection(wrapper.getUrl(), getSetupUsername(), getSetupPassword());
+        return getConnection(wrapper.getUrl(), getSetupUsername(), getSetupPassword());
     }
 
-    public Connection openConnection() throws SQLException {
-        return openConnection(getUsername(), getPassword());
+    /**
+     * Returns the connection to this database. Will reuse a single connection rather than continually open new ones.
+     * Convenience method for {@link #getConnection(String, String)} using {@link #getUsername()} and {@link #getPassword()}
+     */
+    public Connection getConnection() throws SQLException {
+        return getConnection(getUsername(), getPassword());
     }
 
-    public Connection openConnection(String username, String password) throws SQLException {
+    /**
+     * Returns the connection to this database. Will reuse a single connection for each username/password combo rather than continually open new ones.
+     */
+    public Connection getConnection(String username, String password) throws SQLException {
         final String key = username + ":" + password;
+
         Connection connection = connections.get(key);
         if (connection == null || connection.isClosed()) {
-            connection = openConnection(getUrl(), username, password);
+            connection = getConnection(getUrl(), username, password);
             connections.put(key, connection);
         }
         return connection;
     }
 
+    /**
+     * Return the url to connect to this database.
+     */
     public String getUrl() {
         return wrapper.getUrl();
     }
 
+    /**
+     * Standard username to use when connecting. Returns "username" test system configuration.
+     */
     public String getUsername() {
-        return getTestSystemProperty("username", String.class);
+        return getConfiguredValue("username", String.class);
     }
 
+    /**
+     * Standard password to use when connecting. Returns "password" test system configuration.
+     */
     public String getPassword() {
-        return getTestSystemProperty("password", String.class);
+        return getConfiguredValue("password", String.class);
     }
 
+    /**
+     * Standard "catalog" to use for testing. Returns "catalog" test system configuration.
+     */
     public String getCatalog() {
-        return getTestSystemProperty("catalog", String.class);
+        return getConfiguredValue("catalog", String.class);
     }
 
+    /**
+     * Standard alt catalog to use for testing. Returns "altCatalog" test system configuration.
+     */
     public String getAltCatalog() {
-        return getTestSystemProperty("altCatalog", String.class);
+        return getConfiguredValue("altCatalog", String.class);
     }
 
+    /**
+     * Standard alt schema to use for testing. Returns "altSchema" test system configuration.
+     */
     public String getAltSchema() {
-        return getTestSystemProperty("altSchema", String.class);
+        return getConfiguredValue("altSchema", String.class);
     }
 
+    /**
+     * Standard alt tablespace to use for testing. Returns "username" test system configuration.
+     */
     public String getAltTablespace() {
-        return getTestSystemProperty("altTablespace", String.class);
+        return getConfiguredValue("altTablespace", String.class);
     }
 
+    /**
+     * "Privileged" username to use for {@link #setup()}. Returns "setup.username" or "username" test system configuration.
+     */
     protected String getSetupUsername() {
-        return ObjectUtil.defaultIfNull(getTestSystemProperty("setup.username", String.class), getUsername());
+        return ObjectUtil.defaultIfNull(getConfiguredValue("setup.username", String.class), getUsername());
     }
 
+    /**
+     * "Privileged" password to use for {@link #setup()}. Returns "setup.password" or "password" test system configuration.
+     */
     protected String getSetupPassword() {
-        return ObjectUtil.defaultIfNull(getTestSystemProperty("setup.password", String.class), getPassword());
+        return ObjectUtil.defaultIfNull(getConfiguredValue("setup.password", String.class), getPassword());
     }
 
+    /**
+     * Version of the database to test against."Privileged" username to use for {@link #setup()}. Returns "version" test system configuration.
+     */
     protected String getVersion() {
-        return getTestSystemProperty("version", String.class);
+        return getConfiguredValue("version", String.class);
     }
 
+    /**
+     * Docker image of the database to test against. Returns "imageName" test system configuration.
+     */
     protected String getImageName() {
-        return getTestSystemProperty("imageName", String.class);
+        return getConfiguredValue("imageName", String.class);
     }
 
+    /**
+     * Sets up any needed catalogs/schemas/usernames/etc.
+     */
     protected void setup() throws SQLException {
         final Logger log = Scope.getCurrentScope().getLog(getClass());
         try (final Connection connection = openSetupConnection();
              final Statement statement = connection.createStatement()) {
             for (String sql : CollectionUtil.createIfNull(getSetupSql())) {
                 log.info("Running setup SQL: " + sql);
-                statement.execute(sql);
+                try {
+                    statement.execute(sql);
+                } catch (SQLException e) {
+                    log.info("Error running setup SQL " + sql + ": " + e.getMessage() + ". Continuing on");
+                    log.fine(e.getMessage(), e);
+
+                    if (!connection.getAutoCommit()) {
+                        connection.rollback();
+                    }
+                }
             }
 
             if (!connection.getAutoCommit()) {
@@ -181,7 +296,9 @@ public abstract class DatabaseTestSystem extends TestSystem {
         }
     }
 
+    /**
+     * Define SQL to run by {@link #setup()}
+     */
     protected abstract String[] getSetupSql();
-
 
 }

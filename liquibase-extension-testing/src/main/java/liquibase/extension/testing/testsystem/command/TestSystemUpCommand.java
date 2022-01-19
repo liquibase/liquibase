@@ -49,8 +49,6 @@ public class TestSystemUpCommand extends AbstractCommandStep {
         }
         final TestSystem env = new TestSystemFactory().getTestSystem(definition);
 
-        env.start(true);
-
-        System.out.println("Start environment '" + env + "'");
+        env.start();
     }
 }

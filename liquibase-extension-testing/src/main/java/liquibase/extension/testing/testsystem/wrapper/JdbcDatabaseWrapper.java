@@ -2,10 +2,11 @@ package liquibase.extension.testing.testsystem.wrapper;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * Implementation of {@link DatabaseWrapper} for databases that are connected to via a JDBC url and are not "started" in a traditional sense.
+ */
 public class JdbcDatabaseWrapper extends DatabaseWrapper {
 
     private final String url;
@@ -19,7 +20,7 @@ public class JdbcDatabaseWrapper extends DatabaseWrapper {
     }
 
     @Override
-    public void start(boolean keepRunning) throws Exception {
+    public void start() throws Exception {
 
     }
 
