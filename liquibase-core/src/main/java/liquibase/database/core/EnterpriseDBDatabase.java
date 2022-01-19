@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -26,7 +27,8 @@ public class EnterpriseDBDatabase extends PostgresDatabase {
                             }
                         }
                     }
-                } catch (SQLException throwables) {
+                } catch (SQLException e) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Error checking if connection is an EnterpriseDB database: "+e.getMessage(), e);
                     return false;
                 }
             }
