@@ -587,7 +587,14 @@ public class StandardHubService implements HubService {
 
     @Override
     public CoreInitOnboardingResponse validateOnboardingToken(String token) throws LiquibaseHubException {
-        return http.doPost("/api/v1/init", Collections.singletonMap("onboardingToken", token), CoreInitOnboardingResponse.class);
+        // This call does not use authentication, so we purposefully override any existing hub API key with empty string.
+        Map<String, Object> hubApiKeyScopeValues = Collections.singletonMap(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "");
+        try {
+            return Scope.child(hubApiKeyScopeValues, () -> http.doPost("/api/v1/init", Collections.singletonMap("onboardingToken", token), CoreInitOnboardingResponse.class));
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).severe("Failed to call Hub to validate onboarding token", e);
+            throw new LiquibaseHubException(e);
+        }
     }
 
     /**
