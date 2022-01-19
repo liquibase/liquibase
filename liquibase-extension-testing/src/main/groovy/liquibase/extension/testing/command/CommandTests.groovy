@@ -905,6 +905,18 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         /**
          *
+         * Delete the specified resources after the test using a FilenameFilter
+         *
+         * @param filter
+         * @param resourceDirectory
+         *
+         */
+        void cleanResourcesAfter(FilenameFilter filter, File resourceDirectory) {
+            this.setups.add(new SetupCleanResources(CleanupMode.CLEAN_ON_CLEANUP, filter, resourceDirectory))
+        }
+
+        /**
+         *
          * Delete the specified resources at possibly setup and cleanup
          *
          * @param filesToDelete
