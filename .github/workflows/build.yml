@@ -150,6 +150,32 @@ jobs:
           path: |
             */target/*-0-SNAPSHOT.jar
 
+  sonar:
+    name: Sonar Scan
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: 'adopt'
+          cache: 'maven'
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_TOKEN
+
   integration-test:
     name: Integration Test
     runs-on: ubuntu-latest
@@ -308,7 +334,7 @@ jobs:
   finish:
     name: Finish Build
     runs-on: ubuntu-latest
-    needs: [ setup, build, integration-test, package ]
+    needs: [ setup, build, integration-test, package, sonar ]
     if: ${{ always() }}
     steps:
       - uses: actions/checkout@v2
