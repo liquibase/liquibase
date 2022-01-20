@@ -971,7 +971,7 @@ public class LiquibaseCommandLine {
                 "- Environment values (env variable listed above)\n" +
                 "- Defaults file (configuration key OR argument name)\n\n" +
                 "Full documentation is available at\n" +
-                "http://www.liquibase.org";
+                "https://docs.liquibase.com";
 
 
         commandSpec.addOption(CommandLine.Model.OptionSpec.builder("--help", "-h")

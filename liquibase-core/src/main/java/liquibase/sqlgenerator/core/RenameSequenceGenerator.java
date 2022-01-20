@@ -19,7 +19,8 @@ public class RenameSequenceGenerator extends AbstractSqlGenerator<RenameSequence
             && !(database instanceof FirebirdDatabase)
             && !(database instanceof H2Database)
             && !(database instanceof HsqlDatabase)
-            && !(database instanceof InformixDatabase);
+            && !(database instanceof InformixDatabase)
+            && !(database instanceof SQLiteDatabase);
     }
 
     @Override
