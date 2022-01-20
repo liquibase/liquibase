@@ -747,6 +747,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         if (replacementExecutorName != null) {
             Scope.getCurrentScope().getLog(ChangeSet.class).info("Mapped '" + executorName + "' to executor '" + replacementExecutorName + "'");
             return replacementExecutorName;
+        } else if (executorName.equalsIgnoreCase("native")) {
+            String message = "Unable to locate an executor for 'runWith=native'.  You must specify a valid executor name.";
+            Scope.getCurrentScope().getLog(ChangeSet.class).warning(message);
+            Scope.getCurrentScope().getUI().sendErrorMessage("WARNING: " + message);
         }
         return executorName;
     }

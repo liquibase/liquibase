@@ -190,8 +190,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         int returnCode = 0;
         try {
             //output both stdout and stderr data from proc to stdout of this process
-            StreamGobbler errorGobbler = new StreamGobbler(p.getErrorStream(), errorStream);
-            StreamGobbler outputGobbler = new StreamGobbler(p.getInputStream(), inputStream);
+            StreamGobbler errorGobbler = new StreamGobbler(p.getErrorStream(), errorStream, Thread.currentThread());
+            StreamGobbler outputGobbler = new StreamGobbler(p.getInputStream(), inputStream, Thread.currentThread());
 
             errorGobbler.start();
             outputGobbler.start();
@@ -273,6 +273,11 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 }
             } catch (InterruptedException ignore) {
                 // check again
+                if (timedOut.get()) {
+                    timer.cancel();
+                    String timeoutStr = timeout != null ? timeout : timeoutInMillis + " ms";
+                    throw new TimeoutException("Process timed out (" + timeoutStr + ")");
+                }
             }
         }
 
@@ -374,10 +379,12 @@ public class ExecuteShellCommandChange extends AbstractChange {
         private InputStream processStream;
         boolean loggedTruncated = false;
         long copiedSize = 0;
+        private Thread parentThread;
 
-        private StreamGobbler(InputStream processStream, ByteArrayOutputStream outputStream) {
+        private StreamGobbler(InputStream processStream, ByteArrayOutputStream outputStream, Thread parentThread) {
             this.processStream = processStream;
             this.outputStream = outputStream;
+            this.parentThread = parentThread;
         }
 
         @Override
@@ -397,6 +404,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 }
             } catch (IOException ioe) {
                 ioe.printStackTrace();
+                parentThread.interrupt();
             }
         }
 
