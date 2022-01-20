@@ -34,7 +34,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void tsetasd() throws DatabaseException {
+    public void showVersion() throws DatabaseException {
         System.out.println(getDatabase().getDatabaseProductVersion());
     }
 

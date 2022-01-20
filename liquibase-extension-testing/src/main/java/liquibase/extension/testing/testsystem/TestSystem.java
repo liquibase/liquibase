@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 public abstract class TestSystem implements TestRule, Plugin {
 
     private static final SortedSet<TestSystem.Definition> testSystems = new TreeSet<>();
-    private static final ConfiguredValue<String> configuredTestSystems;
+    private static final String configuredTestSystems;
 
     private final Definition definition;
 
@@ -39,9 +39,9 @@ public abstract class TestSystem implements TestRule, Plugin {
 
     static {
         //cache configured test systems for faster lookup
-        configuredTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test");
+        configuredTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test").getValue();
         if (configuredTestSystems != null) {
-            for (String definition : StringUtil.splitAndTrim(configuredTestSystems.getValue(), ","))
+            for (String definition : StringUtil.splitAndTrim(configuredTestSystems, ","))
                 testSystems.add(TestSystem.Definition.parse(definition));
         }
     }

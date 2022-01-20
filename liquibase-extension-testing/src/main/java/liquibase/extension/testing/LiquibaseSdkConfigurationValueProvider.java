@@ -9,6 +9,7 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +22,13 @@ public class LiquibaseSdkConfigurationValueProvider extends AbstractMapConfigura
         properties = new HashMap<>();
         Yaml yaml = new Yaml(new SafeConstructor());
         try {
-            for (URL url : Collections.list(this.getClass().getClassLoader().getResources("liquibase.sdk.yaml"))) {
+            final ArrayList<URL> urls = new ArrayList<>();
+            urls.addAll(Collections.list(this.getClass().getClassLoader().getResources("liquibase.sdk.yaml")));
+            urls.addAll(Collections.list(this.getClass().getClassLoader().getResources("liquibase.sdk.yml")));
+            urls.addAll(Collections.list(this.getClass().getClassLoader().getResources("liquibase.sdk.local.yaml")));
+            urls.addAll(Collections.list(this.getClass().getClassLoader().getResources("liquibase.sdk.local.yml")));
+
+            for (URL url : urls) {
                 try (InputStream stream = url.openStream()) {
                     Map settings = yaml.load(stream);
 

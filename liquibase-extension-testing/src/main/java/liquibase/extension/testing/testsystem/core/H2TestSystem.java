@@ -2,10 +2,6 @@ package liquibase.extension.testing.testsystem.core;
 
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
-import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
-import org.jetbrains.annotations.NotNull;
-
-import java.sql.SQLException;
 
 public class H2TestSystem extends DatabaseTestSystem {
 
@@ -23,7 +19,7 @@ public class H2TestSystem extends DatabaseTestSystem {
         if (driver == null) {
             final String version = getVersion();
             if (version != null) {
-                driver = "com.h2database:h2:"+version;
+                driver = "com.h2database:h2:" + version;
             }
         }
 
@@ -39,6 +35,7 @@ public class H2TestSystem extends DatabaseTestSystem {
     protected String[] getSetupSql() {
         return new String[]{
                 "create schema " + getAltSchema(),
+                "grant all on schema " + getAltSchema() + " to " + getUsername(),
         };
     }
 }

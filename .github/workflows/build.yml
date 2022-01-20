@@ -184,6 +184,7 @@ jobs:
       matrix:
         testSystem:
           - h2
+          - h2:1.4
           - hsql
           - mariadb
           - mssql

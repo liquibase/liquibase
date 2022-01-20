@@ -1,3 +1,10 @@
+########
+## This file defines the default settings to connect to test systems understood by Liquibase core.
+##
+## To override values for your particular environment, create a liquibase.sdk.local.yaml file in the classpath and set
+## whatever settings you want to be different than this default.
+########
+
 liquibase:
   sdk:
     testSystem:
@@ -30,13 +37,13 @@ liquibase:
         version: 11.5.6.0a
 
       h2:
-        url: jdbc:h2:mem:${catalog}
+        url: jdbc:h2:mem:${catalog};DB_CLOSE_DELAY=-1
         profiles:
           "1.4":
             version: 1.4.200
           "2.0":
 
-      hsql:
+      hsqldb:
         url: jdbc:hsqldb:mem:${catalog}
 
       mariadb:
