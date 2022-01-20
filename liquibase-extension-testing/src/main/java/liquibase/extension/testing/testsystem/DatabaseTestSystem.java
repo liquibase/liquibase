@@ -1,6 +1,8 @@
 package liquibase.extension.testing.testsystem;
 
 import liquibase.Scope;
+import liquibase.configuration.ConfigurationValueConverter;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
@@ -8,6 +10,7 @@ import liquibase.extension.testing.util.DownloadUtil;
 import liquibase.logging.Logger;
 import liquibase.util.CollectionUtil;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
@@ -78,16 +81,17 @@ public abstract class DatabaseTestSystem extends TestSystem {
 
         wrapper = createWrapper();
 
-        Scope.getCurrentScope().getUI().sendMessage("Starting database: " + this.getDefinition());
+        Scope.getCurrentScope().getUI().sendMessage("Starting database '" + this.getDefinition() + "'");
 
-        Scope.getCurrentScope().getLog(getClass()).info("Starting database: " + this.getDefinition());
         wrapper.start();
 
-        Scope.getCurrentScope().getLog(getClass()).info("Configuring database: " + this.getDefinition());
+        Scope.getCurrentScope().getLog(getClass()).info("Configuring database '" + this.getDefinition() + "'");
         setup();
 
-        Scope.getCurrentScope().getUI().sendMessage("Database " + getDefinition() + " available:\n" +
-                "    url: " + this.getUrl() + "\n" +
+        Scope.getCurrentScope().getUI().sendMessage("Database '" + getDefinition() + "' details:\n" + StringUtil.indent(wrapper.describe()));
+
+        Scope.getCurrentScope().getUI().sendMessage("Database '" + getDefinition() + "' connection information:\n" +
+                "    url: " + this.getConnectionUrl() + "\n" +
                 "    username: " + this.getUsername() + "\n" +
                 "    password: " + this.getPassword() + "\n"
         );
@@ -186,16 +190,17 @@ public abstract class DatabaseTestSystem extends TestSystem {
 
         Connection connection = connections.get(key);
         if (connection == null || connection.isClosed()) {
-            connection = getConnection(getUrl(), username, password);
+            connection = getConnection(getConnectionUrl(), username, password);
             connections.put(key, connection);
         }
         return connection;
     }
 
     /**
-     * Return the url to connect to this database.
+     * Return the url used to connect to this database.
+     * NOTE: this may be different than the 'url' configured value because the TestSystem implementations are free to tweak and control this URL based on other settings.
      */
-    public String getUrl() {
+    public String getConnectionUrl() {
         return wrapper.getUrl();
     }
 

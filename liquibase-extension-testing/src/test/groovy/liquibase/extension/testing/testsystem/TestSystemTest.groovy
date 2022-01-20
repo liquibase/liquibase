@@ -60,6 +60,19 @@ class TestSystemTest extends Specification {
             def system = new ThisTestSystem(TestSystem.Definition.parse("testing:x?prop1=val1"))
             assert system.getConfiguredValue("prop1", String, false) == "val1"
         } as Scope.ScopedRunner)
+
+
+        Scope.child([
+                "liquibase.sdk.testSystem.testing.prop1"           : "val1",
+                "liquibase.sdk.testSystem.testing.prop2": "I see \${prop1}",
+                "liquibase.sdk.testSystem.testing.prop3": "I see \${ prop1 }",
+        ], { ->
+
+            def system = new ThisTestSystem(TestSystem.Definition.parse("testing"))
+            assert system.getConfiguredValue("prop1", String) == "val1"
+            assert system.getConfiguredValue("prop2", String) == "I see val1"
+            assert system.getConfiguredValue("prop3", String) == "I see val1"
+        } as Scope.ScopedRunner)
     }
 
     private static class ThisTestSystem extends TestSystem {

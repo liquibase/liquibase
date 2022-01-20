@@ -15,12 +15,6 @@ liquibase:
       hub:
         url: http://localhost:8888
 
-      h2:
-        profiles:
-          "1.4":
-            version: 1.4.200
-          "2.0":
-
       cockroachdb:
         version: latest-v21.2
         imageName: cockroachdb/cockroach
@@ -28,9 +22,22 @@ liquibase:
         setup:
           username: root
 
+      derby:
+        url: jdbc:derby:memory:${catalog}
+
       db2:
         imageName: ibmcom/db2
         version: 11.5.6.0a
+
+      h2:
+        url: jdbc:h2:mem:${catalog}
+        profiles:
+          "1.4":
+            version: 1.4.200
+          "2.0":
+
+      hsql:
+        url: jdbc:hsqldb:mem:${catalog}
 
       mariadb:
         imageName: mariadb
@@ -62,5 +69,6 @@ liquibase:
         imageName: postgres
         version: 9.6
 
-
+      sqlite:
+        url: "jdbc:sqlite::memory:"
 

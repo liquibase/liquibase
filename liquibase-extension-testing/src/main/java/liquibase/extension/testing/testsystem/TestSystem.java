@@ -6,6 +6,7 @@ import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.Plugin;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 import org.junit.Assume;
 import org.junit.rules.TestRule;
@@ -166,9 +167,25 @@ public abstract class TestSystem implements TestRule, Plugin {
      * If a value is not found, it will return null or throw an {@link UnexpectedLiquibaseException} if 'required' is true.
      */
     public <T> T getConfiguredValue(String propertyName, ConfigurationValueConverter<T> converter, boolean required) {
+        ConfigurationValueConverter<T> finalConverter = value -> {
+            if (value instanceof String && ((String) value).contains("${")) {
+                final Matcher matcher = Pattern.compile("(\\$\\{.+?})").matcher((String) value);
+                while (matcher.find()) {
+                    final String config = matcher.group(1).replace("${", "").replace("}", "").trim();
+                    value = ((String) value).replace(matcher.group(1), getConfiguredValue(config, String.class));
+                }
+            }
+
+            if (converter == null) {
+                return (T) value;
+            } else {
+                return converter.convert(value);
+            }
+        };
+
         final SortedMap<String, Object> properties = definition.getProperties();
         if (properties.containsKey(propertyName)) {
-            return converter.convert(properties.get(propertyName));
+            return finalConverter.convert(properties.get(propertyName));
         }
 
         final LiquibaseConfiguration config = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
@@ -176,21 +193,21 @@ public abstract class TestSystem implements TestRule, Plugin {
         ConfiguredValue<T> configuredValue;
         //first check profiles
         for (String profile : definition.getProfiles()) {
-            configuredValue = config.getCurrentConfiguredValue(converter, null, "liquibase.sdk.testSystem." + getDefinition().getName() + ".profiles." + profile + "." + propertyName);
+            configuredValue = config.getCurrentConfiguredValue(finalConverter, null, "liquibase.sdk.testSystem." + getDefinition().getName() + ".profiles." + profile + "." + propertyName);
 
             if (configuredValue.found()) {
                 return configuredValue.getValue();
             }
         }
 
-        configuredValue = config.getCurrentConfiguredValue(converter, null, "liquibase.sdk.testSystem." + getDefinition().getName() + "." + propertyName);
+        configuredValue = config.getCurrentConfiguredValue(finalConverter, null, "liquibase.sdk.testSystem." + getDefinition().getName() + "." + propertyName);
 
         if (configuredValue.found()) {
             return configuredValue.getValue();
         }
 
         //fall back to "default" setup
-        configuredValue = config.getCurrentConfiguredValue(converter, null, "liquibase.sdk.testSystem.default." + propertyName);
+        configuredValue = config.getCurrentConfiguredValue(finalConverter, null, "liquibase.sdk.testSystem.default." + propertyName);
         if (configuredValue.found()) {
             return configuredValue.getValue();
         }

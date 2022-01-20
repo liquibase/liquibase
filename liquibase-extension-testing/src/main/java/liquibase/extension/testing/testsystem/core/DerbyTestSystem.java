@@ -24,11 +24,6 @@ public class DerbyTestSystem extends DatabaseTestSystem {
     }
 
     @Override
-    protected @NotNull JdbcDatabaseWrapper createJdbcWrapper(String url) throws SQLException {
-        return new JdbcDatabaseWrapper("jdbc:derby:memory:"+getCatalog(), getUsername(), getPassword());
-    }
-
-    @Override
     protected String[] getSetupSql() {
         return new String[] {
                 "create schema "+getAltSchema(),

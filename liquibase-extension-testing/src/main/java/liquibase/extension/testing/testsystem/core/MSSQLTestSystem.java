@@ -23,11 +23,16 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
         return new DockerDatabaseWrapper(new MSSQLServerContainer(
                 DockerImageName.parse(getImageName()).withTag(getVersion())),
                 this
-        );
+        ) {
+            @Override
+            protected Runnable requireLicense() {
+                return ((MSSQLServerContainer) getContainer())::acceptLicense;
+            }
+        };
     }
 
     @Override
-    public String getUrl() {
+    public String getConnectionUrl() {
         final JdbcDatabaseContainer container = ((DockerDatabaseWrapper) wrapper).getContainer();
 
         return "jdbc:sqlserver://" + container.getHost() + ":" + container.getMappedPort(MSSQLServerContainer.MS_SQL_SERVER_PORT)+";databaseName="+getCatalog();

@@ -1,11 +1,15 @@
 package liquibase.extension.testing.testsystem.command;
 
+import liquibase.Scope;
 import liquibase.command.AbstractCommandStep;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandBuilder;
 import liquibase.command.CommandResultsBuilder;
 import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.extension.testing.testsystem.TestSystemFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestSystemUpCommand extends AbstractCommandStep {
 
@@ -14,6 +18,7 @@ public class TestSystemUpCommand extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> NAME;
     public static final CommandArgumentDefinition<String> VERSION;
     public static final CommandArgumentDefinition<String> PROFILES;
+    public static final CommandArgumentDefinition<Boolean> ACCEPT_LICENSES;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -24,6 +29,10 @@ public class TestSystemUpCommand extends AbstractCommandStep {
                 .description("Override version to use").build();
         PROFILES = builder.argument("profiles", String.class)
                 .description("Set profile(s)").build();
+        ACCEPT_LICENSES = builder.argument("acceptLicense", Boolean.class)
+                .description("Accept licenses for any systems used/accessed")
+                .defaultValue(false)
+                .build();
     }
 
     @Override
@@ -39,6 +48,7 @@ public class TestSystemUpCommand extends AbstractCommandStep {
         final String name = resultsBuilder.getCommandScope().getConfiguredValue(NAME).getValue();
         final String version = resultsBuilder.getCommandScope().getConfiguredValue(VERSION).getValue();
         final String profiles = resultsBuilder.getCommandScope().getConfiguredValue(PROFILES).getValue();
+        final Boolean acceptLicenses = resultsBuilder.getCommandScope().getConfiguredValue(ACCEPT_LICENSES).getValue();
 
         String definition = name;
         if (profiles != null) {
@@ -47,8 +57,14 @@ public class TestSystemUpCommand extends AbstractCommandStep {
         if (version != null) {
             definition += "?version=" + version;
         }
-        final TestSystem env = new TestSystemFactory().getTestSystem(definition);
+        final TestSystem testSystem = new TestSystemFactory().getTestSystem(definition);
 
-        env.start();
+        Map<String, Object> scopeValues = new HashMap<>();
+        if (acceptLicenses) {
+            scopeValues.put("liquibase.sdk.testSystem.acceptLicenses", testSystem.getDefinition().getName());
+        }
+
+        Scope.child(scopeValues, testSystem::start);
+
     }
 }

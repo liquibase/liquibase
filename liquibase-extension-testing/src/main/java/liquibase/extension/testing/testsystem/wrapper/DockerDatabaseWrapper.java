@@ -4,8 +4,13 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.*;
 import liquibase.Scope;
+import liquibase.configuration.ConfigurationValueConverter;
+import liquibase.configuration.ConfiguredValue;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.extension.testing.testsystem.TestSystem;
+import liquibase.util.CollectionUtil;
+import liquibase.util.StringUtil;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import java.util.*;
@@ -29,6 +34,15 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
     }
 
     @Override
+    public String describe() {
+        return "Docker image: " + container.getDockerImageName() + "\n" +
+                "Container name: " + container.getContainerName() + "\n" +
+                "Exposed ports: " + StringUtil.join(container.getExposedPorts(), ",") + "\n" +
+                "Reusable: " + container.isShouldBeReused();
+
+    }
+
+    @Override
     public void start() throws Exception {
         if (container.isRunning()) {
             return;
@@ -49,9 +63,36 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
         }
 
         container.withLabel(TEST_SYSTEM_LABEL, testSystem.getDefinition().toString());
+
+        final Runnable licenseAccept = this.requireLicense();
+        if (licenseAccept != null) {
+            final ConfiguredValue<String> acceptedLicenses = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.acceptLicenses");
+
+            Set<String> accepted = new HashSet<>();
+            if (acceptedLicenses != null) {
+                accepted.addAll(CollectionUtil.createIfNull(StringUtil.splitAndTrim(acceptedLicenses.getValue(), ",")));
+            }
+
+            if (accepted.contains(this.testSystem.getDefinition().getName())) {
+                Scope.getCurrentScope().getLog(getClass()).fine("User accepted license for "+container.getDockerImageName()+" in liquibase.sdk.testSystem.acceptLicenses");
+                licenseAccept.run();
+            } else {
+                throw new UnexpectedLiquibaseException("Container "+container.getDockerImageName()+" requires accepting a license. If you accept its license, add '"+testSystem.getDefinition().getName()+"' to liquibase.sdk.testSystem.acceptLicenses or use the --accept-license flag in the `liquibase sdk system up` CLI");
+            }
+
+        }
+
         container.start();
 
         Scope.getCurrentScope().getLog(getClass()).info("Running " + testSystem.getDefinition() + " as container " + container.getContainerName());
+    }
+
+    /**
+     * If the container requires the user accepting a license, return a Runnable which will accept it.
+     * @return a non-null value if {@link #start()} should call the Runnable if the user accepted the license.
+     */
+    protected Runnable requireLicense() {
+        return null;
     }
 
     protected void mapPorts(JdbcDatabaseContainer container) {

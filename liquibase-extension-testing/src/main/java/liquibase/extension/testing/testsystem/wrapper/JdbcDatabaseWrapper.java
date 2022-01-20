@@ -20,6 +20,11 @@ public class JdbcDatabaseWrapper extends DatabaseWrapper {
     }
 
     @Override
+    public String describe() {
+        return "Wrapped URL: " + url + "\n";
+    }
+
+    @Override
     public void start() throws Exception {
 
     }

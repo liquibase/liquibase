@@ -23,11 +23,6 @@ public class HsqlTestSystem extends DatabaseTestSystem {
     }
 
     @Override
-    protected @NotNull JdbcDatabaseWrapper createJdbcWrapper(String url) throws SQLException {
-        return new JdbcDatabaseWrapper("jdbc:hsqldb:mem:"+getCatalog(), getUsername(), getPassword());
-    }
-
-    @Override
     protected String[] getSetupSql() {
         return new String[] {
                 "create schema "+getAltSchema(),

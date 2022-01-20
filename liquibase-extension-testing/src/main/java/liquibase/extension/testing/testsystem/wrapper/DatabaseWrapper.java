@@ -24,4 +24,8 @@ public abstract class DatabaseWrapper {
 
     public abstract String getUrl();
 
+    /**
+     * Describes the configuration of this wrapper. Used in outputting to user how this connection is configured.
+     */
+    public abstract String describe();
 }

@@ -31,11 +31,6 @@ public class H2TestSystem extends DatabaseTestSystem {
     }
 
     @Override
-    protected @NotNull JdbcDatabaseWrapper createJdbcWrapper(String url) throws SQLException {
-        return new JdbcDatabaseWrapper("jdbc:h2:mem:" + getConfiguredValue("catalog", String.class), getUsername(), getPassword());
-    }
-
-    @Override
     protected DatabaseWrapper createContainerWrapper() throws Exception {
         throw new IllegalArgumentException("Cannot create container for h2. Use url");
     }
