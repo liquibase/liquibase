@@ -745,6 +745,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         String replacementExecutorName =
             (String)Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, key).getValue();
         if (replacementExecutorName != null) {
+            Scope.getCurrentScope().getLog(ChangeSet.class).info("Mapped '" + executorName + "' to executor '" + replacementExecutorName + "'");
             return replacementExecutorName;
         }
         return executorName;
