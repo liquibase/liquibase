@@ -18,6 +18,7 @@ public class PostgresTestSystem extends DatabaseTestSystem {
         super(definition);
     }
 
+    @SuppressWarnings("java:S2095")
     @Override
     protected @NotNull DatabaseWrapper createContainerWrapper() {
         return new DockerDatabaseWrapper(new PostgreSQLContainer(
