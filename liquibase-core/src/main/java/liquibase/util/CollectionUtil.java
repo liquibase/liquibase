@@ -89,7 +89,7 @@ public class CollectionUtil {
     }
 
     /**
-     * Converts a set of nested maps (like from yaml/json) into a flat map with dot-seprated properties
+     * Converts a set of nested maps (like from yaml/json) into a flat map with dot-separated properties
      */
     public static Map<String, Object> flatten(Map<String, Object> map) {
         if (map == null) {

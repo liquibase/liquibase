@@ -3,6 +3,7 @@ package liquibase.extension.testing.testsystem;
 import liquibase.Scope;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.util.CollectionUtil;
@@ -47,8 +48,7 @@ public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
                 TestSystem.Definition finalDefinition = passedDefinition;
                 if (passedDefinition.getProfiles().length == 0 && passedDefinition.getProperties().size() == 0) {
                     //see if we're configured to use a specific setting instead
-                    final String testSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test").getValue();
-                    for (String testSystem : CollectionUtil.createIfNull(StringUtil.splitAndTrim(testSystems, ","))) {
+                    for (String testSystem : getConfiguredTestSystems()) {
                         final TestSystem.Definition testSystemDef = TestSystem.Definition.parse(testSystem);
                         if (testSystemDef.getName().equals(passedDefinition.getName())) {
                             finalDefinition = testSystemDef;
@@ -63,6 +63,12 @@ public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
                 throw new UnexpectedLiquibaseException(e);
             }
         });
+    }
+
+    private List<String> getConfiguredTestSystems() {
+        final String testSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test").getValue();
+
+        return CollectionUtil.createIfNull(StringUtil.splitAndTrim(testSystems, ","));
     }
 
     /**
@@ -81,5 +87,18 @@ public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
     @Override
     protected synchronized Collection<TestSystem> findAllInstances() {
         return super.findAllInstances();
+    }
+
+    public <T extends TestSystem> List<T> getAvailable(Class<T> testSystemType) {
+        List<T> returnList = new ArrayList<>();
+        for (String testSystemDef : getConfiguredTestSystems()) {
+            final TestSystem testSystem = this.getTestSystem(testSystemDef);
+
+            if (testSystemType.isAssignableFrom(testSystem.getClass())) {
+                returnList.add((T) testSystem);
+            }
+        }
+
+        return returnList;
     }
 }

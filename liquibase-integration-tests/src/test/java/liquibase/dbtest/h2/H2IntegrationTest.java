@@ -34,11 +34,6 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void showVersion() throws DatabaseException {
-        System.out.println(getDatabase().getDatabaseProductVersion());
-    }
-
-    @Test
     public void diffToPrintStream() throws Exception{
         if (getDatabase() == null) {
             return;

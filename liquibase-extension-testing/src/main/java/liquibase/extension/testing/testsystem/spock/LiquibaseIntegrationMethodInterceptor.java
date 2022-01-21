@@ -1,5 +1,6 @@
 package liquibase.extension.testing.testsystem.spock;
 
+import liquibase.Scope;
 import liquibase.extension.testing.testsystem.TestSystem;
 import org.spockframework.runtime.extension.AbstractMethodInterceptor;
 import org.spockframework.runtime.extension.IMethodInvocation;
@@ -57,9 +58,13 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
 
     private void stopContainers(List<FieldInfo> containers, IMethodInvocation invocation) throws Exception {
         for (FieldInfo field : containers) {
-            TestSystem env = readContainerFromField(field, invocation);
+            TestSystem testSystem = readContainerFromField(field, invocation);
 
-            env.stop();
+            try {
+                testSystem.stop();
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Cannot stop "+testSystem.getDefinition());
+            }
 
         }
     }
