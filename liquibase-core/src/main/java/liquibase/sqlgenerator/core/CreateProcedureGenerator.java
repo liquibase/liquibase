@@ -11,7 +11,6 @@ import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.util.SqlGeneratorMssqlUtil;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
@@ -43,6 +42,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
     @Override
     public Sql[] generateSql(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<Sql> sql = new ArrayList<Sql>();
+        List<String> mssqlSetStatementsBefore = new ArrayList<>();
+        List<String> mssqlSetStatementsAfter = new ArrayList<>();
 
         String schemaName = statement.getSchemaName();
         if (schemaName == null) {
@@ -50,6 +51,15 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         }
 
         String procedureText = addSchemaToText(statement.getProcedureText(), schemaName, "PROCEDURE", database);
+
+        if (database instanceof MSSQLDatabase) {
+            MssqlSplitStatements mssqlSplitStatements =
+                    splitSetStatementsOutForMssql(procedureText, statement.getEndDelimiter());
+
+            procedureText = mssqlSplitStatements.getBody();
+            mssqlSetStatementsBefore = mssqlSplitStatements.getSetStatementsBefore();
+            mssqlSetStatementsAfter = mssqlSplitStatements.getSetStatementsAfter();
+        }
 
         if (statement.getReplaceIfExists() != null && statement.getReplaceIfExists()) {
             String fullyQualifiedName = database.escapeObjectName(statement.getProcedureName(), StoredProcedure.class);
@@ -91,11 +101,21 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             procedureText = procedureText.replace("OR REPLACE", "");
             procedureText = procedureText.replaceAll("[\\s]{2,}", " ");
         }
-        if (database instanceof MSSQLDatabase) {
-            SqlGeneratorMssqlUtil.addSqlStatementsToList(sql, procedureText, statement.getEndDelimiter());
-        } else {
-            sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
+
+        if (mssqlSetStatementsBefore != null && !mssqlSetStatementsBefore.isEmpty()) {
+            mssqlSetStatementsBefore
+                    .forEach(mssqlSetStatement ->
+                            sql.add(new UnparsedSql(mssqlSetStatement, statement.getEndDelimiter())));
         }
+
+        sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
+
+        if (mssqlSetStatementsAfter != null && !mssqlSetStatementsAfter.isEmpty()) {
+            mssqlSetStatementsAfter
+                    .forEach(mssqlSetStatement ->
+                            sql.add(new UnparsedSql(mssqlSetStatement, statement.getEndDelimiter())));
+        }
+
         surroundWithSchemaSets(sql, statement.getSchemaName(), database);
         return sql.toArray(new Sql[sql.size()]);
     }
@@ -172,5 +192,118 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             }
         }
         return procedureText;
+    }
+    public static MssqlSplitStatements splitSetStatementsOutForMssql(String body, String endDelimiter) {
+        return splitSetStatementsOutForMssql(body, endDelimiter, "BEGIN", "END");
+    }
+
+    public static MssqlSplitStatements splitSetStatementsOutForMssql(String body, String endDelimiter,
+                                                                     String bodyStartStatement, String bodyEndStatement) {
+        MssqlSplitStatements mssqlSplitStatements = new MssqlSplitStatements();
+
+        StringClauses sqlClauses = SqlParser.parse(body, true, true);
+        StringClauses.ClauseIterator clauseIterator = sqlClauses.getClauseIterator();
+        Object next = "";
+        boolean isProcedureBody = false;
+        boolean isAfterProcedureBody = false;
+        ArrayList<String> beforeStatements = new ArrayList<>();
+        ArrayList<String> afterStatements = new ArrayList<>();
+
+        while (next != null && clauseIterator.hasNext()) {
+            next = clauseIterator.nextNonWhitespace();
+
+            if (!isProcedureBody) {
+                if (isAfterProcedureBody) {
+                    next = splitOutIfSetStatement(next, clauseIterator, endDelimiter, afterStatements);
+                } else {
+                    next = splitOutIfSetStatement(next, clauseIterator, endDelimiter, beforeStatements);
+                }
+            }
+
+            if (next != null && next.toString().equalsIgnoreCase(bodyStartStatement)) {
+                isProcedureBody = true;
+            }
+
+            if (next != null && next.toString().equalsIgnoreCase(bodyEndStatement)) {
+                isProcedureBody = false;
+                isAfterProcedureBody = true;
+            }
+        }
+
+        mssqlSplitStatements.setSetStatementsBefore(beforeStatements);
+        mssqlSplitStatements.setSetStatementsAfter(afterStatements);
+        mssqlSplitStatements.setBody(sqlClauses.toString().trim());
+
+        return mssqlSplitStatements;
+    }
+
+    private static Object splitOutIfSetStatement(Object next, StringClauses.ClauseIterator clauseIterator,
+                                                 String endDelimiter, ArrayList<String> setStatements) {
+        while (next != null && next.toString().equalsIgnoreCase("SET")) {
+            StringBuilder bufferedSetStatement = new StringBuilder();
+            boolean bufferIsUsed = false;
+
+            bufferedSetStatement.append(next).append(" ");
+            clauseIterator.remove();
+            next = clauseIterator.nextNonWhitespace();
+
+            if (next != null
+                    && (next.toString().equalsIgnoreCase("ANSI_NULLS")
+                    || next.toString().equalsIgnoreCase("QUOTED_IDENTIFIER"))) {
+                bufferedSetStatement.append(next).append(" ");
+                clauseIterator.remove();
+                next = clauseIterator.nextNonWhitespace();
+
+                if (next != null
+                        && (next.toString().equalsIgnoreCase("ON")
+                        || next.toString().equalsIgnoreCase("OFF"))) {
+                    bufferedSetStatement.append(next);
+                    clauseIterator.remove();
+                    setStatements.add(bufferedSetStatement.toString());
+                    bufferIsUsed = true;
+                    next = clauseIterator.nextNonWhitespace();
+
+                    if (next != null && next.toString().equalsIgnoreCase(endDelimiter)) {
+                        clauseIterator.remove();
+                    }
+                }
+            }
+
+            if (!bufferedSetStatement.toString().isEmpty() && !bufferIsUsed) {
+                clauseIterator.replace(bufferedSetStatement.append(next).toString());
+            }
+        }
+
+        return next;
+    }
+
+    public static class MssqlSplitStatements {
+        private List<String> setStatementsBefore;
+        private String body;
+        private List<String> setStatementsAfter;
+
+        public List<String> getSetStatementsBefore() {
+            return setStatementsBefore;
+        }
+
+        public void setSetStatementsBefore(List<String> setStatementsBefore) {
+            this.setStatementsBefore = setStatementsBefore;
+        }
+
+        public String getBody() {
+            return body;
+        }
+
+        public void setBody(String body) {
+            this.body = body;
+        }
+
+        public List<String> getSetStatementsAfter() {
+            return setStatementsAfter;
+        }
+
+        public void setSetStatementsAfter(List<String> setStatementsAfter) {
+            this.setStatementsAfter = setStatementsAfter;
+        }
     }
 }
