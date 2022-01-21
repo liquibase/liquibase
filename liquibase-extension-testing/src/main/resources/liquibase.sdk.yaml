@@ -65,6 +65,10 @@ liquibase:
         imageName: mysql
         setup:
           username: root
+        profiles:
+          "5.7":
+          "8.0":
+            version: 8.0
 
       oracle:
         imageName: gvenzl/oracle-xe

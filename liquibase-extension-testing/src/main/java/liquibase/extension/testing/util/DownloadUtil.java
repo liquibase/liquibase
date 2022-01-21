@@ -61,7 +61,6 @@ public class DownloadUtil {
                     StreamUtil.copy(response, file);
                 }
                 log.fine("Saved " + url + " to " + pathAsFile.getAbsolutePath());
-                System.out.println(pathAsFile.exists());
 
                 path = pathAsFile.toPath();
             } catch (Exception e) {
