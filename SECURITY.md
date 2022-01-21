@@ -9,4 +9,4 @@
 
 ## Reporting a Vulnerability
 
-Please email Karen Taggart, Product Owner, Liquibase at ktaggart@liquibase.com
+Please email the Liquibase Information Security Team at infosec@liquibase.com
