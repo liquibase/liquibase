@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 /**
  * TestSystem implementations define and manage a connection to an external system to test.
- * Ideally the implementation can start and top the test systems, but that is not necessary.
+ * Ideally the implementation can start and stop the test systems, but that is not necessary.
  * <br><br>
  * This implements {@link TestRule} so it can control start/stop of the TestSystem in JUnit, but that may be removed as tests get converted to spock.
  * <br><br>
