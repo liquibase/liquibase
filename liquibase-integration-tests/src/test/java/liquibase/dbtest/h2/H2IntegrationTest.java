@@ -10,6 +10,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.diff.output.report.DiffToReport;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -30,12 +31,6 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         super("h2", DatabaseFactory.getInstance().getDatabase("h2"));
         this.changeSpecifyDbmsChangeLog = "changelogs/h2/complete/change.specify.dbms.changelog.xml";
         this.dbmsExcludeChangelog = "changelogs/h2/complete/dbms.exclude.changelog.xml";
-    }
-
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        // H2 is an in-process database
-        return true;
     }
 
     @Test
@@ -105,7 +100,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
         //run again to test changelog testing logic
         liquibase = createLiquibase("changelogs/yaml/common.tests.changelog.yaml");
-        liquibase.setChangeLogParameter("loginuser", getUsername());
+        liquibase.setChangeLogParameter("loginuser", testSystem.getUsername());
 
         try {
             liquibase.update(this.contexts);
@@ -128,7 +123,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
         //run again to test changelog testing logic
         liquibase = createLiquibase("changelogs/json/common.tests.changelog.json");
-        liquibase.setChangeLogParameter("loginuser", getUsername());
+        liquibase.setChangeLogParameter("loginuser", testSystem.getUsername());
 
         try {
             liquibase.update(this.contexts);
