@@ -18,10 +18,11 @@ import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
-import liquibase.extension.testing.TestDatabaseConnections
 import liquibase.extension.testing.TestFilter
 import liquibase.extension.testing.setup.*
 import liquibase.extension.testing.setup.SetupCleanResources.CleanupMode
+import liquibase.extension.testing.testsystem.DatabaseTestSystem
+import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
@@ -184,11 +185,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     def "run"() {
         setup:
         Main.runningFromNewCli = true
-        Assume.assumeTrue("Skipping test: " + permutation.connectionStatus.errorMessage, permutation.connectionStatus.connection != null)
+        Assume.assumeTrue("Skipping test: " + permutation.testSetupEnvironment.errorMessage, permutation.testSetupEnvironment.connection != null)
 
         def testDef = permutation.definition
 
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.connectionStatus.connection))
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.testSetupEnvironment.connection))
 
         //clean regular database
         String defaultSchemaName = database.getDefaultSchemaName()
@@ -198,8 +199,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         //clean alt database
         Database altDatabase = null
-        if (permutation.connectionStatus.altConnection != null) {
-            altDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.connectionStatus.altConnection))
+        if (permutation.testSetupEnvironment.altConnection != null) {
+            altDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.testSetupEnvironment.altConnection))
             String altDefaultSchemaName = altDatabase.getDefaultSchemaName()
             CatalogAndSchema[] altCatalogAndSchemas = new CatalogAndSchema[1]
             altCatalogAndSchemas[0] = new CatalogAndSchema(null, altDefaultSchemaName)
@@ -221,14 +222,14 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         def runScope = new RunSettings(
                 database: database,
-                url: permutation.connectionStatus.url,
-                username: permutation.connectionStatus.username,
-                password: permutation.connectionStatus.password,
+                url: permutation.testSetupEnvironment.url,
+                username: permutation.testSetupEnvironment.username,
+                password: permutation.testSetupEnvironment.password,
 
                 altDatabase: altDatabase,
-                altUrl: permutation.connectionStatus.altUrl,
-                altUsername: permutation.connectionStatus.altUsername,
-                altPassword: permutation.connectionStatus.altPassword,
+                altUrl: permutation.testSetupEnvironment.altUrl,
+                altUsername: permutation.testSetupEnvironment.altUsername,
+                altPassword: permutation.testSetupEnvironment.altPassword,
         )
 
         def uiOutputWriter = new StringWriter()
@@ -244,7 +245,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         if (testDef.setup != null) {
             for (def setup : testDef.setup) {
-                setup.setup(permutation.connectionStatus)
+                setup.setup(permutation.testSetupEnvironment)
             }
         }
 
@@ -520,8 +521,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                         continue
                     }
 
-                    permutation.connectionStatus = TestDatabaseConnections.getInstance().getConnection(database.shortName)
-                    returnList.add(permutation)
+
+                    def system = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem(database.shortName)
+                    if (system.shouldTest()) {
+                        system.start()
+                        permutation.testSetupEnvironment = new TestSetupEnvironment(system, null)
+                        returnList.add(permutation)
+                    }
                 }
             }
         }
@@ -781,7 +787,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     private static class RunTestPermutation {
         RunTestDefinition definition
         String databaseName
-        TestDatabaseConnections.ConnectionStatus connectionStatus
+        TestSetupEnvironment testSetupEnvironment
 
         boolean shouldRun() {
             def filter = TestFilter.getInstance()

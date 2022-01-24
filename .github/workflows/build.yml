@@ -179,11 +179,32 @@ jobs:
   integration-test:
     name: Integration Test
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        testSystem:
+          - h2
+#          - h2:1.4
+          - hsql
+          - mariadb
+          - mssql
+          - mysql
+          - oracle
+          - postgresql
+          - sqlite
     needs: build
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+      - name: Prepare
+        id: prepare
+        uses: actions/github-script@v5
+        with:
+          script: |
+            core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
 
       - name: Set up JDK 8
         uses: actions/setup-java@v2
@@ -203,17 +224,15 @@ jobs:
           registry: docker-dev.artifactory.datical.net
           username: ${{ secrets.ARTIFACTORY_USER }}
           password: ${{ secrets.ARTIFACTORY_TOKEN }}
-      - name: Start Docker Databases
-        run: docker-compose -f ./liquibase-integration-tests/docker/docker-compose.yml up -d
+
       - name: Run Tests
-        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false
-      - name: Stop Docker Databases
-        run: docker-compose -f ./liquibase-integration-tests/docker/docker-compose.yml down
+        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=hub,${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest -DfailIfNoTests=false
+
       - name: Archive Test Results
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: liquibase-test-results-integration
+          name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
             ./**/target/surefire-reports
 
@@ -311,6 +330,7 @@ jobs:
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
 
       - name: Archive Packages
         uses: actions/upload-artifact@v2

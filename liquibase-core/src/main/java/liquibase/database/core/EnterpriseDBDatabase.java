@@ -1,16 +1,40 @@
 package liquibase.database.core;
 
+import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.util.JdbcUtil;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class EnterpriseDBDatabase extends PostgresDatabase {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         final String url = conn.getURL();
-        return url.contains("edb") || (url.contains("postgres") && url.contains(":5444"));
+        if (url.startsWith("jdbc:edb:") || url.startsWith("jdbc:postgres")) {
+            if (conn instanceof JdbcConnection) {
+                try (Statement stmt = ((JdbcConnection) conn).createStatement()) {
+                    if (stmt != null) {
+                        try (ResultSet rs = stmt.executeQuery("select version()")) {
+                            if (rs.next()) {
+                                return ((String) JdbcUtil.getResultSetValue(rs, 1)).startsWith("EnterpriseDB");
+                            }
+                        }
+                    }
+                } catch (SQLException e) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Error checking if connection is an EnterpriseDB database: "+e.getMessage(), e);
+                    return false;
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override
