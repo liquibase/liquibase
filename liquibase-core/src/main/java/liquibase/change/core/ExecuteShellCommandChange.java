@@ -42,7 +42,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     protected List<String> finalCommandArray;
     private String executable;
     private List<String> os;
-    private List<String> args = new ArrayList<String>();
+    private final List<String> args = new ArrayList<>();
     private String timeout;
     private static final Pattern TIMEOUT_PATTERN = Pattern.compile("^\\s*(\\d+)\\s*([sSmMhH]?)\\s*$");
     private static final Long SECS_IN_MILLIS = 1000L;
@@ -190,8 +190,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         int returnCode = 0;
         try {
             //output both stdout and stderr data from proc to stdout of this process
-            StreamGobbler errorGobbler = new StreamGobbler(p.getErrorStream(), errorStream, Thread.currentThread());
-            StreamGobbler outputGobbler = new StreamGobbler(p.getInputStream(), inputStream, Thread.currentThread());
+            StreamGobbler errorGobbler = createErrorGobbler(p.getErrorStream(), errorStream);
+            StreamGobbler outputGobbler = createErrorGobbler(p.getInputStream(), inputStream);
 
             errorGobbler.start();
             outputGobbler.start();
@@ -225,6 +225,10 @@ public class ExecuteShellCommandChange extends AbstractChange {
         processResult(returnCode, errorStreamOut, infoStreamOut, database);
     }
 
+    protected StreamGobbler createErrorGobbler(InputStream processStream, OutputStream outputStream) {
+        return new StreamGobbler(processStream, outputStream, Thread.currentThread());
+    }
+
     /**
      * Max bytes to copy from output to {@link #processResult(int, String, String, Database)}. If null, process all output.
      * @return
@@ -238,10 +242,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
      * <p>
      * Creates a scheduled task to destroy the process in given timeout milliseconds.
      * This killer task will be cancelled if the process returns before the timeout value.
-     *
-     * @param process
+     *  @param process
      * @param timeoutInMillis waits for specified timeoutInMillis before destroying the process.
-     *                        It will wait indefinitely if timeoutInMillis is 0.
      */
     @java.lang.SuppressWarnings("squid:S2142")
     private int waitForOrKill(final Process process, final long timeoutInMillis) throws TimeoutException {
@@ -373,15 +375,16 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }
         }
     }
-    private class StreamGobbler extends Thread {
+
+    public class StreamGobbler extends Thread {
         private static final int THREAD_SLEEP_MILLIS = 100;
         private final OutputStream outputStream;
         private InputStream processStream;
         boolean loggedTruncated = false;
         long copiedSize = 0;
-        private Thread parentThread;
+        private final Thread parentThread;
 
-        private StreamGobbler(InputStream processStream, ByteArrayOutputStream outputStream, Thread parentThread) {
+        public StreamGobbler(InputStream processStream, OutputStream outputStream, Thread parentThread) {
             this.processStream = processStream;
             this.outputStream = outputStream;
             this.parentThread = parentThread;
@@ -389,8 +392,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
         @Override
         public void run() {
-            try {
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(processStream);
+            try (BufferedInputStream bufferedInputStream = new BufferedInputStream(processStream)) {
                 while (processStream != null) {
                     if (bufferedInputStream.available() > 0) {
                         copy(bufferedInputStream, outputStream);
@@ -403,8 +405,10 @@ public class ExecuteShellCommandChange extends AbstractChange {
                     }
                 }
             } catch (IOException ioe) {
-                ioe.printStackTrace();
-                parentThread.interrupt();
+                Scope.getCurrentScope().getLog(ExecuteShellCommandChange.class).warning(ioe.getMessage());
+                if (parentThread != null) {
+                    parentThread.interrupt();
+                }
             }
         }
 
