@@ -1,5 +1,6 @@
 package liquibase.parser.core.xml;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
@@ -26,10 +27,12 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         saxParserFactory = SAXParserFactory.newInstance();
         saxParserFactory.setValidating(true);
         saxParserFactory.setNamespaceAware(true);
-        try {
-            saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        } catch (Throwable e) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Cannot enable FEATURE_SECURE_PROCESSING: "+e.getMessage(), e);
+        if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
+            try {
+                saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            } catch (Throwable e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot enable FEATURE_SECURE_PROCESSING: " + e.getMessage(), e);
+            }
         }
     }
 
@@ -55,10 +58,12 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         try (InputStream inputStream = resourceAccessor.openStream(null, physicalChangeLogLocation)) {
             SAXParser parser = saxParserFactory.newSAXParser();
-            try {
-                parser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "http,https"); //need to allow external schemas on http/https to support the liquibase.org xsd files
-            } catch (SAXException e) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Cannot enable ACCESS_EXTERNAL_SCHEMA: "+e.getMessage(), e);
+            if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
+                try {
+                    parser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "http,https"); //need to allow external schemas on http/https to support the liquibase.org xsd files
+                } catch (SAXException e) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Cannot enable ACCESS_EXTERNAL_SCHEMA: " + e.getMessage(), e);
+                }
             }
             trySetSchemaLanguageProperty(parser);
 
