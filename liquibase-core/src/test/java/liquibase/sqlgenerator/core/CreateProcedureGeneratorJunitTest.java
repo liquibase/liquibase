@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.core.CreateProcedureGenerator.MssqlSplitStatements;
 import liquibase.statement.core.CreateProcedureStatement;
 import org.junit.Before;
 import org.junit.Test;
