@@ -6,7 +6,6 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
-import liquibase.extension.testing.TestDatabaseConnections
 import liquibase.integration.commandline.CommandLineResourceAccessor
 import liquibase.resource.CompositeResourceAccessor
 import liquibase.resource.FileSystemResourceAccessor
@@ -22,8 +21,8 @@ class SetupChangeLogSync extends TestSetup {
     }
 
     @Override
-    void setup(TestDatabaseConnections.ConnectionStatus connectionStatus) throws Exception {
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connectionStatus.connection))
+    void setup(TestSetupEnvironment testSetupEnvironment) throws Exception {
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(testSetupEnvironment.connection))
 
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
         changeLogService.init()
