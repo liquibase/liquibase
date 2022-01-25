@@ -1699,6 +1699,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     }
 
     private String escapeForLike(String string) {
+        if (string == null) {
+            return null;
+        }
         return string
                 .replace("%", "\\%")
                 .replace("_", "\\_");
