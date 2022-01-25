@@ -60,7 +60,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
 
         String body = statement.getSelectQuery();
         if (database instanceof MSSQLDatabase) {
-            CreateProcedureGenerator.MssqlSplitStatements mssqlSplitStatements =
+            MssqlSplitStatements mssqlSplitStatements =
                     splitSetStatementsOutForMssql(body, ";", "AS", ";");
 
             body = mssqlSplitStatements.getBody();
