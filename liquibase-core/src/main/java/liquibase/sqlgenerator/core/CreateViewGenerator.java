@@ -4,7 +4,6 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
-import liquibase.sqlgenerator.core.util.MSSQLUtil;
 import liquibase.structure.core.Relation;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -17,6 +16,8 @@ import liquibase.util.StringClauses;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static liquibase.sqlgenerator.core.CreateProcedureGenerator.splitSetStatementsOutForMssql;
 
 public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
 
@@ -49,14 +50,25 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
 
     @Override
     public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        List<Sql> sql = new ArrayList<Sql>();
+        List<String> mssqlSetStatementsBefore = new ArrayList<>();
+        List<String> mssqlSetStatementsAfter = new ArrayList<>();
 
         if (database instanceof InformixDatabase) {
             return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
         }
 
-        List<Sql> sql = new ArrayList<Sql>();
+        String body = statement.getSelectQuery();
+        if (database instanceof MSSQLDatabase) {
+            MssqlSplitStatements mssqlSplitStatements =
+                    splitSetStatementsOutForMssql(body, ";", "AS", ";");
 
-        StringClauses viewDefinition = SqlParser.parse(statement.getSelectQuery(), true, true);
+            body = mssqlSplitStatements.getBody();
+            mssqlSetStatementsBefore = mssqlSplitStatements.getSetStatementsBefore();
+            mssqlSetStatementsAfter = mssqlSplitStatements.getSetStatementsAfter();
+        }
+
+        StringClauses viewDefinition = SqlParser.parse(body, true, true);
 
         if (!statement.isFullDefinition()) {
             viewDefinition
@@ -94,11 +106,21 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                 }
             }
         }
-        if (database instanceof MSSQLDatabase) {
-           MSSQLUtil.addSqlStatementsToList(sql, viewDefinition.toString(), getAffectedView(statement));
-        } else {
-            sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
+
+        if (mssqlSetStatementsBefore != null && !mssqlSetStatementsBefore.isEmpty()) {
+            mssqlSetStatementsBefore
+                    .forEach(mssqlSetStatement ->
+                            sql.add(new UnparsedSql(mssqlSetStatement, ";")));
         }
+
+        sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
+
+        if (mssqlSetStatementsAfter != null && !mssqlSetStatementsAfter.isEmpty()) {
+            mssqlSetStatementsAfter
+                    .forEach(mssqlSetStatement ->
+                            sql.add(new UnparsedSql(mssqlSetStatement, ";")));
+        }
+
         return sql.toArray(new Sql[sql.size()]);
     }
 
