@@ -17,6 +17,7 @@ import liquibase.exception.LockException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
@@ -99,6 +100,14 @@ public class StandardLockService implements LockService {
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc",  database);
 
         int maxIterations = 10;
+        if (executor instanceof LoggingExecutor) {
+            //can't / don't have to re-check
+            if (hasDatabaseChangeLogLockTable()) {
+                maxIterations = 0;
+            } else {
+                maxIterations = 1;
+            }
+        }
         for (int i = 0; i < maxIterations; i++) {
             try {
                 if (!hasDatabaseChangeLogLockTable(true)) {

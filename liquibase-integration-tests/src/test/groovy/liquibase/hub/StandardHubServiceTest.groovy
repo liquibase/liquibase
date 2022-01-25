@@ -1,7 +1,8 @@
 package liquibase.hub
 
 import liquibase.Scope
-import liquibase.configuration.LiquibaseConfiguration
+import liquibase.extension.testing.testsystem.TestSystemFactory
+import liquibase.extension.testing.testsystem.core.HubTestSystem
 import liquibase.hub.core.StandardHubService
 import liquibase.hub.model.Connection
 import spock.lang.Specification
@@ -11,8 +12,7 @@ import static org.junit.Assume.assumeTrue
 class StandardHubServiceTest extends Specification {
 
     private StandardHubService hubService
-
-    private Properties integrationTestProperties
+    private HubTestSystem hubTestSystem = (HubTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("hub")
 
     private UUID knownProjectId = UUID.fromString("ce1a237e-e005-4288-a243-4856823a25a6")
     private UUID knownConnectionId = UUID.fromString("d92e6505-cd0f-4e91-bb66-b12e6a285184")
@@ -20,21 +20,10 @@ class StandardHubServiceTest extends Specification {
     private String testScopeId
 
     def setup() {
-        if (integrationTestProperties == null) {
-            integrationTestProperties = new Properties()
-            integrationTestProperties.load((InputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"))
-
-            def localFileStream = (InputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties")
-            if (localFileStream != null) {
-                integrationTestProperties.load(localFileStream)
-            }
-
-            testScopeId = Scope.enter([
-                    (HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey()):integrationTestProperties.get("integration.test.hub.apikey"),
-                    (HubConfiguration.LIQUIBASE_HUB_URL.getKey()):integrationTestProperties.get("integration.test.hub.url"),
-            ])
-
-        }
+        testScopeId = Scope.enter([
+                (HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey()): hubTestSystem.getApiKey(),
+                (HubConfiguration.LIQUIBASE_HUB_URL.getKey())    : hubTestSystem.getUrl(),
+        ])
 
         hubService = new StandardHubService()
         assumeTrue("Liquibase Hub is not available for testing", hubService.isHubAvailable())
@@ -46,7 +35,7 @@ class StandardHubServiceTest extends Specification {
 
     def getMe() {
         when:
-        def hubUser = integrationTestProperties.get("integration.test.hub.userName")
+        def hubUser = hubTestSystem.getUsername()
         def me = hubService.getMe()
 
         then:
@@ -57,7 +46,7 @@ class StandardHubServiceTest extends Specification {
 
     def getOrganization() {
         when:
-        def hubOrgId = UUID.fromString(integrationTestProperties.get("integration.test.hub.orgId"))
+        def hubOrgId = hubTestSystem.getOrgId()
         def org = hubService.getOrganization()
 
         then:
@@ -107,8 +96,8 @@ class StandardHubServiceTest extends Specification {
     def "getConnections can return all connections"() {
         when:
         String jdbcUrl = integrationTestProperties.get("integration.test.oracle.url")
-        jdbcUrl = jdbcUrl.replaceAll("//","")
-        def hubUrl = integrationTestProperties.get("integration.test.hub.url")
+        jdbcUrl = jdbcUrl.replaceAll("//", "")
+        def hubUrl = hubTestSystem.getUrl()
         def connections = hubService.getConnections(null)
 
         then:

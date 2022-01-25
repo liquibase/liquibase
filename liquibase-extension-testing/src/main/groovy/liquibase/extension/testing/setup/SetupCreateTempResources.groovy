@@ -1,6 +1,6 @@
 package liquibase.extension.testing.setup
 
-import liquibase.extension.testing.TestDatabaseConnections
+
 import liquibase.util.FileUtil
 
 class SetupCreateTempResources extends TestSetup {
@@ -26,7 +26,7 @@ class SetupCreateTempResources extends TestSetup {
     }
 
     @Override
-    void setup(TestDatabaseConnections.ConnectionStatus connectionStatus) throws Exception {
+    void setup(TestSetupEnvironment testSetupEnvironment) throws Exception {
         URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
         File f = new File(url.toURI())
         String contents = FileUtil.getContents(f)
