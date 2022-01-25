@@ -1,13 +1,11 @@
 package liquibase.changelog;
 
-import liquibase.ContextExpression;
-import liquibase.Labels;
-import liquibase.RuntimeEnvironment;
-import liquibase.Scope;
+import liquibase.*;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -137,7 +135,8 @@ public class ChangeLogIterator {
         if (changeSet.getRunWith() == null) {
             return;
         }
-        String executorName = changeSet.getRunWith();
+        String executorName = ChangeSet.lookupExecutor(changeSet.getRunWith());
+
         Executor executor;
         try {
             executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(executorName, env.getTargetDatabase());
