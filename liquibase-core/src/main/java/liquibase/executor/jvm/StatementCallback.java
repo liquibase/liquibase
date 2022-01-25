@@ -16,7 +16,7 @@ import java.sql.Statement;
  *
  * @author Spring Framework
  */
-interface StatementCallback {
+public interface StatementCallback {
 
     /**
      * Gets called by <code>JdbcTemplate.execute</code> with an active JDBC
