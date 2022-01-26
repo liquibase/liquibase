@@ -24,7 +24,7 @@ import java.util.jar.JarFile;
  *
  * @see OSGiResourceAccessor for OSGi-based classloaders
  */
-public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
+public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implements AutoCloseable {
 
     private ClassLoader classLoader;
     protected List<FileSystem> rootPaths;
@@ -270,7 +270,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     try (JarFile jar = new JarFile(URLDecoder.decode(jarPath, StandardCharsets.UTF_8.name()))) {
                         String comparePath = path;
                         if (comparePath.startsWith("/")) {
-                            comparePath = "/"+comparePath;
+                            comparePath = "/" + comparePath;
                         }
                         Enumeration<JarEntry> entries = jar.entries();
                         while (entries.hasMoreElements()) {
@@ -354,5 +354,18 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
         init();
 
         return description;
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (rootPaths != null) {
+            for (final FileSystem rootPath : rootPaths) {
+                try {
+                    rootPath.close();
+                } catch (final Exception e) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Cannot close path " + e.getMessage(), e);
+                }
+            }
+        }
     }
 }
