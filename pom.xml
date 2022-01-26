@@ -457,7 +457,7 @@
                 </plugins>
             </build>
         </profile>
-        <!--profile>
+        <profile>
             <id>liquibase-pro-submodule</id>
             <activation>
                 <file>
@@ -467,7 +467,7 @@
             <modules>
                 <module>../liquibase-pro</module>
             </modules>
-        </profile-->
+        </profile>
 
         <profile>
             <id>sonar</id>
