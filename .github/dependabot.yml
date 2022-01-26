@@ -8,5 +8,13 @@ updates:
 
   - package-ecosystem: "maven"
     directory: "/"
+    open-pull-requests-limit: 10
     schedule:
       interval: "daily"
+
+  - package-ecosystem: "maven"
+    directory: "/liquibase-pro/"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "*"
