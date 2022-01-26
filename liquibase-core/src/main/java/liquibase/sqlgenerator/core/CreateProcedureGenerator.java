@@ -193,10 +193,21 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         }
         return procedureText;
     }
+
     public static MssqlSplitStatements splitSetStatementsOutForMssql(String body, String endDelimiter) {
         return splitSetStatementsOutForMssql(body, endDelimiter, "BEGIN", "END");
     }
 
+    /**
+     * Split <code>SET ANSI_NULLS/QUOTED_IDENTIFIER ON/OFF</code> statements out of SQL statement
+     * into before/after statements if they are before or after procedure/function/trigger/view body.
+     *
+     * @param body - SQL to split if SET statements are present
+     * @param endDelimiter - end line delimiter
+     * @param bodyStartStatement - word/symbol defining that procedure/function/trigger/view body's start
+     * @param bodyEndStatement - word/symbol defining that procedure/function/trigger/view body's start
+     * @return - before/after statements if any are present and procedure/function/trigger/view body
+     */
     public static MssqlSplitStatements splitSetStatementsOutForMssql(String body, String endDelimiter,
                                                                      String bodyStartStatement, String bodyEndStatement) {
         MssqlSplitStatements mssqlSplitStatements = new MssqlSplitStatements();
