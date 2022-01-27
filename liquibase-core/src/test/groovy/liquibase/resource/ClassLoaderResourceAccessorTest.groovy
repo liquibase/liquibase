@@ -171,7 +171,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
         testAccessor.close()
 
         then:
-        2 * path1.close()
+        1 * path1.close()
         1 * path2.close()
     }
 }
