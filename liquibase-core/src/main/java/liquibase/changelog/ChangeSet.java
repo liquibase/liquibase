@@ -737,18 +737,27 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return originalExecutor;
     }
 
+    /**
+     *
+     * Look for a configuration property that matches liquibase.<executor name>.executor
+     * and if found, return its value as the executor name
+     *
+     * @param   executorName                     The value from the input changeset runWith attribute
+     * @return  String                           The mapped value
+     *
+     */
     public static String lookupExecutor(String executorName) {
         if (StringUtil.isEmpty(executorName)) {
             return null;
         }
-        String key = "liquibase." + executorName + ".executor";
+        String key = "liquibase." + executorName.toLowerCase() + ".executor";
         String replacementExecutorName =
             (String)Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, key).getValue();
         if (replacementExecutorName != null) {
             Scope.getCurrentScope().getLog(ChangeSet.class).info("Mapped '" + executorName + "' to executor '" + replacementExecutorName + "'");
             return replacementExecutorName;
-        } else if (executorName.equalsIgnoreCase("native")) {
-            String message = "Unable to locate an executor for 'runWith=native'.  You must specify a valid executor name.";
+        } else {
+            String message = "Unable to locate an executor for 'runWith=" + executorName + "'.  You must specify a valid executor name.";
             Scope.getCurrentScope().getLog(ChangeSet.class).warning(message);
             Scope.getCurrentScope().getUI().sendErrorMessage("WARNING: " + message);
         }
