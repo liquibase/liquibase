@@ -14,6 +14,8 @@ on:
       - master
       - main
       - github-action-*
+    paths-ignore:
+      - '**.md'
 
 jobs:
   setup:
