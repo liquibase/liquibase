@@ -16,6 +16,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.extension.testing.testsystem.TestSystemFactory;
+import liquibase.extension.testing.testsystem.core.MSSQLTestSystem;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.database.core.MockDatabase;
@@ -123,6 +124,9 @@ public abstract class AbstractExecuteTest {
 
         resetAvailableDatabases();
         for (DatabaseTestSystem testSystem : Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getAvailable(DatabaseTestSystem.class)) {
+            if (testSystem instanceof MSSQLTestSystem) {
+                continue;
+            }
             testSystem.start();
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(testSystem.getConnection()));
@@ -208,6 +212,9 @@ public abstract class AbstractExecuteTest {
 
     public void resetAvailableDatabases() throws Exception {
         for (DatabaseTestSystem testSystem : Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getAvailable(DatabaseTestSystem.class)) {
+            if (testSystem instanceof MSSQLTestSystem) {
+                continue;
+            }
             testSystem.start();
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(testSystem.getConnection()));
             DatabaseConnection connection = database.getConnection();
@@ -216,6 +223,8 @@ public abstract class AbstractExecuteTest {
 
             try {
                 database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+                CatalogAndSchema alt = new CatalogAndSchema(testSystem.getAltCatalog(), testSystem.getAltSchema());
+                database.dropDatabaseObjects(alt);
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
             }
