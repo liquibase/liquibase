@@ -866,6 +866,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupCreateTempResources(originalFile, newFile, baseDir))
         }
 
+        void registerValueProvider(Closure<ConfigurationValueProvider> configurationValueProvider) {
+            this.setups.add(new SetupConfigurationValueProvider(configurationValueProvider))
+        }
+
         /**
          * @param fileLastModifiedDate if not null, the newly created file's last modified date will be set to this value
          */
