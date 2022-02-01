@@ -5,6 +5,7 @@ import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
+import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -92,9 +93,12 @@ public class ChangeLogIterator {
                         Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
                             if (finalShouldVisit && !alreadySaw(changeSet)) {
                                 //
-                                // Go validate any change sets with an Executor
+                                // Go validate any change sets with an Executor if
+                                // we are using a ValidatingVisitor
                                 //
-                                validateChangeSetExecutor(changeSet, env);
+                                if (visitor instanceof ValidatingVisitor) {
+                                    validateChangeSetExecutor(changeSet, env);
+                                }
 
                                 //
                                 // Execute the visit call in its own scope with a new
