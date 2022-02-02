@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.MockDatabase;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -14,12 +15,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
-import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.extension.testing.testsystem.TestSystemFactory;
-import liquibase.extension.testing.testsystem.core.MSSQLTestSystem;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.database.core.MockDatabase;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -124,9 +122,6 @@ public abstract class AbstractExecuteTest {
 
         resetAvailableDatabases();
         for (DatabaseTestSystem testSystem : Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getAvailable(DatabaseTestSystem.class)) {
-            if (testSystem instanceof MSSQLTestSystem) {
-                continue;
-            }
             testSystem.start();
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(testSystem.getConnection()));
@@ -212,9 +207,6 @@ public abstract class AbstractExecuteTest {
 
     public void resetAvailableDatabases() throws Exception {
         for (DatabaseTestSystem testSystem : Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getAvailable(DatabaseTestSystem.class)) {
-            if (testSystem instanceof MSSQLTestSystem) {
-                continue;
-            }
             testSystem.start();
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(testSystem.getConnection()));
             DatabaseConnection connection = database.getConnection();
