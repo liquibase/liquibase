@@ -17,7 +17,7 @@
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.9.15</version>
+            <version>1.10.12</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
