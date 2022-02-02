@@ -457,17 +457,6 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>liquibase-pro-submodule</id>
-            <activation>
-                <file>
-                    <exists>../liquibase-pro/pom.xml</exists>
-                </file>
-            </activation>
-            <modules>
-                <module>../liquibase-pro</module>
-            </modules>
-        </profile>
 
         <profile>
             <id>sonar</id>
