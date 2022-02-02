@@ -5,6 +5,7 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangelogRewriter;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
+import liquibase.exception.ChangeLogAlreadyRegisteredException;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.LiquibaseException;
@@ -93,11 +94,11 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
                     throw new CommandExecutionException("Changelog '" + changeLogFile +
                             "' is already registered with changeLogId '" + changeLogId + "' to project '" +
                             hubChangeLog.getProject().getName() + "' with project ID '" + hubChangeLog.getProject().getId().toString() + "'.\n" +
-                            "For more information visit https://docs.liquibase.com.");
+                            "For more information visit https://docs.liquibase.com.", new ChangeLogAlreadyRegisteredException(hubChangeLog));
                 } else {
                     throw new CommandExecutionException("Changelog '" + changeLogFile +
                             "' is already registered with changeLogId '" + changeLogId + "'.\n" +
-                            "For more information visit https://docs.liquibase.com.");
+                            "For more information visit https://docs.liquibase.com.", new ChangeLogAlreadyRegisteredException());
                 }
             }
 
