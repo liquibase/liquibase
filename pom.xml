@@ -298,12 +298,12 @@
 
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.1</version>
+                <version>2.22.2</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.surefire</groupId>
                         <artifactId>surefire-junit4</artifactId>
-                        <version>2.22.1</version>
+                        <version>2.22.2</version>
                     </dependency>
                 </dependencies>
                 <configuration>
