@@ -34,10 +34,10 @@ public class OracleTestSystem extends DatabaseTestSystem {
         return new String[]{
                 "CREATE TABLESPACE " + getAltTablespace() + " DATAFILE '" + getAltTablespace() + ".dat' SIZE 1M AUTOEXTEND ON",
                 "CREATE USER "+getAltCatalog()+" IDENTIFIED BY "+getPassword()+" DEFAULT TABLESPACE USERS TEMPORARY TABLESPACE TEMP ACCOUNT UNLOCK",
+                "CREATE USER "+getAltSchema()+" IDENTIFIED BY "+getPassword()+" DEFAULT TABLESPACE USERS TEMPORARY TABLESPACE TEMP ACCOUNT UNLOCK",
                 "GRANT ALL PRIVILEGES TO "+getUsername(),
                 "GRANT UNLIMITED TABLESPACE TO " + getUsername(),
-                "GRANT UNLIMITED TABLESPACE TO " + getAltCatalog(),
-
+                "GRANT UNLIMITED TABLESPACE TO " + getAltCatalog()
         };
     }
 }
