@@ -337,6 +337,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 if (testDef.expectFileToNotExist != null) {
                     assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getAbsolutePath()}' should not exist"
                 }
+                if (testDef.expectations != null) {
+                    testDef.expectations.call()
+                }
             } finally {
                 if (testDef.setup != null) {
                     for (def setup : testDef.setup) {
@@ -627,6 +630,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private Map<String, ?> arguments = new HashMap<>()
         private Map<String, ?> expectedFileContent = new HashMap<>()
         private Map<String, Object> expectedDatabaseContent = new HashMap<>()
+        private Closure<Void> expectations = null;
 
         private List<TestSetup> setup
 
@@ -687,6 +691,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         def setExpectedFileContent(Map<String, Object> content) {
             this.expectedFileContent = content
+        }
+
+        def setExpectations(Closure<Void> expectations) {
+            this.expectations = expectations;
         }
 
         def setExpectedDatabaseContent(Map<String, Object> content) {
