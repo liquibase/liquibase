@@ -30,7 +30,7 @@
         <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se</artifactId>
-            <version>1.1.8.Final</version>
+            <version>1.1.34.Final</version>
             <scope>test</scope>
         </dependency>
 
