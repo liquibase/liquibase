@@ -171,42 +171,6 @@ public class MavenUtils {
         }
     }
 
-    public static Connection getDatabaseConnection(ClassLoader classLoader,
-                                                   String driver,
-                                                   String url,
-                                                   String username,
-                                                   String password)
-            throws LiquibaseException {
-        Driver dbDriver = null;
-        try {
-            dbDriver = (Driver) Class.forName(driver,
-                    true,
-                    classLoader).getConstructor().newInstance();
-        } catch (ClassNotFoundException e) {
-            throw new LiquibaseException("Missing Class '" + e.getMessage() + "'. Database "
-                    + "driver may not be included in the project "
-                    + "dependencies or with wrong scope.");
-        } catch (ReflectiveOperationException e) {
-            throw new LiquibaseException("Failed to load JDBC driver, " + driver, e);
-        }
-
-        Properties info = new Properties();
-        info.put("user", username);
-        info.put("password", password);
-        try {
-            Connection connection = dbDriver.connect(url, info);
-            if (connection == null) {
-                throw new LiquibaseException("Connection could not be created to " + url
-                        + " with driver " + dbDriver.getClass().getName()
-                        + ".  Possibly the wrong driver for the given "
-                        + "database URL");
-            }
-            return connection;
-        } catch (SQLException e) {
-            throw new LiquibaseException(e);
-        }
-    }
-
     /**
      * Recursively searches for the field specified by the fieldName in the class and all
      * the super classes until it either finds it, or runs out of parents.
