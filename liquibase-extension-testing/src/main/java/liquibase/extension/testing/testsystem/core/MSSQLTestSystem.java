@@ -45,12 +45,19 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
                 "CREATE DATABASE " + getCatalog(),
                 "EXEC lbcat..sp_addsrvrolemember @loginame = N'" + getUsername() + "', @rolename = N'sysadmin'",
 
-                "USE [" + getCatalog() + "]",
-//                "ALTER DATABASE ["+getCatalog()+"] MODIFY FILEGROUP [PRIMARY] DEFAULT",
-                "ALTER DATABASE [" + getCatalog() + "] ADD FILEGROUP [" + getAltTablespace() + "]",
+                "CREATE DATABASE " + getAltCatalog(),
+                "EXEC lbcat..sp_addsrvrolemember @loginame = N'" + getUsername() + "', @rolename = N'sysadmin'",
 
-                "ALTER DATABASE [" + getCatalog() + "] ADD FILE ( NAME = N'" + getAltTablespace() + "', FILENAME = N'/tmp/" + getAltTablespace() + ".ndf' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [" + getAltTablespace() + "]",
+            "USE [" + getCatalog() + "]",
+//                "ALTER DATABASE ["+getCatalog()+"] MODIFY FILEGROUP [PRIMARY] DEFAULT",
+            "ALTER DATABASE [" + getCatalog() + "] ADD FILEGROUP [" + getAltTablespace() + "]",
+
+            "ALTER DATABASE [" + getCatalog() + "] ADD FILE ( NAME = N'" + getAltTablespace() + "', FILENAME = N'/tmp/" + getAltTablespace() + ".ndf' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [" + getAltTablespace() + "]",
                 "CREATE SCHEMA [" + getAltSchema() + "] AUTHORIZATION [dbo]",
+                "USE [" + getAltCatalog() + "]",
+            "ALTER DATABASE [" + getAltCatalog() + "] ADD FILEGROUP [" + getAltTablespace() + "]",
+            "ALTER DATABASE [" + getAltCatalog() + "] ADD FILE ( NAME = N'" + getAltTablespace() + "', FILENAME = N'/tmp/" + getAltTablespace() + ".ndf' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [" + getAltTablespace() + "]",
+                "CREATE SCHEMA [" + getAltSchema() + "] AUTHORIZATION [dbo]"
         };
     }
 }
