@@ -5,6 +5,8 @@ import liquibase.util.StreamUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.nio.file.FileSystem
+
 class ClassLoaderResourceAccessorTest extends Specification {
 
     def testResourceAccessor = new ClassLoaderResourceAccessor(new URLClassLoader(
@@ -152,5 +154,24 @@ class ClassLoaderResourceAccessorTest extends Specification {
                         ]
                 ],
         ]
+    }
+
+    def close() {
+        setup:
+        FileSystem path1 = Mock()
+        FileSystem path2 = Mock()
+
+        when:
+        def testAccessor = new ClassLoaderResourceAccessor(this.getClass().getClassLoader())
+
+        testAccessor.rootPaths = null;
+        testAccessor.close() //no errors thrown from close() when rootPaths is null
+
+        testAccessor.rootPaths = [path1, path2]
+        testAccessor.close()
+
+        then:
+        1 * path1.close()
+        1 * path2.close()
     }
 }

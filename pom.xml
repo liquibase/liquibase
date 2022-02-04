@@ -197,6 +197,28 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.ibm.db2</groupId>
+            <artifactId>jcc</artifactId>
+            <version>11.5.6.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>18.3.0.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.34.0</version>
+            <scope>test</scope>
+        </dependency>
+
+
         <!-- needed for newer java versions -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
@@ -434,17 +456,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>liquibase-pro-submodule</id>
-            <activation>
-                <file>
-                    <exists>../liquibase-pro/pom.xml</exists>
-                </file>
-            </activation>
-            <modules>
-                <module>../liquibase-pro</module>
-            </modules>
         </profile>
 
         <profile>

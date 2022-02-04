@@ -26,6 +26,9 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.extension.testing.testsystem.DatabaseTestSystem;
+import liquibase.extension.testing.testsystem.TestSystemFactory;
+import liquibase.extension.testing.testsystem.core.HubTestSystem;
 import liquibase.hub.HubConfiguration;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockService;
@@ -41,8 +44,6 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.*;
-import liquibase.test.DatabaseTestContext;
-import liquibase.test.DatabaseTestURL;
 import liquibase.test.DiffResultAssert;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.RegexMatcher;
@@ -69,12 +70,20 @@ import static org.junit.Assume.assumeNotNull;
  */
 public abstract class AbstractIntegrationTest {
 
+    public static final String ALT_TABLESPACE = "LIQUIBASE2";
+    public static final String ALT_SCHEMA = "LBSCHEM2";
+    public static final String ALT_CATALOG = "LBCAT2";
+
+    @Rule
+    public DatabaseTestSystem testSystem;
+
+    @Rule
+    public HubTestSystem hubEnvironment;
+
     @Rule
     public TemporaryFolder tempDirectory = new TemporaryFolder();
     protected String completeChangeLog;
     protected String contexts = "test, context-b";
-    protected String username;
-    protected String password;
     Set<String> emptySchemas = new TreeSet<>();
     Logger logger;
     private String rollbackChangeLog;
@@ -86,10 +95,11 @@ public abstract class AbstractIntegrationTest {
     private String invalidReferenceChangeLog;
     private String objectQuotingStrategyChangeLog;
     private Database database;
-    private String jdbcUrl;
     private String defaultSchemaName;
 
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
+        this.testSystem = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem(dbms.getShortName());
+
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
         this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";
@@ -101,92 +111,20 @@ public abstract class AbstractIntegrationTest {
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
         logger = Scope.getCurrentScope().getLog(getClass());
 
-        // Get the integration test properties for both global settings and (if applicable) local overrides.
-        Properties integrationTestProperties;
-        integrationTestProperties = new Properties();
-        integrationTestProperties.load(
-           Thread.currentThread()
-                 .getContextClassLoader()
-                 .getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
-        InputStream localProperties=
-           Thread.currentThread()
-                 .getContextClassLoader()
-                 .getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
-        if(localProperties!=null)
-            integrationTestProperties.load(localProperties);
+        this.hubEnvironment = (HubTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("hub");
 
-        // Login username
-        String username = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".username");
-        if(username==null)
-            username=integrationTestProperties.getProperty("integration.test.username");
-        this.setUsername(username);
-
-        // Login password
-        String password = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".password");
-        if(password==null)
-            password=integrationTestProperties.getProperty("integration.test.password");
-        this.setPassword(password);
-
-        // JDBC URL (no global default so all databases!)
-        String url = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".url");
-        if ((url == null) || ((url.length()) == 0)) {
-            throw new LiquibaseException("No JDBC URL found for integration test of database type " + dbms.getShortName());
-        }
-        this.setJdbcUrl(url);
-
-        String testHubApiKey = integrationTestProperties.getProperty("integration.test.hub.apiKey");
-        if (testHubApiKey != null) {
-            System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), testHubApiKey);
-            String testHubUrl = integrationTestProperties.getProperty("integration.test.hub.url");
-            System.setProperty(HubConfiguration.LIQUIBASE_HUB_URL.getKey(), testHubUrl);
+        if (hubEnvironment.getApiKey() != null) {
+            System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), hubEnvironment.getApiKey());
+            System.setProperty(HubConfiguration.LIQUIBASE_HUB_URL.getKey(), hubEnvironment.getUrl());
         }
         Scope.setScopeManager(new TestScopeManager());
     }
 
-    public static DatabaseTestURL getDatabaseTestURL(String databaseManager) {
-        try {
-            Properties integrationTestProperties;
-            integrationTestProperties = new Properties();
-            integrationTestProperties.load(
-               Thread.currentThread()
-                     .getContextClassLoader()
-                     .getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
-            InputStream localProperties =
-               Thread.currentThread()
-                     .getContextClassLoader()
-                     .getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
-            if (localProperties != null)
-                integrationTestProperties.load(localProperties);
+    private void openConnection() throws Exception {
+        DatabaseConnection connection = new JdbcConnection(testSystem.getConnection());
 
-            String url = integrationTestProperties.getProperty("integration.test." + databaseManager + ".jdbcUrl");
-            if (url == null)
-                return null;
-
-            DatabaseTestURL testUrl = new DatabaseTestURL(databaseManager, url,
-                // These may be set to null if not defined as properties.
-                integrationTestProperties.getProperty("integration.test." + databaseManager + ".username"),
-                integrationTestProperties.getProperty("integration.test." + databaseManager + ".password")
-            );
-            return testUrl;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
     }
-
-    private void openConnection(String url, String username, String password) throws Exception {
-        DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(url, username, password);
-
-        if (connection != null) {
-            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-        }
-    }
-
-    /**
-     * @return true if this database is provided by the Travis CI build on GitHub.
-     *
-     * See https://docs.travis-ci.com/user/database-setup/
-     */
-    protected abstract boolean isDatabaseProvidedByTravisCI();
 
     /**
      * Reset database connection and internal objects before each test.
@@ -195,14 +133,14 @@ public abstract class AbstractIntegrationTest {
     @Before
     public void setUp() throws Exception {
         // Try to get a connection to the DBMS (or start the embedded DBMS types)
-        openConnection(getJdbcUrl(), getUsername(), getPassword());
+        openConnection();
 
         // Do not count the test as successful if we skip it because of a failed login. Count it as skipped instead.
         org.junit.Assume.assumeTrue(database != null);
 
         if (database.supportsTablespaces()) {
             // Use the opportunity to test if the DATABASECHANGELOG table is placed in the correct tablespace
-            database.setLiquibaseTablespaceName(DatabaseTestContext.ALT_TABLESPACE);
+            database.setLiquibaseTablespaceName(ALT_TABLESPACE);
         }
         if (!database.getConnection().getAutoCommit()) {
             database.rollback();
@@ -256,11 +194,11 @@ public abstract class AbstractIntegrationTest {
             SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
 
             if (database.supportsSchemas()) {
-                emptyTestSchema(null, DatabaseTestContext.ALT_SCHEMA, database);
+                emptyTestSchema(null, ALT_SCHEMA, database);
             }
             if (supportsAltCatalogTests()) {
                 if (database.supportsSchemas() && database.supportsCatalogs()) {
-                    emptyTestSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database);
+                    emptyTestSchema(ALT_CATALOG, ALT_SCHEMA, database);
                 }
             }
 
@@ -273,8 +211,8 @@ public abstract class AbstractIntegrationTest {
              * are doing a thorough cleanup.
              */
             CatalogAndSchema[] alternativeLocations = new CatalogAndSchema[]{
-                new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, null),
-                new CatalogAndSchema(null, DatabaseTestContext.ALT_SCHEMA),
+                new CatalogAndSchema(ALT_CATALOG, null),
+                new CatalogAndSchema(null, ALT_SCHEMA),
                 new CatalogAndSchema("LBCAT2", database.getDefaultSchemaName()),
                 new CatalogAndSchema(null, "LBCAT2"),
                 new CatalogAndSchema("lbcat2", database.getDefaultSchemaName()),
@@ -364,22 +302,6 @@ public abstract class AbstractIntegrationTest {
         // ChangeLog already contains the verification code
     }
 
-
-    @Test
-    public void testDatabaseIsReachableIfRequired() {
-        if (isDatabaseProvidedByTravisCI()) {
-            assertNotNull(
-                    "This integration test is expected to pass on Travis CI.\n" +
-                            "If you are running on a dev machine and do not have the required\n" +
-                            "database installed, you may choose to ignore this failed test.\n" +
-                            "To run this test on a dev machine, you will need to install the corresponding\n" +
-                            "database and configure liquibase.integrationtest.local.properties",
-                    getDatabase());
-        } else {
-            assumeNotNull(this.getDatabase());
-        }
-    }
-
     @Test
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRunChangeLog() throws Exception {
@@ -398,7 +320,7 @@ public abstract class AbstractIntegrationTest {
 
         //run again to test changelog testing logic
         liquibase = createLiquibase(changeLogFile);
-        liquibase.setChangeLogParameter( "loginuser", getUsername());
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
 
         try {
             liquibase.update(this.contexts);
@@ -453,7 +375,7 @@ public abstract class AbstractIntegrationTest {
         conn.setAutoCommit(savedAcSetting);
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.setChangeLogParameter( "loginuser", getUsername());
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
 
     }
@@ -467,7 +389,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.setChangeLogParameter("loginuser", getUsername());
+        liquibase.setChangeLogParameter("loginuser", testSystem.getUsername());
         liquibase.update(this.contexts, output);
 
         String outputResult = output.getBuffer().toString();
@@ -573,7 +495,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.setChangeLogParameter( "loginuser", getUsername());
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
         liquibase.update(this.contexts);
     }
@@ -587,12 +509,12 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.setChangeLogParameter( "loginuser", getUsername());
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.setChangeLogParameter( "loginuser", getUsername());
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
     }
 
@@ -657,7 +579,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.setChangeLogParameter( "loginuser", getUsername());
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
 
         liquibase.tag("Test Tag");
@@ -788,7 +710,7 @@ public abstract class AbstractIntegrationTest {
         }
 
         Liquibase liquibase = createLiquibase(includedChangeLog);
-        database.setDefaultSchemaName("lbcat2");
+        database.setDefaultSchemaName("lbschem2");
         clearDatabase();
 
 
@@ -803,7 +725,7 @@ public abstract class AbstractIntegrationTest {
                 new CompareControl.SchemaComparison[]{
                         new CompareControl.SchemaComparison(
                                 CatalogAndSchema.DEFAULT,
-                                new CatalogAndSchema(null, "lbcat2")
+                                new CatalogAndSchema("lbcat2", null)
                         )
                 },
                 originalSnapshot.getSnapshotControl().getTypesToInclude()
@@ -826,20 +748,20 @@ public abstract class AbstractIntegrationTest {
         //run again to test changelog testing logic
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         try {
-            executor.execute(new DropTableStatement("lbcat2", "lbcat2", database.getDatabaseChangeLogTableName(), false));
+            executor.execute(new DropTableStatement("lbcat2", null, database.getDatabaseChangeLogTableName(), false));
         } catch (DatabaseException e) {
             //ok
         }
         try {
-            executor.execute(new DropTableStatement("lbcat2", "lbcat2", database.getDatabaseChangeLogLockTableName(), false));
+            executor.execute(new DropTableStatement("lbcat2", null, database.getDatabaseChangeLogLockTableName(), false));
         } catch (DatabaseException e) {
             //ok
         }
         database.commit();
 
-        DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(getJdbcUrl(), username, password);
+        DatabaseConnection connection = new JdbcConnection(testSystem.getConnection());
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-        database.setDefaultSchemaName("lbcat2");
+        database.setDefaultSchemaName("lbschem2");
         liquibase = createLiquibase(tempFile.getName());
         try {
             liquibase.update(this.contexts);
@@ -873,7 +795,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.setChangeLogParameter( "loginuser", getUsername());
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
 
         liquibase.clearCheckSums();
@@ -903,11 +825,11 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        liquibase.setChangeLogParameter( "loginuser", getUsername());
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.setChangeLogParameter( "loginuser", getUsername());
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         List<ChangeSet> list = liquibase.listUnrunChangeSets(new Contexts(this.contexts), new LabelExpression());
 
         assertTrue("querying the changelog table on an empty target should return at least 1 un-run change set", !list.isEmpty());
@@ -980,14 +902,14 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.setChangeLogParameter( "loginuser", getUsername());
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
 
         Path outputDir = tempDirectory.newFolder().toPath().normalize();
         logger.fine("Database documentation will be written to this temporary folder: " + outputDir);
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.setChangeLogParameter( "loginuser", getUsername());
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.generateDocumentation(outputDir.toAbsolutePath().toString(), this.contexts);
     }
 
@@ -1150,30 +1072,6 @@ public abstract class AbstractIntegrationTest {
 
     protected Database getDatabase(){
         return database;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    protected String getJdbcUrl() {
-        return jdbcUrl;
-    }
-
-    protected void setJdbcUrl(String jdbcUrl) {
-        this.jdbcUrl = jdbcUrl;
     }
 
     public String getDefaultSchemaName() {

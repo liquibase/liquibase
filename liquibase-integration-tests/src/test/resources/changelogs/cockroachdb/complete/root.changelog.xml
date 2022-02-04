@@ -89,9 +89,15 @@
     <changeSet id="7a" author="nvoxland">
         <addColumn tableName="employee">
             <column name="company_id" type="int">
-                <constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>
+                <constraints nullable="true"/>
             </column>
         </addColumn>
+        <createIndex tableName="employee" indexName="idx_employee_company">
+            <column name="company_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseTableName="employee" baseColumnNames="company_id" constraintName="fk_employee_company"
+                                 referencedTableName="employee"
+                                 referencedColumnNames="id"/>
     </changeSet>
     <changeSet id="8" author="bjohnson">
         <dropNotNullConstraint tableName="employee" columnName="name"/>

@@ -8,22 +8,13 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.Logger;
 import liquibase.sql.visitor.AbstractSqlVisitor;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.core.DropTableStatement;
 import org.junit.Test;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -48,12 +39,6 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
         // variable TNS_ADMIN. This allowes the use of TNSNAMES.
         if (System.getenv("TNS_ADMIN") != null)
             System.setProperty("oracle.net.tns_admin",System.getenv("TNS_ADMIN"));
-    }
-
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        // Seems unlikely to ever be provided by Travis, as it's not free
-        return false;
     }
 
     @Override
