@@ -566,7 +566,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
             if (generateIncrementBy) {
                 if (generateStartWith) {
-                    autoIncrementClause += ", ";
+                    autoIncrementClause += getAutoIncrementSeparator() + " ";
                 }
 
                 autoIncrementClause += String.format(getAutoIncrementByClause(), (incrementBy == null) ? defaultAutoIncrementBy : incrementBy);
@@ -599,6 +599,10 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     protected String getAutoIncrementOpening() {
         return " (";
+    }
+
+    protected String getAutoIncrementSeparator() {
+        return ",";
     }
 
     protected String getAutoIncrementClosing() {

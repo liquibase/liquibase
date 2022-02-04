@@ -12,6 +12,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtil;
+import liquibase.util.StringUtil;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -290,18 +291,18 @@ public class H2Database extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String getAutoIncrementClause() {
-        return "AUTO_INCREMENT";
+    protected String getAutoIncrementSeparator() {
+        return "";
     }
 
     @Override
-    protected String getAutoIncrementStartWithClause() {
-	return "%d";
-    }
+    protected String getAutoIncrementClause(final String generationType, final Boolean defaultOnNull) {
+        if (StringUtil.isEmpty(generationType)) {
+            return super.getAutoIncrementClause();
+        }
 
-    @Override
-    protected String getAutoIncrementByClause() {
-	return "%d";
+        String autoIncrementClause = "GENERATED %s AS IDENTITY"; // %s -- [ ALWAYS | BY DEFAULT ]
+        return String.format(autoIncrementClause, generationType);
     }
 
     @Override
