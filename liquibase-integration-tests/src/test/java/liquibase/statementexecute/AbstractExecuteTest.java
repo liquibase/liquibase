@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.MockDatabase;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -14,11 +15,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
-import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.extension.testing.testsystem.TestSystemFactory;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.database.core.MockDatabase;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -216,6 +215,8 @@ public abstract class AbstractExecuteTest {
 
             try {
                 database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+                CatalogAndSchema alt = new CatalogAndSchema(testSystem.getAltCatalog(), testSystem.getAltSchema());
+                database.dropDatabaseObjects(alt);
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
             }
