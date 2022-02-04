@@ -160,6 +160,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
