@@ -23,7 +23,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
     def INSECURE_XML = """
 <!DOCTYPE databaseChangeLog [
-        <!ENTITY insecure SYSTEM "https://localhost/insecure">
+        <!ENTITY insecure SYSTEM "file://invalid.txt">
         ]>
 
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -83,7 +83,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        e.message.contains("Failed to read external document 'insecure'")
+        e.message.contains("access is not allowed due to restriction set by the accessExternalDTD property")
     }
 
     def "allows liquibase.secureParsing=false to disable secure parsing"() {
@@ -97,7 +97,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        e.message.contains("Connection refused")
+        e.message.contains("Error Reading Changelog File: invalid.txt")
     }
 
 }
