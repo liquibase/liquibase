@@ -33,7 +33,7 @@ if [ -f /usr/bin/cygpath ]; then
   done
 
   # Gather jars from a local liquibase_libs directory
-  if [[ -f ./liquibase_libs/*.jar ]]
+  if ls ./liquibase_libs/*.jar 1> /dev/null 2>&1; then
     for i in liquibase_libs/*.jar; do
       i=`cygpath --windows "$i"`
       CP="$CP;$i"
@@ -56,7 +56,7 @@ else
   done
 
   # Gather jars from a local liquibase_libs directory
-  if [[ -f ./liquibase_libs/*.jar ]]
+  if ls ./liquibase_libs/*.jar 1> /dev/null 2>&1; then
     CP="$CP""$CP_SEPARATOR""liquibase_libs/"
     for i in liquibase_libs/*.jar; do
       CP="$CP""$CP_SEPARATOR""$i"
