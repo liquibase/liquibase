@@ -498,7 +498,6 @@ TOKEN: /* symbols */
     "["-"`",
     "{"-"~",
 
-
 /*
 Built list from http://stackoverflow.com/a/37668315/45756 list of punctuation
 */
