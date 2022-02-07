@@ -35,31 +35,7 @@ import java.util.*;
  */
 public class Scope {
 
-    /**
-     * Enumeration containing standard attributes. Normally use methods like convenience {@link #getResourceAccessor()} or {@link #getDatabase()}
-     */
-    public enum Attr {
-        logService,
-        ui,
-        resourceAccessor,
-        classLoader,
-        database,
-        quotingStrategy,
-        changeLogHistoryService,
-        lockService,
-        executeMode,
-        lineSeparator,
-        serviceLocator,
-
-        /**
-         * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
-         */
-        fileEncoding,
-        databaseChangeLog,
-        changeSet,
-        osgiPlatform
-    }
-
+    
     private static ScopeManager scopeManager;
 
     private Scope parent;
