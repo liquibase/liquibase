@@ -6,8 +6,8 @@ on:
       - opened
       - reopened
       - synchronize
-    branches-ignore:
-      - github-action-* #to allow testing of build logic in branches, don't do PR builds for github-action-* branches and instead use branch builds
+    paths-ignore:
+      - '**.md'
 
   push:
     branches:
