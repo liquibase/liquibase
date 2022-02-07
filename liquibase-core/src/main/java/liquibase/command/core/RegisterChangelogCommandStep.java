@@ -22,6 +22,7 @@ import liquibase.ui.UIService;
 import liquibase.util.StringUtil;
 
 import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class RegisterChangelogCommandStep extends AbstractCommandStep {
@@ -74,29 +75,29 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
         doRegisterChangelog(changeLogFile, hubProjectId, hubProjectName, resultsBuilder, false);
     }
 
-    public void doRegisterChangelog(String changeLogFile, UUID hubProjectId, String hubProjectName, CommandResultsBuilder resultsBuilder, boolean skipPromptIfOneProject) throws LiquibaseException, CommandLineParsingException {
+    public void doRegisterChangelog(String changelogFilepath, UUID hubProjectId, String hubProjectName, CommandResultsBuilder resultsBuilder, boolean skipPromptIfOneProject) throws LiquibaseException, CommandLineParsingException {
         try (PrintWriter output = new PrintWriter(resultsBuilder.getOutputStream())) {
 
             HubChangeLog hubChangeLog;
             final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
             //
-            // CHeck for existing changeLog file
+            // Check for existing changeLog file using the untouched changelog filepath
             //
-            DatabaseChangeLog databaseChangeLog = parseChangeLogFile(changeLogFile);
+            DatabaseChangeLog databaseChangeLog = parseChangeLogFile(changelogFilepath);
             if (databaseChangeLog == null) {
-                throw new CommandExecutionException("Cannot parse "+changeLogFile);
+                throw new CommandExecutionException("Cannot parse "+changelogFilepath);
             }
 
             final String changeLogId = databaseChangeLog.getChangeLogId();
             if (changeLogId != null) {
                 hubChangeLog = service.getHubChangeLog(UUID.fromString(changeLogId));
                 if (hubChangeLog != null) {
-                    throw new CommandExecutionException("Changelog '" + changeLogFile +
+                    throw new CommandExecutionException("Changelog '" + changelogFilepath +
                             "' is already registered with changeLogId '" + changeLogId + "' to project '" +
                             hubChangeLog.getProject().getName() + "' with project ID '" + hubChangeLog.getProject().getId().toString() + "'.\n" +
                             "For more information visit https://docs.liquibase.com.", new ChangeLogAlreadyRegisteredException(hubChangeLog));
                 } else {
-                    throw new CommandExecutionException("Changelog '" + changeLogFile +
+                    throw new CommandExecutionException("Changelog '" + changelogFilepath +
                             "' is already registered with changeLogId '" + changeLogId + "'.\n" +
                             "For more information visit https://docs.liquibase.com.", new ChangeLogAlreadyRegisteredException());
                 }
@@ -122,19 +123,20 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
                 }
                 output.print("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n\n");
             } else {
-                project = retrieveOrCreateProject(service, changeLogFile, skipPromptIfOneProject);
+                project = retrieveOrCreateProject(service, changelogFilepath, skipPromptIfOneProject);
                 if (project == null) {
-                    throw new CommandExecutionException("Your changelog " + changeLogFile + " was not registered to any Liquibase Hub project. You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.  Learn more at https://hub.liquibase.com.");
+                    throw new CommandExecutionException("Your changelog " + changelogFilepath + " was not registered to any Liquibase Hub project. You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.  Learn more at https://hub.liquibase.com.");
                 }
             }
 
             //
             // Go create the Hub Changelog
             //
+            String changelogFilename = Paths.get(databaseChangeLog.getFilePath()).getFileName().toString();
             HubChangeLog newChangeLog = new HubChangeLog();
             newChangeLog.setProject(project);
-            newChangeLog.setFileName(databaseChangeLog.getFilePath());
-            newChangeLog.setName(databaseChangeLog.getFilePath());
+            newChangeLog.setFileName(changelogFilename);
+            newChangeLog.setName(changelogFilename);
 
             hubChangeLog = service.createChangeLog(newChangeLog);
 
@@ -143,11 +145,11 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
             // Add the registered changelog ID to the results so that
             // the caller can use it
             //
-            ChangelogRewriter.ChangeLogRewriterResult changeLogRewriterResult = ChangelogRewriter.addChangeLogId(changeLogFile, hubChangeLog.getId().toString(), databaseChangeLog);
+            ChangelogRewriter.ChangeLogRewriterResult changeLogRewriterResult = ChangelogRewriter.addChangeLogId(changelogFilepath, hubChangeLog.getId().toString(), databaseChangeLog);
 
             if (changeLogRewriterResult.success) {
                 Scope.getCurrentScope().getLog(RegisterChangelogCommandStep.class).info(changeLogRewriterResult.message);
-                output.println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been " +
+                output.println("* Changelog file '" + changelogFilepath + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been " +
                         "registered to Project "+project.getName() );
                 resultsBuilder.addResult("statusCode", 0);
                 resultsBuilder.addResult(REGISTERED_CHANGELOG_ID.getName(), hubChangeLog.getId().toString());

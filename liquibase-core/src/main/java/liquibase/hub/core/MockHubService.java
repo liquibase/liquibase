@@ -21,6 +21,7 @@ public class MockHubService implements HubService {
     public static String apiKey = UUID.randomUUID().toString();
     public static UUID organizationId = UUID.randomUUID();
     public static Integer numberOfProjectsInList = null;
+    public static HubChangeLog lastCreatedChangelog = null;
 
     public List<Project> returnProjects = new ArrayList<>();
     public List<Connection> returnConnections;
@@ -62,6 +63,7 @@ public class MockHubService implements HubService {
             randomUUID = UUID.randomUUID();
         }
         hubChangeLog.setId(randomUUID);
+        lastCreatedChangelog = hubChangeLog;
         return hubChangeLog;
     }
 
