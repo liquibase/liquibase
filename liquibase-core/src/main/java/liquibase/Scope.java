@@ -31,6 +31,7 @@ import java.util.*;
  * Scope objects can be created in a hierarchical manner with the {@link #child(Map, ScopedRunner)} or {@link #child(String, Object, ScopedRunner)} methods.
  * Values set in parent scopes are visible in child scopes, but values in child scopes are not visible to parent scopes.
  * Values with the same key in different scopes "mask" each other with the value furthest down the scope chain being returned.
+ * test
  */
 public class Scope {
 
