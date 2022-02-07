@@ -7,10 +7,10 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd
     http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd ">
 
-    <changeSet id="1" author="your.name">
+      <changeSet id="1" author="your.name">
         <createTable tableName="person">
-            <column name="id" type="int">
-                <constraints primaryKey="true"/>
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(50)">
                 <constraints nullable="false"/>
@@ -23,8 +23,8 @@
 
     <changeSet id="2" author="your.name">
         <createTable tableName="company">
-            <column name="id" type="int">
-                <constraints primaryKey="true"/>
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(50)">
                 <constraints nullable="false"/>
