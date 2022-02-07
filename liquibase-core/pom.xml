@@ -262,8 +262,16 @@
                             </artifactSet>
                             <relocations>
                                 <relocation>
-                                    <pattern>org.apache</pattern>
-                                    <shadedPattern>liquibase.repackaged.org.apache</shadedPattern>
+                                    <pattern>org.apache.commons.collections4</pattern>
+                                    <shadedPattern>liquibase.repackaged.org.apache.commons.collections4</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.lang3</pattern>
+                                    <shadedPattern>liquibase.repackaged.org.apache.commons.lang3</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.text</pattern>
+                                    <shadedPattern>liquibase.repackaged.org.apache.commons.text</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.opencsv</pattern>
