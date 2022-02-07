@@ -79,7 +79,8 @@ public class CDILiquibase implements Extension {
 
     @Inject
     @LiquibaseType
-    private CDILiquibaseConfig config;
+    protected CDILiquibaseConfig config;
+
     @Inject
     @LiquibaseType
     private DataSource dataSource;
@@ -132,7 +133,7 @@ public class CDILiquibase implements Extension {
         }
     }
 
-    private void performUpdate() throws LiquibaseException {
+    protected void performUpdate() throws LiquibaseException {
         Connection c = null;
         Liquibase liquibase = null;
         try {
