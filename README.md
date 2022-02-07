@@ -33,7 +33,8 @@ Liquibase system requirements can be found on the [Download Liquibase](https://w
 6. Run the `liquibase update` command.
 7. Optionally, follow the prompt for your email to register for [Liquibase Hub](https://hub.liquibase.com/).
 8. Run the `liquibase history` command.
-9. If you entered your email, check the report link and the output of the `history` command to see they match. 
+9. If you entered your email, check the report link and the output of the `history` command to see they match.
+10. test
 
 See also how to [get started with Liquibase in minutes](https://www.liquibase.org/get-started/quickstart) or refer to our [Liquibase Installation](https://docs.liquibase.com/concepts/installation/home.html) documentation page for more details.
 
