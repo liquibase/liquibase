@@ -1,7 +1,11 @@
 package liquibase.extension.testing.testsystem.spock;
 
 import liquibase.Scope;
+import liquibase.configuration.ConfigurationValueConverter;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.extension.testing.testsystem.TestSystem;
+import liquibase.util.StringUtil;
+import org.junit.Assume;
 import org.spockframework.runtime.extension.AbstractMethodInterceptor;
 import org.spockframework.runtime.extension.IMethodInvocation;
 import org.spockframework.runtime.model.FieldInfo;
@@ -9,11 +13,26 @@ import org.spockframework.runtime.model.SpecInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterceptor {
 
+    private static final SortedSet<TestSystem.Definition> testSystems = new TreeSet<>();
+
     private final SpecInfo spec;
     private final LiquibaseIntegrationTestExtension.ErrorListener errorListener;
+
+    private static final String configuredTestSystems;
+
+    static {
+        //cache configured test systems for faster lookup
+        configuredTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test").getValue();
+        if (configuredTestSystems != null) {
+            for (String definition : StringUtil.splitAndTrim(configuredTestSystems, ","))
+                testSystems.add(TestSystem.Definition.parse(definition));
+        }
+    }
 
     LiquibaseIntegrationMethodInterceptor(SpecInfo spec, LiquibaseIntegrationTestExtension.ErrorListener errorListener) {
         this.spec = spec;
@@ -50,8 +69,11 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
 
     private static void startContainers(List<FieldInfo> containers, IMethodInvocation invocation) throws Exception {
         for (FieldInfo field : containers) {
-            TestSystem env = readContainerFromField(field, invocation);
-            env.start();
+            TestSystem testSystem = readContainerFromField(field, invocation);
+
+            Assume.assumeTrue("Not running test against " + testSystem.getDefinition() + ": liquibase.sdk.testSystem.test is " + configuredTestSystems, testSystem.shouldTest());
+
+            testSystem.start();
 
         }
     }
@@ -59,6 +81,10 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
     private void stopContainers(List<FieldInfo> containers, IMethodInvocation invocation) throws Exception {
         for (FieldInfo field : containers) {
             TestSystem testSystem = readContainerFromField(field, invocation);
+
+            if (!testSystem.shouldTest()) {
+                continue;
+            }
 
             try {
                 testSystem.stop();

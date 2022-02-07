@@ -362,6 +362,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 substring = (caseInsensitive && substring != null ? substring.toLowerCase() : substring)
                 assert !actual.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))): "$actual does not contain: '$substring'"
             }
+
+            @Override
+            String getExpected() {
+                return substring
+            }
         }
     }
 
@@ -381,6 +386,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     int count = (actual.split(Pattern.quote(edited), -1).length) - 1
                     assert count == occurrences: "$actual does not contain '$substring' $occurrences times.  It appears $count times"
                 }
+            }
+
+            @Override
+            String getExpected() {
+                return substring
             }
         }
     }
@@ -458,7 +468,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     try {
                         ((OutputCheck) expectedOutputCheck).check(fullOutput)
                     } catch (AssertionError e) {
-                        Assert.fail("$fullOutput : ${e.getMessage()}")
+                        throw new ComparisonFailure(e.getMessage(), expectedOutputCheck.expected, fullOutput)
                     }
                 } else {
                     Assert.fail "Unknown $outputDescription check type: ${expectedOutputCheck.class.name}"
@@ -968,6 +978,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
     interface OutputCheck {
         def check(String actual) throws AssertionError
+        /**
+         * @return the expected value from this output check
+         */
+        String getExpected()
     }
 
     interface FileContentCheck {
