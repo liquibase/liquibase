@@ -14,6 +14,8 @@ on:
       - master
       - main
       - github-action-*
+    paths-ignore:
+      - '**.md'
 
 jobs:
   setup:
@@ -158,6 +160,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
@@ -185,7 +188,7 @@ jobs:
         testSystem:
           - h2
 #          - h2:1.4
-          - hsql
+          - hsqldb
           - mariadb
           - mssql
           - mysql
@@ -226,7 +229,7 @@ jobs:
           password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - name: Run Tests
-        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=hub,${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest -DfailIfNoTests=false
+        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=hub,${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false
 
       - name: Archive Test Results
         if: ${{ always() }}
@@ -289,8 +292,19 @@ jobs:
       - name: Build & Sign Artifacts
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
+          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
+          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
+          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
+          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
+          ## save install4j code signing keys
+          mkdir -p liquibase-dist/target/keys
+          echo "Saving apple key"
+          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
+
+          echo "Saving windows key"
+          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
           mvn -B -pl liquibase-dist -P liquibase-pro source:jar package
 
           ## extract tar content for other artifacts
@@ -329,8 +343,9 @@ jobs:
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.tar.gz
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
-          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}-deps.jar
 
       - name: Archive Packages
         uses: actions/upload-artifact@v2
