@@ -19,9 +19,13 @@ import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedureStatement> {
+
+    private static final List<String> BEFORE_BODY_START_STATEMENTS = Arrays.asList("CREATE", "ALTER");
+
     @Override
     public ValidationErrors validate(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -43,7 +47,6 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
     public Sql[] generateSql(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<Sql> sql = new ArrayList<Sql>();
         List<String> mssqlSetStatementsBefore = new ArrayList<>();
-        List<String> mssqlSetStatementsAfter = new ArrayList<>();
 
         String schemaName = statement.getSchemaName();
         if (schemaName == null) {
@@ -54,11 +57,10 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
         if (database instanceof MSSQLDatabase) {
             MssqlSplitStatements mssqlSplitStatements =
-                    splitSetStatementsOutForMssql(procedureText, statement.getEndDelimiter());
+                    splitSetStatementsOutForMssql(procedureText, statement.getEndDelimiter(), Arrays.asList("PROC", "PROCEDURE"));
 
             procedureText = mssqlSplitStatements.getBody();
             mssqlSetStatementsBefore = mssqlSplitStatements.getSetStatementsBefore();
-            mssqlSetStatementsAfter = mssqlSplitStatements.getSetStatementsAfter();
         }
 
         if (statement.getReplaceIfExists() != null && statement.getReplaceIfExists()) {
@@ -109,12 +111,6 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         }
 
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
-
-        if (mssqlSetStatementsAfter != null && !mssqlSetStatementsAfter.isEmpty()) {
-            mssqlSetStatementsAfter
-                    .forEach(mssqlSetStatement ->
-                            sql.add(new UnparsedSql(mssqlSetStatement, statement.getEndDelimiter())));
-        }
 
         surroundWithSchemaSets(sql, statement.getSchemaName(), database);
         return sql.toArray(new Sql[sql.size()]);
@@ -194,55 +190,37 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         return procedureText;
     }
 
-    public static MssqlSplitStatements splitSetStatementsOutForMssql(String body, String endDelimiter) {
-        return splitSetStatementsOutForMssql(body, endDelimiter, "BEGIN", "END");
-    }
-
     /**
      * Split <code>SET ANSI_NULLS/QUOTED_IDENTIFIER ON/OFF</code> statements out of SQL statement
-     * into before/after statements if they are before or after procedure/function/trigger/view body.
+     * into before statements if they are before or after procedure/function/trigger/view body.
      *
      * @param body - SQL to split if SET statements are present
      * @param endDelimiter - end line delimiter
-     * @param bodyStartStatement - word/symbol defining that procedure/function/trigger/view body's start
-     * @param bodyEndStatement - word/symbol defining that procedure/function/trigger/view body's start
-     * @return - before/after statements if any are present and procedure/function/trigger/view body
+     * @return - before statements if any are present and procedure/function/trigger/view body
      */
     public static MssqlSplitStatements splitSetStatementsOutForMssql(String body, String endDelimiter,
-                                                                     String bodyStartStatement, String bodyEndStatement) {
+                                                                     List<String> bodyStartStatements) {
         MssqlSplitStatements mssqlSplitStatements = new MssqlSplitStatements();
 
         StringClauses sqlClauses = SqlParser.parse(body, true, true);
         StringClauses.ClauseIterator clauseIterator = sqlClauses.getClauseIterator();
         Object next = "";
-        boolean isProcedureBody = false;
-        boolean isAfterProcedureBody = false;
         ArrayList<String> beforeStatements = new ArrayList<>();
-        ArrayList<String> afterStatements = new ArrayList<>();
 
         while (next != null && clauseIterator.hasNext()) {
             next = clauseIterator.nextNonWhitespace();
 
-            if (!isProcedureBody) {
-                if (isAfterProcedureBody) {
-                    next = splitOutIfSetStatement(next, clauseIterator, endDelimiter, afterStatements);
-                } else {
-                    next = splitOutIfSetStatement(next, clauseIterator, endDelimiter, beforeStatements);
+            next = splitOutIfSetStatement(next, clauseIterator, endDelimiter, beforeStatements);
+
+            if (next != null && BEFORE_BODY_START_STATEMENTS.contains(next.toString().toUpperCase())) {
+                next = clauseIterator.nextNonWhitespace();
+                if (next != null && bodyStartStatements.contains(next.toString().toUpperCase())) {
+                    break;
                 }
-            }
-
-            if (next != null && next.toString().equalsIgnoreCase(bodyStartStatement)) {
-                isProcedureBody = true;
-            }
-
-            if (next != null && next.toString().equalsIgnoreCase(bodyEndStatement)) {
-                isProcedureBody = false;
-                isAfterProcedureBody = true;
             }
         }
 
         mssqlSplitStatements.setSetStatementsBefore(beforeStatements);
-        mssqlSplitStatements.setSetStatementsAfter(afterStatements);
         mssqlSplitStatements.setBody(sqlClauses.toString().trim());
 
         return mssqlSplitStatements;
@@ -291,7 +269,6 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
     public static class MssqlSplitStatements {
         private List<String> setStatementsBefore;
         private String body;
-        private List<String> setStatementsAfter;
 
         MssqlSplitStatements() {
         }
@@ -310,14 +287,6 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
         public void setBody(String body) {
             this.body = body;
-        }
-
-        public List<String> getSetStatementsAfter() {
-            return setStatementsAfter;
-        }
-
-        public void setSetStatementsAfter(List<String> setStatementsAfter) {
-            this.setStatementsAfter = setStatementsAfter;
         }
     }
 }

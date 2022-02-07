@@ -15,6 +15,7 @@ import liquibase.util.SqlParser;
 import liquibase.util.StringClauses;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static liquibase.sqlgenerator.core.CreateProcedureGenerator.splitSetStatementsOutForMssql;
@@ -52,7 +53,6 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<Sql> sql = new ArrayList<Sql>();
         List<String> mssqlSetStatementsBefore = new ArrayList<>();
-        List<String> mssqlSetStatementsAfter = new ArrayList<>();
 
         if (database instanceof InformixDatabase) {
             return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
@@ -61,11 +61,10 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         String body = statement.getSelectQuery();
         if (database instanceof MSSQLDatabase) {
             CreateProcedureGenerator.MssqlSplitStatements mssqlSplitStatements =
-                    splitSetStatementsOutForMssql(body, ";", "AS", ";");
+                    splitSetStatementsOutForMssql(body, ";", Collections.singletonList("VIEW"));
 
             body = mssqlSplitStatements.getBody();
             mssqlSetStatementsBefore = mssqlSplitStatements.getSetStatementsBefore();
-            mssqlSetStatementsAfter = mssqlSplitStatements.getSetStatementsAfter();
         }
 
         StringClauses viewDefinition = SqlParser.parse(body, true, true);
@@ -114,12 +113,6 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         }
 
         sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
-
-        if (mssqlSetStatementsAfter != null && !mssqlSetStatementsAfter.isEmpty()) {
-            mssqlSetStatementsAfter
-                    .forEach(mssqlSetStatement ->
-                            sql.add(new UnparsedSql(mssqlSetStatement, ";")));
-        }
 
         return sql.toArray(new Sql[sql.size()]);
     }
