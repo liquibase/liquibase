@@ -21,7 +21,7 @@ public class InternalDiffChangelogCommandStep extends InternalDiffCommandStep {
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
 
-        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required().build();
+        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required().build();
         DIFF_OUTPUT_CONTROL_ARG = builder.argument("diffOutputControl", DiffOutputControl.class).required().build();
     }
 

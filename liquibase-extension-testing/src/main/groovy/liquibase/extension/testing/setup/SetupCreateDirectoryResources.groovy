@@ -1,7 +1,5 @@
 package liquibase.extension.testing.setup
 
-import liquibase.extension.testing.TestDatabaseConnections
-
 class SetupCreateDirectoryResources extends TestSetup {
 
     private String directory
@@ -11,7 +9,7 @@ class SetupCreateDirectoryResources extends TestSetup {
     }
 
     @Override
-    void setup(TestDatabaseConnections.ConnectionStatus connectionStatus) throws Exception {
+    void setup(TestSetupEnvironment testSetupEnvironment) throws Exception {
         File f = new File(directory)
         boolean b = f.mkdirs()
         if (! b) {
