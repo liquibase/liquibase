@@ -3,6 +3,9 @@ name: Build and Test
 on:
   pull_request_target:
     types:
+      - opened
+      - reopened
+      - synchronize
       - labeled
     branches-ignore:
       - github-action-* #to allow testing of build logic in branches, don't do PR builds for github-action-* branches and instead use branch builds
@@ -17,8 +20,8 @@ on:
 
 jobs:
   setup:
+    if: ${{ github.repository == 'liquibase/liquibase' || (github.repository != 'liquibase/liquibase' && github.event.label.name == 'SafeToBuild') }}
     name: Setup
-    if: ${{ github.event.label.name == 'SafeToBuild' }}
     runs-on: ubuntu-latest
     outputs:
       proBranchName: ${{ steps.find-branches.outputs.proBranchName }}
@@ -107,8 +110,8 @@ jobs:
 
   build:
     name: Build & Test (Java ${{ matrix.java }})
+    if: ${{ github.repository == 'liquibase/liquibase' || (github.repository != 'liquibase/liquibase' && github.event.label.name == 'SafeToBuild') }}
     needs: setup
-    if: ${{ github.event.label.name == 'SafeToBuild' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
