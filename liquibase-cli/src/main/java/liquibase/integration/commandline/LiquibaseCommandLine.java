@@ -605,7 +605,7 @@ public class LiquibaseCommandLine {
         CompositeResourceAccessor composite = null;
         ResourceAccessor localResourceAccessor = ResourceAccessorServiceFactory.getPluginResourceAccessor(null);
         if (localResourceAccessor != null) {
-            composite = new CompositeResourceAccessor(localResourceAccessor, new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader));
+            composite = new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader), localResourceAccessor);
         } else {
             composite = new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader));
         }
