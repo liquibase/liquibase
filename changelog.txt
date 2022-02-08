@@ -1,7 +1,20 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version 4.7.0(2022.01.07)
+Changes in version 4.7.1 (2022.01.21)
+
+- Fix bug which makes Liquibase misidentify your database dialect if the string 'edb' is in your connection url. (#2364)
+- Output changeset execution to UI like rollback does (#1932)
+- Support MaxDB for sequences (#932)
+- Include columnDataType in generated setColumnRemarks changesets (#2188)
+- Use database time for changeloglock table (#2217)
+- Mysql: support additional information "double" datatypes (#2293)
+- Correctly handle old "liquibase tagExists myTag" style CLI structure (#2269)
+- Correctly handle cacheSize in mariadb (#2270)
+- Mark liquibase-maven-plugin logging configuration as deprecated (#2261)
+- Added validation errors for SQLite and DB2z databases (#2359)
+
+Changes in version 4.7.0 (2022.01.07)
 
 Liquibase 4.7.0 introduces the init command with the project subcommand, which helps to build the necessary
 configuration files for using Liquibase or, if you already use Liquibase, create new project files with minimal input.[DAT-8640]

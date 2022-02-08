@@ -64,7 +64,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
 
     @Override
     public boolean getAllowPrompt() {
-        return allowPrompt;
+        return getConsole().supportsInput() && allowPrompt;
     }
 
     @Override

@@ -81,6 +81,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             ChangeSet changeSet = null;
             RawSQLChange change = null;
             Pattern changeLogPattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
+            Pattern propertyPattern = Pattern.compile("\\s*\\-\\-[\\s]*property\\s+(.*:.*)\\s+(.*:.*).*", Pattern.CASE_INSENSITIVE);
             Pattern changeSetPattern = Pattern.compile("\\s*\\-\\-[\\s]*changeset\\s+(\"[^\"]+\"|[^:]+):\\s*(\"[^\"]+\"|\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
             Pattern preconditionsPattern = Pattern.compile("\\s*\\-\\-[\\s]*preconditions(.*)", Pattern.CASE_INSENSITIVE);
@@ -93,7 +94,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern validCheckSumPattern = Pattern.compile("\\-\\-[\\s]*validCheckSum:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern ignoreLinesPattern = Pattern.compile("\\-\\-[\\s]*ignoreLines:(\\w+)", Pattern.CASE_INSENSITIVE);
-            Pattern runWithPattern = Pattern.compile(".*runWith:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern runWithPattern = Pattern.compile(".*runWith:([\\w\\$\\{\\}]+).*", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -114,7 +115,11 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
             String line;
             while ((line = reader.readLine()) != null) {
-
+                Matcher propertyPatternMatcher = propertyPattern.matcher(line);
+                if (propertyPatternMatcher.matches()) {
+                    handleProperty(changeLogParameters, changeLog, propertyPatternMatcher);
+                    continue;
+                }
                 Matcher changeLogPatterMatcher = changeLogPattern.matcher (line);
                 if (changeLogPatterMatcher.matches ()) {
                    Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
@@ -202,21 +207,39 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     boolean failOnError = parseBoolean(failOnErrorPatternMatcher, changeSet, true);
 
                     String runWith = parseString(runWithMatcher);
+                    if (runWith != null) {
+                        runWith = changeLogParameters.expandExpressions(runWith, changeLog);
+                    }
                     String endDelimiter = parseString(endDelimiterPatternMatcher);
                     rollbackEndDelimiter = parseString(rollbackEndDelimiterPatternMatcher);
                     String context = StringUtil.trimToNull(
-                            StringUtil.trimToEmpty(parseString(contextPatternMatcher)).replaceFirst("^\"", "").replaceFirst("\"$", "") //remove surrounding quotes if they're in there
+                        StringUtil.trimToEmpty(parseString(contextPatternMatcher)).replaceFirst("^\"", "").replaceFirst("\"$", "") //remove surrounding quotes if they're in there
                     );
+                    if (context != null) {
+                        context = changeLogParameters.expandExpressions(context, changeLog);
+                    }
                     String labels = parseString(labelsPatternMatcher);
+                    if (labels != null) {
+                        labels = changeLogParameters.expandExpressions(labels, changeLog);
+                    }
                     String logicalFilePath = parseString(logicalFilePathMatcher);
                     if ((logicalFilePath == null) || "".equals(logicalFilePath)) {
-                       logicalFilePath = changeLog.getLogicalFilePath ();
+                       logicalFilePath = changeLog.getLogicalFilePath();
+                    }
+                    if (logicalFilePath != null) {
+                        logicalFilePath = changeLogParameters.expandExpressions(logicalFilePath, changeLog);
                     }
                     String dbms = parseString(dbmsPatternMatcher);
+                    if (dbms != null) {
+                        dbms = changeLogParameters.expandExpressions(dbms, changeLog);
+                    }
 
-
+                    String changeSetId =
+                        changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(changeSetPatternMatcher.group(2)), changeLog);
+                    String changeSetAuthor =
+                        changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(changeSetPatternMatcher.group(1)), changeLog);
                     changeSet =
-                       new ChangeSet(StringUtil.stripEnclosingQuotes(changeSetPatternMatcher.group(2)), StringUtil.stripEnclosingQuotes(changeSetPatternMatcher.group(1)), runAlways, runOnChange, logicalFilePath, context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
+                       new ChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange, logicalFilePath, context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
                     changeSet.setLabels(new Labels(labels));
                     changeSet.setFailOnError(failOnError);
                     changeLog.addChangeSet(changeSet);
@@ -319,7 +342,40 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         return changeLog;
     }
 
-
+    private void handleProperty(ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog, Matcher propertyPatternMatcher) {
+        String name = null;
+        String value = null;
+        String context = null;
+        String labels = null;
+        String dbms = null;
+        boolean global = false;
+        for (int i = 1; i <= propertyPatternMatcher.groupCount(); i++) {
+            String temp = propertyPatternMatcher.group(i);
+            String[] parts = temp.split(":");
+            String key = parts[0].trim().toLowerCase();
+            switch (key) {
+                case "name":
+                    name = parts[1].trim();
+                    break;
+                case "value":
+                    value = parts[1].trim();
+                    break;
+                case "context":
+                    context = parts[1].trim();
+                    break;
+                case "labels":
+                    labels = parts[1].trim();
+                    break;
+                case "dbms":
+                    dbms = parts[1].trim();
+                    break;
+                case "global":
+                    global = Boolean.parseBoolean(parts[1].trim());
+                    break;
+            }
+        }
+        changeLogParameters.set(name, value, context, labels, dbms, global, changeLog);
+    }
 
     private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException{
         Pattern[] patterns = new Pattern[] {

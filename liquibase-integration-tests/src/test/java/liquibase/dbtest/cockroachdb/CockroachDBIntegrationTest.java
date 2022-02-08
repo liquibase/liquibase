@@ -2,7 +2,6 @@ package liquibase.dbtest.cockroachdb;
 
 import liquibase.Scope;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -13,7 +12,6 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -26,44 +24,6 @@ public class CockroachDBIntegrationTest extends AbstractIntegrationTest {
 
     public CockroachDBIntegrationTest() throws Exception {
         super("cockroachdb", DatabaseFactory.getInstance().getDatabase("cockroachdb"));
-    }
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
-                "CREATE USER IF NOT EXISTS lbuser"
-        );
-        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
-                "CREATE DATABASE IF NOT EXISTS lbcat"
-        );
-        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
-                "CREATE DATABASE IF NOT EXISTS lbcat2"
-        );
-        // Create schemas for tests testRerunDiffChangeLogAltSchema
-        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
-                "CREATE SCHEMA IF NOT EXISTS lbcat2"
-        );
-        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
-                "GRANT ALL ON DATABASE lbcat TO lbuser"
-        );//
-        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
-                "GRANT ALL ON DATABASE lbcat2 TO lbuser"
-        );
-        // Create schemas for tests testRerunDiffChangeLogAltSchema
-        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
-                "GRANT ALL ON SCHEMA lbcat2 TO lbuser"
-        );
-
-        getDatabase().commit();
-
-    }
-
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        return true;
     }
 
     @Test

@@ -45,6 +45,15 @@ complete -W \
   listLocks \
   releaseLocks \
   dropAll \
+  'checks run' \
+  'checks delete --check-name=<check_short_name>' \
+  'checks bulk-set' \
+  'checks show' \
+  'checks customize --check-name=<check_short_name>' \
+  'checks reset --check-name=<check_short_name>' \
+  'checks enable --check-name=<check_short_name>' \
+  'checks disable --check-name=<check_short_name>' \
+  'checks copy --check-name=<check_short_name>' \
   --changeLogFile \
   --username \
   --password \
