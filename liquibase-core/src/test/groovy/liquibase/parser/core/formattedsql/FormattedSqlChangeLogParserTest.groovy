@@ -23,8 +23,14 @@ public class FormattedSqlChangeLogParserTest extends Specification {
     private static final String VALID_CHANGELOG = """
 --liquibase formatted sql
 
- --changeset nvoxland:1
-select * from table1;
+--property name:idProp value:1
+--property name:authorProp value:nvoxland
+--property nAmE:tableNameProp value:table1
+--property name:runwith value: sqlplus
+
+
+--changeset \${authorProp}:\${idProp}
+select * from \${tableNameProp};
 
 --changeset "n voxland":"change 2" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
 create table table1 (
@@ -78,6 +84,12 @@ create table my_table (
 
 --changeset complexContext:1 context:"a or b"
 select 1
+
+-- changeset wesley:wesley-1 runWith:\${runWith}
+create table table2 (
+    id int primary key
+);
+
 """.trim()
 
 
@@ -109,7 +121,7 @@ select 1
 
         changeLog.getLogicalFilePath() == "asdf.sql"
 
-        changeLog.getChangeSets().size() == 10
+        changeLog.getChangeSets().size() == 11
 
         changeLog.getChangeSets().get(0).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(0).getId() == "1"
@@ -195,6 +207,7 @@ select 1
         assert changeLog.getChangeSets().get(7).getContexts().toString().contains("second")
         assert changeLog.getChangeSets().get(7).getContexts().toString().contains("third")
 
+        changeLog.getChangeSets().get(10).getRunWith() == "sqlplus"
 
         ChangeSet cs = changeLog.getChangeSets().get(8)
         cs.getAuthor() == "bboisvert"

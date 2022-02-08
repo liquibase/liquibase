@@ -581,6 +581,7 @@ Built list from http://stackoverflow.com/a/37668315/45756 list of punctuation
     "\u208D",
     "\u208E",
     "\u20A0"-"\u20BF", //Currency symbols https://www.Sutf8-chartable.de/unicode-utf8-table.pl
+    "\u2116", //numero sign in Russian it's a regular symbol (https://en.wikipedia.org/wiki/Numero_sign)
     "\u2308"-"\u230B",
     "\u2329",
     "\u232A",
