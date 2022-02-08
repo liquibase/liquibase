@@ -1,25 +1,44 @@
-name: Build and Test
+  name: Build and Test
 
-on:
-  pull_request_target:
-    types:
-      - opened
-      - reopened
-      - synchronize
-    branches-ignore:
-      - github-action-* #to allow testing of build logic in branches, don't do PR builds for github-action-* branches and instead use branch builds
+  on:
+    pull_request_target:
+      types:
+        - opened
+        - reopened
+        - synchronize
+        - labeled
+      branches-ignore:
+        - github-action-* #to allow testing of build logic in branches, don't do PR builds for github-action-* branches and instead use branch builds
 
-  push:
-    branches:
-      - master
-      - main
-      - github-action-*
-    paths-ignore:
-      - '**.md'
+    push:
+      branches:
+        - master
+        - main
+        - github-action-*
+      paths-ignore:
+        - '**.md'
 
-jobs:
+  jobs:
+    check_build_safety:
+      name: Check if Build shoud be done
+      runs-on: ubuntu-latest
+      steps:
+        - name: Emit failure code if unsafe
+          if: ${{ github.repository != 'liquibase/liquibase' && github.event.label.name != 'SafeToBuild' }}
+          run: |
+            echo "PR from Fork is NOT safe to build"
+            echo "A member of Liquibase team needs to apply label 'SafeToBuild'! "
+            exit 1 // add failure code
+        - name: Run needed builds
+          if: ${{ github.repository == 'liquibase/liquibase' && !github.event.label }}
+          run: |
+            echo "We need to do this build on just a label change."
+          # we are counting on this step to be skipped when we're adding labels other than 'SafeToBuild'
+          # which will cause dependent steps to be skipped also.
+
   setup:
     name: Setup
+    needs: check_build_safety
     runs-on: ubuntu-latest
     outputs:
       proBranchName: ${{ steps.find-branches.outputs.proBranchName }}
