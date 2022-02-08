@@ -19,9 +19,26 @@ on:
       - '**.md'
 
 jobs:
+  check_build_safety:
+    name: Check if Safe to Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Emit success code
+        if: ${{ github.repository == 'liquibase/liquibase' || github.event.label.name == 'SafeToBuild') }}
+        run: |
+          echo "PR is safe to build"
+          exit 0 // add success code
+
+      - name: Emit failure code
+        if: ${{ github.repository != 'liquibase/liquibase' && github.event.label.name == 'SafeToBuild') }}
+        run: |
+          echo "PR from Fork is NOT safe to build"
+          exit 1 // add failure code
+
+
   setup:
-    if: ${{ github.repository == 'liquibase/liquibase' || (github.repository != 'liquibase/liquibase' && github.event.label.name == 'SafeToBuild') }}
     name: Setup
+    needs: check_build_safety
     runs-on: ubuntu-latest
     outputs:
       proBranchName: ${{ steps.find-branches.outputs.proBranchName }}
@@ -110,7 +127,6 @@ jobs:
 
   build:
     name: Build & Test (Java ${{ matrix.java }})
-    if: ${{ github.repository == 'liquibase/liquibase' || (github.repository != 'liquibase/liquibase' && github.event.label.name == 'SafeToBuild') }}
     needs: setup
     runs-on: ubuntu-latest
     strategy:
