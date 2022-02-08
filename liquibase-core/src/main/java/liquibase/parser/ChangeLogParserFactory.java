@@ -5,8 +5,12 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.resource.ResourceAccessorService;
+import liquibase.resource.ResourceAccessorServiceFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ChangeLogParserFactory {
 

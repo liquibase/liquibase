@@ -18,6 +18,8 @@ import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.resource.ResourceAccessorServiceFactory;
 import liquibase.ui.ConsoleUIService;
 import liquibase.ui.UIService;
 import liquibase.util.LiquibaseUtil;
@@ -600,8 +602,14 @@ public class LiquibaseCommandLine {
 
     private Map<String, Object> configureResourceAccessor(ClassLoader classLoader) {
         Map<String, Object> returnMap = new HashMap<>();
-
-        returnMap.put(Scope.Attr.resourceAccessor.name(), new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader)));
+        CompositeResourceAccessor composite = null;
+        ResourceAccessor localResourceAccessor = ResourceAccessorServiceFactory.getPluginResourceAccessor(null);
+        if (localResourceAccessor != null) {
+            composite = new CompositeResourceAccessor(localResourceAccessor, new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader));
+        } else {
+            composite = new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader));
+        }
+        returnMap.put(Scope.Attr.resourceAccessor.name(), composite);
 
         return returnMap;
     }
