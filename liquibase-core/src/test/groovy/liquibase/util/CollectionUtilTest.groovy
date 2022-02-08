@@ -64,4 +64,18 @@ class CollectionUtilTest extends Specification {
                                                       ["a": 1, "b": 5, "c": 9], ["a": 2, "b": 5, "c": 9], ["a": 3, "b": 5, "c": 9],
                                                       ["a": 1, "b": 6, "c": 9], ["a": 2, "b": 6, "c": 9], ["a": 3, "b": 6, "c": 9]]
     }
+
+    @Unroll
+    def "flatten"() {
+        expect:
+        CollectionUtil.flatten(input as Map) == expected
+
+        where:
+        input                                                           | expected
+        null                                                            | null
+        [:]                                                             | [:]
+        [a: "a1", b: "b1"]                                              | [a: "a1", b: "b1"]
+        [a: [a1: "a1a", "a2": "a2a"], b: "b1"]                          | ["a.a1": "a1a", "a.a2": "a2a", b: "b1"]
+        [a: [a1: "a1a", "a2": ["a2a": "a2a1", "a2b": "a2b1"]], b: "b1"] | ["a.a1": "a1a", "a.a2.a2a": "a2a1", "a.a2.a2b": "a2b1", b: "b1"]
+    }
 }
