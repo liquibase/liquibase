@@ -1,11 +1,38 @@
 package liquibase.resource;
 
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryService;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ResourceAccessorServiceFactory extends AbstractPluginFactory<ResourceAccessorService> {
 
-    protected ResourceAccessorServiceFactory() {}
+    private List<ResourceAccessorService> registry = new ArrayList<>();
+
+    private static ResourceAccessorServiceFactory instance;
+
+    public static synchronized ResourceAccessorServiceFactory getInstance() {
+        if (instance == null) {
+            instance = new ResourceAccessorServiceFactory();
+        }
+        return instance;
+    }
+
+    private ResourceAccessorServiceFactory() {
+        /*
+        try {
+            for (ResourceAccessorService service : Scope.getCurrentScope().getServiceLocator().findInstances(ResourceAccessorService.class)) {
+                register(service);
+            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+         */
+    }
 
     @Override
     protected Class<ResourceAccessorService> getPluginClass() {
@@ -14,20 +41,15 @@ public class ResourceAccessorServiceFactory extends AbstractPluginFactory<Resour
 
     @Override
     protected int getPriority(ResourceAccessorService obj, Object... args) {
-        return 0;
+        return obj.getPriority();
     }
 
     public ResourceAccessorService getResourceAccessorService() {
         return getPlugin();
     }
 
-    public static ResourceAccessor getPluginResourceAccessor(String filePath) {
-        ResourceAccessorService resourceAccessorService =
-            Scope.getCurrentScope().getSingleton(ResourceAccessorServiceFactory.class).getResourceAccessorService();
-        ResourceAccessor localResourceAccessor = null;
-        if (resourceAccessorService != null) {
-            localResourceAccessor = resourceAccessorService.getResourceAccessor(filePath);
-        }
-        return localResourceAccessor;
+    public ResourceAccessor getPluginResourceAccessor() {
+        ResourceAccessorService resourceAccessorService = getPlugin(); //ResourceAccessorServiceFactory.getInstance().getResourceAccessorService();
+        return resourceAccessorService != null ? resourceAccessorService.getResourceAccessor() : null;
     }
 }

@@ -603,7 +603,7 @@ public class LiquibaseCommandLine {
     private Map<String, Object> configureResourceAccessor(ClassLoader classLoader) {
         Map<String, Object> returnMap = new HashMap<>();
         CompositeResourceAccessor composite = null;
-        ResourceAccessor localResourceAccessor = ResourceAccessorServiceFactory.getPluginResourceAccessor(null);
+        ResourceAccessor localResourceAccessor = ResourceAccessorServiceFactory.getInstance().getPluginResourceAccessor();
         if (localResourceAccessor != null) {
             composite = new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader), localResourceAccessor);
         } else {
