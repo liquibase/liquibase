@@ -26,7 +26,7 @@ public class MockHubService implements HubService {
     public List<Project> returnProjects = new ArrayList<>();
     public List<Connection> returnConnections;
     public List<HubChangeLog> returnChangeLogs = new ArrayList<>();
-    public SortedMap<String, List> sentObjects = new TreeMap<>();
+    public static SortedMap<String, List> sentObjects = new TreeMap<>();
     public boolean online = true;
 
     @Override
@@ -200,6 +200,7 @@ public class MockHubService implements HubService {
 
     @Override
     public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent, UUID organizationId) throws LiquibaseException {
+        sentObjects.computeIfAbsent("sendOperationEvent", k -> new ArrayList<>()).add(operationEvent);
         return null;
     }
 
