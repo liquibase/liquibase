@@ -488,7 +488,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
             def path = "src/test/resources/liquibase/extension/testing/command/"
             try {
-                (path as File).eachFileRecurse {
+                (path as File). eachFileRecurse {
                     if (!it.name.endsWith("test.groovy")) {
                         return
                     }
