@@ -16,10 +16,7 @@ import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.LogMessageFilter;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import liquibase.resource.ResourceAccessorServiceFactory;
+import liquibase.resource.*;
 import liquibase.ui.ConsoleUIService;
 import liquibase.ui.UIService;
 import liquibase.util.LiquibaseUtil;
@@ -602,13 +599,16 @@ public class LiquibaseCommandLine {
 
     private Map<String, Object> configureResourceAccessor(ClassLoader classLoader) {
         Map<String, Object> returnMap = new HashMap<>();
-        CompositeResourceAccessor composite = null;
-        ResourceAccessor localResourceAccessor = ResourceAccessorServiceFactory.getInstance().getPluginResourceAccessor();
+        //ResourceAccessor localResourceAccessor = ResourceAccessorServiceFactory.getInstance().getPluginResourceAccessor();
+        ResourceAccessorService resourceAccessorService = ResourceAccessorServiceFactory.getInstance().getResourceAccessorService();
+        ResourceAccessor composite = resourceAccessorService.getResourceAccessor();
+        /*
         if (localResourceAccessor != null) {
             composite = new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader), localResourceAccessor);
         } else {
             composite = new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader));
         }
+         */
         returnMap.put(Scope.Attr.resourceAccessor.name(), composite);
 
         return returnMap;
