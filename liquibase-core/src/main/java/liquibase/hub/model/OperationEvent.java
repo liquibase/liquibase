@@ -72,6 +72,18 @@ public class OperationEvent implements HubModel {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return "OperationEvent{" +
+                "id=" + id +
+                ", eventType='" + eventType + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", operationEventLog=" + operationEventLog +
+                ", operationEventStatus=" + operationEventStatus +
+                '}';
+    }
+
     public static class OperationEventLog implements HubModel {
         private UUID id;
         private String logMessage;

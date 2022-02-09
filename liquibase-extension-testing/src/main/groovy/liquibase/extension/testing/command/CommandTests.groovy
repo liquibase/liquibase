@@ -277,6 +277,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 (Scope.Attr.logService.name())                        : logService
         ], {
             try {
+                if (testDef.commandTestDefinition.beforeMethodInvocation != null) {
+                    testDef.commandTestDefinition.beforeMethodInvocation.call()
+                }
                 def returnValue = commandScope.execute()
                 assert testDef.expectedException == null : "An exception was expected but the command completed successfully"
                 return returnValue
@@ -581,7 +584,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          * the same scope as the command that is run for the test. This method will always be called, regardless of
          * exceptions thrown from within the test.
          */
-        Callable<Void> afterMethodInvocation
+        Closure<Void> afterMethodInvocation
+
+        Closure<Void> beforeMethodInvocation
 
         void run(@DelegatesTo(RunTestDefinition) Closure testClosure) {
             run(null, testClosure)
