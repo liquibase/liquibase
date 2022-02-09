@@ -25,11 +25,6 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        return true;
-    }
-
-    @Override
     @Test
     public void testRunChangeLog() throws Exception {
         super.testRunChangeLog();    //To change body of overridden methods use File | Settings | File Templates.

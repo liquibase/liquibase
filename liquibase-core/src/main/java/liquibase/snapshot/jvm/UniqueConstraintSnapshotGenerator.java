@@ -183,7 +183,6 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         + "and const.table_name=col.table_name "
                         + "and const.constraint_name=col.constraint_name "
                         + "where const.constraint_catalog='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' ";
-
                 if (database instanceof CockroachDatabase) {
                     sql += " and (select count(*) from (select indexdef from pg_indexes where schemaname='" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + "' AND indexname='" + database.correctObjectName(name, UniqueConstraint.class) + "' AND (position('DESC,' in indexdef) > 0 OR position('DESC)' in indexdef) > 0))) = 0"
                             + "and const.constraint_name != 'primary' ";
@@ -195,6 +194,10 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
 
                 sql += "order by ordinal_position";
+            } else if (database.getClass().getName().contains("MaxDB")) { //have to check classname as this is currently an extension
+				sql = "select CONSTRAINTNAME as constraint_name, COLUMNNAME as column_name from CONSTRAINTCOLUMNS WHERE CONSTRAINTTYPE = 'UNIQUE_CONST' AND tablename = '"
+						+ database.correctObjectName(example.getRelation().getName(), Table.class) + "' AND constraintname = '"
+						+ database.correctObjectName(name, UniqueConstraint.class) + "'";
             } else if (database instanceof MSSQLDatabase) {
                 sql =
                         "SELECT " +
@@ -226,7 +229,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                             "[ic].[key_ordinal]";
 
             } else if (database instanceof OracleDatabase) {
-                sql = "select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name, f.validated as constraint_validate " +
+                sql = "select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name, f.validated as constraint_validate, ucc.table_name " +
                         "from all_cons_columns ucc " +
                         "INNER JOIN all_constraints f " +
                         "ON ucc.owner = f.owner " +

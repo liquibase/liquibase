@@ -1942,12 +1942,13 @@ public class Liquibase implements AutoCloseable {
                 + "@" + getDatabase().getConnection().getURL());
         if (locks.length == 0) {
             out.println(" - No locks");
+            return;
         }
         for (DatabaseChangeLogLock lock : locks) {
             out.println(" - " + lock.getLockedBy() + " at " +
                     DateFormat.getDateTimeInstance().format(lock.getLockGranted()));
         }
-
+        out.println("NOTE:  The lock time displayed is based on the database's configured time");
     }
 
     public void forceReleaseLocks() throws LiquibaseException {

@@ -38,4 +38,4 @@ fi
 
 # echo "${JAVA_PATH}" -cp "${LIQUIBASE_HOME}/lib/h2-1.4.200.jar:${LIQUIBASE_HOME}/liquibase.jar" liquibase.example.StartH2Main
 
-"${JAVA_PATH}" -cp "${LIQUIBASE_HOME}/lib/h2-2.0.206.jar:${LIQUIBASE_HOME}/liquibase.jar" liquibase.example.StartH2Main
+"${JAVA_PATH}" -cp "${LIQUIBASE_HOME}/lib/h2-2.1.210.jar:${LIQUIBASE_HOME}/liquibase.jar" liquibase.example.StartH2Main
