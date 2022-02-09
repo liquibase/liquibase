@@ -24,15 +24,15 @@
       runs-on: ubuntu-latest
       steps:
         - name: Emit failure code if unsafe
-          if: github.event.pull_request.head.repo.full_name != 'liquibase/liquibase' && github.event.label.name != 'SafeToBuild'
+          if: github.event.pull_request && github.event.pull_request.head.repo.full_name != 'liquibase/liquibase' && github.event.label.name != 'SafeToBuild'
           run: |
             echo "PR from Fork is NOT safe to build"
             echo "A member of Liquibase team needs to apply label 'SafeToBuild'! "
-            exit 1 // add failure code
+            exit 1 
         - name: Run needed builds
-          if: github.event.pull_request.head.repo.full_name == 'liquibase/liquibase' && !github.event.label
+          if: (!github.event.pull_request || github.event.pull_request.head.repo.full_name == 'liquibase/liquibase') && !github.event.label
           run: |
-            echo "We need to do this build on just a label change."
+            echo "We need to do this build when not just a label change."
     setup:
       name: Setup
       needs: check_build_safety
