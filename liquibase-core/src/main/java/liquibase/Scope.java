@@ -60,6 +60,7 @@ public class Scope {
     }
 
     private static ScopeManager scopeManager;
+    private String andrePrtest;
 
     private Scope parent;
     private SmartMap values = new SmartMap();
