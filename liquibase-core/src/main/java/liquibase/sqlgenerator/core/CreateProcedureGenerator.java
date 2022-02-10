@@ -192,7 +192,9 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
     /**
      * Split <code>SET ANSI_NULLS/QUOTED_IDENTIFIER ON/OFF</code> statements out of SQL statement
-     * into before statements if they are before or after procedure/function/trigger/view body.
+     * into before statements procedure/function/trigger/view body and adds SET ANSI_NULLS ON and
+     * SET QUOTED_IDENTIFIER ON into before list to isolate settings change between scripts
+     * by keeping default ANSI_NULLS and QUOTED_IDENTIFIER settings behaviour.
      *
      * @param body - SQL to split if SET statements are present
      * @param endDelimiter - end line delimiter
@@ -206,6 +208,9 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         StringClauses.ClauseIterator clauseIterator = sqlClauses.getClauseIterator();
         Object next = "";
         ArrayList<String> beforeStatements = new ArrayList<>();
+
+        beforeStatements.add("SET ANSI_NULLS ON");
+        beforeStatements.add("SET QUOTED_IDENTIFIER ON");
 
         while (next != null && clauseIterator.hasNext()) {
             next = clauseIterator.nextNonWhitespace();
