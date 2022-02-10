@@ -20,7 +20,8 @@ import static liquibase.util.SystemUtil.isWindows;
 public class StandardResourceAccessorService implements ResourceAccessorService {
     @Override
     public ResourceAccessor getResourceAccessor() {
-        return new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(configureClassLoader()));
+        return new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
+                                             new CommandLineResourceAccessor(configureClassLoader()));
     }
 
     @Override

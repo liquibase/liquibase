@@ -599,17 +599,9 @@ public class LiquibaseCommandLine {
 
     private Map<String, Object> configureResourceAccessor(ClassLoader classLoader) {
         Map<String, Object> returnMap = new HashMap<>();
-        //ResourceAccessor localResourceAccessor = ResourceAccessorServiceFactory.getInstance().getPluginResourceAccessor();
         ResourceAccessorService resourceAccessorService = ResourceAccessorServiceFactory.getInstance().getResourceAccessorService();
-        ResourceAccessor composite = resourceAccessorService.getResourceAccessor();
-        /*
-        if (localResourceAccessor != null) {
-            composite = new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader), localResourceAccessor);
-        } else {
-            composite = new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader));
-        }
-         */
-        returnMap.put(Scope.Attr.resourceAccessor.name(), composite);
+        ResourceAccessor resourceAccessor = resourceAccessorService.getResourceAccessor();
+        returnMap.put(Scope.Attr.resourceAccessor.name(), resourceAccessor);
 
         return returnMap;
     }
