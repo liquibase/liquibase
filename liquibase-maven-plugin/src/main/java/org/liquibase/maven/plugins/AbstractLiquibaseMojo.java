@@ -426,54 +426,56 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                     Database database = null;
                     try {
-                        String dbPassword = (emptyPassword || (password == null)) ? "" : password;
-                        String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
-                        database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
-                                url,
-                                username,
-                                dbPassword,
-                                driver,
-                                defaultCatalogName,
-                                defaultSchemaName,
-                                outputDefaultCatalog,
-                                outputDefaultSchema,
-                                databaseClass,
-                                driverPropsFile,
-                                propertyProviderClass,
-                                changelogCatalogName,
-                                changelogSchemaName,
-                                databaseChangeLogTableName,
-                                databaseChangeLogLockTableName);
-                        liquibase = createLiquibase(database);
+                        if (databaseConnectionRequired()) {
+                            String dbPassword = (emptyPassword || (password == null)) ? "" : password;
+                            String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
+                            database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
+                                    url,
+                                    username,
+                                    dbPassword,
+                                    driver,
+                                    defaultCatalogName,
+                                    defaultSchemaName,
+                                    outputDefaultCatalog,
+                                    outputDefaultSchema,
+                                    databaseClass,
+                                    driverPropsFile,
+                                    propertyProviderClass,
+                                    changelogCatalogName,
+                                    changelogSchemaName,
+                                    databaseChangeLogTableName,
+                                    databaseChangeLogLockTableName);
+                            liquibase = createLiquibase(database);
 
-                        configureChangeLogProperties();
+                            configureChangeLogProperties();
 
-                        getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+                            getLog().debug("expressionVars = " + String.valueOf(expressionVars));
 
-                        if (expressionVars != null) {
-                            for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
-                                this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
-                            }
-                        }
-
-                        getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
-                        if (expressionVariables != null) {
-                            for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
-                                if (var.getValue() != null) {
+                            if (expressionVars != null) {
+                                for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
                                     this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
                                 }
                             }
-                        }
 
-                        if (clearCheckSums) {
-                            getLog().info("Clearing the Liquibase checksums on the database");
-                            liquibase.clearCheckSums();
-                        }
+                            getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
+                            if (expressionVariables != null) {
+                                for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
+                                    if (var.getValue() != null) {
+                                        this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
+                                    }
+                                }
+                            }
 
-                        getLog().info("Executing on Database: " + url);
+                            if (clearCheckSums) {
+                                getLog().info("Clearing the Liquibase checksums on the database");
+                                liquibase.clearCheckSums();
+                            }
 
-                        if (isPromptOnNonLocalDatabase()) {
-                            getLog().info("NOTE: The promptOnLocalDatabase functionality has been removed");
+                            getLog().info("Executing on Database: " + url);
+
+                            if (isPromptOnNonLocalDatabase()) {
+                                getLog().info("NOTE: The promptOnLocalDatabase functionality has been removed");
+                            }
                         }
                         setupBindInfoPackage();
                         performLiquibaseTask(liquibase);
@@ -558,7 +560,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     public void configureFieldsAndValues() throws MojoExecutionException, MojoFailureException {
         // Load the properties file if there is one, but only for values that the user has not
         // already specified.
-        if (propertyFile != null) {
+        if (propertyFile != null && shouldLoadLiquibaseProperties()) {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
             try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
@@ -572,6 +574,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
+    }
+
+    /**
+     * Optionally, an implementation of this mojo can override this method to indicate that the liquibase.properties
+     * does not need to be loaded.
+     */
+    public boolean shouldLoadLiquibaseProperties() {
+        return true;
     }
 
     protected void configureChangeLogProperties() throws MojoFailureException, MojoExecutionException {
@@ -649,15 +659,25 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *                              specified.
      */
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
-        if (url == null) {
-            throw new MojoFailureException("The database URL has not been specified either as "
-                    + "a parameter or in a properties file.");
-        }
+        if (databaseConnectionRequired()) {
+            if (url == null) {
+                throw new MojoFailureException("The database URL has not been specified either as "
+                        + "a parameter or in a properties file.");
+            }
 
-        if ((password != null) && emptyPassword) {
-            throw new MojoFailureException("A password cannot be present and the empty "
-                    + "password property both be specified.");
+            if ((password != null) && emptyPassword) {
+                throw new MojoFailureException("A password cannot be present and the empty "
+                        + "password property both be specified.");
+            }
         }
+    }
+
+    /**
+     * Optionally, an implementation of this mojo can override this to indicate that a connection to the database
+     * is not required.
+     */
+    public boolean databaseConnectionRequired() {
+        return true;
     }
 
     /**
