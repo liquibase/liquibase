@@ -12,7 +12,9 @@ import java.util.jar.Manifest;
 public class ManifestReversion {
     public static void main(String[] args) throws Exception {
         String filename = args[0];
-        String version = args[1];
+        String version = args[1]
+                .replaceFirst("^v", "");
+
         Manifest manifest;
         try (InputStream input = new FileInputStream(filename)) {
             manifest = new Manifest(input);
@@ -21,7 +23,8 @@ public class ManifestReversion {
 
         attributes.putValue("Liquibase-Version", version);
 
-        if (attributes.containsKey("Bundle-Version")) {
+        final String bundleVersion = attributes.getValue("Bundle-Version");
+        if (bundleVersion != null) {
             attributes.putValue("Bundle-Version", version);
         }
 
