@@ -23,7 +23,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
     def INSECURE_XML = """
 <!DOCTYPE databaseChangeLog [
-        <!ENTITY insecure SYSTEM "file://invalid.txt">
+        <!ENTITY insecure SYSTEM "file:///invalid.txt">
         ]>
 
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -97,7 +97,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        e.message.contains("Error Reading Changelog File: invalid.txt")
+        e.message.contains("Error Reading Changelog File: " + File.separator + "invalid.txt")
     }
 
 }
