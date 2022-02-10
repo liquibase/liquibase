@@ -55,6 +55,22 @@ do
 
   cp $workdir/$jar $outdir
   rename.ul 0-SNAPSHOT $version $outdir/$jar
+
+  ## Make sure there are no left-over 0-SNAPSHOT versions
+  mkdir -p $workdir/test
+  unzip -q $outdir/*.jar -d $workdir/test
+
+  if grep -rl "0-SNAPSHOT" $workdir/test; then
+    echo "Found '0-SNAPSHOT' in re-versioned jars"
+    exit 1
+  fi
+
+  if grep -rl "0.0.0.SNAPSHOT" $workdir/test; then
+    echo "Found '0.0.0.SNAPSHOT' in re-versioned jars"
+    exit 1
+  fi
+
+  rm -rf $workdir/test
 done
 
 #### Update  javadoc jars

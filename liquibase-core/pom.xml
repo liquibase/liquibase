@@ -17,7 +17,7 @@
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.9.15</version>
+            <version>1.10.11</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
@@ -40,14 +40,14 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.8.0</version>
+            <version>3.12.4</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
-            <version>3.8.0</version>
+            <version>3.12.4</version>
             <scope>test</scope>
         </dependency>
 
@@ -155,7 +155,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>5.1.2</version>
+                <version>5.1.4</version>
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>org.liquibase.core</Bundle-SymbolicName>
@@ -262,8 +262,16 @@
                             </artifactSet>
                             <relocations>
                                 <relocation>
-                                    <pattern>org.apache</pattern>
-                                    <shadedPattern>liquibase.repackaged.org.apache</shadedPattern>
+                                    <pattern>org.apache.commons.collections4</pattern>
+                                    <shadedPattern>liquibase.repackaged.org.apache.commons.collections4</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.lang3</pattern>
+                                    <shadedPattern>liquibase.repackaged.org.apache.commons.lang3</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.text</pattern>
+                                    <shadedPattern>liquibase.repackaged.org.apache.commons.text</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.opencsv</pattern>
@@ -278,7 +286,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.2.2</version>
                 <configuration>
                     <archive>
                         <manifest>
