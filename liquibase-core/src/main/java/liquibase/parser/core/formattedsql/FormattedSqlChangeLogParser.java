@@ -228,6 +228,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     }
                     if (logicalFilePath != null) {
                         logicalFilePath = changeLogParameters.expandExpressions(logicalFilePath, changeLog);
+                        logicalFilePath = DatabaseChangeLog.normalizePath(logicalFilePath);
                     }
                     String dbms = parseString(dbmsPatternMatcher);
                     if (dbms != null) {

@@ -358,6 +358,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         if (filePath == null) {
             if (changeLog != null) {
                 filePath = changeLog.getFilePath();
+                filePath = DatabaseChangeLog.normalizePath(filePath);
             }
         } else {
             filePath = filePath.replaceAll("\\\\", "/")
