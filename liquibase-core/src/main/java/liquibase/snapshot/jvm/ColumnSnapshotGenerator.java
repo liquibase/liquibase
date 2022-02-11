@@ -563,8 +563,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
-        if ((database instanceof PostgresDatabase) && (columnSize != null) && columnSize.equals(Integer.MAX_VALUE)) {
-            columnSize = null;
+        if ((database instanceof PostgresDatabase) && columnSize != null) {
+            if (columnSize.equals(Integer.MAX_VALUE)) {
+                columnSize = null;
+            } else if (columnTypeName.equalsIgnoreCase("numeric") && columnSize.equals(0)) {
+                columnSize = null;
+            }
+
         }
 
         // For SAP (Sybase) SQL ANywhere, JDBC returns "LONG(2147483647) binary" (the number is 2^31-1)
