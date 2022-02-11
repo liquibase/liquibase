@@ -51,6 +51,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
 
     @Override
     public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        String defaultDelimiter = ";";
         List<Sql> sql = new ArrayList<Sql>();
         List<String> mssqlSetStatementsBefore = new ArrayList<>();
 
@@ -61,7 +62,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         String body = statement.getSelectQuery();
         if (database instanceof MSSQLDatabase) {
             CreateProcedureGenerator.MssqlSplitStatements mssqlSplitStatements =
-                    splitSetStatementsOutForMssql(body, ";", Collections.singletonList("VIEW"));
+                    splitSetStatementsOutForMssql(body, defaultDelimiter, Collections.singletonList("VIEW"));
 
             body = mssqlSplitStatements.getBody();
             mssqlSetStatementsBefore = mssqlSplitStatements.getSetStatementsBefore();
@@ -109,7 +110,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         if (mssqlSetStatementsBefore != null && !mssqlSetStatementsBefore.isEmpty()) {
             mssqlSetStatementsBefore
                     .forEach(mssqlSetStatement ->
-                            sql.add(new UnparsedSql(mssqlSetStatement, ";")));
+                            sql.add(new UnparsedSql(mssqlSetStatement, defaultDelimiter)));
         }
 
         sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));

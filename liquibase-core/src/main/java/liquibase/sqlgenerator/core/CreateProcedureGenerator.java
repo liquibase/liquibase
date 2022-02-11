@@ -24,8 +24,6 @@ import java.util.List;
 
 public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedureStatement> {
 
-    private static final List<String> BEFORE_BODY_START_STATEMENTS = Arrays.asList("CREATE", "ALTER");
-
     @Override
     public ValidationErrors validate(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -203,6 +201,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
     public static MssqlSplitStatements splitSetStatementsOutForMssql(String body, String endDelimiter,
                                                                      List<String> bodyStartStatements) {
         MssqlSplitStatements mssqlSplitStatements = new MssqlSplitStatements();
+        List<String> beforeBodyStartStatements = Arrays.asList("CREATE", "ALTER");
 
         StringClauses sqlClauses = SqlParser.parse(body, true, true);
         StringClauses.ClauseIterator clauseIterator = sqlClauses.getClauseIterator();
@@ -217,7 +216,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
             next = splitOutIfSetStatement(next, clauseIterator, endDelimiter, beforeStatements);
 
-            if (next != null && BEFORE_BODY_START_STATEMENTS.contains(next.toString().toUpperCase())) {
+            if (next != null && beforeBodyStartStatements.contains(next.toString().toUpperCase())) {
                 next = clauseIterator.nextNonWhitespace();
                 if (next != null && bodyStartStatements.contains(next.toString().toUpperCase())) {
                     break;
@@ -263,7 +262,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 }
             }
 
-            if (!bufferedSetStatement.toString().isEmpty() && !bufferIsUsed) {
+            if (StringUtils.isNotEmpty(bufferedSetStatement.toString()) && !bufferIsUsed) {
                 clauseIterator.replace(bufferedSetStatement.append(next).toString());
             }
         }
