@@ -3,7 +3,9 @@ package liquibase.changelog;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.Scope;
+import liquibase.change.Change;
 import liquibase.change.CheckSum;
+import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeSet.ExecType;
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
@@ -244,6 +246,14 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 csvWriter.writeNext(line);
             }
 
+            String tag = "";
+            for (Change change : changeSet.getChanges()) {
+                if (change instanceof TagDatabaseChange) {
+                    TagDatabaseChange tagChange = (TagDatabaseChange) change;
+                    tag = tagChange.getTag();
+                }
+            }
+
             String[] newLine = new String[Columns.values().length];
             newLine[Columns.ID.ordinal()] = changeSet.getId();
             newLine[Columns.AUTHOR.ordinal()] = changeSet.getAuthor();
@@ -254,7 +264,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             newLine[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum().toString();
             newLine[Columns.DESCRIPTION.ordinal()] = changeSet.getDescription();
             newLine[Columns.COMMENTS.ordinal()] = changeSet.getComments();
-            newLine[Columns.TAG.ordinal()] = "";
+            newLine[Columns.TAG.ordinal()] = tag;
             newLine[Columns.LIQUIBASE.ordinal()] = LiquibaseUtil.getBuildVersion();
 
             newLine[Columns.CONTEXTS.ordinal()] = (changeSet.getContexts() == null) ? null : changeSet.getContexts().toString();
