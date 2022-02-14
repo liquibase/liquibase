@@ -600,7 +600,7 @@ public class LiquibaseCommandLine {
     private Map<String, Object> configureResourceAccessor(ClassLoader classLoader) {
         Map<String, Object> returnMap = new HashMap<>();
         ResourceAccessorService resourceAccessorService = ResourceAccessorServiceFactory.getInstance().getResourceAccessorService();
-        ResourceAccessor resourceAccessor = resourceAccessorService.getResourceAccessor();
+        ResourceAccessor resourceAccessor = resourceAccessorService.getResourceAccessor(configureClassLoader());
         returnMap.put(Scope.Attr.resourceAccessor.name(), resourceAccessor);
 
         return returnMap;

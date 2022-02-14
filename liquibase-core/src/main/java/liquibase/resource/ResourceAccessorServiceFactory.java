@@ -22,17 +22,7 @@ public class ResourceAccessorServiceFactory extends AbstractPluginFactory<Resour
         return instance;
     }
 
-    private ResourceAccessorServiceFactory() {
-        /*
-        try {
-            for (ResourceAccessorService service : Scope.getCurrentScope().getServiceLocator().findInstances(ResourceAccessorService.class)) {
-                register(service);
-            }
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-         */
-    }
+    private ResourceAccessorServiceFactory() {}
 
     @Override
     protected Class<ResourceAccessorService> getPluginClass() {
@@ -46,10 +36,5 @@ public class ResourceAccessorServiceFactory extends AbstractPluginFactory<Resour
 
     public ResourceAccessorService getResourceAccessorService() {
         return getPlugin();
-    }
-
-    public ResourceAccessor getPluginResourceAccessor() {
-        ResourceAccessorService resourceAccessorService = getPlugin(); //ResourceAccessorServiceFactory.getInstance().getResourceAccessorService();
-        return resourceAccessorService != null ? resourceAccessorService.getResourceAccessor() : null;
     }
 }
