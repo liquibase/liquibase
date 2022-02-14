@@ -291,7 +291,11 @@ public class CustomChangeWrapper extends AbstractChange {
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         try {
-            setClass(parsedNode.getChildValue(null, "class", String.class));
+            String classNameValue = parsedNode.getChildValue(null, "class", String.class);
+            if (classNameValue == null) {
+                throw new ParsedNodeException("Custom change node has no 'class' attribute!");
+            }
+            setClass(classNameValue);
         } catch (CustomChangeException e) {
             throw new ParsedNodeException(e);
         }
