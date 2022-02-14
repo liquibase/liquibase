@@ -6,6 +6,7 @@ liquibase.precondition.core.ColumnExistsPrecondition
 liquibase.precondition.core.DBMSPrecondition
 liquibase.precondition.core.ForeignKeyExistsPrecondition
 liquibase.precondition.core.IndexExistsPrecondition
+liquibase.precondition.core.UniqueConstraintExistsPrecondition
 liquibase.precondition.core.NotPrecondition
 liquibase.precondition.core.ObjectQuotingStrategyPrecondition
 liquibase.precondition.core.OrPrecondition
