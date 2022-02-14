@@ -1,28 +1,21 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.Liquibase;
 import liquibase.command.CommandScope;
 import liquibase.command.CommonArgumentNames;
 import liquibase.exception.CommandExecutionException;
+import liquibase.exception.LiquibaseException;
 import liquibase.util.StringUtil;
 import org.liquibase.maven.property.PropertyElement;
 
 /**
- * @goal checks.run
+ * @goal checks.show
  */
-public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
-
-    /**
-     * Specifies the <i>changelog</i> file for Liquibase Quality Checks to use.
-     *
-     * @parameter property="liquibase.changeLogFile"
-     */
-    @PropertyElement
-    protected String changeLogFile;
+public class LiquibaseChecksShowMojo extends AbstractLiquibaseChecksMojo {
 
     @Override
     protected void performChecksTask() throws CommandExecutionException {
-        CommandScope liquibaseCommand = new CommandScope("checks", "run");
-        liquibaseCommand.addArgumentValue(CommonArgumentNames.CHANGELOG_FILE.getArgumentName(), changeLogFile);
+        CommandScope liquibaseCommand = new CommandScope("checks", "show");
         if (StringUtil.isNotEmpty(checksSettingsFile)) {
             liquibaseCommand.addArgumentValue("checksSettingsFile", checksSettingsFile);
         }
