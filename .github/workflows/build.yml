@@ -20,19 +20,19 @@
 
   jobs:
     check_build_safety:
-      name: Check if Build shoud be done
+      name: Check if Build should be done
       runs-on: ubuntu-latest
       steps:
         - name: Emit failure code if unsafe
-          if: ${{ github.repository != 'liquibase/liquibase' && github.event.label.name != 'SafeToBuild' }}
+          if: github.event.pull_request && github.event.pull_request.head.repo.full_name != 'liquibase/liquibase' && github.event.label.name != 'SafeToBuild'
           run: |
             echo "PR from Fork is NOT safe to build"
             echo "A member of Liquibase team needs to apply label 'SafeToBuild'! "
-            exit 1 // add failure code
+            exit 1 
         - name: Run needed builds
-          if: ${{ github.repository == 'liquibase/liquibase' && !github.event.label }}
+          if: (!github.event.pull_request || github.event.pull_request.head.repo.full_name == 'liquibase/liquibase') && !github.event.label
           run: |
-            echo "We need to do this build on just a label change."
+            echo "We need to do this build when not just a label change."
     setup:
       name: Setup
       needs: check_build_safety
@@ -47,9 +47,10 @@
         thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
         standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
         stablePro: ${{ steps.find-branches.outputs.stablePro }}
+        setupSuccessful: "true"
       steps:
         - name: Failsafe
-          uses: actions/github-script@v5
+          uses: actions/github-script@v6
           with:
             script: |
               if (${{ github.run_attempt }} % 5 == 0) {
@@ -63,7 +64,7 @@
 
         - name: Find corresponding branches
           id: find-branches
-          uses: actions/github-script@v5
+          uses: actions/github-script@v6
           with:
             github-token: ${{ secrets.BOT_TOKEN }}
             script: |
@@ -220,7 +221,7 @@
 
         - name: Prepare
           id: prepare
-          uses: actions/github-script@v5
+          uses: actions/github-script@v6
           with:
             script: |
               core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
@@ -352,7 +353,8 @@
 
             cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts
 
-            .github/util/sign-artifacts.sh artifacts
+            ##TODO: restore signing
+            #.github/util/sign-artifacts.sh artifacts
 
             ##prepare branch-named convenience artifacts directories
             mkdir artifacts-named
@@ -386,14 +388,14 @@
       name: Finish Build
       runs-on: ubuntu-latest
       needs: [ setup, build, integration-test, package, sonar ]
-      if: ${{ always() }}
+      if: ${{ needs.setup.outputs.setupSuccessful }}
       steps:
         - uses: actions/checkout@v2
           with:
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
         - name: Coordinate Liquibase-Pro
-          uses: actions/github-script@v5
+          uses: actions/github-script@v6
           with:
             github-token: ${{ secrets.BOT_TOKEN }}
             script: |
