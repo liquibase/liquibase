@@ -353,8 +353,7 @@
 
             cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts
 
-            ##TODO: restore signing
-            #.github/util/sign-artifacts.sh artifacts
+            .github/util/sign-artifacts.sh artifacts
 
             ##prepare branch-named convenience artifacts directories
             mkdir artifacts-named
