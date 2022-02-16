@@ -350,6 +350,42 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             permutation << getAllRunTestPermutations()
     }
 
+    /**
+     *
+     * Compare the contents of two files, optionally filtering out
+     * lines that contain a specified string.
+     *
+     * @param   f1                           The first file
+     * @param   f2                           The second file
+     * @param   filter                       The filter string (can be NULL)
+     * @return  OutputCheck                  Closure to be used at test run execution
+     *
+     */
+    static OutputCheck assertFilesEqual(File f1, File f2, String filter) {
+        return new OutputCheck() {
+            @Override
+            def check(String actual) throws AssertionError {
+                List<String> lines1 = f1.readLines()
+                if (filter) {
+                    lines1 = lines1.findAll({ line -> !line.contains(filter) })
+                }
+                String contents1 = StringUtil.join(lines1, "\n")
+                List<String> lines2 = f2.readLines()
+                if (filter) {
+                    lines2 = lines2.findAll({ line -> ! line.contains(filter)})
+                }
+                String contents2 = StringUtil.join(lines2, "\n")
+                assert lines1.size() == lines2.size()
+                assert contents1 == contents2
+            }
+
+            @Override
+            String getExpected() {
+                return null
+            }
+        }
+    }
+
     static OutputCheck assertNotContains(String substring) {
         return assertNotContains(substring, false)
     }
