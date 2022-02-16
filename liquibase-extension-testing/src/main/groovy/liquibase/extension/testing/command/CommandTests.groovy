@@ -361,18 +361,26 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
      * @return  OutputCheck                  Closure to be used at test run execution
      *
      */
-    static OutputCheck assertFilesEqual(File f1, File f2, String filter) {
+    static OutputCheck assertFilesEqual(File f1, File f2, String... filters) {
         return new OutputCheck() {
             @Override
             def check(String actual) throws AssertionError {
                 List<String> lines1 = f1.readLines()
-                if (filter) {
-                    lines1 = lines1.findAll({ line -> !line.contains(filter) })
+                if (filters) {
+                    lines1 = lines1.findAll({ line ->
+                        filters.every() { filter ->
+                            ! line.contains(filter)
+                        }
+                    })
                 }
                 String contents1 = StringUtil.join(lines1, "\n")
                 List<String> lines2 = f2.readLines()
-                if (filter) {
-                    lines2 = lines2.findAll({ line -> ! line.contains(filter)})
+                if (filters) {
+                    lines2 = lines2.findAll({ line ->
+                        filters.every() { filter ->
+                            ! line.contains(filter)
+                        }
+                    })
                 }
                 String contents2 = StringUtil.join(lines2, "\n")
                 assert lines1.size() == lines2.size()
