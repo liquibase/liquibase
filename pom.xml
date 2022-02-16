@@ -172,7 +172,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>6.0.6</version>
+            <version>8.0.28</version>
             <scope>test</scope>
         </dependency>
 
