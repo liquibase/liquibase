@@ -438,7 +438,7 @@ public class LiquibaseCommandLine {
             liquibaseConfiguration.registerProvider(fileProvider);
             returnList.add(fileProvider);
         } else {
-            InputStream defaultsStream = null; //Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
+            InputStream defaultsStream = null;
             ResourceAccessorService resourceAccessorService = ResourceAccessorServiceFactory.getInstance().getResourceAccessorService();
             ResourceAccessor resourceAccessor = resourceAccessorService.getResourceAccessor(configureClassLoader());
             if (resourceAccessor != null) {
@@ -451,7 +451,7 @@ public class LiquibaseCommandLine {
                     System.err.println("Could not find defaults file " + defaultsFileConfig.getValue());
                 }
             } else {
-                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File in classpath "+defaultsFileConfig.getValue());
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File in locations "+defaultsFileConfig.getValue());
                 liquibaseConfiguration.registerProvider(fileProvider);
                 returnList.add(fileProvider);
 
