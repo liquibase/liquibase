@@ -304,7 +304,8 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
             "SCHEMA",
             "ROLE",
             "DOW",
-            "INITIAL");
+            "INITIAL",
+            "KEY");
 
     static {
         Map<String, HashSet<String>> tempMap = new HashMap<>();
