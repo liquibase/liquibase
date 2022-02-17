@@ -108,7 +108,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                     }
                     for (int i = 0; i < valueAsList.size(); i++) {
                         if (valueAsList.get(i) instanceof LiquibaseSerializable) {
-                            Map<String, Map> m = convertToMap(valueAsList, i);
+                            Map<String, Object> m = convertToMap(valueAsList, i);
                             valueAsList.set(i, m);
                         }
                     }
@@ -153,8 +153,8 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         return containerMap;
     }
 
-    protected Map<String, Map> convertToMap(List valueAsList, int index) {
-        return (Map<String, Map>)toMap((LiquibaseSerializable) valueAsList.get(index));
+    protected Map<String, Object> convertToMap(List valueAsList, int index) {
+        return (Map<String, Object>)toMap((LiquibaseSerializable) valueAsList.get(index));
     }
 
     protected Comparator<String> getComparator(LiquibaseSerializable object) {
