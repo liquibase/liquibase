@@ -1,5 +1,6 @@
 package liquibase.statement.core;
 
+import liquibase.ContextExpression;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.*;
 
@@ -30,6 +31,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private HashMap<String, NotNullConstraint> notNullColumns = new HashMap<>();
 
     private Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
+    private Set<String> computedColumns = new HashSet<>();
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName = catalogName;
@@ -253,5 +255,13 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
 
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
+    }
+
+    public void setComputed(String columnName) {
+        this.computedColumns.add(columnName);
+    }
+
+    public boolean isComputed(String columnName) {
+        return this.computedColumns.contains(columnName);
     }
 }
