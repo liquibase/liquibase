@@ -31,13 +31,18 @@ public class OracleTestSystem extends DatabaseTestSystem {
 
     @Override
     protected String[] getSetupSql() {
+        String accountInfo = " DEFAULT TABLESPACE USERS TEMPORARY TABLESPACE TEMP ACCOUNT UNLOCK";
         return new String[]{
                 "CREATE TABLESPACE " + getAltTablespace() + " DATAFILE '" + getAltTablespace() + ".dat' SIZE 1M AUTOEXTEND ON",
-                "CREATE USER "+getAltCatalog()+" IDENTIFIED BY "+getPassword()+" DEFAULT TABLESPACE USERS TEMPORARY TABLESPACE TEMP ACCOUNT UNLOCK",
+                "CREATE USER "+getAltCatalog()+" IDENTIFIED BY "+getPassword()+ accountInfo,
+                "CREATE USER "+getAltSchema()+" IDENTIFIED BY "+getPassword()+ accountInfo,
+                "CREATE USER LIMITED_USER IDENTIFIED BY "+getPassword()+ accountInfo,
+                "GRANT CREATE SESSION TO LIMITED_USER",
+                "GRANT CONNECT TO LIMITED_USER",
+                "GRANT SELECT ON DUAL TO LIMITED_USER",
                 "GRANT ALL PRIVILEGES TO "+getUsername(),
                 "GRANT UNLIMITED TABLESPACE TO " + getUsername(),
-                "GRANT UNLIMITED TABLESPACE TO " + getAltCatalog(),
-
+                "GRANT UNLIMITED TABLESPACE TO " + getAltCatalog()
         };
     }
 }

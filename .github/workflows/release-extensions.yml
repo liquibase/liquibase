@@ -37,7 +37,7 @@ jobs:
           - liquibase-yugabytedb
     steps:
       - name: Release liquibase/${{ matrix.extension }} v${{ github.event.inputs.version }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
