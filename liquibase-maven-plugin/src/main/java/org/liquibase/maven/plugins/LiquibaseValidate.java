@@ -1,8 +1,12 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.commandline.Main;
 import org.apache.maven.plugin.MojoFailureException;
+
+import java.util.ResourceBundle;
 
 /**
  * Validates liquibase changelog
@@ -26,6 +30,7 @@ public class LiquibaseValidate extends AbstractLiquibaseChangeLogMojo{
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         liquibase.validate();
+        getLog().info(ResourceBundle.getBundle("liquibase/i18n/liquibase-core").getString("no.validation.errors.found"));
     }
 }
 
