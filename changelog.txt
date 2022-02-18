@@ -1,6 +1,62 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.8.0 (2022.02.23)
+
+- New Test System management by @nvoxland in https://github.com/liquibase/liquibase/pull/2312
+- Remove duplicate databasechangeloglock SQL when running update-sql against a new database by @nvoxland in https://github.com/liquibase/liquibase/pull/2335
+- UniqueConstraintSnapshotGenerator - Add table name to OracleDB query by @wziebicki in https://github.com/liquibase/liquibase/pull/2139
+- CORE-3326 Numero sign is a symbol in Russian by @tolix in https://github.com/liquibase/liquibase/pull/1320
+- Allow a custom executor to be specified through a property on existing Executor implementations DAT-7531 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2374
+- Make ClassLoaderResourceAccessor implement Closable by @Delir4um in https://github.com/liquibase/liquibase/pull/2308
+- Liquibase Responsible Disclosure Policy by @kristyldatical in https://github.com/liquibase/liquibase/pull/2435
+- use lowercase sp_rename function in MSSQL (LB-1763) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2366
+- Added example rollback scripts by @molivasdat in https://github.com/liquibase/liquibase/pull/2367
+- Bump junit from 4.12 to 4.13.1 in /liquibase-extension-testing by @dependabot in https://github.com/liquibase/liquibase/pull/1827
+- Bump maven-surefire-plugin from 2.22.1 to 2.22.2 by @dependabot in https://github.com/liquibase/liquibase/pull/2427
+- Bump testcontainers-bom from 1.16.2 to 1.16.3 by @dependabot in https://github.com/liquibase/liquibase/pull/2467
+- Bump mockito-core from 3.3.3 to 3.12.4 by @dependabot in https://github.com/liquibase/liquibase/pull/2470
+- Bump maven-jar-plugin from 3.1.1 to 3.2.2 by @dependabot in https://github.com/liquibase/liquibase/pull/2458
+- Bump mockito-inline from 3.8.0 to 3.12.4 by @dependabot in https://github.com/liquibase/liquibase/pull/2465
+- Bump surefire-junit4 from 2.22.1 to 2.22.2 by @dependabot in https://github.com/liquibase/liquibase/pull/2466
+- Bump objenesis from 2.1 to 2.6 by @dependabot in https://github.com/liquibase/liquibase/pull/2468
+- Bump slf4j-jdk14 from 1.7.33 to 1.7.35 by @dependabot in https://github.com/liquibase/liquibase/pull/2475
+- Bump assertj-core from 3.13.2 to 3.22.0 by @dependabot in https://github.com/liquibase/liquibase/pull/2474
+- Bump maven-resources-plugin from 3.0.2 to 3.2.0 by @dependabot in https://github.com/liquibase/liquibase/pull/2473
+- Bump maven-verifier from 1.6 to 1.7.2 by @dependabot in https://github.com/liquibase/liquibase/pull/2472
+- Added new Quality Checks command and subcommands (Mac specifict) by @szandany in https://github.com/liquibase/liquibase/pull/2273
+- Don't repackage all org.apache.* classes. by @nvoxland in https://github.com/liquibase/liquibase/pull/2429
+- Log exceptions in CDILiquibase before rethrowing them by @nvoxland in https://github.com/liquibase/liquibase/pull/2397
+- Bump maven-assembly-plugin from 3.1.1 to 3.3.0 by @dependabot in https://github.com/liquibase/liquibase/pull/2499
+- Bump flatten-maven-plugin from 1.1.0 to 1.2.7 by @dependabot in https://github.com/liquibase/liquibase/pull/2495
+- Bump gmavenplus-plugin from 1.6.2 to 1.13.1 by @dependabot in https://github.com/liquibase/liquibase/pull/2491
+- Bump sonar-maven-plugin from 3.7.0.1746 to 3.9.1.2184 by @dependabot in https://github.com/liquibase/liquibase/pull/2490
+- Bump robinraju/release-downloader from 1.2 to 1.3 by @dependabot in https://github.com/liquibase/liquibase/pull/2405
+- Bump maven-plugin-plugin from 3.6.0 to 3.6.4 by @dependabot in https://github.com/liquibase/liquibase/pull/2497
+- Bump maven-bundle-plugin from 5.1.2 to 5.1.4 by @dependabot in https://github.com/liquibase/liquibase/pull/2494
+- [Snyk] Security upgrade com.h2database:h2 from 2.0.206 to 2.1.210 by @snyk-bot in https://github.com/liquibase/liquibase/pull/2392
+- Enable FEATURE_SECURE_PROCESSING XML setting by default by @nvoxland in https://github.com/liquibase/liquibase/pull/2384
+- Correctly set Bundle-Version in META-INF on release by @nvoxland in https://github.com/liquibase/liquibase/pull/2505
+- Bump ant from 1.9.15 to 1.10.9 in /liquibase-core by @dependabot in https://github.com/liquibase/liquibase/pull/1808
+- Bump postgresql from 42.2.12 to 42.3.2 by @dependabot in https://github.com/liquibase/liquibase/pull/2459
+- Use path instead of absolutePath for resources by @liefke in https://github.com/liquibase/liquibase/pull/2122
+- Bump junit from 4.12 to 4.13.2 by @dependabot in https://github.com/liquibase/liquibase/pull/2411
+- Bump slf4j-jdk14 from 1.7.35 to 1.7.36 by @dependabot in https://github.com/liquibase/liquibase/pull/2506
+- Added additional unicode letter points by @nvoxland in https://github.com/liquibase/liquibase/pull/2329
+- Escape schema/tablenames in metadata.getTables() by @nvoxland in https://github.com/liquibase/liquibase/pull/2398
+- Add offline mode support for rollbackSQL <tag> by @msimko81 in https://github.com/liquibase/liquibase/pull/2222
+- Avoid NullPointerException when customChange has no "class" attribute by @danielthegray in https://github.com/liquibase/liquibase/pull/1648
+- Support adding computed=true columns with no type set by @nvoxland in https://github.com/liquibase/liquibase/pull/2340
+- Bump maven-javadoc-plugin from 3.3.1 to 3.3.2 by @dependabot in https://github.com/liquibase/liquibase/pull/2525
+- DAT-9218  Added limited permission user for SQLPLUS integration tests by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2480
+- instruct surefire to read files with UTF-8 encoding by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2541
+- Bump mysql-connector-java from 6.0.6 to 8.0.28 by @dependabot in https://github.com/liquibase/liquibase/pull/2419
+- Reworked license not found message by @suryaaki2 in https://github.com/liquibase/liquibase/pull/2371
+- Fix for Github issue dealing with duplicate property keys by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2351
+- Use "GENERATED BY DEFAULT AS IDENTITY" for h2 2.0+ by @nvoxland in https://github.com/liquibase/liquibase/pull/2372
+- MSSQL: Throw validation error if "ordered" is specified in createSequence/alterSequence by @nvoxland in https://github.com/liquibase/liquibase/pull/2549
+
+
 Changes in version 4.7.1 (2022.01.21)
 
 - Fix bug which makes Liquibase misidentify your database dialect if the string 'edb' is in your connection url. (#2364)
