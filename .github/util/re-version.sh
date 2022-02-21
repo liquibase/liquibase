@@ -80,7 +80,7 @@ do
   unzip -q $file -d $workdir/test
 
   if grep -rl "0-SNAPSHOT" $workdir/test; then
-    echo "Found '0-SNAPSHOT' in re-versioned jars"
+    echo "Found '0-SNAPSHOT' in $file"
     exit 1
   fi
 
