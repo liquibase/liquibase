@@ -55,22 +55,6 @@ do
 
   cp $workdir/$jar $outdir
   rename.ul 0-SNAPSHOT $version $outdir/$jar
-
-  ## Make sure there are no left-over 0-SNAPSHOT versions
-  mkdir -p $workdir/test
-  unzip -q $outdir/*.jar -d $workdir/test
-
-  if grep -rl "0-SNAPSHOT" $workdir/test; then
-    echo "Found '0-SNAPSHOT' in re-versioned jars"
-    exit 1
-  fi
-
-  if grep -rl "0.0.0.SNAPSHOT" $workdir/test; then
-    echo "Found '0.0.0.SNAPSHOT' in re-versioned jars"
-    exit 1
-  fi
-
-  rm -rf $workdir/test
 done
 
 #### Update  javadoc jars
@@ -88,6 +72,26 @@ do
   cp $workdir/$jar $outdir
   rename.ul 0-SNAPSHOT $version $outdir/$jar
 done
+
+## Make sure there are no left-over 0-SNAPSHOT versions in jar files
+for file in $outdir/*.jar
+do
+  mkdir -p $workdir/test
+  unzip -q $file -d $workdir/test
+
+  if grep -rl "0-SNAPSHOT" $workdir/test; then
+    echo "Found '0-SNAPSHOT' in re-versioned jars"
+    exit 1
+  fi
+
+  if grep -rl "0.0.0.SNAPSHOT" $workdir/test; then
+    echo "Found '0.0.0.SNAPSHOT' in $file"
+    exit 1
+  fi
+
+  rm -rf $workdir/test
+done
+
 
 ##### update zip/tar files
 cp $outdir/liquibase-$version.jar $workdir/liquibase.jar ##save versioned jar as unversioned to include in zip/tar
@@ -108,5 +112,3 @@ mv liquibase-dist/target/liquibase-*-installer-* $outdir
 
 ##Sign Files
 $scriptDir/sign-artifacts.sh $outdir
-
-
