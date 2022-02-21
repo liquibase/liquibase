@@ -52,7 +52,8 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
                 (otherForeignKey.getPrimaryKeyTable() == null) || (otherForeignKey.getForeignKeyTable() == null)) {
             //not all table information is set, have to rely on name
 
-            if (thisForeignKey.getForeignKeyTable() != null && otherForeignKey.getForeignKeyTable() != null) {
+            if (thisForeignKey.getForeignKeyTable() != null && thisForeignKey.getForeignKeyTable().getName() != null &&
+                    otherForeignKey.getForeignKeyTable() != null && otherForeignKey.getForeignKeyTable().getName()  != null)  {
                 //FK names are not necessarily unique across all tables, so first check if FK tables are different
                 if (!chain.isSameObject(thisForeignKey.getForeignKeyTable(), otherForeignKey.getForeignKeyTable(), accordingTo)) {
                     return false;
