@@ -378,7 +378,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         changeLogParameters.set(name, value, context, labels, dbms, global, changeLog);
     }
 
-    protected boolean supportExtension(String changelogFile){
+    protected boolean supportsExtension(String changelogFile){
         return changelogFile.endsWith(".sql");
     }
 
