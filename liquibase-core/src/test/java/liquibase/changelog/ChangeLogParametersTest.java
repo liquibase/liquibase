@@ -4,13 +4,15 @@ import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.Labels;
 import liquibase.database.core.H2Database;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 
-public class  ChangeLogParametersTest {
+public class ChangeLogParametersTest {
 
     @Test
     public void setParameterValue_doubleSet() {
@@ -20,6 +22,28 @@ public class  ChangeLogParametersTest {
         changeLogParameters.set("doubleSet", "newValue");
 
         assertEquals("re-setting a param should not overwrite the value (like how ant works)", "originalValue", changeLogParameters.getValue("doubleSet", null));
+    }
+
+    @Test
+    public void setParameterValue_doubleSet_withDbms() throws Exception {
+        final DatabaseChangeLog changelog = new DatabaseChangeLog("com/example/changelog.txt");
+
+        ChangeLogParameters h2Params = new ChangeLogParameters(new H2Database());
+        ChangeLogParameters oracleParams = new ChangeLogParameters(new OracleDatabase());
+        ChangeLogParameters mysqlParams = new ChangeLogParameters(new MySQLDatabase());
+
+        h2Params.set("dbmsProperty", "h2 value", new ContextExpression(), new Labels(), "h2", false, changelog);
+        h2Params.set("dbmsProperty", "oracle value", new ContextExpression(), new Labels(), "oracle", false, changelog);
+
+        oracleParams.set("dbmsProperty", "h2 value", new ContextExpression(), new Labels(), "h2", false, changelog);
+        oracleParams.set("dbmsProperty", "oracle value", new ContextExpression(), new Labels(), "oracle", false, changelog);
+
+        mysqlParams.set("dbmsProperty", "h2 value", new ContextExpression(), new Labels(), "h2", false, changelog);
+        mysqlParams.set("dbmsProperty", "oracle value", new ContextExpression(), new Labels(), "oracle", false, changelog);
+
+        assertEquals("h2 value", h2Params.getValue("dbmsProperty", changelog));
+        assertEquals("oracle value", oracleParams.getValue("dbmsProperty", changelog));
+        assertNull(mysqlParams.getValue("dbmsProperty", changelog));
     }
 
     @Test
@@ -64,7 +88,8 @@ public class  ChangeLogParametersTest {
 
         assertNull(changeLogParameters.getValue("doubleSet", null));
     }
-   @Test
+
+    @Test
     public void setParameterValue_rightDBRightContext() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
         changeLogParameters.setContexts(new Contexts("junit"));

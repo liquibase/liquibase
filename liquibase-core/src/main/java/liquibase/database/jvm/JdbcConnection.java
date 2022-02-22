@@ -40,13 +40,18 @@ public class JdbcConnection implements DatabaseConnection {
 
     @Override
     public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
+        String driverClassName = driverObject.getClass().getName();
+        String errorMessage = "Connection could not be created to " + url + " with driver " + driverClassName;
         try {
             this.con = driverObject.connect(url, driverProperties);
             if (this.con == null) {
-                throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+                throw new DatabaseException(errorMessage + ".  Possibly the wrong driver for the given database URL");
             }
         } catch (SQLException sqle) {
-            throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  " + sqle.getMessage());
+            if (driverClassName.equals("org.h2.Driver")) {
+                errorMessage += ". Make sure your H2 database is active and accessible by opening a new terminal window, run \"liquibase init start-h2\", and then return to this terminal window to run commands";
+            }
+            throw new DatabaseException(errorMessage + ".  " + sqle.getMessage());
         }
     }
 

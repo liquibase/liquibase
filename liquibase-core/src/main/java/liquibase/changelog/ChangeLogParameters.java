@@ -124,7 +124,7 @@ public class ChangeLogParameters {
         if (globalParam) {
             // if it is global param remove duplicate non-global parameters
             ChangeLogParameter param = findParameter(key, null);
-            if (param != null && ! param.isGlobal()) {
+            if (param != null && isDuplicate(param) && ! param.isGlobal()) {
                 changeLogParameters.remove(param);
             }
             // okay add it
@@ -132,12 +132,21 @@ public class ChangeLogParameters {
                 changeLog));
         } else {
            ChangeLogParameter param = findParameter(key, changeLog);
-           if (param != null && ! param.isGlobal() && param.getChangeLog() == changeLog) {
+           if (param != null && isDuplicate(param) && ! param.isGlobal() && param.getChangeLog() == changeLog) {
                changeLogParameters.remove(param);
            }
            //this is a non-global param, just add it
            changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam, changeLog));
         }
+    }
+
+    private boolean isDuplicate(ChangeLogParameter param) {
+        for (ChangeLogParameter parameter : changeLogParameters) {
+            if (param != parameter && param.isDuplicate(parameter)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -341,6 +350,19 @@ public class ChangeLogParameters {
             }
 
             return isValid;
+        }
+
+        public boolean isDuplicate(ChangeLogParameter other) {
+            String contextString = (this.getValidContexts() != null ? this.getValidContexts().toString() : null);
+            String labelsString = (this.getLabels() != null ? this.getLabels().toString() : null);
+            String databases = (this.getValidDatabases() != null ? StringUtil.join(this.getValidDatabases(), ",") : null);
+
+            String otherContextString = (other.getValidContexts() != null ? other.getValidContexts().toString() : null);
+            String otherLabelsString = (other.getLabels() != null ? other.getLabels().toString() : null);
+            String otherDatabases = (other.getValidDatabases() != null ? StringUtil.join(other.getValidDatabases(), ",") : null);
+            return StringUtil.equalsIgnoreCaseAndEmpty(contextString, otherContextString) &&
+                   StringUtil.equalsIgnoreCaseAndEmpty(labelsString, otherLabelsString) &&
+                   StringUtil.equalsIgnoreCaseAndEmpty(databases, otherDatabases);
         }
 
         public boolean isGlobal() {
