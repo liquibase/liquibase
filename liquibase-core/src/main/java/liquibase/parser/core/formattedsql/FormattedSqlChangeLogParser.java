@@ -31,7 +31,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         BufferedReader reader = null;
         try {
-            if (supportExtension(changeLogFile)) {
+            if (supportsExtension(changeLogFile)) {
                 InputStream fileStream = openChangeLogFile(changeLogFile, resourceAccessor);
                 if (fileStream == null) {
                     return false;
