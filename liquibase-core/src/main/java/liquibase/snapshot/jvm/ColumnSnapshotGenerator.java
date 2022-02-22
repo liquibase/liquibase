@@ -541,7 +541,11 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
             decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
             if ((decimalDigits != null) && decimalDigits.equals(0)) {
-                decimalDigits = null;
+                if (dataType == Types.TIME && database instanceof PostgresDatabase) {
+                    //that is allowed
+                } else {
+                    decimalDigits = null;
+                }
             }
         }
 

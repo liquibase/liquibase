@@ -1,7 +1,7 @@
 package liquibase.datatype.core
 
-import liquibase.database.core.*
-import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.database.core.DerbyDatabase
+import liquibase.database.core.PostgresDatabase
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -10,20 +10,22 @@ class TimeTypeTest extends Specification {
     def "toDatabaseType"() {
         when:
         def type = new TimeType()
-        for (param in params) {
+        for (def param : params) {
             type.addParameter(param)
         }
+        type.finishInitialization(rawType)
 
         then:
         type.toDatabaseDataType(database).toString() == expected
 
         where:
-        params  | database               | expected
-        []      | new PostgresDatabase() | "time WITHOUT TIME ZONE"
-        [0]     | new PostgresDatabase() | "time(0) WITHOUT TIME ZONE"
-        [6]     | new PostgresDatabase() | "time(6) WITHOUT TIME ZONE"
-        [7]     | new PostgresDatabase() | "time WITHOUT TIME ZONE"
-        []      | new MySQLDatabase()    | "time"
-
+        rawType                  | params  | database               | expected
+        "time"                   | []      | new DerbyDatabase()    | "time"
+        "time"                   | []      | new PostgresDatabase() | "time WITHOUT TIME ZONE"
+        "timetz"                 | []      | new PostgresDatabase() | "time WITH TIME ZONE"
+        "time(2)"                | []      | new PostgresDatabase() | "time(2) WITHOUT TIME ZONE"
+        "time(2) with time zone" | []      | new PostgresDatabase() | "time(2) WITH TIME ZONE"
+        "time"                   | [11, 3] | new PostgresDatabase() | "time(3) WITHOUT TIME ZONE"
+        "time with time zone"    | [11, 3] | new PostgresDatabase() | "time(3) WITH TIME ZONE"
     }
 }
