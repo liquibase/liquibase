@@ -1,17 +1,12 @@
 package liquibase.extension.testing.setup
 
-
-import liquibase.extension.testing.TestDatabaseConnections
-
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Path
-
 class SetupCleanResources extends TestSetup {
 
     private final List<String> resourcesToDelete = new ArrayList<>()
     public enum CleanupMode { CLEAN_ON_SETUP, CLEAN_ON_CLEANUP, CLEAN_ON_BOTH}
     private CleanupMode cleanupMode
+    private FilenameFilter filter
+    private File resourceDirectory
 
     SetupCleanResources(String[] resourcesToDelete) {
         this(CleanupMode.CLEAN_ON_CLEANUP, resourcesToDelete)
@@ -22,8 +17,14 @@ class SetupCleanResources extends TestSetup {
         this.resourcesToDelete.addAll(resourcesToDelete as Set)
     }
 
+    SetupCleanResources(CleanupMode cleanupMode, FilenameFilter filter, File resourceDirectory) {
+        this.cleanupMode = cleanupMode
+        this.filter = filter
+        this.resourceDirectory = resourceDirectory
+    }
+
     @Override
-    void setup(TestDatabaseConnections.ConnectionStatus connectionStatus) throws Exception {
+    void setup(TestSetupEnvironment testSetupEnvironment) throws Exception {
         if (cleanupMode == CleanupMode.CLEAN_ON_CLEANUP) {
             return
         }
@@ -39,6 +40,14 @@ class SetupCleanResources extends TestSetup {
     }
 
     private void deleteFiles(List<String> resourcesToDelete) {
+        //
+        // Delete resources in the specified directories that match the filter
+        //
+        if (filter != null) {
+            deleteResourcesThatMatch()
+            return
+        }
+
         for (String fileToDelete : resourcesToDelete) {
             File f = null
             URL url = Thread.currentThread().getContextClassLoader().getResource(fileToDelete)
@@ -56,19 +65,27 @@ class SetupCleanResources extends TestSetup {
             } else {
                 f.deleteDir()
             }
+        }
+    }
 
-            //
-            // This will handle files and directories
-            //
-            /*
-            if (f.exists()) {
-                Path path = FileSystems.getDefault().getPath(f.getAbsolutePath());
-                Files.walk(path)
-                     .sorted(Comparator.reverseOrder())
-                     .map({ p -> p.toFile() })
-                     .forEach({ file -> file.delete() })
+    void deleteResourcesThatMatch() {
+        if (! resourceDirectory.isAbsolute()) {
+            URL url = Thread.currentThread().getContextClassLoader().getResource(resourceDirectory.getName())
+            if (url == null) {
+                return;
             }
-             */
+            resourceDirectory = new File(url.toURI())
+        }
+        assert resourceDirectory.isDirectory(): "The resource '$resourceName' is not a directory"
+        String[] listOfFiles = resourceDirectory.list(filter)
+        for (String s : listOfFiles) {
+            File f = new File(resourceDirectory, s)
+            if (f.exists()) {
+                boolean b = f.delete()
+                if (b) {
+                    assert !f.exists(): "The file '$f' was not deleted"
+                }
+            }
         }
     }
 }

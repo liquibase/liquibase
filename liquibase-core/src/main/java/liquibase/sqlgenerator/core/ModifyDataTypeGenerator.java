@@ -17,7 +17,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
 
     @Override
     public boolean supports(ModifyDataTypeStatement statement, Database database) {
-        if (database instanceof SQLiteDatabase) {
+        if (database instanceof SQLiteDatabase || database instanceof Db2zDatabase) {
             return false;
         }
         return super.supports(statement, database);

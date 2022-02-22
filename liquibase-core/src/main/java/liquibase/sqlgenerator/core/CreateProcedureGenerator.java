@@ -4,7 +4,6 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -20,11 +19,16 @@ import liquibase.structure.core.StoredProcedure;
 import liquibase.util.SqlParser;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedureStatement> {
+
+    @Override
+    public boolean supports(CreateProcedureStatement statement, Database database) {
+        return !(database instanceof SQLiteDatabase);
+    }
+
     @Override
     public ValidationErrors validate(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

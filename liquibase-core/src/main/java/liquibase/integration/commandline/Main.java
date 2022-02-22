@@ -789,7 +789,7 @@ public class Main {
     private void parseDefaultPropertyFileFromResource(File potentialPropertyFile) throws IOException,
             CommandLineParsingException {
         try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream
-                (potentialPropertyFile.getAbsolutePath())) {
+                (potentialPropertyFile.getPath())) {
             if (resourceAsStream != null) {
                 parsePropertiesFile(resourceAsStream);
             }

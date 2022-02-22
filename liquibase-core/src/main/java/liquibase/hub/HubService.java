@@ -45,6 +45,8 @@ public interface HubService extends Plugin, PrioritizedService {
 
     Operation createOperation(String operationType, String operationCommand, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException;
 
+    Operation createOperationInOrganization(String operationType, String operationCommand, UUID organizationId) throws LiquibaseHubException;
+
     OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException;
 
     /**
@@ -56,7 +58,11 @@ public interface HubService extends Plugin, PrioritizedService {
      */
     String shortenLink(String url) throws LiquibaseException;
 
+    OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent, UUID organizationId) throws LiquibaseException;
+
     void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException;
 
     void sendOperationChanges(OperationChange operationChange) throws LiquibaseHubException;
+
+    CoreInitOnboardingResponse validateOnboardingToken(String token) throws LiquibaseHubException;
 }

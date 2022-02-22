@@ -47,11 +47,6 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
         super("mysql", DatabaseFactory.getInstance().getDatabase("mysql"));
     }
 
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        return true;
-    }
-
     @Test
     @Override
     public void testRunChangeLog() throws Exception {

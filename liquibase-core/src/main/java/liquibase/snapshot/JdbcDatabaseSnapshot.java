@@ -1029,8 +1029,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, ((table == null) ?
-                            SQL_FILTER_MATCH_ALL : table), new String[]{"TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), ((table == null) ?
+                            SQL_FILTER_MATCH_ALL : escapeForLike(table)), new String[]{"TABLE"}));
                 }
 
                 @Override
@@ -1049,7 +1049,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, SQL_FILTER_MATCH_ALL, new String[]{"TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), SQL_FILTER_MATCH_ALL, new String[]{"TABLE"}));
                 }
 
                 private List<CachedRow> queryMssql(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
@@ -1133,8 +1133,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 private List<CachedRow> queryPostgres(CatalogAndSchema catalogAndSchema, String tableName) throws SQLException {
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, ((tableName == null) ?
-                            SQL_FILTER_MATCH_ALL : tableName), new String[]{"TABLE", "PARTITIONED TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), ((tableName == null) ?
+                            SQL_FILTER_MATCH_ALL : escapeForLike(tableName)), new String[]{"TABLE", "PARTITIONED TABLE"}));
 
                 }
             });
@@ -1186,8 +1186,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, ((view == null) ? SQL_FILTER_MATCH_ALL
-                            : view), new String[]{"VIEW"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), ((view == null) ? SQL_FILTER_MATCH_ALL
+                            : escapeForLike(view)), new String[]{"VIEW"}));
                 }
 
                 @Override
@@ -1200,7 +1200,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, SQL_FILTER_MATCH_ALL, new String[]{"VIEW"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), SQL_FILTER_MATCH_ALL, new String[]{"VIEW"}));
                 }
 
 
@@ -1544,6 +1544,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (tableName != null) {
                             sql += " and table_name='" + tableName + "'";
                         }
+                    } else if (database.getClass().getName().contains("MaxDB")) { //have to check classname as this is currently an extension
+                        sql = "select distinct tablename AS TABLE_NAME, constraintname AS CONSTRAINT_NAME from CONSTRAINTCOLUMNS WHERE CONSTRAINTTYPE = 'UNIQUE_CONST'";
+                        if (tableName != null) {
+                            sql += " and tablename='" + tableName + "'";
+                        }
                     } else if (database instanceof MSSQLDatabase) {
                         sql =
                                 "SELECT " +
@@ -1691,6 +1696,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
     private String getAllCatalogsStringScratchData() {
         return (String) JdbcDatabaseSnapshot.this.getScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY);
+    }
+
+    private String escapeForLike(String string) {
+        if (string == null) {
+            return null;
+        }
+        return string
+                .replace("%", "\\%")
+                .replace("_", "\\_");
     }
 
 }

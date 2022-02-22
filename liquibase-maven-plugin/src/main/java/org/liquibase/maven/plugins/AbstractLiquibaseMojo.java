@@ -14,6 +14,7 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
+import liquibase.util.StringUtil;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -180,10 +181,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected boolean verbose;
 
     /**
-     * Controls the amount of logging detail Liquibase outputs when executing. The values can be
-     * "DEBUG", "INFO", "WARNING", "SEVERE", or "OFF". The value is not case sensitive.
+     * Deprecated and ignored configuration property. Logging is managed via the standard maven logging system
+     * either using the -e, -X or -q flags or the ${maven.home}/conf/logging/simplelogger.properties file.
      *
-     * @parameter property="liquibase.logging" default-value="INFO"
+     * See https://maven.apache.org/maven-logging.html for more information.
+     *
+     * @parameter property="liquibase.logging"
+     * @deprecated Logging managed by maven
      */
     @PropertyElement
     protected String logging;
@@ -335,6 +339,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (StringUtil.trimToNull(logging) != null) {
+            getLog().error("The liquibase-maven-plugin now manages logging via the standard maven logging config, not the 'logging' configuration. Use the -e, -X or -q flags or see https://maven.apache.org/maven-logging.html");
+        }
+
         try {
             Scope.child(Scope.Attr.logService, new MavenLogService(getLog()), () -> {
 
@@ -408,7 +416,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     //
                     hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
 
-                    //        LogService.getInstance().setDefaultLoggingLevel(logging);
                     getLog().info(CommandLineUtils.getBanner());
 
                     // Displays the settings for the Mojo depending of verbosity mode.

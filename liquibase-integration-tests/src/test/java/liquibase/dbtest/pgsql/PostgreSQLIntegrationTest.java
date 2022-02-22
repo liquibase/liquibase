@@ -46,11 +46,6 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         }
     }
 
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        return true;
-    }
-
     @Test
     public void testDependenciesInGenerateChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());

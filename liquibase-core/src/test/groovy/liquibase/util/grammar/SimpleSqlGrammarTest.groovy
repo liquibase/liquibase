@@ -31,7 +31,6 @@ class SimpleSqlGrammarTest extends Specification {
         "create table /* comment here */ test" | ["create", " ", "table", " ", "/* comment here */", " ", "test"]
         "insert 'a string'"                    | ["insert", " ", "'a string'"]
         "invalid ' sql"                        | ["invalid", " ", "'", " ", "sql"]
-
-
+        "utf8-〠＠chars works"                   | ["utf8", "-", "〠＠chars", " ", "works"]
     }
 }

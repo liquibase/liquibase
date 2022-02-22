@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Collect Data
         id: collect-data
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             let tag;
@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download release assets
-        uses: robinraju/release-downloader@v1.2
+        uses: robinraju/release-downloader@v1.3
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"

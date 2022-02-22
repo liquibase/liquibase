@@ -148,12 +148,22 @@ public class HubServiceFactory extends AbstractPluginFactory<HubService> {
         }
 
         @Override
+        public Operation createOperationInOrganization(String operationType, String operationCommand, UUID organizationId) throws LiquibaseHubException {
+            return null;
+        }
+
+        @Override
         public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException {
             return null;
         }
 
         @Override
         public String shortenLink(String url) throws LiquibaseException {
+            return null;
+        }
+
+        @Override
+        public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent, UUID organizationId) throws LiquibaseException {
             return null;
         }
 
@@ -165,6 +175,11 @@ public class HubServiceFactory extends AbstractPluginFactory<HubService> {
         @Override
         public void sendOperationChanges(OperationChange operationChange) throws LiquibaseHubException {
 
+        }
+
+        @Override
+        public CoreInitOnboardingResponse validateOnboardingToken(String token) throws LiquibaseHubException {
+            return null;
         }
     }
 }
