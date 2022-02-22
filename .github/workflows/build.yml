@@ -30,9 +30,10 @@
             echo "A member of Liquibase team needs to apply label 'SafeToBuild'! "
             exit 1 
         - name: Run needed builds
-          if: (!github.event.pull_request || github.event.pull_request.head.repo.full_name == 'liquibase/liquibase') && !(github.event.action == 'labeled')
+          if: github.event.action == 'labeled' && github.event.pull_request.head.repo.full_name == 'liquibase/liquibase'
           run: |
-            echo "We need to do this build when not just a label change."
+            echo "Don't run liquibase/liquibase builds on labels"
+            exit 1
     setup:
       name: Setup
       needs: check_build_safety
