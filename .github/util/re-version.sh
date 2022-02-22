@@ -39,7 +39,7 @@ do
   java -cp $scriptDir ManifestReversion $workdir/META-INF/MANIFEST.MF $version
   find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
   find $workdir/META-INF -name pom.properties -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
-  find $workdir/META-INF -name plugin.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
+  find $workdir/META-INF -name plugin*.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
   (cd $workdir && jar -uMf $jar META-INF)
   rm -rf $workdir/META-INF
 
@@ -55,22 +55,6 @@ do
 
   cp $workdir/$jar $outdir
   rename.ul 0-SNAPSHOT $version $outdir/$jar
-
-  ## Make sure there are no left-over 0-SNAPSHOT versions
-  mkdir -p $workdir/test
-  unzip -q $outdir/*.jar -d $workdir/test
-
-  if grep -rl "0-SNAPSHOT" $workdir/test; then
-    echo "Found '0-SNAPSHOT' in re-versioned jars"
-    exit 1
-  fi
-
-  if grep -rl "0.0.0.SNAPSHOT" $workdir/test; then
-    echo "Found '0.0.0.SNAPSHOT' in re-versioned jars"
-    exit 1
-  fi
-
-  rm -rf $workdir/test
 done
 
 #### Update  javadoc jars
@@ -82,12 +66,34 @@ do
   unzip -q $workdir/$jar -d $workdir/rebuild
 
   find $workdir/rebuild -name "*.html" -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
+  find $workdir/rebuild -name "*.xml" -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
+
   (cd $workdir/rebuild && jar -uf ../$jar *)
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
   rename.ul 0-SNAPSHOT $version $outdir/$jar
 done
+
+## Make sure there are no left-over 0-SNAPSHOT versions in jar files
+for file in $outdir/*.jar
+do
+  mkdir -p $workdir/test
+  unzip -q $file -d $workdir/test
+
+  if grep -rl "0-SNAPSHOT" $workdir/test; then
+    echo "Found '0-SNAPSHOT' in $file"
+    exit 1
+  fi
+
+  if grep -rl "0.0.0.SNAPSHOT" $workdir/test; then
+    echo "Found '0.0.0.SNAPSHOT' in $file"
+    exit 1
+  fi
+
+  rm -rf $workdir/test
+done
+
 
 ##### update zip/tar files
 cp $outdir/liquibase-$version.jar $workdir/liquibase.jar ##save versioned jar as unversioned to include in zip/tar
@@ -108,5 +114,3 @@ mv liquibase-dist/target/liquibase-*-installer-* $outdir
 
 ##Sign Files
 $scriptDir/sign-artifacts.sh $outdir
-
-
