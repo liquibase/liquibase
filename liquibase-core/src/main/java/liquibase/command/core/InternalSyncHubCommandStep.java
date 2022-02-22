@@ -33,8 +33,8 @@ public class InternalSyncHubCommandStep extends AbstractCommandStep {
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        URL_ARG = builder.argument("url", String.class).build();
-        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).build();
+        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).build();
+        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).build();
         HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", UUID.class).build();
         HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", UUID.class).build();
         CONTINUE_IF_CONNECTION_AND_PROJECT_ID_BOTH_SET_ARG = builder.argument("continueIfConnectionAndProjectIdBothSet", Boolean.class)

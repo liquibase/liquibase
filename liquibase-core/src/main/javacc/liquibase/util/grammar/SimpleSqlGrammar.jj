@@ -392,11 +392,7 @@ Built list from http://stackoverflow.com/a/37668315/45756
     "\u2DD0"-"\u2DD6",
     "\u2DD8"-"\u2DDE",
     "\u2E2F",
-    "\u3005",
-    "\u3006",
-    "\u3031"-"\u3035",
-    "\u303B",
-    "\u303C",
+    "\u3000"-"\u303f",
     "\u3041"-"\u3096",
     "\u309D"-"\u309F",
     "\u30A1"-"\u30FA",
@@ -483,6 +479,7 @@ Built list from http://stackoverflow.com/a/37668315/45756
     "\uFDF0"-"\uFDFB",
     "\uFE70"-"\uFE74",
     "\uFE76"-"\uFEFC",
+    "\uFF00"-"\uFFEF",
     "\uFF21"-"\uFF3A",
     "\uFF41"-"\uFF5A",
     "\uFF66"-"\uFFBE",
@@ -500,7 +497,6 @@ TOKEN: /* symbols */
     ":"-"@",
     "["-"`",
     "{"-"~",
-
 
 /*
 Built list from http://stackoverflow.com/a/37668315/45756 list of punctuation
@@ -581,6 +577,7 @@ Built list from http://stackoverflow.com/a/37668315/45756 list of punctuation
     "\u208D",
     "\u208E",
     "\u20A0"-"\u20BF", //Currency symbols https://www.Sutf8-chartable.de/unicode-utf8-table.pl
+    "\u2116", //numero sign in Russian it's a regular symbol (https://en.wikipedia.org/wiki/Numero_sign)
     "\u2308"-"\u230B",
     "\u2329",
     "\u232A",

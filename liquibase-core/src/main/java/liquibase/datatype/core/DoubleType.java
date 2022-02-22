@@ -15,11 +15,15 @@ public class DoubleType  extends LiquibaseDataType {
             return new DatabaseDataType(database.escapeDataTypeName("float"), 53);
         }
         if (database instanceof MySQLDatabase) {
+            DatabaseDataType datatype;
             if ((getParameters() != null) && (getParameters().length > 1)) {
-                return new DatabaseDataType("DOUBLE", getParameters());
+                datatype = new DatabaseDataType("DOUBLE", getParameters());
             } else {
-                return new DatabaseDataType("DOUBLE");
+                datatype = new DatabaseDataType("DOUBLE");
             }
+
+            datatype.addAdditionalInformation(getAdditionalInformation());
+            return datatype;
         }
         if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof HsqlDatabase)) {
             return new DatabaseDataType("DOUBLE");
