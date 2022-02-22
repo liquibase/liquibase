@@ -13,7 +13,7 @@ public interface ChangeLogParser extends LiquibaseParser {
     
     /**
      * Parses a Liquibase database changelog and returns the parsed form as an object.
-     * @param physicalChangeLogLocation the physical location of the changelog. The exakt file formats and locations
+     * @param physicalChangeLogLocation the physical location of the changelog. The exact file formats and locations
      * where can load changelog files from depend on the implementations and capabilities of the implementing parsers.
      * @param changeLogParameters parameters given by the end user that should be applied while parsing the changelog
      *  (i.e. replacement of ${placeholders} inside the changelogs with user-defined content)

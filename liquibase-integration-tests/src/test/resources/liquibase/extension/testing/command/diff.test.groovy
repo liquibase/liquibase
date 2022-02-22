@@ -386,6 +386,7 @@ Changed Column(s): NONE
 
         }
         expectedException = CommandValidationException.class
+        expectedExceptionMessage = "Invalid argument 'referenceUrl': missing required argument"
     }
 
     run "Run without any arguments throws an exception", {

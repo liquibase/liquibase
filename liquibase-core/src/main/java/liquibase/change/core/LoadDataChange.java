@@ -266,7 +266,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public SqlStatement[] generateStatements(Database database) {
         boolean databaseSupportsBatchUpdates = false;
         try {
-            databaseSupportsBatchUpdates = database.supportsBatchUpdates();
+            if (!(database instanceof MySQLDatabase)) {
+                //mysql supports batch updates, but the performance vs. the big insert is worse
+                databaseSupportsBatchUpdates = database.supportsBatchUpdates();
+            }
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -802,7 +805,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     protected String getRelativeTo() {
         String relativeTo = null;
         if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
-            relativeTo = getChangeSet().getFilePath();
+            relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
         }
         return relativeTo;
     }

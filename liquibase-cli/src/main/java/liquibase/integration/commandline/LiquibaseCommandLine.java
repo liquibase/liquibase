@@ -98,7 +98,7 @@ public class LiquibaseCommandLine {
         this.legacyPositionalArguments.put("futurerollbackcountsql", FutureRollbackCountSqlCommandStep.COUNT_ARG.getName());
         this.legacyPositionalArguments.put("futurerollbackfromtagsql", FutureRollbackFromTagSqlCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("tag", TagCommandStep.TAG_ARG.getName());
-        this.legacyPositionalArguments.put("tagExists", TagExistsCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("tagexists", TagExistsCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollback", RollbackCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollbacksql", RollbackSqlCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollbacktodate", RollbackToDateCommandStep.DATE_ARG.getName());
@@ -467,7 +467,6 @@ public class LiquibaseCommandLine {
         } else {
             Scope.getCurrentScope().getLog(getClass()).fine("Cannot find local defaultsFile " + defaultsFile.getAbsolutePath());
         }
-
 
         return returnList;
     }
@@ -972,7 +971,7 @@ public class LiquibaseCommandLine {
                 "- Environment values (env variable listed above)\n" +
                 "- Defaults file (configuration key OR argument name)\n\n" +
                 "Full documentation is available at\n" +
-                "http://www.liquibase.org";
+                "https://docs.liquibase.com";
 
 
         commandSpec.addOption(CommandLine.Model.OptionSpec.builder("--help", "-h")

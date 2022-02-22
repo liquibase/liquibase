@@ -15,12 +15,6 @@ public class DerbyIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        // Derby is an in-process database
-        return true;
-    }
-
-    @Override
     protected boolean shouldRollBack() {
         return false;
     }

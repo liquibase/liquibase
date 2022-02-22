@@ -137,7 +137,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             boolean checksumNotRightSize = false;
             if (!(this.getDatabase() instanceof SQLiteDatabase)) {
                 DataType type = changeLogTable.getColumn("MD5SUM").getType();
-                if (type.getTypeName().toLowerCase().startsWith("varchar")) {
+                if (type.getTypeName().toLowerCase().startsWith("varchar") || type.getTypeName().toLowerCase().startsWith("character varying")) {
                     Integer columnSize = type.getColumnSize();
                     checksumNotRightSize = (columnSize != null) && (columnSize < 35);
                 } else {

@@ -63,7 +63,7 @@
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-verifier</artifactId>
-            <version>1.6</version>
+            <version>1.7.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -72,30 +72,8 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <author>false</author>
-                    <doctitle>Liquibase Maven Plugin ${project.version} API</doctitle>
-                    <quiet>true</quiet>
-                    <doclint>none</doclint>
-                    <encoding>UTF-8</encoding>
-                    <jarOutputDirectory>${project.basedir}/target</jarOutputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>jar-javadoc</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.4</version>
                 <executions>
                     <execution>
                         <id>generated-helpmojo</id>
@@ -157,15 +135,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <groupId>io.snyk</groupId>
-                <artifactId>snyk-maven-plugin</artifactId>
-                <configuration>
-                    <skip>false</skip>
-                </configuration>
-            </plugin>
-
         </plugins>
 
     </build>
@@ -175,57 +144,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.6.4</version>
             </plugin>
         </plugins>
     </reporting>
-
-    <profiles>
-        <profile>
-            <id>gpg-sign</id>
-            <activation>
-                <property>
-                    <name>env.GPG_PASSPHRASE</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <configuration>
-                            <passphrase>${env.GPG_PASSPHRASE}</passphrase>
-                            <gpgArguments>
-                                <arg>--batch</arg>
-                                <arg>--no-tty</arg>
-                                <!-- This is necessary for gpg to not try to use the pinentry programs -->
-                                <arg>--pinentry-mode</arg>
-                                <arg>loopback</arg>
-                            </gpgArguments>
-
-                            <skip>false</skip>
-                            <repositoryId>${deploy.repositoryId}</repositoryId>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <version>${project.version}</version>
-                            <url>${deploy.url}</url>
-                            <file>${project.build.directory}/${project.artifactId}-${project.version}.jar</file>
-                            <sources>${project.build.directory}/${project.artifactId}-${project.version}-sources.jar</sources>
-                            <javadoc>${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar</javadoc>
-                            <pomFile>${project.build.directory}/release.pom.xml</pomFile>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>custom-deploy</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>sign-and-deploy-file</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
 

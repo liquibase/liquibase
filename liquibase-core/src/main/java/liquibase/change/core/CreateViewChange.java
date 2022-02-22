@@ -166,7 +166,7 @@ public class CreateViewChange extends AbstractChange {
             String path = getPath();
             String relativeTo = null;
             if (ObjectUtil.defaultIfNull(getRelativeToChangelogFile(), false)) {
-                relativeTo = getChangeSet().getFilePath();
+                relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
             }
             return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {

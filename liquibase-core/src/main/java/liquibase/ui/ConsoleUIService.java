@@ -64,7 +64,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
 
     @Override
     public boolean getAllowPrompt() {
-        return allowPrompt;
+        return getConsole().supportsInput() && allowPrompt;
     }
 
     @Override
@@ -113,7 +113,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
                     message = "Invalid value: \"" + input + "\"";
                 }
                 this.sendMessage(message);
-                this.sendMessage(prompt + ": ");
+                this.sendMessage(initialMessage + ": ");
             }
         }
     }

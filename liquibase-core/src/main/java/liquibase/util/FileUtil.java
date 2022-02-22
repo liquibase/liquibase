@@ -11,7 +11,7 @@ public class FileUtil {
         throw new IllegalStateException("This utility class must not be instantiated. Sorry.");
     }
 
-   public static String getContents(File file) throws IOException {
+    public static String getContents(File file) throws IOException {
         if (!file.exists()) {
             return null;
         }
@@ -30,7 +30,9 @@ public class FileUtil {
     }
 
     public static void write(String contents, File file, boolean append) throws IOException {
-        file.getParentFile().mkdirs();
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
+        }
 
         try (
                 FileOutputStream output = new FileOutputStream(file, append)

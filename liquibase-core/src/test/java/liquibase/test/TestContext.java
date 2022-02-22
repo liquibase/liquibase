@@ -68,7 +68,7 @@ public class TestContext {
             File thisClassFile = new File(uri);
             return new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile(), "liquibase-core");
         }
-        uri = new URI(this.getClass().getClassLoader().getResource("liquibase/test/DatabaseTest.class").toExternalForm());
+        uri = new URI(this.getClass().getClassLoader().getResource("liquibase/dbtest/AbstractIntegrationTest.class").toExternalForm());
         if(!uri.isOpaque()) {
             File thisClassFile = new File(uri);
             return new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile(), "liquibase-core");
