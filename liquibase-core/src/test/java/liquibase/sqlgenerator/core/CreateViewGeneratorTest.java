@@ -39,16 +39,16 @@ public class CreateViewGeneratorTest {
         assertEquals(6, sqls.length);
         assertEquals("IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[DBO].[some_view]'))\n" +
                 "    EXEC sp_executesql N'CREATE VIEW [DBO].[some_view] AS SELECT ''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'", sqls[0].toSql());
-        assertEquals("SET ANSI_NULLS ON", sqls[1].toSql());
-        assertEquals("SET QUOTED_IDENTIFIER ON", sqls[2].toSql());
-        assertEquals("SET ANSI_NULLS OFF", sqls[3].toSql());
-        assertEquals("SET QUOTED_IDENTIFIER OFF", sqls[4].toSql());
+        assertEquals("SET ANSI_NULLS OFF", sqls[1].toSql());
+        assertEquals("SET QUOTED_IDENTIFIER OFF", sqls[2].toSql());
         assertEquals(
                 "CREATE VIEW [dbo].[some_view] AS ALTER VIEW dbo.some_view \n" +
                         "AS \n" +
                         "   SELECT LastName FROM dbo.Persons\n" +
                         ";",
-                sqls[5].toSql());
+                sqls[3].toSql());
+        assertEquals("SET ANSI_NULLS ON", sqls[4].toSql());
+        assertEquals("SET QUOTED_IDENTIFIER ON", sqls[5].toSql());
     }
 
 //    @Test

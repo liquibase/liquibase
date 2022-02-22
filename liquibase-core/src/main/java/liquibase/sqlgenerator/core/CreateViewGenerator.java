@@ -54,6 +54,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         String defaultDelimiter = ";";
         List<Sql> sql = new ArrayList<Sql>();
         List<String> mssqlSetStatementsBefore = new ArrayList<>();
+        List<String> mssqlSetStatementsAfter = new ArrayList<>();
 
         if (database instanceof InformixDatabase) {
             return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
@@ -66,6 +67,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
 
             body = mssqlSplitStatements.getBody();
             mssqlSetStatementsBefore = mssqlSplitStatements.getSetStatementsBefore();
+            mssqlSetStatementsAfter = mssqlSplitStatements.getSetStatementsAfter();
         }
 
         StringClauses viewDefinition = SqlParser.parse(body, true, true);
@@ -107,13 +109,19 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             }
         }
 
-        if (mssqlSetStatementsBefore != null && !mssqlSetStatementsBefore.isEmpty()) {
+        if (!mssqlSetStatementsBefore.isEmpty()) {
             mssqlSetStatementsBefore
                     .forEach(mssqlSetStatement ->
                             sql.add(new UnparsedSql(mssqlSetStatement, defaultDelimiter)));
         }
 
         sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
+
+        if (!mssqlSetStatementsAfter.isEmpty()) {
+            mssqlSetStatementsAfter
+                    .forEach(mssqlSetStatement ->
+                            sql.add(new UnparsedSql(mssqlSetStatement, defaultDelimiter)));
+        }
 
         return sql.toArray(new Sql[sql.size()]);
     }

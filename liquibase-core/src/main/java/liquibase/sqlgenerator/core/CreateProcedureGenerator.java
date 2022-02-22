@@ -45,6 +45,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
     public Sql[] generateSql(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<Sql> sql = new ArrayList<Sql>();
         List<String> mssqlSetStatementsBefore = new ArrayList<>();
+        List<String> mssqlSetStatementsAfter = new ArrayList<>();
 
         String schemaName = statement.getSchemaName();
         if (schemaName == null) {
@@ -59,6 +60,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
             procedureText = mssqlSplitStatements.getBody();
             mssqlSetStatementsBefore = mssqlSplitStatements.getSetStatementsBefore();
+            mssqlSetStatementsAfter = mssqlSplitStatements.getSetStatementsAfter();
         }
 
         if (statement.getReplaceIfExists() != null && statement.getReplaceIfExists()) {
@@ -102,13 +104,19 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             procedureText = procedureText.replaceAll("[\\s]{2,}", " ");
         }
 
-        if (mssqlSetStatementsBefore != null && !mssqlSetStatementsBefore.isEmpty()) {
+        if (!mssqlSetStatementsBefore.isEmpty()) {
             mssqlSetStatementsBefore
                     .forEach(mssqlSetStatement ->
                             sql.add(new UnparsedSql(mssqlSetStatement, statement.getEndDelimiter())));
         }
 
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
+
+        if (!mssqlSetStatementsAfter.isEmpty()) {
+            mssqlSetStatementsAfter
+                    .forEach(mssqlSetStatement ->
+                            sql.add(new UnparsedSql(mssqlSetStatement, statement.getEndDelimiter())));
+        }
 
         surroundWithSchemaSets(sql, statement.getSchemaName(), database);
         return sql.toArray(new Sql[sql.size()]);
@@ -206,10 +214,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         StringClauses sqlClauses = SqlParser.parse(body, true, true);
         StringClauses.ClauseIterator clauseIterator = sqlClauses.getClauseIterator();
         Object next = "";
-        ArrayList<String> beforeStatements = new ArrayList<>();
-
-        beforeStatements.add("SET ANSI_NULLS ON");
-        beforeStatements.add("SET QUOTED_IDENTIFIER ON");
+        List<String> beforeStatements = new ArrayList<>();
 
         while (next != null && clauseIterator.hasNext()) {
             next = clauseIterator.nextNonWhitespace();
@@ -224,14 +229,19 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             }
         }
 
+        List<String> afterStatements = new ArrayList<>();
+        afterStatements.add("SET ANSI_NULLS ON");
+        afterStatements.add("SET QUOTED_IDENTIFIER ON");
+
         mssqlSplitStatements.setSetStatementsBefore(beforeStatements);
         mssqlSplitStatements.setBody(sqlClauses.toString().trim());
+        mssqlSplitStatements.setSetStatementsAfter(afterStatements);
 
         return mssqlSplitStatements;
     }
 
     private static Object splitOutIfSetStatement(Object next, StringClauses.ClauseIterator clauseIterator,
-                                                 String endDelimiter, ArrayList<String> setStatements) {
+                                                 String endDelimiter, List<String> setStatements) {
         while (next != null && next.toString().equalsIgnoreCase("SET")) {
             StringBuilder bufferedSetStatement = new StringBuilder();
             boolean bufferIsUsed = false;
@@ -273,6 +283,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
     public static class MssqlSplitStatements {
         private List<String> setStatementsBefore;
         private String body;
+        private List<String> setStatementsAfter;
+
 
         MssqlSplitStatements() {
         }
@@ -291,6 +303,14 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
         public void setBody(String body) {
             this.body = body;
+        }
+
+        public List<String> getSetStatementsAfter() {
+            return setStatementsAfter;
+        }
+
+        public void setSetStatementsAfter(List<String> setStatementsAfter) {
+            this.setStatementsAfter = setStatementsAfter;
         }
     }
 }

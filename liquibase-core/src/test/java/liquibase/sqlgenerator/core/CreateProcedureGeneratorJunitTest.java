@@ -46,10 +46,8 @@ public class CreateProcedureGeneratorJunitTest {
 
         assertEquals(6, sqls.length);
         assertEquals("if object_id('[dbo].[SqlTest01]', 'p') is null exec ('create procedure [dbo].[SqlTest01] as select 1 a')", sqls[0].toSql());
-        assertEquals("SET ANSI_NULLS ON", sqls[1].toSql());
-        assertEquals("SET QUOTED_IDENTIFIER ON", sqls[2].toSql());
-        assertEquals("SET ANSI_NULLS OFF", sqls[3].toSql());
-        assertEquals("SET QUOTED_IDENTIFIER OFF", sqls[4].toSql());
+        assertEquals("SET ANSI_NULLS OFF", sqls[1].toSql());
+        assertEquals("SET QUOTED_IDENTIFIER OFF", sqls[2].toSql());
         assertEquals(
                 "ALTER PROCEDURE [dbo].[SqlTest01]\n" +
                         "   AS\n" +
@@ -60,7 +58,9 @@ public class CreateProcedureGeneratorJunitTest {
                         "SET ANSI_NULLS OFF;\n" +
                         "SET QUOTED_IDENTIFIER OFF;\n" +
                         "   END",
-                sqls[5].toSql());
+                sqls[3].toSql());
+        assertEquals("SET ANSI_NULLS ON", sqls[4].toSql());
+        assertEquals("SET QUOTED_IDENTIFIER ON", sqls[5].toSql());
     }
 
     @Test
@@ -78,11 +78,9 @@ public class CreateProcedureGeneratorJunitTest {
         MssqlSplitStatements mssqlSplitStatements = CreateProcedureGenerator
                 .splitSetStatementsOutForMssql(functionWithSetStatementsOutOfBodyWithSemicolon, ";", Collections.singletonList("FUNCTION"));
 
-        assertEquals(4, mssqlSplitStatements.getSetStatementsBefore().size());
-        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsBefore().get(0));
-        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsBefore().get(1));
-        assertEquals("SET ANSI_NULLS OFF", mssqlSplitStatements.getSetStatementsBefore().get(2));
-        assertEquals("SET QUOTED_IDENTIFIER OFF", mssqlSplitStatements.getSetStatementsBefore().get(3));
+        assertEquals(2, mssqlSplitStatements.getSetStatementsBefore().size());
+        assertEquals("SET ANSI_NULLS OFF", mssqlSplitStatements.getSetStatementsBefore().get(0));
+        assertEquals("SET QUOTED_IDENTIFIER OFF", mssqlSplitStatements.getSetStatementsBefore().get(1));
         assertEquals(
                 "CREATE FUNCTION [dbo].some_function() RETURNS VARCHAR(100) AS\n" +
                         "  BEGIN\n" +
@@ -91,6 +89,9 @@ public class CreateProcedureGeneratorJunitTest {
                         "  RETURN @greeting\n" +
                         "  END;",
                 mssqlSplitStatements.getBody());
+        assertEquals(2, mssqlSplitStatements.getSetStatementsAfter().size());
+        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsAfter().get(0));
+        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsAfter().get(1));
     }
 
     @Test
@@ -108,11 +109,9 @@ public class CreateProcedureGeneratorJunitTest {
         MssqlSplitStatements mssqlSplitStatements = CreateProcedureGenerator
                 .splitSetStatementsOutForMssql(functionWithSetStatementsOutOfBodyWithoutSemicolon, ";", Collections.singletonList("FUNCTION"));
 
-        assertEquals(4, mssqlSplitStatements.getSetStatementsBefore().size());
-        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsBefore().get(0));
-        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsBefore().get(1));
-        assertEquals("SET ANSI_NULLS OFF", mssqlSplitStatements.getSetStatementsBefore().get(2));
-        assertEquals("SET QUOTED_IDENTIFIER OFF", mssqlSplitStatements.getSetStatementsBefore().get(3));
+        assertEquals(2, mssqlSplitStatements.getSetStatementsBefore().size());
+        assertEquals("SET ANSI_NULLS OFF", mssqlSplitStatements.getSetStatementsBefore().get(0));
+        assertEquals("SET QUOTED_IDENTIFIER OFF", mssqlSplitStatements.getSetStatementsBefore().get(1));
         assertEquals(
                 "CREATE FUNCTION [dbo].some_function() RETURNS VARCHAR(100) AS\n" +
                         "  BEGIN\n" +
@@ -121,6 +120,9 @@ public class CreateProcedureGeneratorJunitTest {
                         "  RETURN @greeting\n" +
                         "  END;",
                 mssqlSplitStatements.getBody());
+        assertEquals(2, mssqlSplitStatements.getSetStatementsAfter().size());
+        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsAfter().get(0));
+        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsAfter().get(1));
     }
 
     @Test
@@ -140,9 +142,7 @@ public class CreateProcedureGeneratorJunitTest {
         MssqlSplitStatements mssqlSplitStatements = CreateProcedureGenerator
                 .splitSetStatementsOutForMssql(functionWithSetStatementsInsideOfBodyWithSemicolon, ";", Collections.singletonList("FUNCTION"));
 
-        assertEquals(2, mssqlSplitStatements.getSetStatementsBefore().size());
-        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsBefore().get(0));
-        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsBefore().get(1));
+        assertEquals(0, mssqlSplitStatements.getSetStatementsBefore().size());
         assertEquals(
                 "CREATE FUNCTION [dbo].some_function() RETURNS VARCHAR(100) AS\n" +
                         "  BEGIN\n" +
@@ -155,6 +155,9 @@ public class CreateProcedureGeneratorJunitTest {
                         "SET QUOTED_IDENTIFIER ON;\n" +
                         "  END;",
                 mssqlSplitStatements.getBody());
+        assertEquals(2, mssqlSplitStatements.getSetStatementsAfter().size());
+        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsAfter().get(0));
+        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsAfter().get(1));
     }
 
     @Test
@@ -174,9 +177,7 @@ public class CreateProcedureGeneratorJunitTest {
         MssqlSplitStatements mssqlSplitStatements = CreateProcedureGenerator
                 .splitSetStatementsOutForMssql(functionWithSetStatementsInsideOfBodyWithoutSemicolon, ";", Collections.singletonList("FUNCTION"));
 
-        assertEquals(2, mssqlSplitStatements.getSetStatementsBefore().size());
-        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsBefore().get(0));
-        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsBefore().get(1));
+        assertEquals(0, mssqlSplitStatements.getSetStatementsBefore().size());
         assertEquals(
                 "CREATE FUNCTION [dbo].some_function() RETURNS VARCHAR(100) AS\n" +
                         "  BEGIN\n" +
@@ -189,6 +190,9 @@ public class CreateProcedureGeneratorJunitTest {
                         "SET QUOTED_IDENTIFIER ON\n" +
                         "  END;",
                 mssqlSplitStatements.getBody());
+        assertEquals(2, mssqlSplitStatements.getSetStatementsAfter().size());
+        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsAfter().get(0));
+        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsAfter().get(1));
     }
 
     @Test
@@ -204,9 +208,7 @@ public class CreateProcedureGeneratorJunitTest {
         MssqlSplitStatements mssqlSplitStatements = CreateProcedureGenerator
                 .splitSetStatementsOutForMssql(functionWithoutSetStatements, ";", Collections.singletonList("FUNCTION"));
 
-        assertEquals(2, mssqlSplitStatements.getSetStatementsBefore().size());
-        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsBefore().get(0));
-        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsBefore().get(1));
+        assertEquals(0, mssqlSplitStatements.getSetStatementsBefore().size());
         assertEquals(
                 "CREATE FUNCTION [dbo].some_function() RETURNS VARCHAR(100) AS\n" +
                         "  BEGIN\n" +
@@ -215,6 +217,9 @@ public class CreateProcedureGeneratorJunitTest {
                         "  RETURN @greeting\n" +
                         "  END;",
                 mssqlSplitStatements.getBody());
+        assertEquals(2, mssqlSplitStatements.getSetStatementsAfter().size());
+        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsAfter().get(0));
+        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsAfter().get(1));
     }
 
     @Test
@@ -233,11 +238,9 @@ public class CreateProcedureGeneratorJunitTest {
         MssqlSplitStatements mssqlSplitStatements = CreateProcedureGenerator
                 .splitSetStatementsOutForMssql(functionWithSetStatementWhichIsNotRequiredToBeSplitOut, ";", Collections.singletonList("FUNCTION"));
 
-        assertEquals(4, mssqlSplitStatements.getSetStatementsBefore().size());
-        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsBefore().get(0));
-        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsBefore().get(1));
-        assertEquals("SET ANSI_NULLS OFF", mssqlSplitStatements.getSetStatementsBefore().get(2));
-        assertEquals("SET QUOTED_IDENTIFIER OFF", mssqlSplitStatements.getSetStatementsBefore().get(3));
+        assertEquals(2, mssqlSplitStatements.getSetStatementsBefore().size());
+        assertEquals("SET ANSI_NULLS OFF", mssqlSplitStatements.getSetStatementsBefore().get(0));
+        assertEquals("SET QUOTED_IDENTIFIER OFF", mssqlSplitStatements.getSetStatementsBefore().get(1));
         assertEquals(
                 "SET DATEFIRST 7;\n" +
                         "  \n" +
@@ -248,6 +251,9 @@ public class CreateProcedureGeneratorJunitTest {
                         "  RETURN @greeting\n" +
                         "  END;",
                 mssqlSplitStatements.getBody());
+        assertEquals(2, mssqlSplitStatements.getSetStatementsAfter().size());
+        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsAfter().get(0));
+        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsAfter().get(1));
     }
 
     @Test
@@ -266,11 +272,9 @@ public class CreateProcedureGeneratorJunitTest {
         MssqlSplitStatements mssqlSplitStatements = CreateProcedureGenerator
                 .splitSetStatementsOutForMssql(functionWithSetStatementWhichIsNotRequiredToBeSplitOut, ";", Collections.singletonList("FUNCTION"));
 
-        assertEquals(4, mssqlSplitStatements.getSetStatementsBefore().size());
-        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsBefore().get(0));
-        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsBefore().get(1));
-        assertEquals("SET ANSI_NULLS OFF", mssqlSplitStatements.getSetStatementsBefore().get(2));
-        assertEquals("SET QUOTED_IDENTIFIER OFF", mssqlSplitStatements.getSetStatementsBefore().get(3));
+        assertEquals(2, mssqlSplitStatements.getSetStatementsBefore().size());
+        assertEquals("SET ANSI_NULLS OFF", mssqlSplitStatements.getSetStatementsBefore().get(0));
+        assertEquals("SET QUOTED_IDENTIFIER OFF", mssqlSplitStatements.getSetStatementsBefore().get(1));
         assertEquals(
                 "-- Begin creation of new function comment\n" +
                         "  \n" +
@@ -282,5 +286,8 @@ public class CreateProcedureGeneratorJunitTest {
                         "  RETURN @greeting\n" +
                         "  END;",
                 mssqlSplitStatements.getBody());
+        assertEquals(2, mssqlSplitStatements.getSetStatementsAfter().size());
+        assertEquals("SET ANSI_NULLS ON", mssqlSplitStatements.getSetStatementsAfter().get(0));
+        assertEquals("SET QUOTED_IDENTIFIER ON", mssqlSplitStatements.getSetStatementsAfter().get(1));
     }
 }
