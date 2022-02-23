@@ -36,7 +36,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
         Object defaultValue = column.getDefaultValue();
         if (defaultValue == null) {
             // do nothing
-        } else if (column.isAutoIncrement()) {
+        } else if (column.isAutoIncrement() && defaultValue == null) {
             // do nothing
         } else if (defaultValue instanceof Date) {
             columnConfig.setDefaultValueDate((Date) defaultValue);
