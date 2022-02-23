@@ -43,10 +43,9 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
             streams = getFallbackResourceAccessor().openStreams(null, path);
 
             if (streams.isEmpty() && GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
-                String errorMessage = "Unable to resolve xml entity locally : " +
-                        path +
-                        "\nGlobalConfiguration.SECURE_PARSING is set to true which does not allow unsecure remote lookups." +
-                        "\nPlease set the flag to FALSE to allow remote lookups for xsd.";
+                String errorMessage = "Unable to resolve xml entity " + systemId + " locally: " +
+                        GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
+                        "Set it to 'false' to allow remote lookups of xsd files.";
                 throw new XSDLookUpException(errorMessage);
             } else {
                 log.fine("Unable to resolve XML entity locally. Will load from network.");
