@@ -2,6 +2,9 @@ databaseChangeLog:
 - changeSet:
       id:  1
       author:  your.name
+      labels: example-label
+      context: example-context
+      comment: example-comment
       changes:
        - createTable:
             tableName:  person
@@ -20,6 +23,9 @@ databaseChangeLog:
 - changeSet:
       id:  2
       author:  your.name
+      labels: example-label
+      context: example-context
+      comment: example-comment
       changes:
        - createTable:
             tableName:  company
@@ -38,6 +44,9 @@ databaseChangeLog:
 - changeSet:
       id:  3
       author:  your.name
+      labels: example-label
+      context: example-context
+      comment: example-comment
       changes:
        - addColumn:
             tableName:  company

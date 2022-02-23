@@ -7,7 +7,8 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd
     http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd ">
 
-    <changeSet id="1" author="your.name">
+    <changeSet id="1" author="your.name" labels="example-label" context="example-context">
+        <comment>example-comment</comment>
         <createTable tableName="person">
             <column name="id" type="int">
                 <constraints primaryKey="true"/>
@@ -21,7 +22,8 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="2" author="your.name">
+    <changeSet id="2" author="your.name" labels="example-label" context="example-context">
+        <comment>example-comment</comment>
         <createTable tableName="company">
             <column name="id" type="int">
                 <constraints primaryKey="true"/>
@@ -35,7 +37,8 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="3" author="other.dev">
+    <changeSet id="3" author="other.dev" labels="example-label" context="example-context">
+        <comment>example-comment</comment>
         <addColumn tableName="person">
             <column name="country" type="varchar(2)"/>
         </addColumn>
