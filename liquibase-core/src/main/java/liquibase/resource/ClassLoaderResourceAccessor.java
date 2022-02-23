@@ -357,7 +357,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (rootPaths != null) {
             for (final FileSystem rootPath : rootPaths) {
                 try {
