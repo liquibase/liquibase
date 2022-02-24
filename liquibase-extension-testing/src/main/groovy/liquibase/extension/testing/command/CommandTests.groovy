@@ -110,6 +110,13 @@ class CommandTests extends Specification {
             }
         }
 
+        def liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration)
+        for (def runTest : commandTestDefinition.runTests) {
+            for (def arg : runTest.globalArguments.keySet()) {
+                assert liquibaseConfiguration.getRegisteredDefinition(arg) != null: "Unknown global argument '${arg}' in run ${runTest.description}"
+            }
+        }
+
         where:
         commandTestDefinition << getCommandTestDefinitions()
     }
@@ -266,8 +273,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
 
-        Exception savedException = null
-        def results = Scope.child([
+        def scopeSettings = [
                 (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name)               : MockHubService,
                 (Scope.Attr.resourceAccessor.name())                  : testDef.resourceAccessor ?
@@ -275,7 +281,14 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 (Scope.Attr.ui.name())                                : testDef.testUI ? testDef.testUI.initialize(uiOutputWriter, uiErrorWriter) :
                                                                                          new TestUI(uiOutputWriter, uiErrorWriter),
                 (Scope.Attr.logService.name())                        : logService
-        ], {
+        ]
+
+        if (testDef.globalArguments != null) {
+            scopeSettings.putAll(testDef.globalArguments)
+        }
+
+        Exception savedException = null
+        def results = Scope.child(scopeSettings, {
             try {
                 if (testDef.commandTestDefinition.beforeMethodInvocation != null) {
                     testDef.commandTestDefinition.beforeMethodInvocation.call()
@@ -702,6 +715,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          */
         private String description
 
+        private Map<String, ?> globalArguments = new HashMap<>()
+
         /**
          * Arguments to command as key/value pairs
          */
@@ -765,6 +780,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          */
         def setArguments(Map<String, Object> args) {
             this.arguments = args
+        }
+
+        def setGlobalArguments(Map<String, Object> args) {
+            this.globalArguments = args
         }
 
         def setExpectedFileContent(Map<String, Object> content) {
