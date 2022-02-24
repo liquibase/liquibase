@@ -31,6 +31,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private Map<String, RanChangeSet> ranIndex;
     private Database database;
 
+    //
+    // Added for test
+    //
+    public ValidatingVisitor() {
+    }
+
     public ValidatingVisitor(List<RanChangeSet> ranChangeSets) {
         ranIndex = new HashMap<>();
         for(RanChangeSet changeSet:ranChangeSets) {

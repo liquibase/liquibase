@@ -110,6 +110,13 @@ class CommandTests extends Specification {
             }
         }
 
+        def liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration)
+        for (def runTest : commandTestDefinition.runTests) {
+            for (def arg : runTest.globalArguments.keySet()) {
+                assert liquibaseConfiguration.getRegisteredDefinition(arg) != null: "Unknown global argument '${arg}' in run ${runTest.description}"
+            }
+        }
+
         where:
         commandTestDefinition << getCommandTestDefinitions()
     }
@@ -266,8 +273,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
 
-        Exception savedException = null
-        def results = Scope.child([
+        def scopeSettings = [
                 (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name)               : MockHubService,
                 (Scope.Attr.resourceAccessor.name())                  : testDef.resourceAccessor ?
@@ -275,8 +281,18 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 (Scope.Attr.ui.name())                                : testDef.testUI ? testDef.testUI.initialize(uiOutputWriter, uiErrorWriter) :
                                                                                          new TestUI(uiOutputWriter, uiErrorWriter),
                 (Scope.Attr.logService.name())                        : logService
-        ], {
+        ]
+
+        if (testDef.globalArguments != null) {
+            scopeSettings.putAll(testDef.globalArguments)
+        }
+
+        Exception savedException = null
+        def results = Scope.child(scopeSettings, {
             try {
+                if (testDef.commandTestDefinition.beforeMethodInvocation != null) {
+                    testDef.commandTestDefinition.beforeMethodInvocation.call()
+                }
                 def returnValue = commandScope.execute()
                 assert testDef.expectedException == null : "An exception was expected but the command completed successfully"
                 return returnValue
@@ -336,6 +352,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 }
                 if (testDef.expectFileToNotExist != null) {
                     assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getAbsolutePath()}' should not exist"
+                }
+                if (testDef.expectations != null) {
+                    testDef.expectations.call()
                 }
             } finally {
                 if (testDef.setup != null) {
@@ -578,7 +597,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          * the same scope as the command that is run for the test. This method will always be called, regardless of
          * exceptions thrown from within the test.
          */
-        Callable<Void> afterMethodInvocation
+        Closure<Void> afterMethodInvocation
+        /**
+         * An optional method that will be called before the execution of each run command. This is executed within
+         * the same scope as the command that is run for the test. Exceptions thrown from this method will cause the
+         * test to fail.
+         */
+        Closure<Void> beforeMethodInvocation
 
         void run(@DelegatesTo(RunTestDefinition) Closure testClosure) {
             run(null, testClosure)
@@ -621,12 +646,15 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          */
         private String description
 
+        private Map<String, ?> globalArguments = new HashMap<>()
+
         /**
          * Arguments to command as key/value pairs
          */
         private Map<String, ?> arguments = new HashMap<>()
         private Map<String, ?> expectedFileContent = new HashMap<>()
         private Map<String, Object> expectedDatabaseContent = new HashMap<>()
+        private Closure<Void> expectations = null;
 
         private List<TestSetup> setup
 
@@ -685,8 +713,16 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.arguments = args
         }
 
+        def setGlobalArguments(Map<String, Object> args) {
+            this.globalArguments = args
+        }
+
         def setExpectedFileContent(Map<String, Object> content) {
             this.expectedFileContent = content
+        }
+
+        def setExpectations(Closure<Void> expectations) {
+            this.expectations = expectations;
         }
 
         def setExpectedDatabaseContent(Map<String, Object> content) {
@@ -874,6 +910,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         void createTempResource(String originalFile, String newFile, String baseDir) {
             this.setups.add(new SetupCreateTempResources(originalFile, newFile, baseDir))
+        }
+
+        void registerValueProvider(Closure<ConfigurationValueProvider> configurationValueProvider) {
+            this.setups.add(new SetupConfigurationValueProvider(configurationValueProvider))
         }
 
         /**

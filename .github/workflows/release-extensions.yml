@@ -37,13 +37,13 @@ jobs:
           - liquibase-yugabytedb
     steps:
       - name: Release liquibase/${{ matrix.extension }} v${{ github.event.inputs.version }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
             console.log("Sending liquibase-release event to liquibase/${{ matrix.extension }}");
 
-            await github.repos.createDispatchEvent({
+            await github.rest.repos.createDispatchEvent({
                "owner": "liquibase",
                "repo": "${{ matrix.extension }}",
                "event_type": "liquibase-release",

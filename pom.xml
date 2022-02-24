@@ -67,7 +67,7 @@
         <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
         <groovy.version>2.4.17</groovy.version>
         <dependency.spock.version>1.3-groovy-2.4</dependency.spock.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.2</junit.version>
         <trimStackTrace>false</trimStackTrace>
         <argLine></argLine>
     </properties>
@@ -172,7 +172,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>6.0.6</version>
+            <version>8.0.28</version>
             <scope>test</scope>
         </dependency>
 
@@ -246,7 +246,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.10.0</version>
             </plugin>
 
             <plugin>
@@ -308,6 +308,7 @@
                 </dependencies>
                 <configuration>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
                 </configuration>
             </plugin>
 
@@ -343,7 +344,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.3.2</version>
                 <configuration>
                     <attach>true</attach>
                     <author>false</author>

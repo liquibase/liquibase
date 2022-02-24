@@ -25,7 +25,10 @@
               {
                 "column": {
                   "name": "name",
-                  "type": "varchar(50)"
+                  "type": "varchar(50)",
+                  "constraints": {
+                    "nullable": false
+                  }
                 }
               },
               {
@@ -77,7 +80,10 @@
               {
                 "column": {
                   "name": "name",
-                  "type": "varchar(50)"
+                  "type": "varchar(50)",
+                  "constraints": {
+                    "nullable": false
+                  }
                 }
               },
               {
@@ -106,14 +112,14 @@
   {
     "changeSet": {
       "id": "3",
-      "author": "your.name",
+      "author": "other.dev",
       "labels": "example-label",
       "context": "example-context",
       "comment": "example-comment",
       "changes": [
         {
           "addColumn": {
-            "tableName": "company",
+            "tableName": "person",
             "columns": [
               {
                 "column": {
@@ -124,6 +130,3 @@
             ]
           }
         }]
-    }
-  }
-]}
