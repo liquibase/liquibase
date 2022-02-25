@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Collect Data
         id: collect-data
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             core.setOutput("version", context.payload.inputs.version);

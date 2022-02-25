@@ -16,6 +16,7 @@ import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         if (columns != null) {
             for (ColumnConfig columnConfig : columns) {
-                if (columnConfig.getType() == null) {
+                if (columnConfig.getType() == null && !ObjectUtil.defaultIfNull(columnConfig.getComputed(), false)) {
                     validationErrors.addError("column 'type' is required for all columns");
                 }
                 if (columnConfig.getName() == null) {
@@ -67,8 +68,12 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             Object defaultValue = column.getDefaultValueObject();
 
-            LiquibaseDataType columnType = DataTypeFactory.getInstance().fromDescription(column.getType() + (isAutoIncrement ? "{autoIncrement:true}" : ""), database);
-            isAutoIncrement |= columnType.isAutoIncrement();
+            LiquibaseDataType columnType = null;
+            if (column.getType() != null) {
+                columnType = DataTypeFactory.getInstance().fromDescription(column.getType() + (isAutoIncrement ? "{autoIncrement:true}" : ""), database);
+                isAutoIncrement |= columnType.isAutoIncrement();
+            }
+
             if ((constraints != null) && (constraints.isPrimaryKey() != null) && constraints.isPrimaryKey()) {
                 statement.addPrimaryKeyColumn(column.getName(), columnType, defaultValue, constraints.getValidatePrimaryKey(),
                         constraints.isDeferrable() != null && constraints.isDeferrable(),
@@ -145,6 +150,11 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                 if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                     statements.add(remarksStatement);
                 }
+            }
+
+            final Boolean computed = column.getComputed();
+            if (computed != null && computed) {
+                statement.setComputed(column.getName());
             }
         }
 

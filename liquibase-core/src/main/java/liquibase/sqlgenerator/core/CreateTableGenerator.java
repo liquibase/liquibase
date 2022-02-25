@@ -13,6 +13,7 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DatabaseDataType;
+import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -67,10 +68,18 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         /* We have reached the point after "CREATE TABLE ... (" and will now iterate through the column list. */
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
-            DatabaseDataType columnType = statement.getColumnTypes().get(column).toDatabaseDataType(database);
-            buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column, true));
+            DatabaseDataType columnType = null;
+            if (statement.getColumnTypes().get(column) != null) {
+                columnType = statement.getColumnTypes().get(column).toDatabaseDataType(database);
+            }
 
-            buffer.append(" ").append(columnType);
+            if (columnType == null) {
+                buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column, false));
+            } else {
+                buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column, !statement.isComputed(column)));
+                buffer.append(" ").append(columnType);
+            }
+
 
             AutoIncrementConstraint autoIncrementConstraint = null;
 
@@ -102,7 +111,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
             // for the serial data type in postgres, there should be no default value
-            if (!columnType.isAutoIncrement() && (statement.getDefaultValue(column) != null)) {
+            if (columnType != null && !columnType.isAutoIncrement() && (statement.getDefaultValue(column) != null)) {
                 Object defaultValue = statement.getDefaultValue(column);
                 if (database instanceof MSSQLDatabase) {
                     String constraintName = statement.getDefaultValueConstraintName(column);
@@ -196,9 +205,9 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     }
                 } // does the DB support constraint names?
             } else {
-                if ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
+                if (columnType != null && ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
                         instanceof MySQLDatabase) || ((database instanceof MSSQLDatabase) && columnType.toString()
-                        .toLowerCase().contains("timestamp"))) {
+                        .toLowerCase().contains("timestamp")))) {
                     buffer.append(" NULL");
                 } // Do we need to specify NULL explicitly?
             } // Do we have a NOT NULL constraint for this column?

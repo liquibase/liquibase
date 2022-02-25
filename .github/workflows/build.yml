@@ -30,9 +30,10 @@
             echo "A member of Liquibase team needs to apply label 'SafeToBuild'! "
             exit 1 
         - name: Run needed builds
-          if: (!github.event.pull_request || github.event.pull_request.head.repo.full_name == 'liquibase/liquibase') && !github.event.label
+          if: github.event.action == 'labeled' && github.event.pull_request.head.repo.full_name == 'liquibase/liquibase'
           run: |
-            echo "We need to do this build when not just a label change."
+            echo "Don't run liquibase/liquibase builds on labels"
+            exit 1
     setup:
       name: Setup
       needs: check_build_safety
@@ -50,7 +51,7 @@
         setupSuccessful: "true"
       steps:
         - name: Failsafe
-          uses: actions/github-script@v5
+          uses: actions/github-script@v6
           with:
             script: |
               if (${{ github.run_attempt }} % 5 == 0) {
@@ -64,7 +65,7 @@
 
         - name: Find corresponding branches
           id: find-branches
-          uses: actions/github-script@v5
+          uses: actions/github-script@v6
           with:
             github-token: ${{ secrets.BOT_TOKEN }}
             script: |
@@ -221,7 +222,7 @@
 
         - name: Prepare
           id: prepare
-          uses: actions/github-script@v5
+          uses: actions/github-script@v6
           with:
             script: |
               core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
@@ -353,8 +354,7 @@
 
             cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts
 
-            ##TODO: restore signing
-            #.github/util/sign-artifacts.sh artifacts
+            .github/util/sign-artifacts.sh artifacts
 
             ##prepare branch-named convenience artifacts directories
             mkdir artifacts-named
@@ -395,7 +395,7 @@
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
         - name: Coordinate Liquibase-Pro
-          uses: actions/github-script@v5
+          uses: actions/github-script@v6
           with:
             github-token: ${{ secrets.BOT_TOKEN }}
             script: |
