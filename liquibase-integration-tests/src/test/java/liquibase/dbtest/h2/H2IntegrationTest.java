@@ -68,18 +68,6 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void snapshot() throws Exception {
-        if (getDatabase() == null) {
-            return;
-        }
-
-
-        runCompleteChangeLog();
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl(getDatabase()));
-        System.out.println(snapshot);
-    }
-
-    @Test
     public void canSpecifyDbmsForIndividualChanges() throws Exception {
         runChangeLogFile(changeSpecifyDbmsChangeLog);
     }
