@@ -15,6 +15,7 @@ import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.ResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.statement.DatabaseFunction
 import liquibase.statement.ExecutablePreparedStatement
 import liquibase.statement.ExecutablePreparedStatementBase
 import liquibase.statement.SqlStatement
@@ -29,8 +30,12 @@ import liquibase.test.TestContext
 import liquibase.util.csv.CSVReader
 import spock.lang.Unroll
 
+import java.sql.Date
+import java.sql.Time
 import java.sql.Timestamp
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 public class LoadDataChangeTest extends StandardChangeTest {
 
@@ -720,6 +725,51 @@ public class LoadDataChangeTest extends StandardChangeTest {
         columnValue(sqlStatements[3], Col.date) == " s"   // FIX this was "s"
     }
 
+    def "temporal values work for DATE, DATETIME and TIME column configs"() {
+        when:
+        LoadDataChange change = new LoadDataChange()
+
+        change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/change/core/sample.data.temporal.csv",
+                tableName: "table.name"
+        ]).setValue([
+                [column: [name: "id", type: "NUMERIC"]],
+                [column: [name: "date", type: "DATE"]],
+                [column: [name: "datetime", type: "DATETIME"]],
+                [column: [name: "time", type: "TIME"]],
+        ]), new ClassLoaderResourceAccessor())
+
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory()
+
+        LocalTime beforeGeneration = LocalTime.now().withNano(0)
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB)
+        LocalTime afterGeneration = LocalTime.now().withNano(0).plusSeconds(1)
+
+        LocalDate today = LocalDate.now()
+        LocalDate date = LocalDate.of(2022, 9, 13)
+        LocalTime time = LocalTime.of(12,34, 56, 789123000)
+        then:
+        //NULLS
+        columnValue(sqlStatements[0], Col.id) == 1
+        columnValue(sqlStatements[0], Col.date) == "NULL"
+        columnValue(sqlStatements[0], Col.datetime) == "NULL"
+        columnValue(sqlStatements[0], Col.time) == "NULL"
+
+        //NOWANDTODAYUTIL used
+        columnValue(sqlStatements[1], Col.id) == 2
+        ((Date) columnValue(sqlStatements[1], Col.date)).toLocalDate() == today
+        ((Timestamp) columnValue(sqlStatements[1], Col.datetime)).toLocalDateTime() <= LocalDateTime.of(today, afterGeneration)
+        ((Timestamp) columnValue(sqlStatements[1], Col.datetime)).toLocalDateTime() >= LocalDateTime.of(today, beforeGeneration)
+        ((Time) columnValue(sqlStatements[1], Col.time)).toLocalTime() <= afterGeneration
+        ((Time) columnValue(sqlStatements[1], Col.time)).toLocalTime() >= beforeGeneration
+
+        //VALUE PARSED
+        columnValue(sqlStatements[2], Col.id) == 3
+        ((Date) columnValue(sqlStatements[2], Col.date)).toLocalDate() == date
+        ((Timestamp)columnValue(sqlStatements[2], Col.datetime)).toLocalDateTime() == LocalDateTime.of(date, time)
+        ((DatabaseFunction) columnValue(sqlStatements[2], Col.time)).value == time.toString()
+    }
+
     def "all columns defined" () {
         when:
         LoadDataChange change = new LoadDataChange()
@@ -780,7 +830,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
     }
 
     enum Col {
-        name, num, date, bool, id
+        name, num, date, bool, id, datetime, time
 
         String s() {
             return name();
