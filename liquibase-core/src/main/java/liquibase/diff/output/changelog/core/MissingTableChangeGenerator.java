@@ -148,7 +148,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
             }
             columnConfig.setType(typeString);
 
-            if (column.isAutoIncrement()) {
+            if (column.isAutoIncrement() && column.getDefaultValue() == null) {
                 columnConfig.setAutoIncrement(true);
             }
 
