@@ -369,15 +369,72 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             permutation << getAllRunTestPermutations()
     }
 
+    /**
+     *
+     * Compare the contents of two files, optionally filtering out
+     * lines that contain a specified string.
+     *
+     * @param   f1                           The baseline file
+     * @param   f2                           The new output file
+     * @param   filter                       The filter string (can be NULL)
+     * @return  OutputCheck                  Closure to be used at test run execution
+     *
+     */
+    static OutputCheck assertFilesEqual(File f1, File f2, String... filters) {
+        return new OutputCheck() {
+            private String baselineContents
+            private String actualContents
+            @Override
+            def check(String actual) throws AssertionError {
+                List<String> lines1 = f1.readLines()
+                if (filters) {
+                    lines1 = lines1.findAll({ line ->
+                        filters.every() { filter ->
+                            ! line.contains(filter)
+                        }
+                    })
+                }
+                String contents1 = StringUtil.join(lines1, "\n")
+                this.baselineContents = contents1
+
+                List<String> lines2 = f2.readLines()
+                if (filters) {
+                    lines2 = lines2.findAll({ line ->
+                        filters.every() { filter ->
+                            ! line.contains(filter)
+                        }
+                    })
+                }
+                String contents2 = StringUtil.join(lines2, "\n")
+                this.actualContents = contents2
+
+                assert lines1.size() == lines2.size()
+                assert contents1 == contents2
+            }
+
+            @Override
+            String getExpected() {
+                return this.baselineContents
+            }
+
+            @Override
+            String getCheckedOutput() {
+                return this.actualContents
+            }
+        }
+    }
+
     static OutputCheck assertNotContains(String substring) {
         return assertNotContains(substring, false)
     }
 
     static OutputCheck assertNotContains(String substring, boolean caseInsensitive) {
         return new OutputCheck() {
+            private String actualContents
             @Override
             def check(String actual) throws AssertionError {
                 actual = (caseInsensitive && actual != null ? actual.toLowerCase() : actual)
+                this.actualContents = actual
                 substring = (caseInsensitive && substring != null ? substring.toLowerCase() : substring)
                 assert !actual.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))): "$actual does not contain: '$substring'"
             }
@@ -385,6 +442,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             @Override
             String getExpected() {
                 return substring
+            }
+
+            @Override
+            String getCheckedOutput() {
+                return this.actualContents
             }
         }
     }
@@ -395,8 +457,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
     static OutputCheck assertContains(String substring, final Integer occurrences) {
         return new OutputCheck() {
+            private String actualContents
             @Override
             def check(String actual) throws AssertionError {
+                this.actualContents = actual
                 String edited = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))
                 if (occurrences == null) {
                     boolean b = actual.contains(edited)
@@ -410,6 +474,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             @Override
             String getExpected() {
                 return substring
+            }
+
+            @Override
+            String getCheckedOutput() {
+                return this.actualContents
             }
         }
     }
@@ -487,7 +556,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     try {
                         ((OutputCheck) expectedOutputCheck).check(fullOutput)
                     } catch (AssertionError e) {
-                        throw new ComparisonFailure(e.getMessage(), expectedOutputCheck.expected, fullOutput)
+                        throw new ComparisonFailure(e.getMessage(), expectedOutputCheck.expected, expectedOutputCheck.checkedOutput)
                     }
                 } else {
                     Assert.fail "Unknown $outputDescription check type: ${expectedOutputCheck.class.name}"
@@ -1022,6 +1091,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          * @return the expected value from this output check
          */
         String getExpected()
+
+        /**
+         * @return the baseline contents from this output check
+         */
+        String getCheckedOutput()
     }
 
     interface FileContentCheck {
