@@ -46,23 +46,10 @@ public class SmallIntType extends LiquibaseDataType {
             return new DatabaseDataType("NUMBER", 5);
         }
 
-        if (database instanceof CockroachDatabase) {
-            if (isAutoIncrement()) {
-                return new DatabaseDataType("SMALLSERIAL");
-            }
-            return new DatabaseDataType("SMALLINT");
-        }
 
-        if (database instanceof PostgresDatabase)
-        {
+        if (database instanceof PostgresDatabase) {
             if (isAutoIncrement()) {
-                int majorVersion = 9;
-                try {
-                    majorVersion = database.getDatabaseMajorVersion();
-                } catch (DatabaseException e) {
-                    // ignore
-                }
-                if (majorVersion < 10) {
+                if (((PostgresDatabase) database).useSerialDatatypes()) {
                     return new DatabaseDataType("SMALLSERIAL");
                 }
             }
