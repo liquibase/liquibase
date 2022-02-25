@@ -38,6 +38,12 @@ public class IntType extends LiquibaseDataType {
         if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || database instanceof OracleDatabase) {
             return new DatabaseDataType("INTEGER");
         }
+        if (database instanceof CockroachDatabase) {
+            if (isAutoIncrement()) {
+                return new DatabaseDataType("SERIAL");
+            }
+            return new DatabaseDataType("INTEGER");
+        }
         if (database instanceof PostgresDatabase) {
             if (isAutoIncrement()) {
                 int majorVersion = 9;

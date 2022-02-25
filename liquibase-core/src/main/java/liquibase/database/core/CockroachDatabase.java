@@ -5,6 +5,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.util.JdbcUtil;
 
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -69,4 +70,23 @@ public class CockroachDatabase extends PostgresDatabase {
         return false;
     }
 
+    @Override
+    protected String getAutoIncrementClause(String generationType, Boolean defaultOnNull) {
+        return "";
+    }
+
+    @Override
+    public String getAutoIncrementClause() {
+        return "";
+    }
+
+    @Override
+    public boolean generateAutoIncrementStartWith(BigInteger startWith) {
+       return false;
+    }
+
+    @Override
+    public boolean generateAutoIncrementBy(BigInteger incrementBy) {
+       return false;
+    }
 }
