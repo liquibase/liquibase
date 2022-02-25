@@ -12,4 +12,5 @@ public class FileAccessorDTO {
     public String contents;
     public boolean versioned;
     public boolean encoded;
+    public String warningMessage;
 }

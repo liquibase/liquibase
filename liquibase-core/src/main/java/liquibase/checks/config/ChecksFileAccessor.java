@@ -27,10 +27,20 @@ public class ChecksFileAccessor implements liquibase.checks.config.FileAccessor 
             if (dto.encoded) {
                 String extraMessage = "\nThis backup file will work with Liquibase 4.5.0 users who specify it using the --checks-settings-file argument.";
                 File backupFile = new File(f.getAbsolutePath() + ".v4.5");
-                makeBackup(backupFile, contents, extraMessage);
+                dto.warningMessage = makeBackup(backupFile, contents, extraMessage);
             }
             return dto;
         }
+    }
+
+    /**
+     * Make a backup copy of the file
+     * @param backupFile             The file to back up
+     * @param contents               The contents of the file
+     * @param extraMessage           Extra message text to include
+     */
+    public static String makeBackup(File backupFile, String contents, String extraMessage) {
+        return makeBackup(backupFile, contents, extraMessage, true);
     }
 
     /**
@@ -40,9 +50,10 @@ public class ChecksFileAccessor implements liquibase.checks.config.FileAccessor 
      * @param backupFile             The file to back up
      * @param contents               The contents of the file
      * @param extraMessage           Extra message text to include
-     *
+     * @param printMessage           Should the warning message be printed to the console? If an exception occurs, the
+     *                               exception message will be printed regardless of the value of printMessage.
      */
-    public static void makeBackup(File backupFile, String contents, String extraMessage) {
+    public static String makeBackup(File backupFile, String contents, String extraMessage, boolean printMessage) {
         //
         // Make a backup copy of the file
         //
@@ -52,12 +63,16 @@ public class ChecksFileAccessor implements liquibase.checks.config.FileAccessor 
             String message =
                 "The file '" + backupFile.getAbsolutePath() + "' has been updated so it can be used by your current version of Liquibase, and to simplify resolving merge conflicts in Source Control. No action is required from you. Your original file was backed up as '" + confFileBackupPath + "'." +
                     (extraMessage != null ? extraMessage : "");
-            Scope.getCurrentScope().getLog(ChecksFileAccessor.class).warning(message);
-            Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
+            if (printMessage) {
+                Scope.getCurrentScope().getLog(ChecksFileAccessor.class).warning(message);
+                Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
+            }
+            return message;
         } catch (IOException ioe) {
             String message = "Error creating backup file '" + confFileBackupPath + "' " + ioe.getMessage();
             Scope.getCurrentScope().getLog(ChecksFileAccessor.class).warning(message);
             Scope.getCurrentScope().getUI().sendMessage(message);
+            return null;
         }
     }
 
