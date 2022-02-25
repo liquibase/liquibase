@@ -5,7 +5,7 @@
 
     <groupId>org.liquibase.ext</groupId>
     <artifactId>liquibase-bigquery</artifactId>
-    <version>4.5.1-SNAPSHOT</version>
+    <version>4.8.1-SNAPSHOT</version>
 
     <name>Liquibase Extension: BigQuery</name>
     <description>Adds support for BigQuery database</description>
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>4.5.0</version>
+            <version>4.8.0</version>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
@@ -225,7 +225,6 @@
                 <configuration>
                     <serverId>sonatype-nexus-staging</serverId>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
             </plugin>
             <plugin>

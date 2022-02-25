@@ -2,19 +2,29 @@ package liquibase.ext.bigquery.sqlgenerator;
 
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.exception.ValidationErrors;
+import liquibase.ext.bigquery.database.BigqueryDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.sqlgenerator.core.CreateDatabaseChangeLogLockTableGenerator;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.CreateTableStatement;
 
+import static liquibase.ext.bigquery.database.BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
+
 public class BigqueryCreateDatabaseChangeLogLockTableGenerator extends CreateDatabaseChangeLogLockTableGenerator {
+
+    @Override
+    public int getPriority() {
+        return BIGQUERY_PRIORITY_DATABASE;
+    }
+
+    @Override
+    public boolean supports(CreateDatabaseChangeLogLockTableStatement statement, Database database) {
+        return database instanceof BigqueryDatabase;
+    }
 
     @Override
     public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
@@ -37,6 +47,7 @@ public class BigqueryCreateDatabaseChangeLogLockTableGenerator extends CreateDat
         }
     }
 
+    @Override
     protected String getCharTypeName(Database database) {
         return "string";
     }
