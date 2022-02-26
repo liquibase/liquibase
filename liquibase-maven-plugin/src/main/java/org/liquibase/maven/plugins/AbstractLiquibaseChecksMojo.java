@@ -25,9 +25,21 @@ public abstract class AbstractLiquibaseChecksMojo extends AbstractLiquibaseMojo{
     @PropertyElement
     protected String checksSettingsFile;
 
+    /**
+     * Specifies the <i>format</i> file for Liquibase Quality Checks to use. If not specified, the default
+     * format will be used
+     *
+     * @parameter property="liquibase.format"
+     */
+    @PropertyElement
+    protected String format;
+
     @Override
     protected final void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         try {
+            if (format == null) {
+                format = "txt";
+            }
             FileAccessor fileAccessor;
             // If no checksSettingsFile is specified, then run with the default quality checks file in memory.
             if (StringUtil.isEmpty(checksSettingsFile)) {

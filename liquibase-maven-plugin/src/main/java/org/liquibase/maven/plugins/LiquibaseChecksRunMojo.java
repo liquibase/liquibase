@@ -26,6 +26,8 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
         if (StringUtil.isNotEmpty(checksSettingsFile)) {
             liquibaseCommand.addArgumentValue("checksSettingsFile", checksSettingsFile);
         }
+        liquibaseCommand.addArgumentValue("format", format);
+        liquibaseCommand.addArgumentValue("checksIntegration", "maven");
         liquibaseCommand.execute();
     }
 }
