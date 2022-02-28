@@ -905,7 +905,8 @@ public class XMLChangeLogSerializerTest {
     					"objectQuotingStrategy","LEGACY",
     					"failOnError","true",
     					"labels","label",
-    					"created","created"),
+    					"created","created",
+                        "runInTransaction","false"),
     			attsMap(node));
     	
     }
@@ -948,6 +949,7 @@ public class XMLChangeLogSerializerTest {
     			+ "        logicalFilePath=\"path/to/file.json\"\n"
     			+ "        objectQuotingStrategy=\"LEGACY\"\n"
     			+ "        runAlways=\"true\"\n"
+                + "        runInTransaction=\"false\"\n"
     			+ "        runOnChange=\"true\"/>", out);
     	
     }

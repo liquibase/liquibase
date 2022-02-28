@@ -36,7 +36,7 @@ public class JsonChangeLogSerializerTest {
         addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col2").setDefaultValueDate(
                 cal.getTime()));
         addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col2").setDefaultValueSequenceNext(new SequenceNextValueFunction("seq_me")));
-        ChangeSet changeSet = new ChangeSet("1", "nvoxland", false, false, "path/to/file.json", null, null, null);
+        ChangeSet changeSet = new ChangeSet("1", "nvoxland", false, false, "path/to/file.json", null, null,true, null);
         changeSet.setPreconditions(newSamplePreconditions());
         changeSet.addChange(addColumnChange);
         //when

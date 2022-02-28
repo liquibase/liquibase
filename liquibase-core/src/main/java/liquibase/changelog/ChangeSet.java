@@ -955,12 +955,24 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return alwaysRun;
     }
 
+    public void setAlwaysRun(boolean alwaysRun) {
+        this.alwaysRun = alwaysRun;
+    }
+
     public boolean isRunOnChange() {
         return runOnChange;
     }
 
+    public void setRunOnChange(boolean runOnChange) {
+        this.runOnChange = runOnChange;
+    }
+
     public boolean isRunInTransaction() {
         return runInTransaction;
+    }
+
+    public void setRunInTransaction(boolean runInTransaction) {
+        this.runInTransaction = runInTransaction;
     }
 
     public RollbackContainer getRollback() {
@@ -1243,7 +1255,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         if ("runInTransaction".equals(field)) {
-            if (this.isRunInTransaction()) {
+            if (!this.isRunInTransaction()) {
                 return false;
             } else {
                 return null;
@@ -1256,7 +1268,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         if ("ignore".equals(field)) {
             if (this.isIgnore()) {
-                return false;
+                return true;
             } else {
                 return null;
             }
