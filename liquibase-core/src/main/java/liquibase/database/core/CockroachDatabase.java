@@ -56,17 +56,20 @@ public class CockroachDatabase extends PostgresDatabase {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        if (conn instanceof JdbcConnection) {
-            try (Statement stmt = ((JdbcConnection) conn).createStatement()) {
-                if (stmt != null) {
-                    try (ResultSet rs = stmt.executeQuery("select version()")) {
-                        if (rs.next()) {
-                            return ((String) JdbcUtil.getResultSetValue(rs, 1)).startsWith("CockroachDB");
+        final String url = conn.getURL();
+        if (url.startsWith("jdbc:postgres") || url.startsWith("postgres")) {
+            if (conn instanceof JdbcConnection) {
+                try (Statement stmt = ((JdbcConnection) conn).createStatement()) {
+                    if (stmt != null) {
+                        try (ResultSet rs = stmt.executeQuery("select version()")) {
+                            if (rs.next()) {
+                                return ((String) JdbcUtil.getResultSetValue(rs, 1)).startsWith("CockroachDB");
+                            }
                         }
                     }
+                } catch (SQLException throwables) {
+                    return false;
                 }
-            } catch (SQLException throwables) {
-                return false;
             }
         }
 
