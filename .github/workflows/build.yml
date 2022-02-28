@@ -134,8 +134,14 @@
           java: [ 8, 11, 16 ]
           exclude:
              # exclude java 11 and 16 on macos and windows builds
-             - os: [macos-latest, windows-latest]
-               java: [11, 16]
+             - os: macos-latest
+               java: 11
+             - os: windows-latest
+               java: 11
+             - os: macos-latest
+               java: 16
+             - os: windows-latest
+               java: 16
       runs-on: ${{ matrix.os }}
       steps:
         - uses: actions/checkout@v2
