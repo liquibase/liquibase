@@ -388,22 +388,4 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.LOWER_CASE;
     }
-
-    public String getDatabaseFullVersion() throws DatabaseException {
-        if (getConnection() == null) {
-            throw new DatabaseException("Connection not set. Can not get database version. " +
-                    "Postgres Database wasn't initialized in proper way !");
-        }
-        if (dbFullVersion != null){
-            return dbFullVersion;
-        }
-        final String sqlToGetVersion = "SELECT version()";
-        List<?> result = Scope.getCurrentScope().getSingleton(ExecutorService.class).
-                getExecutor("jdbc", this).queryForList(new RawSqlStatement(sqlToGetVersion), String.class);
-        if (result != null && !result.isEmpty()){
-            return dbFullVersion = result.get(0).toString();
-        }
-
-        throw new DatabaseException("Connection set to Postgres type we don't support !");
-    }
 }
