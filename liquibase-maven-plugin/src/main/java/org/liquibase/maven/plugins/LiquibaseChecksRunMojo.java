@@ -19,6 +19,15 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
     @PropertyElement
     protected String changeLogFile;
 
+    /**
+     * Specifies the <i>format</i> file for Liquibase Quality Checks to use. If not specified, the default
+     * format will be used.
+     *
+     * @parameter property="liquibase.format"
+     */
+    @PropertyElement
+    protected String format;
+
     @Override
     protected void performChecksTask() throws CommandExecutionException {
         CommandScope liquibaseCommand = new CommandScope("checks", "run");
@@ -26,7 +35,9 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
         if (StringUtil.isNotEmpty(checksSettingsFile)) {
             liquibaseCommand.addArgumentValue("checksSettingsFile", checksSettingsFile);
         }
-        liquibaseCommand.addArgumentValue("format", format);
+        if (StringUtil.isNotEmpty(format)) {
+            liquibaseCommand.addArgumentValue("format", format);
+        }
         liquibaseCommand.addArgumentValue("checksIntegration", "maven");
         liquibaseCommand.execute();
     }
