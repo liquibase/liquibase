@@ -9,7 +9,9 @@ public class YamlChangeLogSerializerTest {
 
     @Test
     public void serialize__change() {
-        ChangeSet changeSet = new ChangeSet("test1", "nvoxland", false, true, "/test/me.txt", null, null, null);
+        ChangeSet changeSet = new ChangeSet("test1", "nvoxland", false, true, "/test/me.txt", null, null,false, null);
+        changeSet.setIgnore(true);
+        changeSet.setRunOrder("last");
         CreateTableChange change = new CreateTableChange();
         change.setTableName("testTable");
         change.addColumn(new ColumnConfig().setName("id").setType("int"));
