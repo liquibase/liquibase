@@ -125,7 +125,7 @@
               core.setOutput("stablePro", !proFailed);
 
     build:
-      name: Build & Test (Java ${{ matrix.java }})
+      name: Build & Test (Java ${{ matrix.java }} ${{ matrix.os }})
       needs: setup
       strategy:
         fail-fast: false
