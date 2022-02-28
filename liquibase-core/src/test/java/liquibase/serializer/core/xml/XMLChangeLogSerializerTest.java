@@ -936,6 +936,8 @@ public class XMLChangeLogSerializerTest {
     	changeSet.setFailOnError(true);
     	changeSet.setLabels(new Labels("label"));
     	changeSet.setLogicalFilePath("path/to/file.json");
+        changeSet.setIgnore(true);
+        changeSet.setRunOrder("last");
 
     	String out = new XMLChangeLogSerializer().serialize(changeSet, true);
     	
@@ -945,12 +947,14 @@ public class XMLChangeLogSerializerTest {
     			+ "        dbms=\"mssql\"\n"
     			+ "        failOnError=\"true\"\n"
     			+ "        id=\"1\"\n"
+                + "        ignore=\"true\"\n"
     			+ "        labels=\"label\"\n"
     			+ "        logicalFilePath=\"path/to/file.json\"\n"
     			+ "        objectQuotingStrategy=\"LEGACY\"\n"
     			+ "        runAlways=\"true\"\n"
                 + "        runInTransaction=\"false\"\n"
-    			+ "        runOnChange=\"true\"/>", out);
+    			+ "        runOnChange=\"true\"\n"
+                + "        runOrder=\"last\"/>", out);
     	
     }
 
