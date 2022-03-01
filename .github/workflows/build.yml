@@ -130,17 +130,17 @@
       strategy:
         fail-fast: false
         matrix:
-          os: [ubuntu-latest, macos-latest, windows-latest]
+          os: [ubuntu-latest, macos-latest, windows-2019]
           java: [ 8, 11, 16 ]
           exclude:
              # exclude java 11 and 16 on macos and windows builds
              - os: macos-latest
                java: 11
-             - os: windows-latest
+             - os: windows-2019
                java: 11
              - os: macos-latest
                java: 16
-             - os: windows-latest
+             - os: windows-2019
                java: 16
       runs-on: ${{ matrix.os }}
       steps:
