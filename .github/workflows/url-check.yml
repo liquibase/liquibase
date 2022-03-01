@@ -1,0 +1,18 @@
+
+name: Liquibase Url Prerequisites Check
+
+# Job will run nightly at 02:10 EDT / 01:10 CDT
+# Time below is UTC
+on:
+  schedule:
+    - cron: "10 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check URLs
+        uses: paramt/url-checker@master
+        with:
+          files: "url-test.md"
