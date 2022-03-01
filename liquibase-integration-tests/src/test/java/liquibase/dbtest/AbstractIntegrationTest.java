@@ -1081,4 +1081,30 @@ public abstract class AbstractIntegrationTest {
     public void setDefaultSchemaName(String defaultSchemaName) {
         this.defaultSchemaName = defaultSchemaName;
     }
+
+    @Test
+    public void testUpdateChangelogChecksum() throws Exception {
+       //NOTE: This test does as much to test the handing of the StandardHistoryService.ranChangeSetList cache when the underlying checksums need to be updated as anything
+       //NOTE: The end-user behaviour it's replicating is: `liquibase update` with a version that uses an old checksum version then `liquibase update` with the current version
+        assumeNotNull(this.getDatabase());
+
+        String schemaName = getDatabase().getDefaultSchemaName();
+        if (schemaName == null) {
+            return;
+        }
+
+        getDatabase().setOutputDefaultSchema(false);
+        getDatabase().setOutputDefaultCatalog(false);
+
+        Liquibase liquibase = new Liquibase(includedChangeLog, new JUnitResourceAccessor(), database.getConnection());
+        liquibase.setChangeLogParameter("loginuser", testSystem.getUsername());
+        liquibase.update(contexts);
+
+        Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+        conn.createStatement().execute("update DATABASECHANGELOG set md5sum = '1:xxx'");
+        conn.commit();
+
+        liquibase.getDatabase().getRanChangeSetList();
+        liquibase.update(contexts);
+    }
 }
