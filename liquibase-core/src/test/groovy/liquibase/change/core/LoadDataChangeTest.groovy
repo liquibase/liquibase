@@ -746,8 +746,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         LocalTime afterGeneration = LocalTime.now().withNano(0).plusSeconds(1)
 
         LocalDate today = LocalDate.now()
-        LocalDate date = LocalDate.of(2022, 9, 13)
-        LocalTime time = LocalTime.of(12,34, 56, 789123000)
+
         then:
         //NULLS
         columnValue(sqlStatements[0], Col.id) == 1
@@ -765,9 +764,19 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         //VALUE PARSED
         columnValue(sqlStatements[2], Col.id) == 3
-        ((Date) columnValue(sqlStatements[2], Col.date)).toLocalDate() == date
-        ((Timestamp)columnValue(sqlStatements[2], Col.datetime)).toLocalDateTime() == LocalDateTime.of(date, time)
-        ((DatabaseFunction) columnValue(sqlStatements[2], Col.time)).value == time.toString()
+        ((Date) columnValue(sqlStatements[2], Col.date)).toLocalDate().toString() == "2022-09-13"
+        ((Timestamp)columnValue(sqlStatements[2], Col.datetime)).toLocalDateTime().toString() == "2022-09-13T12:34:56.789123"
+        ((DatabaseFunction) columnValue(sqlStatements[2], Col.time)).value == "12:34:56.789123"
+
+        columnValue(sqlStatements[3], Col.id) == 4
+        ((Date) columnValue(sqlStatements[3], Col.date)).toLocalDate().toString() == "2022-09-13"
+        ((Timestamp)columnValue(sqlStatements[3], Col.datetime)).toLocalDateTime().toString() == "2022-09-13T12:34:56.789"
+        ((DatabaseFunction) columnValue(sqlStatements[3], Col.time)).value == "12:34:56.789"
+
+        columnValue(sqlStatements[4], Col.id) == 5
+        ((Date) columnValue(sqlStatements[4], Col.date)).toLocalDate().toString() == "2022-09-13"
+        ((Timestamp)columnValue(sqlStatements[4], Col.datetime)).toLocalDateTime().toString() == "2022-09-13T12:34:56"
+        ((Time) columnValue(sqlStatements[4], Col.time)).toLocalTime().toString() == "12:34:56"
     }
 
     def "all columns defined" () {

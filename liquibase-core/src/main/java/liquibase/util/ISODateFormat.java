@@ -80,7 +80,12 @@ public class ISODateFormat {
             }
         default:
             if (dateAsString.contains(":") && !dateAsString.contains("-")) {
-                return new java.sql.Time(timeFormat.parse(dateAsString).toInstant().getNano());
+                if (dateAsString.contains(".")) {
+                    //cannot handle milliseconds/nanoseconds in java.sql.Time, so throw exception so it's handled as a function
+                    throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
+                } else {
+                    return new java.sql.Time(timeFormat.parse(dateAsString).getTime());
+                }
             }
 
             if ((length < 19) || (dateAsString.charAt(19) != '.')) {
