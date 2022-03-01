@@ -111,9 +111,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
             // for the serial data type in postgres, there should be no default value
-            Object defaultValue = null;
             if (columnType != null && !columnType.isAutoIncrement() && (statement.getDefaultValue(column) != null)) {
-                defaultValue = statement.getDefaultValue(column);
+                Object defaultValue = statement.getDefaultValue(column);
                 if (database instanceof MSSQLDatabase) {
                     String constraintName = statement.getDefaultValueConstraintName(column);
                     if (constraintName == null) {
@@ -152,7 +151,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
             if (isAutoIncrementColumn) {
-                if (database instanceof PostgresDatabase && (buffer.toString().toLowerCase().endsWith("serial") || defaultValue instanceof DatabaseFunction)) {
+                if (database instanceof PostgresDatabase && buffer.toString().toLowerCase().endsWith("serial")) {
                     //don't add more info
                 } else if (database.supportsAutoIncrement()) {
                     // TODO: check if database supports auto increment on non primary key column

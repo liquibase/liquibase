@@ -256,6 +256,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     column.setAutoIncrementInformation(autoIncrementInformation);
                 }
             }
+        } else if (column.getAutoIncrementInformation() != null &&
+                database instanceof PostgresDatabase &&
+                column.getDefaultValue() instanceof DatabaseFunction) {
+            column.setAutoIncrementInformation(null);
         }
     }
 
