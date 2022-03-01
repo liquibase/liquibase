@@ -557,6 +557,8 @@
             <xsd:attribute name="columnDataType" type="xsd:string"/>
             <xsd:attribute name="startWith" type="xsd:long"/>
             <xsd:attribute name="incrementBy" type="xsd:long"/>
+            <xsd:attribute name="defaultOnNull" type="booleanExp"/>
+            <xsd:attribute name="generationType" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
