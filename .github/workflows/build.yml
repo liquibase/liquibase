@@ -162,7 +162,7 @@
             cache: 'maven'
         - name: Build & Test
           run: |
-            mvn -B -Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }} -Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }} -Dbuild.branch=${{ needs.setup.outputs.thisBranchName }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ needs.setup.outputs.thisSha }} -DtrimStackTrace=false -pl '!liquibase-dist' clean test package surefire-report:report
+            mvn -B -Dbuild.repository.owner="${{ needs.setup.outputs.thisRepositoryOwner }}" -Dbuild.repository.name="${{ needs.setup.outputs.thisRepositoryName }}" -Dbuild.branch="${{ needs.setup.outputs.thisBranchName }}" -Dbuild.number="${{ github.run_number }}" -Dbuild.commit="${{ needs.setup.outputs.thisSha }}" -DtrimStackTrace=false -pl '!liquibase-dist' clean test package surefire-report:report
             find . -name original-*.jar -exec rm {} \;
         - name: Archive Test Results
           if: ${{ always() }}
