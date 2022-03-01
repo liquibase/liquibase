@@ -1155,8 +1155,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public Set<String> getSerializableFields() {
         return new LinkedHashSet<>(
             Arrays.asList(
-                "id", "author", "runAlways", "runOnChange", "failOnError", "context",
-                "labels", "dbms", "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
+                "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
+                "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
                 "logicalFilePath", "created", "runInTransaction", "runOrder", "ignore"
             )
         );
