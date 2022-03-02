@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.xml.sax.InputSource;
@@ -23,6 +24,7 @@ import liquibase.util.file.FilenameUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ LiquibaseEntityResolver.class, StreamUtil.class })
+@PowerMockIgnore({"jdk.internal.reflect.*"})
 public class LiquibaseEntityResolverTest {
 
 	private static final String SYSTEM_ID = "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd";
