@@ -14,6 +14,8 @@ Optional Args:
     Default: 127.0.0.1
   dbPort (Integer) Port to run h2 database on
     Default: 9090
+  launchBrowser (Boolean) Whether to open a browser to the database's web interface
+    Default: true
   password (String) Password to use for created h2 user
     Default: letmein
     OBFUSCATED
