@@ -149,7 +149,6 @@
         - uses: actions/checkout@v2
           with:
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-
         - name: Built Code Cache
           if: ${{ matrix.java == 8}}
           uses: actions/cache@v2
@@ -165,9 +164,9 @@
         - name: Build & Test
           run: |
             mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
-            if [ "$OS_TYPE" == "windows-2019" ]; then
-              exit 0
-            fi
+        - name: Remove Original Jars for *nix
+          if: env.OS_TYPE != 'windows-2019'
+          run: |
             find . -name original-*.jar -exec rm {} \;
 
 
