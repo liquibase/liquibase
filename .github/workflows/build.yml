@@ -165,11 +165,9 @@
         - name: Build & Test
           run: |
             mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
-            if ($env:OS_TYPE == "windows-2019") {
-              exit 0
-            } else {
-              find . -name original-*.jar -exec rm {} \;
-            }
+            if ($env:OS_TYPE == "windows-2019") { exit 0 }
+            find . -name original-*.jar -exec rm {} \;
+
         - name: Archive Test Results
           if: ${{ always() }}
           uses: actions/upload-artifact@v2
