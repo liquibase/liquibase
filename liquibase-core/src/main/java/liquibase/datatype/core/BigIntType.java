@@ -58,13 +58,7 @@ public class BigIntType extends LiquibaseDataType {
         }
         if (database instanceof PostgresDatabase) {
             if (isAutoIncrement()) {
-                int majorVersion = 9;
-                try {
-                    majorVersion = database.getDatabaseMajorVersion();
-                } catch (DatabaseException e) {
-                    // ignore
-                }
-                if (majorVersion < 10) {
+                if (((PostgresDatabase) database).useSerialDatatypes()) {
                     return new DatabaseDataType("BIGSERIAL");
                 } else {
                     if (GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue() || this.getRawDefinition() == null) {

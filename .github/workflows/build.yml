@@ -174,7 +174,7 @@
           if: ${{ always() }}
           uses: actions/upload-artifact@v2
           with:
-            name: liquibase-test-results-jdk${{ matrix.java }}-${{ matrix.os }}
+            name: liquibase-test-results-jdk${{ matrix.java }}
             path: |
               ./**/target/surefire-reports
               ./**/target/site
