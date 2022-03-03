@@ -17,18 +17,4 @@ if "%LIQUIBASE_HOME%"=="" (
     exit /B 1
 )
 
-if "%JAVA_HOME%"=="" (
-
-    rem check for jre dir in liquibase_home
-    if NOT "%LIQUIBASE_HOME%"=="" if exist "%LIQUIBASE_HOME%\jre" (
-        set JAVA_HOME=%LIQUIBASE_HOME%\jre
-    )
-)
-
-if "%JAVA_HOME%"=="" (
-    set JAVA_PATH=java
-) else (
-    set JAVA_PATH=%JAVA_HOME%\bin\java
-)
-
-"%JAVA_PATH%" -cp "%LIQUIBASE_HOME%\lib\h2-2.1.210.jar;%LIQUIBASE_HOME%\liquibase.jar" liquibase.example.StartH2Main
+"%LIQUIBASE_HOME%\liquibase.bat" init start-h2

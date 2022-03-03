@@ -13,7 +13,6 @@
             <lineEnding>unix</lineEnding>
             <includes>
                 <include>liquibase</include>
-                <include>examples/start-h2</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
@@ -51,6 +50,26 @@
             <includes>
                 <include>**/*</include>
             </includes>
+            <excludes>
+                <exclude>**/start-h2*</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../liquibase-core/target/classes/liquibase/examples</directory>
+            <outputDirectory>examples</outputDirectory>
+            <includes>
+                <include>**/start-h2</include>
+            </includes>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../liquibase-core/target/classes/liquibase/examples</directory>
+            <outputDirectory>examples</outputDirectory>
+            <includes>
+                <include>**/start-h2.bat</include>
+            </includes>
+            <lineEnding>dos</lineEnding>
         </fileSet>
     </fileSets>
     <files>
