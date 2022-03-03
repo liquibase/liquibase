@@ -266,10 +266,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public SqlStatement[] generateStatements(Database database) {
         boolean databaseSupportsBatchUpdates = false;
         try {
-            if (!(database instanceof MySQLDatabase)) {
-                //mysql supports batch updates, but the performance vs. the big insert is worse
-                databaseSupportsBatchUpdates = database.supportsBatchUpdates();
-            }
+            databaseSupportsBatchUpdates = database.supportsBatchUpdates();
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -521,8 +518,9 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             if (anyPreparedStatements) {
                 // If we have only prepared statements and the database supports batching, let's roll
                 if (databaseSupportsBatchUpdates && statements.isEmpty() && (!preparedStatements.isEmpty())) {
-                    if (database instanceof PostgresDatabase) {
-                        // we don't do batch updates for Postgres but we still send as a prepared statement, see LB-744
+                    if (database instanceof PostgresDatabase || database instanceof MySQLDatabase) {
+                        // we don't do batch updates for Postgres, but we still send as a prepared statement, see LB-744
+                        // mysql supports batch updates, but the performance vs. the big insert is worse
                         return preparedStatements.toArray(new SqlStatement[preparedStatements.size()]);
                     } else {
                         return new SqlStatement[]{
