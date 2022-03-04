@@ -159,7 +159,7 @@ public class StringUtil {
         } else {
             if (endDelimiter.length() == 1) {
                 if ("/".equals(endDelimiter)) {
-                    if (previousPiece != null && !previousPiece.endsWith("\n")) {
+                    if (previousPiece != null && previousPiece.endsWith("*")) {
                         return false;
                     }
                 }
@@ -917,6 +917,7 @@ public class StringUtil {
         return trimRight(str.toString());
     }
 
+ 
     /**
      * Concatenates the addition string to the baseString string, adjusting the case of "addition" to match the base string.
      * If the string is all caps, append addition in all caps. If all lower case, append in all lower case. If baseString is mixed case, make no changes to addition.
