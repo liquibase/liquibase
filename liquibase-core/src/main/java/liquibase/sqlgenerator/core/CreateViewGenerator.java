@@ -15,7 +15,10 @@ import liquibase.util.SqlParser;
 import liquibase.util.StringClauses;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import static liquibase.sqlgenerator.core.CreateProcedureGenerator.splitSetStatementsOutForMssql;
 
 public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
 
@@ -48,14 +51,26 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
 
     @Override
     public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        String defaultDelimiter = ";";
+        List<Sql> sql = new ArrayList<Sql>();
+        List<String> mssqlSetStatementsBefore = new ArrayList<>();
+        List<String> mssqlSetStatementsAfter = new ArrayList<>();
 
         if (database instanceof InformixDatabase) {
             return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
         }
 
-        List<Sql> sql = new ArrayList<Sql>();
+        String body = statement.getSelectQuery();
+        if (database instanceof MSSQLDatabase) {
+            CreateProcedureGenerator.MssqlSplitStatements mssqlSplitStatements =
+                    splitSetStatementsOutForMssql(body, defaultDelimiter, Collections.singletonList("VIEW"));
 
-        StringClauses viewDefinition = SqlParser.parse(statement.getSelectQuery(), true, true);
+            body = mssqlSplitStatements.getBody();
+            mssqlSetStatementsBefore = mssqlSplitStatements.getSetStatementsBefore();
+            mssqlSetStatementsAfter = mssqlSplitStatements.getSetStatementsAfter();
+        }
+
+        StringClauses viewDefinition = SqlParser.parse(body, true, true);
 
         if (!statement.isFullDefinition()) {
             viewDefinition
@@ -93,7 +108,21 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                 }
             }
         }
+
+        if (!mssqlSetStatementsBefore.isEmpty()) {
+            mssqlSetStatementsBefore
+                    .forEach(mssqlSetStatement ->
+                            sql.add(new UnparsedSql(mssqlSetStatement, defaultDelimiter)));
+        }
+
         sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
+
+        if (!mssqlSetStatementsAfter.isEmpty()) {
+            mssqlSetStatementsAfter
+                    .forEach(mssqlSetStatement ->
+                            sql.add(new UnparsedSql(mssqlSetStatement, defaultDelimiter)));
+        }
+
         return sql.toArray(new Sql[sql.size()]);
     }
 
