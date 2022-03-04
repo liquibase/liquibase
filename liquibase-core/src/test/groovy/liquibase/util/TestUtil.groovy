@@ -62,6 +62,9 @@ public abstract class TestUtil {
                 if (file.name.contains("Abstract")) {
                     return;
                 }
+                if (file.name.endsWith("package-info.class")) {
+                    return;
+                }
 
                 def className = file.absolutePath.replace(startDir.absolutePath, "")
                         .replace("\\", ".")
