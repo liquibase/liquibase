@@ -12,11 +12,10 @@ jobs:
   urlcheck:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Check URLs
         uses: urlstechie/urlchecker-action@master
         with:
-        # A project to clone. If not provided, assumes already cloned in the present working directory.
-        git_path: https://github.com/liquibase/liquibase
         # A comma-separated list of file types to cover in the URL checks
         include_files: url-test.md
         # Choose whether to include file with no URLs in the printouts.
