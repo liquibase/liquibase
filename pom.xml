@@ -457,11 +457,12 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <!-- CDILiquibaseTest is currently failing without this setting -->
-                            <argLine>@{argLine}
-                    --illegal-access=warn
-                    --add-opens java.base/java.lang=ALL-UNNAMED
-                </argLine>
-            </configuration>
+                            <argLine>
+                                @{argLine}
+                                --illegal-access=warn
+                                --add-opens java.base/java.lang=ALL-UNNAMED
+                            </argLine>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

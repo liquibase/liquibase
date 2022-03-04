@@ -130,18 +130,18 @@
       strategy:
         fail-fast: false
         matrix:
-        os: [ubuntu-latest, macos-latest, windows-2019]
+          os: [ubuntu-latest, macos-latest, windows-2019]
           java: [ 8, 11, 17 ]
           exclude:
-             # exclude java 11 and 16 on macos and windows builds
+             # exclude java 11 and 17 on macos and windows builds
              - os: macos-latest
                java: 11
              - os: windows-2019
                java: 11
              - os: macos-latest
-               java: 16
+               java: 17
              - os: windows-2019
-               java: 16
+               java: 17
       runs-on: ${{ matrix.os }}
       env:
         OS_TYPE: ${{ matrix.os }}
@@ -159,7 +159,7 @@
           uses: actions/setup-java@v2
           with:
             java-version: ${{ matrix.java }}
-          distribution: 'temurin'
+            distribution: 'temurin'
             cache: 'maven'
         - name: Build & Test
           run: |
@@ -248,7 +248,7 @@
           uses: actions/setup-java@v2
           with:
             java-version: '8'
-          distribution: 'temurin'
+            distribution: 'temurin'
             cache: 'maven'
         - name: Restore Built Code Cache
           uses: actions/cache@v2
@@ -300,7 +300,7 @@
           uses: actions/setup-java@v2
           with:
             java-version: '8'
-          distribution: 'temurin'
+            distribution: 'temurin'
             gpg-private-key: ${{ secrets.GPG_SECRET }}
             gpg-passphrase: GPG_PASSPHRASE
             cache: 'maven'
