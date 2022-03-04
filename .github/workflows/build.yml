@@ -180,7 +180,7 @@
               ./**/target/site
 
         - name: Archive Modules
-          if: ${{ matrix.java == 8}} && ${{ matrix.os == 'ubuntu-latest'}}
+          if: ${{ matrix.java == 8 && matrix.os == 'ubuntu-latest'}}
           uses: actions/upload-artifact@v2
           with:
             name: liquibase-modules
