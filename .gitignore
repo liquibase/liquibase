@@ -35,3 +35,5 @@ original-pom.xml
 **/logback-test.xml
 **/*.swp
 **/dependency-reduced-pom.xml
+liquibase-core/src/test/java/liquibase/verify/saved_state/compareGeneratedSqlWithExpectedSqlForMinimalChangesets/
+.gradle/
