@@ -125,18 +125,30 @@
               core.setOutput("stablePro", !proFailed);
 
     build:
-      name: Build & Test (Java ${{ matrix.java }})
+      name: Build & Test (Java ${{ matrix.java }} ${{ matrix.os }})
       needs: setup
-      runs-on: ubuntu-latest
       strategy:
         fail-fast: false
         matrix:
+          os: [ubuntu-latest, macos-latest, windows-2019]
           java: [ 8, 11, 16 ]
+          exclude:
+             # exclude java 11 and 16 on macos and windows builds
+             - os: macos-latest
+               java: 11
+             - os: windows-2019
+               java: 11
+             - os: macos-latest
+               java: 16
+             - os: windows-2019
+               java: 16
+      runs-on: ${{ matrix.os }}
+      env:
+        OS_TYPE: ${{ matrix.os }}
       steps:
         - uses: actions/checkout@v2
           with:
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-
         - name: Built Code Cache
           if: ${{ matrix.java == 8}}
           uses: actions/cache@v2
@@ -151,8 +163,13 @@
             cache: 'maven'
         - name: Build & Test
           run: |
-            mvn -B -Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }} -Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }} -Dbuild.branch=${{ needs.setup.outputs.thisBranchName }} -Dbuild.number=${{ github.run_number }} -Dbuild.commit=${{ needs.setup.outputs.thisSha }} -DtrimStackTrace=false -pl '!liquibase-dist' clean test package surefire-report:report
+            mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
+        - name: Remove Original Jars for *nix
+          if: env.OS_TYPE != 'windows-2019'
+          run: |
             find . -name original-*.jar -exec rm {} \;
+
+
         - name: Archive Test Results
           if: ${{ always() }}
           uses: actions/upload-artifact@v2
@@ -163,7 +180,7 @@
               ./**/target/site
 
         - name: Archive Modules
-          if: ${{ matrix.java == 8}}
+          if: ${{ matrix.java == 8 && matrix.os == 'ubuntu-latest'}}
           uses: actions/upload-artifact@v2
           with:
             name: liquibase-modules
