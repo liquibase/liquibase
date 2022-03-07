@@ -209,17 +209,57 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                     changes.add(dropDefaultValueChange);
                 }
 
-                ModifyDataTypeChange change = new ModifyDataTypeChange();
-                change.setCatalogName(catalogName);
-                change.setSchemaName(schemaName);
-                change.setTableName(tableName);
-                change.setColumnName(column.getName());
-                DataType referenceType = (DataType) typeDifference.getReferenceValue();
-                change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
+                if (!isPostgresAutoIncrementEquivalentType(comparisonDatabase, typeDifference, column)) {
+                    ModifyDataTypeChange change = new ModifyDataTypeChange();
+                    change.setCatalogName(catalogName);
+                    change.setSchemaName(schemaName);
+                    change.setTableName(tableName);
+                    change.setColumnName(column.getName());
+                    DataType referenceType = (DataType) typeDifference.getReferenceValue();
+                    change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
 
-                changes.add(change);
+                    changes.add(change);
+                }
             }
         }
+    }
+
+    /**
+     * Determine if the type difference is essentially an equivalent type for auto-incrementing columns.
+     * @param comparisonDatabase the database that is being compared
+     * @param typeDifference the difference between the types
+     * @param column the column for which the type difference occurs
+     * @return true if the types are essentially equivalent (bigserial and int8/bigint would be considered equivalent),
+     * false otherwise
+     */
+    private boolean isPostgresAutoIncrementEquivalentType(Database comparisonDatabase, Difference typeDifference, Column column) {
+        if (comparisonDatabase instanceof PostgresDatabase && column.isAutoIncrement()) {
+            String referenceType = ((DataType) typeDifference.getReferenceValue()).getTypeName();
+            String comparisonType = ((DataType) typeDifference.getComparedValue()).getTypeName();
+            return isPostgresAutoIncrementEquivalentType(referenceType, comparisonType) || isPostgresAutoIncrementEquivalentType(comparisonType, referenceType);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Determine if the two types are essentially equivalent.
+     * @param type1 first type to compare
+     * @param type2 second type to compare
+     * @return true if the types are essentially equivalent (bigserial and int8/bigint would be considered equivalent),
+     * false otherwise
+     */
+    private boolean isPostgresAutoIncrementEquivalentType(String type1, String type2) {
+        if (type1.equalsIgnoreCase(type2)) {
+            return true;
+        } else if (type1.equalsIgnoreCase("bigserial")) {
+            return type2.equalsIgnoreCase("bigserial") || type2.equalsIgnoreCase("int8");
+        } else if (type1.equalsIgnoreCase("serial")) {
+            return type2.equalsIgnoreCase("serial") || type2.equalsIgnoreCase("int4");
+        } else if (type1.equalsIgnoreCase("smallserial")) {
+            return type2.equalsIgnoreCase("smallserial") || type2.equalsIgnoreCase("int2");
+        }
+        return false;
     }
 
     protected void handleDefaultValueDifferences(Column column, ObjectDifferences differences, DiffOutputControl control, List<Change> changes, Database referenceDatabase, Database comparisonDatabase) {
