@@ -3,6 +3,9 @@
     "changeSet": {
       "id": "1",
       "author": "your.name",
+      "labels": "example-label",
+      "context": "example-context",
+      "comment": "example-comment",
       "changes": [
         {
           "createTable": {
@@ -55,6 +58,9 @@
     "changeSet": {
       "id": "2",
       "author": "your.name",
+      "labels": "example-label",
+      "context": "example-context",
+      "comment": "example-comment",
       "changes": [
         {
           "createTable": {
@@ -107,6 +113,9 @@
     "changeSet": {
       "id": "3",
       "author": "other.dev",
+      "labels": "example-label",
+      "context": "example-context",
+      "comment": "example-comment",
       "changes": [
         {
           "addColumn": {

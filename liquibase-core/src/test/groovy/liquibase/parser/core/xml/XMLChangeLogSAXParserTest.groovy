@@ -83,7 +83,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        e.message.contains("access is not allowed due to restriction set by the accessExternalDTD property")
+        e.message.contains("Unable to resolve xml entity file:///invalid.txt locally: liquibase.secureParsing is set to 'true' which does not allow remote lookups. Set it to 'false' to allow remote lookups of xsd files")
     }
 
     def "allows liquibase.secureParsing=false to disable secure parsing"() {

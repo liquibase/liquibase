@@ -2,6 +2,9 @@ databaseChangeLog:
 - changeSet:
       id:  1
       author:  your.name
+      labels: example-label
+      context: example-context
+      comment: example-comment
       changes:
        - createTable:
             tableName:  person
@@ -26,11 +29,14 @@ databaseChangeLog:
                   type:  varchar(50)
               - column:
                   name:  city
-                  type:  varchar(30)                                      
+                  type:  varchar(30)
 
 - changeSet:
       id:  2
       author:  your.name
+      labels: example-label
+      context: example-context
+      comment: example-comment
       changes:
        - createTable:
             tableName:  company
@@ -55,11 +61,14 @@ databaseChangeLog:
                   type:  varchar(50)
               - column:
                   name:  city
-                  type:  varchar(30)                   
+                  type:  varchar(30)
 
 - changeSet:
       id:  3
       author:  other.dev
+      labels: example-label
+      context: example-context
+      comment: example-comment
       changes:
        - addColumn:
             tableName:  person
