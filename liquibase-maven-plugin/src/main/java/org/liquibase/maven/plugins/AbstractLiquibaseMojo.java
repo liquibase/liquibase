@@ -560,7 +560,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     public void configureFieldsAndValues() throws MojoExecutionException, MojoFailureException {
         // Load the properties file if there is one, but only for values that the user has not
         // already specified.
-        if (propertyFile != null && shouldLoadLiquibaseProperties()) {
+        if (propertyFile != null) {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
             try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
@@ -574,14 +574,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
-    }
-
-    /**
-     * Optionally, an implementation of this mojo can override this method to indicate that the liquibase.properties
-     * does not need to be loaded.
-     */
-    public boolean shouldLoadLiquibaseProperties() {
-        return true;
     }
 
     protected void configureChangeLogProperties() throws MojoFailureException, MojoExecutionException {
