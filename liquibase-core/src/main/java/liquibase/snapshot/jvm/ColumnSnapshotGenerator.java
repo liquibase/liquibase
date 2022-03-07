@@ -256,10 +256,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     column.setAutoIncrementInformation(autoIncrementInformation);
                 }
             }
-        } else if (column.getAutoIncrementInformation() != null &&
-                database instanceof PostgresDatabase &&
-                column.getDefaultValue() instanceof DatabaseFunction) {
-            column.setAutoIncrementInformation(null);
         }
     }
 
@@ -664,6 +660,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (database instanceof PostgresDatabase) {
+            if (columnInfo.isAutoIncrement()) {
+                columnMetadataResultSet.set(COLUMN_DEF_COL, null);
+            }
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
             if ((defaultValue != null) && (defaultValue instanceof String)) {
                 Matcher matcher = postgresStringValuePattern.matcher((String) defaultValue);
