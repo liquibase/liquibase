@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.xml.sax.InputSource;
@@ -24,6 +25,7 @@ import liquibase.serializer.LiquibaseSerializer;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(NamespaceDetailsFactory.class)
+@PowerMockIgnore({"jdk.internal.reflect.*"})
 public class LiquibaseSchemaResolverTest {
 
 	private static final String SYSTEM_ID = "systemId";

@@ -295,6 +295,7 @@
                     <configuration>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <reportFormat>plain</reportFormat>
+                        <argLine>--add-opens java.base/jdk.internal.loader=ALL-UNNAMED</argLine>
                     </configuration>
                 </plugin>
 
