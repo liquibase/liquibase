@@ -22,7 +22,6 @@
                         </goals>
                         <configuration>
                             <sourcepath>../liquibase-cdi/src/main/java</sourcepath>
-                            <encoding>UTF-8</encoding>
                         </configuration>
                     </execution>
                 </executions>

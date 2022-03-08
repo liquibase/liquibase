@@ -42,12 +42,7 @@
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
-      <artifactId>powermock-api-mockito</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
+      <artifactId>powermock-api-mockito2</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -169,7 +164,9 @@
             </goals>
             <configuration>
               <sourcepath>../liquibase-core/src/main/java</sourcepath>
-              <encoding>UTF-8</encoding>
+              <sourceFileIncludes>
+                <include>liquibase/util/grammar</include>
+              </sourceFileIncludes>
             </configuration>
           </execution>
         </executions>
