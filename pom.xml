@@ -69,6 +69,9 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <!-- COMPILE dependencies START -->
+
             <dependency>
                 <groupId>org.apache.maven</groupId>
                 <artifactId>maven-plugin-api</artifactId>
@@ -83,40 +86,41 @@
             </dependency>
 
             <dependency>
-                <groupId>org.apache.maven.shared</groupId>
-                <artifactId>maven-plugin-testing-harness</artifactId>
-                <version>1.1</version>
-                <scope>test</scope>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.17</version>
+                <!--                <version>1.30</version> FIXME changed clases-->
+                <optional>true</optional>
             </dependency>
 
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.13.2</version>
-                <scope>test</scope>
+                <groupId>commons-cli</groupId>
+                <artifactId>commons-cli</artifactId>
+                <version>1.5.0</version>
             </dependency>
 
             <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-library</artifactId>
-                <version>1.3</version>
-<!--                <version>2.2</version>FIXME changed code-->
-                <scope>test</scope>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>3.3.0</version>
             </dependency>
 
             <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-junit4</artifactId>
-                <version>2.0.9</version>
-                <scope>test</scope>
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>3.2</version>
             </dependency>
 
             <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito2</artifactId>
-                <version>2.0.9</version>
-                <scope>test</scope>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>6.0.0</version>
+                <!--                FIXME was moved to osgi.core, should we use it?-->
             </dependency>
+
+            <!-- COMPILE dependencies END -->
+
+            <!-- PROVIDED dependencies START -->
 
             <dependency>
                 <groupId>org.apache.ant</groupId>
@@ -126,7 +130,7 @@
                 <optional>true</optional>
             </dependency>
 
-            <!-- FIXME: it's better not to change cdi-api, weld-se, servlet-api and spring because in newer -->
+            <!-- FIXME: Discuss that it's better not to change cdi-api, weld-se, servlet-api and spring because in newer -->
             <!-- versions injection mechanism can be changed and it will just stop working during runtime. -->
             <!-- Also in newer versions of cdi-api jsr-250 dependency was removed and it will cause compilation errors. -->
             <dependency>
@@ -145,18 +149,57 @@
             </dependency>
 
             <dependency>
-                <groupId>org.jboss.weld.se</groupId>
-                <artifactId>weld-se</artifactId>
-                <version>1.1.8.Final</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring</artifactId>
                 <version>2.0.6</version>
                 <scope>provided</scope>
                 <optional>true</optional>
+            </dependency>
+
+            <!-- PROVIDED dependencies END -->
+
+            <!-- TEST dependencies START -->
+
+            <dependency>
+                <groupId>org.apache.maven.shared</groupId>
+                <artifactId>maven-plugin-testing-harness</artifactId>
+                <version>1.1</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.13.2</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest</artifactId>
+                <version>2.2</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
+                <version>2.0.9</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-api-mockito2</artifactId>
+                <version>2.0.9</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.weld.se</groupId>
+                <artifactId>weld-se</artifactId>
+                <version>1.1.8.Final</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -166,15 +209,14 @@
                 <scope>test</scope>
             </dependency>
 
+            <!-- FIXME: Discuss that H2 DB starting from 2.0 requires major chnages in test and src code to work -->
             <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>1.17</version>
-<!--                <version>1.30</version> FIXME changed clases-->
-                <optional>true</optional>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>1.3.176</version>
+                <scope>test</scope>
             </dependency>
 
-            <!-- JDBC drivers -->
             <dependency>
                 <groupId>org.hsqldb</groupId>
                 <artifactId>hsqldb</artifactId>
@@ -206,51 +248,21 @@
             </dependency>
 
             <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>3.22.0</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.ant</groupId>
                 <artifactId>ant-antunit</artifactId>
                 <version>1.4.1</version>
                 <scope>test</scope>
             </dependency>
 
-            <dependency>
-                <groupId>commons-cli</groupId>
-                <artifactId>commons-cli</artifactId>
-                <version>1.5.0</version>
-            </dependency>
+            <!-- TEST dependencies END -->
 
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>3.22.0</version>
-<!--                <scope>test</scope> FIXME why there was no test scope? Should scope be specified in dep management? -->
-            </dependency>
-
-            <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>1.3.176</version>
-<!--                <version>2.1.210</version>FIXME: integration tests fail-->
-                <!--                <scope>test</scope> FIXME why there was no test scope? Should scope be specified in dep management? -->
-            </dependency>
-
-            <dependency>
-                <groupId>cglib</groupId>
-                <artifactId>cglib-nodep</artifactId>
-                <version>3.3.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.objenesis</groupId>
-                <artifactId>objenesis</artifactId>
-                <version>3.2</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
-                <version>6.0.0</version>
-<!--                FIXME was moved to osgi.core, should we use it?-->
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
