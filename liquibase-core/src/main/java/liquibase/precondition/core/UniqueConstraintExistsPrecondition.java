@@ -79,18 +79,16 @@ public class UniqueConstraintExistsPrecondition extends AbstractPrecondition {
 
 	@Override
 	public Warnings warn(Database database) {
-		Warnings warnings = new Warnings();
-		if (getConstraintName() != null && (getTableName() != null || getColumnNames() == null)) {
-			warnings.addWarning("Specifying both constraintName AND (tableName and columnNames) is redundant");
-		}
-		return warnings;
+		return new Warnings();
 	}
 
 	@Override
 	public ValidationErrors validate(Database database) {
-		ValidationErrors validationErrors = new ValidationErrors();
-		if (StringUtil.trimToNull(getConstraintName()) == null && (StringUtil.trimToNull(getTableName()) == null || StringUtil.trimToNull(getColumnNames()) == null)) {
-			validationErrors.addError("constraintName OR (tableName and columnNames) is required");
+		ValidationErrors validationErrors = new ValidationErrors(this);
+		validationErrors.checkRequiredField("tableName", getTableName());
+
+		if (StringUtil.trimToNull(getConstraintName()) == null && StringUtil.trimToNull(getColumnNames()) == null) {
+			validationErrors.addError("constraintName OR columnNames is required for "+getName());
 		}
 		return validationErrors;
 	}

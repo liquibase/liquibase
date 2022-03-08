@@ -140,7 +140,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database, DatabaseSnapshot snapshot) throws DatabaseException {
         Relation table = example.getRelation();
-        Schema schema = table.getSchema();
+        Schema schema = example.getSchema();
         String name = example.getName();
 
         boolean bulkQuery;
@@ -196,7 +196,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 if (!bulkQuery) {
                     conditions.add("const.table_name='" + database.correctObjectName(example.getRelation().getName(), Table.class) + "'");
-                    conditions.add("const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "' ");
+                    if (name != null) {
+                        conditions.add("const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "' ");
+                    }
                 }
 
                 if (!conditions.isEmpty()) {
