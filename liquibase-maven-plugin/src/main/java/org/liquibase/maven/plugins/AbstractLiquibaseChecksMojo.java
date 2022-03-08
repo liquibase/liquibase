@@ -42,12 +42,6 @@ public abstract class AbstractLiquibaseChecksMojo extends AbstractLiquibaseMojo{
         }
     }
 
-
-    @Override
-    public boolean shouldLoadLiquibaseProperties() {
-        return false;
-    }
-
     @Override
     public boolean databaseConnectionRequired() {
         return false;
