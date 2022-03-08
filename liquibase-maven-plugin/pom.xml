@@ -15,33 +15,36 @@
     </parent>
 
     <dependencies>
+        <!-- COMPILE dependencies START -->
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-project</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <!-- COMPILE dependencies END -->
+        <!-- PROVIDED dependencies START -->
+        <!-- PROVIDED dependencies END -->
+        <!-- TEST dependencies START -->
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-plugin-testing-harness</artifactId>
+            <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
             <version>10.10.1.1</version><!--$NO-MVN-MAN-VER$-->
             <scope>test</scope>
         </dependency>
+        <!-- TEST dependencies END -->
     </dependencies>
 
     <build>
