@@ -316,7 +316,11 @@ public abstract class AbstractIntegrationTest {
     }
 
     private boolean hasColumn(Table table, String columnName, String columnType) {
-        return table.getColumn(columnName).getType().getTypeName().equalsIgnoreCase(columnType);
+        String dbTypeName = table.getColumn(columnName).getType().getTypeName();
+        if (dbTypeName.equalsIgnoreCase("character varying")) {
+            dbTypeName = "VARCHAR";
+        }
+        return dbTypeName.equalsIgnoreCase(columnType);
     }
 
     @Test
