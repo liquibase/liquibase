@@ -124,6 +124,12 @@ jobs:
             
             core.setOutput("stablePro", !proFailed);
 
+      - name: Upload Event File
+        uses: actions/upload-artifact@v2
+        with:
+          name: Event File
+          path: ${{ github.event_path }}
+
   build:
     name: Build & Test (Java ${{ matrix.java }} ${{ matrix.os }})
     needs: setup
@@ -520,15 +526,3 @@ jobs:
               "context": "Run Functional Tests",
               "description": markFunctionalTestsDescription
             });
-
-  event-file:
-    name: Save Event File
-    runs-on: ubuntu-latest
-    needs: [ finish ]
-    if: always()
-    steps:
-      - name: Upload Event File
-        uses: actions/upload-artifact@v2
-        with:
-          name: Event File
-          path: ${{ github.event_path }}
