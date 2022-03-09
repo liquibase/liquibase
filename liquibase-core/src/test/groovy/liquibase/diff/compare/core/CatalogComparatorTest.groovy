@@ -57,7 +57,7 @@ class CatalogComparatorTest extends Specification {
         new Catalog(null)                    | null                                 | null           | true
         new Catalog(null)                    | null                                 | "MyCat"        | true
         new Catalog("Cat1")                  | new Catalog("Cat1")                  | null           | true
-        new Catalog("Cat1")                  | new Catalog("Cat1")                  | "MyCat"        | true
+        new Catalog("Cat1")                  | new Catalog("Cat1INVALID")                  | "MyCat"        | true
         new Catalog("Cat1")                  | new Catalog("Cat2")                  | null           | false
         new Catalog("Cat1")                  | new Catalog("Cat2")                  | "Cat1"         | false
         new Catalog("Cat1")                  | new Catalog("Cat2")                  | "Cat2"         | false
