@@ -52,19 +52,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.Test.None;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
+import static liquibase.test.SnapshotAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeNotNull;
-import static liquibase.test.SnapshotAssert.*;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -307,20 +309,6 @@ public abstract class AbstractIntegrationTest {
             "UQ_UQTEST1".equalsIgnoreCase(constraint.getName())
             && "CREATETABLENAMEDUQCONST".equalsIgnoreCase(constraint.getRelation().getName())
             && "ID".equalsIgnoreCase(constraint.getColumns().get(0).getName()));
-
-        assertThat(snapshot).containsObject(Table.class, table ->
-            "standardTypesTest".equalsIgnoreCase(table.getName())
-            && hasColumn(table, "timestampColumn", "TIMESTAMP")
-            && hasColumn(table, "varcharColumn", "VARCHAR")
-        );
-    }
-
-    private boolean hasColumn(Table table, String columnName, String columnType) {
-        String dbTypeName = table.getColumn(columnName).getType().getTypeName();
-        if (dbTypeName.equalsIgnoreCase("character varying")) {
-            dbTypeName = "VARCHAR";
-        }
-        return dbTypeName.equalsIgnoreCase(columnType);
     }
 
     @Test
@@ -1096,7 +1084,7 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
-    @Test(expected = None.class)
+    @Test
     public void testTableExistsPreconditionTableNameMatch() throws Exception {
         assumeNotNull(this.getDatabase());
         runChangeLogFile(commonChangeLog);
