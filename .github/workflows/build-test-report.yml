@@ -1,9 +1,8 @@
 name: 'Test Report'
 on:
   workflow_run:
-    workflows: ['Build and Test'] # runs after build.yml workflow
-    types:
-      - completed
+    workflows: [Build and Test] # runs after build.yml workflow
+    types: [completed]
 jobs:
   report:
     runs-on: ubuntu-latest
