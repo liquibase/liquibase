@@ -38,7 +38,7 @@
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
+      <artifactId>osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -319,7 +319,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>javacc-maven-plugin</artifactId>
-        <version>2.6</version>
         <executions>
           <execution>
             <id>javacc</id>

@@ -120,10 +120,9 @@
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
-                <version>6.0.0</version>
+                <artifactId>osgi.core</artifactId>
+                <version>8.0.0</version>
                 <scope>provided</scope>
-                <!--                FIXME was moved to osgi.core, should we use it?-->
             </dependency>
             <!-- TODO: Discuss that it's better not to change cdi-api, weld-se, servlet-api and spring because in newer -->
             <!-- versions injection mechanism can be changed and it will just stop working during runtime. -->
@@ -393,7 +392,6 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>javacc-maven-plugin</artifactId>
                     <version>2.6</version>
-<!--                    <version>3.8.4</version> FIXME-->
                 </plugin>
 
                 <plugin>
