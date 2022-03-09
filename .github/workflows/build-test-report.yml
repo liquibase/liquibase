@@ -1,0 +1,18 @@
+name: 'Test Report'
+on:
+  workflow_run:
+    workflows: ['Build and Test'] # runs after build.yml workflow
+    types:
+      - completed
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dorny/test-reporter@v1
+        with:
+          artifact: /liquibase-test-results-(.*)/
+          name: "Test Results: "
+          path: '**/*.xml'
+          reporter: java-junit
+          only-summary: 'false'
+
