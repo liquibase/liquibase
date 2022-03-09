@@ -117,12 +117,6 @@
                 <version>8.0.0</version>
                 <scope>provided</scope>
             </dependency>
-            <dependency>
-                <groupId>cglib</groupId>
-                <artifactId>cglib-nodep</artifactId>
-                <version>3.3.0</version>
-                <scope>test</scope>
-            </dependency>
             <!-- It's better not to change cdi-api, weld-se, servlet-api and spring because in newer -->
             <!-- versions injection mechanism can be changed and it will just stop working during runtime. -->
             <!-- Also in newer versions of cdi-api jsr-250 dependency was removed and it will cause compilation errors. -->
@@ -230,6 +224,12 @@
                 <groupId>org.apache.ant</groupId>
                 <artifactId>ant-antunit</artifactId>
                 <version>1.4.1</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>3.3.0</version>
                 <scope>test</scope>
             </dependency>
             <!-- TEST dependencies END -->
