@@ -59,7 +59,7 @@
               }
 
 
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
           with:
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
@@ -146,7 +146,7 @@
       env:
         OS_TYPE: ${{ matrix.os }}
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
           with:
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
         - name: Built Code Cache
@@ -192,7 +192,7 @@
       runs-on: ubuntu-latest
       needs: build
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
           with:
             fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
@@ -233,7 +233,7 @@
       needs: build
       timeout-minutes: 30
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
           with:
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
@@ -279,7 +279,7 @@
       runs-on: ubuntu-latest
       needs: [ setup, build ]
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
           with:
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
@@ -407,7 +407,7 @@
       needs: [ setup, build, integration-test, package, sonar ]
       if: ${{ needs.setup.outputs.setupSuccessful }}
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
           with:
             ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
