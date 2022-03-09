@@ -308,8 +308,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.9.1</version>
-<!--                    <version>3.3.0</version> FIXME -->
+                    <version>3.3.0</version>
                 </plugin>
 
                 <plugin>
@@ -467,6 +466,14 @@
             <url>https://repo.maven.apache.org/maven2/</url>
         </repository>
     </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mvnrepository</id>
+            <name>mvnrepository</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <profiles>
         <profile>
