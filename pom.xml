@@ -100,11 +100,6 @@
                 <version>1.5.0</version>
             </dependency>
             <dependency>
-                <groupId>cglib</groupId>
-                <artifactId>cglib-nodep</artifactId>
-                <version>3.3.0</version>
-            </dependency>
-            <dependency>
                 <groupId>org.objenesis</groupId>
                 <artifactId>objenesis</artifactId>
                 <version>3.2</version>
@@ -123,6 +118,12 @@
                 <artifactId>osgi.core</artifactId>
                 <version>8.0.0</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>3.3.0</version>
+                <scope>test</scope>
             </dependency>
             <!-- TODO: Discuss that it's better not to change cdi-api, weld-se, servlet-api and spring because in newer -->
             <!-- versions injection mechanism can be changed and it will just stop working during runtime. -->
