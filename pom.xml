@@ -58,6 +58,7 @@
         <sonar.organization>datical</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+        <targetMavenVersion>3.8.4</targetMavenVersion>
     </properties>
 
     <!-- TODO: Discuss if we should remove liquibase-rpm and liquibase-debian or add them to modules -->
@@ -74,13 +75,17 @@
             <dependency>
                 <groupId>org.apache.maven</groupId>
                 <artifactId>maven-plugin-api</artifactId>
-                <version>2.0</version>
-<!--                <version>3.8.4</version> FIXME [ERROR]   class file for org.apache.maven.artifact.DependencyResolutionRequiredException not found -->
+                <version>${targetMavenVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.maven</groupId>
-                <artifactId>maven-project</artifactId>
-                <version>2.2.1</version>
+                <artifactId>maven-core</artifactId>
+                <version>${targetMavenVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-compat</artifactId>
+                <version>${targetMavenVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>
@@ -146,9 +151,9 @@
             <!-- PROVIDED dependencies END -->
             <!-- TEST dependencies START -->
             <dependency>
-                <groupId>org.apache.maven.shared</groupId>
+                <groupId>org.apache.maven.plugin-testing</groupId>
                 <artifactId>maven-plugin-testing-harness</artifactId>
-                <version>1.1</version>
+                <version>3.3.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -413,12 +418,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>3.1.2</version>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven</groupId>
-                    <artifactId>maven-plugin-api</artifactId>
-                    <version>3.8.4</version>
                 </plugin>
 
                 <plugin>
