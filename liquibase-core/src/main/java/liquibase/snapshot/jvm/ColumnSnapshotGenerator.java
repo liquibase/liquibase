@@ -664,6 +664,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (database instanceof PostgresDatabase) {
+            if (columnInfo.isAutoIncrement()) {
+                columnMetadataResultSet.set(COLUMN_DEF_COL, null);
+            }
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
             if ((defaultValue != null) && (defaultValue instanceof String)) {
                 Matcher matcher = postgresStringValuePattern.matcher((String) defaultValue);
