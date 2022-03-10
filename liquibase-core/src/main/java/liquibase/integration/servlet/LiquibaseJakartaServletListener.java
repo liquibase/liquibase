@@ -1,17 +1,15 @@
 package liquibase.integration.servlet;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+
 import java.util.Enumeration;
 
-/**
- * Version of {@link GenericServletListener} that uses javax.servlet and NOT jakarta.servlet
- */
-public class LiquibaseServletListener extends GenericServletListener implements ServletContextListener {
+public class LiquibaseJakartaServletListener extends GenericServletListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        super.contextInitialized(new JavaxServletContext(sce.getServletContext()));
+        super.contextInitialized(new JakartaServletContext(sce.getServletContext()));
     }
 
     @Override
@@ -19,11 +17,11 @@ public class LiquibaseServletListener extends GenericServletListener implements 
 
     }
 
-    private static class JavaxServletContext extends GenericServletWrapper.ServletContext {
+    private static class JakartaServletContext extends GenericServletWrapper.ServletContext {
 
-        private final javax.servlet.ServletContext servletContext;
+        private final jakarta.servlet.ServletContext servletContext;
 
-        private JavaxServletContext(javax.servlet.ServletContext servletContext) {
+        private JakartaServletContext(jakarta.servlet.ServletContext servletContext) {
             this.servletContext = servletContext;
         }
 
@@ -42,6 +40,4 @@ public class LiquibaseServletListener extends GenericServletListener implements 
             return servletContext.getInitParameterNames();
         }
     }
-
-
 }
