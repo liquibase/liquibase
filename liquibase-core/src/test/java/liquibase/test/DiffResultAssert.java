@@ -1,6 +1,9 @@
 package liquibase.test;
 
+import java.util.Optional;
+import java.util.function.Predicate;
 import liquibase.diff.DiffResult;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.ForeignKey;
 
 import static org.junit.Assert.fail;
@@ -12,11 +15,11 @@ import static org.junit.Assert.fail;
 public class DiffResultAssert {
     private DiffResult diff;
 
-    private DiffResultAssert() {        
+    private DiffResultAssert() {
     }
-    
+
     /**
-     * Constructs a DiffResultAssert to make assertions on a diffresult     
+     * Constructs a DiffResultAssert to make assertions on a diffresult
      */
     public static DiffResultAssert assertThat(DiffResult diffResult) {
         DiffResultAssert da=new DiffResultAssert();
@@ -29,11 +32,24 @@ public class DiffResultAssert {
      * @param fkName Foreign key name
      */
     public DiffResultAssert containsMissingForeignKeyWithName(String fkName) {
-        for(ForeignKey fk:diff.getMissingObjects(ForeignKey.class)) {
-            if(fk.getName().equalsIgnoreCase(fkName))
-                return this;
+        return checkContainsMissingObject(ForeignKey.class, foreignKey -> foreignKey.getName().equalsIgnoreCase(fkName), "Foreign key with name "+fkName+" not found");
+    }
+
+    public <T extends DatabaseObject> DiffResultAssert containsMissingObject(Class<T> type, Predicate<T> condition) {
+        return checkContainsMissingObject(type, condition, type.getSimpleName() + " satisfying condition not found");
+    }
+
+    public DiffResultAssert containsMissingObject(DatabaseObject object) {
+        return checkContainsMissingObject(object.getClass(), object::equals, object + " not found");
+    }
+
+    private <T extends DatabaseObject> DiffResultAssert checkContainsMissingObject(Class<T> type, Predicate<T> condition, String failMessage) {
+        Optional<? extends DatabaseObject> first = diff.getMissingObjects(type).stream()
+            .filter(condition)
+            .findFirst();
+        if (!first.isPresent()) {
+            fail(failMessage);
         }
-        fail("Foreign key with name "+fkName+" not found");
         return this;
     }
 }

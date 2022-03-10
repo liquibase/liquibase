@@ -12,10 +12,23 @@ jobs:
   urlcheck:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Check URLs
-        uses: paramt/url-checker@master
+        uses: urlstechie/urlchecker-action@master
         with:
-          files: "url-test.md"
+          # A comma-separated list of file types to cover in the URL checks
+          include_files: url-test.md
+          # Choose whether to include file with no URLs in the printouts.
+          print_all: false
+          # Choose whether to print a more verbose end summary with files and broken URLs.
+          verbose: true
+          # The timeout seconds to provide to requests, defaults to 5 seconds
+          timeout: 5
+          # How many times to retry a failed request (each is logged, defaults to 1)
+          retry_count: 2
+          # choose if the force pass or not
+          force_pass : false
+
       - name: Slack Notification
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2
