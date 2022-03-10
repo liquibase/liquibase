@@ -34,6 +34,7 @@ import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
+import liquibase.precondition.core.TableExistsPrecondition;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -53,16 +54,19 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
+import static liquibase.test.SnapshotAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeNotNull;
-import static liquibase.test.SnapshotAssert.*;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -87,14 +91,13 @@ public abstract class AbstractIntegrationTest {
     protected String contexts = "test, context-b";
     Set<String> emptySchemas = new TreeSet<>();
     Logger logger;
-    private String rollbackChangeLog;
-    private String includedChangeLog;
-    private String encodingChangeLog;
-    private String externalfkInitChangeLog;
-    private String externalEntityChangeLog;
-    private String externalEntityChangeLog2;
-    private String invalidReferenceChangeLog;
-    private String objectQuotingStrategyChangeLog;
+    private final String rollbackChangeLog;
+    private final String includedChangeLog;
+    private final String encodingChangeLog;
+    private final String externalfkInitChangeLog;
+    private final String invalidReferenceChangeLog;
+    private final String objectQuotingStrategyChangeLog;
+    private final String commonChangeLog;
     private Database database;
     private String defaultSchemaName;
 
@@ -105,9 +108,8 @@ public abstract class AbstractIntegrationTest {
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
         this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";
         this.encodingChangeLog = "changelogs/common/encoding.changelog.xml";
+        this.commonChangeLog = "changelogs/common/common.tests.changelog.xml";
         this.externalfkInitChangeLog= "changelogs/common/externalfk.init.changelog.xml";
-        this.externalEntityChangeLog= "changelogs/common/externalEntity.changelog.xml";
-        this.externalEntityChangeLog2= "com/example/nonIncluded/externalEntity.changelog.xml";
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
         logger = Scope.getCurrentScope().getLog(getClass());
@@ -305,8 +307,8 @@ public abstract class AbstractIntegrationTest {
         // TODO add more object types
         assertThat(snapshot).containsObject(UniqueConstraint.class, constraint ->
             "UQ_UQTEST1".equalsIgnoreCase(constraint.getName())
-                && "CREATETABLENAMEDUQCONST".equalsIgnoreCase(constraint.getRelation().getName())
-                && "ID".equalsIgnoreCase(constraint.getColumns().get(0).getName()));
+            && "CREATETABLENAMEDUQCONST".equalsIgnoreCase(constraint.getRelation().getName())
+            && "ID".equalsIgnoreCase(constraint.getColumns().get(0).getName()));
     }
 
     @Test
@@ -1080,6 +1082,16 @@ public abstract class AbstractIntegrationTest {
             ex.printStackTrace();
             fail("Long clob insertion failed!");
         }
+    }
+
+    @Test
+    public void testTableExistsPreconditionTableNameMatch() throws Exception {
+        assumeNotNull(this.getDatabase());
+        runChangeLogFile(commonChangeLog);
+
+        TableExistsPrecondition precondition = new TableExistsPrecondition();
+        precondition.setTableName("standardTypesTest");
+        precondition.check(this.getDatabase(), null, null, null);
     }
 
     protected Database getDatabase(){
