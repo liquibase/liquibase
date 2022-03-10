@@ -3,9 +3,11 @@ package liquibase.integration.commandline
 
 import liquibase.command.CommandBuilder
 import liquibase.configuration.ConfigurationDefinition
-import picocli.CommandLine
+import liquibase.logging.LogMessageFilter
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import java.util.logging.LogRecord
 
 class LiquibaseCommandLineTest extends Specification {
 
@@ -73,5 +75,21 @@ class LiquibaseCommandLineTest extends Specification {
         then:
         subcommands["update"].commandSpec.findOption("-D") != null
         subcommands["snapshot"].commandSpec.findOption("-D") == null
+    }
+
+    @Unroll
+    def "SecureLogFilter with null log message"() {
+        setup:
+        LogMessageFilter mockFilter = Mock()
+        LogRecord mockLogRecord = Mock()
+        LiquibaseCommandLine.SecureLogFilter secureLogFilter = new LiquibaseCommandLine.SecureLogFilter(mockFilter)
+
+        when:
+        mockFilter.filterMessage(null) >> null
+        mockLogRecord.getMessage() >> null
+        secureLogFilter.isLoggable(mockLogRecord)
+
+        then:
+        noExceptionThrown()
     }
 }

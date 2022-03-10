@@ -11,7 +11,7 @@ public class DefaultLogMessageFilter implements LogMessageFilter {
         if (HubConfiguration.LIQUIBASE_HUB_API_KEY != null) {
             liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
         }
-        if (liquibaseHubApiKey != null) {
+        if (liquibaseHubApiKey != null && message != null) {
             message = message.replace(liquibaseHubApiKey, HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValueObfuscated());
         }
 
