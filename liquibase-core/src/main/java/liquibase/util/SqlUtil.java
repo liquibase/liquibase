@@ -1,5 +1,8 @@
 package liquibase.util;
 
+import static java.util.Locale.US;
+
+import java.util.Locale;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.AbstractDb2Database;
@@ -120,7 +123,7 @@ public abstract class SqlUtil {
         }
 
         String typeName = type.getTypeName();
-        try (Scanner scanner = new Scanner(stringVal.trim())) {
+        try (Scanner scanner = new Scanner(stringVal.trim()).useLocale(US)) {
             if (typeId == Types.ARRAY) {
                 return new DatabaseFunction(stringVal);
             } else if ((liquibaseDataType instanceof BigIntType || typeId == Types.BIGINT)) {

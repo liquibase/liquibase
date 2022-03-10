@@ -62,6 +62,7 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeNotNull;
+import static liquibase.test.SnapshotAssert.*;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -291,6 +292,24 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    public void testSnapshotReportsAllObjectTypes() throws Exception {
+        assumeNotNull(this.getDatabase());
+
+        runCompleteChangeLog();
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl(getDatabase()));
+
+        assertThatSnapshotReportsAllObjectTypes(snapshot);
+    }
+
+    protected void assertThatSnapshotReportsAllObjectTypes(DatabaseSnapshot snapshot) {
+        // TODO add more object types
+        assertThat(snapshot).containsObject(UniqueConstraint.class, constraint ->
+            "UQ_UQTEST1".equalsIgnoreCase(constraint.getName())
+                && "CREATETABLENAMEDUQCONST".equalsIgnoreCase(constraint.getRelation().getName())
+                && "ID".equalsIgnoreCase(constraint.getColumns().get(0).getName()));
+    }
+
+    @Test
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testBatchInsert() throws Exception {
         if (this.getDatabase() == null) {
@@ -302,19 +321,11 @@ public abstract class AbstractIntegrationTest {
         // ChangeLog already contains the verification code
     }
 
-    @Test
-    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
-    public void testRunChangeLog() throws Exception {
-        assumeNotNull(this.getDatabase());
-
-        runCompleteChangeLog();
+    protected Liquibase runCompleteChangeLog() throws Exception {
+        return runChangeLogFile(completeChangeLog);
     }
 
-    protected void runCompleteChangeLog() throws Exception {
-        runChangeLogFile(completeChangeLog);
-    }
-
-    protected void runChangeLogFile(String changeLogFile) throws Exception {
+    protected Liquibase runChangeLogFile(String changeLogFile) throws Exception {
         Liquibase liquibase = createLiquibase(changeLogFile);
         clearDatabase();
 
@@ -328,6 +339,7 @@ public abstract class AbstractIntegrationTest {
             e.printDescriptiveError(System.err);
             throw e;
         }
+        return liquibase;
     }
 
     protected CatalogAndSchema[] getSchemasToDrop() throws DatabaseException {

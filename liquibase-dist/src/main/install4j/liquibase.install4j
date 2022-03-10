@@ -9,7 +9,7 @@
       <variable name="liquibaseVersion" value="0-SNAPSHOT" />
     </variables>
     <codeSigning macEnabled="true" macPkcs12File="../../../target/keys/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../target/keys/datical_windows.pfx" />
-    <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk11/jdk-11.0.12+7" />
+    <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk11/jdk-11.0.14.1+1" />
   </application>
   <files>
     <mountPoints>
