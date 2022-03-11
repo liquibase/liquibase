@@ -19,9 +19,6 @@ liquibase:
 
       test: h2,hsqldb,sqlite
 
-      hub:
-        url: http://localhost:8888
-
       cockroachdb:
         version: latest-v21.2
         imageName: cockroachdb/cockroach
