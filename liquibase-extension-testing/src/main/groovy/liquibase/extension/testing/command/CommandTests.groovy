@@ -300,6 +300,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             catch (Exception e) {
                 savedException = e
                 if (testDef.expectedException == null) {
+                    if (testDef.setup != null) {
+                        for (def setup : testDef.setup) {
+                            setup.cleanup()
+                        }
+                    }
                     throw e
                 } else {
                     assert e.class == testDef.expectedException
@@ -548,7 +553,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                         throw new ComparisonFailure("$outputDescription does not contain expected", expectedOutputCheck, fullOutput)
                     }
                 } else if (expectedOutputCheck instanceof Pattern) {
-                    String patternString = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern()))
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
                     assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"

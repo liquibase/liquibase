@@ -7,4 +7,9 @@ ignore:
         reason: test dependency
         expires: 2022-02-01T00:00:00.000Z
         created: 2021-12-15T16:39:03.089Z
+  SNYK-JAVA-ORGLIQUIBASE-2419059:
+    - '*':
+        reason: ignore liquibase version
+        expires: 2023-03-07T00:00:00.000Z
+        created: 2022-03-07T15:57:03.089Z
 patch: {}

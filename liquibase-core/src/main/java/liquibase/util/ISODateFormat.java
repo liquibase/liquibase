@@ -79,6 +79,15 @@ public class ISODateFormat {
                 return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
             }
         default:
+            if (dateAsString.contains(":") && !dateAsString.contains("-")) {
+                if (dateAsString.contains(".")) {
+                    //cannot handle milliseconds/nanoseconds in java.sql.Time, so throw exception so it's handled as a function
+                    throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
+                } else {
+                    return new java.sql.Time(timeFormat.parse(dateAsString).getTime());
+                }
+            }
+
             if ((length < 19) || (dateAsString.charAt(19) != '.')) {
                 throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
             }
