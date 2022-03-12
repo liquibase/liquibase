@@ -30,6 +30,8 @@ class GenericServletWrapper {
 
     public abstract static class HttpServletResponse {
 
+        public abstract void setStatus(int status);
+
         public abstract void setContentType(String type);
 
         public abstract PrintWriter getWriter() throws IOException;

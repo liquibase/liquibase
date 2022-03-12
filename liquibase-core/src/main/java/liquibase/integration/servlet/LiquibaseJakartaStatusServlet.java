@@ -46,6 +46,11 @@ public class LiquibaseJakartaStatusServlet extends HttpServlet {
         }
 
         @Override
+        public void setStatus(int status) {
+            this.response.setStatus(status);
+        }
+
+        @Override
         public void setContentType(String type) {
             this.response.setContentType(type);
         }
