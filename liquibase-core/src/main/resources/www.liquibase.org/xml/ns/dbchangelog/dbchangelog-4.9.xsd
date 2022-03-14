@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.liquibase.org/xml/ns/pro"
+            xmlns="http://www.liquibase.org/xml/ns/pro"
+            elementFormDefault="qualified">
+    <xsd:element name="createSynonym">
+        <xsd:complexType>
+            <xsd:attribute name="synonymCatalogName" type="xsd:string"/>
+            <xsd:attribute name="synonymSchemaName" type="xsd:string"/>
+            <xsd:attribute name="synonymName" type="xsd:string" use="required"/>
+            <xsd:attribute name="objectCatalogName" type="xsd:string"/>
+            <xsd:attribute name="objectSchemaName" type="xsd:string"/>
+            <xsd:attribute name="objectType" type="xsd:string"/>
+            <xsd:attribute name="objectName" type="xsd:string" use="required"/>
+            <xsd:attribute name="private" type="xsd:boolean"/>
+            <xsd:attribute name="replaceIfExists" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="dropSynonym">
+        <xsd:complexType>
+            <xsd:attribute name="synonymCatalogName" type="xsd:string"/>
+            <xsd:attribute name="synonymSchemaName" type="xsd:string"/>
+            <xsd:attribute name="synonymName" type="xsd:string" use="required"/>
+            <xsd:attribute name="objectType" type="xsd:string"/>
+            <xsd:attribute name="private" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="markUnused">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attribute name="columnName" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="createFunction">
+        <xsd:complexType mixed="true">
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="functionName" type="xsd:string" use="required"/>
+            <xsd:attribute name="dbms" type="xsd:string"/>
+            <xsd:attribute name="path" type="xsd:string"/>
+            <xsd:attribute name="relativeToChangelogFile" type="xsd:boolean"/>
+            <xsd:attribute name="replaceIfExists" type="xsd:boolean"/>
+            <xsd:attribute name="encoding" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="createPackage">
+        <xsd:complexType mixed="true">
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="packageName" type="xsd:string" use="required"/>
+            <xsd:attribute name="dbms" type="xsd:string"/>
+            <xsd:attribute name="path" type="xsd:string"/>
+            <xsd:attribute name="relativeToChangelogFile" type="xsd:boolean"/>
+            <xsd:attribute name="encoding" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="createPackageBody">
+        <xsd:complexType mixed="true">
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="packageBodyName" type="xsd:string" use="required"/>
+            <xsd:attribute name="dbms" type="xsd:string"/>
+            <xsd:attribute name="path" type="xsd:string"/>
+            <xsd:attribute name="relativeToChangelogFile" type="xsd:boolean"/>
+            <xsd:attribute name="encoding" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="createTrigger">
+        <xsd:complexType mixed="true">
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="triggerName" type="xsd:string" use="required"/>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="scope" type="xsd:string"/>
+            <xsd:attribute name="dbms" type="xsd:string"/>
+            <xsd:attribute name="path" type="xsd:string"/>
+            <xsd:attribute name="relativeToChangelogFile" type="xsd:boolean"/>
+            <xsd:attribute name="encoding" type="xsd:string"/>
+            <xsd:attribute name="disabled" type="xsd:boolean"/>
+            <xsd:attribute name="replaceIfExists" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="enableTrigger">
+        <xsd:complexType mixed="true">
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="scope" type="xsd:string"/>
+            <xsd:attribute name="triggerName" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="renameTrigger">
+        <xsd:complexType mixed="true">
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="oldTriggerName" type="xsd:string" use="required"/>
+            <xsd:attribute name="newTriggerName" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="addCheckConstraint">
+        <xsd:complexType mixed="true">
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attribute name="constraintName" type="xsd:string" use="required"/>
+            <xsd:attribute name="disabled" type="xsd:boolean"/>
+            <xsd:attribute name="validate" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="enableCheckConstraint">
+        <xsd:complexType mixed="true">
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attribute name="constraintName" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="disableCheckConstraint">
+        <xsd:complexType mixed="true">
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attribute name="constraintName" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropFunction">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="functionName" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropPackage">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="packageName" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropPackageBody">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="packageBodyName" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropTrigger">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="triggerName" type="xsd:string" use="required"/>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="scope" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="disableTrigger">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="triggerName" type="xsd:string" use="required"/>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="scope" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropCheckConstraint">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attribute name="constraintName" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>
