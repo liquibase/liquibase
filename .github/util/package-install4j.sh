@@ -32,7 +32,7 @@ else
   sudo apt install -y $INSTALL4J_CACHE/install4j_linux_8_0_11.deb
 fi
 
-INSTALL4J_ARGS="$INSTALL4J_ARGS --release=$version -D liquibaseVersion=$version"
+INSTALL4J_ARGS="$INSTALL4J_ARGS --release=$version -D liquibaseVersion=$version -D install4j.logToStderr=true"
 
 if [ ! -e target/keys ]; then
   echo "WARNING: not signing installer because target/keys directory does not exist."
