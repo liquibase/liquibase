@@ -12,6 +12,20 @@ import java.util.Arrays;
 @DataTypeInfo(name="varchar", aliases = {"java.sql.Types.VARCHAR", "java.lang.String", "varchar2", "character varying"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class VarcharType extends CharType {
 
+    /**
+     * While surprising, Postgres allows varchar columns to be autoincrement.
+     */
+    private boolean autoIncrement;
+
+    @Override
+    public boolean isAutoIncrement() {
+        return autoIncrement;
+    }
+
+    public void setAutoIncrement(boolean autoIncrement) {
+        this.autoIncrement = autoIncrement;
+    }
+
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if ((database instanceof OracleDatabase) || ((database instanceof HsqlDatabase) && ((HsqlDatabase) database)
