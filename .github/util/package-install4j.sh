@@ -23,7 +23,7 @@ mkdir -p ~/.install4j8
 export INSTALL4J_CACHE=$HOME/.install4j8
 
 # install4jc="/usr/local/bin/install4jc"
-install4jc="/Applications/install4j.app/Contents/Resources/app/bininstall4jc"
+install4jc="/Applications/install4j.app/Contents/Resources/app/bin/install4jc"
 
 if [ -f "$install4jc" ]; then
     echo "$install4jc already exists"
