@@ -25,7 +25,7 @@ The PR fixes issue #2298.
 - [PR#2434] [Balázs Dési] Added the Maven `validate` goal to `maven-liquibase-plugin` to provide access to the existing Liquibase `validate` command and be available not only in CLI, but also in Maven
 - Added the ability to use `sqlcmd` on an instance with multiple databases
 For more information, see the Using the SQLCMD integration and runWith attribute with Liquibase Pro and MSSQL Server documentation.
-- Added support for Liquibase, Spring Boot, and native executors (SQL Plus and sqlcmd) run with Kerberos
+- Added support for Liquibase, Spring Boot, and SQL Plus run with Kerberos
 - [PR#2561] [Wesley Willard] Added the `--schemas` argument to the `snapshot` command to be able to compare a multi-schema database to its snapshot
 - [PR#2606] [Wesley Willard] Added a best practice message for the `generate-changelog` command so that you can check if the `splitStatements` attribute works for your environment when generating formatted SQL changelogs [DAT-9327]
 - Added the `StripComments` attribute for the `SQLUserDefinedPatternCheck` quality check to choose the code that the `SQLUserDefinedPatternCheck` searches, including the option for the commented code. The `StripComments` attribute strips comments from SQL before searching for the string. The default value is `N` (no). [DAT-9098]
