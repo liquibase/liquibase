@@ -1,4 +1,4 @@
-name: Create Draft Release
+name: Version Build To Draft Release
 on:
   workflow_dispatch:
     inputs:
@@ -100,7 +100,7 @@ jobs:
           (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
-      - name: Create Draft Release
+      - name: Attach Files to Draft Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.setup.outputs.version }}
