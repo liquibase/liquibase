@@ -36,7 +36,7 @@ else
 
   # installer automation for macos-latest
   wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download-gcdn.ej-technologies.com/install4j/install4j_macos_9_0_6.dmg
-  VOLUME=`hdiutil attach $1 | grep Volumes | awk '{print $3}'`
+  VOLUME=`hdiutil attach install4j_macos_9_0_6.dmg | grep Volumes | awk '{print $3}'`
   cp -rf $VOLUME/*.app /Applications
   hdiutil detach $VOLUME
 
