@@ -36,8 +36,11 @@ else
 
   # installer automation for macos-latest; macos needed for apple notarizing
   wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download-gcdn.ej-technologies.com/install4j/install4j_macos_9_0_6.dmg
+  sleep 5
   VOLUME=`hdiutil attach /Users/runner/.install4j8/install4j_macos_9_0_6.dmg | grep Volumes | awk '{print $3}'`
+  sleep 5
   cp -rf $VOLUME/*.app /Applications
+  sleep 5
   hdiutil detach $VOLUME
 
 fi
