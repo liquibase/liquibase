@@ -34,7 +34,7 @@ else
   # wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download-gcdn.ej-technologies.com/install4j/install4j_linux_8_0_11.deb
   # sudo apt install -y $INSTALL4J_CACHE/install4j_linux_8_0_11.deb
 
-  # installer automation for macos-latest
+  # installer automation for macos-latest; macos needed for apple notarizing
   wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download-gcdn.ej-technologies.com/install4j/install4j_macos_9_0_6.dmg
   VOLUME=`hdiutil attach /Users/runner/.install4j8/install4j_macos_9_0_6.dmg | grep Volumes | awk '{print $3}'`
   cp -rf $VOLUME/*.app /Applications
