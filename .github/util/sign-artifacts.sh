@@ -31,11 +31,11 @@ do
     rm -f $i.sha1
 
     gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i
-    # replace the linux hash tools with the ones from macos-latest
-    # md5sum < $i > $i.md5
-    # sha1sum < $i > $i.sha1
-    md5 -r < $i > $i.md5
-    shasum < $i > $i.sha1
+    # install md5sum and sha1sum on macos-latest
+    brew install md5sha1sum
+    sleep 5
+    md5sum < $i > $i.md5
+    sha1sum < $i > $i.sha1
   done
 done
 
