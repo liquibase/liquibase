@@ -31,8 +31,11 @@ do
     rm -f $i.sha1
 
     gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i
-    md5sum < $i > $i.md5
-    sha1sum < $i > $i.sha1
+    # replace the linux hash tools with the ones from macos-latest
+    # md5sum < $i > $i.md5
+    # sha1sum < $i > $i.sha1
+    md5 -r < $i > $i.md5
+    shasum < $i > $i.sha1
   done
 done
 
