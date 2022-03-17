@@ -39,7 +39,11 @@ do
   done
 done
 
-##Fix files
-sed -i 's/ -//' $archiveDir/*.md5
-sed -i 's/ -//' $archiveDir/*.sha1
+##Fix files with Gnu-sed on macos-latest
+brew install gnu-sed
+gsed -i 's/ -//' $archiveDir/*.md5
+gsed -i 's/ -//' $archiveDir/*.sha1
+
+# sed -i 's/ -//' $archiveDir/*.md5
+# sed -i 's/ -//' $archiveDir/*.sha1
 
