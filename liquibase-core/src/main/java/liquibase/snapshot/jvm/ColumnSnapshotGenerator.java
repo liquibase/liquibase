@@ -23,10 +23,7 @@ import liquibase.util.SqlUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -671,7 +668,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (database instanceof PostgresDatabase) {
-            if (columnInfo.isAutoIncrement()) {
+            List<String> validAutoIncrementColumnTypeNames = Arrays.asList("smallint", "int", "bigint", "smallserial", "serial", "bigserial");
+            if (columnInfo.isAutoIncrement() && validAutoIncrementColumnTypeNames.stream().anyMatch(typeName -> typeName.equalsIgnoreCase(columnInfo.getType().getTypeName()))) {
                 columnMetadataResultSet.set(COLUMN_DEF_COL, null);
             }
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
