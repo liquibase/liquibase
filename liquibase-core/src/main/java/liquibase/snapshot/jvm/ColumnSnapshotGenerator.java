@@ -257,6 +257,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             }
         }
+        // It is possible to make a column in Postgres that is varchar and reported as auto-increment. In this case,
+        // we'd rather just preserve the default value, so we remove the auto-increment information.
+        if (column.getAutoIncrementInformation() != null &&
+                database instanceof PostgresDatabase &&
+                column.getType().getTypeName().equalsIgnoreCase("varchar")) {
+            column.setAutoIncrementInformation(null);
+        }
     }
 
     protected Column readColumn(CachedRow columnMetadataResultSet, Relation table, Database database)
