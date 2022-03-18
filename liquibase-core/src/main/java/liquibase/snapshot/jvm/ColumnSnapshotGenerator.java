@@ -254,13 +254,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             }
         }
-        // It is possible to make a column in Postgres that is varchar and reported as auto-increment. In this case,
-        // we'd rather just preserve the default value, so we remove the auto-increment information.
-        if (column.getAutoIncrementInformation() != null &&
-                database instanceof PostgresDatabase &&
-                column.getType().getTypeName().equalsIgnoreCase("varchar")) {
-            column.setAutoIncrementInformation(null);
-        }
     }
 
     protected Column readColumn(CachedRow columnMetadataResultSet, Relation table, Database database)
@@ -315,6 +308,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
+        DataType type = readDataType(columnMetadataResultSet, column, database);
+        column.setType(type);
+
         if (database.supportsAutoIncrement()) {
             if (table instanceof Table) {
                 if (database instanceof OracleDatabase) {
@@ -348,6 +344,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                             column.setAutoIncrementInformation(null);
                         } else {
                             throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
+                        }
+                        // It is possible to make a column in Postgres that is varchar (for example) and reported as auto-increment. In this case,
+                        // we'd rather just preserve the default value, so we remove the auto-increment information since that doesn't really make any sense.
+                        if (column.getAutoIncrementInformation() != null &&
+                                database instanceof PostgresDatabase &&
+                                PostgresDatabase.VALID_AUTO_INCREMENT_COLUMN_TYPE_NAMES.stream().noneMatch(typeName -> typeName.equalsIgnoreCase(column.getType().getTypeName()))) {
+                            column.setAutoIncrementInformation(null);
                         }
                     } else {
                         //probably older version of java, need to select from the column to find out if it is auto-increment
@@ -391,9 +394,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             }
         }
-
-        DataType type = readDataType(columnMetadataResultSet, column, database);
-        column.setType(type);
 
         Object defaultValue = readDefaultValue(columnMetadataResultSet, column, database);
 
@@ -668,8 +668,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (database instanceof PostgresDatabase) {
-            List<String> validAutoIncrementColumnTypeNames = Arrays.asList("smallint", "int", "bigint", "smallserial", "serial", "bigserial");
-            if (columnInfo.isAutoIncrement() && validAutoIncrementColumnTypeNames.stream().anyMatch(typeName -> typeName.equalsIgnoreCase(columnInfo.getType().getTypeName()))) {
+            if (columnInfo.isAutoIncrement()) {
                 columnMetadataResultSet.set(COLUMN_DEF_COL, null);
             }
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
