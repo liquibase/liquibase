@@ -44,7 +44,7 @@ public class LicenseServiceUtils {
     if (licenseService == null) {
       return false;
     }
-    return licenseService.licenseIsValid("Liquibase Pro");
+    return licenseService.licenseIsValid(LicenseTier.PRO.getSubject());
   }
 
 }
