@@ -3,13 +3,18 @@ package liquibase.changelog;
 import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.Labels;
+import liquibase.Scope;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.parser.ChangeLogParserConfiguration;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import java.util.Collections;
+
+import static org.junit.Assert.*;
 
 
 public class ChangeLogParametersTest {
@@ -260,5 +265,28 @@ public class ChangeLogParametersTest {
         assertEquals("should return local value of changeSet", "bValue", changeLogParameters.getValue("aKey", include_of_include_of_table_1));
         assertEquals("should return local value of closest ancestor changeSet (here the direct parent)", "aValue", changeLogParameters.getValue("aKey", include_of_table_1));
         assertEquals("should return local value of changeSet", "aValue", changeLogParameters.getValue("aKey", table_1));
+    }
+
+    @Test
+    public void expandExpressions_MissingParameterThrow() throws Exception {
+        Scope.child(Collections.singletonMap(ChangeLogParserConfiguration.MISSING_PROPERTY_MODE.getKey(), ChangeLogParserConfiguration.MissingPropertyMode.THROW), () -> {
+            ChangeLogParameters changeLogParameters = new ChangeLogParameters(new MySQLDatabase());
+            DatabaseChangeLog changeLog = new DatabaseChangeLog("db_changelog.yml");
+            changeLogParameters.set("bytesarray_type", "BYTEA", new ContextExpression(), new Labels(), "postgresql", false, changeLog);
+            changeLogParameters.set("bytesarray_type", "java.sql.Types.BLOB", new ContextExpression(), new Labels(), "hana", false, changeLog);
+            RuntimeException exception = assertThrows(UnexpectedLiquibaseException.class, () -> changeLogParameters.expandExpressions("${bytesarray_type}", changeLog));
+            assertTrue(exception.getMessage().contains("Could not resolve property"));
+        });
+    }
+
+    @Test
+    public void expandExpressions_MissingParameterEmpty() throws Exception {
+        Scope.child(Collections.singletonMap(ChangeLogParserConfiguration.MISSING_PROPERTY_MODE.getKey(), ChangeLogParserConfiguration.MissingPropertyMode.EMPTY), () -> {
+            ChangeLogParameters changeLogParameters = new ChangeLogParameters(new MySQLDatabase());
+            DatabaseChangeLog changeLog = new DatabaseChangeLog("db_changelog.yml");
+            changeLogParameters.set("bytesarray_type", "BYTEA", new ContextExpression(), new Labels(), "postgresql", false, changeLog);
+            changeLogParameters.set("bytesarray_type", "java.sql.Types.BLOB", new ContextExpression(), new Labels(), "hana", false, changeLog);
+            assertEquals("1234", changeLogParameters.expandExpressions("12${bytesarray_type}34", changeLog));
+        });
     }
 }
