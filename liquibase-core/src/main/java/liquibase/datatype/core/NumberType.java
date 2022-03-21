@@ -6,6 +6,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.GlobalConfiguration;
 
 import java.util.Arrays;
 
@@ -47,7 +48,11 @@ public class NumberType extends LiquibaseDataType {
                 return new DatabaseDataType("NUMBER", getParameters());
             }
         } else if (database instanceof PostgresDatabase) {
-            if ((getParameters().length > 0) && (Integer.parseInt(getParameters()[0].toString()) > 1000)) {
+            if (GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue()){
+                if ((getParameters().length > 1) && "1".equals(getParameters()[0]) && "0".equals(getParameters()[1])) {
+                    return new DatabaseDataType("BOOLEAN");
+                }
+            } else if ((getParameters().length > 0) && (Integer.parseInt(getParameters()[0].toString()) > 1000)) {
                 return new DatabaseDataType("numeric");
             }
             return new DatabaseDataType("numeric", getParameters());
