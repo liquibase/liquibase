@@ -31,7 +31,7 @@ jobs:
   draft-release:
     needs: [ setup ]
     name: Draft Release ${{ needs.setup.outputs.version }}
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
 
