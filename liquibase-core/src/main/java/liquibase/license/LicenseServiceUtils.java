@@ -40,7 +40,12 @@ public class LicenseServiceUtils {
    * @return true if licensed, false if not
    */
   public static boolean isProLicenseValid() {
-    LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+    LicenseServiceFactory licenseServiceFactory = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class);
+    if (licenseServiceFactory == null) {
+      return false;
+    }
+
+    LicenseService licenseService = licenseServiceFactory.getLicenseService();
     if (licenseService == null) {
       return false;
     }
