@@ -13,13 +13,13 @@ import liquibase.exception.ValidationErrors;
  */
 public class LicenseServiceUtils {
 
-    public static ValidationErrors checkForValidLicense(String licenseType, Change change) {
+    public static ValidationErrors checkForValidLicense(LicenseTier licenseType, Change change) {
       LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
       if (licenseService == null) {
         return new ValidationErrors();
       }
-      if (licenseService.licenseIsValid(licenseType)) {
-        String message = String.format("Found valid license with subject '%s' for '%s'",licenseType, change.getDescription());
+      if (licenseService.licenseIsValid(licenseType.getSubject())) {
+        String message = String.format("Found valid license with subject '%s' for '%s'",licenseType.getSubject(), change.getDescription());
         Scope.getCurrentScope().getLog(LicenseService.class).fine(message);
         return new ValidationErrors();
       }
