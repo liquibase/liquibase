@@ -5,7 +5,6 @@ liquibase.extension.testing.testsystem.core.DerbyTestSystem
 liquibase.extension.testing.testsystem.core.FirebirdTestSystem
 liquibase.extension.testing.testsystem.core.H2TestSystem
 liquibase.extension.testing.testsystem.core.HsqlTestSystem
-liquibase.extension.testing.testsystem.core.HubTestSystem
 liquibase.extension.testing.testsystem.core.InformixTestSystem
 liquibase.extension.testing.testsystem.core.MariaDBTestSystem
 liquibase.extension.testing.testsystem.core.MSSQLTestSystem

@@ -31,12 +31,19 @@ do
     rm -f $i.sha1
 
     gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i
+    # install md5sum and sha1sum on macos-latest
+    brew install md5sha1sum
+    sleep 5
     md5sum < $i > $i.md5
     sha1sum < $i > $i.sha1
   done
 done
 
-##Fix files
-sed -i 's/ -//' $archiveDir/*.md5
-sed -i 's/ -//' $archiveDir/*.sha1
+##Fix files with Gnu-sed on macos-latest
+brew install gnu-sed
+gsed -i 's/ -//' $archiveDir/*.md5
+gsed -i 's/ -//' $archiveDir/*.sha1
+
+# sed -i 's/ -//' $archiveDir/*.md5
+# sed -i 's/ -//' $archiveDir/*.sha1
 
