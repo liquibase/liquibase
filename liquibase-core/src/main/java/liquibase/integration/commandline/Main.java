@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.CommandFailedException;
 import liquibase.command.CommandResults;
+import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
 import liquibase.configuration.ConfiguredValue;
@@ -1642,7 +1643,12 @@ public class Main {
                         .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
 
                 Writer outputWriter = getOutputWriter();
-                String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute());
+                CommandResults commandResults = snapshotCommand.execute();
+                if (Scope.getCurrentScope().has("parentResultsBuilder")) {
+                    CommandResultsBuilder parentResultsBuilder = Scope.getCurrentScope().get("parentResultsBuilder", CommandResultsBuilder.class);
+                    parentResultsBuilder.addResult("snapshot", commandResults.getResult("snapshot"));
+                }
+                String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, commandResults);
                 outputWriter.write(result);
                 outputWriter.flush();
                 return;

@@ -131,12 +131,20 @@ public class CommandScope {
         return this;
     }
 
+    public CommandResultsBuilder createResultsBuilder() {
+        CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
+        return resultsBuilder;
+    }
+
     /**
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
+        return executeWithResultsBuilder(resultsBuilder);
+    }
 
+    public CommandResults executeWithResultsBuilder(CommandResultsBuilder resultsBuilder ) throws CommandExecutionException {
         for (ConfigurationValueProvider provider : Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getProviders()) {
             provider.validate(this);
         }
