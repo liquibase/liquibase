@@ -20,7 +20,7 @@ fi
 # since we're switching to a macos-latest runner we'll need gnu-sed and greadlink
 brew install gnu-sed
 brew install coreutils
-brew install util-linux
+brew install rename
 
 workdir=$(greadlink -m $1)
 version=$2
@@ -66,7 +66,7 @@ do
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
   cp $workdir/$jar $outdir
-  rename.ul 0-SNAPSHOT $version $outdir/$jar
+  rename 0-SNAPSHOT $version $outdir/$jar
 done
 
 #### Update  javadoc jars
@@ -84,7 +84,7 @@ do
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
-  rename.ul 0-SNAPSHOT $version $outdir/$jar
+  rename 0-SNAPSHOT $version $outdir/$jar
 done
 
 ## Test jar structure
