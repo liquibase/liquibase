@@ -17,7 +17,7 @@ if [ -z ${2+x} ]; then
   exit 1;
 fi
 
-workdir=$(readlink -m $1)
+workdir=$(readlink $1)
 version=$2
 scriptDir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
