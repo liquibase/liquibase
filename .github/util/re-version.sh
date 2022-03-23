@@ -20,6 +20,7 @@ fi
 # since we're switching to a macos-latest runner we'll need gnu-sed and greadlink
 brew install gnu-sed
 brew install coreutils
+brew install util-linux
 
 workdir=$(greadlink -m $1)
 version=$2
