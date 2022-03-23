@@ -1642,15 +1642,21 @@ public class Main {
                         .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
                         .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
 
+                //
+                // If we find a ResultsBuilder in the current scope then
+                // we will add the snapshot object to it
+                // otherwise, we will print the output
+                //
                 Writer outputWriter = getOutputWriter();
                 CommandResults commandResults = snapshotCommand.execute();
-                if (Scope.getCurrentScope().has("parentResultsBuilder")) {
-                    CommandResultsBuilder parentResultsBuilder = Scope.getCurrentScope().get("parentResultsBuilder", CommandResultsBuilder.class);
-                    parentResultsBuilder.addResult("snapshot", commandResults.getResult("snapshot"));
+                if (Scope.getCurrentScope().has(SnapshotCommandStep.SNAPSHOT_RESULTS_BUILDER)) {
+                    CommandResultsBuilder snapshotResultsBuilder = Scope.getCurrentScope().get(SnapshotCommandStep.SNAPSHOT_RESULTS_BUILDER, CommandResultsBuilder.class);
+                    snapshotResultsBuilder.addResult("snapshot", commandResults.getResult("snapshot"));
+                } else {
+                    String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, commandResults);
+                    outputWriter.write(result);
+                    outputWriter.flush();
                 }
-                String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, commandResults);
-                outputWriter.write(result);
-                outputWriter.flush();
                 return;
             } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
                 CommandScope executeSqlCommand = new CommandScope("internalExecuteSql")

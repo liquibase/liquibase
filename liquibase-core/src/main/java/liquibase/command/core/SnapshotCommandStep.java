@@ -44,6 +44,8 @@ public class SnapshotCommandStep extends AbstractCliWrapperCommandStep {
                 .description("Output format to use (JSON or YAML").build();
     }
 
+    public static final String SNAPSHOT_RESULTS_BUILDER = "snapshotResultsBuilder";
+
     @Override
     public String[][] defineCommandNames() {
         return new String[][] { COMMAND_NAME };
