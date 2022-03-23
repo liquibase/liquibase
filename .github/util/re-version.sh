@@ -17,14 +17,16 @@ if [ -z ${2+x} ]; then
   exit 1;
 fi
 
-workdir=$(readlink $1)
+# since we're switching to a macos-latest runner we'll need gnu-sed and greadlink
+brew install gnu-sed
+brew install coreutils
+
+workdir=$(greadlink -m $1)
 version=$2
 scriptDir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 outdir=$(pwd)/re-version/out
 
-# since we're switching to a macos-latest runner we'll need gnu-sed
-brew install gnu-sed
 rm -rf outdir
 mkdir -p $outdir
 
