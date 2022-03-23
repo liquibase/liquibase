@@ -23,6 +23,8 @@ scriptDir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 outdir=$(pwd)/re-version/out
 
+# since we're switching to a macos-latest runner we'll need gnu-sed
+brew install gnu-sed
 rm -rf outdir
 mkdir -p $outdir
 
@@ -37,16 +39,16 @@ do
   unzip -q $workdir/$jar META-INF/* -d $workdir
 
   java -cp $scriptDir ManifestReversion $workdir/META-INF/MANIFEST.MF $version
-  find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
-  find $workdir/META-INF -name pom.properties -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
-  find $workdir/META-INF -name plugin*.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
+  find $workdir/META-INF -name pom.xml -exec gsed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
+  find $workdir/META-INF -name pom.properties -exec gsed -i -e "s/0-SNAPSHOT/$version/" {} \;
+  find $workdir/META-INF -name plugin*.xml -exec gsed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
   (cd $workdir && jar -uMf $jar META-INF)
   rm -rf $workdir/META-INF
 
   ## Fix up liquibase.build.properties
   if [ $jar == "liquibase-0-SNAPSHOT.jar" ]; then
     unzip -q $workdir/$jar liquibase.build.properties -d $workdir
-    sed -i -e "s/build.version=.*/build.version=$version/" $workdir/liquibase.build.properties
+    gsed -i -e "s/build.version=.*/build.version=$version/" $workdir/liquibase.build.properties
     (cd $workdir && jar -uf $jar liquibase.build.properties)
     rm "$workdir/liquibase.build.properties"
 
@@ -65,8 +67,8 @@ do
   mkdir $workdir/rebuild
   unzip -q $workdir/$jar -d $workdir/rebuild
 
-  find $workdir/rebuild -name "*.html" -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
-  find $workdir/rebuild -name "*.xml" -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
+  find $workdir/rebuild -name "*.html" -exec gsed -i -e "s/0-SNAPSHOT/$version/" {} \;
+  find $workdir/rebuild -name "*.xml" -exec gsed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
 
   (cd $workdir/rebuild && jar -uf ../$jar *)
   rm -rf $workdir/rebuild
@@ -102,7 +104,7 @@ cp $outdir/liquibase-$version.jar $workdir/liquibase.jar ##save versioned jar as
 mkdir $workdir/tgz-repackage
 (cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-0-SNAPSHOT.tar.gz)
 cp $workdir/liquibase.jar $workdir/tgz-repackage/liquibase.jar
-find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
+find $workdir/tgz-repackage -name "*.txt" -exec gsed -i -e "s/0-SNAPSHOT/$version/" {} \;
 (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
 (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
 
