@@ -66,7 +66,7 @@ do
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
   cp $workdir/$jar $outdir
-  rename -n "s/0-SNAPSHOT/$version/" $outdir/$jar
+  rename "s/0-SNAPSHOT/$version/" $outdir/$jar
 
   echo "checking after rename: $outdir/$jar"
   ls -l $outdir
@@ -90,7 +90,7 @@ do
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
-  rename -n "s/0-SNAPSHOT/$version/" $outdir/$jar
+  rename "s/0-SNAPSHOT/$version/" $outdir/$jar
 done
 
 ## Test jar structure
