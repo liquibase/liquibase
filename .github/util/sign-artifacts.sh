@@ -21,6 +21,12 @@ fi
 
 declare -a file_patterns=("*.jar" "*-installer-*" "*.zip" "*.tar.gz")
 
+# install md5sum and sha1sum on macos-latest
+brew install md5sha1sum
+
+##Fix files with Gnu-sed on macos-latest
+brew install gnu-sed
+
 for file_pattern in "${file_patterns[@]}"
 do
   echo "Searching for $file_pattern files..."
@@ -31,16 +37,12 @@ do
     rm -f $i.sha1
 
     gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i
-    # install md5sum and sha1sum on macos-latest
-    brew install md5sha1sum
     sleep 5
     md5sum < $i > $i.md5
     sha1sum < $i > $i.sha1
   done
 done
 
-##Fix files with Gnu-sed on macos-latest
-brew install gnu-sed
 gsed -i 's/ -//' $archiveDir/*.md5
 gsed -i 's/ -//' $archiveDir/*.sha1
 
