@@ -62,7 +62,7 @@ public class CommandResultsBuilder {
     /**
      * Collects the results and flushes the output stream.
      */
-    CommandResults build() {
+    public CommandResults build() {
         try {
             outputStream.flush();
         } catch (Exception e) {
