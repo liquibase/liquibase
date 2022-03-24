@@ -1,4 +1,4 @@
-name: Version Build To Draft Release
+name: Attach Artifacts To Draft Release
 on:
   workflow_dispatch:
     inputs:
