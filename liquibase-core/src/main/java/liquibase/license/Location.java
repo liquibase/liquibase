@@ -14,12 +14,10 @@ package liquibase.license;
 public class Location {
 
   public String name;
-  public LocationType type;
   public String value;
 
-  public Location(String name, LocationType type, String value) {
+  public Location(String name, String value) {
     this.name = name;
-    this.type = type;
     this.value = value;
   }
 
@@ -27,69 +25,26 @@ public class Location {
    * Only use this constructor for things where the name and the value are the same
    * 
    * @param value
-   * @param type
    */
-  public Location(String value, LocationType type) {
-    this(value, type, value);
+  public Location(String value) {
+    this(value, value);
   }
 
   @Override
   public String toString() {
-    switch (type) {
-    case ENVIRONMENT_VARIABLE:
-      return String.format("Environment variable '%s' (%s)", name, getPath());
-
-    case FILE_PATH:
-      return String.format("File path '%s' (%s)", value, name);
-
-    case SYSTEM_PROPERTY:
-      return String.format("System property '%s' (%s)", value, name);
-
-      case BASE64_STRING:
-        int substring_length = 10;
-        if (value.length() < 10) {
-          substring_length = value.length();
-        }
-        return String.format("Base64 string starting with '%s' (%s)", value.substring(0,substring_length), name);
+    int substring_length = 10;
+    if (value.length() < 10) {
+      substring_length = value.length();
     }
-    return String.format("%s %s %s", type, name, value);
+    return String.format("Base64 string starting with '%s' (%s)", value.substring(0,substring_length), name);
   }
 
   public String toDisplayString() {
-    switch (type) {
-    case ENVIRONMENT_VARIABLE:
-      return String.format("(%s)", name);
-
-    case FILE_PATH:
-      return String.format("(%s)", name);
-
-    case SYSTEM_PROPERTY:
-      return String.format("(%s)", name);
-
-    case BASE64_STRING:
-      return String.format("(%s)", name);
-    }
-    return String.format("%s %s %s", type, name, value);
+    return String.format("(%s)", name);
   }
 
   public String getPath() {
-    String path = null;
-    switch (this.type) {
-    case ENVIRONMENT_VARIABLE:
-      path = System.getenv(this.value);
-      break;
-    case FILE_PATH:
-      path = this.value;
-      break;
-    case SYSTEM_PROPERTY:
-      path = System.getProperty(this.value);
-      break;
-    case BASE64_STRING:
-      path = this.value;
-      break;
-    default:
-      throw new RuntimeException("Unknown location type");
-    }
+    String path = this.value;
     if (path != null && path.startsWith("file:")){
       path = path.substring(5);
     }

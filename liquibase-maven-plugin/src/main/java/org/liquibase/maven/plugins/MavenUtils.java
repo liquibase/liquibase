@@ -107,7 +107,7 @@ public class MavenUtils {
             hasProLicense = false;
         } else {
             Location licenseKeyLocation =
-                    new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, liquibaseProLicenseKey);
+                    new Location("property liquibaseProLicenseKey", liquibaseProLicenseKey);
             LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
             if (result.code != 0) {
                 String allMessages = String.join("\n", result.messages);
