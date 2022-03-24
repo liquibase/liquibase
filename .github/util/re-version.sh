@@ -67,13 +67,7 @@ do
 
   cp $workdir/$jar $outdir
   rename "s/0-SNAPSHOT/$version/" $outdir/$jar
-
-  echo "checking after rename: $outdir/$jar"
-  ls -l $outdir
 done
-
-echo "checking $outdir"
-ls -l $outdir
 
 #### Update  javadoc jars
 declare -a javadocJars=("liquibase-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar")
@@ -127,9 +121,6 @@ do
   rm -rf $workdir/test
 done
 
-
-echo "checking $outdir"
-ls -l $outdir
 
 ##### update zip/tar files
 cp $outdir/liquibase-$version.jar $workdir/liquibase.jar ##save versioned jar as unversioned to include in zip/tar
