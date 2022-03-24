@@ -21,11 +21,13 @@ fi
 
 declare -a file_patterns=("*.jar" "*-installer-*" "*.zip" "*.tar.gz")
 
-# install md5sum and sha1sum on macos-latest
-brew install md5sha1sum
+if [[ "$OSTYPE" != "linux-gnu"* ]]; then
+  # install md5sum and sha1sum on macos-latest
+  brew install md5sha1sum
 
-##Fix files with Gnu-sed on macos-latest
-brew install gnu-sed
+  ##Fix files with Gnu-sed on macos-latest
+  brew install gnu-sed
+fi
 
 for file_pattern in "${file_patterns[@]}"
 do
@@ -43,8 +45,13 @@ do
   done
 done
 
-gsed -i 's/ -//' $archiveDir/*.md5
-gsed -i 's/ -//' $archiveDir/*.sha1
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  sed -i 's/ -//' $archiveDir/*.md5
+  sed -i 's/ -//' $archiveDir/*.sha1
+else
+  gsed -i 's/ -//' $archiveDir/*.md5
+  gsed -i 's/ -//' $archiveDir/*.sha1
+fi
 
 # sed -i 's/ -//' $archiveDir/*.md5
 # sed -i 's/ -//' $archiveDir/*.sha1
