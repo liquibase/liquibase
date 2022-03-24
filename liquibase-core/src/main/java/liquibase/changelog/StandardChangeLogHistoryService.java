@@ -116,7 +116,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         boolean changeLogCreateAttempted = false;
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        if (changeLogTable != null) {
+        if (changeLogTable != null && hasDatabaseChangeLogTable) {
             boolean hasDescription = changeLogTable.getColumn("DESCRIPTION") != null;
             boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
             boolean hasTag = changeLogTable.getColumn("TAG") != null;
