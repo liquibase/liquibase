@@ -121,6 +121,9 @@ do
   rm -rf $workdir/test
 done
 
+## having coreutils below causes `Cannot install md5sha1sum because conflicting formulae are installed. coreutils: because both install `md5sum` and `sha1sum` binaries` from the package-install4j.sh script
+brew unlink coreutils
+
 
 ##### update zip/tar files
 cp $outdir/liquibase-$version.jar $workdir/liquibase.jar ##save versioned jar as unversioned to include in zip/tar
