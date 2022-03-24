@@ -123,6 +123,11 @@ public class SnapshotCommandStep extends AbstractCommandStep {
         if (databaseClass != null) {
             databaseClassName = databaseClass.getCanonicalName();
         }
+        String propertyProviderClass = null;
+        Class clazz = LiquibaseCommandLineConfiguration.PROPERTY_PROVIDER_CLASS.getCurrentValue();
+        if (clazz != null) {
+            propertyProviderClass = clazz.getName();
+        }
         String liquibaseCatalogName = GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue();
         String liquibaseSchemaName = GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue();
         String databaseChangeLogTablespaceName = GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentValue();
@@ -133,7 +138,7 @@ public class SnapshotCommandStep extends AbstractCommandStep {
                                                   false, false,
                                                   databaseClassName,
                                                   driverPropertiesFile,
-                                                  null,
+                                                  propertyProviderClass,
                                                   liquibaseCatalogName, liquibaseSchemaName,
                                                   null,
                                                   null);
