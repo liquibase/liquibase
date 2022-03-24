@@ -15,7 +15,7 @@ public class LicenseServiceUtils {
 
   /**
    * Check for a Liquibase Pro License.
-   * @return true if licensed, false if not
+   * @return true if licensed, or the installed license also permits access to Liquibase Pro features, false if not
    */
   public static boolean isProLicenseValid() {
     LicenseServiceFactory licenseServiceFactory = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class);
