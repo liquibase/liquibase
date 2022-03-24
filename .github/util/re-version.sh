@@ -66,7 +66,7 @@ do
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
   cp $workdir/$jar $outdir
-  rename -n "s/0-SNAPSHOT/$version/" $outdir/$jar
+  rename "s/0-SNAPSHOT/$version/" $outdir/$jar
 done
 
 #### Update  javadoc jars
@@ -84,7 +84,7 @@ do
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
-  rename -n "s/0-SNAPSHOT/$version/" $outdir/$jar
+  rename "s/0-SNAPSHOT/$version/" $outdir/$jar
 done
 
 ## Test jar structure
@@ -120,6 +120,9 @@ do
 
   rm -rf $workdir/test
 done
+
+## having coreutils below causes `Cannot install md5sha1sum because conflicting formulae are installed. coreutils: because both install `md5sum` and `sha1sum` binaries` from the package-install4j.sh script
+brew unlink coreutils
 
 
 ##### update zip/tar files
