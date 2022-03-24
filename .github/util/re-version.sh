@@ -103,7 +103,7 @@ do
   ##Jars need MANIFEST.MF first in the file
   if jar -tf $file | grep "META-INF/MANIFEST.MF"; then
     ##only check if there is no MANIFEST.MF file
-    secondLine=$(jar -tf $file | gsed -n '2 p')
+    secondLine=$(jar -tf $file | sed -n '2 p')
 
     if [ $secondLine == "META-INF/MANIFEST.MF" ]; then
       echo "$file has a correctly structured MANIFEST.MF entry"
