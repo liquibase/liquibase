@@ -64,7 +64,7 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
         if (! hasProLicense) {
             throw new LiquibaseException(
                     "The command 'rollbackOneUpdate' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com." +
-                            "Add liquibase.pro.licenseKey as a Maven property or add liquibase.pro.licenseKey=<yourKey> into your defaults file.");
+                            "Add liquibase.licenseKey as a Maven property or add liquibase.licenseKey=<yourKey> into your defaults file.");
         }
         Database database = liquibase.getDatabase();
         CommandScope liquibaseCommand = new CommandScope("internalRollbackOneUpdate");

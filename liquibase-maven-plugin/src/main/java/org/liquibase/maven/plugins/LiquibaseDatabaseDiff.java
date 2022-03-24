@@ -220,7 +220,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
             if (!hasProLicense) {
                 throw new LiquibaseException("The command 'diff --format=" + format +
                         "' requires a Liquibase Pro License, available at https://www.liquibase.org/download or sales@liquibase.com." +
-                        " Options include the liquibase.pro.licenseKey in the defaults file, adding a flag in the CLI, and more. Learn more at https://docs.liquibase.com");
+                        " Options include the liquibase.licenseKey in the defaults file, adding a flag in the CLI, and more. Learn more at https://docs.liquibase.com");
             }
         }
         ClassLoader cl = null;
