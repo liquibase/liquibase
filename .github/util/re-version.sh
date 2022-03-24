@@ -66,7 +66,7 @@ do
   (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
 
   cp $workdir/$jar $outdir
-  rename 0-SNAPSHOT $version $outdir/$jar
+  rename -n "s/0-SNAPSHOT/$version/" $outdir/$jar
 done
 
 #### Update  javadoc jars
