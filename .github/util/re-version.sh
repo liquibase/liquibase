@@ -20,7 +20,7 @@ fi
 ## Check filesystem case sensitivity. Otherwise the unzip/zip of jars may overwrite files that only differ in case
 touch case-test-abc
 touch case-test-ABC
-filesMade=(ls case-test-* | wc -l)
+filesMade=$(ls case-test-* | wc -l)
 
 if [ "$filesMade" == "2" ]; then
   echo "Case sensitive filesystem: OK"
