@@ -30,7 +30,7 @@ public class ManifestReversion {
 
         final String importPackage = attributes.getValue("Import-Package");
         if (importPackage != null) {
-            attributes.putValue("Import-Package", importPackage.replaceAll("version=\"\\[0\\.0,1\\)\"", "version=\"[" + version + ",1)\""));
+            attributes.putValue("Import-Package", importPackage.replaceAll("version=\"\\[0\\.0,1\\)\"", "version=\""+ version + "\""));
         }
 
         final String exportPackage = attributes.getValue("Export-Package");
