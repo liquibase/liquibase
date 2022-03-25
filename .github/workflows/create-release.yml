@@ -140,10 +140,11 @@ jobs:
           
           ##### Rebuild installers
           tarFile=$(pwd)/re-version/final/liquibase-$version.tar.gz
+          scriptDir=$(pwd)/.github/util/
           
           mkdir -p liquibase-dist/target/liquibase-$version
           (cd liquibase-dist/target/liquibase-$version && tar xfz $tarFile)
-          (cd liquibase-dist && .github/util/package-install4j.sh $version)
+          (cd liquibase-dist && $scriptDir/package-install4j.sh $version)
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
           
           ##Sign Files
