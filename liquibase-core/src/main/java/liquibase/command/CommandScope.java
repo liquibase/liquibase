@@ -187,7 +187,9 @@ public class CommandScope {
             }
         } finally {
             try {
-                this.outputStream.flush();
+                if (this.outputStream != null) {
+                    this.outputStream.flush();
+                }
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
             }
