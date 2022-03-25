@@ -17,14 +17,17 @@ if [ -z ${2+x} ]; then
   exit 1;
 fi
 
-workdir=$(readlink -m $1)
+# since we're switching to a macos-latest runner we'll need gnu-sed and greadlink
+brew install gnu-sed
+brew install coreutils
+brew install rename
+
+workdir=$(greadlink -m $1)
 version=$2
 scriptDir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 outdir=$(pwd)/re-version/out
 
-# since we're switching to a macos-latest runner we'll need gnu-sed
-brew install gnu-sed
 rm -rf outdir
 mkdir -p $outdir
 
@@ -55,8 +58,15 @@ do
     ##TODO: update XSD
   fi
 
+  ##rebuild jar to ensure META-INF manifest is correct
+  rm -rf $workdir/finalize-jar
+  mkdir $workdir/finalize-jar
+  (cd $workdir/finalize-jar && jar xf $workdir/$jar)
+  mv $workdir/finalize-jar/META-INF/MANIFEST.MF $workdir/tmp-manifest.mf
+  (cd $workdir/finalize-jar && jar cfm $workdir/$jar $workdir/tmp-manifest.mf .)
+
   cp $workdir/$jar $outdir
-  rename.ul 0-SNAPSHOT $version $outdir/$jar
+  rename "s/0-SNAPSHOT/$version/" $outdir/$jar
 done
 
 #### Update  javadoc jars
@@ -74,12 +84,27 @@ do
   rm -rf $workdir/rebuild
 
   cp $workdir/$jar $outdir
-  rename.ul 0-SNAPSHOT $version $outdir/$jar
+  rename "s/0-SNAPSHOT/$version/" $outdir/$jar
 done
 
-## Make sure there are no left-over 0-SNAPSHOT versions in jar files
+## Test jar structure
 for file in $outdir/*.jar
 do
+
+  ##Jars need MANIFEST.MF first in the file
+  if jar -tf $file | grep "META-INF/MANIFEST.MF"; then
+    ##only check if there is no MANIFEST.MF file
+    secondLine=$(jar -tf $file | gsed -n '2 p')
+
+    if [ $secondLine == "META-INF/MANIFEST.MF" ]; then
+      echo "$file has a correctly structured MANIFEST.MF entry"
+    else
+      echo "$file does not have MANIFEST.MF in the correct spot. Actual value: $secondLine"
+      exit 1
+    fi
+  fi
+
+  ##Make sure there are no left-over 0-SNAPSHOT versions in jar files
   mkdir -p $workdir/test
   unzip -q $file -d $workdir/test
 
@@ -95,6 +120,9 @@ do
 
   rm -rf $workdir/test
 done
+
+## having coreutils below causes `Cannot install md5sha1sum because conflicting formulae are installed. coreutils: because both install `md5sum` and `sha1sum` binaries` from the package-install4j.sh script
+brew unlink coreutils
 
 
 ##### update zip/tar files

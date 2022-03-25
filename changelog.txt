@@ -1,6 +1,11 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.9.1 (2022.03.25)
+
+- [PR#2651] Enable apple notarization of macos installer
+- [PR#2666] Fix manifest location in jar during re-version.sh by @nvoxland
+
 Changes in version 4.9.0 (2022.03.17)
 
 # Notable Changes
