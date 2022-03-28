@@ -91,6 +91,33 @@ public class MavenUtils {
         return new URLClassLoader(urlArray, clazz.getClassLoader());
     }
 
+    /**
+     * Generate the message that should be printed if a Pro license is not found.
+     * @param command the name of the command
+     */
+    private static String generateMissingProLicenseMessage(String command) {
+        return String.format("Using '%s' requires a valid Liquibase Pro license. Get a free Pro license key at %s. Add liquibase.liquibaseLicenseKey as a Maven property or add liquibaseLicenseKey=<yourKey> into your defaults file.", command, LicenseServiceUtils.PRO_TRIAL_LICENSE_URL);
+    }
+
+    /**
+     * Throw an exception if the specified pro license is not valid.
+     * @param liquibaseProLicenseKey the license key, see {@link AbstractLiquibaseMojo}.getLicenseKey()
+     * @param commandName the name of the command
+     * @throws LiquibaseException the exception thrown if the specified pro license is not valid
+     */
+    public static void checkProLicenseAndThrowException(String liquibaseProLicenseKey, String commandName, Log log) throws LiquibaseException {
+        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, log);
+        if (!hasProLicense) {
+            throw new LiquibaseException(generateMissingProLicenseMessage(commandName));
+        }
+    }
+
+    /**
+     * Determine if the specified pro license key is valid.
+     * @param liquibaseProLicenseKey the license key, see {@link AbstractLiquibaseMojo}.getLicenseKey()
+     * @param commandName the name of the command
+     * @return true if the license is valid, false otherwise
+     */
     public static boolean checkProLicense(String liquibaseProLicenseKey, String commandName, Log log) {
         boolean hasProLicense = true;
         LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
@@ -100,8 +127,7 @@ public class MavenUtils {
         if (liquibaseProLicenseKey == null) {
             log.info("");
             if (commandName != null) {
-                log.info("The command '" + commandName + "' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com." +
-                        "Add liquibase.licenseKey as a Maven property or add liquibase.licenseKey=<yourKey> into your defaults file.");
+                log.info(generateMissingProLicenseMessage(commandName));
             }
             log.info("");
             hasProLicense = false;
