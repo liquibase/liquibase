@@ -61,8 +61,8 @@ public class SnapshotCommandStep extends AbstractDatabaseCommandStep {
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
         SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)
-                .description("Output format to use (JSON, YAML, or TXT").build();
-        DATABASE_ARG = builder.argument("database", Database.class).build();
+                .description("Output format to use (JSON, YAML, or TXT)").build();
+        DATABASE_ARG = builder.argument("database", Database.class).hidden().build();
     }
 
     private Map<String, Object> snapshotMetadata;
@@ -135,6 +135,7 @@ public class SnapshotCommandStep extends AbstractDatabaseCommandStep {
             snapshot.setMetadata(this.getSnapshotMetadata());
 
             resultsBuilder.addResult("snapshot", snapshot);
+            resultsBuilder.addResult("statusCode", 0);
 
             OutputStream outputStream = resultsBuilder.getOutputStream();
             if (outputStream != null) {

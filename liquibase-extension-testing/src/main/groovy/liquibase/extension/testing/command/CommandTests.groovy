@@ -53,6 +53,8 @@ class CommandTests extends Specification {
 
     public static final PATTERN_FLAGS = Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE
 
+    public static String NOT_NULL = "not_null"
+
     private ConfigurationValueProvider propertiesProvider
 
     def setup() {
@@ -349,7 +351,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                         def seenValue = String.valueOf(returnedResult.getValue())
 
                         assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
-                        assert seenValue == expectedValue
+                        if (expectedValue == NOT_NULL) {
+                            assert seenValue != null: "The result is null"
+                        } else {
+                            assert seenValue == expectedValue
+                        }
                     }
                 }
                 if (testDef.expectFileToExist != null) {
