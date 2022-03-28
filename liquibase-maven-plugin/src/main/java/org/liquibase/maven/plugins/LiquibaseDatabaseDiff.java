@@ -216,7 +216,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                                 "currently supports only 'TXT' or 'JSON' as values.  (Blank defaults to 'TXT')";
                 throw new LiquibaseException(String.format(messageString));
             }
-            boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+            boolean hasProLicense = MavenUtils.checkProLicense(getLicenseKey(), commandName, getLog());
             if (!hasProLicense) {
                 throw new LiquibaseException("The command 'diff --format=" + format +
                         "' requires a Liquibase Pro License, available at https://www.liquibase.org/download or sales@liquibase.com." +

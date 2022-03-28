@@ -105,7 +105,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         //
         // Check the Pro license
         //
-        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+        boolean hasProLicense = MavenUtils.checkProLicense(getLicenseKey(), commandName, getLog());
         if (! hasProLicense) {
             throw new LiquibaseException(
                "The command 'rollbackOneChangeSetSQL' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com." +
