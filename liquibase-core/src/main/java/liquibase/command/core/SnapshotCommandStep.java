@@ -5,34 +5,27 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.*;
 import liquibase.exception.LiquibaseException;
-import liquibase.integration.commandline.CommandLineResourceAccessor;
-import liquibase.integration.commandline.CommandLineUtils;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.integration.commandline.Main;
 import liquibase.license.LicenseServiceUtils;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.snapshot.SnapshotListener;
 import liquibase.util.StringUtil;
 
-import java.io.*;
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class SnapshotCommandStep extends AbstractCommandStep {
+public class SnapshotCommandStep extends AbstractDatabaseCommandStep {
 
     public static final String[] COMMAND_NAME = {"snapshot"};
 
@@ -45,7 +38,8 @@ public class SnapshotCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> SNAPSHOT_FORMAT_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
-    public static final CommandArgumentDefinition<String> SERIALIZER_FORMAT_ARG;
+    public static final CommandArgumentDefinition<Database> DATABASE_ARG;
+
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
@@ -67,13 +61,11 @@ public class SnapshotCommandStep extends AbstractCommandStep {
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
         SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)
-                .description("Output format to use (JSON or YAML").build();
-        SERIALIZER_FORMAT_ARG = builder.argument("serializerFormat", String.class).build();
+                .description("Output format to use (JSON, YAML, or TXT").build();
+        DATABASE_ARG = builder.argument("database", Database.class).build();
     }
 
     private Map<String, Object> snapshotMetadata;
-
-    public static final String SNAPSHOT_RESULTS_BUILDER = "snapshotResultsBuilder";
 
     @Override
     public String[][] defineCommandNames() {
@@ -110,39 +102,19 @@ public class SnapshotCommandStep extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        final ResourceAccessor fileOpener = Scope.getCurrentScope().getResourceAccessor();
-        String url = commandScope.getArgumentValue(URL_ARG);
-        String username = commandScope.getArgumentValue(USERNAME_ARG);
-        String password = commandScope.getArgumentValue(PASSWORD_ARG);
-        String driver = commandScope.getArgumentValue(DRIVER_ARG);
-        String defaultCatalogName = commandScope.getArgumentValue(DEFAULT_CATALOG_NAME_ARG);
-        String defaultSchemaName = commandScope.getArgumentValue(DEFAULT_SCHEMA_NAME_ARG);
-        String driverPropertiesFile = commandScope.getArgumentValue(DRIVER_PROPERTIES_FILE_ARG);
-        String databaseClassName = null;
-        Class databaseClass = LiquibaseCommandLineConfiguration.DATABASE_CLASS.getCurrentValue();
-        if (databaseClass != null) {
-            databaseClassName = databaseClass.getCanonicalName();
+
+        if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
+            String url = commandScope.getArgumentValue(SnapshotCommandStep.URL_ARG);
+            String username = commandScope.getArgumentValue(SnapshotCommandStep.USERNAME_ARG);
+            String password = commandScope.getArgumentValue(SnapshotCommandStep.PASSWORD_ARG);
+            String defaultSchemaName = commandScope.getArgumentValue(SnapshotCommandStep.DEFAULT_SCHEMA_NAME_ARG);
+            String defaultCatalogName = commandScope.getArgumentValue(SnapshotCommandStep.DEFAULT_CATALOG_NAME_ARG);
+            String driver = commandScope.getArgumentValue(SnapshotCommandStep.DRIVER_ARG);
+            String driverPropertiesFile = commandScope.getArgumentValue(SnapshotCommandStep.DRIVER_PROPERTIES_FILE_ARG);
+            createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile);
+        } else {
+            database = commandScope.getArgumentValue(DATABASE_ARG);
         }
-        String propertyProviderClass = null;
-        Class clazz = LiquibaseCommandLineConfiguration.PROPERTY_PROVIDER_CLASS.getCurrentValue();
-        if (clazz != null) {
-            propertyProviderClass = clazz.getName();
-        }
-        String liquibaseCatalogName = GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue();
-        String liquibaseSchemaName = GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue();
-        String databaseChangeLogTablespaceName = GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentValue();
-        Database database =
-            CommandLineUtils.createDatabaseObject(fileOpener,
-                                                  url,
-                                                  username, password, driver, defaultCatalogName, defaultSchemaName,
-                                                  false, false,
-                                                  databaseClassName,
-                                                  driverPropertiesFile,
-                                                  propertyProviderClass,
-                                                  liquibaseCatalogName, liquibaseSchemaName,
-                                                  null,
-                                                  null);
-        database.setLiquibaseTablespaceName(databaseChangeLogTablespaceName);
 
         CatalogAndSchema[] schemas = parseSchemas(database, commandScope.getArgumentValue(SCHEMAS_ARG));
 
@@ -156,23 +128,33 @@ public class SnapshotCommandStep extends AbstractCommandStep {
         ObjectQuotingStrategy originalQuotingStrategy = database.getObjectQuotingStrategy();
 
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
-        DatabaseSnapshot snapshot;
+
         try {
-            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
+            DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
+
+            snapshot.setMetadata(this.getSnapshotMetadata());
+
+            resultsBuilder.addResult("snapshot", snapshot);
+
+            OutputStream outputStream = resultsBuilder.getOutputStream();
+            if (outputStream != null) {
+                String result = printSnapshot(resultsBuilder.getCommandScope(), resultsBuilder.build());
+                Writer outputWriter = getOutputWriter(outputStream);
+                outputWriter.write(result);
+                outputWriter.flush();
+            }
         } finally {
+            //
+            // Reset the quoting strategy
+            //
             database.setObjectQuotingStrategy(originalQuotingStrategy);
-        }
 
-        snapshot.setMetadata(this.getSnapshotMetadata());
-
-        resultsBuilder.addResult("snapshot", snapshot);
-
-        OutputStream outputStream = resultsBuilder.getOutputStream();
-        if (outputStream != null) {
-            String result = printSnapshot(resultsBuilder.getCommandScope(), resultsBuilder.build());
-            Writer outputWriter = getOutputWriter(outputStream);
-            outputWriter.write(result);
-            outputWriter.flush();
+            //
+            // Need to clean up here since we created the Database
+            //
+            if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
+                closeDatabase();
+            }
         }
     }
 
@@ -183,7 +165,7 @@ public class SnapshotCommandStep extends AbstractCommandStep {
     }
 
     public static String printSnapshot(CommandScope commandScope, CommandResults snapshotResults) throws LiquibaseException {
-        String format = commandScope.getArgumentValue(SERIALIZER_FORMAT_ARG);
+        String format = commandScope.getArgumentValue(SNAPSHOT_FORMAT_ARG);
         if (format == null) {
             format = "txt";
         }

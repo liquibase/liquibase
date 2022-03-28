@@ -5,7 +5,6 @@ import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.CommandResults;
-import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
 import liquibase.configuration.ConfiguredValue;
@@ -32,6 +31,7 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.ui.ConsoleUIService;
+import liquibase.util.BooleanUtil;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
@@ -1346,7 +1346,6 @@ public class Main {
         if (this.includeSystemClasspath == null) {
             this.includeSystemClasspath = Boolean.TRUE;
         }
-
         if (this.outputDefaultCatalog == null) {
             this.outputDefaultCatalog = "true";
         }
@@ -1648,14 +1647,9 @@ public class Main {
                 //
                 Writer outputWriter = getOutputWriter();
                 CommandResults commandResults = snapshotCommand.execute();
-                if (Scope.getCurrentScope().has(SnapshotCommandStep.SNAPSHOT_RESULTS_BUILDER)) {
-                    CommandResultsBuilder snapshotResultsBuilder = Scope.getCurrentScope().get(SnapshotCommandStep.SNAPSHOT_RESULTS_BUILDER, CommandResultsBuilder.class);
-                    snapshotResultsBuilder.addResult("snapshot", commandResults.getResult("snapshot"));
-                } else {
-                    String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, commandResults);
-                    outputWriter.write(result);
-                    outputWriter.flush();
-                }
+                String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, commandResults);
+                outputWriter.write(result);
+                outputWriter.flush();
                 return;
             } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
                 CommandScope executeSqlCommand = new CommandScope("internalExecuteSql")
@@ -2024,7 +2018,7 @@ public class Main {
                 }
             } catch (DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        coreBundle.getString("problem.closing.connection"), e);
+                    coreBundle.getString("problem.closing.connection"), e);
             }
         }
     }
