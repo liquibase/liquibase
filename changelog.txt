@@ -1,6 +1,74 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.9.1 (2022.03.25)
+
+## Liquibase 4.9.1 patch release
+Please report any issues to [https://github.com/liquibase/liquibase/issues](https://github.com/liquibase/liquibase/issues).
+
+## Notable Changes
+
+[[PR#2666](https://github.com/liquibase/liquibase/pull/2666)] [[nvoxland](https://github.com/nvoxland)] Liquibase 4.9.1 release is a patch release that fixes the `MANIFEST.MF` location in the `liquibase.jar` file for tools that require the `MANIFEST.MF` file to be the first entry in the jar archive.
+If the `MANIFEST.MF` file is not the first entry, `java.util.jar.JarInputStream#getManifest()` reading the `MANIFEST.MF` file will not return the manifest information appropriately. The PR fixes issue [#2648](https://github.com/liquibase/liquibase/issues/2648).
+
+[[Issue#2672](https://github.com/liquibase/liquibase/issues/2672)] Addresses the remaining OSGi-related packaging problems to fully restore Liquibase support in OSGi environments.
+
+## Fixes
+[[PR#2651](https://github.com/liquibase/liquibase/pull/2651)] Fixed the issue with a malicious software alert for the Liquibase macOS Installer preventing from proceeding with the installation. [DAT-9524]
+
+[[PR#2643](https://github.com/liquibase/liquibase/pull/2643)] Fixed an issue in snapshot on PostgreSQL where non-integer datatypes that used a default value with a sequence would not be handled correctly [DAT-8670]
+
+[[PR#2691](https://github.com/liquibase/liquibase/pull/2691)] Fixed invalid JSON in the example-changelog.json file [DAT-9893]
+
+Changes in version 4.9.0 (2022.03.17)
+
+# Notable Changes
+
+Liquibase  4.9.0 introduces the following functionality:
+- [PRO] Quality checks output in a JSON format
+- Quality checks for Maven - `checks run` and `checks show` goals
+- [PR#2558] [kavya-shastri] The extension of the usage of the Liquibase global configuration for the `secureParsing` parameter to prevent the entity resolver from falling back to looking on the network for missing XSDs. If you reference an XSD other than one of Liquibase, Liquibase will no longer automatically download the XSD from the internet and use it. The default value for `secureParsing`  is `true`, but you can override it in any of the Liquibase configuration locations. For more information, see the Example Changelogs: XML Format documentation.
+- [PR#2529] [Krzysztof Sierszeń] [LB-1781] The `uniqueConstraintExists` precondition to check for the existence of unique constraints before running the update. You can check the constraint by constraint name or columns:
+<preConditions>
+    <uniqueConstraintExists constraintName="uq_constraint_name" tableName="test_table"/>
+</preConditions>
+<preConditions>
+    <uniqueConstraintExists tableName="test_table" columnNames="first_name, last_name"/>
+</preConditions>
+- [PR#2339] [[nvoxland] [Toukite] The support for running the Liquibase Servlet listener in application servers built on the Jakarta Servlet specification and not the Java Servlet specification. To use the new listener, specify the following tag:
+<listener>
+    <listener-class>liquibase.integration.servlet.LiquibaseJakartaServletListener</listener-class>
+</listener>
+The PR fixes issue #2298.
+## Enhancements
+- [PR#2434] [Balázs Dési] Added the Maven `validate` goal to `maven-liquibase-plugin` to provide access to the existing Liquibase `validate` command and be available not only in CLI, but also in Maven
+- Added the ability to use `sqlcmd` on an instance with multiple databases
+For more information, see the Using the SQLCMD integration and runWith attribute with Liquibase Pro and MSSQL Server documentation.
+- Added support for Liquibase, Spring Boot, and SQL Plus run with Kerberos
+- [PR#2561] [Wesley Willard] Added the `--schemas` argument to the `snapshot` command to be able to compare a multi-schema database to its snapshot
+- [PR#2606] [Wesley Willard] Added a best practice message for the `generate-changelog` command so that you can check if the `splitStatements` attribute works for your environment when generating formatted SQL changelogs [DAT-9327]
+- Added the `StripComments` attribute for the `SQLUserDefinedPatternCheck` quality check to choose the code that the `SQLUserDefinedPatternCheck` searches, including the option for the commented code. The `StripComments` attribute strips comments from SQL before searching for the string. The default value is `N` (no). [DAT-9098]
+- [PR#2273] [Tsvi Zandany] Added the autocomplete option for quality checks commands running on macOS
+## Fixes
+- [PR#2542] [nvoxland] Fixed the `--should-snapshot-data` CLI parameter to be preserved when the `--data-output-directory` property is not specified in the command
+- [PR#2330] [Inane Mohammed] Fixed the issue with checking the `referenceSnapshot` parameter instead of `referenceDatabase` for the potential null value
+- [PR#2521] [Steven Massaro] Added a label, context, and comment to the `example-changelog.sql` file that comes with the Liquibase installation package
+- [PR#2556] [nvoxland] Fixed the CockroachDB processes so that Liquibase checks the URL first rather than proceeding with SQL calls
+- [PR#2569] [Clarence Dimitri CHARLES] Made `FormattedSqlChangeLogParser` to be reusable for extensions
+- [PR#2377] [devorgpl] Fixed the issue with updating statements when the `onlyUpdate` attribute is `false` in the `loadUpdateData` Change Type for HSQL
+- [PR#1908] [Emiliano Capoccia] Fixed the issue with retrieving the CockroachDB version. As part of the fix, Liquibase generates version-specific autoincrement SQL statements for CockroachDB identity columns:
+   - `SMALLSERIAL`, `SERIAL`, and `BIGSERIAL` for versions earlier than 21.2
+   - `GENERATED BY DEFAULT AS IDENTITY` for version 21.2 or later
+- [PR#2135] [PR#2133] [Saucistophe] [mkobylarz] Fixed the issue with the `endDelimiter` attribute  not being respected during the Liquibase update. The fix for `endDelimiter` does not break the handling of trailing comments in SQL statements. [LB-2186]
+- [PR#2573] [nvoxland] Fixed the quoting for the MANIFEST.MF file for correct versioning
+- [PR#2572] [Steven Massaro] Fixed the issue with generating changelogs for PostgreSQL columns that use `SET DEFAULT`
+- [PR#2589] [nvoxland] [Marcel Blonk] Fixed the MD5 checksums generated by older versions of Liquibase to be correctly updated in the DATABASECHANGELOG table when a more recent version of Liquibase executes against the database. The PR fixes issue #2580.
+- [PR#2592] [nvoxland] Added support for the double precision type in MySQL. The PR fixes issue #2337.
+- [PR#1894] [KushnirykOleh] Fixed the time data type to be precise for PostgreSQL. The PR fixes issue #1774.
+- [PR#2387] [Jenson3210] Fixed the handling of date and time in the `loadData` Change Type
+- [PR#2566] [nvoxland] Updated OpenCSV from 5.5.2 to 5.6
+
+
 Changes in version 4.8.0 (2022.02.23)
 
 Notable Changes

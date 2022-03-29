@@ -22,14 +22,27 @@ fi
 mkdir -p ~/.install4j8
 export INSTALL4J_CACHE=$HOME/.install4j8
 
-install4jc="/usr/local/bin/install4jc"
+# install4jc="/usr/local/bin/install4jc"
+install4jc="/Applications/install4j.app/Contents/Resources/app/bin/install4jc"
 
 if [ -f "$install4jc" ]; then
     echo "$install4jc already exists"
 else
   echo "$install4jc does not exist. Installing..."
-  wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download-gcdn.ej-technologies.com/install4j/install4j_linux_8_0_11.deb
-  sudo apt install -y $INSTALL4J_CACHE/install4j_linux_8_0_11.deb
+
+  # installer automation for ubuntu-latest; replaced
+  # wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download-gcdn.ej-technologies.com/install4j/install4j_linux_8_0_11.deb
+  # sudo apt install -y $INSTALL4J_CACHE/install4j_linux_8_0_11.deb
+
+  # installer automation for macos-latest; macos needed for apple notarizing
+  wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download-gcdn.ej-technologies.com/install4j/install4j_macos_8_0_11.dmg
+  sleep 5
+  hdiutil attach /Users/runner/.install4j8/install4j_macos_8_0_11.dmg
+  sleep 5
+  cp -rf /Volumes/install4j/install4j.app /Applications
+  sleep 5
+  hdiutil detach /Volumes/install4j
+
 fi
 
 INSTALL4J_ARGS="$INSTALL4J_ARGS --release=$version -D liquibaseVersion=$version -D install4j.logToStderr=true"

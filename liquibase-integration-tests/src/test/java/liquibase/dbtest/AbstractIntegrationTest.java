@@ -28,7 +28,6 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.TestSystemFactory;
-import liquibase.extension.testing.testsystem.core.HubTestSystem;
 import liquibase.hub.HubConfiguration;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockService;
@@ -83,9 +82,6 @@ public abstract class AbstractIntegrationTest {
     public DatabaseTestSystem testSystem;
 
     @Rule
-    public HubTestSystem hubEnvironment;
-
-    @Rule
     public TemporaryFolder tempDirectory = new TemporaryFolder();
     protected String completeChangeLog;
     protected String contexts = "test, context-b";
@@ -114,12 +110,6 @@ public abstract class AbstractIntegrationTest {
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
         logger = Scope.getCurrentScope().getLog(getClass());
 
-        this.hubEnvironment = (HubTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("hub");
-
-        if (hubEnvironment.getApiKey() != null) {
-            System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), hubEnvironment.getApiKey());
-            System.setProperty(HubConfiguration.LIQUIBASE_HUB_URL.getKey(), hubEnvironment.getUrl());
-        }
         Scope.setScopeManager(new TestScopeManager());
     }
 
