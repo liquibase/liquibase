@@ -1,11 +1,7 @@
 package liquibase.license;
 
 import liquibase.Scope;
-import liquibase.change.Change;
-import liquibase.change.ChangeFactory;
-import liquibase.changelog.ChangeSet;
 import liquibase.exception.CommandValidationException;
-import liquibase.exception.ValidationErrors;
 import liquibase.util.StringUtil;
 
 /**
@@ -15,7 +11,8 @@ import liquibase.util.StringUtil;
  */
 public class LicenseServiceUtils {
 
-  public static final String PRO_TRIAL_LICENSE_URL = "https://liquibase.com/protrial";
+  private static final String TRIAL_LICENSE_URL = "https://liquibase.com/trial";
+  public static final String BASE_INVALID_LICENSE_MESSAGE = "Using '%s' requires a valid Liquibase Pro or EMPIRE license. Get a free license key at " + TRIAL_LICENSE_URL + ".";
 
   /**
    * Check for a Liquibase Pro License.
@@ -41,7 +38,7 @@ public class LicenseServiceUtils {
    */
   public static void checkProLicenseAndThrowException(String[] commandNames) throws CommandValidationException {
     if (!isProLicenseValid()) {
-      throw new CommandValidationException(String.format("Using '%s' requires a valid Liquibase Pro license. Get a free Pro license key at %s. Add liquibase.pro.licenseKey=<yourKey> into your defaults file or use --license-key=<yourKey> before your command in the CLI.", StringUtil.join(commandNames, " "), PRO_TRIAL_LICENSE_URL));
+      throw new CommandValidationException(String.format(BASE_INVALID_LICENSE_MESSAGE + " Add liquibase.licenseKey=<yourKey> into your defaults file or use --license-key=<yourKey> before your command in the CLI.", StringUtil.join(commandNames, " ")));
     }
   }
 }

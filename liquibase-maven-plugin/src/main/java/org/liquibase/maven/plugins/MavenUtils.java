@@ -16,9 +16,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -96,7 +93,7 @@ public class MavenUtils {
      * @param command the name of the command
      */
     private static String generateMissingProLicenseMessage(String command) {
-        return String.format("Using '%s' requires a valid Liquibase Pro license. Get a free Pro license key at %s. Add liquibase.liquibaseLicenseKey as a Maven property or add liquibaseLicenseKey=<yourKey> into your defaults file.", command, LicenseServiceUtils.PRO_TRIAL_LICENSE_URL);
+        return String.format(LicenseServiceUtils.BASE_INVALID_LICENSE_MESSAGE + " Add liquibase.liquibaseLicenseKey as a Maven property or add liquibaseLicenseKey=<yourKey> into your defaults file.", command);
     }
 
     /**
