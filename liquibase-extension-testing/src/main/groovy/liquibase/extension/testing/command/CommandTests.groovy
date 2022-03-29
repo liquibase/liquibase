@@ -351,7 +351,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                         def seenValue = String.valueOf(returnedResult.getValue())
 
                         assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
-                        if (expectedValue == NOT_NULL) {
+                        if (expectedValue instanceof Closure) {
+                            assert expectedValue.call(returnedResult)
+                        } else if (expectedValue == NOT_NULL) {
                             assert seenValue != null: "The result is null"
                         } else {
                             assert seenValue == expectedValue
