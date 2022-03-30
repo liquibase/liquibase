@@ -306,4 +306,8 @@ public abstract class DatabaseTestSystem extends TestSystem {
      */
     protected abstract String[] getSetupSql();
 
+    public boolean executeSql(String sql) throws SQLException {
+        return getConnection().createStatement().execute(sql);
+    }
+
 }
