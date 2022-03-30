@@ -22,7 +22,6 @@
                         </goals>
                         <configuration>
                             <sourcepath>../liquibase-cdi/src/main/java</sourcepath>
-                            <encoding>UTF-8</encoding>
                         </configuration>
                     </execution>
                 </executions>
@@ -30,7 +29,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -74,28 +72,36 @@
     </profiles>
 
     <dependencies>
+        <!-- COMPILE dependencies START -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <!-- COMPILE dependencies END -->
+        <!-- PROVIDED dependencies START -->
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
+            <scope>provided</scope>
         </dependency>
-
+        <!-- PROVIDED dependencies END -->
+        <!-- TEST dependencies START -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
+            <scope>test</scope>
         </dependency>
+        <!-- TEST dependencies END -->
     </dependencies>
 </project>
