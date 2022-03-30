@@ -1,8 +1,11 @@
 package liquibase.parser.core.xml;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.logging.Logger;
-import liquibase.resource.*;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.InputStreamList;
+import liquibase.resource.ResourceAccessor;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
@@ -34,13 +37,17 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 .replace("http://www.liquibase.org/xml/ns/migrator/", "http://www.liquibase.org/xml/ns/dbchangelog/")
                 .replaceFirst("https?://", "");
 
-
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         InputStreamList streams = resourceAccessor.openStreams(null, path);
         if (streams.isEmpty()) {
             streams = getFallbackResourceAccessor().openStreams(null, path);
 
-            if (streams.isEmpty()) {
+            if (streams.isEmpty() && GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
+                String errorMessage = "Unable to resolve xml entity " + systemId + " locally: " +
+                        GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
+                        "Set it to 'false' to allow remote lookups of xsd files.";
+                throw new XSDLookUpException(errorMessage);
+            } else {
                 log.fine("Unable to resolve XML entity locally. Will load from network.");
                 return null;
             }

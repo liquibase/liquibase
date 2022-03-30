@@ -117,10 +117,15 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.12.4</version>
+            <version>4.4.0</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>4.4.0</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency> <!-- use a specific Groovy version rather than the one specified by spock-core -->
             <groupId>org.codehaus.groovy</groupId>
@@ -246,7 +251,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.10.0</version>
             </plugin>
 
             <plugin>
@@ -452,7 +457,11 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <!-- CDILiquibaseTest is currently failing without this setting -->
-                            <argLine>@{argLine} --illegal-access=permit</argLine>
+                            <argLine>
+                                @{argLine}
+                                --illegal-access=warn
+                                --add-opens java.base/java.lang=ALL-UNNAMED
+                            </argLine>
                         </configuration>
                     </plugin>
                 </plugins>

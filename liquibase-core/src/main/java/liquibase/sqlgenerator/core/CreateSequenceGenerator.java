@@ -42,7 +42,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             validationErrors.checkDisallowedField("AS", statement.getDataType(), database, PostgresDatabase.class);
         }
 
-        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, HsqlDatabase.class, PostgresDatabase.class);
+        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, HsqlDatabase.class, PostgresDatabase.class, MSSQLDatabase.class);
         validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class, CockroachDatabase.class);
 
         if (database instanceof H2Database && statement.getDataType() != null && !statement.getDataType().equalsIgnoreCase("bigint")) {

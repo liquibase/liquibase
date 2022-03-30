@@ -1534,11 +1534,10 @@ public class Main {
                                 OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
             }
 
-            //
-            // Set the global configuration option based on presence of the dataOutputDirectory
-            //
-            boolean b = dataOutputDirectory != null;
-            DeprecatedConfigurationValueProvider.setData(GlobalConfiguration.SHOULD_SNAPSHOT_DATA, b);
+            if (GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getCurrentValue().equals(false) && dataOutputDirectory != null) {
+                // If we are not otherwise going to snapshot data, still snapshot data if dataOutputDirectory is set
+                DeprecatedConfigurationValueProvider.setData(GlobalConfiguration.SHOULD_SNAPSHOT_DATA, true);
+            }
 
             ObjectChangeFilter objectChangeFilter = null;
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(

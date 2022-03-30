@@ -26,11 +26,12 @@ import java.util.regex.Pattern;
 @SuppressWarnings("java:S2583")
 public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
+
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         BufferedReader reader = null;
         try {
-            if (changeLogFile.endsWith(".sql")) {
+            if (supportsExtension(changeLogFile)) {
                 InputStream fileStream = openChangeLogFile(changeLogFile, resourceAccessor);
                 if (fileStream == null) {
                     return false;
@@ -376,6 +377,10 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             }
         }
         changeLogParameters.set(name, value, context, labels, dbms, global, changeLog);
+    }
+
+    protected boolean supportsExtension(String changelogFile){
+        return changelogFile.endsWith(".sql");
     }
 
     private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException{

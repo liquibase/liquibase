@@ -110,6 +110,13 @@ class CommandTests extends Specification {
             }
         }
 
+        def liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration)
+        for (def runTest : commandTestDefinition.runTests) {
+            for (def arg : runTest.globalArguments.keySet()) {
+                assert liquibaseConfiguration.getRegisteredDefinition(arg) != null: "Unknown global argument '${arg}' in run ${runTest.description}"
+            }
+        }
+
         where:
         commandTestDefinition << getCommandTestDefinitions()
     }
@@ -266,8 +273,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
 
-        Exception savedException = null
-        def results = Scope.child([
+        def scopeSettings = [
                 (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name)               : MockHubService,
                 (Scope.Attr.resourceAccessor.name())                  : testDef.resourceAccessor ?
@@ -275,8 +281,18 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 (Scope.Attr.ui.name())                                : testDef.testUI ? testDef.testUI.initialize(uiOutputWriter, uiErrorWriter) :
                                                                                          new TestUI(uiOutputWriter, uiErrorWriter),
                 (Scope.Attr.logService.name())                        : logService
-        ], {
+        ]
+
+        if (testDef.globalArguments != null) {
+            scopeSettings.putAll(testDef.globalArguments)
+        }
+
+        Exception savedException = null
+        def results = Scope.child(scopeSettings, {
             try {
+                if (testDef.commandTestDefinition.beforeMethodInvocation != null) {
+                    testDef.commandTestDefinition.beforeMethodInvocation.call()
+                }
                 def returnValue = commandScope.execute()
                 assert testDef.expectedException == null : "An exception was expected but the command completed successfully"
                 return returnValue
@@ -284,6 +300,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             catch (Exception e) {
                 savedException = e
                 if (testDef.expectedException == null) {
+                    if (testDef.setup != null) {
+                        for (def setup : testDef.setup) {
+                            setup.cleanup()
+                        }
+                    }
                     throw e
                 } else {
                     assert e.class == testDef.expectedException
@@ -337,6 +358,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 if (testDef.expectFileToNotExist != null) {
                     assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getAbsolutePath()}' should not exist"
                 }
+                if (testDef.expectations != null) {
+                    testDef.expectations.call()
+                }
             } finally {
                 if (testDef.setup != null) {
                     for (def setup : testDef.setup) {
@@ -350,15 +374,72 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             permutation << getAllRunTestPermutations()
     }
 
+    /**
+     *
+     * Compare the contents of two files, optionally filtering out
+     * lines that contain a specified string.
+     *
+     * @param   f1                           The baseline file
+     * @param   f2                           The new output file
+     * @param   filter                       The filter string (can be NULL)
+     * @return  OutputCheck                  Closure to be used at test run execution
+     *
+     */
+    static OutputCheck assertFilesEqual(File f1, File f2, String... filters) {
+        return new OutputCheck() {
+            private String baselineContents
+            private String actualContents
+            @Override
+            def check(String actual) throws AssertionError {
+                List<String> lines1 = f1.readLines()
+                if (filters) {
+                    lines1 = lines1.findAll({ line ->
+                        filters.every() { filter ->
+                            ! line.contains(filter)
+                        }
+                    })
+                }
+                String contents1 = StringUtil.join(lines1, "\n")
+                this.baselineContents = contents1
+
+                List<String> lines2 = f2.readLines()
+                if (filters) {
+                    lines2 = lines2.findAll({ line ->
+                        filters.every() { filter ->
+                            ! line.contains(filter)
+                        }
+                    })
+                }
+                String contents2 = StringUtil.join(lines2, "\n")
+                this.actualContents = contents2
+
+                assert lines1.size() == lines2.size()
+                assert contents1 == contents2
+            }
+
+            @Override
+            String getExpected() {
+                return this.baselineContents
+            }
+
+            @Override
+            String getCheckedOutput() {
+                return this.actualContents
+            }
+        }
+    }
+
     static OutputCheck assertNotContains(String substring) {
         return assertNotContains(substring, false)
     }
 
     static OutputCheck assertNotContains(String substring, boolean caseInsensitive) {
         return new OutputCheck() {
+            private String actualContents
             @Override
             def check(String actual) throws AssertionError {
                 actual = (caseInsensitive && actual != null ? actual.toLowerCase() : actual)
+                this.actualContents = actual
                 substring = (caseInsensitive && substring != null ? substring.toLowerCase() : substring)
                 assert !actual.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))): "$actual does not contain: '$substring'"
             }
@@ -366,6 +447,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             @Override
             String getExpected() {
                 return substring
+            }
+
+            @Override
+            String getCheckedOutput() {
+                return this.actualContents
             }
         }
     }
@@ -376,8 +462,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
     static OutputCheck assertContains(String substring, final Integer occurrences) {
         return new OutputCheck() {
+            private String actualContents
             @Override
             def check(String actual) throws AssertionError {
+                this.actualContents = actual
                 String edited = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))
                 if (occurrences == null) {
                     boolean b = actual.contains(edited)
@@ -391,6 +479,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             @Override
             String getExpected() {
                 return substring
+            }
+
+            @Override
+            String getCheckedOutput() {
+                return this.actualContents
             }
         }
     }
@@ -460,7 +553,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                         throw new ComparisonFailure("$outputDescription does not contain expected", expectedOutputCheck, fullOutput)
                     }
                 } else if (expectedOutputCheck instanceof Pattern) {
-                    String patternString = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern()))
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
                     assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
@@ -468,7 +560,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     try {
                         ((OutputCheck) expectedOutputCheck).check(fullOutput)
                     } catch (AssertionError e) {
-                        throw new ComparisonFailure(e.getMessage(), expectedOutputCheck.expected, fullOutput)
+                        throw new ComparisonFailure(e.getMessage(), expectedOutputCheck.expected, expectedOutputCheck.checkedOutput)
                     }
                 } else {
                     Assert.fail "Unknown $outputDescription check type: ${expectedOutputCheck.class.name}"
@@ -578,7 +670,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          * the same scope as the command that is run for the test. This method will always be called, regardless of
          * exceptions thrown from within the test.
          */
-        Callable<Void> afterMethodInvocation
+        Closure<Void> afterMethodInvocation
+        /**
+         * An optional method that will be called before the execution of each run command. This is executed within
+         * the same scope as the command that is run for the test. Exceptions thrown from this method will cause the
+         * test to fail.
+         */
+        Closure<Void> beforeMethodInvocation
 
         void run(@DelegatesTo(RunTestDefinition) Closure testClosure) {
             run(null, testClosure)
@@ -621,12 +719,15 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          */
         private String description
 
+        private Map<String, ?> globalArguments = new HashMap<>()
+
         /**
          * Arguments to command as key/value pairs
          */
         private Map<String, ?> arguments = new HashMap<>()
         private Map<String, ?> expectedFileContent = new HashMap<>()
         private Map<String, Object> expectedDatabaseContent = new HashMap<>()
+        private Closure<Void> expectations = null;
 
         private List<TestSetup> setup
 
@@ -685,8 +786,16 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.arguments = args
         }
 
+        def setGlobalArguments(Map<String, Object> args) {
+            this.globalArguments = args
+        }
+
         def setExpectedFileContent(Map<String, Object> content) {
             this.expectedFileContent = content
+        }
+
+        def setExpectations(Closure<Void> expectations) {
+            this.expectations = expectations;
         }
 
         def setExpectedDatabaseContent(Map<String, Object> content) {
@@ -876,6 +985,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupCreateTempResources(originalFile, newFile, baseDir))
         }
 
+        void registerValueProvider(Closure<ConfigurationValueProvider> configurationValueProvider) {
+            this.setups.add(new SetupConfigurationValueProvider(configurationValueProvider))
+        }
+
         /**
          * @param fileLastModifiedDate if not null, the newly created file's last modified date will be set to this value
          */
@@ -953,6 +1066,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupRollbackCount(count, changeLogPath))
         }
 
+        void modifyProperties(File propsFile, String key, String value) {
+            this.setups.add(new SetupModifyProperties(propsFile, key, value))
+        }
+
+        void modifyTextFile(File textFile, String originalString, String newString) {
+            this.setups.add(new SetupModifyTextFile(textFile, originalString, newString))
+        }
 
         private void validate() throws IllegalArgumentException {
 
@@ -982,6 +1102,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          * @return the expected value from this output check
          */
         String getExpected()
+
+        /**
+         * @return the baseline contents from this output check
+         */
+        String getCheckedOutput()
     }
 
     interface FileContentCheck {
