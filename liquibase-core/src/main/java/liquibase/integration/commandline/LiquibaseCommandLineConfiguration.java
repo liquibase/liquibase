@@ -3,6 +3,7 @@ package liquibase.integration.commandline;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
+import org.springframework.remoting.RemoteTimeoutException;
 
 import java.io.File;
 import java.util.logging.Level;
@@ -15,6 +16,8 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<Class> DRIVER;
     public static final ConfigurationDefinition<Class> DATABASE_CLASS;
     public static final ConfigurationDefinition<String> CLASSPATH;
+    public static final ConfigurationDefinition<String> REMOTE_RESOURCE_LOCATIONS;
+    public static final ConfigurationDefinition<String> REMOTE_RESOURCE_LOCATIONS_DELIMITER;
     public static final ConfigurationDefinition<String> DRIVER_PROPERTIES_FILE;
     public static final ConfigurationDefinition<Class> PROPERTY_PROVIDER_CLASS;
     public static final ConfigurationDefinition<Boolean> PROMPT_FOR_NON_LOCAL_DATABASE;
@@ -32,6 +35,15 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
         DRIVER = builder.define("driver", Class.class).setDescription("Database driver class").build();
         DATABASE_CLASS = builder.define("databaseClass", Class.class).setDescription("Class to use for Database implementation").build();
         CLASSPATH = builder.define("classpath", String.class).setDescription("Additional classpath entries to use").build();
+        REMOTE_RESOURCE_LOCATIONS =
+            builder.define("remoteResourceLocations", String.class)
+                   .setDescription("Locations to search for remote resources")
+                   .build();
+        REMOTE_RESOURCE_LOCATIONS_DELIMITER =
+            builder.define("remoteResourceLocationsDelimiter", String.class)
+                   .setDescription("Delimiter used to separate the remote resource locations")
+                   .setDefaultValue("::")
+                   .build();
         DRIVER_PROPERTIES_FILE = builder.define("driverPropertiesFile", String.class)
                                         .setDescription("Driver-specific properties")
                                         .build();
