@@ -21,8 +21,12 @@ public class JdbcConnection implements DatabaseConnection {
     private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
     static {
-        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i);password=[^;]*")));
+        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]password=[^;&]*")));
+        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]user(.*?)=(.+)[^;&]")));
+        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]private_key_file(.*?)=[^;&]*")));
+        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]accountkey=[^;&]*")));
         PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
     }
 
     public JdbcConnection() {
@@ -41,7 +45,7 @@ public class JdbcConnection implements DatabaseConnection {
     @Override
     public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
         String driverClassName = driverObject.getClass().getName();
-        String errorMessage = "Connection could not be created to " + url + " with driver " + driverClassName;
+        String errorMessage = "Connection could not be created to " + sanitizeUrl(url) + " with driver " + driverClassName;
         try {
             this.con = driverObject.connect(url, driverProperties);
             if (this.con == null) {
