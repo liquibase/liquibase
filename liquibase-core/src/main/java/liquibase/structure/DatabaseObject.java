@@ -46,6 +46,10 @@ public interface DatabaseObject extends Comparable, LiquibaseSerializable {
 
     boolean snapshotByDefault();
 
+    default boolean isProOnlyObject() {
+        return false;
+    }
+
     /**
      * Returns the name of all attributes currently stored for this {@link DatabaseObject}.
      *
