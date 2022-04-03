@@ -27,7 +27,7 @@ public class GetViewDefinitionGeneratorDB2 extends GetViewDefinitionGenerator {
 
         if (database instanceof Db2zDatabase) {
             return new Sql[] {
-                    new UnparsedSql("select STATEMENT AS view_definition from SYSIBM.SYSVIEWS where NAME='" + statement.getViewName() + "' and (PATHSCHEMAS LIKE '%" + schema.getSchemaName() + "%' OR CREATOR = '" + schema.getSchemaName() + "')")
+                    new UnparsedSql("select STATEMENT AS view_definition from SYSIBM.SYSVIEWS where NAME='" + statement.getViewName() + "' and CREATOR = '" + schema.getSchemaName() + "'")
             };
         }
         return new Sql[] {
