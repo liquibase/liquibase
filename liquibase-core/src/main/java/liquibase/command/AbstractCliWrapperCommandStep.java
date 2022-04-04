@@ -1,5 +1,6 @@
 package liquibase.command;
 
+import liquibase.Scope;
 import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
 
@@ -26,7 +27,7 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
             Main.setOutputStream(printStream);
         }
 
-        CommandScope commandScope = resultsBuilder.getCommandScope();
+        final CommandScope commandScope = resultsBuilder.getCommandScope();
 
         String[] args = collectArguments(commandScope);
         int statusCode = Main.run(args);
