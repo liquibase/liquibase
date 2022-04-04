@@ -24,7 +24,6 @@ public class JdbcConnection implements DatabaseConnection {
         PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]password=[^;&]*")));
         PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]user(.*?)=(.+)[^;&]")));
         PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]private_key_file(.*?)=[^;&]*")));
-        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]accountkey=[^;&]*")));
         PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
         PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
     }

@@ -30,7 +30,6 @@ class JdbcConnectionTest extends Specification {
         "jdbc:snowflake://ba89345.us-east-2.aws.snowflakecomputing.com?warehouse=COMPUTE_WH&db=lbcat&schema=public&user=dude&password=Password123" | "jdbc:snowflake://ba89345.us-east-2.aws.snowflakecomputing.com?warehouse=COMPUTE_WH&db=lbcat&schema=public"
         "jdbc:snowflake://ba89345.us-east-2.aws.snowflakecomputing.com?warehouse=COMPUTE_WH&db=lbcat&schema=public&password=Password123&user=dude" | "jdbc:snowflake://ba89345.us-east-2.aws.snowflakecomputing.com?warehouse=COMPUTE_WH&db=lbcat&schema=public"
         "jdbc:snowflake://ba89345.us-east-2.aws.snowflakecomputing.com?warehouse=COMPUTE_WH&db=lbcat&schema=public&user=lbcat&private_key_file=/home/dude/rsa_key.p8&private_key_file_pwd=dudeabides" | "jdbc:snowflake://ba89345.us-east-2.aws.snowflakecomputing.com?warehouse=COMPUTE_WH&db=lbcat&schema=public"
-        "jdbc:cosmosdb:AccountEndpoint=myAccountEndpoint;AccountKey=myAccountKey;"           | "jdbc:cosmosdb:AccountEndpoint=myAccountEndpoint;"
         "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=my_user;password=my_password;" | "jdbc:jtds:sqlserver://localhost:1433/proCatalog;"
         "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=my_user;password=my_password"  | "jdbc:jtds:sqlserver://localhost:1433/proCatalog"
         "jdbc:jtds:sqlserver://localhost:1433/proCatalog;password=my_password;user=my_user;" | "jdbc:jtds:sqlserver://localhost:1433/proCatalog;"
