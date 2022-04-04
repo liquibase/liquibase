@@ -62,9 +62,11 @@ public class CommandResultsBuilder {
     /**
      * Collects the results and flushes the output stream.
      */
-    CommandResults build() {
+    public CommandResults build() {
         try {
-            outputStream.flush();
+            if (this.outputStream != null) {
+                outputStream.flush();
+            }
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Error flushing " + StringUtil.join(commandScope.getCommand().getName(), " ") + " output: " + e.getMessage(), e);
         }
