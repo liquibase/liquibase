@@ -97,11 +97,11 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         //
         // Check the Pro license
         //
-        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+        boolean hasProLicense = MavenUtils.checkProLicense(getLicenseKey(), commandName, getLog());
         if (! hasProLicense) {
             throw new LiquibaseException(
                     "The command 'rollbackOneChangeSet' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com." +
-                            "Add liquibase.pro.licenseKey as a Maven property or add liquibase.pro.licenseKey=<yourKey> into your defaults file.");
+                            "Add liquibase.licenseKey as a Maven property or add liquibase.licenseKey=<yourKey> into your defaults file.");
         }
         Database database = liquibase.getDatabase();
         CommandScope liquibaseCommand = new CommandScope("internalRollbackOneChangeSet");
@@ -114,7 +114,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         }
         argsMap.put("force", Boolean.TRUE);
         argsMap.put("liquibase", liquibase);
-        argsMap.put("liquibaseProLicenseKey", liquibaseProLicenseKey);
+        argsMap.put("liquibaseProLicenseKey", getLicenseKey());
 
         for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
             liquibaseCommand.addArgumentValue(entry.getKey(), entry.getValue());
