@@ -101,13 +101,13 @@ public class MavenUtils {
             log.info("");
             if (commandName != null) {
                 log.info("The command '" + commandName + "' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com." +
-                        "Add liquibase.pro.licenseKey as a Maven property or add liquibase.pro.licenseKey=<yourKey> into your defaults file.");
+                        "Add liquibase.licenseKey as a Maven property or add liquibase.licenseKey=<yourKey> into your defaults file.");
             }
             log.info("");
             hasProLicense = false;
         } else {
             Location licenseKeyLocation =
-                    new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, liquibaseProLicenseKey);
+                    new Location("property liquibaseProLicenseKey", liquibaseProLicenseKey);
             LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
             if (result.code != 0) {
                 String allMessages = String.join("\n", result.messages);

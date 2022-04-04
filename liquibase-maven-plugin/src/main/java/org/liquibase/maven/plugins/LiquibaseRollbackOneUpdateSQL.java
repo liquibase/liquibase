@@ -64,10 +64,10 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         //
         // Check the Pro license
         //
-        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+        boolean hasProLicense = MavenUtils.checkProLicense(getLicenseKey(), commandName, getLog());
         if (!hasProLicense) {
             throw new LiquibaseException(
-                    "The 'rollbackOneUpdateSQL' command requires a valid Liquibase Pro license. Get a free Pro license key at https://liquibase.com/protrial and add liquibase.pro.licenseKey=<yourKey> into your defaults file or use --pro-license-key=<yourKey> before your command in the CLI.");
+                    "The 'rollbackOneUpdateSQL' command requires a valid Liquibase Pro license. Get a free Pro license key at https://liquibase.com/trial and add liquibase.licenseKey=<yourKey> into your defaults file or use --pro-license-key=<yourKey> before your command in the CLI.");
         }
         Database database = liquibase.getDatabase();
         CommandScope liquibaseCommand = new CommandScope("internalRollbackOneUpdateSQL");

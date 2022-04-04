@@ -198,8 +198,15 @@ public class LiquibaseConfiguration implements SingletonObject {
                 return def;
             }
             final Set<String> aliasKeys = def.getAliasKeys();
-            if (aliasKeys != null && aliasKeys.contains(key)) {
-                return def;
+            if (aliasKeys != null) {
+                if (aliasKeys.contains(key)) {
+                    return def;
+                } else {
+                    Optional<String> first = aliasKeys.stream().filter(ak -> ak.replace(".", "").equalsIgnoreCase(key)).findFirst();
+                    if (first.isPresent()) {
+                        return def;
+                    }
+                }
             }
             if(def.getKey().replace(".","").equalsIgnoreCase(key)) {
                 return def;
