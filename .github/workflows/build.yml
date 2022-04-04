@@ -528,7 +528,7 @@ jobs:
               }
               
               console.log("Trigger Test Harness tests");
-              let workflowDispatch = await github.rest.actions.createWorkflowDispatch({
+              let testHarnessWorkflowDispatch = await github.rest.actions.createWorkflowDispatch({
                 "owner": "liquibase",
                 "repo": "liquibase-test-harness",
                 "workflow_id": "main.yml",
