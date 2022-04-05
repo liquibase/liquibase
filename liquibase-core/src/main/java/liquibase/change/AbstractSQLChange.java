@@ -4,13 +4,14 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.Scope;
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtil;
 
@@ -249,7 +250,11 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 escapedStatement = statement;
             }
 
-            returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
+            if (database instanceof Db2zDatabase && escapedStatement.toUpperCase().startsWith("CALL")) {
+                returnStatements.add(new RawCompoundStatement(escapedStatement, getEndDelimiter()));
+            } else {
+                returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
+            }
         }
 
         return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
