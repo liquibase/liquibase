@@ -289,16 +289,20 @@ jobs:
         with:
           path: artifacts
 
-      - name: Aggregate Coverage Info
-        run: |
-          mvn -pl liquibase-core jacoco:merge "-Djacoco.destFile=../jacoco-overall/jacoco.exec" "-Djacoco.fileSetDirectory=artifacts" "-Djacoco.fileSetInclude=**/target/jacoco/*.exec"
-          mvn -pl liquibase-core jacoco:report "-Djacoco.dataFile=../jacoco-overall/jacoco.exec"  "-Djacoco.outputDirectory=../jacoco-overall/jacoco"  "-Djacoco.formats=XML"
-
       - name: Sonar Analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn compile sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }} -Dsonar.sonar.coverage.jacoco.xmlReportPaths=../jacoco-overall/jacoco/jacoco.xml
+        run: |
+          # Jacoco and sonar need class files
+          mvn compile
+          
+          # Aggregate converage information 
+          mvn -pl liquibase-core jacoco:merge "-Djacoco.destFile=../jacoco-overall/jacoco.exec" "-Djacoco.fileSetDirectory=artifacts" "-Djacoco.fileSetInclude=**/target/jacoco/*.exec"
+          mvn -pl liquibase-core jacoco:report "-Djacoco.dataFile=../jacoco-overall/jacoco.exec"  "-Djacoco.outputDirectory=../jacoco-overall/jacoco"  "-Djacoco.formats=XML"
+          
+          # Run sonar
+          mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }} -Dsonar.sonar.coverage.jacoco.xmlReportPaths=../jacoco-overall/jacoco/jacoco.xml
 
   package:
     name: Package Artifacts
