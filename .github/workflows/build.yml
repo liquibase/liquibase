@@ -173,8 +173,8 @@ jobs:
       - name: Build & Test
         run: |
           mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' jacoco:prepare-agent clean test package surefire-report:report
-          mvn -pl liquibase-core jacoco:merge -Djacoco.destFile="../target/jacoco/jacoco-aggregate.exec" -Djacoco.fileSetDirectory=".."
-          mvn -pl liquibase-core jacoco:report -Djacoco.dataFile="../target/jacoco/jacoco-aggregate.exec"  -Djacoco.outputDirectory="../target/jacoco"
+          mvn -pl liquibase-core jacoco:merge "-Djacoco.destFile=../target/jacoco/jacoco-aggregate.exec" "-Djacoco.fileSetDirectory=.."
+          mvn -pl liquibase-core jacoco:report "-Djacoco.dataFile=../target/jacoco/jacoco-aggregate.exec"  "-Djacoco.outputDirectory=../target/jacoco"
 
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
