@@ -74,6 +74,7 @@
         <jacoco.fileSetDirectory></jacoco.fileSetDirectory>
         <jacoco.fileSetInclude>**/target/*.exec</jacoco.fileSetInclude>
         <jacoco.outputDirectory></jacoco.outputDirectory>
+        <jacoco.formats></jacoco.formats>
 
         <sonar.organization>liquibase</sonar.organization>
         <sonar.projectKey>liquibase</sonar.projectKey>
@@ -431,6 +432,7 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.7</version>
                 <configuration>
+                    <formats>${jacoco.formats}</formats>
                     <outputDirectory>${jacoco.outputDirectory}</outputDirectory>
                     <fileSets>
                         <fileSet>
