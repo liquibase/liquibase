@@ -36,6 +36,19 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
         }
         resultsBuilder.addResult("statusCode", statusCode);
 
+/*
+        Map<String, Object> scopedObjects = new HashMap<>();
+        scopedObjects.put("parentResultsBuilder", resultsBuilder);
+        Scope.child(scopedObjects, () -> {
+            String[] args = collectArguments(commandScope);
+            int statusCode = Main.run(args);
+            if (statusCode != 0) {
+                throw new CommandExecutionException("Unexpected error running liquibase");
+            }
+            resultsBuilder.addResult("statusCode", statusCode);
+        });
+ */
+
         if (printStream != null) {
             printStream.close();
         }
