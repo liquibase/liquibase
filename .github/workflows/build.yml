@@ -172,7 +172,10 @@ jobs:
           cache: 'maven'
       - name: Build & Test
         run: |
-          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
+          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' jacoco:prepare-agent clean test package surefire-report:report
+          mvn -pl liquibase-core jacoco:merge -Djacoco.destFile=../target/jacoco/jacoco-aggregate.exec -Djacoco.fileSetDirectory=".."
+          mvn -pl liquibase-core jacoco:report -Djacoco.dataFile=../target/jacoco/jacoco-aggregate.exec  -Djacoco.outputDirectory=../target/jacoco
+
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
         run: |
@@ -183,10 +186,11 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: liquibase-test-results-jdk${{ matrix.java }}
+          name: liquibase-test-results-jdk${{ matrix.java }}-${{ matrix.os }}
           path: |
             ./**/target/surefire-reports
             ./**/target/site
+            ./target/jacoco
 
       - name: Archive Modules
         if: ${{ matrix.java == 8 && matrix.os == 'ubuntu-latest'}}
@@ -195,33 +199,6 @@ jobs:
           name: liquibase-modules
           path: |
             */target/*-0-SNAPSHOT.jar
-
-  sonar:
-    name: Sonar Scan
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: 11
-          distribution: 'adopt'
-          cache: 'maven'
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: Build and analyze
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
 
   integration-test:
     name: Integration Test
@@ -273,7 +250,7 @@ jobs:
           password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - name: Run Tests
-        run: mvn -B jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false
+        run: mvn -B jacoco:prepare-agent jar:jar jar:test-jar surefire:test -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false
 
       - name: Archive Test Results
         if: ${{ always() }}
@@ -282,6 +259,46 @@ jobs:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
             ./**/target/surefire-reports
+            ./**/target/site
+            ./target/jacoco
+
+  sonar:
+    name: Sonar Scan
+    runs-on: ubuntu-latest
+    needs: [ setup, build, integration-test ]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: 'adopt'
+          cache: 'maven'
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Download coverage information
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Aggregate Coverage Info
+        run: |
+          mvn -pl liquibase-core jacoco:merge -Djacoco.destFile=../jacoco-overall/jacoco.exec -Djacoco.fileSetDirectory=artifacts -Djacoco.fileSetInclude="**/target/jacoco/*.exec"
+          mvn -pl liquibase-core jacoco:report -Djacoco.dataFile=../jacoco-overall/jacoco.exec  -Djacoco.outputDirectory=../jacoco-overall/jacoco
+
+      - name: Sonar Analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }} -Dsonar.sonar.coverage.jacoco.xmlReportPaths=../jacoco-overall/jacoco/jacoco.xml
 
   package:
     name: Package Artifacts

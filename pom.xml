@@ -70,6 +70,19 @@
         <junit.version>4.13.2</junit.version>
         <trimStackTrace>false</trimStackTrace>
         <argLine></argLine>
+
+        <jacoco.fileSetDirectory></jacoco.fileSetDirectory>
+        <jacoco.fileSetInclude>**/target/*.exec</jacoco.fileSetInclude>
+        <jacoco.outputDirectory></jacoco.outputDirectory>
+
+        <sonar.organization>liquibase</sonar.organization>
+        <sonar.projectKey>liquibase</sonar.projectKey>
+        <sonar.projectName>Liquibase</sonar.projectName>
+        <sonar.projectDescription>Liquibase</sonar.projectDescription>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.scm.provider>git</sonar.scm.provider>
+        <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+
     </properties>
 
 
@@ -313,7 +326,7 @@
                 </dependencies>
                 <configuration>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
+                    <argLine>@{argLine} -Dfile.encoding=${project.build.sourceEncoding}</argLine>
                 </configuration>
             </plugin>
 
@@ -413,6 +426,29 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.7</version>
+                <configuration>
+                    <outputDirectory>${jacoco.outputDirectory}</outputDirectory>
+                    <fileSets>
+                        <fileSet>
+                            <directory>${jacoco.fileSetDirectory}</directory>
+                            <includes>
+                                <include>${jacoco.fileSetInclude}</include>
+                            </includes>
+                        </fileSet>
+                    </fileSets>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.1.2184</version>
+            </plugin>
+
             <!--        <plugin>-->
             <!--            <artifactId>maven-install-plugin</artifactId>-->
             <!--            <version>2.5.2</version>-->
@@ -463,57 +499,6 @@
                                 --add-opens java.base/java.lang=ALL-UNNAMED
                             </argLine>
                         </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>sonar</id>
-            <properties>
-                <sonar.organization>liquibase</sonar.organization>
-                <sonar.projectKey>liquibase</sonar.projectKey>
-                <sonar.projectName>Liquibase</sonar.projectName>
-                <sonar.projectDescription>Liquibase</sonar.projectDescription>
-                <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-                <sonar.scm.provider>git</sonar.scm.provider>
-                <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonarsource.scanner.maven</groupId>
-                        <artifactId>sonar-maven-plugin</artifactId>
-                        <version>3.9.1.2184</version>
-                        <executions>
-                            <execution>
-                                <id>sonar</id>
-                                <goals>
-                                    <goal>sonar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.7</version>
-                        <executions>
-                            <execution>
-                                <id>prepare-agent</id>
-                                <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>report</id>
-                                <phase>test</phase>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>
