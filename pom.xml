@@ -72,9 +72,11 @@
         <argLine></argLine>
 
         <jacoco.fileSetDirectory></jacoco.fileSetDirectory>
-        <jacoco.fileSetInclude>**/target/*.exec</jacoco.fileSetInclude>
         <jacoco.outputDirectory></jacoco.outputDirectory>
         <jacoco.formats></jacoco.formats>
+        <jacoco.destFile></jacoco.destFile>
+        <jacoco.dataFile></jacoco.dataFile>
+        <jacoco.fileSetInclude></jacoco.fileSetInclude>
 
         <sonar.organization>liquibase</sonar.organization>
         <sonar.projectKey>liquibase</sonar.projectKey>
@@ -433,7 +435,9 @@
                 <version>0.8.7</version>
                 <configuration>
                     <formats>${jacoco.formats}</formats>
+                    <destFile>${jacoco.destFile}</destFile>
                     <outputDirectory>${jacoco.outputDirectory}</outputDirectory>
+                    <dataFile>${jacoco.dataFile}</dataFile>
                     <fileSets>
                         <fileSet>
                             <directory>${jacoco.fileSetDirectory}</directory>

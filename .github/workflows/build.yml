@@ -289,20 +289,33 @@ jobs:
         with:
           path: artifacts
 
+      - name: Restore Built Code Cache
+        uses: actions/cache@v2
+        with:
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
+          path: ./**/target
+
       - name: Sonar Analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          # Jacoco and sonar need class files
-          mvn compile
+          # Aggregate converage information
+          ## sonar requires all the class files to be from the same jvm. Remove any non-java-8 ones
+          rm -rf artifacts/*results-jdk11*
+          rm -rf artifacts/*results-jdk17*
+          rm -rf artifacts/*results-*macos-*
+          rm -rf artifacts/*results-*windows-*
           
-          # Aggregate converage information 
-          mvn -pl liquibase-core jacoco:merge "-Djacoco.destFile=../jacoco-overall/jacoco.exec" "-Djacoco.fileSetDirectory=artifacts" "-Djacoco.fileSetInclude=**/target/jacoco/*.exec"
-          mvn -pl liquibase-core jacoco:report "-Djacoco.dataFile=../jacoco-overall/jacoco.exec"  "-Djacoco.outputDirectory=../jacoco-overall/jacoco"  "-Djacoco.formats=XML"
+          mkdir jacoco-aggregate
+          cp -r **/target/classes/* jacoco-aggregate/
+          cp .github/util/jacoco-aggregate.pom.xml jacoco-aggregate/pom.xml
+          
+          cd (jacoco-aggregate && mvn jacoco:merge "-Djacoco.destFile=jacoco-aggregate.exec" "-Djacoco.fileSetDirectory=../artifacts" -Djacoco.fileSetInclude="**/target/jacoco/*.exec")
+          cd (jacoco-aggregate && mvn jacoco:report "-Djacoco.dataFile=jacoco-aggregate.exec" "-Djacoco.formats=XML")
           
           # Run sonar
-          mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }} -Dsonar.sonar.coverage.jacoco.xmlReportPaths=../jacoco-overall/jacoco/jacoco.xml
+          mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }} -Dsonar.sonar.coverage.jacoco.xmlReportPaths=../jacoco-aggregate/jacoco-aggregate.xml
 
   package:
     name: Package Artifacts
