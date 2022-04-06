@@ -310,8 +310,8 @@ jobs:
           cp -r **/target/classes/* jacoco-aggregate/
           cp .github/util/jacoco-aggregate.pom.xml jacoco-aggregate/pom.xml
           
-          cd (jacoco-aggregate && mvn jacoco:merge "-Djacoco.destFile=jacoco-aggregate.exec" "-Djacoco.fileSetDirectory=../artifacts" -Djacoco.fileSetInclude="**/target/jacoco/*.exec")
-          cd (jacoco-aggregate && mvn jacoco:report "-Djacoco.dataFile=jacoco-aggregate.exec" "-Djacoco.formats=XML")
+          (cd jacoco-aggregate && mvn jacoco:merge "-Djacoco.destFile=jacoco-aggregate.exec" "-Djacoco.fileSetDirectory=../artifacts" -Djacoco.fileSetInclude="**/target/jacoco/*.exec")
+          (cd jacoco-aggregate && mvn jacoco:report "-Djacoco.dataFile=jacoco-aggregate.exec" "-Djacoco.formats=XML")
           
           # Run sonar
           mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }} -Dsonar.sonar.coverage.jacoco.xmlReportPaths=../jacoco-aggregate/jacoco-aggregate.xml
