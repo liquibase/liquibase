@@ -306,8 +306,8 @@ jobs:
           rm -rf artifacts/*results-*macos-*
           rm -rf artifacts/*results-*windows-*
           
-          mkdir jacoco-aggregate
-          cp -r **/target/classes/* jacoco-aggregate/
+          mkdir -p jacoco-aggregate/target/classes
+          cp -r **/target/classes/* jacoco-aggregate/target/classes
           cp .github/util/jacoco-aggregate.pom.xml jacoco-aggregate/pom.xml
           
           (cd jacoco-aggregate && mvn jacoco:merge "-Djacoco.destFile=jacoco-aggregate.exec" "-Djacoco.fileSetDirectory=../artifacts" -Djacoco.fileSetInclude="**/target/jacoco/*.exec")
