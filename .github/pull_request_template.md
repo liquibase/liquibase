@@ -61,4 +61,4 @@ Add any other context about the problem here.
 - [ ] Documentation Updated
 
 ## Need Help?
-Come chat with us on our [discord channel](https://discord.com/channels/700506481111597066/700506481572839505)
+Come chat with us in the [Liquibase Forum](https://forum.liquibase.org/).
