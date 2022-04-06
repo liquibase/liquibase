@@ -329,7 +329,8 @@
                 </dependencies>
                 <configuration>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <argLine>@{argLine} -Dfile.encoding=${project.build.sourceEncoding}</argLine>
+                    <forkCount>0</forkCount>
+                    <argLine>@{argLine} -Dfile.encoding=${project.build.sourceEncoding} -Xmx1024m</argLine>
                 </configuration>
             </plugin>
 
