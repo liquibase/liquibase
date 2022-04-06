@@ -74,7 +74,6 @@
         <jacoco.fileSetDirectory></jacoco.fileSetDirectory>
         <jacoco.outputDirectory></jacoco.outputDirectory>
         <jacoco.formats></jacoco.formats>
-        <jacoco.destFile></jacoco.destFile>
         <jacoco.dataFile></jacoco.dataFile>
         <jacoco.fileSetInclude></jacoco.fileSetInclude>
 
@@ -329,7 +328,6 @@
                 </dependencies>
                 <configuration>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <forkCount>0</forkCount>
                     <argLine>@{argLine} -Dfile.encoding=${project.build.sourceEncoding} -Xmx1024m</argLine>
                 </configuration>
             </plugin>
@@ -436,7 +434,6 @@
                 <version>0.8.7</version>
                 <configuration>
                     <formats>${jacoco.formats}</formats>
-                    <destFile>${jacoco.destFile}</destFile>
                     <outputDirectory>${jacoco.outputDirectory}</outputDirectory>
                     <dataFile>${jacoco.dataFile}</dataFile>
                     <fileSets>
