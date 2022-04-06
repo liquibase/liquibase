@@ -98,7 +98,7 @@ public interface DatabaseObject extends Comparable, LiquibaseSerializable {
      */
     default String buildFullyQualifiedName() {
         DatabaseObject[] containingObjects = getContainingObjects();
-        if (containingObjects == null) {
+        if (containingObjects == null || containingObjects[0] == null) {
             return getName();
         } else {
             return containingObjects[0].buildFullyQualifiedName() + "." + getName();
