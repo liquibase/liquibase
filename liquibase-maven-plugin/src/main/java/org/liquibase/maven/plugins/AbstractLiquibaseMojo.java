@@ -315,17 +315,39 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private boolean hasProLicense;
 
     /**
-     * Specifies your Liquibase Pro license key.
+     * Specifies your Liquibase Pro license key. This has been deprecated in favor of using
+     * "liquibase.liquibaseLicenseKey", but this property will continue to be operational.
      *
      * @parameter property="liquibase.liquibaseProLicenseKey"
      */
     @PropertyElement
-    protected String liquibaseProLicenseKey;
+    @Deprecated
+    private String liquibaseProLicenseKey;
+
+    /**
+     * Specifies your Liquibase license key.
+     *
+     * @parameter property="liquibase.liquibaseLicenseKey"
+     */
+    @PropertyElement
+    private String liquibaseLicenseKey;
 
     protected String commandName;
 
     protected boolean hasProLicense() {
         return hasProLicense;
+    }
+
+    /**
+     * Get the specified license key. This first checks liquibaseLicenseKey and if no key is found, then returns
+     * liquibaseProLicenseKey.
+     */
+    protected String getLicenseKey() {
+        if (StringUtil.isNotEmpty(liquibaseLicenseKey)) {
+            return liquibaseLicenseKey;
+        } else {
+            return liquibaseProLicenseKey;
+        }
     }
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
@@ -414,7 +436,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     //
                     // Check for a LiquibasePro license
                     //
-                    hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+                    hasProLicense = MavenUtils.checkProLicense(getLicenseKey(), commandName, getLog());
 
                     getLog().info(CommandLineUtils.getBanner());
 

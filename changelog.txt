@@ -18,6 +18,8 @@ If the `MANIFEST.MF` file is not the first entry, `java.util.jar.JarInputStream#
 
 [[PR#2643](https://github.com/liquibase/liquibase/pull/2643)] Fixed an issue in snapshot on PostgreSQL where non-integer datatypes that used a default value with a sequence would not be handled correctly [DAT-8670]
 
+[[PR#2691](https://github.com/liquibase/liquibase/pull/2691)] Fixed invalid JSON in the example-changelog.json file [DAT-9893]
+
 Changes in version 4.9.0 (2022.03.17)
 
 # Notable Changes
