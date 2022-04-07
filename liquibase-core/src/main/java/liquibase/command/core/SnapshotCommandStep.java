@@ -38,8 +38,6 @@ public class SnapshotCommandStep extends AbstractDatabaseCommandStep {
     public static final CommandArgumentDefinition<String> SNAPSHOT_FORMAT_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
-    public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
-    public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<SnapshotControl> SNAPSHOT_CONTROL_ARG;
 
