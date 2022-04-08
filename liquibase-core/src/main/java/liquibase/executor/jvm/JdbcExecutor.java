@@ -397,16 +397,12 @@ public class JdbcExecutor extends AbstractExecutor {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: " + getErrorCode(e) + statement+"]", e);
                 }
                 try {
-                    int updateCount = 0;
-                    //cycle for retrieving row counts from all statements
-                    do {
-                        if (!stmt.getMoreResults()) {
-                            updateCount = stmt.getUpdateCount();
-                            if (updateCount != -1)
-                                log.log(sqlLogLevel, updateCount + " row(s) affected", null);
-                        }
-                    } while (updateCount != -1);
-
+                    // cycle for retrieving row counts from all statements
+                    while (stmt.getMoreResults()) {
+                        int updateCount = stmt.getUpdateCount();
+                        if (updateCount != -1)
+                            log.log(sqlLogLevel, updateCount + " row(s) affected", null);
+                    }
                 } catch (Exception e) {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: "+ getErrorCode(e) + statement+"]", e);
                 }
