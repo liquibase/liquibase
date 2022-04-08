@@ -221,7 +221,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_TOKEN
+        run: mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
 
   integration-test:
     name: Integration Test
@@ -521,6 +521,27 @@ jobs:
                   })
                 }
               });
+            
+              let testHarnessBranch = await helper.findMatchingBranch("liquibase", "liquibase-test-harness");
+              if (testHarnessBranch.name == "main" || testHarnessBranch.name == "master") {
+                testHarnessBranch.name = "develop";
+              }
+              
+              console.log("Trigger Test Harness tests");
+              let testHarnessWorkflowDispatch = await github.rest.actions.createWorkflowDispatch({
+                "owner": "liquibase",
+                "repo": "liquibase-test-harness",
+                "workflow_id": "main.yml",
+                "ref": testHarnessBranch.name,
+                "inputs": {
+                  "liquibaseCommit": helper.getCurrentSha(),
+                  "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
+                  "runDetails": JSON.stringify({
+                    "liquibaseBranch": helper.getCurrentBranch(),
+                    "notices": notices
+                  })
+                }
+              });
             }
 
             await github.rest.repos.createCommitStatus({
@@ -529,5 +550,14 @@ jobs:
               "sha": helper.getCurrentSha(),
               "state": markFunctionalTestsStatus,
               "context": "Run Functional Tests",
+              "description": markFunctionalTestsDescription
+            });
+
+            await github.rest.repos.createCommitStatus({
+              "owner": "liquibase",
+              "repo": "liquibase",
+              "sha": helper.getCurrentSha(),
+              "state": markFunctionalTestsStatus,
+              "context": "Run Test Harness",
               "description": markFunctionalTestsDescription
             });
