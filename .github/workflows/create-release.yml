@@ -54,7 +54,7 @@ jobs:
           path: download/liquibase-artifacts
 
       - name: Set up JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '8'
           distribution: 'adopt'
@@ -108,7 +108,7 @@ jobs:
           path: re-version/final
 
       - name: Set up JDK for GPG
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '8'
           distribution: 'adopt'
