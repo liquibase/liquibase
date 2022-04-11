@@ -12,6 +12,7 @@ Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changeExecListenerClass (String) Fully-qualified class which specifies a ChangeExecListener
     Default: null
