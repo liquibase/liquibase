@@ -7,8 +7,6 @@ on:
       - reopened
       - synchronize
       - labeled
-    branches-ignore:
-      - github-action-* #to allow testing of build logic in branches, don't do PR builds for github-action-* branches and instead use branch builds
 
   push:
     branches:
@@ -23,7 +21,12 @@ jobs:
     name: Check if Build should be done
     runs-on: ubuntu-latest
     steps:
-      - name: Emit failure code if unsafe
+      - name: Supress builds for PRs from branch github-action-*
+        if: github.event.pull_request && contains(github.head_ref, 'github-action')
+        run: |
+          echo "not building PRs with source branch github-action-*"
+          exit 1
+      - name: Emit failure code for unsafe fork PRs
         if: github.event.pull_request && github.event.pull_request.head.repo.full_name != 'liquibase/liquibase' && github.event.label.name != 'SafeToBuild'
         run: |
           echo "PR from Fork is NOT safe to build"
@@ -222,7 +225,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_TOKEN
+        run: mvn clean verify sonar:sonar -P sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
 
   integration-test:
     name: Integration Test
@@ -522,6 +525,27 @@ jobs:
                   })
                 }
               });
+            
+              let testHarnessBranch = await helper.findMatchingBranch("liquibase", "liquibase-test-harness");
+              if (testHarnessBranch.name == "main" || testHarnessBranch.name == "master") {
+                testHarnessBranch.name = "develop";
+              }
+              
+              console.log("Trigger Test Harness tests");
+              let testHarnessWorkflowDispatch = await github.rest.actions.createWorkflowDispatch({
+                "owner": "liquibase",
+                "repo": "liquibase-test-harness",
+                "workflow_id": "main.yml",
+                "ref": testHarnessBranch.name,
+                "inputs": {
+                  "liquibaseCommit": helper.getCurrentSha(),
+                  "runDescription": "Triggered by https://github.com/liquibase/liquibase/actions/runs/"+context.runId,
+                  "runDetails": JSON.stringify({
+                    "liquibaseBranch": helper.getCurrentBranch(),
+                    "notices": notices
+                  })
+                }
+              });
             }
 
             await github.rest.repos.createCommitStatus({
@@ -530,5 +554,14 @@ jobs:
               "sha": helper.getCurrentSha(),
               "state": markFunctionalTestsStatus,
               "context": "Run Functional Tests",
+              "description": markFunctionalTestsDescription
+            });
+
+            await github.rest.repos.createCommitStatus({
+              "owner": "liquibase",
+              "repo": "liquibase",
+              "sha": helper.getCurrentSha(),
+              "state": markFunctionalTestsStatus,
+              "context": "Run Test Harness",
               "description": markFunctionalTestsDescription
             });

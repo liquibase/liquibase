@@ -1066,6 +1066,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupRollbackCount(count, changeLogPath))
         }
 
+        void modifyProperties(File propsFile, String key, String value) {
+            this.setups.add(new SetupModifyProperties(propsFile, key, value))
+        }
+
+        void modifyTextFile(File textFile, String originalString, String newString) {
+            this.setups.add(new SetupModifyTextFile(textFile, originalString, newString))
+        }
 
         private void validate() throws IllegalArgumentException {
 

@@ -1,6 +1,25 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.9.1 (2022.03.25)
+
+## Liquibase 4.9.1 patch release
+Please report any issues to [https://github.com/liquibase/liquibase/issues](https://github.com/liquibase/liquibase/issues).
+
+## Notable Changes
+
+[[PR#2666](https://github.com/liquibase/liquibase/pull/2666)] [[nvoxland](https://github.com/nvoxland)] Liquibase 4.9.1 release is a patch release that fixes the `MANIFEST.MF` location in the `liquibase.jar` file for tools that require the `MANIFEST.MF` file to be the first entry in the jar archive.
+If the `MANIFEST.MF` file is not the first entry, `java.util.jar.JarInputStream#getManifest()` reading the `MANIFEST.MF` file will not return the manifest information appropriately. The PR fixes issue [#2648](https://github.com/liquibase/liquibase/issues/2648).
+
+[[Issue#2672](https://github.com/liquibase/liquibase/issues/2672)] Addresses the remaining OSGi-related packaging problems to fully restore Liquibase support in OSGi environments.
+
+## Fixes
+[[PR#2651](https://github.com/liquibase/liquibase/pull/2651)] Fixed the issue with a malicious software alert for the Liquibase macOS Installer preventing from proceeding with the installation. [DAT-9524]
+
+[[PR#2643](https://github.com/liquibase/liquibase/pull/2643)] Fixed an issue in snapshot on PostgreSQL where non-integer datatypes that used a default value with a sequence would not be handled correctly [DAT-8670]
+
+[[PR#2691](https://github.com/liquibase/liquibase/pull/2691)] Fixed invalid JSON in the example-changelog.json file [DAT-9893]
+
 Changes in version 4.9.0 (2022.03.17)
 
 # Notable Changes
