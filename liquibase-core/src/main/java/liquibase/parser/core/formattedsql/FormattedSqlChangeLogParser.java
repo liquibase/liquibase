@@ -84,6 +84,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern changeLogPattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
             Pattern propertyPattern = Pattern.compile("\\s*\\-\\-[\\s]*property\\s+(.*:.*)\\s+(.*:.*).*", Pattern.CASE_INSENSITIVE);
             Pattern changeSetPattern = Pattern.compile("\\s*\\-\\-[\\s]*changeset\\s+(\"[^\"]+\"|[^:]+):\\s*(\"[^\"]+\"|\\S+).*", Pattern.CASE_INSENSITIVE);
+            Pattern altChangeSetPattern = Pattern.compile("[-]+.*changeset\\s.*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
             Pattern preconditionsPattern = Pattern.compile("\\s*\\-\\-[\\s]*preconditions(.*)", Pattern.CASE_INSENSITIVE);
             Pattern preconditionPattern = Pattern.compile("\\s*\\-\\-[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", Pattern.CASE_INSENSITIVE);
@@ -123,8 +124,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 }
                 Matcher changeLogPatterMatcher = changeLogPattern.matcher (line);
                 if (changeLogPatterMatcher.matches ()) {
-                   Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
-                   changeLog.setLogicalFilePath (parseString(logicalFilePathMatcher));
+                    Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
+                    changeLog.setLogicalFilePath (parseString(logicalFilePathMatcher));
 
                     Matcher changeLogIdMatcher = changeLogIdPattern.matcher (line);
                     changeLog.setChangeLogId (parseString(changeLogIdMatcher));
@@ -257,6 +258,10 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     currentSql.setLength(0);
                     currentRollbackSql.setLength(0);
                 } else {
+                    Matcher altChangeSetPatterMatcher = altChangeSetPattern.matcher(line);
+                    if (altChangeSetPatterMatcher.matches ()) {
+                        throw new ChangeLogParseException("\nChangeset lines in your formatted SQL changelog must start with '--changeset'");
+                    }
                     if (changeSet != null) {
                         Matcher commentMatcher = commentPattern.matcher(line);
                         Matcher rollbackMatcher = rollbackPattern.matcher(line);
