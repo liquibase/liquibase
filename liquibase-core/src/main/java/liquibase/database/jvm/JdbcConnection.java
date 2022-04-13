@@ -17,15 +17,25 @@ import java.util.regex.Pattern;
  */
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
-    private static final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC = new HashSet<>();
+    private static final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC_BLANK = new HashSet<>();
+    private static final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC_BLANK_TO_OBFUSCATE = new HashSet<>();
+    private static final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC_OBFUSCATE = new HashSet<>();
     private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
     static {
-        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]password=[^;&]*")));
-        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]user(.*?)=(.+)[^;&]")));
-        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]private_key_file(.*?)=[^;&]*")));
-        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
-        PATTERN_JDBC.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]password=[^;&]*")));
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]user(.*?)=(.+)[^;&]")));
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)[?&:;]private_key_file(.*?)=[^;&]*")));
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+
+        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+
+        PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)(.+?)password=([^;&?]+)[;&]*?(.*?)$")));
+        PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)(.+?)user[name]*?=([^;&?]+)[;&]*?(.*?)$")));
+        PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)(.+?)private_key_file=([^;&?]+)[;&]*?(.*?)$")));
+        PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile("(?i)(.+?)private_key_file_pwd=([^;&?]+)[;&]*?(.*?)$")));
     }
 
     public JdbcConnection() {
@@ -126,7 +136,43 @@ public class JdbcConnection implements DatabaseConnection {
      * @return modified string
      */
     public static String sanitizeUrl(String url) {
-        return stripPasswordPropFromJdbcUrl(url);
+        return obfuscateCredentialsPropFromJdbcUrl(url);
+    }
+
+    private static String obfuscateCredentialsPropFromJdbcUrl(String jdbcUrl) {
+        if (jdbcUrl == null || (jdbcUrl != null && jdbcUrl.equals(""))) {
+            return jdbcUrl;
+        }
+
+        //
+        // Do not try to strip passwords from a proxy URL
+        //
+        Matcher m = PROXY_USER.matcher(jdbcUrl);
+        if (m.matches()) {
+            return jdbcUrl;
+        }
+
+        for (Map.Entry<Pattern, Pattern> entry : PATTERN_JDBC_BLANK_TO_OBFUSCATE) {
+            Pattern jdbcUrlPattern = entry.getKey();
+            Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
+            if (matcher.matches()) {
+                Pattern pattern = entry.getValue();
+                jdbcUrl = pattern.matcher(jdbcUrl).replaceAll("");
+            }
+        }
+
+        for (Map.Entry<Pattern, Pattern> entry : PATTERN_JDBC_OBFUSCATE) {
+            Pattern jdbcUrlPattern = entry.getKey();
+            Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
+            if (matcher.matches()) {
+                Pattern pattern = entry.getValue();
+                Matcher actualMatcher = pattern.matcher(jdbcUrl);
+                if (actualMatcher.find()) {
+                    jdbcUrl = jdbcUrl.replace("=" + actualMatcher.group(2), "=*****");
+                }
+            }
+        }
+        return jdbcUrl;
     }
 
     private static String stripPasswordPropFromJdbcUrl(String jdbcUrl) {
@@ -141,12 +187,12 @@ public class JdbcConnection implements DatabaseConnection {
         if (m.matches()) {
             return jdbcUrl;
         }
-        for (Map.Entry<Pattern, Pattern> entry : PATTERN_JDBC) {
+        for (Map.Entry<Pattern, Pattern> entry : PATTERN_JDBC_BLANK) {
             Pattern jdbcUrlPattern = entry.getKey();
             Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
             if (matcher.matches()) {
-                Pattern passwordPattern = entry.getValue();
-                jdbcUrl = passwordPattern.matcher(jdbcUrl).replaceAll("");
+                Pattern pattern = entry.getValue();
+                jdbcUrl = pattern.matcher(jdbcUrl).replaceAll("");
             }
         }
         return jdbcUrl;
