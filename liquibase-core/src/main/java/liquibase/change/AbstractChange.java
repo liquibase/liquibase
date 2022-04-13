@@ -38,7 +38,6 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     private ChangeSet changeSet;
 
     public AbstractChange() {
-//        String s = "";
     }
 
     /**
