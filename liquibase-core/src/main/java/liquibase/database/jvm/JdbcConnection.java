@@ -39,15 +39,17 @@ public class JdbcConnection implements DatabaseConnection {
     @SuppressWarnings("squid:S2068")
     public static final String FILTER_CREDS_PRIVATE_KEY_FILE_PWD = "(?i)(.+?)private_key_file_pwd=([^;&?]+)[;&]*?(.*?)$";
 
+    public static final String FILTER_CREDS = "(?i)/(.*)((?=@))";
+
     static {
         PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PW_TO_BLANK)));
         PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_USER_TO_BLANK)));
         PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PRIVATE_KEY_TO_BLANK)));
-        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
-        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile(FILTER_CREDS)));
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile(FILTER_CREDS)));
 
-        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
-        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile("(?i)/(.*)((?=@))")));
+        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile(FILTER_CREDS)));
+        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile(FILTER_CREDS)));
 
         PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PASSWORD)));
         PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_USER)));
