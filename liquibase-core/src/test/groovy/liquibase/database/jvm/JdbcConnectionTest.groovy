@@ -57,7 +57,7 @@ class JdbcConnectionTest extends Specification {
         "jdbc:postgresql://localhost:6432/intuserdb?user=proschema&password=password"        | "jdbc:postgresql://localhost:6432/intuserdb?user=*****&password=*****"
         "jdbc:postgresql://localhost:6432/intuserdb?password=proschema&user=proschema"       | "jdbc:postgresql://localhost:6432/intuserdb?password=*****&user=*****"
         "jdbc:postgresql://localhost:6432/intuserdb?other=nothing&password=proschema&user=proschema" | "jdbc:postgresql://localhost:6432/intuserdb?other=nothing&password=*****&user=*****"
-        "jdbc:mysql://dude:secret@localhost:3306/lbcat"                                      | "jdbc:mysql:@localhost:3306/lbcat"
+        "jdbc:mysql://dude:secret@localhost:3306/lbcat"                                      | "jdbc:mysql://*****:*****@localhost:3306/lbcat"
         "jdbc:mysql://localhost:3306/lbcat?user=dude&password=secret"                        | "jdbc:mysql://localhost:3306/lbcat?user=*****&password=*****"
         "jdbc:snowflake://ba89345.us-east-2.aws.snowflakecomputing.com?warehouse=COMPUTE_WH&db=lbcat&schema=public&user=dude&password=password123" | "jdbc:snowflake://ba89345.us-east-2.aws.snowflakecomputing.com?warehouse=COMPUTE_WH&db=lbcat&schema=public&user=*****&password=*****"
         "jdbc:snowflake://ba89345.us-east-2.aws.snowflakecomputing.com?warehouse=COMPUTE_WH&db=lbcat&schema=public&password=Password123&user=dude" | "jdbc:snowflake://ba89345.us-east-2.aws.snowflakecomputing.com?warehouse=COMPUTE_WH&db=lbcat&schema=public&password=*****&user=*****"
@@ -66,7 +66,7 @@ class JdbcConnectionTest extends Specification {
         "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=my_user;password=my_password"  | "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=*****;password=*****"
         "jdbc:jtds:sqlserver://localhost:1433/proCatalog;password=my_password;user=my_user;" | "jdbc:jtds:sqlserver://localhost:1433/proCatalog;password=*****;user=*****;"
         "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=my_user;"                      | "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=*****;"
-        "jdbc:oracle:thin:user/password@host:1521/db"                                        | "jdbc:oracle:thin:user@host:1521/db"
+        "jdbc:oracle:thin:user/password@host:1521/db"                                        | "jdbc:oracle:thin:*****/*****@host:1521/db"
         "jdbc:oracle:thin:@host:1521/db"                                                     | "jdbc:oracle:thin:@host:1521/db"
         null                                                                                 | null
     }

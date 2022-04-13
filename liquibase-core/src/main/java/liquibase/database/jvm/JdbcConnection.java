@@ -41,6 +41,9 @@ public class JdbcConnection implements DatabaseConnection {
 
     public static final String FILTER_CREDS = "(?i)/(.*)((?=@))";
 
+    public static final String FILTER_CREDS_MYSQL_TO_OBFUSCATE = "(?i).+://(.*?)([:])(.*?)((?=@))";
+    public static final String FILTER_CREDS_ORACLE_TO_OBFUSCATE = "(?i)jdbc:oracle:thin:(.*?)([/])(.*?)((?=@))";
+
     static {
         PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PW_TO_BLANK)));
         PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_USER_TO_BLANK)));
@@ -48,8 +51,8 @@ public class JdbcConnection implements DatabaseConnection {
         PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile(FILTER_CREDS)));
         PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile(FILTER_CREDS)));
 
-        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile(FILTER_CREDS)));
-        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile(FILTER_CREDS)));
+        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile(FILTER_CREDS_ORACLE_TO_OBFUSCATE)));
+        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile(FILTER_CREDS_MYSQL_TO_OBFUSCATE)));
 
         PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PASSWORD)));
         PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_USER)));
@@ -176,7 +179,10 @@ public class JdbcConnection implements DatabaseConnection {
             Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
             if (matcher.matches()) {
                 Pattern pattern = entry.getValue();
-                jdbcUrl = pattern.matcher(jdbcUrl).replaceAll("");
+                Matcher actualMatcher = pattern.matcher(jdbcUrl);
+                if (actualMatcher.find()) {
+                    jdbcUrl = jdbcUrl.replace(actualMatcher.group(1) + actualMatcher.group(2) + actualMatcher.group(3), "*****" + actualMatcher.group(2) + "*****");
+                }
             }
         }
 
