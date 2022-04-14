@@ -132,7 +132,6 @@ module.exports = ({github, context}) => {
                                         continue;
                                     }
 
-                                    matchingBuildFound = true;
                                     console.log(`Found build for branch ${branchName}`);
 
                                     if (!returnData.workflowId) {
@@ -157,6 +156,7 @@ module.exports = ({github, context}) => {
                                         returnData.lastSuccessfulRunHtmlUrl = run.html_url;
                                         returnData.lastSuccessfulRunRerunUrl = run.rerun_url;
 
+                                        matchingBuildFound = true;
                                         break;
                                     } else {
                                         console.log(`Found build ${run.run_number} was status: ${run.status} conclusion:${run.conclusion}`);
