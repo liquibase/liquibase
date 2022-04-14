@@ -37,7 +37,7 @@ class JavaLogServiceTest extends Specification {
 
         then:
         noPackageClass.getPackage() == null
-        new JavaLogService().getLogName(noPackageClass) == "unknown"
+        new JavaLogService().getLogName(noPackageClass) == "NoPackageClass"
 
     }
 }

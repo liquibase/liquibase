@@ -42,8 +42,12 @@ public class JavaLogService extends AbstractLogService {
      * For example, all {@link liquibase.change.Change} classes will return a log name of "liquibase.change" no matter what class name or package name they have.
      */
     protected String getLogName(Class clazz) {
-        if (clazz == null || clazz.getPackage() == null) {
+        if (clazz == null) {
             return "unknown";
+        }
+
+        if (clazz.getPackage() == null) {
+            return clazz.getName();
         }
 
         final String classPackageName = clazz.getPackage().getName();
