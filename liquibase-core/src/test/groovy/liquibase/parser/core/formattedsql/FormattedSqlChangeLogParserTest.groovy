@@ -123,7 +123,7 @@ grant execute on any_procedure_name to ANY_USER3/
             "--liquibase formatted sql\n" +
                     "\n" +
                     "--changeset bboisvert:invalid_precondition\n" +
-                    "--precondition-invalid-type 123\n" +
+                    "-precondition 123\n" +
                     "select 1;"
 
     def supports() throws Exception {
@@ -143,7 +143,10 @@ grant execute on any_procedure_name to ANY_USER3/
         when:
         new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_INVALID_PRECONDITION_PATTERN).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
         then:
-        thrown(ChangeLogParseException)
+        def e = thrown(ChangeLogParseException)
+        assert e != null
+        assert e instanceof ChangeLogParseException
+        assert e.getMessage().toLowerCase().contains("--precondition <sqlcheck>")
     }
 
     def parse() throws Exception {
