@@ -111,7 +111,7 @@ module.exports = ({github, context}) => {
                                 "owner": owner,
                                 "repo": repo,
                                 "workflow_id": "build.yml",
-                                "per_page": 100,
+                                "per_page": 5,
                                 "page": pageNumber,
                             });
 
