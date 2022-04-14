@@ -114,7 +114,7 @@
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>osgi.core</artifactId>
-                <version>8.0.0</version>
+                <version>7.0.0</version>
                 <scope>provided</scope>
             </dependency>
             <!-- It's better not to change cdi-api, weld-se, servlet-api and spring because in newer -->
