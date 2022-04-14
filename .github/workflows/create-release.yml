@@ -45,7 +45,7 @@ jobs:
 
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v2
+        uses: liquibase/action-download-artifact@v2-liquibase
         with:
           workflow: build.yml
           workflow_conclusion: success
