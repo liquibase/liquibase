@@ -103,6 +103,7 @@ module.exports = ({github, context}) => {
                     }
 
                     let pageNumber = 1;
+                    const maxPagesToCheck = 10;
                     let matchingBuildFound = false;
                     while(!matchingBuildFound) {
                         try { //add build info
@@ -174,6 +175,10 @@ module.exports = ({github, context}) => {
                             } else {
                                 throw error;
                             }
+                        }
+                        if (pageNumber >= maxPagesToCheck) {
+                            console.log("Hit page limit maximum of", maxPagesToCheck);
+                            matchingBuildFound = true;
                         }
                         pageNumber++;
                     }
