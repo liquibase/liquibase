@@ -373,6 +373,7 @@ create view sql_view as select * from sql_table;'''
         path                    | expected
         "changelog.xml"         | "changelog.xml"
         "path/to/changelog.xml" | "path/to/changelog.xml"
+        "path//to//changelog.xml" | "path/to/changelog.xml"
         "/path/to/changelog.xml" | "path/to/changelog.xml"
         "classpath:path/to/changelog.xml" | "path/to/changelog.xml"
         "classpath:/path/to/changelog.xml" | "path/to/changelog.xml"
@@ -380,6 +381,7 @@ create view sql_view as select * from sql_table;'''
         "path\\to\\changelog.xml" | "path/to/changelog.xml"
         "c:\\path\\to\\changelog.xml" | "path/to/changelog.xml"
         "c:/path/to/changelog.xml" | "path/to/changelog.xml"
+        "s3://liquibase-data/changelog.xml" | "liquibase-data/changelog.xml"
     }
 
 }

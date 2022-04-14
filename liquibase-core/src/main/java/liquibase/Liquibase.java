@@ -35,6 +35,8 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
+import liquibase.resource.ResourceAccessorService;
+import liquibase.resource.ResourceAccessorServiceFactory;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -368,10 +370,8 @@ public class Liquibase implements AutoCloseable {
             ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
             databaseChangeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
         }
-
         return databaseChangeLog;
     }
-
 
     protected UpdateVisitor createUpdateVisitor() {
         return new UpdateVisitor(database, changeExecListener);

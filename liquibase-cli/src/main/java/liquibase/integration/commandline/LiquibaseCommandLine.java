@@ -1,7 +1,10 @@
 package liquibase.integration.commandline;
 
 import liquibase.Scope;
-import liquibase.command.*;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandDefinition;
+import liquibase.command.CommandFactory;
+import liquibase.command.CommandFailedException;
 import liquibase.command.core.*;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueProvider;
@@ -16,8 +19,9 @@ import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.LogMessageFilter;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.resource.ResourceAccessorService;
+import liquibase.resource.ResourceAccessorServiceFactory;
 import liquibase.ui.ConsoleUIService;
 import liquibase.ui.UIService;
 import liquibase.util.LiquibaseUtil;
@@ -28,7 +32,6 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
@@ -439,7 +442,12 @@ public class LiquibaseCommandLine {
             liquibaseConfiguration.registerProvider(fileProvider);
             returnList.add(fileProvider);
         } else {
-            final InputStream defaultsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
+            InputStream defaultsStream = null;
+            ResourceAccessorService resourceAccessorService = ResourceAccessorServiceFactory.getInstance().getResourceAccessorService();
+            ResourceAccessor resourceAccessor = resourceAccessorService.getResourceAccessor(configureClassLoader());
+            if (resourceAccessor != null) {
+                defaultsStream = resourceAccessor.openStream(null, defaultsFileConfig.getValue());
+            }
             if (defaultsStream == null) {
                 Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
                 if (!defaultsFileConfig.wasDefaultValueUsed()) {
@@ -447,7 +455,7 @@ public class LiquibaseCommandLine {
                     System.err.println("Could not find defaults file " + defaultsFileConfig.getValue());
                 }
             } else {
-                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File in classpath "+defaultsFileConfig.getValue());
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File in locations "+defaultsFileConfig.getValue());
                 liquibaseConfiguration.registerProvider(fileProvider);
                 returnList.add(fileProvider);
 
@@ -600,9 +608,9 @@ public class LiquibaseCommandLine {
 
     private Map<String, Object> configureResourceAccessor(ClassLoader classLoader) {
         Map<String, Object> returnMap = new HashMap<>();
-
-        returnMap.put(Scope.Attr.resourceAccessor.name(), new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader)));
-
+        ResourceAccessorService resourceAccessorService = ResourceAccessorServiceFactory.getInstance().getResourceAccessorService();
+        ResourceAccessor resourceAccessor = resourceAccessorService.getResourceAccessor(classLoader);
+        returnMap.put(Scope.Attr.resourceAccessor.name(), resourceAccessor);
         return returnMap;
     }
 
