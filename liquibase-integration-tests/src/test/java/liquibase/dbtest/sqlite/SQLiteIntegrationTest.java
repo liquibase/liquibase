@@ -32,6 +32,11 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
 
     }
 
+    @Override
+    public void testTableExistsPreconditionTableNameMatch() throws Exception {
+        //does not work for sqlite
+    }
+
     @Test
     public void smartDataLoad() throws Exception {
         if (this.getDatabase() == null) {
