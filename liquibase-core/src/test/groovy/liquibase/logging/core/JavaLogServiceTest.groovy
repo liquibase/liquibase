@@ -5,7 +5,6 @@ import liquibase.Scope
 import liquibase.change.Change
 import liquibase.change.core.CreateTableChange
 import liquibase.util.StringUtil
-import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -17,27 +16,14 @@ class JavaLogServiceTest extends Specification {
         new JavaLogService().getLogName(clazz) == expected
 
         where:
-        clazz                             | expected
-        Scope.class                       | "liquibase"
-        Change.class                      | "liquibase.change"
-        CreateTableChange.class           | "liquibase.change"
-        StringUtil.class                  | "liquibase.util"
-        String.class                      | "liquibase"
-        CreateTableExampleChange          | "liquibase.change"
-        null                              | "unknown"
-    }
-
-    def "getLogName with a null package"() {
-        when:
-        def noPackageClass = { -> }.getClass()
-
-        def nameField = Class.class.getDeclaredField("name")
-        nameField.setAccessible(true)
-        nameField.set(noPackageClass, "NoPackageClass")
-
-        then:
-        noPackageClass.getPackage() == null
-        new JavaLogService().getLogName(noPackageClass) == "NoPackageClass"
-
+        clazz                    | expected
+        Scope.class              | "liquibase"
+        Change.class             | "liquibase.change"
+        CreateTableChange.class  | "liquibase.change"
+        StringUtil.class         | "liquibase.util"
+        String.class             | "liquibase"
+        CreateTableExampleChange | "liquibase.change"
+        null                     | "unknown"
+        int.class                | "int"
     }
 }
