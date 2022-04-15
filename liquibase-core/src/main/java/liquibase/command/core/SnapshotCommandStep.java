@@ -39,6 +39,7 @@ public class SnapshotCommandStep extends AbstractDatabaseCommandStep {
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
+    public static final CommandArgumentDefinition<SnapshotControl> SNAPSHOT_CONTROL_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -63,6 +64,7 @@ public class SnapshotCommandStep extends AbstractDatabaseCommandStep {
         SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)
                 .description("Output format to use (JSON, YAML, or TXT)").build();
         DATABASE_ARG = builder.argument("database", Database.class).hidden().build();
+        SNAPSHOT_CONTROL_ARG = builder.argument("snapshotControl", SnapshotControl.class).hidden().build();
     }
 
     private Map<String, Object> snapshotMetadata;
@@ -119,7 +121,12 @@ public class SnapshotCommandStep extends AbstractDatabaseCommandStep {
         CatalogAndSchema[] schemas = parseSchemas(database, commandScope.getArgumentValue(SCHEMAS_ARG));
 
         logUnsupportedDatabase(database, this.getClass());
-        SnapshotControl snapshotControl = new SnapshotControl(database);
+        SnapshotControl snapshotControl;
+        if (commandScope.getArgumentValue(SNAPSHOT_CONTROL_ARG) == null) {
+            snapshotControl = new SnapshotControl(database);
+        } else {
+            snapshotControl = commandScope.getArgumentValue(SnapshotCommandStep.SNAPSHOT_CONTROL_ARG);
+        }
 
         if (schemas == null) {
             schemas = new CatalogAndSchema[]{database.getDefaultSchema()};

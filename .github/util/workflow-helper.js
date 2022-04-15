@@ -102,69 +102,85 @@ module.exports = ({github, context}) => {
                         returnData.pullRequestState = pulls.data[0].state;
                     }
 
-                    try { //add build info
-                        let runs = await github.rest.actions.listWorkflowRuns({
-                            "owner": owner,
-                            "repo": repo,
-                            "workflow_id": "build.yml",
-                            "branch": branchName,
-                            "per_page": 20,
-                            "page": 1,
-                        });
+                    let pageNumber = 1;
+                    const maxPagesToCheck = 10;
+                    let matchingBuildFound = false;
+                    while(!matchingBuildFound) {
+                        try { //add build info
+                            console.log("Reading workflow run results from page", pageNumber)
+                            let runs = await github.rest.actions.listWorkflowRuns({
+                                "owner": owner,
+                                "repo": repo,
+                                "workflow_id": "build.yml",
+                                "per_page": 100,
+                                "page": pageNumber,
+                            });
 
-                        if (runs.data.workflow_runs.length !== 0) {
-                            for (let run of runs.data.workflow_runs) {
-                                if (run.event === 'pull_request_target') {
-                                    if (!returnData.pullRequestId) {
-                                        console.log("Skipping pull_request_target from non-pull-request build " + run.html_url);
+                            if (runs.data.workflow_runs.length !== 0) {
+                                for (let run of runs.data.workflow_runs) {
+                                    if (run.event === 'pull_request_target') {
+                                        if (!returnData.pullRequestId) {
+                                            console.log("Skipping pull_request_target from non-pull-request build " + run.html_url);
+                                            continue;
+                                        }
+                                        if (run.head_repository && run.head_repository.fork) {
+                                            console.log("Skipping pull_request_target from fork " + run.head_repository.full_name);
+                                            continue;
+                                        }
+                                    }
+                                    if (run.head_branch != branchName) {
+                                        console.log("Skipping run from branch: " + run.head_branch);
                                         continue;
                                     }
-                                    if (run.head_repository && run.head_repository.fork) {
-                                        console.log("Skipping pull_request_target from fork " + run.head_repository.full_name);
-                                        continue;
+
+                                    console.log(`Found build for branch ${branchName}`);
+
+                                    if (!returnData.workflowId) {
+                                        returnData.workflowId = run.id;
                                     }
-                                }
-                                console.log(`Found build for branch ${branchName}`);
 
-                                if (!returnData.workflowId) {
-                                    returnData.workflowId = run.id;
-                                }
+                                    if (!returnData.runNumber) {
+                                        returnData.runNumber = run.run_number;
+                                        returnData.runAttempt = run.run_attempt;
+                                        returnData.runStatus = run.status;
+                                        returnData.runConclusion = run.conclusion;
+                                        returnData.runHtmlUrl = run.html_url;
+                                        returnData.runRerunUrl = run.rerun_url;
+                                    }
 
-                                if (!returnData.runNumber) {
-                                    returnData.runNumber = run.run_number;
-                                    returnData.runAttempt = run.run_attempt;
-                                    returnData.runStatus = run.status;
-                                    returnData.runConclusion = run.conclusion;
-                                    returnData.runHtmlUrl = run.html_url;
-                                    returnData.runRerunUrl = run.rerun_url;
-                                }
+                                    if (run.status === "completed" && run.conclusion === "success") {
+                                        console.log(`Found successful build for branch ${branchName}`);
+                                        returnData.lastSuccessfulRunNumber = run.run_number;
+                                        returnData.lastSuccessfulRunAttempt = run.run_attempt;
+                                        returnData.lastSuccessfulRunStatus = run.status;
+                                        returnData.lastSuccessfulRunConclusion = run.conclusion;
+                                        returnData.lastSuccessfulRunHtmlUrl = run.html_url;
+                                        returnData.lastSuccessfulRunRerunUrl = run.rerun_url;
 
-                                if (run.status === "completed" && run.conclusion === "success") {
-                                    console.log(`Found successful build for branch ${branchName}`);
-                                    returnData.lastSuccessfulRunNumber = run.run_number;
-                                    returnData.lastSuccessfulRunAttempt = run.run_attempt;
-                                    returnData.lastSuccessfulRunStatus = run.status;
-                                    returnData.lastSuccessfulRunConclusion = run.conclusion;
-                                    returnData.lastSuccessfulRunHtmlUrl = run.html_url;
-                                    returnData.lastSuccessfulRunRerunUrl = run.rerun_url;
-
-                                    break;
-                                } else {
-                                    console.log(`Found build ${run.run_number} was status: ${run.status} conclusion:${run.conclusion}`);
+                                        matchingBuildFound = true;
+                                        break;
+                                    } else {
+                                        console.log(`Found build ${run.run_number} was status: ${run.status} conclusion:${run.conclusion}`);
+                                    }
                                 }
                             }
-                        }
 
-                        if (!returnData.workflowId) {
-                            console.log(`No build for branch ${branchName}`);
-                        }
+                            if (!returnData.workflowId) {
+                                console.log(`No build for branch ${branchName}`);
+                            }
 
-                    } catch (error) {
-                        if (error.status === 404) {
-                            console.log(`Cannot get build info for ${branchName}`);
-                        } else {
-                            throw error;
+                        } catch (error) {
+                            if (error.status === 404) {
+                                console.log(`Cannot get build info for ${branchName}`);
+                            } else {
+                                throw error;
+                            }
                         }
+                        if (pageNumber >= maxPagesToCheck) {
+                            console.log("Hit page limit maximum of", maxPagesToCheck);
+                            matchingBuildFound = true;
+                        }
+                        pageNumber++;
                     }
 
                     console.log("Matching branch information: ");
