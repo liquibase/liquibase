@@ -73,26 +73,6 @@ import static liquibase.change.ChangeParameterMetaData.ALL;
         since = "1.7")
 @SuppressWarnings("java:S2583")
 public class LoadDataChange extends AbstractTableChange implements ChangeWithColumns<LoadDataColumnConfig> {
-
-    protected static class LoadDataRowConfig {
-
-        private final boolean needsPreparedStatement;
-        private final List<LoadDataColumnConfig> columns;
-
-        public LoadDataRowConfig(boolean needsPreparedStatement, List<LoadDataColumnConfig> columns) {
-            this.needsPreparedStatement = needsPreparedStatement;
-            this.columns = columns;
-        }
-
-        public boolean needsPreparedStatement() {
-            return needsPreparedStatement;
-        }
-
-        public List<LoadDataColumnConfig> getColumns() {
-            return columns;
-        }
-    }
-
     /**
      * CSV Lines starting with that sign(s) will be treated as comments by default
      */
@@ -284,7 +264,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        boolean databaseSupportsBatchUpdates = databaseSupportsBatchUpdates(database);
+        boolean databaseSupportsBatchUpdates = supportsBatchUpdates(database);
 
         CSVReader reader = null;
         try {
@@ -521,7 +501,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         }
     }
 
-    private boolean databaseSupportsBatchUpdates(Database database) {
+    protected boolean supportsBatchUpdates(Database database) {
         boolean databaseSupportsBatchUpdates = false;
         try {
             if (!(database instanceof MySQLDatabase)) {
@@ -867,7 +847,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         }
         if (rows.stream().anyMatch(LoadDataRowConfig::needsPreparedStatement)) {
             // If we have only prepared statements and the database supports batching, let's roll
-            if (databaseSupportsBatchUpdates(database) && !preparedStatements.isEmpty()) {
+            if (supportsBatchUpdates(database) && !preparedStatements.isEmpty()) {
                 if (database instanceof PostgresDatabase) {
                     // we don't do batch updates for Postgres but we still send as a prepared statement, see LB-744
                     return preparedStatements.toArray(new SqlStatement[0]);
@@ -916,5 +896,24 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     @SuppressWarnings("HardCodedStringLiteral")
     public enum LOAD_DATA_TYPE {
         BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP, UUID, OTHER, UNKNOWN
+    }
+
+    protected static class LoadDataRowConfig {
+
+        private final boolean needsPreparedStatement;
+        private final List<LoadDataColumnConfig> columns;
+
+        public LoadDataRowConfig(boolean needsPreparedStatement, List<LoadDataColumnConfig> columns) {
+            this.needsPreparedStatement = needsPreparedStatement;
+            this.columns = columns;
+        }
+
+        public boolean needsPreparedStatement() {
+            return needsPreparedStatement;
+        }
+
+        public List<LoadDataColumnConfig> getColumns() {
+            return columns;
+        }
     }
 }
