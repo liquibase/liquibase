@@ -128,7 +128,7 @@ jobs:
             core.setOutput("stablePro", !proFailed);
 
       - name: Upload Event File
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Event File
           path: ${{ github.event_path }}
@@ -181,7 +181,7 @@ jobs:
 
       - name: Archive Test Results
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: liquibase-test-results-jdk${{ matrix.java }}
           path: |
@@ -190,7 +190,7 @@ jobs:
 
       - name: Archive Modules
         if: ${{ matrix.java == 8 && matrix.os == 'ubuntu-latest'}}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: liquibase-modules
           path: |
@@ -277,7 +277,7 @@ jobs:
 
       - name: Archive Test Results
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
@@ -394,19 +394,19 @@ jobs:
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}-deps.jar
 
       - name: Archive Packages
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: liquibase-artifacts
           path: artifacts/*
 
       - name: Archive Convenience Zip
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: liquibase-zip-${{ needs.setup.outputs.thisBranchFileName }}
           path: liquibase-dist/target/liquibase-0-SNAPSHOT/*
 
       - name: Archive Convenience Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchFileName }}
           path: artifacts-named/*
