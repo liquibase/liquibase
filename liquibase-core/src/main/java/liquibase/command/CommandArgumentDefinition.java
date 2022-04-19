@@ -157,6 +157,14 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         Building(String[][] commandNames, CommandArgumentDefinition<DataType> newCommandArgument) {
             this.commandNames = commandNames;
             this.newCommandArgument = newCommandArgument;
+
+            //
+            // If the argument name is "url", then we set up an obfuscator to avoid bleeding credentials
+            // via the logging framework
+            //
+            if (newCommandArgument.getName().equalsIgnoreCase(CommonArgumentNames.URL.getArgumentName())) {
+                this.setValueObfuscator((ConfigurationValueObfuscator<DataType>) ConfigurationValueObfuscator.URL_OBFUSCATOR);
+            }
         }
 
         /**

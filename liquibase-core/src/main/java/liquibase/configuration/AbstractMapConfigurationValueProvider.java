@@ -137,23 +137,23 @@ public abstract class AbstractMapConfigurationValueProvider extends AbstractConf
      * @param storedKey the key stored in the map
      */
     protected boolean keyMatches(String wantedKey, String storedKey) {
-        if (storedKey.equalsIgnoreCase(wantedKey)) {
+        if (wantedKey.equalsIgnoreCase(storedKey)) {
             return true;
         }
 
         wantedKey = StringUtil.toKabobCase(wantedKey);
-        if (storedKey.equalsIgnoreCase(wantedKey)) {
+        if (wantedKey.equalsIgnoreCase(storedKey)) {
             return true;
         }
 
         wantedKey = wantedKey.replace(".", "-");
-        if (storedKey.equalsIgnoreCase(wantedKey)) {
+        if (wantedKey.equalsIgnoreCase(storedKey)) {
             return true;
         }
 
         //check for everythingSmashedTogether case insensitively
         wantedKey = wantedKey.replace("-", "");
-        if (storedKey.equalsIgnoreCase(wantedKey)) {
+        if (wantedKey.equalsIgnoreCase(storedKey)) {
             return true;
         }
 
