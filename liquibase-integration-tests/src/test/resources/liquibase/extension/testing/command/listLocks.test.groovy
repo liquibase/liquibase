@@ -9,6 +9,7 @@ Short Description: List the hostname, IP address, and timestamp of the Liquibase
 Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changelogFile (String) The root changelog
     Default: null
