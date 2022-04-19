@@ -92,18 +92,19 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern preconditionsPattern = Pattern.compile("\\s*\\-\\-[\\s]*preconditions(.*)", Pattern.CASE_INSENSITIVE);
             Pattern altPreconditionsOneDashPattern = Pattern.compile("^[-]+.*preconditions\\s.*", Pattern.CASE_INSENSITIVE);
             Pattern preconditionPattern = Pattern.compile("\\s*\\-\\-[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", Pattern.CASE_INSENSITIVE);
-            Pattern altPreconditionOneDashPattern = Pattern.compile("^\\s*?[-]+.*precondition\\s.*", Pattern.CASE_INSENSITIVE);
+            Pattern altPreconditionOneDashPattern = Pattern.compile("\\s*\\-[\\s]*precondition(.*)", Pattern.CASE_INSENSITIVE);
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackSplitStatementsPattern = Pattern.compile(".*rollbackSplitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackEndDelimiterPattern = Pattern.compile(".*rollbackEndDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment:? (.*)", Pattern.CASE_INSENSITIVE);
-            Pattern altCommentOneDashPattern = Pattern.compile("^\\-[\\s]*comment(.*)$", Pattern.CASE_INSENSITIVE);
+            Pattern altCommentPluralPattern = Pattern.compile("\\-\\-[\\s]*comments:? (.*)", Pattern.CASE_INSENSITIVE);
+            Pattern altCommentOneDashPattern = Pattern.compile("\\-[\\s]*comment:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern validCheckSumPattern = Pattern.compile("\\-\\-[\\s]*validCheckSum:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern altValidCheckSumOneDashPattern = Pattern.compile("^\\-[\\s]*validCheckSum(.*)$", Pattern.CASE_INSENSITIVE);
             Pattern ignoreLinesPattern = Pattern.compile("\\-\\-[\\s]*ignoreLines:(\\w+)", Pattern.CASE_INSENSITIVE);
-            Pattern altIgnoreLinesOneDashPattern = Pattern.compile("^\\-[\\s]*ignoreLines(.*)$", Pattern.CASE_INSENSITIVE);
+            Pattern altIgnoreLinesOneDashPattern = Pattern.compile("^\\-[\\s]*ignoreLines:(\\w+)", Pattern.CASE_INSENSITIVE);
             Pattern runWithPattern = Pattern.compile(".*runWith:([\\w\\$\\{\\}]+).*", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -172,7 +173,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         }
                     }
                 } else if (altIgnoreLinesOneDashMatcher.matches()) {
-                    String message = String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--ignore start' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
+                    String message = String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--ignore:<count>' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
                     throw new ChangeLogParseException("\n" + message);
                 }
 
@@ -287,6 +288,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     if (changeSet != null) {
                         Matcher commentMatcher = commentPattern.matcher(line);
                         Matcher altCommentOneDashMatcher = altCommentOneDashPattern.matcher(line);
+                        Matcher altCommentPluralMatcher = altCommentPluralPattern.matcher(line);
                         Matcher rollbackMatcher = rollbackPattern.matcher(line);
                         Matcher altRollbackMatcher = altRollbackOneDashPattern.matcher(line);
                         Matcher preconditionsMatcher = preconditionsPattern.matcher(line);
@@ -304,7 +306,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             if (commentMatcher.groupCount() == 1) {
                                 changeSet.setComments(commentMatcher.group(1));
                             }
-                        } else if (altCommentOneDashMatcher.matches()) {
+                        } else if (altCommentOneDashMatcher.matches() || altCommentPluralMatcher.matches()) {
                             String message = String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--comment <comment>' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
                             throw new ChangeLogParseException("\n" + message);
                         } else if (validCheckSumMatcher.matches()) {
@@ -363,7 +365,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 }
                             }
                         } else if (altPreconditionOneDashMatcher.matches()) {
-                            String message = String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--precondition <SqlCheck>' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
+                            String message =
+                               String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--precondition-sql-check' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
                             throw new ChangeLogParseException("\n" + message);
                         } else {
                             currentSql.append(line).append(System.lineSeparator());

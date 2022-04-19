@@ -146,7 +146,7 @@ grant execute on any_procedure_name to ANY_USER3/
         def e = thrown(ChangeLogParseException)
         assert e != null
         assert e instanceof ChangeLogParseException
-        assert e.getMessage().toLowerCase().contains("--precondition <sqlcheck>")
+        assert e.getMessage().toLowerCase().contains("--precondition-sql-check")
     }
 
     def parse() throws Exception {
@@ -370,6 +370,18 @@ grant execute on any_procedure_name to ANY_USER3/
         String changeLogWithComment = "--liquibase formatted sql\n\n" +
                 "--changeset JohnDoe:12345\n" +
                 "-comment: This is a test comment\n" +
+                "create table test (id int);\n"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        thrown(ChangeLogParseException)
+    }
+
+    def parse_withCommentThatUsesPlural() {
+        when:
+        String changeLogWithComment = "--liquibase formatted sql\n\n" +
+                "--changeset JohnDoe:12345\n" +
+                "--comments: This is a test comment\n" +
                 "create table test (id int);\n"
         DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
 
