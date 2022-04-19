@@ -156,6 +156,7 @@ module.exports = ({github, context}) => {
                                         returnData.lastSuccessfulRunConclusion = run.conclusion;
                                         returnData.lastSuccessfulRunHtmlUrl = run.html_url;
                                         returnData.lastSuccessfulRunRerunUrl = run.rerun_url;
+                                        returnData.lastSuccessfulWorkflowId = run.id;
 
                                         matchingBuildFound = true;
                                         break;

@@ -12,6 +12,7 @@ Short Description: List all deployed changesets and their deployment ID
 Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changelogFile (String) The root changelog
     Default: null
