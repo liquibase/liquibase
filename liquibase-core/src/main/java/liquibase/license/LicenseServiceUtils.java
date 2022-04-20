@@ -11,7 +11,7 @@ import liquibase.util.StringUtil;
  */
 public class LicenseServiceUtils {
 
-  private static final String TRIAL_LICENSE_URL = "https://liquibase.com/trial";
+  public static final String TRIAL_LICENSE_URL = "https://liquibase.com/trial";
   public static final String BASE_INVALID_LICENSE_MESSAGE = "Using '%s' requires a valid Liquibase Pro or EMPIRE license. Get a free license key at " + TRIAL_LICENSE_URL + ".";
 
   /**
