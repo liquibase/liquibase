@@ -483,7 +483,6 @@ public class Main {
 
         for (Handler handler : rootLogger.getHandlers()) {
             handler.setLevel(level);
-            handler.setFilter(new SecureLogFilter(logService.getFilter()));
         }
         //
         // Set the Liquibase Hub log level if logging is not OFF
@@ -2228,23 +2227,6 @@ public class Main {
      */
     public boolean isWindows() {
         return System.getProperty("os.name").startsWith("Windows ");
-    }
-
-    public static class SecureLogFilter implements Filter {
-
-        private LogMessageFilter filter;
-
-        public SecureLogFilter(LogMessageFilter filter) {
-            this.filter = filter;
-        }
-
-        @Override
-        public boolean isLoggable(LogRecord record) {
-            final String filteredMessage = filter.filterMessage(record.getMessage());
-
-            final boolean equals = filteredMessage.equals(record.getMessage());
-            return equals;
-        }
     }
 
     @SuppressWarnings("HardCodedStringLiteral")

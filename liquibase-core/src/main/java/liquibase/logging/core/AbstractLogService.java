@@ -11,12 +11,6 @@ import java.util.logging.Level;
  */
 public abstract class AbstractLogService implements LogService {
 
-    protected LogMessageFilter filter;
-
-    public AbstractLogService() {
-        this.filter = new DefaultLogMessageFilter();
-    }
-
     /**
      * Default implementation does nothing.
      */
@@ -25,13 +19,18 @@ public abstract class AbstractLogService implements LogService {
 
     }
 
+    /**
+     * @deprecated always returns null
+     */
     @Override
     public LogMessageFilter getFilter() {
-        return filter;
+        return null;
     }
 
+    /**
+     * @deprecated does not save the filter
+     */
     @Override
     public void setFilter(LogMessageFilter filter) {
-        this.filter = filter;
     }
 }

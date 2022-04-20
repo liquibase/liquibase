@@ -1,8 +1,8 @@
 package liquibase.logging;
 
 /**
- * Filter to apply to messages before they are sent to underlying logging systems.
- * Usually used to remove potentially insecure data
+ * @deprecated No longer used for filtering log messages.
+ * Log messages should be filtered for sensitive information before sending them to the log.
  */
 public interface LogMessageFilter {
 

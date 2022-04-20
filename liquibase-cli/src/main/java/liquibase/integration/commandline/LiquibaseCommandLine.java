@@ -586,8 +586,6 @@ public class LiquibaseCommandLine {
             if (handler instanceof ConsoleHandler) {
                 handler.setLevel(cliLogLevel);
             }
-
-            handler.setFilter(new SecureLogFilter(logService.getFilter()));
         }
     }
 
@@ -1038,22 +1036,5 @@ public class LiquibaseCommandLine {
             return;
         }
         returnList.add(key);
-    }
-
-    public static class SecureLogFilter implements Filter {
-
-        private LogMessageFilter filter;
-
-        public SecureLogFilter(LogMessageFilter filter) {
-            this.filter = filter;
-        }
-
-        @Override
-        public boolean isLoggable(LogRecord record) {
-            final String filteredMessage = filter.filterMessage(record.getMessage());
-
-            final boolean equals = filteredMessage.equals(record.getMessage());
-            return equals;
-        }
     }
 }

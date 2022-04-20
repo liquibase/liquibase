@@ -14,10 +14,15 @@ import java.util.logging.Level;
  */
 public abstract class AbstractLogger extends AbstractExtensibleObject implements Logger {
 
-    protected final LogMessageFilter filter;
 
-    public AbstractLogger(LogMessageFilter filter) {
-        this.filter = filter;
+    /**
+     * @deprecated use {@link AbstractLogger().
+     * Passed filter is not used.
+     */
+    public AbstractLogger(LogMessageFilter ignored) {
+    }
+
+    public AbstractLogger() {
     }
 
     @Override
@@ -80,15 +85,10 @@ public abstract class AbstractLogger extends AbstractExtensibleObject implements
         this.fine(message, e);
     }
 
+    /**
+     * @deprecated now just returns the message
+     */
     protected String filterMessage(String message) {
-        try {
-            if (filter == null || GlobalConfiguration.FILTER_LOG_MESSAGES == null || !GlobalConfiguration.FILTER_LOG_MESSAGES.getCurrentValue()) {
-                return message;
-            }
-        } catch (UnknownConfigurationType unknownConfigurationType) {
-            //probably in initial scope bootstrap
-            return message;
-        }
-        return filter.filterMessage(message);
+        return message;
     }
 }
