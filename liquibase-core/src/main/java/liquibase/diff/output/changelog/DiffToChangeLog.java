@@ -333,12 +333,15 @@ public class DiffToChangeLog {
                     if (i != 0) {
                         return i;
                     }
-                } else if (o1 instanceof StoredDatabaseLogic && o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null
-                        && o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) {
-                    int order = o1.getAttribute(ORDER_ATTRIBUTE, Long.class).compareTo(o2.getAttribute(ORDER_ATTRIBUTE, Long.class));
-                    if (order != 0) {
-                        return order;
-                    }
+                } else if (o1 instanceof StoredDatabaseLogic) {
+                  if (o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null && o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) {
+                      int order = o1.getAttribute(ORDER_ATTRIBUTE, Long.class).compareTo(o2.getAttribute(ORDER_ATTRIBUTE, Long.class));
+                      if (order != 0) {
+                          return order;
+                      }
+                  } else if (((StoredDatabaseLogic)o1).getDbObjectComparator() != null) {
+                      return ((StoredDatabaseLogic)o1).getDbObjectComparator().compare(o1, o2);
+                  }
                 }
                 return super.compare(o1, o2);
 

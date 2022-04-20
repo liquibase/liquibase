@@ -3,6 +3,7 @@ package liquibase.structure.core;
 import liquibase.license.LicenseServiceUtils;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.DatabaseObjectComparator;
 import liquibase.util.StringUtil;
 
 public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends AbstractDatabaseObject {
@@ -59,6 +60,10 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
     public T setBody(String body) {
         setAttribute("body", body);
         return (T) this;
+    }
+
+    public DatabaseObjectComparator getDbObjectComparator() {
+        return null;
     }
 
     @Override
