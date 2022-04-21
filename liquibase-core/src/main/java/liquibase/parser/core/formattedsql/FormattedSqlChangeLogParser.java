@@ -83,14 +83,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             RawSQLChange change = null;
             Pattern changeLogPattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
             Pattern propertyPattern = Pattern.compile("\\s*\\-\\-[\\s]*property\\s+(.*:.*)\\s+(.*:.*).*", Pattern.CASE_INSENSITIVE);
-            Pattern altPropertyOneDashPattern = Pattern.compile("^\\s*?[-]+.*property\\s.*", Pattern.CASE_INSENSITIVE);
+            Pattern altPropertyOneDashPattern = Pattern.compile("\\s*?[-]+.*property\\s.*", Pattern.CASE_INSENSITIVE);
             Pattern changeSetPattern = Pattern.compile("\\s*\\-\\-[\\s]*changeset\\s+(\"[^\"]+\"|[^:]+):\\s*(\"[^\"]+\"|\\S+).*", Pattern.CASE_INSENSITIVE);
-            Pattern altChangeSetOneDashPattern = Pattern.compile("^\\s*?[-]+.*changeset\\s.*", Pattern.CASE_INSENSITIVE);
+            Pattern altChangeSetOneDashPattern = Pattern.compile("\\-[\\s]*changeset\\s.*", Pattern.CASE_INSENSITIVE);
             Pattern altChangeSetNoOtherInfoPattern = Pattern.compile("\\s*?\\-\\-[\\s]*?changeset[\\s]*?$", Pattern.CASE_INSENSITIVE);
             Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
-            Pattern altRollbackOneDashPattern = Pattern.compile("^\\s*?[-]+.*?rollback\\s.*", Pattern.CASE_INSENSITIVE);
+            Pattern altRollbackOneDashPattern = Pattern.compile("\\s*\\-[\\s]*rollback\\s.*", Pattern.CASE_INSENSITIVE);
             Pattern preconditionsPattern = Pattern.compile("\\s*\\-\\-[\\s]*preconditions(.*)", Pattern.CASE_INSENSITIVE);
-            Pattern altPreconditionsOneDashPattern = Pattern.compile("^[-]+.*preconditions\\s.*", Pattern.CASE_INSENSITIVE);
+            Pattern altPreconditionsOneDashPattern = Pattern.compile("\\s*\\-[\\s]*preconditions\\s.*", Pattern.CASE_INSENSITIVE);
             Pattern preconditionPattern = Pattern.compile("\\s*\\-\\-[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", Pattern.CASE_INSENSITIVE);
             Pattern altPreconditionOneDashPattern = Pattern.compile("\\s*\\-[\\s]*precondition(.*)", Pattern.CASE_INSENSITIVE);
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -104,7 +104,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern validCheckSumPattern = Pattern.compile("\\-\\-[\\s]*validCheckSum:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern altValidCheckSumOneDashPattern = Pattern.compile("^\\-[\\s]*validCheckSum(.*)$", Pattern.CASE_INSENSITIVE);
             Pattern ignoreLinesPattern = Pattern.compile("\\-\\-[\\s]*ignoreLines:(\\w+)", Pattern.CASE_INSENSITIVE);
-            Pattern altIgnoreLinesOneDashPattern = Pattern.compile("^\\-[\\s]*ignoreLines:(\\w+)", Pattern.CASE_INSENSITIVE);
+            Pattern altIgnoreLinesOneDashPattern = Pattern.compile("\\-[\\s]*?ignoreLines:(\\w+).*$", Pattern.CASE_INSENSITIVE);
+            Pattern altIgnorePattern = Pattern.compile("\\-\\-[\\s]*ignore:(\\w+)", Pattern.CASE_INSENSITIVE);
             Pattern runWithPattern = Pattern.compile(".*runWith:([\\w\\$\\{\\}]+).*", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -128,6 +129,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             String line;
             while ((line = reader.readLine()) != null) {
                 count++;
+                Matcher commentMatcher = commentPattern.matcher(line);
                 Matcher propertyPatternMatcher = propertyPattern.matcher(line);
                 Matcher altPropertyPatternMatcher = altPropertyOneDashPattern.matcher(line);
                 if (propertyPatternMatcher.matches()) {
@@ -147,16 +149,22 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 }
 
                 Matcher ignoreLinesMatcher = ignoreLinesPattern.matcher(line);
+                Matcher altIgnoreMatcher = altIgnorePattern.matcher(line);
                 Matcher altIgnoreLinesOneDashMatcher = altIgnoreLinesOneDashPattern.matcher(line);
                 if (ignoreLinesMatcher.matches ()) {
                     if ("start".equals(ignoreLinesMatcher.group(1))){
                         while ((line = reader.readLine()) != null){
+                            altIgnoreLinesOneDashMatcher = altIgnoreLinesOneDashPattern.matcher(line);
                             count++;
                             ignoreLinesMatcher = ignoreLinesPattern.matcher(line);
                             if (ignoreLinesMatcher.matches ()) {
                                 if ("end".equals(ignoreLinesMatcher.group(1))){
                                     break;
                                 }
+                            } else if (altIgnoreLinesOneDashMatcher.matches()) {
+                                String message =
+                                   String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--ignoreLines:end' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
+                                throw new ChangeLogParseException("\n" + message);
                             }
                         }
                         continue;
@@ -173,7 +181,12 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         }
                     }
                 } else if (altIgnoreLinesOneDashMatcher.matches()) {
-                    String message = String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--ignore:<count>' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
+                    String message =
+                       String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--ignoreLines:<count|start>' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
+                    throw new ChangeLogParseException("\n" + message);
+                } else if (altIgnoreMatcher.matches()) {
+                    String message =
+                       String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--ignoreLines:<count|start>' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
                     throw new ChangeLogParseException("\n" + message);
                 }
 
@@ -286,7 +299,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         throw new ChangeLogParseException("\n" + message);
                     }
                     if (changeSet != null) {
-                        Matcher commentMatcher = commentPattern.matcher(line);
                         Matcher altCommentOneDashMatcher = altCommentOneDashPattern.matcher(line);
                         Matcher altCommentPluralMatcher = altCommentPluralPattern.matcher(line);
                         Matcher rollbackMatcher = rollbackPattern.matcher(line);
@@ -366,10 +378,16 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             }
                         } else if (altPreconditionOneDashMatcher.matches()) {
                             String message =
-                               String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--precondition-sql-check' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
+                                    String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--precondition-sql-check' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
                             throw new ChangeLogParseException("\n" + message);
                         } else {
                             currentSql.append(line).append(System.lineSeparator());
+                        }
+                    } else {
+                        if (commentMatcher.matches()) {
+                            String message =
+                               String.format("Unexpected formatting at line %d. Formatted SQL changelogs do not allow comment lines outside of change sets. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
+                            throw new ChangeLogParseException("\n" + message);
                         }
                     }
                 }

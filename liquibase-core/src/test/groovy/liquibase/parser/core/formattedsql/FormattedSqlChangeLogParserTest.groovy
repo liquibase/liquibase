@@ -389,6 +389,62 @@ grant execute on any_procedure_name to ANY_USER3/
         thrown(ChangeLogParseException)
     }
 
+    def parse_withWithCommentOutsideChangeSet() {
+        when:
+        String changeLogWithComment = "--liquibase formatted sql\n\n" +
+                "--comment: This is my comment" +
+                "--changeset erz:2-create-multiple-tables splitStatements:true endDelimiter:;\n" +
+                "create table tbl_dat7721b ( ID int not null, FNAME varchar(100) not null);\n" +
+                "create table tbl_dat7721c ( ID int not null, FNAME varchar(100) not null);\n" +
+                "create table tbl_dat7721d ( ID int not null, FNAME varchar(100) not null);\n" +
+                "--ignore:1\n" +
+                "foo\n" +
+                "create table tbl_dat7721e ( ID int not null, FNAME varchar(100) not null);\n"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        assert e : "ChangeLogParseException should be thrown"
+        assert e.getMessage().contains("do not allow comment lines outside of change sets")
+    }
+
+    def parse_withWithIgnoreNotIgnoreLines() {
+        when:
+        String changeLogString = "--liquibase formatted sql\n\n" +
+                "--changeset erz:2-create-multiple-tables splitStatements:true endDelimiter:;\n" +
+                "create table tbl_dat7721b ( ID int not null, FNAME varchar(100) not null);\n" +
+                "create table tbl_dat7721c ( ID int not null, FNAME varchar(100) not null);\n" +
+                "create table tbl_dat7721d ( ID int not null, FNAME varchar(100) not null);\n" +
+                "--ignore:1\n" +
+                "foo\n" +
+                "create table tbl_dat7721e ( ID int not null, FNAME varchar(100) not null);\n"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogString).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        assert e : "ChangeLogParseException should be thrown"
+        assert e.getMessage().contains("--ignoreLines:<count|start>")
+    }
+
+    def parse_withWithIgnoreLinesEndOneDash() {
+        when:
+        String changeLogString = "--liquibase formatted sql\n\n" +
+                "--changeset erz:2-create-multiple-tables splitStatements:true endDelimiter:;\n" +
+                "create table tbl_dat7721b ( ID int not null, FNAME varchar(100) not null);\n" +
+                "create table tbl_dat7721c ( ID int not null, FNAME varchar(100) not null);\n" +
+                "create table tbl_dat7721d ( ID int not null, FNAME varchar(100) not null);\n" +
+                "--ignoreLines:start\n" +
+                "foo\n" +
+                "-ignoreLines:end\n" +
+                "create table tbl_dat7721e ( ID int not null, FNAME varchar(100) not null);\n"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogString).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        assert e : "ChangeLogParseException should be thrown"
+        assert e.getMessage().contains("--ignoreLines:end")
+    }
+
     @Unroll
     def parse_multipleDbms() throws Exception {
         when:
