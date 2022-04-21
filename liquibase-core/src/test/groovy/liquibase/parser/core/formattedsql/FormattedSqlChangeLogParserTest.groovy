@@ -274,6 +274,19 @@ grant execute on any_procedure_name to ANY_USER3/
 
     }
 
+    def "parse change set with only author"() throws Exception {
+        when:
+        String changeLogWithOnlyAuthor= "   \n\n" +
+                "--liquibase formatted sql\n\n" +
+                "--changeset Steve\n" +
+                "create table test (id int);\n"
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOnlyAuthor).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        thrown(ChangeLogParseException)
+    }
+
     def parse_startsWithSpace() throws Exception {
         when:
         String changeLogWithSpace = "   \n\n" +

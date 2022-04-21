@@ -86,7 +86,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern altPropertyOneDashPattern = Pattern.compile("\\s*?[-]+.*property\\s.*", Pattern.CASE_INSENSITIVE);
             Pattern changeSetPattern = Pattern.compile("\\s*\\-\\-[\\s]*changeset\\s+(\"[^\"]+\"|[^:]+):\\s*(\"[^\"]+\"|\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern altChangeSetOneDashPattern = Pattern.compile("\\-[\\s]*changeset\\s.*", Pattern.CASE_INSENSITIVE);
-            Pattern altChangeSetNoOtherInfoPattern = Pattern.compile("\\s*?\\-\\-[\\s]*?changeset[\\s]*?$", Pattern.CASE_INSENSITIVE);
+            Pattern altChangeSetNoOtherInfoPattern = Pattern.compile("\\s*\\-\\-[\\s]*changeset[\\s]*.*$", Pattern.CASE_INSENSITIVE);
             Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
             Pattern altRollbackOneDashPattern = Pattern.compile("\\s*\\-[\\s]*rollback\\s.*", Pattern.CASE_INSENSITIVE);
             Pattern preconditionsPattern = Pattern.compile("\\s*\\-\\-[\\s]*preconditions(.*)", Pattern.CASE_INSENSITIVE);
