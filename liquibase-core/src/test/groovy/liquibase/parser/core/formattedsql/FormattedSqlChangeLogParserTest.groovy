@@ -274,6 +274,25 @@ grant execute on any_procedure_name to ANY_USER3/
 
     }
 
+    def "parse change set with one good one bad"() throws Exception {
+        when:
+        String changeLogWithOnlyAuthor= "   \n\n" +
+                "--liquibase formatted sql\n\n" +
+                "--changeset SteveZ:45555-createtablecontacts labels:onlytest\n" +
+                "CREATE TABLE contacts (" +
+                "id int," +
+                "firstname VARCHAR(255)," +
+                "lastname VARCHAR(255)" +
+                ");" +
+                "--changeset Steve\n" +
+                "create table test (id int);\n"
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOnlyAuthor).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        thrown(ChangeLogParseException)
+    }
+
     def "parse change set with only author"() throws Exception {
         when:
         String changeLogWithOnlyAuthor= "   \n\n" +
