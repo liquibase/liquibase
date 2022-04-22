@@ -78,7 +78,8 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                 statement.addPrimaryKeyColumn(column.getName(), columnType, defaultValue, constraints.getValidatePrimaryKey(),
                         constraints.isDeferrable() != null && constraints.isDeferrable(),
                         constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred(),
-                    constraints.getPrimaryKeyName(),constraints.getPrimaryKeyTablespace());
+                    constraints.getPrimaryKeyName(),constraints.getPrimaryKeyTablespace(),
+                        column.getRemarks());
 
             } else {
                 statement.addColumn(column.getName(),
@@ -136,7 +137,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         List<SqlStatement> statements = new ArrayList<>();
         statements.add(statement);
 
-        if (StringUtil.trimToNull(remarks) != null) {
+        if (StringUtil.trimToNull(remarks) != null && !(database instanceof MySQLDatabase)) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, tableName, remarks);
             if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                 statements.add(remarksStatement);
@@ -145,7 +146,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         for (ColumnConfig column : getColumns()) {
             String columnRemarks = StringUtil.trimToNull(column.getRemarks());
-            if (columnRemarks != null) {
+            if (columnRemarks != null && !(database instanceof MySQLDatabase)) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks, column.getType());
                 if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                     statements.add(remarksStatement);
