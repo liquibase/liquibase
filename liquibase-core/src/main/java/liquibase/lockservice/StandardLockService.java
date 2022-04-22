@@ -37,19 +37,19 @@ import java.util.*;
 import static java.util.ResourceBundle.getBundle;
 
 public class StandardLockService implements LockService {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
 
     protected boolean hasChangeLogLock;
 
-    private Long changeLogLockPollRate;
-    private Long changeLogLockRecheckTime;
+    protected Long changeLogLockPollRate;
+    protected Long changeLogLockRecheckTime;
 
-    private Boolean hasDatabaseChangeLogLockTable;
-    private boolean isDatabaseChangeLogLockTableInitialized;
-    private ObjectQuotingStrategy quotingStrategy;
-    private final SecureRandom random = new SecureRandom();
+    protected Boolean hasDatabaseChangeLogLockTable;
+    protected boolean isDatabaseChangeLogLockTableInitialized;
+    protected ObjectQuotingStrategy quotingStrategy;
+    protected final SecureRandom random = new SecureRandom();
 
 
     public StandardLockService() {
