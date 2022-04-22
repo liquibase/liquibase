@@ -171,6 +171,8 @@ module.exports = ({github, context}) => {
                             }
 
                         } catch (error) {
+                            console.log(`Error getting build info for ${branchName}`)
+                            console.log(error);
                             if (error.status === 404) {
                                 console.log(`Cannot get build info for ${branchName}`);
                             } else {
