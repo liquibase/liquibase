@@ -93,6 +93,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern altPreconditionsOneDashPattern = Pattern.compile("\\s*\\-[\\s]*preconditions\\s.*", Pattern.CASE_INSENSITIVE);
             Pattern preconditionPattern = Pattern.compile("\\s*\\-\\-[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", Pattern.CASE_INSENSITIVE);
             Pattern altPreconditionOneDashPattern = Pattern.compile("\\s*\\-[\\s]*precondition(.*)", Pattern.CASE_INSENSITIVE);
+
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackSplitStatementsPattern = Pattern.compile(".*rollbackSplitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -270,10 +271,29 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         dbms = changeLogParameters.expandExpressions(dbms, changeLog);
                     }
 
+                    //
+                    // Make sure that this line matches the --changeset <author>:<id> with no spaces before ID
+                    //
+                    String idGroup = changeSetPatternMatcher.group(2);
+                    String idGroupForMatch = idGroup.replace("{", "\\{").replace("}","\\}")
+                                                    .replace("$", "\\$");
+                    String authorGroup = changeSetPatternMatcher.group(1);
+                    String authorGroupForMatch = authorGroup.replace("{", "\\{").replace("}","\\}")
+                                                            .replace("$", "\\$");
+                    Pattern changeSetAuthorIdPattern =
+                            Pattern.compile("\\s*\\-\\-[\\s]*changeset\\s+" + authorGroupForMatch + ":" + idGroupForMatch + ".*$", Pattern.CASE_INSENSITIVE);
+                    Matcher changeSetAuthorIdPatternMatcher = changeSetAuthorIdPattern.matcher(line);
+                    if (! changeSetAuthorIdPatternMatcher.matches()) {
+                        String message =
+                                String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--changeset <authorname>:<changesetId>' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
+                        throw new ChangeLogParseException("\n" + message);
+                    }
+
                     String changeSetId =
-                        changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(changeSetPatternMatcher.group(2)), changeLog);
+                        changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(idGroup), changeLog);
                     String changeSetAuthor =
-                        changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(changeSetPatternMatcher.group(1)), changeLog);
+                        changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(authorGroup), changeLog);
+
                     changeSet =
                        new ChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange, logicalFilePath, context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
                     changeSet.setLabels(new Labels(labels));

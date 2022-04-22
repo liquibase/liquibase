@@ -274,6 +274,43 @@ grant execute on any_procedure_name to ANY_USER3/
 
     }
 
+    def "parse change set with colon in ID"() throws Exception {
+        when:
+        String changeLogWithOneGoodOneBad = "   \n\n" +
+                "--liquibase formatted sql\n\n" +
+                "--changeset SteveZ:\"ID:1\" labels:onlytest\n" +
+                "CREATE TABLE contacts (" +
+                "id int," +
+                "firstname VARCHAR(255)," +
+                "lastname VARCHAR(255))" +
+                ");\n"
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneGoodOneBad).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        ChangeSet changeSet = changeLog.getChangeSets().get(0)
+        assert changeSet.getAuthor() == "SteveZ"
+        assert changeSet.getId() == "ID:1"
+    }
+
+    def "parse change set with invalid change set attributes"() throws Exception {
+        when:
+        String changeLogWithInvalidChangeSetAttributes =
+                "--liquibase formatted sql\n\n" +
+                "--changeset SteveZ: labels:onlytest\n" +
+                "CREATE TABLE contacts (" +
+                "id int," +
+                "firstname VARCHAR(255)," +
+                "lastname VARCHAR(255))" +
+                ");\n"
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithInvalidChangeSetAttributes).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        assert e
+    }
+
     def "parse change set with one good one bad"() throws Exception {
         when:
         String changeLogWithOneGoodOneBad = "   \n\n" +
@@ -303,7 +340,8 @@ grant execute on any_procedure_name to ANY_USER3/
         DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOnlyAuthor).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
-        thrown(ChangeLogParseException)
+        def e = thrown(ChangeLogParseException)
+        assert e
     }
 
     def parse_startsWithSpace() throws Exception {
@@ -530,7 +568,6 @@ grant execute on any_procedure_name to ANY_USER3/
         where:
         example                                                                                                       | expected
         "--liquibase formatted sql\n--changeset John Doe:12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"      | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
-        "--liquibase formatted sql\n--changeset John Doe: 12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/" | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
     }
 
     @LiquibaseService(skip = true)
