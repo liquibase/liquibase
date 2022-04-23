@@ -110,7 +110,10 @@ module.exports = ({github, context}) => {
                             let workflowId = "build.yml";
                             if (repo === "liquibase-test-harness") {
                                 workflowId = "main.yml";
+                            } else if (repo === "liquibase-pro-tests") {
+                                workflowId = "test.yml";
                             }
+
 
                             console.log("Reading workflow run results from page", pageNumber)
                             let runs = await github.rest.actions.listWorkflowRuns({
