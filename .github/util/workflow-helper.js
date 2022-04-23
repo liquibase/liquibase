@@ -107,11 +107,16 @@ module.exports = ({github, context}) => {
                     let matchingBuildFound = false;
                     while(!matchingBuildFound) {
                         try { //add build info
+                            let workflowId = "build.yml";
+                            if (repo === "liquibase-test-harness") {
+                                workflowId = "main.yml";
+                            }
+
                             console.log("Reading workflow run results from page", pageNumber)
                             let runs = await github.rest.actions.listWorkflowRuns({
                                 "owner": owner,
                                 "repo": repo,
-                                "workflow_id": "build.yml",
+                                "workflow_id": workflowId,
                                 "per_page": 100,
                                 "page": pageNumber,
                             });
