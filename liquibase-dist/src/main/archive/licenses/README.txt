@@ -4,84 +4,66 @@ Version: ${project.version}
 Liquibase ships with 3rd party components using the following licenses:
 
 - Apache 2.0 License - https://opensource.org/licenses/Apache-2.0
-- BSD 2 Clause License - https://opensource.org/licenses/BSD-2-Clause
+- BSD 2-Clause License - https://opensource.org/licenses/BSD-2-Clause
+- BSD 3-Clause License - https://opensource.org/licenses/BSD-3-Clause
 - CDDL 1.1 License - https://opensource.org/licenses/cddl1.txt
-- CPL 1.0 License - https://opensource.org/licenses/CPL-1.0
+- Eclipse Distribution 1.0 License - https://www.eclipse.org/org/documents/edl-v10.php
 - Eclipse Public 1.0 License - https://opensource.org/licenses/epl-1.0
-- ISC License - https://opensource.org/licenses/ISC
+- Eclipse Public 2.0 License - https://opensource.org/licenses/epl-2.0
+- GNU Affero General Public License version 3 https://opensource.org/licenses/AGPL-3.0
+- IBM International Program License Agreement (IPLA) - https://www-40.ibm.com/software/sla/sladb.nsf/lilookup/1024954E51C94B03002587A4003CB520?OpenDocument
 - LPGL 3.0 License - https://opensource.org/licenses/LGPL-3.0
 - MIT License - https://opensource.org/licenses/MIT
-- Plexus Classworlds License - https://spdx.org/licenses/Plexus.html
+- Oracle Free Use Terms and Conditions (FUTC) https://www.oracle.com/downloads/licenses/oracle-free-license.html
 
 Libraries and their licenses:
 
 Apache 2.0 License
-- avalon-framework:avalon-framework
-- commons-logging:commons-logging
-- doxia:doxia-sink-api
-- javax.enterprise:cdi-api
-- javax.inject:javax.inject
-- org.apache.ant:ant
-- org.apache.ant:ant-launcher
-- org.apache.maven:maven-artifact
-- org.apache.maven:maven-artifact-manager
-- org.apache.maven:maven-core
-- org.apache.maven:maven-error-diagnostics
-- org.apache.maven:maven-model
-- org.apache.maven:maven-monitor
-- org.apache.maven:maven-plugin-api
-- org.apache.maven:maven-plugin-descriptor
-- org.apache.maven:maven-plugin-parameter-documenter
-- org.apache.maven:maven-plugin-registry
-- org.apache.maven:maven-profile
-- org.apache.maven:maven-project
-- org.apache.maven:maven-repository-metadata
-- org.apache.maven:maven-settings
-- org.apache.maven.reporting:maven-reporting-api
-- org.apache.maven.shared:maven-plugin-testing-harness
-- org.apache.maven.shared:maven-verifier
-- org.apache.maven.wagon:wagon-file
-- org.apache.maven.wagon:wagon-http-lightweight
-- org.apache.maven.wagon:wagon-provider-api
-- org.apache.maven.wagon:wagon-ssh
-- org.codehaus.plexus:plexus-archiver
-- org.codehaus.plexus:plexus-container-default
-- org.codehaus.plexus:plexus-interactivity-api
-- org.codehaus.plexus:plexus-utils
-- org.jboss.weld.se:weld-se
-- org.liquibase:liquibase-cdi
-- org.liquibase:liquibase-core
-- org.liquibase:liquibase-debian
-- org.liquibase:liquibase-maven-plugin
-- org.liquibase:liquibase-parent
-- org.springframework:spring
 - org.yaml:snakeyaml
-- snakeyaml.jar
+- info.picocli:picocli
+- org.xerial:sqlite-jdbc
+- com.opencsv:opencsv
+- commons-codec:commons-codec
+- org.apache.commons:commons-lang3
+- org.apache.commons:commons-text
+- org.apache.commons:commons-collections4
+- com.fasterxml.jackson.module:jackson-module-jaxb-annotations
+- com.fasterxml.jackson.core:jackson-core
+- com.fasterxml.jackson.core:jackson-databind
+- com.fasterxml.jackson.core:jackson-annotations
+- com.github.jsqlparser:jsqlparser (Dual licence: Apache 2.0, LGPL 2.1)
 
 BSD 2 Clause License
-- com.jcraft:jsch
-- org.hamcrest:hamcrest-core
 - org.hsqldb:hsqldb
 - org.postgresql:postgresql
 
+BSD 3 Clause License
+- org.firebirdsql.jdbc:jaybird (Dual License: LGPL, BSD-3 Clause)
+
 CDDL 1.1 License
-- javax.annotation:jsr250-api
-- javax.servlet:servlet-api (Dual license: CDDL-1.1, GPL-2.0)
-- jaxb-api.jar
-- jaxb-core.jar
-- jaxb-impl.jar
+- javax.xml.bind:jaxb-api
 
-CPL 1.0 License
-- junit:junit
+Eclipse Distribution 1.0 License
+- org.glassfish.jaxb/jaxb-core
+- org.glassfish.jaxb/jaxb-runtime
 
-Eclipse Public License 1.0
-- h2.jar
+Eclipse Public 1.0 License
+- com.h2database:h2 (Dual license: MPL 2.0, EPL 1.0)
 
-ISC License
-- logkit:logkit
+Eclipse Public 2.0 License
+- Adoptium OpenJDK
 
-LGPL-3.0 license
-- org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec
+IBM International Program License Agreement (IPLA)
+- com.ibm.db2:jcc
 
-Plexus Classworlds License
-- classworlds:classworlds
+GNU Affero General Public License (AGPL) version 3
+- net.java.truelicense:truelicense
+
+GNU Lesser General Public License (LGPL) 3.0
+- org.mariadb.jdbc:mariadb-java-client (Dual license: LGPL 2.1, LGPL 3.0)
+
+MIT License
+- com.microsoft.sqlserver:mssql-jdbc
+
+Oracle Free Use Terms and Conditions (FUTC)
+- com.oracle.database.jdbc:ojdbc8
