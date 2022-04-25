@@ -33,6 +33,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     /**
      * @deprecated No longer used
      */
+    @Deprecated
     public static final ConfigurationDefinition<Boolean> FILTER_LOG_MESSAGES;
     public static final ConfigurationDefinition<Boolean> HEADLESS;
     public static final ConfigurationDefinition<Boolean> STRICT;

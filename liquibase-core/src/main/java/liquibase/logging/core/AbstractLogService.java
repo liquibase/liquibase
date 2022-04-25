@@ -22,6 +22,7 @@ public abstract class AbstractLogService implements LogService {
     /**
      * @deprecated always returns null
      */
+    @Deprecated
     @Override
     public LogMessageFilter getFilter() {
         return null;
@@ -30,6 +31,7 @@ public abstract class AbstractLogService implements LogService {
     /**
      * @deprecated does not save the filter
      */
+    @Deprecated
     @Override
     public void setFilter(LogMessageFilter filter) {
     }

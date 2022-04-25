@@ -19,10 +19,11 @@ public abstract class AbstractLogger extends AbstractExtensibleObject implements
      * @deprecated use {@link AbstractLogger().
      * Passed filter is not used.
      */
-    public AbstractLogger(LogMessageFilter ignored) {
+    @Deprecated
+    protected AbstractLogger(LogMessageFilter ignored) {
     }
 
-    public AbstractLogger() {
+    protected AbstractLogger() {
     }
 
     @Override
@@ -88,6 +89,7 @@ public abstract class AbstractLogger extends AbstractExtensibleObject implements
     /**
      * @deprecated now just returns the message
      */
+    @Deprecated
     protected String filterMessage(String message) {
         return message;
     }
