@@ -19,7 +19,7 @@
         <deploy.repositoryId>github</deploy.repositoryId>
         <deploy.url>https://maven.pkg.github.com/liquibase</deploy.url>
 
-        <h2.version>2.1.210</h2.version>
+        <h2.version>2.1.212</h2.version>
         <hsqldb.version>2.5.2</hsqldb.version>
         <postgresql.version>42.3.2</postgresql.version>
         <mssql.version>8.4.0.jre8</mssql.version>
