@@ -33,6 +33,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
 --changeset \${authorProp}:\${idProp}
 select * from \${tableNameProp};
 
+
 --changeset "n voxland":"change 2" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
 create table table1 (
     id int primary key
@@ -86,11 +87,70 @@ create table my_table (
 --changeset complexContext:1 context:"a or b"
 select 1
 
--- changeset wesley:wesley-1 runWith:\${runWith}
+-- changeset the_user:the_user-1 runWith:\${runWith}
 create table table2 (
     id int primary key
 );
 
+--changeset Mike:CREATE_PROCEDURE_[dbo].[CustOrderHist1]
+CREATE PROCEDURE dbo.CustOrderHist1 @CustomerID nchar(5)
+AS
+SELECT ProductName, Total=SUM(Quantity)
+FROM Products P, [Order Details] OD, Orders O, Customers C
+WHERE C.CustomerID = @CustomerID
+AND C.CustomerID = O.CustomerID AND O.OrderID = OD.OrderID AND OD.ProductID = P.ProductID
+GROUP BY ProductName;
+--rollback DROP PROCEDURE [dbo].[CustOrderHist1];
+
+--changeset Mike:CREATE_PROCEDURE_[dbo].[CustOrderHist1].999
+CREATE PROCEDURE dbo.CustOrderHist999 @CustomerID nchar(5)
+AS
+SELECT ProductName, Total=SUM(Quantity)
+FROM Products P, [Order Details] OD, Orders O, Customers C
+WHERE C.CustomerID = @CustomerID
+AND C.CustomerID = O.CustomerID AND O.OrderID = OD.OrderID AND OD.ProductID = P.ProductID
+GROUP BY ProductName;
+--rollback DROP PROCEDURE [dbo].[CustOrderHist999];
+
+-- changeset the_user:the_user|1 runWith:\${runWith}
+create table table22 (
+    id int primary key
+);
+
+-- changeset the_user:the_user!1 runWith:\${runWith}
+create table table33 (
+    id int primary key
+);
+
+-- changeset the_user:{the_user-1} runWith:\${runWith}
+create table table44 (
+    id int primary key
+);
+
+-- changeset the_user:{the_user?1} runWith:\${runWith}
+create table table55 (
+    id int primary key
+);
+
+-- changeset the_user:{(the_user?1)} runWith:\${runWith}
+create table table66 (
+    id int primary key
+);
+
+-- changeset the_user:{^the_user\\1} runWith:\${runWith}
+create table table77 (
+    id int primary key
+);
+
+-- changeset the_user:<the_user> runWith:\${runWith}
+create table table88 (
+    id int primary key
+);
+
+-- changeset the_user:+the_user+ runWith:\${runWith}
+create table table99 (
+    id int primary key
+);
 """.trim()
 
     private static final String END_DELIMITER_CHANGELOG = """
@@ -157,7 +217,7 @@ grant execute on any_procedure_name to ANY_USER3/
 
         changeLog.getLogicalFilePath() == "asdf.sql"
 
-        changeLog.getChangeSets().size() == 11
+        changeLog.getChangeSets().size() == 21
 
         changeLog.getChangeSets().get(0).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(0).getId() == "1"
@@ -222,7 +282,6 @@ grant execute on any_procedure_name to ANY_USER3/
         assert changeLog.getChangeSets().get(5).rollback.changes[0] instanceof RawSQLChange
         ((RawSQLChange) changeLog.getChangeSets().get(5).rollback.changes[0]).getSql() == "drop table table4;"
 
-
         changeLog.getChangeSets().get(6).getAuthor() == "mysql"
         changeLog.getChangeSets().get(6).getId() == "1"
         changeLog.getChangeSets().get(6).getChanges().size() == 1
@@ -238,7 +297,6 @@ grant execute on any_procedure_name to ANY_USER3/
         assert changeLog.getChangeSets().get(7).getChanges().get(0) instanceof RawSQLChange
         ((RawSQLChange) changeLog.getChangeSets().get(7).getChanges().get(0)).getSql() == "select 1;"
         changeLog.getChangeSets().get(7).rollback.changes.size() == 0
-//         changeLog.getChangeSets().get(7).getContexts().size() == 3
         assert changeLog.getChangeSets().get(7).getContexts().toString().contains("first")
         assert changeLog.getChangeSets().get(7).getContexts().toString().contains("second")
         assert changeLog.getChangeSets().get(7).getContexts().toString().contains("third")
@@ -269,9 +327,21 @@ grant execute on any_procedure_name to ANY_USER3/
         assert cs.rollback.changes[0] instanceof RawSQLChange
         ((RawSQLChange) cs.rollback.changes[0]).getSql() == "drop table my_table;"
 
-
         changeLog.getChangeSets().get(9).getContexts().toString() == "a or b"
 
+        changeLog.getChangeSets().get(11).getId().equalsIgnoreCase("CREATE_PROCEDURE_[dbo].[CustOrderHist1]")
+
+        changeLog.getChangeSets().get(15).getId().equalsIgnoreCase("{the_user-1}")
+
+        changeLog.getChangeSets().get(16).getId().equalsIgnoreCase("{the_user?1}")
+
+        changeLog.getChangeSets().get(17).getId().equalsIgnoreCase("{(the_user?1)}")
+
+        changeLog.getChangeSets().get(18).getId().equalsIgnoreCase("{^the_user\\1}")
+
+        changeLog.getChangeSets().get(19).getId().equalsIgnoreCase("<the_user>")
+
+        changeLog.getChangeSets().get(20).getId().equalsIgnoreCase("+the_user+")
     }
 
     def "parse change set with colon in ID"() throws Exception {
