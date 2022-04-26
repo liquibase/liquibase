@@ -52,7 +52,7 @@ jobs:
       ## Running with -Dscope=compile in order to report only on shipped modules, not "test" or "provided" scope ones
       - name: Run Snyk Test to check for vulnerabilities
         run: |
-          ./snyk test --fail-on=all --all-projects --severity-threshold=high --org=datical --policy-path=.snyk -- -B -Dscope=compile
+          ./snyk test --fail-on=all --all-projects --severity-threshold=low --org=datical --policy-path=.snyk -- -B -Dscope=compile
 
 
       - name: Slack Notification
