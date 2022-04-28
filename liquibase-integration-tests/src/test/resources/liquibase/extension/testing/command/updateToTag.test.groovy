@@ -11,6 +11,7 @@ Required Args:
   changelogFile (String) The root changelog
   tag (String) The tag to update to
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changeExecListenerClass (String) Fully-qualified class which specifies a ChangeExecListener
     Default: null

@@ -17,10 +17,7 @@ liquibase:
         altTablespace: liquibase2
         keepRunning: true
 
-      test: hub,h2,hsqldb,sqlite
-
-      hub:
-        url: http://localhost:8888
+      test: h2,hsqldb,sqlite
 
       cockroachdb:
         version: latest-v21.2

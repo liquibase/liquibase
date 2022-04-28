@@ -16,7 +16,7 @@ public class LiquibaseStatusServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(javax.servlet.http.HttpServletRequest req, javax.servlet.http.HttpServletResponse resp) throws javax.servlet.ServletException, IOException {
+    protected void doGet(javax.servlet.http.HttpServletRequest req, javax.servlet.http.HttpServletResponse resp)  {
         delegate.doGet(new JavaxHttpServletRequest(req), new JavaxHttpServletResponse(resp));
     }
 
@@ -44,6 +44,11 @@ public class LiquibaseStatusServlet extends HttpServlet {
 
         public JavaxHttpServletResponse(javax.servlet.http.HttpServletResponse resp) {
             this.response = resp;
+        }
+
+        @Override
+        public void setStatus(int status) {
+            this.response.setStatus(status);
         }
 
         @Override
