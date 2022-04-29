@@ -1,5 +1,6 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.Liquibase;
 import liquibase.command.CommandScope;
 import liquibase.command.CommonArgumentNames;
 import liquibase.exception.CommandExecutionException;
@@ -29,7 +30,7 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
     protected String format;
 
     @Override
-    protected void performChecksTask() throws CommandExecutionException {
+    protected void performLiquibaseTask(Liquibase liquibase) throws CommandExecutionException {
         CommandScope liquibaseCommand = new CommandScope("checks", "run");
         liquibaseCommand.addArgumentValue(CommonArgumentNames.CHANGELOG_FILE.getArgumentName(), changeLogFile);
         if (StringUtil.isNotEmpty(checksSettingsFile)) {
