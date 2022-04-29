@@ -12,6 +12,7 @@ Additional guidance [here](https://liquibase.jira.com/wiki/spaces/LB/pages/12749
 - If there is an existing issue this addresses, include "Fixes #XXXX" to auto-link the issue to this PR
 - If there is NOT an existing issue, consider creating one.
   - In general, issues describe wanted change from an end-user perspective and PRs describe the technical change.
+  - If this change is very small and not worth splitting off an issue, include `Steps To Reproduce`, `Expected Behavior`, and `Actual Behavior` sections in this PR as you would have in the issue.
 - Describe what users need and how the fix will affect them
 - Describe how the code change addresses the problem
 - Ensure private information is redacted.
