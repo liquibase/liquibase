@@ -14,11 +14,12 @@ import org.liquibase.maven.property.PropertyElement;
 public class LiquibaseChecksShowMojo extends AbstractLiquibaseChecksMojo {
 
     @Override
-    protected void performChecksTask() throws CommandExecutionException {
+    protected void performLiquibaseTask(Liquibase liquibase) throws CommandExecutionException {
         CommandScope liquibaseCommand = new CommandScope("checks", "show");
         if (StringUtil.isNotEmpty(checksSettingsFile)) {
             liquibaseCommand.addArgumentValue("checksSettingsFile", checksSettingsFile);
         }
+        liquibaseCommand.addArgumentValue("checksIntegration", "maven");
         liquibaseCommand.execute();
     }
 }
