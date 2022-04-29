@@ -47,7 +47,7 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
         if (container.isRunning()) {
             return;
         }
-
+/*
         final DockerClient dockerClient = container.getDockerClient();
         for (Container container : dockerClient.listContainersCmd().exec()) {
             final String containerTestSystem = container.getLabels().get(TEST_SYSTEM_LABEL);
@@ -55,6 +55,8 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
                 break;
             }
         }
+        
+ */
 
         container.withReuse(testSystem.getKeepRunning());
 
