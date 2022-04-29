@@ -10,6 +10,7 @@ Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null

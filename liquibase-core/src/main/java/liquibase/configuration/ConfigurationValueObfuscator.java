@@ -1,5 +1,7 @@
 package liquibase.configuration;
 
+import liquibase.database.jvm.JdbcConnection;
+
 /**
  * Used by {@link ConfigurationDefinition#getCurrentValueObfuscated()} to obfuscate the current value.
  */
@@ -9,6 +11,11 @@ public interface ConfigurationValueObfuscator<DataType> {
      * Standard obfuscator. Returns the constant "*****".
      */
     ConfigurationValueObfuscator<String> STANDARD = value -> value == null ? null : "*****";
+
+    /**
+     * Obfuscates credentials from the URL
+     */
+    ConfigurationValueObfuscator<String> URL_OBFUSCATOR = value -> value == null ? null : JdbcConnection.sanitizeUrl(value);
 
     /**
      * Not really an obfuscator -- simply returns the passed value directly.

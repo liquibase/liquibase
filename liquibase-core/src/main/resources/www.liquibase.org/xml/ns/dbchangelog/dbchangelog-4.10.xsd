@@ -765,6 +765,16 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="uniqueConstraintExists">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="constraintName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attribute name="columnNames" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="rowCount">
         <xsd:complexType>
             <xsd:attribute name="catalogName" type="xsd:string"/>
@@ -1372,6 +1382,7 @@
                 <xsd:element ref="sequenceExists" maxOccurs="unbounded"/>
                 <xsd:element ref="foreignKeyConstraintExists" maxOccurs="unbounded"/>
                 <xsd:element ref="indexExists" maxOccurs="unbounded"/>
+                <xsd:element ref="uniqueConstraintExists" maxOccurs="unbounded"/>
                 <xsd:element ref="primaryKeyExists" maxOccurs="unbounded"/>
                 <xsd:element ref="viewExists" maxOccurs="unbounded"/>
                 <xsd:element ref="tableIsEmpty" maxOccurs="unbounded"/>

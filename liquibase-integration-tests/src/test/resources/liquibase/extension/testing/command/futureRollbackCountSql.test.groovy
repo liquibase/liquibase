@@ -11,6 +11,7 @@ Required Args:
   changelogFile (String) The root changelog
   count (Integer) Number of change sets to generate rollback SQL for
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   contexts (String) Changeset contexts to match
     Default: null

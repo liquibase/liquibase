@@ -363,9 +363,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         } else if (columnConfig.getType() == null) {
                             // columnConfig did not specify a type
                             valueConfig.setValue(value);
-                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UNKNOWN) {
-                            // columnConfig did not match a specific type
-                            valueConfig.setValue(value);
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.BOOLEAN) {
                             if (value == null) { // TODO getDefaultValueBoolean should use BooleanUtil.parseBoolean also for consistent behaviour
                                 valueConfig.setValueBoolean(columnConfig.getDefaultValueBoolean());
@@ -378,11 +375,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             } else {
                                 valueConfig.setValueNumeric(columnConfig.getDefaultValueNumeric());
                             }
-                        } else if (columnConfig.getType().toLowerCase().contains("date")
-                                || columnConfig.getType().toLowerCase().contains("time")
-                        ) {
-                            if ("NULL".equalsIgnoreCase(value) ||
-                                    "".equals(value)) {
+                        } else if (columnConfig.getType().equalsIgnoreCase("date")
+                                || columnConfig.getType().equalsIgnoreCase("datetime")
+                                || columnConfig.getType().equalsIgnoreCase("time")) {
+                            if ("NULL".equalsIgnoreCase(value) || "".equals(value)) {
                                 valueConfig.setValue(null);
                             } else {
                                 try {
@@ -446,6 +442,9 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             } else {
                                 valueConfig.setValue(value);
                             }
+                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UNKNOWN) {
+                            // columnConfig did not match a specific type
+                            valueConfig.setValue(value);
                         } else {
                             throw new UnexpectedLiquibaseException(
                                     String.format(coreBundle.getString("loaddata.type.is.not.supported"),

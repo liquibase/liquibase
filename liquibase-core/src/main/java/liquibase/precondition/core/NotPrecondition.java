@@ -22,11 +22,6 @@ public class NotPrecondition extends PreconditionLogic {
     }
 
     @Override
-    public ValidationErrors validate(Database database) {
-        return new ValidationErrors();
-    }
-
-    @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
