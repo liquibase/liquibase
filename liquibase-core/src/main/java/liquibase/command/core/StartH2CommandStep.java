@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 
@@ -99,13 +100,14 @@ public class StartH2CommandStep extends AbstractCommandStep {
                     "  Integration Web URL: " + intUrl + System.lineSeparator());
 
 
-            while (true) {
-                try {
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(60));
-                } catch (InterruptedException interruptedException) {
-                    Thread.currentThread().interrupt();
-                }
-            }
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                Scope.getCurrentScope().getUI().sendMessage("Shutting down H2 database...");
+            }));
+        try {
+            Thread.sleep(Long.MAX_VALUE);
+        } catch (InterruptedException interruptedException) {
+            Thread.currentThread().interrupt();
+        }
 
         } catch (Throwable e) {
             e.printStackTrace();
