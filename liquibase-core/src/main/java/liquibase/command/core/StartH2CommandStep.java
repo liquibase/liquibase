@@ -6,7 +6,6 @@ import liquibase.configuration.ConfigurationValueObfuscator;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.concurrent.TimeUnit;
 
 public class StartH2CommandStep extends AbstractCommandStep {
 
@@ -103,11 +102,11 @@ public class StartH2CommandStep extends AbstractCommandStep {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 Scope.getCurrentScope().getUI().sendMessage("Shutting down H2 database...");
             }));
-        try {
-            Thread.sleep(Long.MAX_VALUE);
-        } catch (InterruptedException interruptedException) {
-            Thread.currentThread().interrupt();
-        }
+            try {
+                Thread.sleep(Long.MAX_VALUE);
+            } catch (InterruptedException ignored) {
+                Scope.getCurrentScope().getLog(getClass()).fine("StartH2CommandStep was interrupted");
+            }
 
         } catch (Throwable e) {
             e.printStackTrace();
