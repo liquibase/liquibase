@@ -102,12 +102,10 @@ public class StartH2CommandStep extends AbstractCommandStep {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 Scope.getCurrentScope().getUI().sendMessage("Shutting down H2 database...");
             }));
-            try {
-                Thread.sleep(Long.MAX_VALUE);
-            } catch (InterruptedException ignored) {
-                Scope.getCurrentScope().getLog(getClass()).fine("StartH2CommandStep was interrupted");
-            }
 
+            Thread.sleep(Long.MAX_VALUE);
+        } catch (InterruptedException e) {
+            throw e;
         } catch (Throwable e) {
             e.printStackTrace();
             System.exit(-1);
