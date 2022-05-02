@@ -312,8 +312,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     private File driverPropertiesFile;
 
-    private boolean hasProLicense;
-
     /**
      * Specifies your Liquibase Pro license key. This has been deprecated in favor of using
      * "liquibase.liquibaseLicenseKey", but this property will continue to be operational.
@@ -333,10 +331,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private String liquibaseLicenseKey;
 
     protected String commandName;
-
-    protected boolean hasProLicense() {
-        return hasProLicense;
-    }
 
     /**
      * Get the specified license key. This first checks liquibaseLicenseKey and if no key is found, then returns
@@ -432,11 +426,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 Scope.child(scopeValues, () -> {
 
                     configureFieldsAndValues();
-
-                    //
-                    // Check for a LiquibasePro license
-                    //
-                    hasProLicense = MavenUtils.checkProLicense(getLicenseKey(), commandName, getLog());
 
                     getLog().info(CommandLineUtils.getBanner());
 

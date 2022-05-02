@@ -216,7 +216,6 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                                 "currently supports only 'TXT' or 'JSON' as values.  (Blank defaults to 'TXT')";
                 throw new LiquibaseException(String.format(messageString));
             }
-            MavenUtils.checkProLicenseAndThrowException(getLicenseKey(), "diff --format=" + format, getLog());
         }
         ClassLoader cl = null;
         ResourceAccessor resourceAccessor;
@@ -283,6 +282,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 CommandScope formattedDiffCommand = new CommandScope("internalFormattedDiff");
                 formattedDiffCommand.addArgumentValue("format", format);
                 formattedDiffCommand.addArgumentValue("diffCommand", liquibaseCommand);
+                formattedDiffCommand.addArgumentValue("liquibaseProLicenseKey", getLicenseKey());
 
                 formattedDiffCommand.execute();
             } else {
