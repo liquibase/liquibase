@@ -4,22 +4,22 @@ import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Labels;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.ChangeLogParserConfiguration;
+import liquibase.util.ExpressionExpander;
 import liquibase.util.StringUtil;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ChangeLogParameters {
 
-    private List<ChangeLogParameter> changeLogParameters = new ArrayList<>();
-    private ExpressionExpander expressionExpander;
-    private Database currentDatabase;
+    private final List<ChangeLogParameter> changeLogParameters = new ArrayList<>();
+    private final ExpressionExpander expressionExpander;
+    private final MissingPropertyHandler missingPropertyHandler;
+    private final Database currentDatabase;
     private Contexts currentContexts;
     private LabelExpression currentLabelExpression;
 
@@ -31,10 +31,10 @@ public class ChangeLogParameters {
     	LinkedHashMap<Object, Object> externalParameters = new LinkedHashMap<>();
     	// First add environment variables
     	externalParameters.putAll(System.getenv());
-    	
+
     	// Next add system properties; they have higher precedence than / overwrite environment variables
     	externalParameters.putAll((Properties) System.getProperties().clone());
-        
+
     	for (Map.Entry entry : externalParameters.entrySet()) {
             changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
@@ -79,10 +79,31 @@ public class ChangeLogParameters {
             this.set("database.supportsNotNullConstraintNames", database.supportsNotNullConstraintNames());
         }
 
-        this.expressionExpander = new ExpressionExpander(this);
+        this.expressionExpander = new ExpressionExpander(ChangeLogParserConfiguration.SUPPORT_PROPERTY_ESCAPING.getCurrentValue());
+        this.missingPropertyHandler = createMissingPropertyHandler();
         this.currentDatabase = database;
         this.currentContexts = new Contexts();
         this.currentLabelExpression = new LabelExpression();
+    }
+
+    private MissingPropertyHandler createMissingPropertyHandler() {
+        final MissingPropertyHandler missingPropertyHandler;
+        ChangeLogParserConfiguration.MissingPropertyMode missingPropertyMode =
+                ChangeLogParserConfiguration.MISSING_PROPERTY_MODE.getCurrentValue();
+        switch (missingPropertyMode) {
+            case EMPTY:
+                missingPropertyHandler = (property, changeLog) -> "";
+                break;
+            case THROW:
+                missingPropertyHandler = (property, changeLog) -> {
+                    throw new UnexpectedLiquibaseException("Could not resolve property `" + property + "` in file `" + changeLog.getLogicalFilePath() + "`");
+                };
+                break;
+            default:
+                missingPropertyHandler = (property, changeLog) -> "${" + property + "}";
+                break;
+        }
+        return missingPropertyHandler;
     }
 
     public void setContexts(Contexts contexts) {
@@ -214,8 +235,7 @@ public class ChangeLogParameters {
         Object value = changeLogParameter.getValue();
         if (value instanceof String) {
             String string = (String) value;
-            Matcher matcher = ExpressionExpander.EXPRESSION_PATTERN.matcher(string);
-            return matcher.find();
+            return !string.equals(expressionExpander.expandExpressions(string, property -> ""));
         }
         return false;
     }
@@ -225,7 +245,14 @@ public class ChangeLogParameters {
     }
 
     public String expandExpressions(String string, DatabaseChangeLog changeLog) {
-        return expressionExpander.expandExpressions(string, changeLog);
+        return expressionExpander.expandExpressions(string, property -> {
+            Object value = getValue(property, changeLog);
+            if (value == null) {
+                return missingPropertyHandler.onMissingProperty(property, changeLog);
+            } else {
+                return value.toString();
+            }
+        });
     }
 
     public void setLabels(LabelExpression labels) {
@@ -234,43 +261,6 @@ public class ChangeLogParameters {
 
     public LabelExpression getLabels() {
         return currentLabelExpression;
-    }
-
-    protected static class ExpressionExpander {
-        private boolean enableEscaping;
-        private ChangeLogParameters changeLogParameters;
-        private static final Pattern EXPRESSION_PATTERN = Pattern.compile("(\\$\\{[^\\}]+\\})");
-
-        public ExpressionExpander(ChangeLogParameters changeLogParameters) {
-            this.changeLogParameters = changeLogParameters;
-            this.enableEscaping = ChangeLogParserConfiguration.SUPPORT_PROPERTY_ESCAPING.getCurrentValue();
-        }
-
-        public String expandExpressions(String text, DatabaseChangeLog changeLog) {
-            if (text == null) {
-                return null;
-            }
-            Matcher matcher = EXPRESSION_PATTERN.matcher(text);
-            String originalText = text;
-            while (matcher.find()) {
-                String expressionString = originalText.substring(matcher.start(), matcher.end());
-                String valueTolookup = expressionString.replaceFirst("\\$\\{", "").replaceFirst("\\}$", "");
-
-                Object value = (enableEscaping && valueTolookup.startsWith(":")) ? null : changeLogParameters
-                    .getValue(valueTolookup, changeLog);
-
-                if (value != null) {
-                    text = text.replace(expressionString, value.toString());
-                }
-            }
-
-            // replace all escaped expressions with its literal
-            if (enableEscaping) {
-                text = text.replaceAll("\\$\\{:(.+?)}", "\\$\\{$1}");
-            }
-
-            return text;
-        }
     }
 
     public class ChangeLogParameter {
@@ -372,5 +362,9 @@ public class ChangeLogParameters {
         public DatabaseChangeLog getChangeLog() {
             return changeLog;
         }
+    }
+
+    private interface MissingPropertyHandler {
+        String onMissingProperty(String property, DatabaseChangeLog changeLog);
     }
 }
