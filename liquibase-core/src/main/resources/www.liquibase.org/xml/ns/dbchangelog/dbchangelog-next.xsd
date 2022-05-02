@@ -425,7 +425,7 @@
         <xsd:attribute name="ordered" type="booleanExp"/>
         <xsd:attribute name="cacheSize" type="xsd:string"/>
         <xsd:attribute name="dataType" type="xsd:string" />
-        <xsd:attribute name="cycle" type="booleanExp" default="false">
+        <xsd:attribute name="cycle" type="booleanExp">
             <xsd:annotation>
                 <xsd:documentation>
                     true for a cycling sequence, false for a non-cycling sequence.
