@@ -1,6 +1,50 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.9.10 (2022.05.04)
+
+## Breaking Change
+
+Upgraded mssql driver to 10.2.0 by @nvoxland in https://github.com/liquibase/liquibase/pull/2790
+
+End User Impact:  The driver changed the encryption default from "false" to "true" between 8.x and 10.x. If you have a self-signed certificate in your database, you must do one of the following: add `encrypt=false`; add `trustServerCertificate=true`; or add the server certificate to the java trusted certificate list. For production systems, Liquibase recommends against using self-signed certificates without adding the server certificate to the Java keystore. For more information on installing the trusted certificate, see https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/manage-certificates?view=sql-server-ver15
+
+## Security Updates
+Upgraded postgresql from 42.3.2 to 42.3.4  to address [CVE-2022-26520](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-26520) by @dependabot in https://github.com/liquibase/liquibase/pull/2769
+* Vulnerability introduced in org.postgresql:postgresql@42.3.2
+* Fixed in org.postgresql:postgresql@42.3.3
+
+## JDBC Driver and Third-Party Library Updates
+* Upgraded oracle driver to 21.5.0.0 by @nvoxland in https://github.com/liquibase/liquibase/pull/2791
+* Upgraded jcc from 11.5.6.0 to 11.5.7.0 by @dependabot in https://github.com/liquibase/liquibase/pull/2421
+* Upgraded mssql driver to 10.2.0 by @nvoxland in https://github.com/liquibase/liquibase/pull/2790
+* Upgraded  h2 from 2.1.210 to 2.1.212 by @dependabot in https://github.com/liquibase/liquibase/pull/2740
+* Upgraded sqlite-jdbc from 3.34.0 to 3.36.0.3 by @dependabot in https://github.com/liquibase/liquibase/pull/2412
+* Upgraded jaybird from 4.0.3.java8 to 4.0.6.java8 by @dependabot in https://github.com/liquibase/liquibase/pull/2802
+* Upgraded hsqldb from 2.4.0 to 2.5.2 by @nvoxland in https://github.com/liquibase/liquibase/pull/2797
+* Updated information in "licenses" directory by @nvoxland in https://github.com/liquibase/liquibase/pull/2795
+* Upgraded mariadb driver to 3.0.4 by @nvoxland in https://github.com/liquibase/liquibase/pull/2789
+
+
+## Enhancements
+* Allow CompositeResourceAccessor to have a non-fixed size list of ResourceAccessor so that the list can be added to/removed from by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2650
+* Correctly handle null class package names in the logging system by @nvoxland in https://github.com/liquibase/liquibase/pull/2763
+* Handle URLs correctly in error conditions DAT-9882 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2709
+* Validate formatted SQL changelog for invalid patterns DAT-7721 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2761
+* Quality checks for Maven - `checks run` and `checks show` goals
+
+
+## Fixes
+* Fix EnterpriseDB database recognition by @nvoxland in https://github.com/liquibase/liquibase/pull/2767
+* Fix start failure with Nullpointed exception when Environment contains empty string Key (fix Issue 2631) by @feltonma91 in https://github.com/liquibase/liquibase/pull/2636
+* Fix createTable on Mysql not preserving primary key information when remarks also defined on the column by @nvoxland in https://github.com/liquibase/liquibase/pull/2752
+* Updated information in "licenses" directory by @nvoxland in https://github.com/liquibase/liquibase/pull/2795
+
+
+**Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.9.1...v4.10.0
+
+
+
 Changes in version 4.9.1 (2022.03.25)
 
 ## Liquibase 4.9.1 patch release
@@ -26,7 +70,6 @@ Changes in version 4.9.0 (2022.03.17)
 
 Liquibase  4.9.0 introduces the following functionality:
 - [PRO] Quality checks output in a JSON format
-- Quality checks for Maven - `checks run` and `checks show` goals
 - [PR#2558] [kavya-shastri] The extension of the usage of the Liquibase global configuration for the `secureParsing` parameter to prevent the entity resolver from falling back to looking on the network for missing XSDs. If you reference an XSD other than one of Liquibase, Liquibase will no longer automatically download the XSD from the internet and use it. The default value for `secureParsing`  is `true`, but you can override it in any of the Liquibase configuration locations. For more information, see the Example Changelogs: XML Format documentation.
 - [PR#2529] [Krzysztof Sierszeń] [LB-1781] The `uniqueConstraintExists` precondition to check for the existence of unique constraints before running the update. You can check the constraint by constraint name or columns:
 <preConditions>
