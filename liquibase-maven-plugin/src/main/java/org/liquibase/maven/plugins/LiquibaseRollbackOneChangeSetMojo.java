@@ -108,7 +108,6 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         }
         argsMap.put("force", Boolean.TRUE);
         argsMap.put("liquibase", liquibase);
-        argsMap.put("liquibaseProLicenseKey", getLicenseKey());
 
         for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
             liquibaseCommand.addArgumentValue(entry.getKey(), entry.getValue());

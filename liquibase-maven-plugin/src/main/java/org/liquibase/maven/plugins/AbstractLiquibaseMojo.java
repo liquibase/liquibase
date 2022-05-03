@@ -420,6 +420,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     }
                 }
                 scopeValues.put("integrationDetails", integrationDetails);
+                scopeValues.put("liquibase.licenseKey", getLicenseKey());
 
                 final Map pluginContext = this.getPluginContext();
                 System.out.println(pluginContext.keySet());

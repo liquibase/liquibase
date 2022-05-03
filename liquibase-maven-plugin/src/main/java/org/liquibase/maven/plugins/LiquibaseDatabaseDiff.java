@@ -282,7 +282,6 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 CommandScope formattedDiffCommand = new CommandScope("internalFormattedDiff");
                 formattedDiffCommand.addArgumentValue("format", format);
                 formattedDiffCommand.addArgumentValue("diffCommand", liquibaseCommand);
-                formattedDiffCommand.addArgumentValue("liquibaseProLicenseKey", getLicenseKey());
 
                 formattedDiffCommand.execute();
             } else {
