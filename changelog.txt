@@ -1,7 +1,7 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version 4.9.10 (2022.05.04)
+Changes in version 4.10.0 (2022.05.04)
 
 ## Breaking Change
 
@@ -42,7 +42,6 @@ Upgraded postgresql from 42.3.2 to 42.3.4  to address [CVE-2022-26520](https://c
 
 
 **Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.9.1...v4.10.0
-
 
 
 Changes in version 4.9.1 (2022.03.25)
