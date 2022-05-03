@@ -8,6 +8,8 @@ import liquibase.util.StringUtil;
 import org.liquibase.maven.property.PropertyElement;
 
 /**
+ * Check the changelog for issues
+ *
  * @goal checks.run
  */
 public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {

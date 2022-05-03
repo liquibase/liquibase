@@ -9,6 +9,8 @@ import liquibase.util.StringUtil;
 import org.liquibase.maven.property.PropertyElement;
 
 /**
+ * List available checks, their configuration options, and current settings
+ *
  * @goal checks.show
  */
 public class LiquibaseChecksShowMojo extends AbstractLiquibaseChecksMojo {
