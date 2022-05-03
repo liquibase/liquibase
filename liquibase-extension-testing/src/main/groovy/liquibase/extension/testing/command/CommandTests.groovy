@@ -46,6 +46,7 @@ import spock.lang.Unroll
 import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.regex.Pattern
+import java.util.stream.Collectors
 
 class CommandTests extends Specification {
 
@@ -640,6 +641,20 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     }
                 }
             }
+        }
+
+        def descriptions =
+                returnList.stream()
+                        .map({ rtp -> rtp.definition.commandTestDefinition.joinedCommand + ": '" + rtp.definition.description + "'" })
+                        .collect(Collectors.toList())
+
+        def duplicateDescriptions =
+                descriptions.stream()
+                        .filter({ d -> Collections.frequency(descriptions, d) > 1 })
+                        .distinct().collect(Collectors.toList())
+
+        if (!duplicateDescriptions.isEmpty()) {
+            throw new Exception("There are duplicate command test definitions with the same description: " + StringUtil.join(duplicateDescriptions, "; "))
         }
 
         return returnList
