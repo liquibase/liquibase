@@ -9,9 +9,13 @@ import liquibase.resource.ResourceAccessor;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * Finds the Liquibase schema from the classpath rather than fetching it over the Internet.
@@ -25,6 +29,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
     @java.lang.SuppressWarnings("squid:S2095")
     public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
         Logger log = Scope.getCurrentScope().getLog(getClass());
+        Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
 
         log.fine("Resolving XML entity name='" + name + "', publicId='" + publicId + "', baseURI='" + baseURI + "', systemId='" + systemId + "'");
 
@@ -36,12 +41,26 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         String path = systemId.toLowerCase()
                 .replace("http://www.liquibase.org/xml/ns/migrator/", "http://www.liquibase.org/xml/ns/dbchangelog/")
                 .replaceFirst("https?://", "");
-
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         InputStreamList streams = resourceAccessor.openStreams(null, path);
+        if (streams.isEmpty() && Boolean.TRUE.equals(osgiPlatform)) {
+           Bundle bundle = FrameworkUtil.getBundle(LiquibaseEntityResolver.class);
+            URL schemaURL = bundle.getEntry(path);
+            if (schemaURL != null) {
+              try {
+                URI schemaURI = schemaURL.toURI();
+                streams = new InputStreamList(schemaURI, schemaURL.openStream());
+              } catch(URISyntaxException ex) {
+                log.fine("Cannot read resource " + path,ex);
+              }
+            } else {
+              log.fine("Cannot read resource " + path);
+            }
+        }
         if (streams.isEmpty()) {
+            
             streams = getFallbackResourceAccessor().openStreams(null, path);
-
+            
             if (streams.isEmpty() && GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
                 String errorMessage = "Unable to resolve xml entity " + systemId + " locally: " +
                         GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
