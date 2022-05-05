@@ -46,9 +46,8 @@ jobs:
     with:
       lb_flavor: "oss"
     secrets:
-      registry: "docker-dev.artifactory.datical.net"
-      username: ${{ secrets.ARTIFACTORY_USER }}
-      password: ${{ secrets.ARTIFACTORY_TOKEN }}
+      artifactory_user: ${{ secrets.ARTIFACTORY_USER }}
+      artifactory_token: ${{ secrets.ARTIFACTORY_TOKEN }}
 
   package:
     needs: [setup, build]
