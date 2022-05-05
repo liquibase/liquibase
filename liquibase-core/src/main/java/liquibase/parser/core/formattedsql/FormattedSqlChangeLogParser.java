@@ -451,7 +451,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         String context = null;
         String labels = null;
         String dbms = null;
-        boolean global = false;
+        boolean global = true;
         for (int i = 1; i <= propertyPatternMatcher.groupCount(); i++) {
             String temp = propertyPatternMatcher.group(i);
             String[] parts = temp.split(":");

@@ -1,7 +1,7 @@
 package liquibase.parser;
 
-import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.AutoloadedConfigurations;
+import liquibase.configuration.ConfigurationDefinition;
 
 /**
  * Configuration container for properties applicable to most {@link liquibase.parser.ChangeLogParser} implementations
@@ -27,14 +27,14 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
                 .build();
 
         MISSING_PROPERTY_MODE = builder.define("missingPropertyMode", MissingPropertyMode.class)
-                .setDescription("How to handle missing properties. Values can be 'legacy', 'empty' or 'throw'.")
-                .setDefaultValue(MissingPropertyMode.LEGACY)
+                .setDescription("How to handle changelog property expressions where a value is not set. For example, a string '${address}' when no 'address' property was defined. Values can be: 'preserve' which leaves the string as-is, 'empty' which replaces it with an empty string, or 'error' which stops processing with an error.")
+                .setDefaultValue(MissingPropertyMode.PRESERVE)
                 .build();
     }
 
     public enum MissingPropertyMode {
-        LEGACY,
+        PRESERVE,
         EMPTY,
-        THROW
+        ERROR,
     }
 }

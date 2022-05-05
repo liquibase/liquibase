@@ -127,6 +127,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (logicalFilePath == null) {
             returnPath = physicalFilePath;
         }
+        if (returnPath == null) {
+            return null;
+        }
+
         return returnPath
                 .replaceAll("\\\\", "/")
                 .replaceFirst("^/", "");
