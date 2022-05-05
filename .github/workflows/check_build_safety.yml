@@ -1,0 +1,21 @@
+jobs:
+  check_build_safety:
+    name: Check if Build should be done
+    runs-on: ubuntu-latest
+    steps:
+      - name: Supress builds for PRs from branch github-action-*
+        if: github.event.pull_request && contains(github.head_ref, 'github-action')
+        run: |
+          echo "not building PRs with source branch github-action-*"
+          exit 1
+      - name: Emit failure code for unsafe fork PRs
+        if: github.event.pull_request && github.event.pull_request.head.repo.full_name != 'liquibase/liquibase' && github.event.label.name != 'SafeToBuild'
+        run: |
+          echo "PR from Fork is NOT safe to build"
+          echo "A member of Liquibase team needs to apply label 'SafeToBuild'! "
+          exit 1
+      - name: Run needed builds
+        if: github.event.action == 'labeled' && github.event.pull_request.head.repo.full_name == 'liquibase/liquibase'
+        run: |
+          echo "Don't run liquibase/liquibase builds on labels"
+          exit 1

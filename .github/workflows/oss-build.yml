@@ -1,0 +1,74 @@
+ on:
+  workflow_call:
+    inputs:
+      lb_flavor:
+        required: false
+        type: string
+        default: 'oss'
+
+jobs:
+  build:
+    name: Build & Test (Java ${{ matrix.java }} ${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-2019 ]
+        java: [ 8, 11, 17, 18 ]
+        exclude:
+          # exclude non-java 8 on macos and windows builds
+          - os: macos-latest
+            java: 11
+          - os: windows-2019
+            java: 11
+          - os: macos-latest
+            java: 17
+          - os: windows-2019
+            java: 17
+          - os: macos-latest
+            java: 18
+          - os: windows-2019
+            java: 18
+    runs-on: ${{ matrix.os }}
+    env:
+      OS_TYPE: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+      - name: Built Code Cache
+        if: ${{ matrix.java == 8}}
+        uses: actions/cache@v3.0.1
+        with:
+          key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
+          path: ./**/target
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Build & Test
+        run: |
+          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
+      - name: Remove Original Jars for *nix
+        if: env.OS_TYPE != 'windows-2019'
+        run: |
+          find . -name original-*.jar -exec rm {} \;
+
+      - name: Archive Test Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-test-results-jdk${{ matrix.java }}
+          path: |
+            ./**/target/surefire-reports
+            ./**/target/site
+
+      - name: Archive Modules
+        if: ${{ matrix.java == 8 && matrix.os == 'ubuntu-latest'}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: liquibase-modules
+          path: |
+            */target/*-0-SNAPSHOT.jar
+

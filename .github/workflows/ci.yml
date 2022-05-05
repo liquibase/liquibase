@@ -1,0 +1,76 @@
+name: Build and Test
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+  push:
+    branches:
+      - master
+      - main
+      - github-action-*
+      - test-sonar-scan
+
+jobs:
+  check_build_safety:
+    uses: ./.github/workflows/check_build_safety.yml
+
+  setup:
+    needs: check_build_safety
+    uses: ./.github/workflows/setup.yml
+    with:
+      lb_flavor: "oss"
+    secrets:
+      bot_token: ${{secrets.BOT_TOKEN}}
+
+  build:
+    needs: setup
+    uses: ./.github/workflows/oss-build.yml
+    with:
+      lb_flavor: "oss"
+
+  sonar:
+    needs: build
+    uses: ./.github/workflows/oss-sonar.yml
+    with:
+      lb_flavor: "oss"
+    secrets:
+      sonar_token: ${{secrets.SONAR_TOKEN}}
+
+  integration-test:
+    needs: build
+    uses: ./.github/workflows/oss-test.yml
+    with:
+      lb_flavor: "oss"
+    secrets:
+      registry: "docker-dev.artifactory.datical.net"
+      username: ${{ secrets.ARTIFACTORY_USER }}
+      password: ${{ secrets.ARTIFACTORY_TOKEN }}
+
+  package:
+    needs: [ setup, build ]
+    uses: ./.github/workflows/oss-package.yml
+    with:
+      lb_flavor: "oss"
+    secrets:
+      bot_token: ${{secrets.BOT_TOKEN}}
+      gpg_private_key: ${{ secrets.GPG_SECRET }}
+      gpg_password: ${{ secrets.GPG_PASSPHRASE }}
+      install4j_lic: ${{secrets.INSTALL4J_LICENSE}}
+      install4j_apple_key: ${{ secrets.INSTALL4J_APPLE_KEY }}
+      install4j_apple_key_password: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
+      install4j_apple_id: ${{ secrets.INSTALL4J_APPLE_ID }}
+      install4j_apple_id_password: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
+      install4j_win_key: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
+      install4j_win_key_password: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
+
+  finish:
+    needs: [ setup, build, integration-test, package, sonar ]
+    uses: ./.github/workflows/oss-finish.yml
+    with:
+      lb_flavor: oss
+    secrets:
+      bot_token: ${{secrets.BOT_TOKEN}}
