@@ -5,9 +5,14 @@ on:
         required: false
         type: string
         default: 'oss'
+    secrets:
+      bot_token:
+        required: true
+
 jobs:
-  name: Setup
+  setup:
     runs-on: ubuntu-latest
+
     outputs:
       proBranchName: ${{ steps.find-branches.outputs.proBranchName }}
       proBranchSha: ${{ steps.find-branches.outputs.proBranchSha }}
@@ -37,7 +42,7 @@ jobs:
         id: find-branches
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.BOT_TOKEN }}
+          github-token: ${{ secrets.bot_token }}
           script: |
             const helper = require('./.github/util/workflow-helper.js')({github, context});
 
