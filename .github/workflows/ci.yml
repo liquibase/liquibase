@@ -51,7 +51,7 @@ jobs:
       password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
   package:
-    needs: [ setup, build ]
+    needs: [setup, build]
     uses: ./.github/workflows/oss-package.yml
     with:
       lb_flavor: "oss"
@@ -68,7 +68,7 @@ jobs:
       install4j_win_key_password: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
 
   finish:
-    needs: [ setup, build, integration-test, package, sonar ]
+    needs: [setup, build, integration-test, package, sonar]
     uses: ./.github/workflows/oss-finish.yml
     with:
       lb_flavor: oss
