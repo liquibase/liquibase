@@ -8,6 +8,7 @@ databaseChangeLog:
       changes:
        - createTable:
             tableName:  person
+            remarks: example-remarks
             columns:
               - column:
                   name:  id
@@ -40,6 +41,7 @@ databaseChangeLog:
       changes:
        - createTable:
             tableName:  company
+            remarks: example-remarks
             columns:
               - column:
                   name:  id
