@@ -2,7 +2,7 @@ on:
   workflow_call:
     inputs:
       lb_flavor:
-        required: false 
+        required: false
         type: string
         default: 'oss'
     secrets:
@@ -25,6 +25,7 @@ on:
       install4j_win_key:
         required: true
       install4j_win_key_password:
+        required: true
 
 jobs:
   package:
