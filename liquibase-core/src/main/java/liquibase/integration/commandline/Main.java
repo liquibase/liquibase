@@ -1468,39 +1468,6 @@ public class Main {
         }
         LOG.fine("Liquibase Hub Mode:     " + HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
 
-        //
-        // Check for a valid license to run PRO commands
-        //
-        String formatValue = getCommandParam(OPTIONS.FORMAT, null);
-        if (isLicenseableCommand(formatValue)) {
-            if (isFormattedDiff()) {
-                if (formatValue != null && !formatValue.equalsIgnoreCase("json")) {
-                    String messageString =
-                            "\nWARNING: The diff command optional Pro parameter '--format' " +
-                                    "currently supports only 'TXT' or 'JSON' as values.  (Blank defaults to 'TXT')";
-                    throw new LiquibaseException(String.format(messageString));
-                }
-            }
-            if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
-                String warningAboutCommand = command;
-                if (command.equalsIgnoreCase(COMMANDS.DIFF) && formatValue != null && !formatValue.isEmpty()) {
-                    warningAboutCommand = "diff --format=" + formatValue;
-                }
-                String messageString = String.format(coreBundle.getString("no.pro.license.found"), warningAboutCommand);
-                throw new LiquibaseException(messageString);
-            }
-        }
-
-        try {
-//            if (null != logFile) {
-//                Scope.getCurrentScope().getLog(getClass()).setLogLevel(logLevel, logFile);
-//            } else {
-//                Scope.getCurrentScope().getLog(getClass()).setLogLevel(logLevel);
-//            }
-        } catch (IllegalArgumentException e) {
-            throw new CommandLineParsingException(e.getMessage(), e);
-        }
-
         final ResourceAccessor fileOpener;
         if (Main.runningFromNewCli) {
             fileOpener = Scope.getCurrentScope().getResourceAccessor();
@@ -2039,14 +2006,6 @@ public class Main {
     private boolean dbConnectionNeeded(String command) {
         return !COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command) &&
                 !COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(command);
-    }
-
-    private boolean isLicenseableCommand(String formatValue) {
-        return COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command) ||
-                COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command) ||
-                COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command) ||
-                COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command) ||
-                (COMMANDS.DIFF.equalsIgnoreCase(command) && formatValue != null && !formatValue.toLowerCase().equals("txt"));
     }
 
     private void loadChangeSetInfoToMap(Map<String, Object> argsMap) throws CommandLineParsingException {

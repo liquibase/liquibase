@@ -2,6 +2,7 @@ package liquibase.license;
 
 import liquibase.plugin.Plugin;
 
+import java.util.Date;
 import java.util.List;
 
 public interface LicenseService extends Plugin {
@@ -74,5 +75,13 @@ public interface LicenseService extends Plugin {
    * would indicate that the license expired that many days ago.
    */
   int daysTilExpiration();
+
+  /**
+   * Get the expiration date of the installed license.
+   * @return the expiration date, or null if no license can be found
+   */
+  default Date getExpirationDate() {
+    return null;
+  }
 
 }
