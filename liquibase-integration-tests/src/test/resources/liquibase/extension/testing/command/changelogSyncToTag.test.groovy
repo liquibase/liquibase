@@ -14,6 +14,7 @@ Required Args:
   changelogFile (String) The root changelog file
   tag (String) Tag ID to execute changelogSync to
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   contexts (String) Changeset contexts to match
     Default: null

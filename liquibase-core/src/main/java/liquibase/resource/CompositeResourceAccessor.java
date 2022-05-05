@@ -13,7 +13,8 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
     private List<ResourceAccessor> resourceAccessors;
 
     public CompositeResourceAccessor(ResourceAccessor... resourceAccessors) {
-        this.resourceAccessors = Arrays.asList(CollectionUtil.createIfNull(resourceAccessors));
+        this.resourceAccessors = new ArrayList<>(); //Arrays.asList(CollectionUtil.createIfNull(resourceAccessors));
+        this.resourceAccessors.addAll(Arrays.asList(resourceAccessors));
     }
 
     public CompositeResourceAccessor(Collection<ResourceAccessor> resourceAccessors) {
@@ -24,6 +25,10 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
         this.resourceAccessors.add(resourceAccessor);
 
         return this;
+    }
+
+    public void removeResourceAccessor(ResourceAccessor resourceAccessor) {
+        this.resourceAccessors.remove(resourceAccessor);
     }
 
     @Override
