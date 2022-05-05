@@ -1,3 +1,10 @@
+ on:
+  workflow_call:
+    inputs:
+      lb_flavor:
+        required: false
+        type: string
+        default: 'oss'
 jobs:
   check_build_safety:
     name: Check if Build should be done

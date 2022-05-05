@@ -1,4 +1,12 @@
-    name: Setup
+ on:
+  workflow_call:
+    inputs:
+      lb_flavor:
+        required: false
+        type: string
+        default: 'oss'
+jobs:
+  name: Setup
     needs: check_build_safety
     runs-on: ubuntu-latest
     outputs:
