@@ -29,7 +29,7 @@ jobs:
       thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
       thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
       thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
-#      standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
+      standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
 #      stablePro: ${{ steps.find-branches.outputs.stablePro }}
 #      setupSuccessful: "true"
     steps:
@@ -104,7 +104,7 @@ jobs:
               "description": statusMessage
             });
 
-            core.setOutput("stablePro", !proFailed);
+            # core.setOutput("stablePro", !proFailed);
 
       - name: Upload Event File
         uses: actions/upload-artifact@v3
