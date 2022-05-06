@@ -5,6 +5,21 @@ on:
         required: false
         type: string
         default: 'oss'
+      thisSha:
+        required: false
+        type: string
+      thisBranchName:
+        required: true
+        type: string
+      thisBranchFilehName:
+        required: true
+        type: string
+      thisRepositoryName:
+        required: true
+        type: string
+      thisRepositoryOwner:
+        required: true
+        type: string
 
 jobs:
   build:
