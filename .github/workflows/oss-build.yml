@@ -64,7 +64,7 @@ jobs:
           cache: 'maven'
       - name: Build & Test
         run: |
-          mvn -B "-Dbuild.repository.owner=${{ needs.setup.outputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ needs.setup.outputs.thisRepositoryName }}" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
+          mvn -B "-Dbuild.repository.owner=${{ inputs.thisRepositoryOwner }}" "-Dbuild.repository.name=${{ inputs.thisRepositoryName }}" "-Dbuild.branch=${{ inputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ inputs.thisSha }}" "-DtrimStackTrace=false" -pl '!liquibase-dist' clean test package surefire-report:report
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-2019'
         run: |

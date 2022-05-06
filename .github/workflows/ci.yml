@@ -125,11 +125,11 @@ jobs:
     uses: ./.github/workflows/oss-build.yml
     with:
       lb_flavor: "oss"
-      thisSha: ${{ steps.find-branches.outputs.thisSha }}
-      thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
-      thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
-      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
-      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
+      thisSha: ${{ needs.setup.outputs.thisSha }}
+      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
+      thisBranchFileName: ${{ needs.setup.outputs.thisBranchFileName }}
+      thisRepositoryName: ${{ needs.setup.outputs.thisRepositoryName }}
+      thisRepositoryOwner: ${{ needs.setup.outputs.thisRepositoryOwner }}
 
   sonar:
     needs: build
