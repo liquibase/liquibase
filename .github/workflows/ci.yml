@@ -28,7 +28,7 @@ jobs:
       thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
       thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
       thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
-      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryName }}
+      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryOwner }}
 #      standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
 #      stablePro: ${{ steps.find-branches.outputs.stablePro }}
 #      setupSuccessful: "true"
@@ -56,8 +56,8 @@ jobs:
             core.setOutput("thisSha", helper.getCurrentSha());
             core.setOutput("thisBranchName", helper.getCurrentBranch());
             core.setOutput("thisBranchFileName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_]/g, "_"));
-            core.setOutput("thisRepoName", helper.getRepositoryName());
-            core.setOutput("thisRepoOwner", helper.getRepositoryOwner());
+            core.setOutput("thisRepositoryName", helper.getRepositoryName());
+            core.setOutput("thisRepositoryOwner", helper.getRepositoryOwner());
 
             # let proStatusMessage = "success";
             # let proFailed = false;
