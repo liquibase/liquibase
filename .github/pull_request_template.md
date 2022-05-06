@@ -1,3 +1,10 @@
+## Impact
+
+<!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
+- [ ] Bug fix (non-breaking change which fixes expected existing functionality)
+- [ ] Enhancement/New feature (adds functionality without impacting existing logic)
+- [ ] Breaking change (fix or feature that would cause existing functionality to change)
+ 
 ## Description
 
 A clear and concise description of the change being made.  
