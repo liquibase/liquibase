@@ -11,7 +11,7 @@ on:
       thisBranchName:
         required: true
         type: string
-      thisBranchFilehName:
+      thisBranchFileName:
         required: true
         type: string
       thisRepositoryName:
