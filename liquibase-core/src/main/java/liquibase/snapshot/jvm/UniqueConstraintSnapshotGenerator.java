@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import java.util.stream.Collectors;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -139,7 +140,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database, DatabaseSnapshot snapshot) throws DatabaseException {
         Relation table = example.getRelation();
-        Schema schema = table.getSchema();
+        Schema schema = example.getSchema();
         String name = example.getName();
 
         boolean bulkQuery;
@@ -176,24 +177,36 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 sql += "order by ordinal_position";
             } else if (database instanceof PostgresDatabase) {
+                List<String> conditions = new ArrayList<>();
                 sql = "select const.CONSTRAINT_NAME, COLUMN_NAME, const.constraint_schema as CONSTRAINT_CONTAINER "
                         + "from " + database.getSystemSchema() + ".table_constraints const "
                         + "join " + database.getSystemSchema() + ".key_column_usage col "
                         + "on const.constraint_schema=col.constraint_schema "
                         + "and const.table_name=col.table_name "
-                        + "and const.constraint_name=col.constraint_name "
-                        + "where const.constraint_catalog='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' ";
-                if (database instanceof CockroachDatabase) {
-                    sql += " and (select count(*) from (select indexdef from pg_indexes where schemaname='" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + "' AND indexname='" + database.correctObjectName(name, UniqueConstraint.class) + "' AND (position('DESC,' in indexdef) > 0 OR position('DESC)' in indexdef) > 0))) = 0"
-                            + "and const.constraint_name != 'primary' ";
+                        + "and const.constraint_name=col.constraint_name ";
+                if (schema.getCatalogName() != null) {
+                    conditions.add("const.constraint_catalog='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "'");
                 }
-                    sql += "and const.constraint_schema='" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + "' ";
+                if (database instanceof CockroachDatabase) {
+                    conditions.add("(select count(*) from (select indexdef from pg_indexes where schemaname='\" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + \"' AND indexname='\" + database.correctObjectName(name, UniqueConstraint.class) + \"' AND (position('DESC,' in indexdef) > 0 OR position('DESC)' in indexdef) > 0))) = 0");
+                    conditions.add("const.constraint_name != 'primary'");
+                }
+                if (schema.getSchema().getName() != null) {
+                    conditions.add("const.constraint_schema='" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + "'");
+                }
                 if (!bulkQuery) {
-                    sql += "and const.table_name='" + database.correctObjectName(example.getRelation().getName(), Table.class) + "' "
-                            + "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'";
+                    conditions.add("const.table_name='" + database.correctObjectName(example.getRelation().getName(), Table.class) + "'");
+                    if (name != null) {
+                        conditions.add("const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "' ");
+                    }
                 }
 
-                sql += "order by ordinal_position";
+                if (!conditions.isEmpty()) {
+                    sql += " WHERE ";
+                    sql += conditions.stream().collect(Collectors.joining(" AND "));
+                }
+
+                sql += " order by ordinal_position";
             } else if (database.getClass().getName().contains("MaxDB")) { //have to check classname as this is currently an extension
 				sql = "select CONSTRAINTNAME as constraint_name, COLUMNNAME as column_name from CONSTRAINTCOLUMNS WHERE CONSTRAINTTYPE = 'UNIQUE_CONST' AND tablename = '"
 						+ database.correctObjectName(example.getRelation().getName(), Table.class) + "' AND constraintname = '"

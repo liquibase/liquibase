@@ -23,10 +23,7 @@ import liquibase.util.SqlUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -331,9 +328,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                 } else {
                     if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
+                        // It is possible to make a column in Postgres that is varchar (for example) and reported as auto-increment. In this case,
+                        // we'd rather just preserve the default value, so we remove the auto-increment information since that doesn't really make any sense.
                         String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
                         isAutoincrement = StringUtil.trimToNull(isAutoincrement);
                         if (isAutoincrement == null) {
+                            column.setAutoIncrementInformation(null);
+                        } else if (database instanceof PostgresDatabase && PostgresDatabase.VALID_AUTO_INCREMENT_COLUMN_TYPE_NAMES.stream().noneMatch(typeName -> typeName.equalsIgnoreCase((String) columnMetadataResultSet.get("TYPE_NAME")))) {
                             column.setAutoIncrementInformation(null);
                         } else if (isAutoincrement.equals("YES")) {
                             column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
@@ -664,6 +665,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (database instanceof PostgresDatabase) {
+            if (columnInfo.isAutoIncrement()) {
+                columnMetadataResultSet.set(COLUMN_DEF_COL, null);
+            }
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
             if ((defaultValue != null) && (defaultValue instanceof String)) {
                 Matcher matcher = postgresStringValuePattern.matcher((String) defaultValue);
