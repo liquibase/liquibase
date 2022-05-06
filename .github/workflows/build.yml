@@ -270,7 +270,7 @@ jobs:
           path: ./**/target
 
       - name: Login to Artifactory
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: docker-dev.artifactory.datical.net
           username: ${{ secrets.ARTIFACTORY_USER }}
