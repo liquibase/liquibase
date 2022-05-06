@@ -59,53 +59,55 @@ jobs:
             core.setOutput("thisRepositoryName", helper.getRepositoryName());
             core.setOutput("thisRepositoryOwner", helper.getRepositoryOwner());
 
-            # let proStatusMessage = "success";
-            # let proFailed = false;
+             /*           
+             let proStatusMessage = "success";
+             let proFailed = false;
 
-            # let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
+             let branch = await helper.findMatchingBranch("liquibase", "liquibase-pro");
 
-            # //count as not a stand-alone PR for branch builds on master/main, even though there are no PRs
-            # if (helper.getCurrentBranch() == 'master' || helper.getCurrentBranch() == 'main' && branch.pullRequestId) {
-            #   core.setOutput("standAlonePR", helper.getCurrentBranch() !== branch.name);
-            # } else {
-            #   core.setOutput("standAlonePR", true);
-            # }
+            //count as not a stand-alone PR for branch builds on master/main, even though there are no PRs
+             if (helper.getCurrentBranch() == 'master' || helper.getCurrentBranch() == 'main' && branch.pullRequestId) {
+               core.setOutput("standAlonePR", helper.getCurrentBranch() !== branch.name);
+             } else {
+               core.setOutput("standAlonePR", true);
+             }
 
-            # if (!branch.lastSuccessfulRunNumber) {
-            #   proFailed = true;
-            #  proStatusMessage = "Matching pro branch has never passed. Falling back to master"
-            #  branch = await helper.findMatchingBranch("liquibase", "liquibase-pro", ["main", "master"])
-            # }
-            # core.setOutput("proBranchName", branch.name);
-            # core.setOutput("proBranchSha", branch.sha);
+             if (!branch.lastSuccessfulRunNumber) {
+               proFailed = true;
+              proStatusMessage = "Matching pro branch has never passed. Falling back to master"
+              branch = await helper.findMatchingBranch("liquibase", "liquibase-pro", ["main", "master"])
+             }
+             core.setOutput("proBranchName", branch.name);
+             core.setOutput("proBranchSha", branch.sha);
 
-            # if (!proFailed) {
-            #  if (!branch.workflowId) {
-            #    proStatusMessage = "does not have a ran workflow";
-            #    proFailed = true
-            #  } else if ( branch.runStatus != "completed") {
-            #    proStatusMessage = "build is "+ branch.runStatus;
-            #    proFailed = true
-            #  } else if ( branch.runConclusion != "success") {
-            #    proStatusMessage = "build conclusion was "+branch.runConclusion;
-            #    proFailed = true
-            #  }
-            # }
+             if (!proFailed) {
+              if (!branch.workflowId) {
+                proStatusMessage = "does not have a ran workflow";
+                proFailed = true
+              } else if ( branch.runStatus != "completed") {
+                proStatusMessage = "build is "+ branch.runStatus;
+                proFailed = true
+              } else if ( branch.runConclusion != "success") {
+                proStatusMessage = "build conclusion was "+branch.runConclusion;
+                proFailed = true
+              }
+             }
 
-            # statusMessage = "liquibase/liquibase-pro:"+branch.name+"@" + branch.sha.substring(0, 7) + " " + proStatusMessage;
-            # console.log("Pro failed?" + proFailed + ": "+statusMessage);
+             statusMessage = "liquibase/liquibase-pro:"+branch.name+"@" + branch.sha.substring(0, 7) + " " + proStatusMessage;
+             console.log("Pro failed?" + proFailed + ": "+statusMessage);
 
-            # github.rest.repos.createCommitStatus({
-            #   "owner": "liquibase",
-            #  "repo": "liquibase",
-            #  "sha": helper.getCurrentSha(),
-            #  "state": (proFailed ? "failure" : "success"),
-            #  "target_url": branch.runHtmlUrl,
-            #  "context": "Stable Liquibase Pro",
-            #  "description": statusMessage
-            # });
+             github.rest.repos.createCommitStatus({
+               "owner": "liquibase",
+              "repo": "liquibase",
+              "sha": helper.getCurrentSha(),
+              "state": (proFailed ? "failure" : "success"),
+              "target_url": branch.runHtmlUrl,
+              "context": "Stable Liquibase Pro",
+              "description": statusMessage
+             });
 
-            # core.setOutput("stablePro", !proFailed);
+             core.setOutput("stablePro", !proFailed);
+             */  
 
       - name: Upload Event File
         uses: actions/upload-artifact@v3
