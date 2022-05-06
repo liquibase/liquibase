@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.time.Duration;
 import java.util.*;
 import java.util.logging.*;
 import java.util.stream.Collectors;
@@ -396,7 +397,8 @@ public class LiquibaseCommandLine {
             final Class<?> recordingClass = Class.forName("jdk.jfr.Recording");
             Object configuration = configurationClass.getMethod("getConfiguration", String.class).invoke(null, "profile");
             Object recording = recordingClass.getConstructor(configurationClass).newInstance(configuration);
-            recordingClass.getMethod("setMaxSize", long.class).invoke(recording, 100_00_00L);
+            recordingClass.getMethod("setMaxSize", long.class).invoke(recording, 0L);
+            recordingClass.getMethod("setMaxAge", Duration.class).invoke(recording, (Duration) null);
             recordingClass.getMethod("setDumpOnExit", boolean.class).invoke(recording, true);
             recordingClass.getMethod("setToDisk", boolean.class).invoke(recording, true);
             final File filePath = new File(filename).getAbsoluteFile();
