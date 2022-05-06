@@ -49,7 +49,7 @@ jobs:
         id: find-branches
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.bot_token }}
+          github-token: ${{ secrets.BOT_TOKEN }}
           script: |
             const helper = require('./.github/util/workflow-helper.js')({github, context});
 
