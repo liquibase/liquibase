@@ -19,6 +19,7 @@ jobs:
     uses: ./.github/workflows/check_build_safety.yml
 
   setup:
+    needs: check_build_safety
     runs-on: ubuntu-latest
     outputs:
       proBranchName: ${{ steps.find-branches.outputs.proBranchName }}
