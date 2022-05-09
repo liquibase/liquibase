@@ -8,7 +8,7 @@ create table person (
     address1 varchar(50),
     address2 varchar(50),
     city varchar(30)
-) comment = "example-comment"
+)
 --rollback DROP TABLE person;
 
 --changeset your.name:2 labels:example-label context:example-context
@@ -19,7 +19,7 @@ create table company (
     address1 varchar(50),
     address2 varchar(50),
     city varchar(30)
-) comment = "example-comment"
+)
 --rollback DROP TABLE company;
 
 --changeset other.dev:3 labels:example-label context:example-context

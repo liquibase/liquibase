@@ -10,7 +10,6 @@
         {
           "createTable": {
             "tableName": "person",
-            "remarks": "example-remarks",
             "columns": [
               {
                 "column": {
@@ -66,7 +65,6 @@
         {
           "createTable": {
             "tableName": "company",
-            "remarks": "example-remarks",
             "columns": [
               {
                 "column": {

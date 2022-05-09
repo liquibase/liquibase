@@ -9,7 +9,7 @@
 
       <changeSet id="1" author="your.name" labels="example-label" context="example-context">
           <comment>example-comment</comment>
-        <createTable tableName="person" remarks="example-remarks">
+        <createTable tableName="person">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -24,7 +24,7 @@
 
     <changeSet id="2" author="your.name" labels="example-label" context="example-context">
         <comment>example-comment</comment>
-        <createTable tableName="company" remarks="example-remarks">
+        <createTable tableName="company">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
