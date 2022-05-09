@@ -332,7 +332,12 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         // Check to see if there was supposed to be an exception
         //
         if (testDef.expectedResults.size() > 0 && (results == null || results.getResults().isEmpty())) {
-            throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
+            String message = "Results were expected but none were found for " + testDef.commandTestDefinition.command
+            if (savedException) {
+                throw new RuntimeException(message, savedException)
+            } else {
+                throw new RuntimeException(message)
+            }
         }
 
         then:
