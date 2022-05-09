@@ -10,6 +10,7 @@ Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog
   url (String) The JDBC Database connection URL
+    OBFUSCATED
 Optional Args:
   contexts (String) Changeset contexts to match
     Default: null

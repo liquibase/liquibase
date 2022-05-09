@@ -14,6 +14,7 @@ Long Description: Writes Change Log XML to copy the current state of the databas
 Required Args:
   changelogFile (String) File to write changelog to
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   dataOutputDirectory (String) Directory to write table data to
     Default: null

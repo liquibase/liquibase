@@ -13,6 +13,7 @@ Short Description: Synchronize the local DatabaseChangeLog table with Liquibase 
 Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changelogFile (String) The root changelog
     Default: null
