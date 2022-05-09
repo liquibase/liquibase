@@ -3,6 +3,7 @@ package liquibase.changelog
 import liquibase.*
 import liquibase.database.core.MockDatabase
 import liquibase.database.core.MySQLDatabase
+import liquibase.exception.ChangeLogParseException
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.parser.ChangeLogParserConfiguration
 import spock.lang.Specification
@@ -123,7 +124,7 @@ class ChangeLogParametersTest extends Specification {
         } as Scope.ScopedRunner)
 
         then:
-        def e = thrown(UnexpectedLiquibaseException)
+        def e = thrown(ChangeLogParseException)
         e.getMessage().contains("Could not resolve expression")
     }
 
