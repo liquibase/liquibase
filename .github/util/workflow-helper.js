@@ -107,11 +107,19 @@ module.exports = ({github, context}) => {
                     let matchingBuildFound = false;
                     while(!matchingBuildFound) {
                         try { //add build info
+                            let workflowId = "build.yml";
+                            if (repo === "liquibase-test-harness") {
+                                workflowId = "main.yml";
+                            } else if (repo === "liquibase-pro-tests") {
+                                workflowId = "test.yml";
+                            }
+
+
                             console.log("Reading workflow run results from page", pageNumber)
                             let runs = await github.rest.actions.listWorkflowRuns({
                                 "owner": owner,
                                 "repo": repo,
-                                "workflow_id": "build.yml",
+                                "workflow_id": workflowId,
                                 "per_page": 100,
                                 "page": pageNumber,
                             });
@@ -156,6 +164,7 @@ module.exports = ({github, context}) => {
                                         returnData.lastSuccessfulRunConclusion = run.conclusion;
                                         returnData.lastSuccessfulRunHtmlUrl = run.html_url;
                                         returnData.lastSuccessfulRunRerunUrl = run.rerun_url;
+                                        returnData.lastSuccessfulWorkflowId = run.id;
 
                                         matchingBuildFound = true;
                                         break;
@@ -170,6 +179,8 @@ module.exports = ({github, context}) => {
                             }
 
                         } catch (error) {
+                            console.log(`Error getting build info for ${branchName}`)
+                            console.log(error);
                             if (error.status === 404) {
                                 console.log(`Cannot get build info for ${branchName}`);
                             } else {

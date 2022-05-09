@@ -12,6 +12,7 @@ Short Description: Capture the current state of the reference database
 Long Description: NOT SET
 Required Args:
   referenceUrl (String) The JDBC reference database connection URL
+    OBFUSCATED
 Optional Args:
   driver (String) The JDBC driver class
     Default: null

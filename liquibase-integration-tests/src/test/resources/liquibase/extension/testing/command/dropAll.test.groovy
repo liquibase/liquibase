@@ -12,6 +12,7 @@ Short Description: Drop all database objects owned by the user
 Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changelogFile (String) The root changelog
     Default: null

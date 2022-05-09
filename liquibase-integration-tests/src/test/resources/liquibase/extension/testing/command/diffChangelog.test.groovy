@@ -21,6 +21,7 @@ Required Args:
   changelogFile (String) Changelog file to write results
   referenceUrl (String) The JDBC reference database connection URL
   url (String) The JDBC target database connection URL
+    OBFUSCATED
 Optional Args:
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
