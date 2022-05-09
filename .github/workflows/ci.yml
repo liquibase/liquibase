@@ -33,20 +33,20 @@ jobs:
 #      stablePro: ${{ steps.find-branches.outputs.stablePro }}
 #      setupSuccessful: "true"
     steps:
-      - name: Failsafe
-        uses: actions/github-script@v6
-        with:
-          script: |
-            if (${{ github.run_attempt }} % 5 == 0) {
-              core.setFailed("Fail every 5 run attempts to catch accidental infinite loops");
-            }
+#      - name: Failsafe
+#        uses: actions/github-script@v6
+#        with:
+#          script: |
+#            if (${{ github.run_attempt }} % 5 == 0) {
+#              core.setFailed("Fail every 5 run attempts to catch accidental infinite loops");
+#            }
 
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Find corresponding branches
-        id: find-branches
+        id: get-branch-info
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
