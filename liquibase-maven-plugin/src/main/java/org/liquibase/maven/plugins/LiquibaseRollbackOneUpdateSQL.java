@@ -64,7 +64,6 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         //
         // Check the Pro license
         //
-        MavenUtils.checkProLicenseAndThrowException(getLicenseKey(), commandName, getLog());
         Database database = liquibase.getDatabase();
         CommandScope liquibaseCommand = new CommandScope("internalRollbackOneUpdateSQL");
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);

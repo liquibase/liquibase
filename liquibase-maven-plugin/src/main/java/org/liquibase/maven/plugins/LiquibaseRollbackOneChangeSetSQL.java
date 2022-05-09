@@ -105,7 +105,6 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         //
         // Check the Pro license
         //
-        MavenUtils.checkProLicenseAndThrowException(getLicenseKey(), commandName, getLog());
         Database database = liquibase.getDatabase();
         CommandScope liquibaseCommand = new CommandScope("internalRollbackOneChangeSetSQL");
 
