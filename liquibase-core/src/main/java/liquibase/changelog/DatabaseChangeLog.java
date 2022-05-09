@@ -309,8 +309,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return changeSet;
     }
 
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor)
-            throws ParsedNodeException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException, ChangeLogParseException {
         setChangeLogId(parsedNode.getChildValue(null, "changeLogId", String.class));
         setLogicalFilePath(parsedNode.getChildValue(null, "logicalFilePath", String.class));
         setContexts(new ContextExpression(parsedNode.getChildValue(null, "context", String.class)));
@@ -323,7 +322,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-    protected void expandExpressions(ParsedNode parsedNode) {
+    protected void expandExpressions(ParsedNode parsedNode) throws ChangeLogParseException {
         if (changeLogParameters == null) {
             return;
         }
@@ -344,8 +343,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-    protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor)
-            throws ParsedNodeException, SetupException {
+    protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException, ChangeLogParseException {
         expandExpressions(node);
         String nodeName = node.getName();
         switch (nodeName) {

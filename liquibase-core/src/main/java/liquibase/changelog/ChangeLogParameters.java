@@ -193,12 +193,8 @@ public class ChangeLogParameters {
      * Expand any expressions in the given string, taking into account parameters local to the given changelog file as well as
      * contexts, labels, and database configured in this instance.
      */
-    public String expandExpressions(String string, DatabaseChangeLog changeLog) {
-        try {
-            return expressionExpander.expandExpressions(string, changeLog);
-        } catch (ChangeLogParseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+    public String expandExpressions(String string, DatabaseChangeLog changeLog) throws ChangeLogParseException {
+        return expressionExpander.expandExpressions(string, changeLog);
     }
 
     /**

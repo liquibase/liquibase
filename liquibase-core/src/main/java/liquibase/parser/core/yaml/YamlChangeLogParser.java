@@ -132,7 +132,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 		return global;
 	}
 
-    protected void replaceParameters(Object obj, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog) {
+    protected void replaceParameters(Object obj, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog) throws ChangeLogParseException{
         if (obj instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) obj).entrySet()) {
                 if ((entry.getValue() instanceof Map) || (entry.getValue() instanceof Collection)) {

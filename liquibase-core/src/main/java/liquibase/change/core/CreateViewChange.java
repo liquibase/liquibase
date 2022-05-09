@@ -7,6 +7,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
@@ -252,7 +253,7 @@ public class CreateViewChange extends AbstractChange {
 						selectQuery = parameters.expandExpressions(selectQuery, getChangeSet().getChangeLog());
 					}
 				}
-			} catch (IOException e) {
+			} catch (IOException | ChangeLogParseException e) {
 				throw new UnexpectedLiquibaseException(e);
 			}
 		}

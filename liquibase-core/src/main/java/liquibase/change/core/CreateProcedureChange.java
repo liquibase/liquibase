@@ -7,6 +7,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
+import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
@@ -306,7 +307,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                             procedureText = parameters.expandExpressions(procedureText, getChangeSet().getChangeLog());
                         }
                     }
-                } catch (IOException e) {
+                } catch (IOException | ChangeLogParseException e) {
                     throw new UnexpectedLiquibaseException(e);
                 }
             }

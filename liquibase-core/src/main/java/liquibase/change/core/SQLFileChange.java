@@ -7,6 +7,7 @@ import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
+import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -164,7 +165,7 @@ public class SQLFileChange extends AbstractSQLChange {
                     }
                 }
                 return content;
-            } catch (IOException e) {
+            } catch (IOException | ChangeLogParseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         } else {
@@ -175,7 +176,11 @@ public class SQLFileChange extends AbstractSQLChange {
     @Override
     public void setSql(String sql) {
         if ((getChangeSet() != null) && (getChangeSet().getChangeLogParameters() != null)) {
-            sql = getChangeSet().getChangeLogParameters().expandExpressions(sql, getChangeSet().getChangeLog());
+            try {
+                sql = getChangeSet().getChangeLogParameters().expandExpressions(sql, getChangeSet().getChangeLog());
+            } catch (ChangeLogParseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
         super.setSql(sql);
     }
