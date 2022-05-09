@@ -112,6 +112,10 @@ public class DataTypeFactory {
         if (dataTypeDefinition == null) {
             return null;
         }
+        if (dataTypeDefinition.matches("^\\$\\{.*}$")) {
+            return new UnknownType(dataTypeDefinition);
+        }
+
         String dataTypeName = dataTypeDefinition;
 
         // Remove the first occurrence of (anything within parentheses). This will remove the size information from
