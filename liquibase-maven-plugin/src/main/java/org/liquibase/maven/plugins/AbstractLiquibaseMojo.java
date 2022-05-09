@@ -3,6 +3,8 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -582,6 +584,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 parsePropertiesFile(is);
                 getLog().info(MavenUtils.LOG_SEPARATOR);
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+            try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
+                if (is == null) {
+                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
+                }
+
+                LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(is, "Property file "+propertyFile);
+                liquibaseConfiguration.registerProvider(fileProvider);
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
