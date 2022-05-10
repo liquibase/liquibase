@@ -33,7 +33,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Export repo data
-        id: get-branch-info
+        id: find-branches
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
