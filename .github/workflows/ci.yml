@@ -22,30 +22,17 @@ jobs:
     needs: check_build_safety
     runs-on: ubuntu-latest
     outputs:
-#      proBranchName: ${{ steps.find-branches.outputs.proBranchName }}
-#      proBranchSha: ${{ steps.find-branches.outputs.proBranchSha }}
       thisSha: ${{ steps.find-branches.outputs.thisSha }}
       thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
       thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
       thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
       thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryOwner }}
-#      standAlonePR: ${{ steps.find-branches.outputs.standAlonePR }}
-#      stablePro: ${{ steps.find-branches.outputs.stablePro }}
-#      setupSuccessful: "true"
     steps:
-#      - name: Failsafe
-#        uses: actions/github-script@v6
-#        with:
-#          script: |
-#            if (${{ github.run_attempt }} % 5 == 0) {
-#              core.setFailed("Fail every 5 run attempts to catch accidental infinite loops");
-#            }
-
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
-      - name: Find corresponding branches
+      - name: Export repo data
         id: get-branch-info
         uses: actions/github-script@v6
         with:
@@ -115,14 +102,6 @@ jobs:
           name: Event File
           path: ${{ github.event_path }}
 
-#  setup:
-#    needs: check_build_safety
-#    uses: ./.github/workflows/setup.yml
-#    with:
-#      lb_flavor: "oss"
-#    secrets:
-#      bot_token: ${{secrets.BOT_TOKEN}}
-
   build:
     needs: setup
     uses: ./.github/workflows/oss-build.yml
@@ -167,11 +146,3 @@ jobs:
       install4j_apple_id_password: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
       install4j_win_key: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
       install4j_win_key_password: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
-
-  finish:
-    needs: [setup, build, integration-test, package, sonar]
-    uses: ./.github/workflows/oss-finish.yml
-    with:
-      lb_flavor: oss
-    secrets:
-      bot_token: ${{secrets.BOT_TOKEN}}
