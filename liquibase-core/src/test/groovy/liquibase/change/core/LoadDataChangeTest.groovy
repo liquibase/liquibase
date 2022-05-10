@@ -840,7 +840,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         change.generateStatements(mockDB)
 
         then:
-        change.rows.size == 2
+        change.rows.size() == 2
         change.rows[0] == [
                 ["needsPreparedStatement": false, "name": "name", "value": "Bob Johnson"],
                 ["needsPreparedStatement": false, "name": "username", "value": "bjohnson"]
