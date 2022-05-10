@@ -17,6 +17,11 @@ public class DropProcedureGeneratorSnowflake extends DropProcedureGenerator {
     }
 
     @Override
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    @Override
     public Sql[] generateSql(DropProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         // we shouldn't escape procedure name for Snowflake
         // DROP PROCEDURE "PUBLIC".proc3() -- works
