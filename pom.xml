@@ -71,6 +71,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>libraries-bom</artifactId>
+                <version>25.2.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -78,12 +85,12 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>4.9.1</version>
+            <version>4.10.0</version>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.29</version>
+            <version>1.30</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -101,7 +108,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-test-harness</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -110,6 +117,15 @@
             <version>4.2</version>
             <scope>system</scope>
             <systemPath>${basedir}/lib/GoogleBigQueryJDBC42.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-bigquery</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>4.6.3</version>
         </dependency>
 
         <dependency>
