@@ -173,7 +173,7 @@
                     <artifactSet>
                         <includes>
                             <include>${project.groupId}:liquibase-core</include>
-                            <include>com.datical.lb:liquibase-pro</include>
+                            <include>${project.groupId}:liquibase-cli</include>
                         </includes>
                     </artifactSet>
                     <filters>
