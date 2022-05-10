@@ -16,6 +16,7 @@ liquibase.database.core.MySQLDatabase
 liquibase.database.core.OracleDatabase
 liquibase.database.core.PostgresDatabase
 liquibase.database.core.SQLiteDatabase
+liquibase.database.core.SnowflakeDatabase
 liquibase.database.core.SybaseASADatabase
 liquibase.database.core.SybaseDatabase
 liquibase.database.core.UnsupportedDatabase

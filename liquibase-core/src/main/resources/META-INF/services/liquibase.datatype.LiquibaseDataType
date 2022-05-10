@@ -16,7 +16,9 @@ liquibase.datatype.core.NCharType
 liquibase.datatype.core.NVarcharType
 liquibase.datatype.core.NumberType
 liquibase.datatype.core.SmallIntType
+liquibase.datatype.core.TextDataTypeSnowflake
 liquibase.datatype.core.TimeType
+liquibase.datatype.core.TimestampNTZTypeSnowflake
 liquibase.datatype.core.TimestampType
 liquibase.datatype.core.TinyIntType
 liquibase.datatype.core.UUIDType

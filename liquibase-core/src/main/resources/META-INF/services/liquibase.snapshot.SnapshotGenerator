@@ -8,7 +8,10 @@ liquibase.snapshot.jvm.ForeignKeySnapshotGenerator
 liquibase.snapshot.jvm.IndexSnapshotGenerator
 liquibase.snapshot.jvm.PrimaryKeySnapshotGenerator
 liquibase.snapshot.jvm.SchemaSnapshotGenerator
+liquibase.snapshot.jvm.SchemaSnapshotGeneratorSnowflake
 liquibase.snapshot.jvm.SequenceSnapshotGenerator
+liquibase.snapshot.jvm.SequenceSnapshotGeneratorSnowflake
 liquibase.snapshot.jvm.TableSnapshotGenerator
 liquibase.snapshot.jvm.UniqueConstraintSnapshotGenerator
+liquibase.snapshot.jvm.UniqueConstraintSnapshotGeneratorSnowflake
 liquibase.snapshot.jvm.ViewSnapshotGenerator
