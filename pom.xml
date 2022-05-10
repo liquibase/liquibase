@@ -118,27 +118,19 @@
             <scope>system</scope>
             <systemPath>${basedir}/lib/GoogleBigQueryJDBC42.jar</systemPath>
         </dependency>
-        <dependency>
-            <groupId>com.simba.googlebigquery.jdbc</groupId>
-            <artifactId>google-cloud-bigquerystorage</artifactId>
-            <version>2.8.3</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/google-cloud-bigquerystorage-2.8.3.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>com.simba.googlebigquery.jdbc</groupId>
-            <artifactId>gax-grpc</artifactId>
-            <version>2.11.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/gax-grpc-2.11.0.jar</systemPath>
-        </dependency>
-
 
 
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
+            <version>2.10.10</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-bigquerystorage</artifactId>
+            <version>2.13.0</version>
+        </dependency>
+
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
