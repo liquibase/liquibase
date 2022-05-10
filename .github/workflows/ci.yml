@@ -84,7 +84,7 @@ jobs:
              console.log("Pro failed?" + proFailed + ": "+statusMessage);
 
              github.rest.repos.createCommitStatus({
-               "owner": "liquibase",
+              "owner": "liquibase",
               "repo": "liquibase",
               "sha": helper.getCurrentSha(),
               "state": (proFailed ? "failure" : "success"),
