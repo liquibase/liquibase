@@ -113,10 +113,12 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
         return "AUTOINCREMENT";
     }
 
+    @Override
     protected String getAutoIncrementStartWithClause() {
         return "%d";
     }
 
+    @Override
     protected String getAutoIncrementByClause() {
         return "%d";
     }
@@ -145,8 +147,7 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
         try {
             ResultSet resultSet = ((JdbcConnection) connection).createStatement().executeQuery("SELECT CURRENT_SCHEMA()");
             resultSet.next();
-            String schema = resultSet.getString(1);
-            return schema;
+            return resultSet.getString(1);
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
         }

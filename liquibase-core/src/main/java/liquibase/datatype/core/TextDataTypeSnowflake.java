@@ -6,8 +6,9 @@ import liquibase.database.core.SnowflakeDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.servicelocator.PrioritizedService;
 
-@DataTypeInfo(name = "text", minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DATABASE)
+@DataTypeInfo(name = "text", minParameters = 0, maxParameters = 0, priority = PrioritizedService.PRIORITY_DATABASE)
 public class TextDataTypeSnowflake extends LiquibaseDataType {
 
     @Override

@@ -66,9 +66,8 @@ public class UniqueConstraintSnapshotGeneratorSnowflake extends UniqueConstraint
         if (constraintName != null) {
             sql += "and CONSTRAINT_NAME='" + constraintName + "'";
         }
-        List<Map<String, ?>> rows = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
-                .queryForList(new RawSqlStatement(sql));
 
-        return rows;
+        return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
+                .queryForList(new RawSqlStatement(sql));
     }
 }

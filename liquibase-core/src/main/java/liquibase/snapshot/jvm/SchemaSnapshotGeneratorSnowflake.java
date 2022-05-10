@@ -5,7 +5,7 @@ import liquibase.database.core.SnowflakeDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,7 +31,7 @@ public class SchemaSnapshotGeneratorSnowflake extends SchemaSnapshotGenerator {
             schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas(database
                     .getDefaultCatalogName(), database.getDefaultSchemaName());
             while (schemas.next()) {
-                returnList.add(JdbcUtils.getValueForColumn(schemas, "TABLE_SCHEM", database));
+                returnList.add(JdbcUtil.getValueForColumn(schemas, "TABLE_SCHEM", database));
             }
         } finally {
             if (schemas != null) {

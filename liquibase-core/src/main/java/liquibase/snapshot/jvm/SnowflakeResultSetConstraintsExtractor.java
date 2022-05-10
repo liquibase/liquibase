@@ -14,7 +14,6 @@ import java.util.List;
 
 public class SnowflakeResultSetConstraintsExtractor extends ResultSetCacheSnowflake.SingleResultSetExtractor {
 
-    private DatabaseSnapshot databaseSnapshot;
     private Database database;
     private String catalogName;
     private String schemaName;
@@ -23,7 +22,6 @@ public class SnowflakeResultSetConstraintsExtractor extends ResultSetCacheSnowfl
     public SnowflakeResultSetConstraintsExtractor(DatabaseSnapshot databaseSnapshot, String catalogName, String schemaName,
                                                   String tableName) {
         super(databaseSnapshot.getDatabase());
-        this.databaseSnapshot = databaseSnapshot;
         this.database = databaseSnapshot.getDatabase();
         this.catalogName = catalogName;
         this.schemaName = schemaName;

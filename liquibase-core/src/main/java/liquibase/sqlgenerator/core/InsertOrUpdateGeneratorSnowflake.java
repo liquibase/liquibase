@@ -70,7 +70,7 @@ public class InsertOrUpdateGeneratorSnowflake extends InsertOrUpdateGenerator {
         } else if (newValue instanceof Date) {
             sqlString = database.getDateLiteral(((Date) newValue));
         } else if (newValue instanceof Boolean) {
-            if (((Boolean) newValue)) {
+            if (Boolean.TRUE.equals(newValue)) {
                 sqlString = DataTypeFactory.getInstance().getTrueBooleanValue(database);
             } else {
                 sqlString = DataTypeFactory.getInstance().getFalseBooleanValue(database);
