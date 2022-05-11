@@ -2,18 +2,18 @@
 
 --changeset myuser:create-a-table
 
-create table liquibase.dim_channels
+create table liquibase_test_harness.dim_channels
 (
-dim_channel_key smallint NOT NULL,
-channel_name character varying(40) NOT NULL,
-channel_type character varying(20) NOT NULL,
-channel_sub_type character varying(20) NOT NULL,
+dim_channel_key smallint,
+channel_name  STRING(40),
+channel_type STRING(40) NOT NULL,
+channel_sub_type  STRING(40) NOT NULL,
 storing_order integer NOT NULL,
-channel_display_name character varying(40) NOT NULL,
-channel_code character varying(20) NOT NULL,
-created_date timestamp without time zone NOT NULL,
-last_modified_date timestamp without time zone NOT NULL,
-oem_owner character varying(50) NOT NULL,
-publisher character varying(100) NOT NULL
+channel_display_name  STRING(40) NOT NULL,
+channel_code  STRING(40) NOT NULL,
+created_date timestamp, ##Note that a TIMESTAMP itself does not have a time zone
+last_modified_date timestamp,
+oem_owner  STRING(40) NOT NULL,
+publisher  STRING(40) NOT NULL
 )
 ;
