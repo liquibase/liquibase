@@ -46,12 +46,15 @@ import spock.lang.Unroll
 import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.regex.Pattern
+import java.util.stream.Collectors
 
 class CommandTests extends Specification {
 
     private static List<CommandTestDefinition> commandTestDefinitions
 
     public static final PATTERN_FLAGS = Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE
+
+    public static String NOT_NULL = "not_null"
 
     private ConfigurationValueProvider propertiesProvider
 
@@ -349,7 +352,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                         def seenValue = String.valueOf(returnedResult.getValue())
 
                         assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
-                        assert seenValue == expectedValue
+                        if (expectedValue instanceof Closure) {
+                            assert expectedValue.call(returnedResult)
+                        } else if (expectedValue == NOT_NULL) {
+                            assert seenValue != null: "The result is null"
+                        } else {
+                            assert seenValue == expectedValue
+                        }
                     }
                 }
                 if (testDef.expectFileToExist != null) {
@@ -632,6 +641,20 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     }
                 }
             }
+        }
+
+        def descriptions =
+                returnList.stream()
+                        .map({ rtp -> rtp.definition.commandTestDefinition.joinedCommand + ": '" + rtp.definition.description + "'" })
+                        .collect(Collectors.toList())
+
+        def duplicateDescriptions =
+                descriptions.stream()
+                        .filter({ d -> Collections.frequency(descriptions, d) > 1 })
+                        .distinct().collect(Collectors.toList())
+
+        if (!duplicateDescriptions.isEmpty()) {
+            throw new Exception("There are duplicate command test definitions with the same description: " + StringUtil.join(duplicateDescriptions, "; "))
         }
 
         return returnList

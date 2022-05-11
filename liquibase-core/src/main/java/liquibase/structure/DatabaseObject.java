@@ -92,5 +92,17 @@ public interface DatabaseObject extends Comparable, LiquibaseSerializable {
      */
     DatabaseObject setAttribute(String attribute, Object value);
 
+    /**
+     * Given a database object, build its fully qualified name by looking up the at its containing objects.
+     * @return the fully qualified name
+     */
+    default String buildFullyQualifiedName() {
+        DatabaseObject[] containingObjects = getContainingObjects();
+        if (containingObjects == null || containingObjects[0] == null) {
+            return getName();
+        } else {
+            return containingObjects[0].buildFullyQualifiedName() + "." + getName();
+        }
+    }
 }
 

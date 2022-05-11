@@ -132,11 +132,34 @@ public class CommandScope {
     }
 
     /**
+     *
+     * Create and return a results builder
+     *
+     * @return  CommandResultsBuilder
+     *
+     */
+    public CommandResultsBuilder createResultsBuilder() {
+        return new CommandResultsBuilder(this, outputStream);
+    }
+
+    /**
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
-        CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
+        CommandResultsBuilder resultsBuilder = createResultsBuilder();
+        return executeWithResultsBuilder(resultsBuilder);
+    }
 
+    /**
+     *
+     * Execute the command with the given CommandResultsBuilder
+     *
+     * @param   resultsBuilder                   The CommandResultsBuilder to use
+     * @return  CommandResults
+     * @throws  CommandExecutionException
+     *
+     */
+    public CommandResults executeWithResultsBuilder(CommandResultsBuilder resultsBuilder ) throws CommandExecutionException {
         for (ConfigurationValueProvider provider : Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getProviders()) {
             provider.validate(this);
         }
@@ -164,7 +187,9 @@ public class CommandScope {
             }
         } finally {
             try {
-                this.outputStream.flush();
+                if (this.outputStream != null) {
+                    this.outputStream.flush();
+                }
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
             }

@@ -120,8 +120,6 @@ public class LiquibaseCommandLine {
                 "username",
                 "password",
                 "url",
-                "outputDefaultSchema",
-                "outputDefaultCatalog",
                 "changelogFile",
                 "hubConnectionId",
                 "hubProjectId",

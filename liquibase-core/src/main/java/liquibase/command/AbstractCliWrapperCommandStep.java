@@ -1,5 +1,6 @@
 package liquibase.command;
 
+import liquibase.Scope;
 import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
 
@@ -26,7 +27,7 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
             Main.setOutputStream(printStream);
         }
 
-        CommandScope commandScope = resultsBuilder.getCommandScope();
+        final CommandScope commandScope = resultsBuilder.getCommandScope();
 
         String[] args = collectArguments(commandScope);
         int statusCode = Main.run(args);
@@ -34,6 +35,19 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
             throw new CommandExecutionException("Unexpected error running liquibase");
         }
         resultsBuilder.addResult("statusCode", statusCode);
+
+/*
+        Map<String, Object> scopedObjects = new HashMap<>();
+        scopedObjects.put("parentResultsBuilder", resultsBuilder);
+        Scope.child(scopedObjects, () -> {
+            String[] args = collectArguments(commandScope);
+            int statusCode = Main.run(args);
+            if (statusCode != 0) {
+                throw new CommandExecutionException("Unexpected error running liquibase");
+            }
+            resultsBuilder.addResult("statusCode", statusCode);
+        });
+ */
 
         if (printStream != null) {
             printStream.close();
