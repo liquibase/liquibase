@@ -73,7 +73,7 @@ public abstract class TestSystem implements TestRule, Plugin {
     public static List<String> determineEnabledTestSystems(String configuredTestSystems, String skippedTestSystems, Set<String> allTestSystemsNames) {
         List<String> returnList;
 
-        if (StringUtil.isEmpty(configuredTestSystems)) {
+        if (StringUtil.isNotEmpty(configuredTestSystems) && configuredTestSystems.equals("all")) {
             returnList = new ArrayList<>(allTestSystemsNames);
         } else {
             returnList = CollectionUtil.createIfNull(StringUtil.splitAndTrim(configuredTestSystems, ","));
