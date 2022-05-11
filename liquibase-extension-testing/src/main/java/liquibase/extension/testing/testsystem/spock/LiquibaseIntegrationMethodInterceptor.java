@@ -29,7 +29,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         configuredTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test").getValue();
         skippedTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.skip").getValue();
 
-        for (String definition : TestSystem.determineEnabledTestSystems(configuredTestSystems, skippedTestSystems)) {
+        for (String definition : TestSystem.getEnabledTestSystems(configuredTestSystems, skippedTestSystems)) {
             testSystems.add(TestSystem.Definition.parse(definition));
         }
     }

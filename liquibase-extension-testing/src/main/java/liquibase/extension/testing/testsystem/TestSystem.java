@@ -44,7 +44,7 @@ public abstract class TestSystem implements TestRule, Plugin {
         configuredTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test").getValue();
         skippedTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.skip").getValue();
 
-        for (String definition : determineEnabledTestSystems(configuredTestSystems, skippedTestSystems)) {
+        for (String definition : getEnabledTestSystems(configuredTestSystems, skippedTestSystems)) {
             testSystems.add(TestSystem.Definition.parse(definition));
         }
     }
@@ -55,26 +55,13 @@ public abstract class TestSystem implements TestRule, Plugin {
      * @param skippedTestSystems the value of the "liquibase.sdk.testSystem.skip" property
      * @return the list of test system names that are enabled
      */
-    public static List<String> determineEnabledTestSystems(String configuredTestSystems, String skippedTestSystems) {
-        ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
-        Set<String> allTestSystemNames = serviceLocator.findInstances(TestSystem.class).stream()
-                .map(testSystem -> testSystem.getDefinition().getName())
-                .collect(Collectors.toSet());
-        return determineEnabledTestSystems(configuredTestSystems, skippedTestSystems, allTestSystemNames);
-    }
-
-    /**
-     * Determine which test systems are considered enabled and should have tests run against them.
-     * @param configuredTestSystems the value of the "liquibase.sdk.testSystem.test" property
-     * @param skippedTestSystems the value of the "liquibase.sdk.testSystem.skip" property
-     * @param allTestSystemsNames a list of all of the {@link TestSystem} names that are in the system
-     * @return the list of test system names that are enabled
-     */
-    public static List<String> determineEnabledTestSystems(String configuredTestSystems, String skippedTestSystems, Set<String> allTestSystemsNames) {
+    public static List<String> getEnabledTestSystems(String configuredTestSystems, String skippedTestSystems) {
         List<String> returnList;
 
         if (StringUtil.isNotEmpty(configuredTestSystems) && configuredTestSystems.equals("all")) {
-            returnList = new ArrayList<>(allTestSystemsNames);
+            ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
+            returnList = serviceLocator.findInstances(TestSystem.class).stream()
+                    .map(testSystem -> testSystem.getDefinition().getName()).distinct().collect(Collectors.toList());
         } else {
             returnList = CollectionUtil.createIfNull(StringUtil.splitAndTrim(configuredTestSystems, ","));
         }
