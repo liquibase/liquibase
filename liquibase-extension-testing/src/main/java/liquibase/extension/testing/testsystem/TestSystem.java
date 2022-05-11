@@ -6,7 +6,8 @@ import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.Plugin;
-import liquibase.util.ObjectUtil;
+import liquibase.servicelocator.ServiceLocator;
+import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtil;
 import org.junit.Assume;
 import org.junit.rules.TestRule;
@@ -17,6 +18,7 @@ import org.junit.runners.model.Statement;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * TestSystem implementations define and manage a connection to an external system to test.
@@ -30,6 +32,7 @@ public abstract class TestSystem implements TestRule, Plugin {
 
     private static final SortedSet<TestSystem.Definition> testSystems = new TreeSet<>();
     private static final String configuredTestSystems;
+    private static final String skippedTestSystems;
 
     private final Definition definition;
 
@@ -38,12 +41,49 @@ public abstract class TestSystem implements TestRule, Plugin {
     ));
 
     static {
-        //cache configured test systems for faster lookup
         configuredTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test").getValue();
-        if (configuredTestSystems != null) {
-            for (String definition : StringUtil.splitAndTrim(configuredTestSystems, ","))
-                testSystems.add(TestSystem.Definition.parse(definition));
+        skippedTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.skip").getValue();
+
+        for (String definition : determineEnabledTestSystems(configuredTestSystems, skippedTestSystems)) {
+            testSystems.add(TestSystem.Definition.parse(definition));
         }
+    }
+
+    /**
+     * Determine which test systems are considered enabled and should have tests run against them.
+     * @param configuredTestSystems the value of the "liquibase.sdk.testSystem.test" property
+     * @param skippedTestSystems the value of the "liquibase.sdk.testSystem.skip" property
+     * @return the list of test system names that are enabled
+     */
+    public static List<String> determineEnabledTestSystems(String configuredTestSystems, String skippedTestSystems) {
+        ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
+        Set<String> allTestSystemNames = serviceLocator.findInstances(TestSystem.class).stream()
+                .map(testSystem -> testSystem.getDefinition().getName())
+                .collect(Collectors.toSet());
+        return determineEnabledTestSystems(configuredTestSystems, skippedTestSystems, allTestSystemNames);
+    }
+
+    /**
+     * Determine which test systems are considered enabled and should have tests run against them.
+     * @param configuredTestSystems the value of the "liquibase.sdk.testSystem.test" property
+     * @param skippedTestSystems the value of the "liquibase.sdk.testSystem.skip" property
+     * @param allTestSystemsNames a list of all of the {@link TestSystem} names that are in the system
+     * @return the list of test system names that are enabled
+     */
+    public static List<String> determineEnabledTestSystems(String configuredTestSystems, String skippedTestSystems, Set<String> allTestSystemsNames) {
+        List<String> returnList;
+
+        if (StringUtil.isEmpty(configuredTestSystems)) {
+            returnList = new ArrayList<>(allTestSystemsNames);
+        } else {
+            returnList = CollectionUtil.createIfNull(StringUtil.splitAndTrim(configuredTestSystems, ","));
+        }
+
+        if (StringUtil.isNotEmpty(skippedTestSystems)) {
+            List<String> skippedTestSystemsList = CollectionUtil.createIfNull(StringUtil.splitAndTrim(skippedTestSystems, ","));
+            returnList = returnList.stream().filter(ts -> !skippedTestSystemsList.contains(ts)).collect(Collectors.toList());
+        }
+        return returnList;
     }
 
     /**
@@ -85,7 +125,7 @@ public abstract class TestSystem implements TestRule, Plugin {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                Assume.assumeTrue("Not running test against " + TestSystem.this.getDefinition() + ": liquibase.sdk.testSystem.test is " + configuredTestSystems, shouldTest());
+                Assume.assumeTrue("Not running test against " + TestSystem.this.getDefinition() + ": liquibase.sdk.testSystem.test is " + configuredTestSystems + " and liquibase.sdk.testSystem.skip is " + skippedTestSystems, shouldTest());
 
                 List<Throwable> errors = new ArrayList<>();
 

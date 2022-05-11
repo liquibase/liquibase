@@ -67,8 +67,9 @@ public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
 
     private List<String> getConfiguredTestSystems() {
         final String testSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test").getValue();
+        final String skippedTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.skip").getValue();
 
-        return CollectionUtil.createIfNull(StringUtil.splitAndTrim(testSystems, ","));
+        return TestSystem.determineEnabledTestSystems(testSystems, skippedTestSystems, getTestSystemNames());
     }
 
     /**
