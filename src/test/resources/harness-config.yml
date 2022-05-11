@@ -5,8 +5,6 @@ context: testContext
 
 databasesUnderTest:
   - name: bigquery
-    version:
-    url: jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;OAuthType=2;ProjectId=upheld-modem-345014;OAuthAccessToken=548660630369-rb2qumcb5ojr7avpaindbgj308asdp0o.apps.googleusercontent.com;OAuthClientSecret=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;
-    #username: myuser
-    #password: mypass
-    dbSchema: liquibase_test_harness
+    version: 1.0
+    # driver: com.simba.googlebigquery.jdbc.Driver
+    url: jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=upheld-modem-345014;OAuthType=0;OAuthServiceAcctEmail=liquibase-test-harness@upheld-modem-345014.iam.gserviceaccount.com;OAuthPvtKeyPath=upheld-modem-345014-3c2981dea801.json;DefaultDataset=liquibase_test_harness;
