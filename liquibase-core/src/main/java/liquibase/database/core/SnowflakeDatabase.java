@@ -6,9 +6,11 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.JdbcUtil;
 
 import java.math.BigInteger;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -144,8 +146,7 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
         if (connection == null) {
             return null;
         }
-        try {
-            ResultSet resultSet = ((JdbcConnection) connection).createStatement().executeQuery("SELECT CURRENT_SCHEMA()");
+        try ( ResultSet resultSet = ((JdbcConnection) connection).createStatement().executeQuery("SELECT CURRENT_SCHEMA()")){
             resultSet.next();
             return resultSet.getString(1);
         } catch (Exception e) {
