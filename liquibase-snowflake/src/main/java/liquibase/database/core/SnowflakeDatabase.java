@@ -144,8 +144,7 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
         if (connection == null) {
             return null;
         }
-        try {
-            ResultSet resultSet = ((JdbcConnection) connection).createStatement().executeQuery("SELECT CURRENT_SCHEMA()");
+        try (ResultSet resultSet = ((JdbcConnection) connection).createStatement().executeQuery("SELECT CURRENT_SCHEMA()")) {
             resultSet.next();
             return resultSet.getString(1);
         } catch (Exception e) {
