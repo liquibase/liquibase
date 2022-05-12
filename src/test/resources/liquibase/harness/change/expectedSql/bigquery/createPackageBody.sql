@@ -1,2 +1,2 @@
 INVALID TEST
--- BigQuery doesn't support packages
+-- BigQuery doesn't support package bodies

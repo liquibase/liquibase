@@ -1,2 +1,2 @@
 INVALID TEST
--- BigQuery doesn't support functions
+-- BigQuery doesn't support indexes

@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
     <changeSet id="1" author="kristyl">
-        <addColumn tableName="authors">
+        <addColumn tableName="liquibase_test_harness.authors">
             <column name="varcharColumn" type="STRING(25)"/>
             <column name="intColumn" type="integer"/>
             <column name="dateColumn" type="date"/>

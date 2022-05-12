@@ -1,2 +1,2 @@
 INVALID TEST
--- BigQuery doesn't support sequences
+-- BigQuery doesn't support functions

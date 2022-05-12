@@ -1,2 +1,2 @@
 INVALID TEST
--- BigQuery doesn't support default values
+-- BigQuery doesn't support sequences
