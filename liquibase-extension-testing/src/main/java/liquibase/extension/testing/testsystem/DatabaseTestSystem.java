@@ -1,6 +1,5 @@
 package liquibase.extension.testing.testsystem;
 
-import groovy.lang.Tuple;
 import liquibase.Scope;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -20,10 +19,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
-import static java.lang.Math.abs;
 
 /**
  * Base class for {@link TestSystem}s for databases.
@@ -35,7 +30,7 @@ public abstract class DatabaseTestSystem extends TestSystem {
 
     protected DatabaseWrapper wrapper;
 
-    private final Map<String, TimedConnection> connections = new HashMap<>();
+    private final Map<String, Connection> connections = new HashMap<>();
 
     public DatabaseTestSystem(String shortName) {
         super(shortName);
@@ -193,12 +188,12 @@ public abstract class DatabaseTestSystem extends TestSystem {
     public Connection getConnection(String username, String password) throws SQLException {
         final String key = username + ":" + password;
 
-        TimedConnection timedConnection = connections.get(key);
-        if (timedConnection == null || timedConnection.isExpired() || timedConnection.getConnection().isClosed()) {
-            timedConnection = new TimedConnection(getConnection(getConnectionUrl(), username, password));
-            connections.put(key, timedConnection);
+        Connection connection = connections.get(key);
+        if (connection == null || connection.isClosed()) {
+            connection = getConnection(getConnectionUrl(), username, password);
+            connections.put(key, connection);
         }
-        return timedConnection.getConnection();
+        return connection;
     }
 
     /**
@@ -317,31 +312,4 @@ public abstract class DatabaseTestSystem extends TestSystem {
         }
     }
 
-    /**
-     * Wrapper class around Connections that includes the creation date so that the connections can be recycled out
-     * of the pool regularly.
-     */
-    private static class TimedConnection {
-        private final Connection connection;
-        private final Date creationDate;
-
-        public TimedConnection(Connection connection) {
-            this.connection = connection;
-            this.creationDate = new Date();
-        }
-
-        public Connection getConnection() {
-            return connection;
-        }
-
-        public Date getCreationDate() {
-            return creationDate;
-        }
-
-        public boolean isExpired() {
-            long current = new Date().getTime();
-            long diffInMillis = Math.abs(current - creationDate.getTime());
-            return diffInMillis > TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
-        }
-    }
 }
