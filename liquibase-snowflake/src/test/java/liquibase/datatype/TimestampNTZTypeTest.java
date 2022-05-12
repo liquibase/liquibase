@@ -42,7 +42,7 @@ public class TimestampNTZTypeTest {
     @Test
     public void datetimeConvertsToTimestamp() {
         LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance().fromDescription("datetime", snowflakeDatabase);
-        assertEquals("liquibase.database.core.TimestampNTZTypeSnowflake", liquibaseDataType.getClass().getName());
+        assertEquals("liquibase.datatype.core.TimestampNTZTypeSnowflake", liquibaseDataType.getClass().getName());
     }
 
     @Test
