@@ -10,14 +10,12 @@ import org.spockframework.runtime.extension.IMethodInvocation;
 import org.spockframework.runtime.model.FieldInfo;
 import org.spockframework.runtime.model.SpecInfo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterceptor {
 
     private static final SortedSet<TestSystem.Definition> testSystems = new TreeSet<>();
+    public static final Set<TestSystem> startedTestSystems = new HashSet<>();
 
     private final SpecInfo spec;
     private final LiquibaseIntegrationTestExtension.ErrorListener errorListener;
@@ -47,15 +45,6 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         invocation.proceed();
     }
 
-    @Override
-    public void interceptCleanupSpecMethod(IMethodInvocation invocation) throws Throwable {
-        final List<FieldInfo> containers = findAllContainers();
-        stopContainers(containers, invocation);
-
-        invocation.proceed();
-    }
-
-
     private List<FieldInfo> findAllContainers() {
         List<FieldInfo> returnList = new ArrayList<>();
         for (FieldInfo fieldInfo : spec.getAllFields()) {
@@ -74,6 +63,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
             Assume.assumeTrue("Not running test against " + testSystem.getDefinition() + ": liquibase.sdk.testSystem.test is " + configuredTestSystems + " and liquibase.sdk.testSystem.skip is " + skippedTestSystems, testSystem.shouldTest());
 
             testSystem.start();
+            startedTestSystems.add(testSystem);
 
         }
     }
