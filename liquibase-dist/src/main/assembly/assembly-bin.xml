@@ -79,9 +79,10 @@
             <includes>
                 <include>org.yaml:snakeyaml:jar:</include>
                 <include>javax.xml.bind:jaxb-api:jar:</include>
-                <include>org.glassfish.jaxb:jaxb-runtime:jar:</include>
-                <include>org.glassfish.jaxb:jaxb-core:jar:</include>
+                <include>com.sun.xml.bind:jaxb-impl:jar:</include>
+                <include>com.sun.xml.bind:jaxb-core:jar:</include>
                 <include>info.picocli:picocli:jar:</include>
+                <include>com.diogonunes:JColor:jar</include>
 
                 <include>com.h2database:h2:jar:</include>
                 <include>org.hsqldb:hsqldb:jar:</include>
