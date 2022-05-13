@@ -4,11 +4,14 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
-    <changeSet id="1" author="kristyl">
-        <addColumn tableName="authors">
-            <column name="varcharColumn" type="STRING(25)"/>
-            <column name="intColumn" type="integer"/>
-            <column name="dateColumn" type="date"/>
-        </addColumn>
+    <changeSet id="1" author="oleh">
+        <createTable tableName="test_table">
+            <column name="test_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="test_column" type="string(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
     </changeSet>
 </databaseChangeLog>
