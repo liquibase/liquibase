@@ -164,7 +164,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Built Code Cache
         if: ${{ matrix.java == 8}}
-        uses: actions/cache@v3.0.1
+        uses: actions/cache@v3.0.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -216,7 +216,7 @@ jobs:
           distribution: 'adopt'
           cache: 'maven'
       - name: Cache SonarCloud packages
-        uses: actions/cache@v3.0.1
+        uses: actions/cache@v3.0.2
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
@@ -264,7 +264,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Restore Built Code Cache
-        uses: actions/cache@v3.0.1
+        uses: actions/cache@v3.0.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -297,14 +297,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Built Code Cache
-        uses: actions/cache@v3.0.1
+        uses: actions/cache@v3.0.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
-        uses: actions/cache@v3.0.1
+        uses: actions/cache@v3.0.2
         with:
           key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**
