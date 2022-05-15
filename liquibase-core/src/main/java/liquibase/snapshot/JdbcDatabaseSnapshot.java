@@ -1029,8 +1029,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), ((table == null) ?
-                            SQL_FILTER_MATCH_ALL : escapeForLike(table)), new String[]{"TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), ((table == null) ?
+                            SQL_FILTER_MATCH_ALL : escapeForLike(table, database)), new String[]{"TABLE"}));
                 }
 
                 @Override
@@ -1049,7 +1049,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), SQL_FILTER_MATCH_ALL, new String[]{"TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), SQL_FILTER_MATCH_ALL, new String[]{"TABLE"}));
                 }
 
                 private List<CachedRow> queryMssql(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
@@ -1133,8 +1133,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 private List<CachedRow> queryPostgres(CatalogAndSchema catalogAndSchema, String tableName) throws SQLException {
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), ((tableName == null) ?
-                            SQL_FILTER_MATCH_ALL : escapeForLike(tableName)), new String[]{"TABLE", "PARTITIONED TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), ((tableName == null) ?
+                            SQL_FILTER_MATCH_ALL : escapeForLike(tableName, database)), new String[]{"TABLE", "PARTITIONED TABLE"}));
 
                 }
             });
@@ -1186,8 +1186,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), ((view == null) ? SQL_FILTER_MATCH_ALL
-                            : escapeForLike(view)), new String[]{"VIEW"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), ((view == null) ? SQL_FILTER_MATCH_ALL
+                            : escapeForLike(view, database)), new String[]{"VIEW"}));
                 }
 
                 @Override
@@ -1200,7 +1200,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), SQL_FILTER_MATCH_ALL, new String[]{"VIEW"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), SQL_FILTER_MATCH_ALL, new String[]{"VIEW"}));
                 }
 
 
@@ -1698,10 +1698,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         return (String) JdbcDatabaseSnapshot.this.getScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY);
     }
 
-    private String escapeForLike(String string) {
+    private String escapeForLike(String string, Database database) {
         if (string == null) {
             return null;
         }
+
+        if (database instanceof SQLiteDatabase) {
+            //sqlite jdbc's queries does not support escaped patterns.
+            return string;
+        }
+
         return string
                 .replace("%", "\\%")
                 .replace("_", "\\_");
