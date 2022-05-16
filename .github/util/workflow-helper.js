@@ -32,6 +32,14 @@ module.exports = ({github, context}) => {
             }
         },
 
+        getCurrentBranchLabel: function () {
+            if (context.payload.pull_request) {
+                return this.cleanBranchRef(context.payload.pull_request.head.label);
+            } else {
+                return this.cleanBranchRef(context.payload.ref);
+            }
+        },
+
         getCurrentSha: function () {
             if (context.payload.pull_request) {
                 return this.cleanBranchRef(context.payload.pull_request.head.sha);
