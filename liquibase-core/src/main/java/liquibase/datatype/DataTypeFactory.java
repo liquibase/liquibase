@@ -112,6 +112,10 @@ public class DataTypeFactory {
         if (dataTypeDefinition == null) {
             return null;
         }
+        if (dataTypeDefinition.matches("^\\$\\{.*}$")) {
+            return new UnknownType(dataTypeDefinition);
+        }
+
         String dataTypeName = dataTypeDefinition;
 
         // Remove the first occurrence of (anything within parentheses). This will remove the size information from
@@ -238,6 +242,7 @@ public class DataTypeFactory {
                 param = StringUtil.trimToNull(param);
                 if (param != null) {
                     String[] paramAndValue = param.split(":", 2);
+
                     // TODO: A run-time exception will occur here if the user writes a property name into the
                     // data type which does not exist - but what else could we do in this case, except aborting?
                     ObjectUtil.setProperty(liquibaseDataType, paramAndValue[0], paramAndValue[1]);

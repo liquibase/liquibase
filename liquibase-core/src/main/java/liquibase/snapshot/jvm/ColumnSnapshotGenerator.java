@@ -37,7 +37,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     protected static final String COLUMN_DEF_COL = "COLUMN_DEF";
 
     private Pattern postgresStringValuePattern = Pattern.compile("'(.*)'::[\\w .]+");
-    private Pattern postgresNumberValuePattern = Pattern.compile("(\\d*)::[\\w .]+");
+    private Pattern postgresNumberValuePattern = Pattern.compile("\\(?(\\d*)\\)?::[\\w .]+");
 
 
     public ColumnSnapshotGenerator() {
