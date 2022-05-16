@@ -70,6 +70,13 @@ public class LiquibaseLauncher {
             }
         }
 
+        if (debug) {
+            debug("Final Classpath:");
+            for (URL url : urls) {
+                debug("  " + url.toString());
+            }
+        }
+
         final URLClassLoader classloader = new URLClassLoader(urls.toArray(new URL[0]), null);
         Thread.currentThread().setContextClassLoader(classloader);
 

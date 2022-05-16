@@ -25,6 +25,7 @@ import liquibase.ui.ConsoleUIService;
 import liquibase.ui.UIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
@@ -38,6 +39,9 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.*;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -563,23 +567,7 @@ public class LiquibaseCommandLine {
     }
 
     private void configureVersionInfo() {
-        final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-        String licenseInfo = "";
-        if (licenseService == null) {
-            licenseInfo = "WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.";
-        } else {
-            licenseInfo = licenseService.getLicenseInfo();
-        }
-        getRootCommand(this.commandLine).getCommandSpec().version(
-                CommandLineUtils.getBanner(),
-                String.format("Running Java under %s (Version %s)",
-                        System.getProperties().getProperty("java.home"),
-                        System.getProperty("java.version")
-                ),
-                "",
-                "Liquibase Version: " + LiquibaseUtil.getBuildVersionInfo(),
-                licenseInfo
-        );
+        getRootCommand(this.commandLine).getCommandSpec().versionProvider(new LiquibaseVersionProvider());
     }
 
     protected Map<String, Object> configureLogging() throws IOException {
@@ -1111,4 +1099,111 @@ public class LiquibaseCommandLine {
             return equals;
         }
     }
+
+    private static class LiquibaseVersionProvider implements CommandLine.IVersionProvider {
+        @Override
+        public String[] getVersion() throws Exception {
+            final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+            String licenseInfo = "";
+            if (licenseService == null) {
+                licenseInfo = "WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.";
+            } else {
+                licenseInfo = licenseService.getLicenseInfo();
+            }
+
+            String liquibaseHome;
+            Path liquibaseHomePath = null;
+            try {
+                liquibaseHomePath = new File(ObjectUtil.defaultIfNull(System.getenv("LIQUIBASE_HOME"), ".")).getAbsoluteFile().getCanonicalFile().toPath();
+                liquibaseHome = liquibaseHomePath.toString();
+            } catch (IOException e) {
+                liquibaseHome = "Cannot resolve LIQUIBASE_HOME: " + e.getMessage();
+            }
+
+
+
+            SortedMap<String, LibraryInfo> libraryInfo = new TreeMap<>();
+
+            final ClassLoader classLoader = getClass().getClassLoader();
+            if (classLoader instanceof URLClassLoader) {
+                for (URL url : ((URLClassLoader) classLoader).getURLs()) {
+                    if (!url.toExternalForm().startsWith("file:")) {
+                        continue;
+                    }
+                    final File file = new File(url.toURI());
+                    if (file.getName().equals("liquibase.jar")) {
+                        continue;
+                    }
+                    if (file.exists() && file.getName().toLowerCase().endsWith(".jar")) {
+                        final LibraryInfo thisInfo = getLibraryInfo(file);
+                        libraryInfo.putIfAbsent(thisInfo.name, thisInfo);
+                    }
+                }
+            }
+
+            final StringBuilder libraryDescription = new StringBuilder("Libraries:\n");
+            if (libraryInfo.size() == 0) {
+                libraryDescription.append("    UNKNOWN");
+            } else {
+                for (LibraryInfo info : libraryInfo.values()) {
+                    String filePath = info.file.getCanonicalPath();
+
+                    if (liquibaseHomePath != null && info.file.toPath().startsWith(liquibaseHomePath)) {
+                        filePath = liquibaseHomePath.relativize(info.file.toPath()).toString();
+                    }
+                    libraryDescription.append("    ").append(info.name).append(" ").append(info.version).append(" (").append(filePath).append(")\n");
+                }
+            }
+
+            return new String[]{
+                    CommandLineUtils.getBanner(),
+                    String.format("Liquibase Home: %s", liquibaseHome),
+                    String.format("Java Home %s (Version %s)",
+                            System.getProperties().getProperty("java.home"),
+                            System.getProperty("java.version")
+                    ),
+                    libraryDescription.toString(),
+                    "",
+                    "Liquibase Version: " + LiquibaseUtil.getBuildVersionInfo(),
+                    licenseInfo,
+            };
+        }
+
+        private LibraryInfo getLibraryInfo(File pathEntryFile) throws IOException {
+            try (final JarFile jarFile = new JarFile(pathEntryFile)) {
+                final LibraryInfo libraryInfo = new LibraryInfo();
+                libraryInfo.file = pathEntryFile;
+
+                final Manifest manifest = jarFile.getManifest();
+                libraryInfo.name = findKeys(manifest, "Bundle-Name", "Implementation-Title");
+                libraryInfo.version = findKeys(manifest, "Bundle-Version", "Implementation-Version");
+
+                if (libraryInfo.name == null) {
+                    libraryInfo.name = pathEntryFile.getName().replace(".jar", "");
+                }
+                if (libraryInfo.version == null) {
+                    libraryInfo.version = "UNKNOWN";
+                }
+                return libraryInfo;
+            }
+        }
+
+        private String findKeys(Manifest manifest, String... keys) {
+            for (String key : keys) {
+                String value = manifest.getMainAttributes().getValue(key);
+                if (value != null) {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+
+        private static class LibraryInfo {
+            private String name;
+            private File file;
+            private String version;
+        }
+    }
+
 }
