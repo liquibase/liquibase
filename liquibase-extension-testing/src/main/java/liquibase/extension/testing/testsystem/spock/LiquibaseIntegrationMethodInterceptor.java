@@ -4,33 +4,31 @@ import liquibase.Scope;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.extension.testing.testsystem.TestSystem;
-import liquibase.util.StringUtil;
 import org.junit.Assume;
 import org.spockframework.runtime.extension.AbstractMethodInterceptor;
 import org.spockframework.runtime.extension.IMethodInvocation;
 import org.spockframework.runtime.model.FieldInfo;
 import org.spockframework.runtime.model.SpecInfo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterceptor {
 
     private static final SortedSet<TestSystem.Definition> testSystems = new TreeSet<>();
+    public static final Set<TestSystem> startedTestSystems = new HashSet<>();
 
     private final SpecInfo spec;
     private final LiquibaseIntegrationTestExtension.ErrorListener errorListener;
 
     private static final String configuredTestSystems;
+    private static final String skippedTestSystems;
 
     static {
-        //cache configured test systems for faster lookup
         configuredTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test").getValue();
-        if (configuredTestSystems != null) {
-            for (String definition : StringUtil.splitAndTrim(configuredTestSystems, ","))
-                testSystems.add(TestSystem.Definition.parse(definition));
+        skippedTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.skip").getValue();
+
+        for (String definition : TestSystem.getEnabledTestSystems(configuredTestSystems, skippedTestSystems)) {
+            testSystems.add(TestSystem.Definition.parse(definition));
         }
     }
 
@@ -47,15 +45,6 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         invocation.proceed();
     }
 
-    @Override
-    public void interceptCleanupSpecMethod(IMethodInvocation invocation) throws Throwable {
-        final List<FieldInfo> containers = findAllContainers();
-        stopContainers(containers, invocation);
-
-        invocation.proceed();
-    }
-
-
     private List<FieldInfo> findAllContainers() {
         List<FieldInfo> returnList = new ArrayList<>();
         for (FieldInfo fieldInfo : spec.getAllFields()) {
@@ -71,9 +60,10 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         for (FieldInfo field : containers) {
             TestSystem testSystem = readContainerFromField(field, invocation);
 
-            Assume.assumeTrue("Not running test against " + testSystem.getDefinition() + ": liquibase.sdk.testSystem.test is " + configuredTestSystems, testSystem.shouldTest());
+            Assume.assumeTrue("Not running test against " + testSystem.getDefinition() + ": liquibase.sdk.testSystem.test is " + configuredTestSystems + " and liquibase.sdk.testSystem.skip is " + skippedTestSystems, testSystem.shouldTest());
 
             testSystem.start();
+            startedTestSystems.add(testSystem);
 
         }
     }

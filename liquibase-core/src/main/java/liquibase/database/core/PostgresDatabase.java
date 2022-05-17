@@ -388,4 +388,12 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.LOWER_CASE;
     }
+
+    @Override
+    public void rollback() throws DatabaseException {
+        super.rollback();
+
+        //Rollback in postgresql resets the search path. Need to put it back to the defaults
+        DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
+    }
 }
