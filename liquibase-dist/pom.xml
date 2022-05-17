@@ -42,7 +42,11 @@
             <artifactId>liquibase-cli</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>liquibase-snowflake</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -173,6 +177,7 @@
                         <includes>
                             <include>${project.groupId}:liquibase-core</include>
                             <include>${project.groupId}:liquibase-cli</include>
+                            <include>${project.groupId}:liquibase-snowflake</include>
                             <include>com.datical.lb:liquibase-pro</include>
                         </includes>
                     </artifactSet>
