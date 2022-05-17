@@ -5,6 +5,7 @@ import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.InputStreamList;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.ContextResource;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
@@ -132,7 +133,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
             relativeTo = relativeTo.replace("\\", "/");
 
             boolean relativeIsFile;
-            Resource rootResource = resourceLoader.getResource(relativeTo);
+            Resource rootResource = new DefaultResourceLoader(resourceLoader.getClassLoader()).getResource(relativeTo);
             relativeIsFile = resourceIsFile(rootResource);
 
             if (relativeIsFile) {
