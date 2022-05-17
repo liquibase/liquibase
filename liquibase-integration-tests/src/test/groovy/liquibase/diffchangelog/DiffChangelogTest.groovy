@@ -37,7 +37,9 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
 """
         def statement = postgres.getConnection().createStatement()
         statement.execute(sql)
-        postgres.getConnection().commit()
+        if (! postgres.getConnection().getAutoCommit()) {
+            postgres.getConnection().setAutoCommit(true)
+        }
 
         Database refDatabase = DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
         boolean b = SnapshotGeneratorFactory.instance.has(new Sequence(null, "public", sequenceName), refDatabase)
