@@ -275,13 +275,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     // Make sure that this line matches the --changeset <author>:<id> with no spaces before ID
                     //
                     String idGroup = changeSetPatternMatcher.group(2);
-                    String idGroupForMatch = idGroup.replace("{", "\\{").replace("}","\\}")
-                                                    .replace("$", "\\$");
                     String authorGroup = changeSetPatternMatcher.group(1);
-                    String authorGroupForMatch = authorGroup.replace("{", "\\{").replace("}","\\}")
-                                                            .replace("$", "\\$");
+
+                    //
+                    // Use Pattern.Quote to escape the meta-characters
+                    // <([{\^-=$!|]})?*+.>
+                    //
                     Pattern changeSetAuthorIdPattern =
-                            Pattern.compile("\\s*\\-\\-[\\s]*changeset\\s+" + authorGroupForMatch + ":" + idGroupForMatch + ".*$", Pattern.CASE_INSENSITIVE);
+                            Pattern.compile("\\s*\\-\\-[\\s]*changeset\\s+" + Pattern.quote(authorGroup+ ":" + idGroup) + ".*$", Pattern.CASE_INSENSITIVE);
                     Matcher changeSetAuthorIdPatternMatcher = changeSetAuthorIdPattern.matcher(line);
                     if (! changeSetAuthorIdPatternMatcher.matches()) {
                         String message =
