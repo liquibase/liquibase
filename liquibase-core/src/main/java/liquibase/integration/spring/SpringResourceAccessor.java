@@ -20,9 +20,11 @@ import java.util.TreeSet;
 public class SpringResourceAccessor extends AbstractResourceAccessor {
 
     private final ResourceLoader resourceLoader;
+    private final DefaultResourceLoader fallbackResourceLoader;
 
     public SpringResourceAccessor(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
+        this.fallbackResourceLoader = new DefaultResourceLoader(resourceLoader.getClassLoader());
     }
 
     @Override
@@ -103,7 +105,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
             if (url.contains("!")) {
                 return url.replaceFirst(".*!", "");
             } else {
-                while (!resourceLoader.getResource("classpath:" + url).exists()) {
+                while (!getResource("classpath:" + url).exists()) {
                     String newUrl = url.replaceFirst("^/?.*?/", "");
                     if (newUrl.equals(url)) {
                         throw new UnexpectedLiquibaseException("Could determine path for " + resource.getURL().toExternalForm());
@@ -133,7 +135,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
             relativeTo = relativeTo.replace("\\", "/");
 
             boolean relativeIsFile;
-            Resource rootResource = new DefaultResourceLoader(resourceLoader.getClassLoader()).getResource(relativeTo);
+            Resource rootResource = getResource(relativeTo);
             relativeIsFile = resourceIsFile(rootResource);
 
             if (relativeIsFile) {
@@ -143,6 +145,21 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
             }
         }
         return searchPath;
+    }
+
+    /**
+     * Looks up the given resource.
+     */
+    protected Resource getResource(String resourcePath) {
+        //some ResourceLoaders (FilteredReactiveWebContextResource) lie about whether they exist or not which can confuse the rest of the code.
+        //check the "fallback" loader first, and if that can't find it use the "real" one.
+        // The fallback one should be more reasonable in it's `exists()` function
+        Resource defaultLoaderResource = fallbackResourceLoader.getResource(resourcePath);
+        if (defaultLoaderResource.exists()) {
+            return defaultLoaderResource;
+        }
+
+        return resourceLoader.getResource(resourcePath);
     }
 
     /**
