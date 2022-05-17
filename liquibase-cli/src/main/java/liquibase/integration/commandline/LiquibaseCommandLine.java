@@ -39,7 +39,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.*;
-import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.logging.*;
@@ -1101,6 +1100,7 @@ public class LiquibaseCommandLine {
     }
 
     private static class LiquibaseVersionProvider implements CommandLine.IVersionProvider {
+
         @Override
         public String[] getVersion() throws Exception {
             final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
@@ -1111,18 +1111,18 @@ public class LiquibaseCommandLine {
                 licenseInfo = licenseService.getLicenseInfo();
             }
 
+            final Path workingDirectory = Paths.get(".").toAbsolutePath();
+
             String liquibaseHome;
             Path liquibaseHomePath = null;
             try {
-                liquibaseHomePath = new File(ObjectUtil.defaultIfNull(System.getenv("LIQUIBASE_HOME"), ".")).getAbsoluteFile().getCanonicalFile().toPath();
+                liquibaseHomePath = new File(ObjectUtil.defaultIfNull(System.getenv("LIQUIBASE_HOME"), workingDirectory.toAbsolutePath().toString())).getAbsoluteFile().getCanonicalFile().toPath();
                 liquibaseHome = liquibaseHomePath.toString();
             } catch (IOException e) {
                 liquibaseHome = "Cannot resolve LIQUIBASE_HOME: " + e.getMessage();
             }
 
-
-
-            SortedMap<String, LibraryInfo> libraryInfo = new TreeMap<>();
+            Map<String, LibraryInfo> libraryInfo = new HashMap<>();
 
             final ClassLoader classLoader = getClass().getClassLoader();
             if (classLoader instanceof URLClassLoader) {
@@ -1143,15 +1143,19 @@ public class LiquibaseCommandLine {
 
             final StringBuilder libraryDescription = new StringBuilder("Libraries:\n");
             if (libraryInfo.size() == 0) {
-                libraryDescription.append("    UNKNOWN");
+                libraryDescription.append("- UNKNOWN");
             } else {
-                for (LibraryInfo info : libraryInfo.values()) {
+                for (LibraryInfo info : new TreeSet<>(libraryInfo.values())) {
                     String filePath = info.file.getCanonicalPath();
 
                     if (liquibaseHomePath != null && info.file.toPath().startsWith(liquibaseHomePath)) {
                         filePath = liquibaseHomePath.relativize(info.file.toPath()).toString();
                     }
-                    libraryDescription.append("    ").append(info.name).append(" ").append(info.version).append(" (").append(filePath).append(")\n");
+                    if (info.file.toPath().startsWith(workingDirectory)) {
+                        filePath = workingDirectory.relativize(info.file.toPath()).toString();
+                    }
+
+                    libraryDescription.append("- "). append(filePath).append(": ").append(info.name).append(" ").append(info.version).append("\n");
                 }
             }
 
@@ -1175,8 +1179,8 @@ public class LiquibaseCommandLine {
                 libraryInfo.file = pathEntryFile;
 
                 final Manifest manifest = jarFile.getManifest();
-                libraryInfo.name = findKeys(manifest, "Bundle-Name", "Implementation-Title");
-                libraryInfo.version = findKeys(manifest, "Bundle-Version", "Implementation-Version");
+                libraryInfo.name = getValue(manifest, "Bundle-Name", "Implementation-Title");
+                libraryInfo.version = getValue(manifest, "Bundle-Version", "Implementation-Version");
 
                 if (libraryInfo.name == null) {
                     libraryInfo.name = pathEntryFile.getName().replace(".jar", "");
@@ -1188,7 +1192,7 @@ public class LiquibaseCommandLine {
             }
         }
 
-        private String findKeys(Manifest manifest, String... keys) {
+        private String getValue(Manifest manifest, String... keys) {
             for (String key : keys) {
                 String value = manifest.getMainAttributes().getValue(key);
                 if (value != null) {
@@ -1199,10 +1203,15 @@ public class LiquibaseCommandLine {
         }
 
 
-        private static class LibraryInfo {
+        private static class LibraryInfo implements Comparable<LibraryInfo> {
             private String name;
             private File file;
             private String version;
+
+            @Override
+            public int compareTo(LibraryInfo o) {
+                return this.file.compareTo(o.file);
+            }
         }
     }
 
