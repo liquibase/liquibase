@@ -470,12 +470,19 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     static OutputCheck assertContains(String substring, final Integer occurrences) {
+        return assertContains(substring, occurrences, false)
+    }
+
+    static OutputCheck assertContains(String substring, final Integer occurrences, final Boolean removeWhitespaceFromExpected) {
         return new OutputCheck() {
             private String actualContents
             @Override
             def check(String actual) throws AssertionError {
                 this.actualContents = actual
                 String edited = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))
+                if (Boolean.TRUE == removeWhitespaceFromExpected) {
+                    edited = edited.replaceAll(/\s+/," ")
+                }
                 if (occurrences == null) {
                     boolean b = actual.contains(edited)
                     assert b: "$actual does not contain: '$substring'"
