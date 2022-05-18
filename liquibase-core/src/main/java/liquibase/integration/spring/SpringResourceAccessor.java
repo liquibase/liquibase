@@ -24,7 +24,11 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
 
     public SpringResourceAccessor(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
-        this.fallbackResourceLoader = new DefaultResourceLoader(resourceLoader.getClassLoader());
+        if (resourceLoader == null) {
+            this.fallbackResourceLoader = new DefaultResourceLoader(Thread.currentThread().getContextClassLoader());
+        } else {
+            this.fallbackResourceLoader = new DefaultResourceLoader(resourceLoader.getClassLoader());
+        }
     }
 
     @Override
