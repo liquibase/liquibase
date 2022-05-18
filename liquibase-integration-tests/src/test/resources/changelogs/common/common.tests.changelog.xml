@@ -1135,6 +1135,7 @@
         <sql>
             CREATE TABLE fkexists_table2 (
                 id INT,
+                id2 INT,
                 CONSTRAINT fkexists_1
                     FOREIGN KEY (id)
                         REFERENCES fkexists_table1 (id)
@@ -1156,7 +1157,7 @@
                 <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
             </not>
         </preConditions>
-        <addForeignKeyConstraint baseColumnNames="id" baseTableName="fkexists_table2"
+        <addForeignKeyConstraint baseColumnNames="id2" baseTableName="fkexists_table2"
                                  constraintName="fkexists_2"
                                  referencedColumnNames="id" referencedTableName="fkexists_table1"/>
     </changeSet>
