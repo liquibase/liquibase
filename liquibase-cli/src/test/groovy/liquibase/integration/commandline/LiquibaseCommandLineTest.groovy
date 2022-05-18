@@ -76,20 +76,4 @@ class LiquibaseCommandLineTest extends Specification {
         subcommands["update"].commandSpec.findOption("-D") != null
         subcommands["snapshot"].commandSpec.findOption("-D") == null
     }
-
-    @Unroll
-    def "SecureLogFilter with null log message"() {
-        setup:
-        LogMessageFilter mockFilter = Mock()
-        LogRecord mockLogRecord = Mock()
-        LiquibaseCommandLine.SecureLogFilter secureLogFilter = new LiquibaseCommandLine.SecureLogFilter(mockFilter)
-
-        when:
-        mockFilter.filterMessage(null) >> null
-        mockLogRecord.getMessage() >> null
-        secureLogFilter.isLoggable(mockLogRecord)
-
-        then:
-        noExceptionThrown()
-    }
 }
