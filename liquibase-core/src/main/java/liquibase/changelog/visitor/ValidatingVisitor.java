@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
@@ -134,8 +135,14 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
         if(ranChangeSet != null){
             if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
-                if (!changeSet.shouldRunOnChange()) {
-                    invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()+" but is now: "+changeSet.generateCheckSum().toString());
+                if (!changeSet.shouldRunOnChange()) { // TODO: Desactivarlo aqui seria muchisimo mas sencillo
+                    if (GlobalConfiguration.DISABLE_CHECKSUM_VERIFICATION.getCurrentValue()) {
+                        Scope.getCurrentScope().getLog(getClass()).warning(
+                                changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()+" but is now: "+changeSet.generateCheckSum().toString()
+                        );
+                    } else {
+                        invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()+" but is now: "+changeSet.generateCheckSum().toString());
+                    }
                 }
             }
         }

@@ -34,6 +34,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> STRICT;
     public static final ConfigurationDefinition<Integer> DDL_LOCK_TIMEOUT;
     public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
+    public static final ConfigurationDefinition<Boolean> DISABLE_CHECKSUM_VERIFICATION;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -180,6 +181,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         SECURE_PARSING = builder.define("secureParsing", Boolean.class)
                 .setDescription("If true, remove functionality from file parsers which could be used insecurely. Examples include (but not limited to) disabling remote XML entity support.")
                 .setDefaultValue(true)
+                .build();
+
+        DISABLE_CHECKSUM_VERIFICATION = builder.define("disableChecksumVerification", Boolean.class)
+                .setDescription("If true, disable the checksum verification when running the migrations and only shows a warning message.")
+                .setDefaultValue(false)
                 .build();
     }
 }
