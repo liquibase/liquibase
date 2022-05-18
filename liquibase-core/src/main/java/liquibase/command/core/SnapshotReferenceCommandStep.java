@@ -20,6 +20,7 @@ public class SnapshotReferenceCommandStep extends AbstractCliWrapperCommandStep 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required()
+                .setValueObfuscator(ConfigurationValueObfuscator.URL_OBFUSCATOR)
                 .description("The JDBC reference database connection URL").build();
         REFERENCE_DEFAULT_SCHEMA_NAME_ARG = builder.argument("referenceDefaultSchemaName", String.class)
                 .description("The default schema name to use for the database connection").build();

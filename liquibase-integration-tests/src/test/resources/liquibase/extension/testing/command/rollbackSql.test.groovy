@@ -11,6 +11,7 @@ Required Args:
   changelogFile (String) File to write changelog to
   tag (String) Tag to rollback to
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changeExecListenerClass (String) Fully-qualified class which specifies a ChangeExecListener
     Default: null

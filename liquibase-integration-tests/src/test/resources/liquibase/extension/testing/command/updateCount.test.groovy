@@ -11,6 +11,7 @@ Required Args:
   changelogFile (String) The root changelog
   count (Integer) The number of changes in the changelog to deploy
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changeExecListenerClass (String) Fully-qualified class which specifies a ChangeExecListener
     Default: null

@@ -3,16 +3,11 @@ package liquibase.extension.testing.testsystem;
 import liquibase.Scope;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
-import liquibase.util.CollectionUtil;
-import liquibase.util.StringUtil;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -67,8 +62,9 @@ public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
 
     private List<String> getConfiguredTestSystems() {
         final String testSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.test").getValue();
+        final String skippedTestSystems = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.sdk.testSystem.skip").getValue();
 
-        return CollectionUtil.createIfNull(StringUtil.splitAndTrim(testSystems, ","));
+        return TestSystem.getEnabledTestSystems(testSystems, skippedTestSystems);
     }
 
     /**
