@@ -2206,7 +2206,7 @@ public class Main {
         public boolean isLoggable(LogRecord record) {
             final String filteredMessage = filter.filterMessage(record.getMessage());
 
-            final boolean equals = filteredMessage.equals(record.getMessage());
+            final boolean equals = filteredMessage != null && filteredMessage.equals(record.getMessage());
             return equals;
         }
     }
