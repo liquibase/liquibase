@@ -13,10 +13,10 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
-import liquibase.logging.LogMessageFilter;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
 import liquibase.resource.CompositeResourceAccessor;
@@ -29,6 +29,7 @@ import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -642,6 +643,34 @@ public class LiquibaseCommandLine {
                 handler.setLevel(cliLogLevel);
             }
         }
+
+        try {
+            //Attempt to disable the sun.net.www.protocol.http.HttpURLConnection logging, since it is verbose and can contain sensitive info in the headers
+            //using reflection since it net.sun.* classes are not always available
+            Class httpConnectionClass = Class.forName("sun.net.www.protocol.http.HttpURLConnection");
+            final Class<? extends Enum> levelEnum = (Class<? extends Enum>) Class.forName("sun.util.logging.PlatformLogger$Level");
+
+            final Method getLoggerMethod = httpConnectionClass.getMethod("getHttpLogger");
+            final Object httpLogger = getLoggerMethod.invoke(null);
+
+            final Method setLevelMethod = httpLogger.getClass().getMethod("setLevel", levelEnum);
+
+            Enum offEnum = null;
+            for (Enum definedEnum : levelEnum.getEnumConstants()) {
+                if (definedEnum.name().equals("OFF")) {
+                    offEnum = definedEnum;
+                    break;
+                }
+            }
+            if (offEnum == null) {
+                throw new UnexpectedLiquibaseException("Could not find OFF enum");
+            }
+
+            setLevelMethod.invoke(httpLogger, offEnum);
+        } catch (Throwable e) {
+            liquibaseLogger.fine("Error disabling system HTTP logging: "+e.getMessage());
+        }
+
     }
 
     private CommandLine getRootCommand(CommandLine commandLine) {
