@@ -1126,4 +1126,45 @@
         <output target="stderr">Message using stderr target</output>
     </changeSet>
 
+    <changeSet id="fkexists-without-table-setup" author="example">
+        <sql>
+            CREATE TABLE fkexists_table1 (
+                id INT PRIMARY KEY
+            )
+        </sql>
+        <sql>
+            CREATE TABLE fkexists_table2 (
+                id INT,
+                CONSTRAINT fkexists_1
+                    FOREIGN KEY (id)
+                        REFERENCES fkexists_table1 (id)
+            )
+        </sql>
+        <rollback>
+            <sql>
+                DROP TABLE fkexists_table1
+            </sql>
+            <sql>
+                DROP TABLE fkexists_table2
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="example" id="fkexists-without-table-check">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="id" baseTableName="fkexists_table2"
+                                 constraintName="fkexists_2"
+                                 referencedColumnNames="id" referencedTableName="fkexists_table1"/>
+    </changeSet>
+    <changeSet author="example" id="fkexists-without-table-check2">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
+        </preConditions>
+    </changeSet>
+
 </databaseChangeLog>
