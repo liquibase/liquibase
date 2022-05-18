@@ -14,8 +14,15 @@ public final class AntTaskLogger extends AbstractLogger {
 
     private final Task task;
 
-    public AntTaskLogger(Task task, LogMessageFilter filter) {
-        super(filter);
+    /**
+     * @deprecated use {@link AntTaskLogger(Task)} instead
+     */
+    @Deprecated
+    public AntTaskLogger(Task task, LogMessageFilter ignored) {
+        this(task);
+    }
+
+    public AntTaskLogger(Task task) {
         this.task = task;
     }
 
