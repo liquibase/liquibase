@@ -595,16 +595,13 @@ public class LiquibaseCommandLine {
     private void configureLogging(Level logLevel, File logFile) throws IOException {
         configuredLogLevel = logLevel;
 
-        System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
-
-        java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
-
         final JavaLogService logService = (JavaLogService) Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
+        java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
         logService.setParent(liquibaseLogger);
 
+        System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
 
         java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
-
         Level cliLogLevel = logLevel;
 
         if (logFile != null) {
@@ -622,42 +619,19 @@ public class LiquibaseCommandLine {
             cliLogLevel = Level.OFF;
         }
 
-        rootLogger.setLevel(logLevel);
-        liquibaseLogger.setLevel(logLevel);
+        final List<String> channels = StringUtil.splitAndTrim(LiquibaseCommandLineConfiguration.LOG_CHANNELS.getCurrentValue(), ",");
+        if (logLevel == Level.OFF) {
+            channels.add("");
+        }
+        for (String channel : channels) {
+            java.util.logging.Logger.getLogger(channel).setLevel(logLevel);
+        }
 
         for (Handler handler : rootLogger.getHandlers()) {
             if (handler instanceof ConsoleHandler) {
                 handler.setLevel(cliLogLevel);
             }
         }
-
-        try {
-            //Attempt to disable the sun.net.www.protocol.http.HttpURLConnection logging, since it is verbose and can contain sensitive info in the headers
-            //using reflection since it net.sun.* classes are not always available
-            Class httpConnectionClass = Class.forName("sun.net.www.protocol.http.HttpURLConnection");
-            final Class<? extends Enum> levelEnum = (Class<? extends Enum>) Class.forName("sun.util.logging.PlatformLogger$Level");
-
-            final Method getLoggerMethod = httpConnectionClass.getMethod("getHttpLogger");
-            final Object httpLogger = getLoggerMethod.invoke(null);
-
-            final Method setLevelMethod = httpLogger.getClass().getMethod("setLevel", levelEnum);
-
-            Enum offEnum = null;
-            for (Enum definedEnum : levelEnum.getEnumConstants()) {
-                if (definedEnum.name().equals("OFF")) {
-                    offEnum = definedEnum;
-                    break;
-                }
-            }
-            if (offEnum == null) {
-                throw new UnexpectedLiquibaseException("Could not find OFF enum");
-            }
-
-            setLevelMethod.invoke(httpLogger, offEnum);
-        } catch (Throwable e) {
-            liquibaseLogger.fine("Error disabling system HTTP logging: "+e.getMessage());
-        }
-
     }
 
     private CommandLine getRootCommand(CommandLine commandLine) {
