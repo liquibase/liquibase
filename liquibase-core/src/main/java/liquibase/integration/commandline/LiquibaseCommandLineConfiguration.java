@@ -63,7 +63,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 .build();
 
         LOG_CHANNELS = builder.define("logChannels", String.class)
-                .setDefaultValue("liquibase", "Controls which log channels have their level set by the liquibase.logLevel setting. Comma separate multiple values. Example: liquibase,org.mariadb.jdbc")
+                .setDefaultValue("liquibase", "Controls which log channels have their level set by the liquibase.logLevel setting. Comma separate multiple values. To set the level of all channels, use 'all'. Example: liquibase,org.mariadb.jdbc")
                 .build();
 
         LOG_FILE = builder.define("logFile", File.class).build();

@@ -619,11 +619,22 @@ public class LiquibaseCommandLine {
             cliLogLevel = Level.OFF;
         }
 
-        final List<String> channels = StringUtil.splitAndTrim(LiquibaseCommandLineConfiguration.LOG_CHANNELS.getCurrentValue(), ",");
-        if (logLevel == Level.OFF) {
-            channels.add("");
+        final String configuredChannels = LiquibaseCommandLineConfiguration.LOG_CHANNELS.getCurrentValue();
+        List<String> channels;
+        if (configuredChannels.equalsIgnoreCase("all")) {
+            channels = new ArrayList<>(Arrays.asList("", "liquibase"));
+        } else {
+            channels = StringUtil.splitAndTrim(configuredChannels, ",");
+
+            if (logLevel == Level.OFF) {
+                channels.add("");
+            }
         }
+
         for (String channel : channels) {
+            if (channel.equalsIgnoreCase("all")) {
+                channel = "";
+            }
             java.util.logging.Logger.getLogger(channel).setLevel(logLevel);
         }
 
