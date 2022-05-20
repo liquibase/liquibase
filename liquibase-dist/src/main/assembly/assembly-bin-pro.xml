@@ -15,4 +15,19 @@
 			src/main/assembly/components.xml
 		</componentDescriptor>
 	</componentDescriptors>
+	<dependencySets>
+		<dependencySet>
+			<outputFileNameMapping>
+				${artifact.artifactId}${dashClassifier?}.${artifact.extension}
+			</outputFileNameMapping>
+			<outputDirectory>
+				internal/lib
+			</outputDirectory>
+			<includes>
+				<include>
+					com.datical.lb:liquibase-pro:jar:
+				</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
 </assembly>
