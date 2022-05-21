@@ -29,6 +29,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION;
     public static final ConfigurationDefinition<Boolean> INCLUDE_CATALOG_IN_SPECIFICATION;
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
+
+    /**
+     * @deprecated No longer used
+     */
+    @Deprecated
     public static final ConfigurationDefinition<Boolean> FILTER_LOG_MESSAGES;
     public static final ConfigurationDefinition<Boolean> HEADLESS;
     public static final ConfigurationDefinition<Boolean> STRICT;
@@ -155,8 +160,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         FILTER_LOG_MESSAGES = builder.define("filterLogMessages", Boolean.class)
-                .setDescription("Should Liquibase filter log messages for potentially insecure data?")
-                .setDefaultValue(true)
+                .setDescription("DEPRECATED: No longer used")
+                .setCommonlyUsed(false)
                 .build();
 
         HEADLESS = builder.define("headless", Boolean.class)

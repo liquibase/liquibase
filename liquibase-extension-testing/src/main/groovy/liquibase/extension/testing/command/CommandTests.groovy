@@ -912,7 +912,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             def filter = TestFilter.getInstance()
 
             return filter.shouldRun(TestFilter.DB, databaseName) &&
-                    filter.shouldRun("command", definition.commandTestDefinition.joinedCommand)
+                    filter.shouldRun("command", definition.commandTestDefinition.joinedCommand) &&
+                    filter.shouldRun("def", definition.description)
         }
     }
 

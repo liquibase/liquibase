@@ -25,7 +25,7 @@ public class MavenLogService extends AbstractLogService {
     @Override
     public Logger getLog(Class clazz) {
         if (this.mavenLogger == null) {
-            this.mavenLogger = new MavenLogger(rootLog, this.filter);
+            this.mavenLogger = new MavenLogger(rootLog);
         }
         return this.mavenLogger;
     }
@@ -34,8 +34,7 @@ public class MavenLogService extends AbstractLogService {
 
         private final Log mavenLog;
 
-        public MavenLogger(Log log, LogMessageFilter filter) {
-            super(filter);
+        public MavenLogger(Log log) {
             this.mavenLog = log;
         }
 

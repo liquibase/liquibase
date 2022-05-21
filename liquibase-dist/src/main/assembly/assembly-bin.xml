@@ -13,7 +13,6 @@
             <lineEnding>unix</lineEnding>
             <includes>
                 <include>liquibase</include>
-                <include>examples/start-h2</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
@@ -51,6 +50,26 @@
             <includes>
                 <include>**/*</include>
             </includes>
+            <excludes>
+                <exclude>**/start-h2*</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../liquibase-core/target/classes/liquibase/examples</directory>
+            <outputDirectory>examples</outputDirectory>
+            <includes>
+                <include>**/start-h2</include>
+            </includes>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../liquibase-core/target/classes/liquibase/examples</directory>
+            <outputDirectory>examples</outputDirectory>
+            <includes>
+                <include>**/start-h2.bat</include>
+            </includes>
+            <lineEnding>dos</lineEnding>
         </fileSet>
     </fileSets>
     <files>
@@ -75,12 +94,13 @@
     </files>
     <dependencySets>
         <dependencySet>
-            <outputDirectory>lib</outputDirectory>
+            <outputFileNameMapping> ${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputDirectory>internal/lib</outputDirectory>
             <includes>
                 <include>org.yaml:snakeyaml:jar:</include>
                 <include>javax.xml.bind:jaxb-api:jar:</include>
-                <include>com.sun.xml.bind:jaxb-impl:jar:</include>
-                <include>com.sun.xml.bind:jaxb-core:jar:</include>
+                <include>org.glassfish.jaxb:jaxb-runtime:jar:</include>
+                <include>org.glassfish.jaxb:jaxb-core:jar:</include>
                 <include>info.picocli:picocli:jar:</include>
 
                 <include>com.h2database:h2:jar:</include>

@@ -14,7 +14,7 @@ public final class AntTaskLogService extends AbstractLogService {
     private final AntTaskLogger logger;
 
     public AntTaskLogService(Task task) {
-        logger = new AntTaskLogger(task, this.filter);
+        logger = new AntTaskLogger(task);
     }
 
     @Override

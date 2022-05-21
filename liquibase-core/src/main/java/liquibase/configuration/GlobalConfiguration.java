@@ -228,17 +228,16 @@ public class GlobalConfiguration extends liquibase.GlobalConfiguration implement
     }
 
     /**
-     * @deprecated
+     * @deprecated always returns "false"
      */
     public boolean getShouldFilterLogMessages() {
-        return liquibase.GlobalConfiguration.FILTER_LOG_MESSAGES.getCurrentValue();
+        return false;
     }
 
     /**
-     * @deprecated
+     * @deprecated ignores value
      */
-    public GlobalConfiguration setShouldFilterLogMessages(boolean filter) {
-        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.FILTER_LOG_MESSAGES, filter);
+    public GlobalConfiguration setShouldFilterLogMessages(boolean ignored) {
         return this;
     }
 

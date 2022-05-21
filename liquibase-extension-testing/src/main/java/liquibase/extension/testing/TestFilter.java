@@ -47,7 +47,7 @@ public class TestFilter {
         includeString = System.getProperty(includeKey, includeString);
         excludeString = System.getProperty(excludeKey, excludeString);
 
-        if (StringUtil.isNotEmpty(includeString) && StringUtil.isNotEmpty(excludeString)) {
+        if (StringUtil.isNotEmpty(includeString) || StringUtil.isNotEmpty(excludeString)) {
             System.out.println("Integration test filtering: ");
             System.out.println("    " + includeKey + ": " + includeString);
             System.out.println("    " + excludeKey + ": " + excludeString);
