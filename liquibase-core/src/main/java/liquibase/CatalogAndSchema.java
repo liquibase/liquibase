@@ -105,11 +105,13 @@ public class CatalogAndSchema {
             workSchemaName = null;
         }
 
+        boolean preserveSchemaCase = Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue());
+
         if (CatalogAndSchemaCase.LOWER_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
             if (workCatalogName != null) {
                 workCatalogName = workCatalogName.toLowerCase(Locale.US);
             }
-            if (workSchemaName != null) {
+            if (workSchemaName != null && ! preserveSchemaCase) {
                 workSchemaName = workSchemaName.toLowerCase(Locale.US);
             }
         } else if (CatalogAndSchemaCase.UPPER_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
@@ -117,7 +119,7 @@ public class CatalogAndSchema {
                 if (workCatalogName != null) {
                     workCatalogName = workCatalogName.toUpperCase(Locale.US);
                 }
-                if (workSchemaName != null) {
+                if (workSchemaName != null && ! preserveSchemaCase) {
                     workSchemaName = workSchemaName.toUpperCase(Locale.US);
                 }
             }
