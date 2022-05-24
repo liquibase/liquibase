@@ -26,7 +26,7 @@ public class JavaLogService extends AbstractLogService {
             if (parent != null && !parent.getName().equals(utilLogger.getName())) {
                 utilLogger.setParent(parent);
             }
-            logger = new JavaLogger(utilLogger, this.filter);
+            logger = new JavaLogger(utilLogger);
 
             this.loggers.put(clazz, logger);
         }
