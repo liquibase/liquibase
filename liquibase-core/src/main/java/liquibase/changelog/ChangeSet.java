@@ -875,6 +875,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return contexts;
     }
 
+    public ChangeSet setContexts(ContextExpression contexts) {
+        this.contexts = contexts;
+        return this;
+    }
+
     public Labels getLabels() {
         return labels;
     }
@@ -917,17 +922,17 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return Collections.unmodifiableCollection(expressions);
     }
 
-    public Collection<LabelExpression> getInheritableLabels() {
-        Collection<LabelExpression> expressions = new ArrayList<LabelExpression>();
+    public Collection<Labels> getInheritableLabels() {
+        Collection<Labels> labels = new ArrayList<>();
         DatabaseChangeLog changeLog = getChangeLog();
         while (changeLog != null) {
-            LabelExpression expression = changeLog.getIncludeLabels();
-            if (expression != null && !expression.isEmpty()) {
-                expressions.add(expression);
+            Labels includeLabels = changeLog.getIncludeLabels();
+            if (includeLabels != null && !includeLabels.isEmpty()) {
+                labels.add(includeLabels);
             }
             changeLog = changeLog.getParentChangeLog();
         }
-        return Collections.unmodifiableCollection(expressions);
+        return Collections.unmodifiableCollection(labels);
     }
 
     public DatabaseChangeLog getChangeLog() {
