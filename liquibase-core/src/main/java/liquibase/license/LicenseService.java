@@ -65,7 +65,7 @@ public interface LicenseService extends Plugin {
   /**
    * Delete any cached, installed licenses currently tracked by the implementation.
    */
-  default void clearInstalledLicenses() {
+  default void reset() {
 
   }
 

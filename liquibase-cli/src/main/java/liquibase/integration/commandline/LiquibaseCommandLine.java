@@ -500,7 +500,7 @@ public class LiquibaseCommandLine {
         if (licenseServiceFactory != null) {
             LicenseService licenseService = licenseServiceFactory.getLicenseService();
             if (licenseService != null) {
-                licenseService.clearInstalledLicenses();
+                licenseService.reset();
             }
         }
 
