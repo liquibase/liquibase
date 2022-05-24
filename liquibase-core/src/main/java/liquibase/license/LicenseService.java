@@ -63,6 +63,13 @@ public interface LicenseService extends Plugin {
   void disable();
 
   /**
+   * Delete any cached, installed licenses currently tracked by the implementation.
+   */
+  default void reset() {
+
+  }
+
+  /**
    * @return true if any installed license is valid but will expire within the next 30 days.
    */
   boolean licenseIsAboutToExpire();
