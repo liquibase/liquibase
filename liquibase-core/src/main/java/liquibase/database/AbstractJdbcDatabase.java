@@ -332,7 +332,9 @@ public abstract class AbstractJdbcDatabase implements Database {
 
         if ((defaultSchemaName == null) && (connection != null)) {
             defaultSchemaName = getConnectionSchemaName();
-            Scope.getCurrentScope().getLog(getClass()).info("Set default schema name to " + defaultSchemaName);
+            if (defaultSchemaName != null) {
+                Scope.getCurrentScope().getLog(getClass()).info("Set default schema name to " + defaultSchemaName);
+            }
         }
 
         return defaultSchemaName;
