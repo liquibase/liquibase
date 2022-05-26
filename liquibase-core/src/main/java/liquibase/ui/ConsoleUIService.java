@@ -145,9 +145,10 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
                 boolean useStdIn = wasHeadlessOverridden;
                 String minTtyValue = System.getenv(TERM_PROGRAM);
                 if (systemConsole == null && ! useStdIn) {
-                    if (minTtyValue != null) {
+                    if (StringUtil.isNotEmpty(minTtyValue)) {
                         useStdIn = minTtyValue.equalsIgnoreCase(MINTTY);
-                    } else {
+                    }
+                    if (! useStdIn) {
                         String msystem = System.getenv(MSYSTEM);
                         useStdIn = msystem != null && msystem.equalsIgnoreCase(MINGW64);
                     }
