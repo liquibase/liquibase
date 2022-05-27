@@ -504,10 +504,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     protected boolean supportsBatchUpdates(Database database) {
         boolean databaseSupportsBatchUpdates = false;
         try {
-            if (!(database instanceof MySQLDatabase)) {
-                //mysql supports batch updates, but the performance vs. the big insert is worse
-                databaseSupportsBatchUpdates = database.supportsBatchUpdates();
-            }
+            databaseSupportsBatchUpdates = database.supportsBatchUpdates();
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -848,8 +845,9 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         if (rows.stream().anyMatch(LoadDataRowConfig::needsPreparedStatement)) {
             // If we have only prepared statements and the database supports batching, let's roll
             if (supportsBatchUpdates(database) && !preparedStatements.isEmpty()) {
-                if (database instanceof PostgresDatabase) {
+                if (database instanceof PostgresDatabase || database instanceof MySQLDatabase) {
                     // we don't do batch updates for Postgres but we still send as a prepared statement, see LB-744
+                    // mysql supports batch updates, but the performance vs. the big insert is worse
                     return preparedStatements.toArray(new SqlStatement[0]);
                 } else {
                     return new SqlStatement[]{

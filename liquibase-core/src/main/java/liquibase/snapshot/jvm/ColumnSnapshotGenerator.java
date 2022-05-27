@@ -508,6 +508,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     // SET
                     boilerLength = "6";
                 }
+
                 List<String> enumValues = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(
                         new RawSqlStatement(
                                 "SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, " + boilerLength +
@@ -518,7 +519,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                                         "UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units\n" +
                                         "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 " +
                                         "UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
-                                        "WHERE TABLE_NAME = '" + column.getRelation().getName() + "' \n" +
+                                        "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "' \n" +
+                                        "AND TABLE_NAME = '" + column.getRelation().getName() + "' \n" +
                                         "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
                 String enumClause = "";
                 for (String enumValue : enumValues) {
