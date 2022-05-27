@@ -1,39 +1,38 @@
 package liquibase.configuration;
 
+import liquibase.Scope;
+import liquibase.SingletonObject;
 import liquibase.plugin.AbstractPluginFactory;
+import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
 
-public class ConfiguredValueModifierFactory extends AbstractPluginFactory<ConfiguredValueModifier> {
+/**
+ * Factory for working with {@link ConfiguredValueModifier}s.
+ */
+public class ConfiguredValueModifierFactory  implements SingletonObject {
 
-    private ConfiguredValueModifierFactory() {}
+    private final SortedSet<ConfiguredValueModifier> allInstances;
 
-    @Override
-    protected Class<ConfiguredValueModifier> getPluginClass() {
-        return ConfiguredValueModifier.class;
+    private ConfiguredValueModifierFactory() {
+        this.allInstances = new TreeSet<>(Comparator.comparingInt(ConfiguredValueModifier::getOrder));
+
+        ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
+        this.allInstances.addAll(serviceLocator.findInstances(ConfiguredValueModifier.class));
+
     }
 
-    @Override
-    protected void removeInstance(ConfiguredValueModifier instance) {
-        super.removeInstance(instance);
+    public void register(ConfiguredValueModifier modifier) {
+        allInstances.add(modifier);
     }
 
-    @Override
-    protected int getPriority(ConfiguredValueModifier obj, Object... args) {
-        return obj.getPriority();
+    public void unregister(ConfiguredValueModifier modifier) {
+        allInstances.remove(modifier);
     }
 
-    List<ConfiguredValueModifier> getModifiers() {
-        List<ConfiguredValueModifier> foundModifiers = new ArrayList<>();
-        foundModifiers.addAll(findAllInstances());
-        foundModifiers.sort(new SortByPriority());
-        return foundModifiers;
-    }
-}
-
-class SortByPriority implements Comparator<ConfiguredValueModifier> {
-    @Override
-    public int compare(ConfiguredValueModifier a, ConfiguredValueModifier b) {
-        return a.getPriority() - b.getPriority();
+    public void override(ConfiguredValue configuredValue) {
+        for (ConfiguredValueModifier modifier: allInstances) {
+            modifier.override(configuredValue);
+        }
     }
 }

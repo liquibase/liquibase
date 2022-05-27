@@ -4,22 +4,21 @@ import liquibase.plugin.Plugin;
 
 /**
  * Provides a way for {@link LiquibaseConfiguration} to modify configured values.
+ * After all the {@link ConfigurationValueProvider}s have been checked for a value, all registered {@link ConfiguredValueModifier}s are called in {@link #getOrder()} order.
  */
-public interface ConfiguredValueModifier extends Plugin {
+public interface ConfiguredValueModifier<DataType> extends Plugin {
 
     /**
-     * Returns the priority in which values should be modified. Modifiers with a higher priority will overwrite values
-     * from lower priority modifiers.
+     * Returns the order in which modifiers should be run. Modifiers with a higher order will run after modifiers with a lower order value.
      *
      * @return int
      */
-    int getPriority();
+    int getOrder();
 
     /**
-     * Modify a Configuration Value
-     *
-     * @param object
-     * @return
+     * Called to potentially override the given {@link ConfiguredValue}.
+     * Implementations can use any information from the passed {@link ConfiguredValue}, including calling getProvidedValue() to determine keys used, format of the value, etc.
+     * If an implementation wants to modify the value, it should call {@link ConfiguredValue#override(ProvidedValue)}
      */
-    Object modify(ProvidedValue object);
+    void override(ConfiguredValue<DataType> object);
 }

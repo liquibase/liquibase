@@ -1,8 +1,5 @@
 package liquibase.configuration;
 
-import liquibase.Scope;
-import liquibase.SingletonObject;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,14 +29,11 @@ public class ConfiguredValue<DataType> {
     }
 
     public DataType getValue() {
-        ProvidedValue providedValue = getProvidedValue();
+        final ProvidedValue providedValue = getProvidedValue();
         if (providedValue == null) {
             return null;
         }
-        List<ConfiguredValueModifier> modifiers = Scope.getCurrentScope().getSingleton(ConfiguredValueModifierFactory.class).getModifiers();
-        for (ConfiguredValueModifier modifier: modifiers) {
-            providedValue = (ProvidedValue) modifier.modify(providedValue);
-        }
+
         return valueConverter.convert(providedValue.getValue());
     }
 
