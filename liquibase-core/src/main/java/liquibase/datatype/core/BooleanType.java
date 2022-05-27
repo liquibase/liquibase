@@ -6,6 +6,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtil;
@@ -19,11 +20,18 @@ public class BooleanType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
-        if ((database instanceof FirebirdDatabase) && ! ((FirebirdDatabase)database).isVersion2()) {
+        if ((database instanceof FirebirdDatabase)) {
+            try {
+                if (database.getDatabaseMajorVersion() <= 2) {
+                    return new DatabaseDataType("SMALLINT");
+                }
+            } catch (DatabaseException e) {
+                //assume it's version 3+
+            }
             return new DatabaseDataType("BOOLEAN");
         }
 
-        if ((database instanceof Db2zDatabase) || (database instanceof FirebirdDatabase)) {
+        if ((database instanceof Db2zDatabase)) {
             return new DatabaseDataType("SMALLINT");
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("bit"));
@@ -110,7 +118,14 @@ public class BooleanType extends LiquibaseDataType {
     }
 
     protected boolean isNumericBoolean(Database database) {
-        if ((database instanceof FirebirdDatabase) && ! ((FirebirdDatabase)database).isVersion2()) {
+        if ((database instanceof FirebirdDatabase)) {
+            try {
+                if (database.getDatabaseMajorVersion() <= 2) {
+                    return true;
+                }
+            } catch (DatabaseException ignored) {
+                //assume it's version 3
+            }
             return false;
         }
         if (database instanceof DerbyDatabase) {

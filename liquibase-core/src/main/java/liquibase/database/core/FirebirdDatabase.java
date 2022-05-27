@@ -19,22 +19,6 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
         super.sequenceNextValueFunction="NEXT VALUE FOR %s";
     }
 
-    private boolean version2 = false;
-
-    public boolean isVersion2() {
-        return version2;
-    }
-
-    @Override
-    public void setConnection(final DatabaseConnection conn) {
-        super.setConnection(conn);
-        try {
-            version2 = conn.getDatabaseProductName().startsWith("Firebird 2");
-        } catch (DatabaseException e) {
-            // Do nothing
-        }
-    }
-
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("Firebird");
