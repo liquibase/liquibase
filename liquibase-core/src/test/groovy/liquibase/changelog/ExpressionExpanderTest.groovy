@@ -4,7 +4,7 @@ import liquibase.Scope
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.changelog.ExpressionExpander
-import liquibase.exception.ChangeLogParseException
+import liquibase.exception.UnknownChangeLogParameterException
 import liquibase.parser.ChangeLogParserConfiguration
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -21,6 +21,10 @@ class ExpressionExpanderTest extends Specification {
         params.set("param2", "value2");
         params.set("param.value", "dot value");
         params.set("value1", "nested value1");
+        params.set("nested.value.valid", "a param with param1=\${param1}");
+        params.set("nested.value.escaped", "a param with escaped param1 \${: param1}");
+        params.set("double.nested.value.valid", "double \${nested.value.valid}");
+        params.set("double.nested.value.invalid", "double \${nested.value.invalid}");
 
         def changelog = new DatabaseChangeLog()
         changelog.setChangeLogParameters(params)
@@ -60,6 +64,11 @@ class ExpressionExpanderTest extends Specification {
         PRESERVE | "\${:\${:param1}} = \${\${param1}}"                                                               | "\${\${param1}} = nested value1"
         EMPTY    | "\${:\${:param1}} = \${\${param1}}"                                                               | "\${\${param1}} = nested value1"
         ERROR    | "\${:\${:param1}} = \${\${param1}}"                                                               | "\${\${param1}} = nested value1"
+        PRESERVE | "valid '\${nested.value.valid}' nested"                                                           | "valid 'a param with param1=value1' nested"
+        PRESERVE | "valid '\${nested.value.escaped}' nested"                                                         | "valid 'a param with escaped param1 \${param1}' nested"
+        PRESERVE | "valid '\${double.nested.value.valid}' double nested"                                             | "valid 'double a param with param1=value1' double nested"
+        PRESERVE | "invalid '\${double.nested.value.invalid}' double nested"                                         | "invalid 'double \${nested.value.invalid}' double nested"
+        EMPTY    | "invalid '\${double.nested.value.invalid}' double nested"                                         | "invalid 'double ' double nested"
     }
 
 
@@ -78,7 +87,7 @@ class ExpressionExpanderTest extends Specification {
         })
 
         then:
-        def e = thrown(ChangeLogParseException)
+        def e = thrown(UnknownChangeLogParameterException)
         e.message == expected
 
         where:

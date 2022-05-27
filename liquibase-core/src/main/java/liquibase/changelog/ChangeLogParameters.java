@@ -6,9 +6,8 @@ import liquibase.LabelExpression;
 import liquibase.Labels;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
-import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnknownChangeLogParameterException;
 import liquibase.util.StringUtil;
 
 import java.util.*;
@@ -193,7 +192,7 @@ public class ChangeLogParameters {
      * Expand any expressions in the given string, taking into account parameters local to the given changelog file as well as
      * contexts, labels, and database configured in this instance.
      */
-    public String expandExpressions(String string, DatabaseChangeLog changeLog) throws ChangeLogParseException {
+    public String expandExpressions(String string, DatabaseChangeLog changeLog) throws UnknownChangeLogParameterException {
         return expressionExpander.expandExpressions(string, changeLog);
     }
 

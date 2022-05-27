@@ -1,7 +1,7 @@
 package liquibase.changelog;
 
-import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnknownChangeLogParameterException;
 import liquibase.parser.ChangeLogParserConfiguration;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ class ExpressionExpander {
         this.parameters = parameters;
     }
 
-    public String expandExpressions(String text, DatabaseChangeLog changeLog) throws ChangeLogParseException {
+    public String expandExpressions(String text, DatabaseChangeLog changeLog) throws UnknownChangeLogParameterException {
         if (text == null) {
             return null;
         }
@@ -24,7 +24,7 @@ class ExpressionExpander {
         return expandExpressions(new StringReader(text), changeLog, false);
     }
 
-    private String expandExpressions(StringReader reader, DatabaseChangeLog changeLog, boolean inExpression) throws ChangeLogParseException {
+    private String expandExpressions(StringReader reader, DatabaseChangeLog changeLog, boolean inExpression) throws UnknownChangeLogParameterException {
         StringBuilder stringBuilder = new StringBuilder();
         try {
             int nextChar = reader.read();
@@ -50,15 +50,18 @@ class ExpressionExpander {
                                         paramValue = "";
                                         break;
                                     case ERROR:
-                                        throw new ChangeLogParseException("Could not resolve expression `${" + paramExpression + "}` in file " + changeLog.getPhysicalFilePath());
+                                        throw new UnknownChangeLogParameterException("Could not resolve expression `${" + paramExpression + "}` in file " + changeLog.getPhysicalFilePath());
                                     case PRESERVE:
                                         paramValue = "${" + paramExpression + "}";
                                         break;
                                     default:
                                         throw new UnexpectedLiquibaseException("Unknown MissingPropertyMode: " + missingPropertyMode);
                                 }
+                            } else {
+                                if (paramValue instanceof String) {
+                                    paramValue = expandExpressions((String) paramValue, changeLog);
+                                }
                             }
-
                             stringBuilder.append(paramValue);
                         }
                     } else {
