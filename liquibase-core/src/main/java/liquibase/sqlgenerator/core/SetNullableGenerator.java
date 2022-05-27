@@ -89,7 +89,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
                 nullableString = "";
             }
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + nullableString + ")";
-        } else if (database instanceof FirebirdDatabase && !(database instanceof Firebird3Database)) {
+        } else if (database instanceof FirebirdDatabase && (((FirebirdDatabase)database).isVersion2())) {
             // For Firebird database prior to Firebird 3 the ALTER TABLE syntax is not working
             // As a workaround we can modify the system table entry directly (see http://www.firebirdfaq.org/faq103/)
             sql = "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = " + (statement.isNullable() ? "NULL" : "1") + " WHERE RDB$RELATION_NAME = '" + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "' AND RDB$FIELD_NAME = '" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + "'";
