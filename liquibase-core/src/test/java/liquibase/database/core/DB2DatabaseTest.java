@@ -12,5 +12,10 @@ public class DB2DatabaseTest extends TestCase {
         assertNull(database.getDefaultDriver("jdbc:oracle://localhost;databaseName=liquibase"));
     }
 
+    public void testMaxFractionDigits() {
+        Database database = new DB2Database();
+        assertEquals(12, database.getMaxFractionalDigitsForTimestamp());
+    }
+
 
 }
