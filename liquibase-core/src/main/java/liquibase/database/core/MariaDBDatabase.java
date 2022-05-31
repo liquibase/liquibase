@@ -22,6 +22,7 @@ public class MariaDBDatabase extends MySQLDatabase {
            "boolean", "tinyint", "smallint", "mediumint", "int", "integer", "bigint", "dec", "numeric",
            "fixed", "float", "bit"
         ));
+        super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP()");
     }
 
     @Override
