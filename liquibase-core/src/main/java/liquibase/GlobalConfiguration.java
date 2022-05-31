@@ -29,6 +29,12 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION;
     public static final ConfigurationDefinition<Boolean> INCLUDE_CATALOG_IN_SPECIFICATION;
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
+    public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
+
+    /**
+     * @deprecated No longer used
+     */
+    @Deprecated
     public static final ConfigurationDefinition<Boolean> FILTER_LOG_MESSAGES;
     public static final ConfigurationDefinition<Boolean> HEADLESS;
     public static final ConfigurationDefinition<Boolean> STRICT;
@@ -156,8 +162,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         FILTER_LOG_MESSAGES = builder.define("filterLogMessages", Boolean.class)
-                .setDescription("Should Liquibase filter log messages for potentially insecure data?")
-                .setDefaultValue(true)
+                .setDescription("DEPRECATED: No longer used")
+                .setCommonlyUsed(false)
                 .build();
 
         HEADLESS = builder.define("headless", Boolean.class)
@@ -186,6 +192,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         DISABLE_CHECKSUM_VERIFICATION = builder.define("disableChecksumVerification", Boolean.class)
                 .setDescription("If true, disable the checksum verification when running the migrations and only shows a warning message.")
                 .setDefaultValue(false)
+                .build();
+
+        SHOW_BANNER = builder.define("showBanner", Boolean.class)
+                .setDescription("If true, show a Liquibase banner on startup.")
+                .setDefaultValue(true)
                 .build();
     }
 }

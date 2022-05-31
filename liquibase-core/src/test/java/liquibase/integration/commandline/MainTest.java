@@ -2,23 +2,22 @@ package liquibase.integration.commandline;
 
 import liquibase.Scope;
 import liquibase.exception.CommandLineParsingException;
-import liquibase.logging.LogMessageFilter;
 import liquibase.util.StringUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Collections;
-import java.util.Properties;
-import java.util.Arrays;
-import java.util.List;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.logging.LogRecord;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -124,17 +123,6 @@ public class MainTest {
 //            ("local-context-for-liquibase-unit-tests")));
         assertTrue("Read context from liquibase.properties", ((cli.logFile != null) && ("target" +
             "/logfile_set_from_liquibase_properties.log").equals(cli.logFile)));
-    }
-
-    @Test
-    public void testSecureLogFilterForNullLogMessage() throws Exception {
-        LogMessageFilter mockFilter = mock(LogMessageFilter.class);
-        when(mockFilter.filterMessage(null)).thenReturn(null);
-        Main.SecureLogFilter secureLogFilter = new Main.SecureLogFilter(mockFilter);
-
-        LogRecord mockLogRecord = mock(LogRecord.class);
-        when(mockLogRecord.getMessage()).thenReturn(null);
-        assertFalse(secureLogFilter.isLoggable(mockLogRecord));
     }
 
     @Test

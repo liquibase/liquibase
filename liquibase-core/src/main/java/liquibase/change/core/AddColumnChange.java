@@ -99,7 +99,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             if (constraintsConfig != null) {
                 if ((constraintsConfig.isNullable() != null) && !constraintsConfig.isNullable()) {
                     if (column.getValueObject() != null) {
-                        List<SqlStatement> sqlStatements = generateAddNotNullConstraintStatements(column, database);
+                        List<SqlStatement> sqlStatements = generateAddNotNullConstraintStatements(column, constraintsConfig, database);
                         addNotNullConstraintStatements.addAll(sqlStatements);
                     } else {
                         NotNullConstraint notNullConstraint = createNotNullConstraint(constraintsConfig);
@@ -283,17 +283,20 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         return notNullConstraint;
     }
 
-    private List<SqlStatement> generateAddNotNullConstraintStatements(AddColumnConfig column, Database database) {
-        AddNotNullConstraintChange addNotNullConstraintChange = createAddNotNullConstraintChange(column);
+    private List<SqlStatement> generateAddNotNullConstraintStatements(AddColumnConfig column, ConstraintsConfig constraints, Database database) {
+        AddNotNullConstraintChange addNotNullConstraintChange = createAddNotNullConstraintChange(column,constraints);
         return Arrays.asList(addNotNullConstraintChange.generateStatements(database));
     }
 
-    private AddNotNullConstraintChange createAddNotNullConstraintChange(AddColumnConfig column) {
+    private AddNotNullConstraintChange createAddNotNullConstraintChange(AddColumnConfig column, ConstraintsConfig constraints) {
         AddNotNullConstraintChange addNotNullConstraintChange = new AddNotNullConstraintChange();
         addNotNullConstraintChange.setCatalogName(getCatalogName());
+        addNotNullConstraintChange.setSchemaName(getSchemaName());
         addNotNullConstraintChange.setTableName(getTableName());
         addNotNullConstraintChange.setColumnName(column.getName());
         addNotNullConstraintChange.setColumnDataType(column.getType());
+        addNotNullConstraintChange.setValidate(constraints.getValidateNullable());
+        addNotNullConstraintChange.setConstraintName(constraints.getNotNullConstraintName());
         return addNotNullConstraintChange;
     }
 }

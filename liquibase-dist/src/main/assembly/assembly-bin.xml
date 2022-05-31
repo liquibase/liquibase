@@ -94,7 +94,8 @@
     </files>
     <dependencySets>
         <dependencySet>
-            <outputDirectory>lib</outputDirectory>
+            <outputFileNameMapping> ${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputDirectory>internal/lib</outputDirectory>
             <includes>
                 <include>org.yaml:snakeyaml:jar:</include>
                 <include>javax.xml.bind:jaxb-api:jar:</include>
@@ -111,6 +112,7 @@
                 <include>org.xerial:sqlite-jdbc:jar:</include>
                 <include>com.ibm.db2:jcc:jar:</include>
                 <include>org.firebirdsql.jdbc:jaybird:</include>
+                <include>javax.resource:connector-api:</include>
 
                 <!-- CANNOT SHIP FOR LICENSE REASONS -->
                 <!-- <include>mysql:mysql-connector-java:jar</include>-->
