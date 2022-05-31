@@ -20,8 +20,10 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
 
     @Override
     protected @NotNull DatabaseWrapper createContainerWrapper() {
-        return new DockerDatabaseWrapper(new MSSQLServerContainer(
-                DockerImageName.parse(getImageName()).withTag(getVersion())),
+        final MSSQLServerContainer container = new MSSQLServerContainer(DockerImageName.parse(getImageName()).withTag(getVersion()));
+        container.withUrlParam("encrypt", "false");
+
+        return new DockerDatabaseWrapper(container,
                 this
         ) {
             @Override
