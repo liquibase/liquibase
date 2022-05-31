@@ -41,6 +41,7 @@ BSD 3 Clause License
 - org.firebirdsql.jdbc:jaybird (Dual License: LGPL, BSD-3 Clause)
 
 CDDL 1.1 License
+- javax.resource:connector-api
 - javax.xml.bind:jaxb-api
 
 Eclipse Distribution 1.0 License

@@ -91,7 +91,7 @@ class SpringResourceAccessorTest extends Specification {
         "classpath:classpath:/path/to/file" | "classpath*:/path/to/file"
         "classpath*:/path/to/file" | "classpath*:/path/to/file"
         "classpath*:path/to/file" | "classpath*:/path/to/file"
-
+        "file:/path/to/file" | "file:/path/to/file"
     }
 
 

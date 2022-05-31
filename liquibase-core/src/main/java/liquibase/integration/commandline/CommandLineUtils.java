@@ -271,14 +271,16 @@ public class CommandLineUtils {
         buildTimeString = LiquibaseUtil.getBuildTime();
 
         StringBuilder banner = new StringBuilder();
+        if (GlobalConfiguration.SHOW_BANNER.getCurrentValue()) {
 
-        // Banner is stored in liquibase/banner.txt in resources.
-        Class commandLinUtilsClass = CommandLineUtils.class;
-        InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
-        try {
-            banner.append(readFromInputStream(inputStream));
-        } catch (IOException e) {
-            Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
+            // Banner is stored in liquibase/banner.txt in resources.
+            Class commandLinUtilsClass = CommandLineUtils.class;
+            InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
+            try {
+                banner.append(readFromInputStream(inputStream));
+            } catch (IOException e) {
+                Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
+            }
         }
 
         banner.append(String.format(

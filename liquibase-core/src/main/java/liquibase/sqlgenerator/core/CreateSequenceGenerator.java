@@ -75,7 +75,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
                 queryStringBuilder.append(" AS " + statement.getDataType());
             }
         }
-        if (!(database instanceof MariaDBDatabase) && !(database instanceof CockroachDatabase) && statement.getStartValue() != null) {
+        if (!(database instanceof MariaDBDatabase) && statement.getStartValue() != null) {
             queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
         }
         if (statement.getIncrementBy() != null) {
