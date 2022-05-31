@@ -23,7 +23,9 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.*;
 
 public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnStatement> {
-    private static final String TABLE_NAME = "table_name";
+    private static final String SCHEMA_NAME = "schema_name";
+    private static final String CATALOG_NAME = "catalog_name";
+    private static final String TABLE_NAME = "table_name";    
     private static final String COLUMN_NAME = "column_name";
     private static final String COLUMN_TYPE = "column_type";
 
@@ -103,6 +105,7 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
     public void testAddColumnWithNotNullConstraintAndValue() {
         AddColumnChange change = new AddColumnChange();
         change.setTableName(TABLE_NAME);
+        change.setSchemaName(SCHEMA_NAME);
 
         AddColumnConfig column = new AddColumnConfig();
         column.setName("column1");
@@ -123,10 +126,10 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
         Sql[] sql = instance.generateSql(statements, new MySQLDatabase());
 
         assertEquals(5, sql.length);
-        assertEquals("ALTER TABLE table_name ADD column1 BIGINT NULL, ADD column2 BIT(1) NULL", sql[0].toSql());
-        assertEquals("UPDATE table_name SET column1 = 0", sql[1].toSql());
-        assertEquals("UPDATE table_name SET column2 = 1", sql[2].toSql());
-        assertEquals("ALTER TABLE table_name MODIFY column1 BIGINT NOT NULL", sql[3].toSql());
-        assertEquals("ALTER TABLE table_name MODIFY column2 BIT(1) NOT NULL", sql[4].toSql());
+        assertEquals("ALTER TABLE schema_name.table_name ADD column1 BIGINT NULL, ADD column2 BIT(1) NULL", sql[0].toSql());
+        assertEquals("UPDATE schema_name.table_name SET column1 = 0", sql[1].toSql());
+        assertEquals("UPDATE schema_name.table_name SET column2 = 1", sql[2].toSql());
+        assertEquals("ALTER TABLE schema_name.table_name MODIFY column1 BIGINT NOT NULL", sql[3].toSql());
+        assertEquals("ALTER TABLE schema_name.table_name MODIFY column2 BIT(1) NOT NULL", sql[4].toSql());
     }
 }
