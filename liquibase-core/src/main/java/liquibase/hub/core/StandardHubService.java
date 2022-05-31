@@ -485,7 +485,8 @@ public class StandardHubService implements HubService {
 
             if (allowed) {
                 String value = param.getValue();
-                if (param.getKey().toLowerCase().contains("liquibaseProLicenseKey".toLowerCase())) {
+                if (param.getKey().toLowerCase().contains("liquibaseProLicenseKey".toLowerCase()) ||
+                    param.getKey().toLowerCase().contains("liquibaseLicenseKey".toLowerCase())) {
                     if (value != null && value.length() > 8) {
                         value = value.substring(0, 8) + "************";
                     }
