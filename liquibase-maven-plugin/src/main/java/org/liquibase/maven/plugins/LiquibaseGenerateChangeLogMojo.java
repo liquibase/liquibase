@@ -144,7 +144,7 @@ public class LiquibaseGenerateChangeLogMojo extends
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
         if (outputChangeLogFile == null) {
-            throw new MojoFailureException("The output changeLogFile (outputChangeLogFile) must be specified.");
+            throw new MojoFailureException("The outputChangeLogFile property must be specified.");
         }
     }
 
