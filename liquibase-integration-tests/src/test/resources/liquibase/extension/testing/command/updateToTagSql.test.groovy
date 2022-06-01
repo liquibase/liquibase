@@ -29,6 +29,10 @@ Optional Args:
     Default: null
   labels (String) Changeset labels to match
     Default: null
+  outputDefaultCatalog (Boolean) Control whether names of objects in the default catalog are fully qualified or not. If true they are. If false, only objects outside the default catalog are fully qualified
+    Default: true
+  outputDefaultSchema (Boolean) Control whether names of objects in the default schema are fully qualified or not. If true they are. If false, only objects outside the default schema are fully qualified
+    Default: true
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
