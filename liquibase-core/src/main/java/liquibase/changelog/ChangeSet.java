@@ -897,9 +897,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public boolean isInheritableIgnore() {
        DatabaseChangeLog changeLog = getChangeLog();
-        if(null!=changeLog)
-        	return changeLog.isIncludeIgnore();
-        return false;
+        if (changeLog == null) {
+            return false;
+        }
+
+        return changeLog.isIncludeIgnore();
     }
 
     public Collection<ContextExpression> getInheritableContexts() {
