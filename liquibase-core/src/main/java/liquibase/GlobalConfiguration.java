@@ -21,8 +21,6 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Charset> FILE_ENCODING;
     public static final ConfigurationDefinition<Long> CHANGELOGLOCK_WAIT_TIME;
     public static final ConfigurationDefinition<Long> CHANGELOGLOCK_POLL_RATE;
-    public static final ConfigurationDefinition<Boolean> OUTPUT_DEFAULT_SCHEMA;
-    public static final ConfigurationDefinition<Boolean> OUTPUT_DEFAULT_CATALOG;
     public static final ConfigurationDefinition<Boolean> CONVERT_DATA_TYPES;
     public static final ConfigurationDefinition<Boolean> GENERATE_CHANGESET_CREATED_VALUES;
     public static final ConfigurationDefinition<Boolean> AUTO_REORG;
@@ -116,16 +114,6 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue("UTF-8")
                 .setCommonlyUsed(true)
                 .build();
-
-        OUTPUT_DEFAULT_SCHEMA = builder.define("outputDefaultSchema", Boolean.class)
-            .setDescription("Should Liquibase output the default schema when creating changesets.")
-            .setDefaultValue(true)
-            .build();
-
-        OUTPUT_DEFAULT_CATALOG = builder.define("outputDefaultCatalog", Boolean.class)
-            .setDescription("Should Liquibase output the default catalog when creating changesets.")
-            .setDefaultValue(true)
-            .build();
 
         CONVERT_DATA_TYPES = builder.define("convertDataTypes", Boolean.class)
                 .setDescription("Should Liquibase convert to/from STANDARD data types. Applies to both snapshot and " +

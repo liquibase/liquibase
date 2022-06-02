@@ -8,8 +8,11 @@ import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.*;
-import liquibase.exception.LiquibaseException;
+import liquibase.exception.DatabaseException;
+import liquibase.integration.commandline.CommandLineUtils;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.license.LicenseServiceUtils;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -20,14 +23,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
-public class SnapshotCommandStep extends AbstractDatabaseCommandStep {
+import static java.util.ResourceBundle.getBundle;
+
+public class SnapshotCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"snapshot"};
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
@@ -67,6 +70,8 @@ public class SnapshotCommandStep extends AbstractDatabaseCommandStep {
         SNAPSHOT_CONTROL_ARG = builder.argument("snapshotControl", SnapshotControl.class).hidden().build();
     }
 
+    private Database database;
+
     private Map<String, Object> snapshotMetadata;
 
     @Override
@@ -79,7 +84,7 @@ public class SnapshotCommandStep extends AbstractDatabaseCommandStep {
         commandDefinition.setShortDescription("Capture the current state of the database");
     }
 
-    public static CatalogAndSchema[] parseSchemas(Database database, String... schemas) {
+    private CatalogAndSchema[] parseSchemas(Database database, String... schemas) {
         if ((schemas == null) || (schemas.length == 0) || (schemas[0] == null)) {
             return null;
         }
@@ -146,7 +151,7 @@ public class SnapshotCommandStep extends AbstractDatabaseCommandStep {
 
             OutputStream outputStream = resultsBuilder.getOutputStream();
             if (outputStream != null) {
-                String result = printSnapshot(resultsBuilder.getCommandScope(), resultsBuilder.build());
+                String result = printSnapshot(commandScope, snapshot);
                 Writer outputWriter = getOutputWriter(outputStream);
                 outputWriter.write(result);
                 outputWriter.flush();
@@ -172,16 +177,87 @@ public class SnapshotCommandStep extends AbstractDatabaseCommandStep {
         return new OutputStreamWriter(outputStream, charsetName);
     }
 
-    public static String printSnapshot(CommandScope commandScope, CommandResults snapshotResults) throws LiquibaseException {
+    /**
+     *
+     * Method to create a Database object given these parameters
+     *
+     * @param  url                       URL to connect to
+     * @param  username                  Username credential
+     * @param  password                  Password credential
+     * @param  defaultSchemaName         Default schema for connection
+     * @param  defaultCatalogName        Default catalog for connection
+     * @param  driver                    Driver class
+     * @param  driverPropertiesFile      Additional driver properties
+     * @throws DatabaseException         Thrown when there is a connection error
+     *
+     */
+    private void createDatabaseObject(String url,
+                                      String username,
+                                      String password,
+                                      String defaultSchemaName,
+                                      String defaultCatalogName,
+                                      String driver,
+                                      String driverPropertiesFile)
+            throws DatabaseException {
+        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+        String databaseClassName = null;
+        Class databaseClass = LiquibaseCommandLineConfiguration.DATABASE_CLASS.getCurrentValue();
+        if (databaseClass != null) {
+            databaseClassName = databaseClass.getCanonicalName();
+        }
+        String propertyProviderClass = null;
+        Class clazz = LiquibaseCommandLineConfiguration.PROPERTY_PROVIDER_CLASS.getCurrentValue();
+        if (clazz != null) {
+            propertyProviderClass = clazz.getName();
+        }
+        String liquibaseCatalogName = GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue();
+        String liquibaseSchemaName = GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue();
+        String databaseChangeLogTablespaceName = GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentValue();
+        String databaseChangeLogLockTableName = GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue();
+        String databaseChangeLogTableName = GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue();
+        database =
+                CommandLineUtils.createDatabaseObject(resourceAccessor,
+                        url,
+                        username,
+                        password,
+                        driver,
+                        defaultCatalogName,
+                        defaultSchemaName,
+                        true,
+                        true,
+                        databaseClassName,
+                        driverPropertiesFile,
+                        propertyProviderClass,
+                        liquibaseCatalogName, liquibaseSchemaName,
+                        databaseChangeLogTableName,
+                        databaseChangeLogLockTableName);
+        database.setLiquibaseTablespaceName(databaseChangeLogTablespaceName);
+    }
+
+    private void closeDatabase() {
+        try {
+            if (database != null) {
+                database.rollback();
+                database.close();
+            }
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).warning(
+                    coreBundle.getString("problem.closing.connection"), e);
+        }
+    }
+
+    private String printSnapshot(CommandScope commandScope, DatabaseSnapshot snapshot) {
         String format = commandScope.getArgumentValue(SNAPSHOT_FORMAT_ARG);
         if (format == null) {
             format = "txt";
         }
 
-        return SnapshotSerializerFactory.getInstance().getSerializer(format.toLowerCase(Locale.US)).serialize((DatabaseSnapshot) snapshotResults.getResult("snapshot"), true);
+        return SnapshotSerializerFactory.getInstance()
+                                        .getSerializer(format.toLowerCase(Locale.US))
+                                        .serialize(snapshot, true);
     }
 
-    public static void logUnsupportedDatabase(Database database, Class callingClass) {
+    private void logUnsupportedDatabase(Database database, Class callingClass) {
         if (LicenseServiceUtils.isProLicenseValid()) {
             if (!(database instanceof MSSQLDatabase
                 || database instanceof OracleDatabase
