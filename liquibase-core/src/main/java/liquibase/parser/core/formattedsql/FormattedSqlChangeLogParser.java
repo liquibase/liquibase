@@ -481,7 +481,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     }
 
     protected boolean supportsExtension(String changelogFile){
-        return changelogFile.endsWith(".sql");
+        return changelogFile.toLowerCase().endsWith(".sql");
     }
 
     private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException{

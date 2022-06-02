@@ -185,12 +185,14 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
      * Default implementation adds "classpath:" and removes duplicated /'s and classpath:'s
      */
     protected String finalizeSearchPath(String searchPath) {
+        if(searchPath.matches("^classpath\\*?:.*")) {
+            searchPath = searchPath.replace("classpath:","").replace("classpath*:","");
+            searchPath = "classpath*:/" +searchPath;
+        } else if(!searchPath.matches("^\\w+:.*")) {
+            searchPath = "classpath*:/" +searchPath;
+        }
         searchPath = searchPath.replace("\\", "/");
-        searchPath = searchPath.replaceAll("classpath\\*?:", "");
-        searchPath = "/" + searchPath;
         searchPath = searchPath.replaceAll("//+", "/");
-
-        searchPath = "classpath*:" + searchPath;
 
         return searchPath;
     }
