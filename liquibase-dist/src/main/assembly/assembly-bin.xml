@@ -125,7 +125,6 @@
                 <exclude>org.antlr:antlr4-runtime:jar:</exclude>  <!-- from connector-api -->
                 <exclude>org.checkerframework:checker-qual:jar:</exclude> <!-- from postgresql -->
                 <exclude>commons-beanutils:commons-beanutils:jar:</exclude> <!-- from opencsv -->
-                <exclude>commons-beanutils:commons-beanutils:jar:</exclude> <!-- from opencsv -->
                 <exclude>org.glassfish.jaxb:txw2:jar:</exclude> <!-- from jaxb-core -->
                 <exclude>com.sun.istack:istack-commons-runtime:jar:</exclude> <!-- from jaxb-core -->
                 <exclude>jakarta.xml.bind:jakarta.xml.bind-api:jar:</exclude> <!-- from jaxb-runtime -->
