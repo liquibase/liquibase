@@ -213,8 +213,6 @@ public class SnapshotCommandStep extends AbstractCommandStep {
         String liquibaseCatalogName = GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue();
         String liquibaseSchemaName = GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue();
         String databaseChangeLogTablespaceName = GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentValue();
-        boolean outputDefaultSchema = GlobalConfiguration.OUTPUT_DEFAULT_SCHEMA.getCurrentValue();
-        boolean outputDefaultCatalog = GlobalConfiguration.OUTPUT_DEFAULT_CATALOG.getCurrentValue();
         String databaseChangeLogLockTableName = GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue();
         String databaseChangeLogTableName = GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue();
         database =
@@ -225,8 +223,8 @@ public class SnapshotCommandStep extends AbstractCommandStep {
                         driver,
                         defaultCatalogName,
                         defaultSchemaName,
-                        outputDefaultCatalog,
-                        outputDefaultSchema,
+                        true,
+                        true,
                         databaseClassName,
                         driverPropertiesFile,
                         propertyProviderClass,
