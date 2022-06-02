@@ -37,19 +37,19 @@ import java.util.*;
 import static java.util.ResourceBundle.getBundle;
 
 public class StandardLockService implements LockService {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    protected static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
 
     protected boolean hasChangeLogLock;
 
-    private Long changeLogLockPollRate;
-    private Long changeLogLockRecheckTime;
+    protected Long changeLogLockPollRate;
+    protected Long changeLogLockRecheckTime;
 
-    private Boolean hasDatabaseChangeLogLockTable;
-    private boolean isDatabaseChangeLogLockTableInitialized;
-    private ObjectQuotingStrategy quotingStrategy;
-    private final SecureRandom random = new SecureRandom();
+    protected Boolean hasDatabaseChangeLogLockTable;
+    protected boolean isDatabaseChangeLogLockTableInitialized;
+    protected ObjectQuotingStrategy quotingStrategy;
+    protected final SecureRandom random = new SecureRandom();
 
 
     public StandardLockService() {
@@ -70,7 +70,7 @@ public class StandardLockService implements LockService {
         this.database = database;
     }
 
-    public Long getChangeLogLockWaitTime() {
+    protected Long getChangeLogLockWaitTime() {
         if (changeLogLockPollRate != null) {
             return changeLogLockPollRate;
         }
@@ -82,7 +82,7 @@ public class StandardLockService implements LockService {
         this.changeLogLockPollRate = changeLogLockWaitTime;
     }
 
-    public Long getChangeLogLockRecheckTime() {
+    protected Long getChangeLogLockRecheckTime() {
         if (changeLogLockRecheckTime != null) {
             return changeLogLockRecheckTime;
         }
@@ -187,7 +187,7 @@ public class StandardLockService implements LockService {
      * Determine whether the databasechangeloglock table has been initialized.
      * @param forceRecheck if true, do not use any cached information, and recheck the actual database
      */
-    private boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated, final boolean forceRecheck) {
+    protected boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated, final boolean forceRecheck) {
         if (!isDatabaseChangeLogLockTableInitialized || forceRecheck) {
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
 
@@ -222,7 +222,7 @@ public class StandardLockService implements LockService {
      * Check whether the databasechangeloglock table exists in the database.
      * @param forceRecheck if true, do not use any cached information and check the actual database
      */
-    private boolean hasDatabaseChangeLogLockTable(boolean forceRecheck) {
+    protected boolean hasDatabaseChangeLogLockTable(boolean forceRecheck) {
         if (forceRecheck || hasDatabaseChangeLogLockTable == null) {
             try {
                 hasDatabaseChangeLogLockTable = SnapshotGeneratorFactory.getInstance()
@@ -234,7 +234,7 @@ public class StandardLockService implements LockService {
         return hasDatabaseChangeLogLockTable;
     }
 
-    public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
+    protected boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
         return hasDatabaseChangeLogLockTable(false);
     }
 
@@ -331,6 +331,7 @@ public class StandardLockService implements LockService {
             try {
                 database.rollback();
             } catch (DatabaseException e) {
+
             }
         }
 

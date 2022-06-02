@@ -19,7 +19,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
 
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        return changeLogFile.endsWith(".sql");
+        return changeLogFile.toLowerCase().endsWith(".sql");
     }
 
     @Override

@@ -112,6 +112,7 @@
                 <include>org.xerial:sqlite-jdbc:jar:</include>
                 <include>com.ibm.db2:jcc:jar:</include>
                 <include>org.firebirdsql.jdbc:jaybird:</include>
+                <include>javax.resource:connector-api:</include>
 
                 <!-- CANNOT SHIP FOR LICENSE REASONS -->
                 <!-- <include>mysql:mysql-connector-java:jar</include>-->
