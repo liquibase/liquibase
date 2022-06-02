@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TableOutput {
     /**
@@ -22,6 +23,34 @@ public class TableOutput {
      */
     public static void formatOutput(List<List<String>> table, List<Integer> maxWidths, boolean leftJustifiedRows, Writer writer) throws LiquibaseException {
         formatOutput(table.stream().map(u -> u.toArray(new String[0])).toArray(String[][]::new), maxWidths, leftJustifiedRows, writer);
+    }
+
+    /**
+     *
+     * This method outputs the input data in a tabular format with wrapping of lines
+     *
+     * @param table                    2-dimensional array of data
+     * @param maxWidths                Maximum widths of each column to control wrapping
+     * @param leftJustifiedRows        If true then add "-" to format string
+     * @param writer                   Writer to use for output
+     *
+     */
+    public static void formatOutput(List<List<String>> table, int[] maxWidths, boolean leftJustifiedRows, Writer writer) throws LiquibaseException {
+        formatOutput(table.stream().map(u -> u.toArray(new String[0])).toArray(String[][]::new), maxWidths, leftJustifiedRows, writer);
+    }
+
+    /**
+     *
+     * This method outputs the input data in a tabular format with wrapping of lines
+     *
+     * @param table                    2-dimensional array of data
+     * @param maxWidths                Maximum widths of each column to control wrapping
+     * @param leftJustifiedRows        If true then add "-" to format string
+     * @param writer                   Writer to use for output
+     *
+     */
+    public static void formatOutput(String[][] table, int[] maxWidths, boolean leftJustifiedRows, Writer writer) throws LiquibaseException {
+        formatOutput(table, IntStream.of(maxWidths).boxed().collect(Collectors.toList()), leftJustifiedRows, writer);
     }
 
     /**
