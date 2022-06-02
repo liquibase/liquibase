@@ -282,11 +282,11 @@
 
 	<profiles>
 		<profile>
-            <id>liquibase-pro</id>
+            <id>liquibase-commercial</id>
 
 			<activation>
 				<file>
-                    <exists>../../liquibase-pro/pom.xml</exists>
+                    <exists>../../liquibase-commercial/pom.xml</exists>
 				</file>
 			</activation>
 
@@ -297,7 +297,7 @@
 			<dependencies>
 				<dependency>
                     <groupId>com.datical.lb</groupId>
-                    <artifactId>liquibase-pro</artifactId>
+                    <artifactId>liquibase-commercial</artifactId>
                     <version>${project.version}</version>
 				</dependency>
 			</dependencies>

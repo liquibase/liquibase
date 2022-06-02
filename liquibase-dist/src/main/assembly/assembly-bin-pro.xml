@@ -13,7 +13,7 @@
 			<outputDirectory>internal/lib</outputDirectory>
 			<includes>
 				<include>
-					com.datical.lb:liquibase-pro:jar:
+					com.datical.lb:liquibase-commercial:jar:
 				</include>
 			</includes>
 		</dependencySet>
