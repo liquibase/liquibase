@@ -213,6 +213,11 @@ public class TableOutput {
      * @return the new current running width
      */
     private static int doAppend(int runningWidth, String part, int maxWidth, StringBuilder result) {
+        // If a word that is longer than the maxWidth is appended before this method is called, it will spill onto
+        // multiple lines, and we only care about the runningWidth of the last line.
+        if (runningWidth > maxWidth) {
+            runningWidth = runningWidth % maxWidth;
+        }
         int spaceWidth = runningWidth > 0 ? 1 : 0;
         if (runningWidth + (part.length() + spaceWidth) > maxWidth) {
             runningWidth = fillLineWithSpaces(runningWidth, maxWidth, result);

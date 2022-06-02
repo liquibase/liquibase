@@ -47,4 +47,4 @@ fi
 JAVA_OPTS="${JAVA_OPTS-}"
 
 export LIQUIBASE_HOME
-"${JAVA_PATH}" $JAVA_OPTS -jar $LIQUIBASE_HOME/liquibase.jar ${1+"$@"}
+"${JAVA_PATH}" $JAVA_OPTS -jar "$LIQUIBASE_HOME/liquibase.jar" ${1+"$@"}
