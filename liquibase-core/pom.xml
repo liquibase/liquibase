@@ -113,8 +113,6 @@
             <artifactId>opencsv</artifactId>
             <version>5.6</version>
         </dependency>
-
-
     </dependencies>
 
     <build>
@@ -230,48 +228,6 @@
                         <goals>
                             <goal>manifest</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.3.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <artifactSet>
-                                <includes>
-                                    <include>com.opencsv:*</include>
-                                    <include>org.apache.commons:commons-lang3</include>
-                                    <include>org.apache.commons:commons-text</include>
-                                    <include>org.apache.commons:commons-collections4</include>
-                                </includes>
-                            </artifactSet>
-                            <relocations>
-                                <relocation>
-                                    <pattern>org.apache.commons.collections4</pattern>
-                                    <shadedPattern>liquibase.repackaged.org.apache.commons.collections4</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons.lang3</pattern>
-                                    <shadedPattern>liquibase.repackaged.org.apache.commons.lang3</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons.text</pattern>
-                                    <shadedPattern>liquibase.repackaged.org.apache.commons.text</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.opencsv</pattern>
-                                    <shadedPattern>liquibase.repackaged.com.opencsv</shadedPattern>
-                                </relocation>
-                            </relocations>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
