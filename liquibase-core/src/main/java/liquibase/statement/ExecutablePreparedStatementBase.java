@@ -61,6 +61,13 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         return (in instanceof BufferedInputStream) ? in : new BufferedInputStream(in);
     }
 
+    String getErrorCode(Throwable e) {
+        if (e instanceof SQLException) {
+            return "(" + ((SQLException) e).getErrorCode() + ") ";
+        }
+        return "";
+    }
+
     @Override
     public void execute(PreparedStatementFactory factory) throws DatabaseException {
 
@@ -81,7 +88,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             // trigger execution
             executePreparedStatement(stmt);
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw new DatabaseException(e.getMessage() + " [Failed SQL: " + getErrorCode(e) + sql + "]", e);
         } finally {
             for (Closeable closeable : closeables) {
                 try {
@@ -94,7 +101,21 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
-        stmt.execute();
+        // if execute returns false, we can retrieve the affected rows count
+        // (true used when resultset is returned)
+        if (!stmt.execute()) {
+            LOG.debug(Integer.toString(stmt.getUpdateCount()) + " row(s) affected");
+        } else {
+            int updateCount = 0;
+            // cycle for retrieving row counts from all statements
+            do {
+                if (!stmt.getMoreResults()) {
+                    updateCount = stmt.getUpdateCount();
+                    if (updateCount != -1)
+                        LOG.debug(Integer.toString(updateCount) + " row(s) affected");
+                }
+            } while (updateCount != -1);
+        }
     }
 
     /**
