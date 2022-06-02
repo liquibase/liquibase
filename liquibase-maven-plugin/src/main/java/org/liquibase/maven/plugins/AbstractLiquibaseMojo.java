@@ -327,7 +327,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Specifies your Liquibase license key.
      *
-     * @parameter property="liquibase.liquibaseLicenseKey"
+     * @parameter property="liquibase.licenseKey"
      */
     @PropertyElement
     private String liquibaseLicenseKey;

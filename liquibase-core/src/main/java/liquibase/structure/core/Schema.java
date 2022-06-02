@@ -155,9 +155,4 @@ public class Schema extends AbstractDatabaseObject {
         fields.remove("objects");
         return fields;
     }
-
-    @Override
-    public String buildFullyQualifiedName() {
-        return getCatalogName() + "." + getName();
-    }
 }
