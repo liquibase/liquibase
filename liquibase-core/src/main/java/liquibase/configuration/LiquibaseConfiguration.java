@@ -190,27 +190,23 @@ public class LiquibaseConfiguration implements SingletonObject {
     }
 
     /**
-     * @return the registered {@link ConfigurationDefinition} asssociated with this key. Null if none match.
+     * @return the registered {@link ConfigurationDefinition} associated with this key. Null if none match.
      */
     public ConfigurationDefinition<?> getRegisteredDefinition(String key) {
         for (ConfigurationDefinition<?> def : getRegisteredDefinitions(true)) {
-            if (def.getKey().equalsIgnoreCase(key)) {
-                return def;
-            }
-            final Set<String> aliasKeys = def.getAliasKeys();
-            if (aliasKeys != null) {
-                if (aliasKeys.contains(key)) {
+            List<String> keys = new ArrayList<>();
+            keys.add(def.getKey());
+            keys.addAll(def.getAliasKeys());
+
+            for (String keyName : keys) {
+                if (keyName.equalsIgnoreCase(key)) {
                     return def;
-                } else {
-                    Optional<String> first = aliasKeys.stream().filter(ak -> ak.replace(".", "").equalsIgnoreCase(key)).findFirst();
-                    if (first.isPresent()) {
-                        return def;
-                    }
+                }
+                if(def.getKey().replace(".","").equalsIgnoreCase(key)) {
+                    return def;
                 }
             }
-            if(def.getKey().replace(".","").equalsIgnoreCase(key)) {
-                return def;
-            }
+            
         }
         return null;
     }
