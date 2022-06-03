@@ -282,7 +282,7 @@
 
 	<profiles>
 		<profile>
-            <id>liquibase-commercial</id>
+            <id>liquibase-pro</id>
 
 			<activation>
 				<file>
