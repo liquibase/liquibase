@@ -16,7 +16,7 @@ on:
 
 jobs:
   check_build_safety:
-    uses: liquibase/build-logic/.github/workflows/check_build_safety.yml@github-action-DAT-10497
+    uses: liquibase/build-logic/.github/workflows/lb-build-safety.yml@github-action-DAT-10497
 
   setup:
     needs: check_build_safety
