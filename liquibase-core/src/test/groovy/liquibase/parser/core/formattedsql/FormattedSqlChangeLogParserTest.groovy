@@ -190,6 +190,7 @@ grant execute on any_procedure_name to ANY_USER3/
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
         assert !new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
+        assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.SQL", new JUnitResourceAccessor())
     }
 
     def invalidPrecondition() throws Exception {

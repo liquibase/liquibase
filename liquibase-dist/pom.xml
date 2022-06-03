@@ -114,6 +114,13 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- required for firebird driver -->
+        <dependency>
+            <groupId>javax.resource</groupId>
+            <artifactId>connector-api</artifactId>
+            <version>1.5</version>
+        </dependency>
+
         <!-- needed for inclusion in CLI when running in newer java versions -->
 
         <dependency>

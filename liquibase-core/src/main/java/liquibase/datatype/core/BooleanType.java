@@ -1,11 +1,13 @@
 package liquibase.datatype.core;
 
+import liquibase.Scope;
 import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtil;
@@ -19,11 +21,18 @@ public class BooleanType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
-        if ((database instanceof Firebird3Database)) {
+        if ((database instanceof FirebirdDatabase)) {
+            try {
+                if (database.getDatabaseMajorVersion() <= 2) {
+                    return new DatabaseDataType("SMALLINT");
+                }
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Error checking database major version, assuming version 3+: "+e.getMessage(), e);
+            }
             return new DatabaseDataType("BOOLEAN");
         }
 
-        if ((database instanceof Db2zDatabase) || (database instanceof FirebirdDatabase)) {
+        if ((database instanceof Db2zDatabase)) {
             return new DatabaseDataType("SMALLINT");
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("bit"));
@@ -110,7 +119,14 @@ public class BooleanType extends LiquibaseDataType {
     }
 
     protected boolean isNumericBoolean(Database database) {
-        if (database instanceof Firebird3Database) {
+        if ((database instanceof FirebirdDatabase)) {
+            try {
+                if (database.getDatabaseMajorVersion() <= 2) {
+                    return true;
+                }
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Error checking database major version, assuming version 3+: "+e.getMessage(), e);
+            }
             return false;
         }
         if (database instanceof DerbyDatabase) {

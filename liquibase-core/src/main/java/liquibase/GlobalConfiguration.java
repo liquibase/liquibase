@@ -29,6 +29,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION;
     public static final ConfigurationDefinition<Boolean> INCLUDE_CATALOG_IN_SPECIFICATION;
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
+    public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
 
     /**
      * @deprecated No longer used
@@ -184,6 +185,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         SECURE_PARSING = builder.define("secureParsing", Boolean.class)
                 .setDescription("If true, remove functionality from file parsers which could be used insecurely. Examples include (but not limited to) disabling remote XML entity support.")
+                .setDefaultValue(true)
+                .build();
+
+        SHOW_BANNER = builder.define("showBanner", Boolean.class)
+                .setDescription("If true, show a Liquibase banner on startup.")
                 .setDefaultValue(true)
                 .build();
     }
