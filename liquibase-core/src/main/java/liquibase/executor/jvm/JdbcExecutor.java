@@ -20,6 +20,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.CompoundStatement;
 import liquibase.statement.ExecutablePreparedStatement;
+import liquibase.statement.QueryablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
@@ -157,6 +158,10 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        if (sql instanceof QueryablePreparedStatement) {
+            PreparedStatementFactory factory = new PreparedStatementFactory((JdbcConnection) database.getConnection());
+            return ((QueryablePreparedStatement) sql).query(factory, rse, sqlVisitors);
+        }
         if (sql instanceof CallableSqlStatement) {
             return execute(new QueryCallableStatementCallback(sql, rse), sqlVisitors);
         }

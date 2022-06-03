@@ -16,7 +16,7 @@ import java.sql.SQLException;
  * @see RowCallbackHandler
  * @see RowMapper
  */
-interface ResultSetExtractor {
+public interface ResultSetExtractor {
 
     /**
      * Implementations must implement this method to process the entire ResultSet.
