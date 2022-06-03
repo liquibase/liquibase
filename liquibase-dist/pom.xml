@@ -286,7 +286,7 @@
 
 			<activation>
 				<file>
-                    <exists>../../liquibase-commercial/pom.xml</exists>
+                    <exists>../../liquibase-pro/pom.xml</exists>
 				</file>
 			</activation>
 
@@ -297,7 +297,7 @@
 			<dependencies>
 				<dependency>
                     <groupId>com.datical.lb</groupId>
-                    <artifactId>liquibase-commercial</artifactId>
+                    <artifactId>liquibase-pro</artifactId>
                     <version>${project.version}</version>
 				</dependency>
 			</dependencies>
