@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.Scope;
 import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -26,7 +27,7 @@ public class BooleanType extends LiquibaseDataType {
                     return new DatabaseDataType("SMALLINT");
                 }
             } catch (DatabaseException e) {
-                //assume it's version 3+
+                Scope.getCurrentScope().getLog(getClass()).fine("Error checking database major version, assuming version 3+: "+e.getMessage(), e);
             }
             return new DatabaseDataType("BOOLEAN");
         }
@@ -123,8 +124,8 @@ public class BooleanType extends LiquibaseDataType {
                 if (database.getDatabaseMajorVersion() <= 2) {
                     return true;
                 }
-            } catch (DatabaseException ignored) {
-                //assume it's version 3
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Error checking database major version, assuming version 3+: "+e.getMessage(), e);
             }
             return false;
         }
