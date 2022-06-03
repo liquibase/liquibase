@@ -297,7 +297,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         if (objectName.contains("-")
                 || hasMixedCase(objectName)
                 || startsWithNumeric(objectName)
-                || isReservedWord(objectName)) {
+                || isReservedWord(objectName)
+                || Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
             return objectName;
         } else {
             return objectName.toLowerCase(Locale.US);
