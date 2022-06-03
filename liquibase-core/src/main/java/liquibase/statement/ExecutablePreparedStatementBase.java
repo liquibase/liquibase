@@ -21,6 +21,8 @@ import liquibase.util.StreamUtil;
 import liquibase.util.FilenameUtil;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
@@ -44,6 +46,17 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     private ResourceAccessor resourceAccessor;
 
+    //Some databases do extra work on creating prepared statements, so constantly creating new prepared statements is expensive
+    //When running through a CSV file, the SQL will be the same within the same file so just storing the last seen prepared statement is all we need
+    //Ideally the creation of the prepared statements would happen at the spot where we know we should be re-using it and that code can close it.
+    // But that will have to wait for a refactoring of this code.
+    // So for now we're trading leaving at most one prepared statement unclosed at the end of the liquibase run for better re-using statements to avoid overhead
+    private static PreparedStatement lastPreparedStatement;
+    private static String lastPreparedStatementSql;
+
+    //Cache the executeWithFlags method to avoid reflection overhead
+    private static Method executeWithFlagsMethod;
+
     protected ExecutablePreparedStatementBase(Database database, String catalogName, String schemaName, String
             tableName, List<? extends ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
         this.database = database;
@@ -63,6 +76,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     @Override
     public void execute(PreparedStatementFactory factory) throws DatabaseException {
+        final Logger log = Scope.getCurrentScope().getLog(getClass());
 
         // build the sql statement
         List<ColumnConfig> cols = new ArrayList<>(getColumns().size());
@@ -71,10 +85,26 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
             listener.writeSqlWillRun(sql);
         }
-        Scope.getCurrentScope().getLog(getClass()).fine("Number of columns = " + cols.size());
+        log.fine("Number of columns = " + cols.size());
 
-        // create prepared statement
-        PreparedStatement stmt = factory.create(sql);
+        PreparedStatement stmt;
+        if (sql.equals(lastPreparedStatementSql)) {
+            stmt = lastPreparedStatement;
+            try {
+                stmt.clearParameters();
+            } catch (SQLException e) {
+                log.fine("Error clearing parameters on prepared statement: "+e.getMessage(), e);
+            }
+        } else {
+            // create prepared statement
+            stmt = factory.create(sql);
+
+            if (lastPreparedStatement != null) {
+                JdbcUtil.closeStatement(lastPreparedStatement);
+            }
+            lastPreparedStatement = stmt;
+            lastPreparedStatementSql = sql;
+        }
 
         try {
             attachParams(cols, stmt);
@@ -89,12 +119,25 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 } catch (IOException ignore) {
                 }
             }
-            JdbcUtil.closeStatement(stmt);
         }
     }
 
     protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
-        stmt.execute();
+        if (database instanceof PostgresDatabase) {
+            //postgresql's default prepared statement setup is slow for normal liquibase usage. Calling with QUERY_ONESHOT seems faster, even when we keep re-calling the same prepared statement for many rows in loadData
+            try {
+                if (executeWithFlagsMethod == null) {
+                    executeWithFlagsMethod = stmt.getClass().getMethod("executeWithFlags", int.class);
+                    executeWithFlagsMethod.setAccessible(true);
+                }
+
+                executeWithFlagsMethod.invoke(stmt, 1 ); //QueryExecutor.QUERY_ONESHOT
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new SQLException(e.getMessage(), e);
+            }
+        } else {
+            stmt.execute();
+        }
     }
 
     /**
