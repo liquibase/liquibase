@@ -133,7 +133,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
                 executeWithFlagsMethod.invoke(stmt, 1 ); //QueryExecutor.QUERY_ONESHOT
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                throw new SQLException(e.getMessage(), e);
+                stmt.execute();
             }
         } else {
             stmt.execute();
