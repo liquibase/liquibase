@@ -51,9 +51,6 @@ Eclipse Public 2.0 License
 IBM International Program License Agreement (IPLA)
 - com.ibm.db2:jcc
 
-GNU Affero General Public License (AGPL) version 3
-- net.java.truelicense:truelicense
-
 GNU Lesser General Public License (LGPL) 3.0
 - org.mariadb.jdbc:mariadb-java-client (Dual license: LGPL 2.1, LGPL 3.0)
 
