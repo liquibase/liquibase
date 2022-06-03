@@ -1,0 +1,98 @@
+name: Build Liquibase OSS
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+  push:
+    branches:
+      - master
+      - main
+      - github-action-*
+      - test-sonar-scan
+
+jobs:
+  check_build_safety:
+    uses: liquibase/build-logic/.github/workflows/check_build_safety.yml@github-action-DAT-10497
+
+  setup:
+    needs: check_build_safety
+    runs-on: ubuntu-latest
+    outputs:
+      thisSha: ${{ steps.find-branches.outputs.thisSha }}
+      thisBranchName: ${{ steps.find-branches.outputs.thisBranchName }}
+      thisBranchFileName: ${{ steps.find-branches.outputs.thisBranchFileName }}
+      thisRepositoryName: ${{ steps.find-branches.outputs.thisRepositoryName }}
+      thisRepositoryOwner: ${{ steps.find-branches.outputs.thisRepositoryOwner }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+      - name: Export repo data
+        id: find-branches
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.BOT_TOKEN }}
+          script: |
+            const helper = require('./.github/util/workflow-helper.js')({github, context});
+
+            core.setOutput("thisSha", helper.getCurrentSha());
+            core.setOutput("thisBranchName", helper.getCurrentBranch());
+            core.setOutput("thisBranchFileName", helper.getCurrentBranch().replace(/[^a-zA-Z0-9\-_]/g, "_"));
+            core.setOutput("thisRepositoryName", helper.getRepositoryName());
+            core.setOutput("thisRepositoryOwner", helper.getRepositoryOwner());
+
+      - name: Upload Event File
+        uses: actions/upload-artifact@v3
+        with:
+          name: Event File
+          path: ${{ github.event_path }}
+
+  build:
+    needs: setup
+    uses: liquibase/build-logic/.github/workflows/lb-build.yml@github-action-DAT-10497
+    with:
+      lb_flavor: "oss"
+      thisSha: ${{ needs.setup.outputs.thisSha }}
+      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
+      thisBranchFileName: ${{ needs.setup.outputs.thisBranchFileName }}
+      thisRepositoryName: ${{ needs.setup.outputs.thisRepositoryName }}
+      thisRepositoryOwner: ${{ needs.setup.outputs.thisRepositoryOwner }}
+
+  sonar:
+    needs: build
+    uses: liquibase/build-logic/.github/workflows/lb-sonar.yml@github-action-DAT-10497
+    with:
+      lb_flavor: "oss"
+    secrets:
+      sonar_token: ${{secrets.SONAR_TOKEN}}
+
+  integration-test:
+    needs: build
+    uses: liquibase/build-logic/.github/workflows/lb-test.yml@github-action-DAT-10497
+    with:
+      lb_flavor: "oss"
+    secrets:
+      artifactory_user: ${{ secrets.ARTIFACTORY_USER }}
+      artifactory_token: ${{ secrets.ARTIFACTORY_TOKEN }}
+
+  package:
+    needs: [setup, build]
+    uses: liquibase/build-logic/.github/workflows/lb-package.yml@github-action-DAT-10497
+    with:
+      lb_flavor: "oss"
+    secrets:
+      bot_token: ${{secrets.BOT_TOKEN}}
+      gpg_private_key: ${{ secrets.GPG_SECRET }}
+      gpg_password: ${{ secrets.GPG_PASSPHRASE }}
+      install4j_lic: ${{secrets.INSTALL4J_LICENSE}}
+      install4j_apple_key: ${{ secrets.INSTALL4J_APPLE_KEY }}
+      install4j_apple_key_password: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
+      install4j_apple_id: ${{ secrets.INSTALL4J_APPLE_ID }}
+      install4j_apple_id_password: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
+      install4j_win_key: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
+      install4j_win_key_password: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
