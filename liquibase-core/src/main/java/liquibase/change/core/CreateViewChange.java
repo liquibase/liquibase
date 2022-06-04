@@ -1,9 +1,9 @@
 package liquibase.change.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SQLiteDatabase;
