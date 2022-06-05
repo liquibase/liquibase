@@ -246,12 +246,6 @@
     </dependencies>
 
     <build>
-        <plugin>
-            <groupId>org.liquibase.ext</groupId>
-            <artifactId>liquibase-sdk-maven-plugin</artifactId>
-            <version>0.9</version>
-        </plugin>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
