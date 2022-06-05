@@ -151,6 +151,11 @@
 		</resources>
 
 		<plugins>
+            <groupId>org.liquibase.ext</groupId>
+                <artifactId>liquibase-sdk-maven-plugin</artifactId>
+                <version>0.9</version>
+            </plugin>
+			
 			<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
