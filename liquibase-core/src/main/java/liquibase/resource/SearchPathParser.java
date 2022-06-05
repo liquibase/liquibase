@@ -5,9 +5,9 @@ import liquibase.plugin.Plugin;
 import java.io.IOException;
 
 /**
- * Interface for plugins that can create {@link ResourceAccessor}s out of the values in {@link liquibase.GlobalConfiguration#RESOURCE_ROOTS}.
+ * Interface for plugins that can create {@link ResourceAccessor}s out of the values in {@link liquibase.GlobalConfiguration#SEARCH_PATHS}.
  */
-public interface ResourceRootParser extends Plugin {
+public interface SearchPathParser extends Plugin {
 
     /**
      * Priority of this parser for the given path. The implementation with the highest priority will be used.

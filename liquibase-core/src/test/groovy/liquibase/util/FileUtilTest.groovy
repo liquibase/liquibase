@@ -30,7 +30,7 @@ class FileUtilTest extends Specification {
 
         then:
         message.startsWith("The file path/to/file was not found in")
-        message.endsWith("Specifying files by absolute path was removed in Liquibase 4.0. Please use a relative path or add '/' to the classpath parameter.")
+        message.endsWith("Specifying files by absolute path was removed in Liquibase 4.0. Please use a relative path or add '/' to the searchPaths parameter.")
     }
 
 }

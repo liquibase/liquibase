@@ -1,15 +1,14 @@
 package liquibase.resource
 
-import liquibase.GlobalConfiguration
-import liquibase.Scope
+
 import liquibase.util.StreamUtil
 import spock.lang.Specification
 
-class ResourceRootResourceAccessorTest extends Specification {
+class SearchPathResourceAccessorTest extends Specification {
 
     def "can construct"() {
         when:
-        ResourceAccessor accessor = new ResourceRootsResourceAccessor(new File(".", "target/test-classes").getAbsolutePath() + ", " + new File(".", "target/classes").getAbsolutePath())
+        ResourceAccessor accessor = new SearchPathsResourceAccessor(new File(".", "target/test-classes").getAbsolutePath() + ", " + new File(".", "target/classes").getAbsolutePath())
 
         then:
         StreamUtil.readStreamAsString(accessor.openStream(null, "file-in-root.txt")) == "File in root"

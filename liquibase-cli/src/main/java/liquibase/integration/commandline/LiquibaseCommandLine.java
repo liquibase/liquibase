@@ -672,7 +672,7 @@ public class LiquibaseCommandLine {
 
         returnMap.put(Scope.Attr.resourceAccessor.name(), new CompositeResourceAccessor(
                 new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
-                new ResourceRootsResourceAccessor(),
+                new SearchPathsResourceAccessor(),
                 new CommandLineResourceAccessor(classLoader)));
 
         return returnMap;

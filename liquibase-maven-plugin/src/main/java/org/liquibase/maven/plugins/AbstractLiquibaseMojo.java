@@ -15,7 +15,7 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.resource.ResourceRootsResourceAccessor;
+import liquibase.resource.SearchPathsResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
 import org.apache.maven.artifact.manager.WagonManager;
@@ -297,10 +297,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Specifies the locations where Liquibase can find your <i>changelog</i> files.
      *
-     * @parameter property="liquibase.resourceRoots"
+     * @parameter property="liquibase.searchPaths"
      */
     @PropertyElement
-    protected String resourceRoots;
+    protected String searchPaths;
 
 
     /**
@@ -675,7 +675,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
         ResourceAccessor mFO = new MavenResourceAccessor(cl);
         ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir());
-        return new CompositeResourceAccessor(mFO, fsFO, new ResourceRootsResourceAccessor(resourceRoots));
+        return new CompositeResourceAccessor(mFO, fsFO, new SearchPathsResourceAccessor(searchPaths));
     }
 
     /**

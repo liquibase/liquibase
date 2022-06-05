@@ -7,12 +7,12 @@ import spock.lang.Unroll
 import static liquibase.plugin.Plugin.PRIORITY_DEFAULT
 import static liquibase.plugin.Plugin.PRIORITY_NOT_APPLICABLE
 
-class FileSystemResourceRootParserTest extends Specification {
+class FileSystemSearchPathParserTest extends Specification {
 
     @Unroll
     def "getPriority: #input"() {
         expect:
-        new FileSystemResourceRootParser().getPriority(input) == expected
+        new FileSystemSearchPathParser().getPriority(input) == expected
 
         where:
         input                       | expected

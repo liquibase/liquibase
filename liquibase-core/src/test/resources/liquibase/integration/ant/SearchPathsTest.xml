@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="ResourceRootsTest" basedir="."
+<project name="SearchPathsTest" basedir="."
 		xmlns="antlib:org.apache.tools.ant"
 		xmlns:au="antlib:org.apache.ant.antunit"
 		xmlns:lb="antlib:liquibase.integration.ant"
 		xmlns:db="antlib:liquibase.integration.ant.test">
 	
-	<tempfile property="temp.dir" prefix="ResourceRootsTest" destDir="${java.io.tmpdir}" />
+	<tempfile property="temp.dir" prefix="SearchPathsTest" destDir="${java.io.tmpdir}" />
 
 	<path id="basic-classpath">
 		<pathelement path="." />
@@ -38,7 +38,7 @@
 		<delete dir="${temp.dir}" />
 	</target>
 
-	<target name="testWithoutResourceRoots">
+	<target name="testWithoutSearchPaths">
 		<db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 		<lb:updateDatabase
 				changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml">
@@ -47,90 +47,90 @@
 		<db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 	</target>
 
-	<target name="testAbsoluteResourceRoots">
+	<target name="testAbsoluteSearchPaths">
 		<db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 		<lb:updateDatabase
-				resourceRoots="${liquibase.test.ant.basedir}/changelog"
+				searchPaths="${liquibase.test.ant.basedir}/changelog"
 				changelogfile="simple-changelog.xml">
 			<lb:database refid="test-db" />
 		</lb:updateDatabase>
 		<db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 	</target>
 
-	<target name="testAbsoluteResourceRootsEndsBySlash">
+	<target name="testAbsoluteSearchPathsEndsBySlash">
 		<db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 		<lb:updateDatabase
-				resourceRoots="${liquibase.test.ant.basedir}/changelog/"
+				searchPaths="${liquibase.test.ant.basedir}/changelog/"
 				changelogfile="simple-changelog.xml">
 			<lb:database refid="test-db" />
 		</lb:updateDatabase>
 		<db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 	</target>
 
-	<target name="testAbsoluteResourceRootsMixSlashAndBackslash">
+	<target name="testAbsoluteSearchPathsMixSlashAndBackslash">
 		<db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 		<lb:updateDatabase
-				resourceRoots="${liquibase.test.ant.basedir}\changelog\"
+				searchPaths="${liquibase.test.ant.basedir}\changelog\"
 				changelogfile="simple-changelog.xml">
 			<lb:database refid="test-db" />
 		</lb:updateDatabase>
 		<db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 	</target>
 
-	<target name="testRelativeResourceRoots">
+	<target name="testRelativeSearchPaths">
 		<db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 		<lb:updateDatabase
-				resourceRoots="src/test/resources/liquibase/integration/ant/changelog"
+				searchPaths="src/test/resources/liquibase/integration/ant/changelog"
 				changelogfile="simple-changelog.xml">
 			<lb:database refid="test-db" />
 		</lb:updateDatabase>
 		<db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 	</target>
 
-	<target name="testRelativeResourceRootsStartsWithSlash">
+	<target name="testRelativeSearchPathsStartsWithSlash">
         <au:expectfailure expectedmessage="Unable to update database: The file simple-changelog.xml was not found">
 			<lb:updateDatabase
-					resourceRoots="/src/test/resources/liquibase/integration/ant/changelog"
+					searchPaths="/src/test/resources/liquibase/integration/ant/changelog"
 					changelogfile="simple-changelog.xml">
 				<lb:database refid="test-db" />
 			</lb:updateDatabase>
 		</au:expectfailure>
 	</target>
 
-	<target name="testRelativeResourceRootsEndsBySlash">
+	<target name="testRelativeSearchPathsEndsBySlash">
 		<db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 		<lb:updateDatabase
-				resourceRoots="src/test/resources/liquibase/integration/ant/changelog/"
+				searchPaths="src/test/resources/liquibase/integration/ant/changelog/"
 				changelogfile="simple-changelog.xml">
 			<lb:database refid="test-db" />
 		</lb:updateDatabase>
 		<db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 	</target>
 
-	<target name="testRelativeBackslashedResourceRoots">
+	<target name="testRelativeBackslashedSearchPaths">
 		<db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 		<lb:updateDatabase
-				resourceRoots="src\test\resources\liquibase\integration\ant\changelog"
+				searchPaths="src\test\resources\liquibase\integration\ant\changelog"
 				changelogfile="simple-changelog.xml">
 			<lb:database refid="test-db" />
 		</lb:updateDatabase>
 		<db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 	</target>
 
-	<target name="testRelativeBackslashedResourceRootsStartsWithBackslash">
+	<target name="testRelativeBackslashedSearchPathsStartsWithBackslash">
         <au:expectfailure expectedmessage="Unable to update database: The file simple-changelog.xml was not found">
 			<lb:updateDatabase
-					resourceRoots="\src\test\resources\liquibase\integration\ant\changelog"
+					searchPaths="\src\test\resources\liquibase\integration\ant\changelog"
 					changelogfile="simple-changelog.xml">
 				<lb:database refid="test-db" />
 			</lb:updateDatabase>
         </au:expectfailure>
 	</target>
 
-	<target name="testRelativeBackslashedResourceRootsEndsByBackslash">
+	<target name="testRelativeBackslashedSearchPathsEndsByBackslash">
 		<db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="DATABASECHANGELOG" />
 		<lb:updateDatabase
-				resourceRoots="src\test\resources\liquibase\integration\ant\changelog\"
+				searchPaths="src\test\resources\liquibase\integration\ant\changelog\"
 				changelogfile="simple-changelog.xml">
 			<lb:database refid="test-db" />
 		</lb:updateDatabase>

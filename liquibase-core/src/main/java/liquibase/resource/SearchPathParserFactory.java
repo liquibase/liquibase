@@ -5,20 +5,20 @@ import liquibase.plugin.AbstractPluginFactory;
 import java.io.IOException;
 
 /**
- * Singleton for working with {@link ResourceRootParser}s.
+ * Singleton for working with {@link SearchPathParser}s.
  */
-public class ResourceRootParserFactory extends AbstractPluginFactory<ResourceRootParser> {
+public class SearchPathParserFactory extends AbstractPluginFactory<SearchPathParser> {
 
-    private ResourceRootParserFactory() {
+    private SearchPathParserFactory() {
     }
 
     @Override
-    protected Class<ResourceRootParser> getPluginClass() {
-        return ResourceRootParser.class;
+    protected Class<SearchPathParser> getPluginClass() {
+        return SearchPathParser.class;
     }
 
     @Override
-    protected int getPriority(ResourceRootParser obj, Object... args) {
+    protected int getPriority(SearchPathParser obj, Object... args) {
         return obj.getPriority((String) args[0]);
     }
 
@@ -26,7 +26,7 @@ public class ResourceRootParserFactory extends AbstractPluginFactory<ResourceRoo
      * Creates the {@link ResourceAccessor} for the given path.
      */
     public ResourceAccessor parse(String root) throws IOException {
-        final ResourceRootParser plugin = getPlugin(root);
+        final SearchPathParser plugin = getPlugin(root);
         if (plugin == null) {
             throw new IOException("Cannot parse resource location: '" + root + "'");
         }
