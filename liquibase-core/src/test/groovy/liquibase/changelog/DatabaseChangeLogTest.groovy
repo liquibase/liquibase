@@ -285,7 +285,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/root/children/file2.sql": "file 2",
                 "com/example/root/children/file3.sql": "file 3",
                 "com/example/root/children/file1.sql": "file 1",
-                "com/example/not/fileX.sql"     : "file X",
+                "com/example/not/fileX.sql"          : "file X",
         ]) {
             private callingPath;
 
@@ -296,7 +296,7 @@ create view sql_view as select * from sql_table;'''
             }
         }
         def changeLogFile = new DatabaseChangeLog("com/example/children/root.xml")
-        changeLogFile.includeAll("", true, { r -> r != changeLogFile.physicalFilePath}, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new LabelExpression(), false)
+        changeLogFile.includeAll("", true, { r -> r != changeLogFile.physicalFilePath }, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new LabelExpression(), false)
 
         then:
         resourceAccessor.callingPath == ""
@@ -365,25 +365,26 @@ create view sql_view as select * from sql_table;'''
     }
 
     @Unroll
-    def "normalizePath"() {
+    def "normalizePath: #path"() {
         expect:
         DatabaseChangeLog.normalizePath(path) == expected
 
         where:
-        path                    | expected
-        "changelog.xml"         | "changelog.xml"
-        "path/to/changelog.xml" | "path/to/changelog.xml"
-        "/path/to/changelog.xml" | "path/to/changelog.xml"
-        "./path/to/changelog.xml" | "path/to/changelog.xml"
-        "classpath:./path/to/changelog.xml" | "path/to/changelog.xml"
-        "classpath:path/to/changelog.xml" | "path/to/changelog.xml"
-        "classpath:/path/to/changelog.xml" | "path/to/changelog.xml"
-        "\\path\\to\\changelog.xml" | "path/to/changelog.xml"
-        ".\\path\\to\\changelog.xml" | "path/to/changelog.xml"
-        "path\\to\\changelog.xml" | "path/to/changelog.xml"
-        "path\\.\\to\\.\\changelog.xml" | "path/to/changelog.xml"
-        "c:\\path\\to\\changelog.xml" | "path/to/changelog.xml"
-        "c:/path/to/changelog.xml" | "path/to/changelog.xml"
+        path                                  | expected
+        "changelog.xml"                       | "changelog.xml"
+        "path/to/changelog.xml"               | "path/to/changelog.xml"
+        "/path/to/changelog.xml"              | "path/to/changelog.xml"
+        "./path/to/changelog.xml"             | "path/to/changelog.xml"
+        "classpath:./path/to/changelog.xml"   | "path/to/changelog.xml"
+        "classpath:path/to/changelog.xml"     | "path/to/changelog.xml"
+        "classpath:/path/to/changelog.xml"    | "path/to/changelog.xml"
+        "\\path\\to\\changelog.xml"           | "path/to/changelog.xml"
+        ".\\path\\to\\changelog.xml"          | "path/to/changelog.xml"
+        "path\\to\\changelog.xml"             | "path/to/changelog.xml"
+        "path\\.\\to\\.\\changelog.xml"       | "path/to/changelog.xml"
+        "c:\\path\\to\\changelog.xml"         | "path/to/changelog.xml"
+        "c:/path/to/changelog.xml"            | "path/to/changelog.xml"
+        "D:\\a\\liquibase\\DBDocTaskTest.xml" | "a/liquibase/DBDocTaskTest.xml"
     }
 
 }

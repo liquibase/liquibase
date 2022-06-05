@@ -649,7 +649,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return filePath.replaceFirst("^classpath:", "")
                 .replaceAll("\\\\", "/")
                 .replaceAll("//+", "/")
-                .replaceAll("/./", "/")
+                .replaceAll("/\\./", "/")
                 .replaceFirst("^[a-zA-Z]:", "")
                 .replaceFirst("^\\.?/", "")
                 ;
