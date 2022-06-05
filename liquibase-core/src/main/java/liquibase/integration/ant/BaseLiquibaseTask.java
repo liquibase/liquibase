@@ -11,6 +11,7 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.resource.ResourceRootsResourceAccessor;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -122,6 +123,15 @@ public abstract class BaseLiquibaseTask extends Task {
      * This method is designed to be overridden by subclasses when a change log is needed. By default it returns null.
      *
      * @return Returns null in this implementation. Subclasses that need a change log should implement.
+     */
+    public String getResourceRoots() {
+        return null;
+    }
+
+    /**
+     * This method is designed to be overridden by subclasses when a change log is needed. By default it returns null.
+     *
+     * @return Returns null in this implementation. Subclasses that need a change log should implement.
      * @see AbstractChangeLogBasedTask#getChangeLogFile()
      */
     protected String getChangeLogFile() {
@@ -158,7 +168,8 @@ public abstract class BaseLiquibaseTask extends Task {
     private ResourceAccessor createResourceAccessor(AntClassLoader classLoader) {
         return new CompositeResourceAccessor(
                 new AntResourceAccessor(classLoader, getChangeLogDirectory()),
-                new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader())
+                new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader()),
+                new ResourceRootsResourceAccessor(getResourceRoots())
         );
     }
 

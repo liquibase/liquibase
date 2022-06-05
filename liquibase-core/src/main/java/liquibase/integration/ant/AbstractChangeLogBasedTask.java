@@ -10,6 +10,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
+
+    private String resourceRoots;
     private String changeLogDirectory;
     private String changeLogFile;
     private String contexts;
@@ -42,7 +44,20 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
     public void setChangeLogDirectory(String changeLogDirectory) {
         this.changeLogDirectory = changeLogDirectory;
     }
-    
+
+    /**
+     * Gets the change log directory set from Ant.
+     * @return The change log directory resource.
+     */
+    @Override
+    public String getResourceRoots() {
+        return resourceRoots;
+    }
+
+    public void setResourceRoots(String resourceRoots) {
+        this.resourceRoots = resourceRoots;
+    }
+
     /**
      * Gets the change log file set from Ant.
      * @return The change log file resource.

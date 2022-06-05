@@ -13,14 +13,12 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.*;
 import liquibase.ui.ConsoleUIService;
 import liquibase.ui.UIService;
 import liquibase.util.ISODateFormat;
@@ -30,7 +28,6 @@ import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
 import java.io.*;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -673,7 +670,10 @@ public class LiquibaseCommandLine {
     private Map<String, Object> configureResourceAccessor(ClassLoader classLoader) {
         Map<String, Object> returnMap = new HashMap<>();
 
-        returnMap.put(Scope.Attr.resourceAccessor.name(), new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader)));
+        returnMap.put(Scope.Attr.resourceAccessor.name(), new CompositeResourceAccessor(
+                new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
+                new ResourceRootsResourceAccessor(),
+                new CommandLineResourceAccessor(classLoader)));
 
         return returnMap;
     }
@@ -693,7 +693,7 @@ public class LiquibaseCommandLine {
             for (String classpathEntry : classpathSoFar) {
                 File classPathFile = new File(classpathEntry);
                 if (!classPathFile.exists()) {
-                    throw new IllegalArgumentException(classPathFile.getAbsolutePath() + " does.not.exist");
+                    throw new IllegalArgumentException(classPathFile.getAbsolutePath() + " does not exist");
                 }
 
                 try {
