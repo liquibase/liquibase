@@ -11,7 +11,7 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.resource.SearchPathsResourceAccessor;
+import liquibase.resource.SearchPathResourceAccessor;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -124,7 +124,7 @@ public abstract class BaseLiquibaseTask extends Task {
      *
      * @return Returns null in this implementation. Subclasses that need a change log should implement.
      */
-    public String getSearchPaths() {
+    public String getSearchPath() {
         return null;
     }
 
@@ -169,7 +169,7 @@ public abstract class BaseLiquibaseTask extends Task {
         return new CompositeResourceAccessor(
                 new AntResourceAccessor(classLoader, getChangeLogDirectory()),
                 new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader()),
-                new SearchPathsResourceAccessor(getSearchPaths())
+                new SearchPathResourceAccessor(getSearchPath())
         );
     }
 

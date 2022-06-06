@@ -194,8 +194,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(true)
                 .build();
 
-        SEARCH_PATHS = builder.define("searchPaths", String.class)
-                .addAliasKey("searchPath")
+        SEARCH_PATHS = builder.define("searchPath", String.class)
                 .setDescription("Location(s) to search for files such as changelog files in. Multiple paths can be specified by separating them with commas.")
                 .build();
     }

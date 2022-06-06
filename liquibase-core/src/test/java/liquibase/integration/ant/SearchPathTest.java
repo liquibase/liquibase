@@ -10,12 +10,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 @RunWith(AntUnitSuiteRunner.class)
-public class SearchPathsTest extends AbstractAntTaskTest {
+public class SearchPathTest extends AbstractAntTaskTest {
 
     public static TestSuite suite() throws URISyntaxException {
         setProperties();
-        URL resource = SearchPathsTest.class.getResource("/liquibase/integration/ant/SearchPathsTest.xml");
+        URL resource = SearchPathTest.class.getResource("/liquibase/integration/ant/SearchPathTest.xml");
         File file = new File(resource.toURI());
-        return new AntUnitSuite(file, SearchPathsTest.class);
+        return new AntUnitSuite(file, SearchPathTest.class);
     }
 }

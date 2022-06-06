@@ -9,26 +9,26 @@ import java.io.IOException;
 /**
  * {@link ResourceAccessor} that uses the value currently in {@link GlobalConfiguration#SEARCH_PATHS} at the time it is constructed.
  */
-public class SearchPathsResourceAccessor extends CompositeResourceAccessor {
+public class SearchPathResourceAccessor extends CompositeResourceAccessor {
 
     /**
      * Creates itself with the value in {@link GlobalConfiguration#SEARCH_PATHS}.
      */
-    public SearchPathsResourceAccessor() {
+    public SearchPathResourceAccessor() {
         this(GlobalConfiguration.SEARCH_PATHS.getCurrentValue());
     }
 
     /**
-     * Creates itself with the given searchPaths value.
+     * Creates itself with the given searchPath value.
      * If any of the paths in {@link GlobalConfiguration#SEARCH_PATHS} are invalid, an error is logged but no exception is thrown from this method.
      */
-    public SearchPathsResourceAccessor(String searchPaths) {
-        if (searchPaths == null) {
+    public SearchPathResourceAccessor(String searchPath) {
+        if (searchPath == null) {
             return;
         }
 
         final SearchPathParserFactory parserFactory = Scope.getCurrentScope().getSingleton(SearchPathParserFactory.class);
-        StringUtil.splitAndTrim(searchPaths, ",").forEach(path -> {
+        StringUtil.splitAndTrim(searchPath, ",").forEach(path -> {
             try {
                 addResourceAccessor(parserFactory.parse(path));
             } catch (IOException e) {

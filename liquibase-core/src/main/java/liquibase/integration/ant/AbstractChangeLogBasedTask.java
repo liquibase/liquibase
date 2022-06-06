@@ -11,7 +11,7 @@ import java.io.Writer;
 
 public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
 
-    private String searchPaths;
+    private String searchPath;
     private String changeLogDirectory;
     private String changeLogFile;
     private String contexts;
@@ -50,12 +50,12 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
      * @return The change log directory resource.
      */
     @Override
-    public String getSearchPaths() {
-        return searchPaths;
+    public String getSearchPath() {
+        return searchPath;
     }
 
-    public void setSearchPaths(String searchPaths) {
-        this.searchPaths = searchPaths;
+    public void setSearchPath(String searchPath) {
+        this.searchPath = searchPath;
     }
 
     /**

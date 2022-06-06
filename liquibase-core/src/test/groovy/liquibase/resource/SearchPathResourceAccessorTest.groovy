@@ -8,7 +8,7 @@ class SearchPathResourceAccessorTest extends Specification {
 
     def "can construct"() {
         when:
-        ResourceAccessor accessor = new SearchPathsResourceAccessor(new File(".", "target/test-classes").getAbsolutePath() + ", " + new File(".", "target/classes").getAbsolutePath())
+        ResourceAccessor accessor = new SearchPathResourceAccessor(new File(".", "target/test-classes").getAbsolutePath() + ", " + new File(".", "target/classes").getAbsolutePath())
 
         then:
         StreamUtil.readStreamAsString(accessor.openStream(null, "file-in-root.txt")) == "File in root"
