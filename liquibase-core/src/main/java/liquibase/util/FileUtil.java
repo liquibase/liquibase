@@ -43,11 +43,11 @@ public class FileUtil {
     }
 
     public static String getFileNotFoundMessage(String physicalChangeLogLocation) {
-        String message = "The file " + physicalChangeLogLocation + " was not found in" + System.lineSeparator();
+        String message = "The file " + physicalChangeLogLocation + " was not found in the configured search path:" + System.lineSeparator();
         for (String location : Scope.getCurrentScope().getResourceAccessor().describeLocations()) {
             message += "    - " + location + System.lineSeparator();
         }
-        message += "Specifying files by absolute path was removed in Liquibase 4.0. Please use a relative path or add '/' to the searchPath parameter.";
+        message += "More locations can be added with the 'searchPath' parameter.";
 
         return message;
     }

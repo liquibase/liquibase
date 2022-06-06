@@ -53,7 +53,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
         if (!base.exists()) {
             Scope.getCurrentScope().getLog(getClass()).warning("Non-existent path: " + base.getAbsolutePath());
-            invalidPaths.add(base.toPath().toString());
+            invalidPaths.add(base.toPath().toAbsolutePath().toString());
         } else if (base.isDirectory()) {
             addRootPath(base.toPath());
         } else if (base.getName().endsWith(".jar") || base.getName().toLowerCase().endsWith("zip")) {
@@ -299,7 +299,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         SortedSet<String> returnSet = new TreeSet<>();
 
         for (Path path : getRootPaths()) {
-            returnSet.add(path.toString());
+            returnSet.add(path.toAbsolutePath().toString());
         }
 
         for (String path : invalidPaths) {

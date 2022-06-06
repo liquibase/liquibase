@@ -29,8 +29,8 @@ class FileUtilTest extends Specification {
         def message = FileUtil.getFileNotFoundMessage("path/to/file")
 
         then:
-        message.startsWith("The file path/to/file was not found in")
-        message.endsWith("Specifying files by absolute path was removed in Liquibase 4.0. Please use a relative path or add '/' to the searchPath parameter.")
+        message.startsWith("The file path/to/file was not found in the configured search path")
+        message.endsWith("More locations can be added with the 'searchPath' parameter.")
     }
 
 }
