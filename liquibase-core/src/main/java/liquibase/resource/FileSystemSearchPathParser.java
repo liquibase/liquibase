@@ -26,6 +26,6 @@ public class FileSystemSearchPathParser extends AbstractSearchPathParser {
     }
 
     public ResourceAccessor parse(String root) {
-        return new FileSystemResourceAccessor(new File(root));
+        return new FileSystemResourceAccessor(new File(root.replace("\\", "/")));
     }
 }
