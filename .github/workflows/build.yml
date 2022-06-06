@@ -192,7 +192,7 @@ jobs:
             ./**/target/surefire-reports
             ./**/target/site
 
-      - name: Archive Modules
+      - name: Archive Moduless
         if: ${{ matrix.java == 8 && matrix.os == 'ubuntu-latest'}}
         uses: actions/upload-artifact@v3
         with:
