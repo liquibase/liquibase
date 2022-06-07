@@ -1,6 +1,5 @@
 package org.liquibase.maven.plugins;
 
-import jdk.nashorn.internal.objects.Global;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
