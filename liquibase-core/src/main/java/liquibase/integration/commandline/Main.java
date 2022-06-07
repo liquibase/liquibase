@@ -4,7 +4,6 @@ import liquibase.*;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
-import liquibase.command.CommandFailedException;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
@@ -32,6 +31,7 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.ui.ConsoleUIService;
+import liquibase.util.BooleanUtil;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
@@ -236,7 +236,7 @@ public class Main {
                         LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                         if (licenseService != null && main.liquibaseProLicenseKey != null) {
                             Location licenseKeyLocation =
-                                    new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                                    new Location("property liquibaseProLicenseKey", main.liquibaseProLicenseKey);
                             LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                             if (result.code != 0) {
                                 String allMessages = String.join("\n", result.messages);
@@ -332,7 +332,7 @@ public class Main {
                                 Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
                             }
                         } else {
-                            Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                            Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", main.liquibaseProLicenseKey);
                             LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                             if (result.code != 0) {
                                 String allMessages = String.join("\n", result.messages);
@@ -1237,7 +1237,7 @@ public class Main {
         // Check the licensing keys to see if they are being set from properties
         //
         if (liquibaseProLicenseKey == null) {
-            String key = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.pro.licenseKey").getValue();
+            String key = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.licenseKey").getValue();
             liquibaseProLicenseKey = key;
         }
         if (liquibaseHubApiKey == null) {
@@ -1345,7 +1345,6 @@ public class Main {
         if (this.includeSystemClasspath == null) {
             this.includeSystemClasspath = Boolean.TRUE;
         }
-
         if (this.outputDefaultCatalog == null) {
             this.outputDefaultCatalog = "true";
         }
@@ -1467,39 +1466,6 @@ public class Main {
             LOG.fine("Liquibase Hub URL:      " + HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue());
         }
         LOG.fine("Liquibase Hub Mode:     " + HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
-
-        //
-        // Check for a valid license to run PRO commands
-        //
-        String formatValue = getCommandParam(OPTIONS.FORMAT, null);
-        if (isLicenseableCommand(formatValue)) {
-            if (isFormattedDiff()) {
-                if (formatValue != null && !formatValue.equalsIgnoreCase("json")) {
-                    String messageString =
-                            "\nWARNING: The diff command optional Pro parameter '--format' " +
-                                    "currently supports only 'TXT' or 'JSON' as values.  (Blank defaults to 'TXT')";
-                    throw new LiquibaseException(String.format(messageString));
-                }
-            }
-            if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
-                String warningAboutCommand = command;
-                if (command.equalsIgnoreCase(COMMANDS.DIFF) && formatValue != null && !formatValue.isEmpty()) {
-                    warningAboutCommand = "diff --format=" + formatValue;
-                }
-                String messageString = String.format(coreBundle.getString("no.pro.license.found"), warningAboutCommand);
-                throw new LiquibaseException(messageString);
-            }
-        }
-
-        try {
-//            if (null != logFile) {
-//                Scope.getCurrentScope().getLog(getClass()).setLogLevel(logLevel, logFile);
-//            } else {
-//                Scope.getCurrentScope().getLog(getClass()).setLogLevel(logLevel);
-//            }
-        } catch (IllegalArgumentException e) {
-            throw new CommandLineParsingException(e.getMessage(), e);
-        }
 
         final ResourceAccessor fileOpener;
         if (Main.runningFromNewCli) {
@@ -1640,8 +1606,14 @@ public class Main {
                         .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
                         .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
 
+                //
+                // If we find a ResultsBuilder in the current scope then
+                // we will add the snapshot object to it
+                // otherwise, we will print the output
+                //
                 Writer outputWriter = getOutputWriter();
-                String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute());
+                CommandResults commandResults = snapshotCommand.execute();
+                String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, commandResults);
                 outputWriter.write(result);
                 outputWriter.flush();
                 return;
@@ -2012,7 +1984,7 @@ public class Main {
                 }
             } catch (DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        coreBundle.getString("problem.closing.connection"), e);
+                    coreBundle.getString("problem.closing.connection"), e);
             }
         }
     }
@@ -2033,14 +2005,6 @@ public class Main {
     private boolean dbConnectionNeeded(String command) {
         return !COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command) &&
                 !COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(command);
-    }
-
-    private boolean isLicenseableCommand(String formatValue) {
-        return COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command) ||
-                COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command) ||
-                COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command) ||
-                COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command) ||
-                (COMMANDS.DIFF.equalsIgnoreCase(command) && formatValue != null && !formatValue.toLowerCase().equals("txt"));
     }
 
     private void loadChangeSetInfoToMap(Map<String, Object> argsMap) throws CommandLineParsingException {
