@@ -43,5 +43,11 @@
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
+
+		<dependency>
+            <groupId>com.datical.lb</groupId>
+            <artifactId>liquibase-commercial</artifactId>
+            <version>0-SNAPSHOT</version>
+		</dependency>
     </dependencies>
 </project>
