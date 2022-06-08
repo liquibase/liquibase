@@ -432,9 +432,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     }
                 }
 
+                //
+                // Add properties to this top-level scope
+                //
                 scopeValues.put("integrationDetails", integrationDetails);
                 scopeValues.put("liquibase.licenseKey", getLicenseKey());
-
+                String key = GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey();
+                scopeValues.put(key, preserveSchemaCase);
                 Scope.child(scopeValues, () -> {
 
                     configureFieldsAndValues();
@@ -508,7 +512,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         // which might have been specified in a defaults file
                         //
                         Map<String, Object> innerScopeValues = new HashMap<>();
-                        String key = GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey();
                         innerScopeValues.put(key, preserveSchemaCase);
                         Scope.child(innerScopeValues, () -> {
                             performLiquibaseTask(liquibase);
