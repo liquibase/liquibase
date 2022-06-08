@@ -76,7 +76,13 @@
             <optional>true</optional>
         </dependency>
 
-<!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
+        <dependency>
+            <groupId>net.snowflake</groupId>
+            <artifactId>snowflake-jdbc</artifactId>
+            <version>3.13.19</version>
+        </dependency>
+
+        <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
 <!--        <dependency>-->
 <!--            <groupId>mysql</groupId>-->
 <!--            <artifactId>mysql-connector-java</artifactId>-->
