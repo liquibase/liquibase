@@ -189,15 +189,12 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(true)
                 .build();
 
-<<<<<<< HEAD
         PRESERVE_SCHEMA_CASE = builder.define("preserveSchemaCase", Boolean.class)
                 .setDescription("Should Liquibase preserve the original case of schemas")
                 .setDefaultValue(false)
-=======
         SHOW_BANNER = builder.define("showBanner", Boolean.class)
                 .setDescription("If true, show a Liquibase banner on startup.")
                 .setDefaultValue(true)
->>>>>>> origin/master
                 .build();
     }
 }
