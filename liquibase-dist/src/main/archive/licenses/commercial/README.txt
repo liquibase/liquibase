@@ -1,4 +1,4 @@
-Liquibase License Information (Used by Liquibase Pro)
+Liquibase License Information (Used by Liquibase Commercial)
 Version: ${project.version}
 
 Liquibase ships with 3rd party components using the following licenses:
