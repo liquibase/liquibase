@@ -492,6 +492,24 @@ public class LiquibaseCommandLine {
         returnList.add(argumentProvider);
 
         final ConfiguredValue<String> defaultsFileConfig = LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue();
+        /*
+         * The installed licenses are cleared from the license service. Clearing the licenses
+         * forces the license service to reinstall the licenses.
+         *
+         * The call to LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue() above will check
+         * the environment variables for a value, and that requires a valid license. Thus, if the user has a license
+         * key specified in both an environment variable and in their defaults file (using different property names),
+         * the value in the defaults file will not be seen, despite it possibly being more preferred than the value
+         * in the environment variable, because the DefaultsFileValueProvider hasn't been registered yet.
+         */
+        LicenseServiceFactory licenseServiceFactory = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class);
+        if (licenseServiceFactory != null) {
+            LicenseService licenseService = licenseServiceFactory.getLicenseService();
+            if (licenseService != null) {
+                licenseService.reset();
+            }
+        }
+
         final File defaultsFile = new File(defaultsFileConfig.getValue());
         if (defaultsFile.exists()) {
             final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsFile);
