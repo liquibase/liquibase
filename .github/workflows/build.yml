@@ -320,22 +320,22 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Download liquibase-pro
+      - name: Download liquibase-commercial
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
           github_token: ${{ secrets.BOT_TOKEN }}
           workflow: build.yml
           workflow_conclusion: success
           branch: "${{ needs.setup.outputs.proBranchName }}"
-          name: liquibase-pro-modules
-          path: download/liquibase-pro
+          name: liquibase-commercial-modules
+          path: download/liquibase-commercial
           repo: liquibase/liquibase-pro
 
       - name: Install Built Modules
         run: |
           (find . -name *-SNAPSHOT.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile={} \;)
           (find . -name *-SNAPSHOT-sources.jar -exec mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dclassifier=sources -Dfile={} \;)
-          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-pro/liquibase-pro-0-SNAPSHOT.jar
+          mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar
 
       - name: Build & Sign Artifacts
         env:
@@ -355,7 +355,7 @@ jobs:
 
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          mvn -B -pl liquibase-dist -P liquibase-pro source:jar package
+          mvn -B -pl liquibase-dist -P liquibase-commercial source:jar package
 
           ## extract tar content for other artifacts
           mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
@@ -474,7 +474,7 @@ jobs:
               }
 
               if (failedCheckingUs) {
-                console.log("Rerun liquibase-pro that was waiting on us");
+                console.log("Rerun liquibase-commercial that was waiting on us");
 
                 //octokit removed the retryWorkflow function
                 github.request("POST "+currentBranchInfo.runRerunUrl);
