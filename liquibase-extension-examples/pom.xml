@@ -12,10 +12,6 @@
 	<packaging>jar</packaging>
 	<description>Liquibase Examples</description>
 
-	<properties>
-		<targetMavenVersion>3.3.9</targetMavenVersion>
-	</properties>
-
 	<dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>

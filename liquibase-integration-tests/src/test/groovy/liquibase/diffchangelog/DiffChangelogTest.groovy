@@ -35,8 +35,7 @@ class DiffChangelogTest extends Specification {
 CREATE SEQUENCE $sequenceName INCREMENT 5 START 100;
 CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'));
 """
-        def statement = postgres.getConnection().createStatement()
-        statement.execute(sql)
+        postgres.executeSql(sql)
         postgres.getConnection().commit()
 
         Database refDatabase = DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
