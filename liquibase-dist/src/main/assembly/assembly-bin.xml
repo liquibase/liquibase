@@ -96,7 +96,10 @@
         <dependencySet>
             <outputFileNameMapping> ${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <outputDirectory>internal/lib</outputDirectory>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <scope>runtime</scope>
             <includes>
+                <include>com.opencsv:opencsv:</include>
                 <include>org.yaml:snakeyaml:jar:</include>
                 <include>javax.xml.bind:jaxb-api:jar:</include>
                 <include>org.glassfish.jaxb:jaxb-runtime:jar:</include>
@@ -118,8 +121,19 @@
 
                 <!-- CANNOT SHIP FOR LICENSE REASONS -->
                 <!-- <include>mysql:mysql-connector-java:jar</include>-->
-
             </includes>
+
+            <!-- some libraries lie about compile vs. runtime dependencies. Or we don't hit code that uses these. So exclude them manually. -->
+            <excludes>
+                <exclude>org.antlr:antlr4-runtime:jar:</exclude>  <!-- from connector-api -->
+                <exclude>org.checkerframework:checker-qual:jar:</exclude> <!-- from postgresql -->
+                <exclude>commons-beanutils:commons-beanutils:jar:</exclude> <!-- from opencsv -->
+                <exclude>org.glassfish.jaxb:txw2:jar:</exclude> <!-- from jaxb-core -->
+                <exclude>com.sun.istack:istack-commons-runtime:jar:</exclude> <!-- from jaxb-core -->
+                <exclude>jakarta.xml.bind:jakarta.xml.bind-api:jar:</exclude> <!-- from jaxb-runtime -->
+                <exclude>com.sun.activation:jakarta.activation:jar:</exclude> <!-- from jaxb-runtime -->
+                <exclude>javax.activation:javax.activation-api:jar:</exclude> <!-- from jaxb-api -->
+            </excludes>
         </dependencySet>
     </dependencySets>
 
