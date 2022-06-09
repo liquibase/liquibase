@@ -136,7 +136,6 @@ public class CommandScope {
      */
     public CommandResults execute() throws CommandExecutionException {
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
-
         for (ConfigurationValueProvider provider : Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getProviders()) {
             provider.validate(this);
         }
@@ -164,7 +163,9 @@ public class CommandScope {
             }
         } finally {
             try {
-                this.outputStream.flush();
+                if (this.outputStream != null) {
+                    this.outputStream.flush();
+                }
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
             }

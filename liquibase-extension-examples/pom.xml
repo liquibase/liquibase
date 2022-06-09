@@ -12,10 +12,6 @@
 	<packaging>jar</packaging>
 	<description>Liquibase Examples</description>
 
-	<properties>
-		<targetMavenVersion>3.3.9</targetMavenVersion>
-	</properties>
-
 	<dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>
@@ -55,7 +51,7 @@
           <plugin>
               <groupId>org.apache.felix</groupId>
               <artifactId>maven-bundle-plugin</artifactId>
-              <version>5.1.4</version>
+              <version>5.1.6</version>
               <configuration>
                   <instructions>
                       <Bundle-SymbolicName>org.liquibase.core</Bundle-SymbolicName>

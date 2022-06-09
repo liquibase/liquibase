@@ -23,48 +23,6 @@ if [ ! -n "${LIQUIBASE_HOME+x}" ]; then
   # echo "Liquibase Home: $LIQUIBASE_HOME"
 fi
 
- 
-# build classpath from all jars in lib
-if [ -f /usr/bin/cygpath ]; then
-  CP=.
-  for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
-    i=`cygpath --windows "$i"`
-    CP="$CP;$i"
-  done
-
-  # Gather jars from a local liquibase_libs directory
-  for i in liquibase_libs/*.jar; do
-    i=`cygpath --windows "$i"`
-    CP="$CP;$i"
-  done
-
-  for i in "$LIQUIBASE_HOME"/lib/*.jar; do
-    i=`cygpath --windows "$i"`
-    CP="$CP;$i"
-  done
-else
-  if [[ $(uname) = MINGW* ]]; then
-    CP_SEPARATOR=";"
-  else
-    CP_SEPARATOR=":"
-  fi
-  CP=.
-  for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
-    CP="$CP""$CP_SEPARATOR""$i"
-  done
-
-  # Gather jars from a local liquibase_libs directory
-  CP="$CP""$CP_SEPARATOR""liquibase_libs/"
-  for i in liquibase_libs/*.jar; do
-    CP="$CP""$CP_SEPARATOR""$i"
-  done
-
-  CP="$CP""$CP_SEPARATOR""$LIQUIBASE_HOME/lib/"
-  for i in "$LIQUIBASE_HOME"/lib/*.jar; do
-    CP="$CP""$CP_SEPARATOR""$i"
-  done
-fi
-
 if [ -z "${JAVA_HOME}" ]; then
   #JAVA_HOME not set, try to find a bundled version
   if [ -d "${LIQUIBASE_HOME}/jre" ]; then
@@ -88,4 +46,5 @@ fi
 # add any JVM options here
 JAVA_OPTS="${JAVA_OPTS-}"
 
-"${JAVA_PATH}" -cp "$CP" $JAVA_OPTS liquibase.integration.commandline.LiquibaseCommandLine ${1+"$@"}
+export LIQUIBASE_HOME
+"${JAVA_PATH}" $JAVA_OPTS -jar "$LIQUIBASE_HOME/liquibase.jar" ${1+"$@"}

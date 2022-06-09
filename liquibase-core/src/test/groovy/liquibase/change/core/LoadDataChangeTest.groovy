@@ -5,6 +5,7 @@ import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
+import liquibase.database.Database
 import liquibase.database.DatabaseConnection
 import liquibase.database.DatabaseFactory
 import liquibase.database.core.MSSQLDatabase
@@ -828,6 +829,28 @@ public class LoadDataChangeTest extends StandardChangeTest {
         0 | "tableName is empty for loadData on mock"
     }
 
+    def "allow statement generation to be overridden"() {
+        given:
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory()
+        FakeLoadDataChangeExtension change = new FakeLoadDataChangeExtension()
+        change.setFile("liquibase/change/core/sample.data1.csv");
+
+
+        when:
+        change.generateStatements(mockDB)
+
+        then:
+        change.rows.size() == 2
+        change.rows[0] == [
+                ["needsPreparedStatement": false, "name": "name", "value": "Bob Johnson"],
+                ["needsPreparedStatement": false, "name": "username", "value": "bjohnson"]
+        ]
+        change.rows[1] == [
+                ["needsPreparedStatement": false, "name": "name", "value": "John Doe"],
+                ["needsPreparedStatement": false, "name": "username", "value": "jdoe"]
+        ]
+    }
+
 
     class ColDef {
         ColDef(Object n, String type) {
@@ -850,6 +873,24 @@ public class LoadDataChangeTest extends StandardChangeTest {
         regular, space_left, space_right, space_both, empty
     }
 
+    class FakeLoadDataChangeExtension extends LoadDataChange {
+        def rows
+
+        protected SqlStatement[] generateStatementsFromRows(Database database, List<LoadDataChange.LoadDataRowConfig> rows) {
+            this.rows = rows.collect {
+                row ->
+                    row.columns.collect {
+                        col ->
+                            [
+                                    "needsPreparedStatement": row.needsPreparedStatement(),
+                                    "name"                  : col.getName(),
+                                    "value"                 : col.getValueObject(),
+                            ]
+                    }
+            }
+            return []
+        }
+    }
 }
 
 
