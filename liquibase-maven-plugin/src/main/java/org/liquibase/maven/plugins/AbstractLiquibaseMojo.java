@@ -272,6 +272,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String databaseChangeLogTableName;
+
     /**
      * Specifies the table name to use for the DATABASECHANGELOGLOCK table.
      *
@@ -279,6 +280,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String databaseChangeLogLockTableName;
+
+    /**
+     * Show the liquibase banner in output.
+     *
+     * @parameter property="liquibase.showBanner"
+     */
+    @PropertyElement
+    protected boolean showBanner = true;
 
     /**
      * Specifies the server ID in the Maven <i>settings.xml</i> to use when authenticating.
@@ -430,7 +439,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                     configureFieldsAndValues();
 
-                    getLog().info(CommandLineUtils.getBanner());
+                    if (showBanner) {
+                        getLog().info(CommandLineUtils.getBanner());
+                    }
 
                     // Displays the settings for the Mojo depending of verbosity mode.
                     displayMojoSettings();
