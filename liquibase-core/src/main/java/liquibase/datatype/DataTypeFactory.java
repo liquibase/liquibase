@@ -242,9 +242,9 @@ public class DataTypeFactory {
                 param = StringUtil.trimToNull(param);
                 if (param != null) {
                     String[] paramAndValue = param.split(":", 2);
-
-                    // TODO: A run-time exception will occur here if the user writes a property name into the
-                    // data type which does not exist - but what else could we do in this case, except aborting?
+                    if (paramAndValue.length < 2) {
+                        throw new UnexpectedLiquibaseException("Data type definition contains unparseable embedded information: `" + dataTypeDefinition + "`");
+                    }
                     ObjectUtil.setProperty(liquibaseDataType, paramAndValue[0], paramAndValue[1]);
                 }
             }

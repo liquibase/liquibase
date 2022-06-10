@@ -16,7 +16,4 @@ public interface NamespaceDetails extends PrioritizedService{
     String getSchemaUrl(String namespaceOrUrl);
 
     String[] getNamespaces();
-
-    String getLocalPath(String namespaceOrUrl);
-
 }

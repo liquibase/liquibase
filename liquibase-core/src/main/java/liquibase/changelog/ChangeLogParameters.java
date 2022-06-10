@@ -4,40 +4,54 @@ import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Labels;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
-import liquibase.parser.ChangeLogParserConfiguration;
+import liquibase.exception.UnknownChangeLogParameterException;
 import liquibase.util.StringUtil;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+/**
+ * Holds the parameters configured for a {@link DatabaseChangeLog}.
+ * <p>
+ * In general, the end behavior of defined parameters is "the first set value wins".
+ * For example, if you set a parameter "x" to "1" and then set it to "2", the value will remain "1".
+ * This immutable property behavior allows users to easily set default values, knowing that any "upstream" overrides will take priority.
+ * <p>
+ * In determining which property value is actually "first set", context, label, and dbms filtering is taken into account.
+ * <p>
+ * Properties can be defined as "global" or "local". Global properties span all change logs.
+ * A global setting configured in an included changelog is still available to all changesets
+ * Local properties are  only available in the change log that they are defined in -- not even in changelogs "included" by the file that defines the property.
+ */
 public class ChangeLogParameters {
 
-    private List<ChangeLogParameter> changeLogParameters = new ArrayList<>();
-    private ExpressionExpander expressionExpander;
-    private Database currentDatabase;
-    private Contexts currentContexts;
-    private LabelExpression currentLabelExpression;
+    private final List<ChangeLogParameter> globalParameters = new ArrayList<>();
+    private final Map<String, List<ChangeLogParameter>> localParameters = new HashMap<>();
 
+    private final ExpressionExpander expressionExpander;
+    private String filterDatabase;
+    private Contexts filterContexts;
+    private LabelExpression filterLabels;
+
+    /**
+     * Calls {@link #ChangeLogParameters(Database)} with a null database.
+     */
     public ChangeLogParameters() {
         this(null);
     }
 
+    /**
+     * Creates a new ChangeLogParameters instance, populated with a set of "database.*" global parameters based on the passed database configuration.
+     * If the database is null, no global parameters are added.
+     *
+     * The passed database is used as a default value for {@link #getDatabase()}
+     */
     public ChangeLogParameters(Database database) {
-    	LinkedHashMap<Object, Object> externalParameters = new LinkedHashMap<>();
-    	// First add environment variables
-    	externalParameters.putAll(System.getenv());
-    	
-    	// Next add system properties; they have higher precedence than / overwrite environment variables
-    	externalParameters.putAll((Properties) System.getProperties().clone());
-        
-    	for (Map.Entry entry : externalParameters.entrySet()) {
-            changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
-        }
+        globalParameters.addAll(System.getenv().entrySet().stream().map(e -> new ChangeLogParameter(e.getKey(), e.getValue())).collect(Collectors.toList()));
+        globalParameters.addAll(System.getProperties().entrySet().stream().map(e -> new ChangeLogParameter(String.valueOf(e.getKey()), e.getValue())).collect(Collectors.toList()));
 
         if (database != null) {
             this.set("database.autoIncrementClause", database.getAutoIncrementClause(null, null, null, null));
@@ -60,7 +74,7 @@ public class ChangeLogParameters {
             this.set("database.defaultCatalogName", database.getDefaultCatalogName());
             this.set("database.defaultSchemaName", database.getDefaultSchemaName());
             this.set("database.defaultSchemaNamePrefix", (StringUtil.trimToNull(database.getDefaultSchemaName()) ==
-                null) ? "" : ("." + database.getDefaultSchemaName()));
+                    null) ? "" : ("." + database.getDefaultSchemaName()));
             this.set("database.lineComment", database.getLineComment());
             this.set("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
             this.set("database.typeName", database.getShortName());
@@ -77,238 +91,213 @@ public class ChangeLogParameters {
             this.set("database.supportsSequences", database.supportsSequences());
             this.set("database.supportsTablespaces", database.supportsTablespaces());
             this.set("database.supportsNotNullConstraintNames", database.supportsNotNullConstraintNames());
+
+            this.filterDatabase = database.getShortName();
         }
 
         this.expressionExpander = new ExpressionExpander(this);
-        this.currentDatabase = database;
-        this.currentContexts = new Contexts();
-        this.currentLabelExpression = new LabelExpression();
-    }
-
-    public void setContexts(Contexts contexts) {
-        this.currentContexts = contexts;
-    }
-
-    public Contexts getContexts() {
-        return currentContexts;
-    }
-
-    public List<ChangeLogParameter> getChangeLogParameters() {
-        return Collections.unmodifiableList(changeLogParameters);
-    }
-
-    public void set(String parameter, Object value) {
-        /*
-         * TODO: this was a bug. Multiple created parameters have been created, but the corresponding method in
-         * #findParameter() is only catching the first one. So here we should eliminate duplicate entries
-         */
-        ChangeLogParameter param = findParameter(parameter, null);
-        // okay add it
-        changeLogParameters.add(new ChangeLogParameter(parameter, value));
-        if (param != null && ! param.isGlobal()) {
-            changeLogParameters.remove(param);
-        }
-    }
-
-    public void set(String key, String value, String contexts, String labels, String databases, boolean globalParam,
-                    DatabaseChangeLog changeLog) {
-        set(key, value, new ContextExpression(contexts), new Labels(labels), databases, globalParam, changeLog);
-    }
-
-    public void set(String key, String value, ContextExpression contexts, Labels labels, String databases,
-                    boolean globalParam, DatabaseChangeLog changeLog) {
-        /**
-         * TODO: this was a bug. Multiple created parameters have been created, but the corresponding method in
-         * #findParameter() is only catching the first one. So here we should eliminate duplicate entries
-         **/
-        if (globalParam) {
-            // if it is global param remove duplicate non-global parameters
-            ChangeLogParameter param = findParameter(key, null);
-            if (param != null && isDuplicate(param) && ! param.isGlobal()) {
-                changeLogParameters.remove(param);
-            }
-            // okay add it
-            changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam,
-                changeLog));
-        } else {
-           ChangeLogParameter param = findParameter(key, changeLog);
-           if (param != null && isDuplicate(param) && ! param.isGlobal() && param.getChangeLog() == changeLog) {
-               changeLogParameters.remove(param);
-           }
-           //this is a non-global param, just add it
-           changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam, changeLog));
-        }
-    }
-
-    private boolean isDuplicate(ChangeLogParameter param) {
-        for (ChangeLogParameter parameter : changeLogParameters) {
-            if (param != parameter && param.isDuplicate(parameter)) {
-                return true;
-            }
-        }
-        return false;
+        this.filterContexts = new Contexts();
+        this.filterLabels = new LabelExpression();
     }
 
     /**
-     * Return the value of a parameter
+     * Sets a global changelog parameter with no context/label/database filters on it.
+     * Convenience version of {@link #set(String, Object, ContextExpression, Labels, String...)}.
+     */
+    public void set(String parameter, Object value) {
+        this.set(parameter, value, new ContextExpression(), new Labels());
+    }
+
+    /**
+     * Sets a local changelog parameter with no context/label/database filters on it.
+     * Convenience version of {@link #setLocal(String, Object, DatabaseChangeLog, ContextExpression, Labels, String...)}.
+     */
+    public void setLocal(String parameter, Object value, DatabaseChangeLog changeLog) {
+        this.setLocal(parameter, value, changeLog, new ContextExpression(), new Labels());
+    }
+
+    /**
+     * Calls either {@link #set(String, Object, ContextExpression, Labels, String...)} or {@link #setLocal(String, Object, DatabaseChangeLog, ContextExpression, Labels, String...)} depending on the value of globalParam.
+     */
+    public void set(String key, Object value, ContextExpression contexts, Labels labels, String databases, boolean globalParam, DatabaseChangeLog changeLog) {
+        String[] parsedDatabases = null;
+        if (databases != null && databases.length() > 0) {
+            parsedDatabases = StringUtil.splitAndTrim(databases, ",").toArray(new String[0]);
+        }
+
+        if (globalParam) {
+            set(key, value, contexts, labels, parsedDatabases);
+        } else {
+            setLocal(key, value, changeLog, contexts, labels, parsedDatabases);
+        }
+    }
+
+    /**
+     * Convenience version of {@link #set(String, Object, ContextExpression, Labels, String, boolean, DatabaseChangeLog)}.
+     */
+    public void set(String key, Object value, String contexts, String labels, String databases, boolean globalParam, DatabaseChangeLog changeLog) {
+        set(key, value, new ContextExpression(contexts), new Labels(labels), databases, globalParam, changeLog);
+    }
+
+    /**
+     * Sets a global changelog parameter.
+     * Just because you call this with a particular key, does not mean it will override the existing value. See the class description for more details on how values act as if they are immutable.
+     */
+    public void set(String key, Object value, ContextExpression contexts, Labels labels, String... databases) {
+        globalParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases));
+    }
+
+    /**
+     * Sets a changelog parameter local to the given changeLog file.
+     * Just because you call this with a particular key, does not mean it will override the existing value. See the class description for more details on how values act as if they are immutable.
      *
-     * @param key Name of the parameter
-     * @return The parameter value or null if not found. (Note that null can also be return if it is the parameter
-     * value. For strict parameter existence use {@link #hasValue(String, DatabaseChangeLog)}
+     * @param changeLog required for local parameters, ignored for global parameters
+     **/
+    public void setLocal(String key, Object value, DatabaseChangeLog changeLog, ContextExpression contexts, Labels labels, String... databases) {
+        if (changeLog == null) {
+            throw new IllegalArgumentException("changeLog cannot be null when setting a local parameter");
+        }
+
+        final String changelogKey = getLocalKey(changeLog);
+
+        List<ChangeLogParameter> localParams = localParameters.get(changelogKey);
+        if (localParams == null) {
+            localParams = new ArrayList<>();
+            this.localParameters.put(changelogKey, localParams);
+        }
+        localParams.add(new ChangeLogParameter(key, value, contexts, labels, databases));
+    }
+
+    /**
+     * Get the value of the given parameter, taking into account parameters local to the given changelog file and
+     * values configured in {@link #getContexts()} and {@link #getLabels()} and the database.
      */
     public Object getValue(String key, DatabaseChangeLog changeLog) {
-        ChangeLogParameter parameter = findParameter(key, changeLog);
-        return (parameter != null) ? parameter.getValue() : null;
+        final ChangeLogParameter param = getChangelogParameter(key, changeLog, getFilter());
+        if (param == null) {
+            return null;
+        }
+        return param.getValue();
     }
 
-    private ChangeLogParameter findParameter(String key, DatabaseChangeLog changeLog) {
-        ChangeLogParameter result = null;
-
-        List<ChangeLogParameter> found = new ArrayList<>();
-        for (ChangeLogParameter param : changeLogParameters) {
-            if (param.getKey().equalsIgnoreCase(key) && param.isValid()) {
-                found.add(param);
-            }
-        }
-
-        // if any parameters were found, determine which parameter value to use
-        // (even if only one was found, we can not assume it should be used)
-        if (found.size() > 0) {
-            // look for the first global parameter
-            for (ChangeLogParameter changeLogParameter : found) {
-                if (changeLogParameter.isGlobal()) {
-                    result = changeLogParameter;
-                    break;
-                }
-            }
-
-            // if none of the found parameters are global (all of them are local) and
-            // the parameter is searched in the context of a changeSet (otherwise implicitly a global parameter is wanted)
-            if (result == null && changeLog != null) {
-                // look for the first parameter belonging to the current changeLog or the closest ancestor of the changeLog
-                DatabaseChangeLog changeLogOrParent = changeLog;
-                do {
-                    for (ChangeLogParameter changeLogParameter : found) {
-                        //
-                        // If we are iterating through multiple found parameters for the key
-                        // then we skip any with unexpanded parameter values.
-                        // If all of the found parameters have unexpanded values
-                        // then we will just return the first one in the current changelog or closest ancestor.
-                        //
-                        if (found.size() > 1 && isUnexpanded(changeLogParameter)) {
-                            continue;
-                        }
-                        if (changeLogParameter.getChangeLog().equals(changeLogOrParent)) {
-                            result = changeLogParameter;
-                            break;
-                        }
-                    }
-                } while (result == null && (changeLogOrParent = changeLogOrParent.getParentChangeLog()) != null);
-            }
-        }
-
-        return result;
-    }
-
-    private boolean isUnexpanded(ChangeLogParameter changeLogParameter) {
-        Object value = changeLogParameter.getValue();
-        if (value instanceof String) {
-            String string = (String) value;
-            Matcher matcher = ExpressionExpander.EXPRESSION_PATTERN.matcher(string);
-            return matcher.find();
-        }
-        return false;
-    }
-
+    /**
+     * Return whether the given parameters is defined, taking into account parameters local to the given changelog file
+     * as well as contexts, labels, and database configured on this instance
+     */
     public boolean hasValue(String key, DatabaseChangeLog changeLog) {
-        return findParameter(key, changeLog) != null;
+        return getChangelogParameter(key, changeLog, getFilter()) != null;
     }
 
-    public String expandExpressions(String string, DatabaseChangeLog changeLog) {
+    /**
+     * Expand any expressions in the given string, taking into account parameters local to the given changelog file as well as
+     * contexts, labels, and database configured in this instance.
+     */
+    public String expandExpressions(String string, DatabaseChangeLog changeLog) throws UnknownChangeLogParameterException {
         return expressionExpander.expandExpressions(string, changeLog);
     }
 
-    public void setLabels(LabelExpression labels) {
-        this.currentLabelExpression = labels;
+    /**
+     * Gets the contexts to filter calls to {@link #getValue(String, DatabaseChangeLog)} etc. with.
+     */
+    public Contexts getContexts() {
+        return filterContexts;
     }
 
+    /**
+     * Sets the contexts to filter calls to {@link #getValue(String, DatabaseChangeLog)} etc. with.
+     */
+    public void setContexts(Contexts contexts) {
+        this.filterContexts = contexts;
+    }
+
+
+    /**
+     * Gets the labels to filter calls to {@link #getValue(String, DatabaseChangeLog)} etc. with.
+     */
     public LabelExpression getLabels() {
-        return currentLabelExpression;
+        return filterLabels;
     }
 
-    protected static class ExpressionExpander {
-        private boolean enableEscaping;
-        private ChangeLogParameters changeLogParameters;
-        private static final Pattern EXPRESSION_PATTERN = Pattern.compile("(\\$\\{[^\\}]+\\})");
+    /**
+     * Sets the labels to filter calls to {@link #getValue(String, DatabaseChangeLog)} etc. with.
+     */
+    public void setLabels(LabelExpression labels) {
+        this.filterLabels = labels;
+    }
 
-        public ExpressionExpander(ChangeLogParameters changeLogParameters) {
-            this.changeLogParameters = changeLogParameters;
-            this.enableEscaping = ChangeLogParserConfiguration.SUPPORT_PROPERTY_ESCAPING.getCurrentValue();
+    /**
+     * Sets the database to filter calls to {@link #getValue(String, DatabaseChangeLog)} etc. with.
+     */
+    public String getDatabase() {
+        return filterDatabase;
+    }
+
+    /**
+     * Sets the database to filter calls to {@link #getValue(String, DatabaseChangeLog)} etc. with.
+     */
+    public void setDatabase(String filterDatabase) {
+        this.filterDatabase = filterDatabase;
+    }
+
+    private Filter getFilter() {
+        return new Filter(this.filterDatabase, this.filterContexts, this.filterLabels);
+    }
+
+    private ChangeLogParameter getChangelogParameter(String key, DatabaseChangeLog changeLog, Filter filter) {
+        List<ChangeLogParameter> localList = null;
+        if (changeLog != null) {
+            localList = localParameters.get(getLocalKey(changeLog));
         }
 
-        public String expandExpressions(String text, DatabaseChangeLog changeLog) {
-            if (text == null) {
-                return null;
+        for (List<ChangeLogParameter> paramList : Arrays.asList(globalParameters, localList)) {
+            if (paramList == null) {
+                continue;
             }
-            Matcher matcher = EXPRESSION_PATTERN.matcher(text);
-            String originalText = text;
-            while (matcher.find()) {
-                String expressionString = originalText.substring(matcher.start(), matcher.end());
-                String valueTolookup = expressionString.replaceFirst("\\$\\{", "").replaceFirst("\\}$", "");
 
-                Object value = (enableEscaping && valueTolookup.startsWith(":")) ? null : changeLogParameters
-                    .getValue(valueTolookup, changeLog);
-
-                if (value != null) {
-                    text = text.replace(expressionString, value.toString());
+            for (ChangeLogParameter parameter : paramList) {
+                if (parameter.getKey().equalsIgnoreCase(key) && (filter == null || filter.matches(parameter))) {
+                    return parameter;
                 }
             }
 
-            // replace all escaped expressions with its literal
-            if (enableEscaping) {
-                text = text.replaceAll("\\$\\{:(.+?)}", "\\$\\{$1}");
-            }
-
-            return text;
         }
+
+        return null;
     }
 
-    public class ChangeLogParameter {
-        private String key;
-        private Object value;
-        private ContextExpression validContexts;
-        private Labels labels;
-        private List<String> validDatabases;
-        /** is this parameter a global parameter, means globally over all changesets. */
-        private boolean global = true;
-        private DatabaseChangeLog changeLog;
+    /**
+     * The key to use in {@link #localParameters}
+     */
+    private String getLocalKey(DatabaseChangeLog changeLog) {
+        if (changeLog == null) {
+            return "null changelog path";
+        }
+        return changeLog.getLogicalFilePath();
+    }
+
+    private static class ChangeLogParameter {
+        private final String key;
+        private final Object value;
+
+        private final ContextExpression validContexts;
+        private final Labels validLabels;
+        private final List<String> validDatabases;
 
         public ChangeLogParameter(String key, Object value) {
+            this(key, value, null, null, null);
+        }
+
+        public ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels, String[] validDatabases) {
             this.key = key;
             this.value = value;
-        }
+            this.validContexts = validContexts == null ? new ContextExpression() : validContexts;
+            this.validLabels = labels == null ? new Labels() : labels;
 
-        public ChangeLogParameter(String key, Object value, String validContexts, String labels, String validDatabases,
-                                  boolean globalParam, DatabaseChangeLog changeLog) {
-            this(key, value, new ContextExpression(validContexts), new Labels(labels),
-                StringUtil.splitAndTrim(validDatabases, ","), globalParam, changeLog);
-        }
-
-        private ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels,
-                                   String validDatabases, boolean globalParam, DatabaseChangeLog changeLog) {
-            this(key, value, validContexts, labels, StringUtil.splitAndTrim(validDatabases, ","),
-                globalParam, changeLog);
-        }
-
-        public ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels,
-                                  List<String> validDatabases, boolean globalParam, DatabaseChangeLog changeLog) {
-            this.key = key;
-            this.value = value;
-            this.validContexts = validContexts;
-            this.labels = labels;
-            this.validDatabases = validDatabases;
-            this.global = globalParam;
-            this.changeLog = changeLog;
+            if (validDatabases == null) {
+                this.validDatabases = null;
+            } else {
+                this.validDatabases = Arrays.asList(validDatabases);
+            }
         }
 
         public String getKey() {
@@ -328,49 +317,31 @@ public class ChangeLogParameters {
         }
 
         public Labels getLabels() {
-            return labels;
+            return validLabels;
         }
 
         @Override
         public String toString() {
             return getValue().toString();
         }
+    }
 
-        public boolean isValid() {
-            boolean isValid = (validContexts == null)
-                || validContexts.matches(ChangeLogParameters.this.currentContexts);
+    private static class Filter {
+        private final Contexts contexts;
+        private final LabelExpression labels;
+        private final String database;
 
-            if (isValid) {
-                isValid = (labels == null) || (currentLabelExpression == null)
-                    || currentLabelExpression.matches(labels);
-            }
-
-            if (isValid) {
-                isValid = DatabaseList.definitionMatches(validDatabases, currentDatabase, true);
-            }
-
-            return isValid;
+        public Filter(String database, Contexts contexts, LabelExpression labels) {
+            this.contexts = contexts;
+            this.labels = labels;
+            this.database = database;
         }
 
-        public boolean isDuplicate(ChangeLogParameter other) {
-            String contextString = (this.getValidContexts() != null ? this.getValidContexts().toString() : null);
-            String labelsString = (this.getLabels() != null ? this.getLabels().toString() : null);
-            String databases = (this.getValidDatabases() != null ? StringUtil.join(this.getValidDatabases(), ",") : null);
-
-            String otherContextString = (other.getValidContexts() != null ? other.getValidContexts().toString() : null);
-            String otherLabelsString = (other.getLabels() != null ? other.getLabels().toString() : null);
-            String otherDatabases = (other.getValidDatabases() != null ? StringUtil.join(other.getValidDatabases(), ",") : null);
-            return StringUtil.equalsIgnoreCaseAndEmpty(contextString, otherContextString) &&
-                   StringUtil.equalsIgnoreCaseAndEmpty(labelsString, otherLabelsString) &&
-                   StringUtil.equalsIgnoreCaseAndEmpty(databases, otherDatabases);
-        }
-
-        public boolean isGlobal() {
-            return global;
-        }
-
-        public DatabaseChangeLog getChangeLog() {
-            return changeLog;
+        public boolean matches(ChangeLogParameter parameter) {
+            return (labels == null || labels.matches(parameter.getLabels()))
+                    && (contexts == null || parameter.getValidContexts().matches(contexts))
+                    && (database == null || DatabaseList.definitionMatches(parameter.getValidDatabases(), database, true))
+                    ;
         }
     }
 }

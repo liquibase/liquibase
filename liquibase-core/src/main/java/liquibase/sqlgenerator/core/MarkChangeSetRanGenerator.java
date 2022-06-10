@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.ContextExpression;
+import liquibase.Labels;
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -121,14 +122,12 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         return limitSize(StringUtil.trimToEmpty(changeSet.getComments()));
     }
 
-    private String getContextsColumn(ChangeSet changeSet) {
-        return ((changeSet.getContexts() == null) || changeSet.getContexts()
-                .isEmpty()) ? null : buildFullContext(changeSet);
+    protected String getContextsColumn(ChangeSet changeSet) {
+        return buildFullContext(changeSet);
     }
 
-    private String getLabelsColumn(ChangeSet changeSet) {
-        return ((changeSet.getLabels() == null) || changeSet.getLabels()
-                .isEmpty()) ? null : changeSet.getLabels().toString();
+    protected String getLabelsColumn(ChangeSet changeSet) {
+        return buildFullLabels(changeSet);
     }
 
     private String buildFullContext(ChangeSet changeSet) {
@@ -142,7 +141,28 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         if ((changeSetContext != null) && !changeSetContext.isEmpty()) {
             appendContext(contextExpression, changeSetContext.toString(), notFirstContext);
         }
-        return contextExpression.toString();
+        return StringUtil.trimToNull(contextExpression.toString());
+    }
+
+    private String buildFullLabels(ChangeSet changeSet) {
+        StringBuilder labels = new StringBuilder();
+        boolean notFirstLabel = false;
+        for (Labels inheritableLabel : changeSet.getInheritableLabels()) {
+            appendLabels(labels, inheritableLabel.toString(), notFirstLabel);
+            notFirstLabel = true;
+        }
+        Labels changeSetLabels = changeSet.getLabels();
+        if ((changeSetLabels != null) && !changeSetLabels.isEmpty()) {
+            appendLabels(labels, changeSetLabels.toString(), notFirstLabel);
+        }
+        return StringUtil.trimToNull(labels.toString());
+    }
+
+    private void appendLabels(StringBuilder existingLabels, String labelToAppend, boolean notFirstContext) {
+        if (notFirstContext) {
+            existingLabels.append(COMMA);
+        }
+        existingLabels.append(labelToAppend);
     }
 
     private void appendContext(StringBuilder contextExpression, String contextToAppend, boolean notFirstContext) {
