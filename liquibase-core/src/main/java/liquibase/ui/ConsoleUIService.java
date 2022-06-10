@@ -23,6 +23,8 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
 
     public static final String TERM_PROGRAM = "TERM_PROGRAM";
     public static final String MINTTY = "mintty";
+    public static final String MSYSTEM = "MSYSTEM";
+    public static final String MINGW64 = "mingw64";
 
     public ConsoleUIService() {
     }
@@ -135,14 +137,21 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             } else {
                 //
                 // If no system console and headless was not overridden as headless=false
-                // then check the TERM_PROGRAM environment variable setting
+                // then first, check the TERM_PROGRAM environment variable setting
                 // to detect whether we need to read from stdin
+                // otherwise check the MSYSTEM environment variable to look for the value "mingw"
                 //
                 final Console systemConsole = System.console();
                 boolean useStdIn = wasHeadlessOverridden;
                 String minTtyValue = System.getenv(TERM_PROGRAM);
-                if (systemConsole == null && ! useStdIn && minTtyValue != null) {
-                    useStdIn = minTtyValue.equalsIgnoreCase(MINTTY);
+                if (systemConsole == null && ! useStdIn) {
+                    if (StringUtil.isNotEmpty(minTtyValue)) {
+                        useStdIn = minTtyValue.equalsIgnoreCase(MINTTY);
+                    }
+                    if (! useStdIn) {
+                        String msystem = System.getenv(MSYSTEM);
+                        useStdIn = msystem != null && msystem.equalsIgnoreCase(MINGW64);
+                    }
                 }
                 this.console = new ConsoleWrapper(systemConsole, useStdIn);
 
