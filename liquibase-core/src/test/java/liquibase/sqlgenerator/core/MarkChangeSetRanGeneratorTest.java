@@ -15,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class MarkChangeSetRanGeneratorTest extends AbstractSqlGeneratorTest<MarkChangeSetRanStatement> {
+
     public MarkChangeSetRanGeneratorTest() throws Exception {
         super(new MarkChangeSetRanGenerator());
     }
@@ -72,4 +73,63 @@ public class MarkChangeSetRanGeneratorTest extends AbstractSqlGeneratorTest<Mark
         assertTrue(sql.contains("CONTEXTS = '(childChangeLogContext1, childChangeLogContext2 AND childChangeLogContext3) AND (includeContext1, includeContext2 AND includeContext3) AND (rootContext1 OR (rootContext2) AND (rootContext3)) AND (changeSetContext1 AND changeSetContext2)'"));
         assertTrue(sql.contains("LABELS = 'newlabel123'"));
     }
-}
+
+    @Test
+    public void getLabelsColumn() {
+        final DatabaseChangeLog changeLog = new DatabaseChangeLog();
+        final ChangeSet changeSet = new ChangeSet("1", "a", false, false, "c", null, null, changeLog);
+
+        changeSet.setLabels(null);
+        assert new MarkChangeSetRanGenerator().getLabelsColumn(changeSet) == null;
+
+        changeSet.setLabels(new Labels(""));
+        assert new MarkChangeSetRanGenerator().getLabelsColumn(changeSet) == null;
+
+        changeSet.setLabels(new Labels("a"));
+        assertEquals("a", new MarkChangeSetRanGenerator().getLabelsColumn(changeSet));
+
+        changeSet.setLabels(new Labels("a", "b"));
+        assertEquals("a,b", new MarkChangeSetRanGenerator().getLabelsColumn(changeSet));
+
+        changeLog.setIncludeLabels(new Labels("p1"));
+        assertEquals("p1,a,b", new MarkChangeSetRanGenerator().getLabelsColumn(changeSet));
+
+        changeSet.setLabels(new Labels("a"));
+        assertEquals("p1,a", new MarkChangeSetRanGenerator().getLabelsColumn(changeSet));
+
+        changeSet.setLabels(new Labels());
+        assertEquals("p1", new MarkChangeSetRanGenerator().getLabelsColumn(changeSet));
+
+        changeSet.setLabels(null);
+        assertEquals("p1", new MarkChangeSetRanGenerator().getLabelsColumn(changeSet));
+    }
+
+    @Test
+    public void getContextsColumn() {
+        final DatabaseChangeLog changeLog = new DatabaseChangeLog();
+        final ChangeSet changeSet = new ChangeSet("1", "a", false, false, "c", null, null, changeLog);
+
+        changeSet.setContexts(null);
+        assert new MarkChangeSetRanGenerator().getContextsColumn(changeSet) == null;
+
+        changeSet.setContexts(new ContextExpression(""));
+        assert new MarkChangeSetRanGenerator().getContextsColumn(changeSet) == null;
+
+        changeSet.setContexts(new ContextExpression("a"));
+        assertEquals("a", new MarkChangeSetRanGenerator().getContextsColumn(changeSet));
+
+        changeSet.setContexts(new ContextExpression("a or b"));
+        assertEquals("(a or b)", new MarkChangeSetRanGenerator().getContextsColumn(changeSet));
+
+        changeLog.setIncludeContexts(new ContextExpression("p1"));
+        assertEquals("p1 AND (a or b)", new MarkChangeSetRanGenerator().getContextsColumn(changeSet));
+
+        changeSet.setContexts(new ContextExpression("a"));
+        assertEquals("p1 AND a", new MarkChangeSetRanGenerator().getContextsColumn(changeSet));
+
+        changeSet.setContexts(new ContextExpression());
+        assertEquals("p1", new MarkChangeSetRanGenerator().getContextsColumn(changeSet));
+
+        changeSet.setContexts(null);
+        assertEquals("p1", new MarkChangeSetRanGenerator().getContextsColumn(changeSet));
+    }}
