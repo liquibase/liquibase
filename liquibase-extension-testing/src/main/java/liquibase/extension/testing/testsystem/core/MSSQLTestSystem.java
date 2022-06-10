@@ -18,6 +18,7 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
         super(definition);
     }
 
+    @SuppressWarnings("java:S2095")
     @Override
     protected @NotNull DatabaseWrapper createContainerWrapper() {
         return new DockerDatabaseWrapper(new MSSQLServerContainer(
