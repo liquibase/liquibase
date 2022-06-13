@@ -1,6 +1,7 @@
 package liquibase.command;
 
 import liquibase.Scope;
+import liquibase.precondition.FailedPrecondition;
 import liquibase.util.StringUtil;
 
 import java.io.OutputStream;
@@ -56,7 +57,11 @@ public class CommandResultsBuilder {
     }
 
     public CommandFailedException commandFailed(String message, int exitCode) {
-        return new CommandFailedException(this.build(), exitCode, message);
+        return commandFailed(message, exitCode, false);
+    }
+
+    public CommandFailedException commandFailed(String message, int exitCode, boolean hidden) {
+        return new CommandFailedException(this.build(), exitCode, message, hidden);
     }
 
     /**
