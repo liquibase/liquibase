@@ -3,6 +3,8 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -270,6 +272,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String databaseChangeLogTableName;
+
     /**
      * Specifies the table name to use for the DATABASECHANGELOGLOCK table.
      *
@@ -277,6 +280,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String databaseChangeLogLockTableName;
+
+    /**
+     * Show the liquibase banner in output.
+     *
+     * @parameter property="liquibase.showBanner"
+     */
+    @PropertyElement
+    protected boolean showBanner = true;
 
     /**
      * Specifies the server ID in the Maven <i>settings.xml</i> to use when authenticating.
@@ -312,20 +323,36 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     private File driverPropertiesFile;
 
-    private boolean hasProLicense;
-
     /**
-     * Specifies your Liquibase Pro license key.
+     * Specifies your Liquibase Pro license key. This has been deprecated in favor of using
+     * "liquibase.liquibaseLicenseKey", but this property will continue to be operational.
      *
      * @parameter property="liquibase.liquibaseProLicenseKey"
      */
     @PropertyElement
-    protected String liquibaseProLicenseKey;
+    @Deprecated
+    private String liquibaseProLicenseKey;
+
+    /**
+     * Specifies your Liquibase license key.
+     *
+     * @parameter property="liquibase.licenseKey"
+     */
+    @PropertyElement
+    private String liquibaseLicenseKey;
 
     protected String commandName;
 
-    protected boolean hasProLicense() {
-        return hasProLicense;
+    /**
+     * Get the specified license key. This first checks liquibaseLicenseKey and if no key is found, then returns
+     * liquibaseProLicenseKey.
+     */
+    protected String getLicenseKey() {
+        if (StringUtil.isNotEmpty(liquibaseLicenseKey)) {
+            return liquibaseLicenseKey;
+        } else {
+            return liquibaseProLicenseKey;
+        }
     }
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
@@ -404,6 +431,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     }
                 }
                 scopeValues.put("integrationDetails", integrationDetails);
+                scopeValues.put("liquibase.licenseKey", getLicenseKey());
 
                 final Map pluginContext = this.getPluginContext();
                 System.out.println(pluginContext.keySet());
@@ -411,12 +439,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                     configureFieldsAndValues();
 
-                    //
-                    // Check for a LiquibasePro license
-                    //
-                    hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
-
-                    getLog().info(CommandLineUtils.getBanner());
+                    if (showBanner) {
+                        getLog().info(CommandLineUtils.getBanner());
+                    }
 
                     // Displays the settings for the Mojo depending of verbosity mode.
                     displayMojoSettings();
@@ -426,54 +451,56 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                     Database database = null;
                     try {
-                        String dbPassword = (emptyPassword || (password == null)) ? "" : password;
-                        String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
-                        database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
-                                url,
-                                username,
-                                dbPassword,
-                                driver,
-                                defaultCatalogName,
-                                defaultSchemaName,
-                                outputDefaultCatalog,
-                                outputDefaultSchema,
-                                databaseClass,
-                                driverPropsFile,
-                                propertyProviderClass,
-                                changelogCatalogName,
-                                changelogSchemaName,
-                                databaseChangeLogTableName,
-                                databaseChangeLogLockTableName);
-                        liquibase = createLiquibase(database);
+                        if (databaseConnectionRequired()) {
+                            String dbPassword = (emptyPassword || (password == null)) ? "" : password;
+                            String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
+                            database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
+                                    url,
+                                    username,
+                                    dbPassword,
+                                    driver,
+                                    defaultCatalogName,
+                                    defaultSchemaName,
+                                    outputDefaultCatalog,
+                                    outputDefaultSchema,
+                                    databaseClass,
+                                    driverPropsFile,
+                                    propertyProviderClass,
+                                    changelogCatalogName,
+                                    changelogSchemaName,
+                                    databaseChangeLogTableName,
+                                    databaseChangeLogLockTableName);
+                            liquibase = createLiquibase(database);
 
-                        configureChangeLogProperties();
+                            configureChangeLogProperties();
 
-                        getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+                            getLog().debug("expressionVars = " + String.valueOf(expressionVars));
 
-                        if (expressionVars != null) {
-                            for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
-                                this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
-                            }
-                        }
-
-                        getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
-                        if (expressionVariables != null) {
-                            for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
-                                if (var.getValue() != null) {
+                            if (expressionVars != null) {
+                                for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
                                     this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
                                 }
                             }
-                        }
 
-                        if (clearCheckSums) {
-                            getLog().info("Clearing the Liquibase checksums on the database");
-                            liquibase.clearCheckSums();
-                        }
+                            getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
+                            if (expressionVariables != null) {
+                                for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
+                                    if (var.getValue() != null) {
+                                        this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
+                                    }
+                                }
+                            }
 
-                        getLog().info("Executing on Database: " + url);
+                            if (clearCheckSums) {
+                                getLog().info("Clearing the Liquibase checksums on the database");
+                                liquibase.clearCheckSums();
+                            }
 
-                        if (isPromptOnNonLocalDatabase()) {
-                            getLog().info("NOTE: The promptOnLocalDatabase functionality has been removed");
+                            getLog().info("Executing on Database: " + url);
+
+                            if (isPromptOnNonLocalDatabase()) {
+                                getLog().info("NOTE: The promptOnLocalDatabase functionality has been removed");
+                            }
                         }
                         setupBindInfoPackage();
                         performLiquibaseTask(liquibase);
@@ -571,6 +598,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
+            try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
+                if (is == null) {
+                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
+                }
+
+                LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(is, "Property file "+propertyFile);
+                liquibaseConfiguration.registerProvider(fileProvider);
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
     }
 
@@ -649,15 +687,25 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *                              specified.
      */
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
-        if (url == null) {
-            throw new MojoFailureException("The database URL has not been specified either as "
-                    + "a parameter or in a properties file.");
-        }
+        if (databaseConnectionRequired()) {
+            if (url == null) {
+                throw new MojoFailureException("The database URL has not been specified either as "
+                        + "a parameter or in a properties file.");
+            }
 
-        if ((password != null) && emptyPassword) {
-            throw new MojoFailureException("A password cannot be present and the empty "
-                    + "password property both be specified.");
+            if ((password != null) && emptyPassword) {
+                throw new MojoFailureException("A password cannot be present and the empty "
+                        + "password property both be specified.");
+            }
         }
+    }
+
+    /**
+     * Optionally, an implementation of this mojo can override this to indicate that a connection to the database
+     * is not required.
+     */
+    public boolean databaseConnectionRequired() {
+        return true;
     }
 
     /**

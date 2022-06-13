@@ -36,9 +36,13 @@ public class DatabaseUtils {
                         new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA=" +
                                 database.escapeObjectName(schema, Schema.class)));
             } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
-                final String searchPath = executor.queryForObject(new RawSqlStatement("SHOW SEARCH_PATH"), String.class);
+                String searchPath = executor.queryForObject(new RawSqlStatement("SHOW SEARCH_PATH"), String.class);
 
                 if (!searchPath.equals(defaultCatalogName) && !searchPath.startsWith(defaultSchemaName + ",") && !searchPath.startsWith("\"" + defaultSchemaName + "\",")) {
+                    if (database instanceof CockroachDatabase) {
+                        // CockroachDB doesn't support unquoted `$user` type values
+                        searchPath = searchPath.replaceAll("(\\$\\w+)", "'$1'");
+                    }
                     executor.execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class) + ", " + searchPath));
                 }
 

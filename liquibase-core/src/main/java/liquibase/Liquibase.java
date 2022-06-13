@@ -309,7 +309,7 @@ public class Liquibase implements AutoCloseable {
         if (hubUpdater.hubIsNotAvailable(changeLogId)) {
             if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) && changeLogId == null) {
                 String message =
-                    "The API key '" + HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue() + "' was found, but no changelog ID exists.\n" +
+                    "An API key was configured, but no changelog ID exists.\n" +
                     "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
                     "Learn more at https://hub.liquibase.com.";
                 Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);

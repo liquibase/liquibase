@@ -2,7 +2,7 @@ package liquibase.extension.testing.testsystem.wrapper;
 
 /**
  * Wraps the external database used by {@link liquibase.extension.testing.testsystem.DatabaseTestSystem}
- * so that HOW the database is interacted with is indepenent of WHAT we do with that connection.
+ * so that HOW the database is interacted with is independent of WHAT we do with that connection.
  * For example, the same setup logic can be applied regardless of whether the wrapped database is accessed via {@link JdbcDatabaseWrapper} or {@link DockerDatabaseWrapper}.
  */
 public abstract class DatabaseWrapper {

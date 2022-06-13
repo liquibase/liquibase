@@ -33,6 +33,6 @@ public class CompositeLogService extends AbstractLogService {
         for (LogService service : services) {
             loggers.add(service.getLog(clazz));
         }
-        return new CompositeLogger(loggers, this.filter);
+        return new CompositeLogger(loggers);
     }
 }

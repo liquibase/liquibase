@@ -3,9 +3,11 @@ package liquibase.integration.commandline
 
 import liquibase.command.CommandBuilder
 import liquibase.configuration.ConfigurationDefinition
-import picocli.CommandLine
+import liquibase.logging.LogMessageFilter
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import java.util.logging.LogRecord
 
 class LiquibaseCommandLineTest extends Specification {
 

@@ -1,5 +1,7 @@
 package liquibase.precondition;
 
+import liquibase.database.Database;
+import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -21,6 +23,16 @@ public abstract class PreconditionLogic extends AbstractPrecondition {
         if (precondition != null) {
             nestedPreconditions.add(precondition);
         }
+    }
+
+    @Override
+    public ValidationErrors validate(Database database) {
+        final ValidationErrors validationErrors = new ValidationErrors();
+        for (Precondition precondition : getNestedPreconditions()) {
+            validationErrors.addAll(precondition.validate(database));
+        }
+
+        return validationErrors;
     }
 
     @Override

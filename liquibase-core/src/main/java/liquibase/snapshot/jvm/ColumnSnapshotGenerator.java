@@ -23,10 +23,7 @@ import liquibase.util.SqlUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,7 +37,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     protected static final String COLUMN_DEF_COL = "COLUMN_DEF";
 
     private Pattern postgresStringValuePattern = Pattern.compile("'(.*)'::[\\w .]+");
-    private Pattern postgresNumberValuePattern = Pattern.compile("(\\d*)::[\\w .]+");
+    private Pattern postgresNumberValuePattern = Pattern.compile("\\(?(\\d*)\\)?::[\\w .]+");
 
 
     public ColumnSnapshotGenerator() {
@@ -331,9 +328,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                 } else {
                     if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
+                        // It is possible to make a column in Postgres that is varchar (for example) and reported as auto-increment. In this case,
+                        // we'd rather just preserve the default value, so we remove the auto-increment information since that doesn't really make any sense.
                         String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
                         isAutoincrement = StringUtil.trimToNull(isAutoincrement);
                         if (isAutoincrement == null) {
+                            column.setAutoIncrementInformation(null);
+                        } else if (database instanceof PostgresDatabase && PostgresDatabase.VALID_AUTO_INCREMENT_COLUMN_TYPE_NAMES.stream().noneMatch(typeName -> typeName.equalsIgnoreCase((String) columnMetadataResultSet.get("TYPE_NAME")))) {
                             column.setAutoIncrementInformation(null);
                         } else if (isAutoincrement.equals("YES")) {
                             column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
@@ -507,6 +508,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     // SET
                     boilerLength = "6";
                 }
+
                 List<String> enumValues = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(
                         new RawSqlStatement(
                                 "SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, " + boilerLength +
@@ -517,7 +519,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                                         "UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units\n" +
                                         "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 " +
                                         "UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
-                                        "WHERE TABLE_NAME = '" + column.getRelation().getName() + "' \n" +
+                                        "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "' \n" +
+                                        "AND TABLE_NAME = '" + column.getRelation().getName() + "' \n" +
                                         "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
                 String enumClause = "";
                 for (String enumValue : enumValues) {
@@ -664,6 +667,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (database instanceof PostgresDatabase) {
+            if (columnInfo.isAutoIncrement()) {
+                columnMetadataResultSet.set(COLUMN_DEF_COL, null);
+            }
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
             if ((defaultValue != null) && (defaultValue instanceof String)) {
                 Matcher matcher = postgresStringValuePattern.matcher((String) defaultValue);

@@ -6,6 +6,9 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.util.StringUtil;
+
+import java.util.Locale;
 
 @DataTypeInfo(name="double", aliases = {"java.sql.Types.DOUBLE", "java.lang.Double"}, minParameters = 0, maxParameters = 2, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class DoubleType  extends LiquibaseDataType {
@@ -16,13 +19,21 @@ public class DoubleType  extends LiquibaseDataType {
         }
         if (database instanceof MySQLDatabase) {
             DatabaseDataType datatype;
-            if ((getParameters() != null) && (getParameters().length > 1)) {
-                datatype = new DatabaseDataType("DOUBLE", getParameters());
-            } else {
-                datatype = new DatabaseDataType("DOUBLE");
+            String additionalInfo = StringUtil.trimToEmpty(getAdditionalInformation()).toUpperCase(Locale.US);
+            String name = "DOUBLE";
+            if (additionalInfo.contains("PRECISION")) {
+                name += " PRECISION";
+                additionalInfo = additionalInfo.replace("PRECISION", "");
             }
 
-            datatype.addAdditionalInformation(getAdditionalInformation());
+            if ((getParameters() != null) && (getParameters().length > 1)) {
+                datatype = new DatabaseDataType(name, getParameters());
+            } else {
+                datatype = new DatabaseDataType(name);
+            }
+
+            additionalInfo = additionalInfo.replaceAll("\\s+", " ");
+            datatype.addAdditionalInformation(StringUtil.trimToNull(additionalInfo));
             return datatype;
         }
         if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof HsqlDatabase)) {

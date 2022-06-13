@@ -34,6 +34,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "PostgreSQL";
     public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
     public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
+    /**
+     * The data type names which are valid for auto-increment columns.
+     */
+    public static final List<String> VALID_AUTO_INCREMENT_COLUMN_TYPE_NAMES = Collections.unmodifiableList(Arrays.asList("int2", "int4", "int8", "smallint", "int", "bigint", "smallserial", "serial", "bigserial"));
 
     /**
      * Maximum length of PostgresSQL identifier.
@@ -383,5 +387,13 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     @Override
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.LOWER_CASE;
+    }
+
+    @Override
+    public void rollback() throws DatabaseException {
+        super.rollback();
+
+        //Rollback in postgresql resets the search path. Need to put it back to the defaults
+        DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
     }
 }

@@ -46,12 +46,15 @@ import spock.lang.Unroll
 import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.regex.Pattern
+import java.util.stream.Collectors
 
 class CommandTests extends Specification {
 
     private static List<CommandTestDefinition> commandTestDefinitions
 
     public static final PATTERN_FLAGS = Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE
+
+    public static String NOT_NULL = "not_null"
 
     private ConfigurationValueProvider propertiesProvider
 
@@ -300,6 +303,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             catch (Exception e) {
                 savedException = e
                 if (testDef.expectedException == null) {
+                    if (testDef.setup != null) {
+                        for (def setup : testDef.setup) {
+                            setup.cleanup()
+                        }
+                    }
                     throw e
                 } else {
                     assert e.class == testDef.expectedException
@@ -344,7 +352,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                         def seenValue = String.valueOf(returnedResult.getValue())
 
                         assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
-                        assert seenValue == expectedValue
+                        if (expectedValue instanceof Closure) {
+                            assert expectedValue.call(returnedResult)
+                        } else if (expectedValue == NOT_NULL) {
+                            assert seenValue != null: "The result is null"
+                        } else {
+                            assert seenValue == expectedValue
+                        }
                     }
                 }
                 if (testDef.expectFileToExist != null) {
@@ -456,12 +470,19 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     static OutputCheck assertContains(String substring, final Integer occurrences) {
+        return assertContains(substring, occurrences, false)
+    }
+
+    static OutputCheck assertContains(String substring, final Integer occurrences, final Boolean removeWhitespaceFromExpected) {
         return new OutputCheck() {
             private String actualContents
             @Override
             def check(String actual) throws AssertionError {
                 this.actualContents = actual
                 String edited = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))
+                if (Boolean.TRUE == removeWhitespaceFromExpected) {
+                    edited = edited.replaceAll(/\s+/," ")
+                }
                 if (occurrences == null) {
                     boolean b = actual.contains(edited)
                     assert b: "$actual does not contain: '$substring'"
@@ -548,7 +569,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                         throw new ComparisonFailure("$outputDescription does not contain expected", expectedOutputCheck, fullOutput)
                     }
                 } else if (expectedOutputCheck instanceof Pattern) {
-                    String patternString = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern()))
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
                     assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
@@ -628,6 +648,20 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     }
                 }
             }
+        }
+
+        def descriptions =
+                returnList.stream()
+                        .map({ rtp -> rtp.definition.commandTestDefinition.joinedCommand + ": '" + rtp.definition.description + "'" })
+                        .collect(Collectors.toList())
+
+        def duplicateDescriptions =
+                descriptions.stream()
+                        .filter({ d -> Collections.frequency(descriptions, d) > 1 })
+                        .distinct().collect(Collectors.toList())
+
+        if (!duplicateDescriptions.isEmpty()) {
+            throw new Exception("There are duplicate command test definitions with the same description: " + StringUtil.join(duplicateDescriptions, "; "))
         }
 
         return returnList
@@ -908,7 +942,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             def filter = TestFilter.getInstance()
 
             return filter.shouldRun(TestFilter.DB, databaseName) &&
-                    filter.shouldRun("command", definition.commandTestDefinition.joinedCommand)
+                    filter.shouldRun("command", definition.commandTestDefinition.joinedCommand) &&
+                    filter.shouldRun("def", definition.description)
         }
     }
 
@@ -1062,6 +1097,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupRollbackCount(count, changeLogPath))
         }
 
+        void modifyProperties(File propsFile, String key, String value) {
+            this.setups.add(new SetupModifyProperties(propsFile, key, value))
+        }
+
+        void modifyTextFile(File textFile, String originalString, String newString) {
+            this.setups.add(new SetupModifyTextFile(textFile, originalString, newString))
+        }
 
         private void validate() throws IllegalArgumentException {
 
