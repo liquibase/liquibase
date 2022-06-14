@@ -73,7 +73,6 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             validationErrors.checkDisallowedField("addAfterColumn", statement.getAddAfterColumn(), database, database.getClass());
         }
 
-        //not supported on any databases
         if (!((database instanceof H2Database || database instanceof HsqlDatabase))) {
             validationErrors.checkDisallowedField("addBeforeColumn", statement.getAddBeforeColumn(), database, database.getClass());
         }
