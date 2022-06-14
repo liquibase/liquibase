@@ -135,7 +135,7 @@ public class JdbcExecutor extends AbstractExecutor {
             try (PreparedStatement pstmt = factory.create(finalSql)) {
                 final List<?> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
                 for (int i = 0; i < parameters.size(); i++) {
-                    pstmt.setObject(i, parameters.get(0));
+                    pstmt.setObject(i, parameters.get(i));
                 }
                 pstmt.execute();
 
