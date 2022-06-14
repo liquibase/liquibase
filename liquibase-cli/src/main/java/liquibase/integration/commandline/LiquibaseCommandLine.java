@@ -13,7 +13,6 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -30,7 +29,6 @@ import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
 import java.io.*;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -233,7 +231,7 @@ public class LiquibaseCommandLine {
             bestMessage = bestMessage.replace("Unexpected error running Liquibase: ", "");
         }
 
-        if (cause instanceof CommandFailedException && ((CommandFailedException) cause).isHidden()) {
+        if (cause instanceof CommandFailedException && ((CommandFailedException) cause).isExpected()) {
             Scope.getCurrentScope().getLog(getClass()).severe(bestMessage);
         } else {
             Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
