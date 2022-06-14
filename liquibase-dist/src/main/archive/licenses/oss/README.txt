@@ -23,6 +23,7 @@ Apache 2.0 License
 - info.picocli:picocli
 - org.xerial:sqlite-jdbc
 - com.opencsv:opencsv
+- net.snowflake:snowflake-jdbc
 - org.apache.commons:commons-lang3
 - org.apache.commons:commons-text
 - org.apache.commons:commons-collections4
