@@ -466,7 +466,38 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             return type;
         }
 
+        int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
         String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
+        if (database instanceof MariaDBDatabase && columnTypeName.startsWith("DATETIME") && dataType == Types.OTHER) {
+            String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
+            String selectStatement =
+               "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS " +
+               "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "' AND TABLE_NAME = '" + rawTableName + "' AND COLUMN_NAME = '" + column.getName() + "'";
+            Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+            Statement statement = null;
+            ResultSet columnSelectRS = null;
+            try {
+                statement = underlyingConnection.createStatement();
+                columnSelectRS = statement.executeQuery(selectStatement);
+                while (columnSelectRS.next()) {
+                    String actualDataType = columnSelectRS.getString("DATA_TYPE");
+                    columnTypeName = actualDataType.toUpperCase();
+                    dataType = Types.TIMESTAMP;
+                }
+            } catch (SQLException sqle) {
+
+            } finally {
+                try {
+                    if (statement != null) {
+                        statement.close();
+                    }
+                    if (columnSelectRS != null) {
+                        columnSelectRS.close();
+                    }
+                } catch (SQLException ignore) {
+                }
+            }
+        }
 
         if (database instanceof MSSQLDatabase) {
             if ("numeric() identity".equalsIgnoreCase(columnTypeName)) {
@@ -535,7 +566,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
 
-        int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
         Integer columnSize = null;
         Integer decimalDigits = null;
 
