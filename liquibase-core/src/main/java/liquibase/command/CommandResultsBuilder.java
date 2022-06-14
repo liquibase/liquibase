@@ -60,8 +60,8 @@ public class CommandResultsBuilder {
         return commandFailed(message, exitCode, false);
     }
 
-    public CommandFailedException commandFailed(String message, int exitCode, boolean hidden) {
-        return new CommandFailedException(this.build(), exitCode, message, hidden);
+    public CommandFailedException commandFailed(String message, int exitCode, boolean expected) {
+        return new CommandFailedException(this.build(), exitCode, message, expected);
     }
 
     /**
