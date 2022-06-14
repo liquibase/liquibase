@@ -190,7 +190,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         PRESERVE_SCHEMA_CASE = builder.define("preserveSchemaCase", Boolean.class)
-                .setDescription("Should Liquibase preserve the original case of schemas")
+                .setDescription("Should liquibase treat schema and catalog names as case sensitive?")
                 .setDefaultValue(false)
                 .build();
 
