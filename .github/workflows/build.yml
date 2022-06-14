@@ -193,10 +193,9 @@ jobs:
             ./**/target/site
 
       - name: Archive Modules
-        if: ${{ matrix.java == 8 && matrix.os == 'ubuntu-latest'}}
         uses: actions/upload-artifact@v3
         with:
-          name: liquibase-modules
+          name: liquibase-modules-${{ matrix.os }}-jdk${{ matrix.java }}
           path: |
             */target/*-0-SNAPSHOT.jar
 
