@@ -130,12 +130,7 @@ public class JdbcExecutor extends AbstractExecutor {
         if (sql instanceof RawParameterizedSqlStatement) {
             PreparedStatementFactory factory = new PreparedStatementFactory((JdbcConnection) database.getConnection());
 
-            final String[] finalSqls = applyVisitors(sql, sqlVisitors);
-            if (finalSqls.length != 1) {
-                throw new DatabaseException("Unexpected number of statements: " + finalSqls.length);
-            }
-
-            String finalSql = finalSqls[0];
+            String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
             PreparedStatement pstmt = factory.create(finalSql);
 
             try {
@@ -166,6 +161,18 @@ public class JdbcExecutor extends AbstractExecutor {
         execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
     }
 
+    private String applyVisitors(RawParameterizedSqlStatement sql, List<SqlVisitor> sqlVisitors) {
+        String finalSql = sql.getSql();
+        if (sqlVisitors != null) {
+            for (SqlVisitor visitor : sqlVisitors) {
+                if (visitor != null) {
+                    finalSql = visitor.modifySql(finalSql, database);
+                }
+            }
+        }
+        return finalSql;
+    }
+
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws DatabaseException {
         return query(sql, rse, new ArrayList<SqlVisitor>());
@@ -175,12 +182,8 @@ public class JdbcExecutor extends AbstractExecutor {
         if (sql instanceof RawParameterizedSqlStatement) {
             PreparedStatementFactory factory = new PreparedStatementFactory((JdbcConnection) database.getConnection());
 
-            final String[] finalSqls = applyVisitors(sql, sqlVisitors);
-            if (finalSqls.length != 1) {
-                throw new DatabaseException("Unexpected number of statements: " + finalSqls.length);
-            }
+            String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
 
-            String finalSql = finalSqls[0];
             PreparedStatement pstmt = factory.create(finalSql);
 
             try {
