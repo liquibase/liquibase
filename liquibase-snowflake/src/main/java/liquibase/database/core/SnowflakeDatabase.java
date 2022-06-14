@@ -86,54 +86,6 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String getLiquibaseSchemaName() {
-        String liquibaseSchemaName = super.getLiquibaseSchemaName();
-        if (liquibaseSchemaName == null) {
-            return null;
-        }
-        if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
-            return liquibaseSchemaName;
-        }
-        return liquibaseSchemaName.toUpperCase();
-    }
-
-    @Override
-    public String getDefaultCatalogName() {
-        String defaultCatalogName = super.getDefaultCatalogName();
-        return defaultCatalogName == null ? null : defaultCatalogName.toUpperCase();
-    }
-
-    @Override
-    public String getDefaultSchemaName() {
-        String defaultSchemaName = super.getDefaultSchemaName();
-        if (defaultSchemaName == null) {
-            return null;
-        }
-        if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
-            return defaultSchemaName;
-        }
-        return defaultSchemaName.toUpperCase();
-    }
-
-    @Override
-    public String getJdbcCatalogName(final CatalogAndSchema schema) {
-        String jdbcCatalogName = super.getJdbcCatalogName(schema);
-        return jdbcCatalogName == null ? null : jdbcCatalogName.toUpperCase();
-    }
-
-    @Override
-    public String getJdbcSchemaName(final CatalogAndSchema schema) {
-        String jdbcSchemaName = super.getJdbcSchemaName(schema);
-        if (jdbcSchemaName == null) {
-            return null;
-        }
-        if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
-            return jdbcSchemaName;
-        }
-        return jdbcSchemaName.toUpperCase();
-    }
-
-    @Override
     public boolean supportsCatalogs() {
         return true;
     }
