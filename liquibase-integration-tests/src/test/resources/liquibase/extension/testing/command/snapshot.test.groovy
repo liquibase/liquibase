@@ -27,7 +27,7 @@ Optional Args:
     OBFUSCATED
   schemas (String) The schemas to snapshot
     Default: null
-  snapshotFormat (String) Output format to use (JSON or YAML
+  snapshotFormat (String) Output format to use (JSON, YAML, or TXT)
     Default: null
   username (String) Username to use to connect to the database
     Default: null
@@ -69,7 +69,8 @@ Optional Args:
         }
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                snapshot: { CommandTests.NOT_NULL }
         ]
     }
 
@@ -112,7 +113,8 @@ Optional Args:
         expectedOutput = [CommandTests.assertContains("Catalog & Schema:", 1)]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                snapshot: { CommandTests.NOT_NULL }
         ]
     }
 
@@ -155,7 +157,8 @@ Optional Args:
         expectedOutput = [CommandTests.assertContains("Catalog & Schema:", 1)]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                snapshot: { CommandTests.NOT_NULL }
         ]
     }
 
@@ -205,7 +208,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                snapshot: { CommandTests.NOT_NULL }
         ]
     }
 

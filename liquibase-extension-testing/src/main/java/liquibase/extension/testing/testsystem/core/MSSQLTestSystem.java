@@ -18,12 +18,13 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
         super(definition);
     }
 
+    @SuppressWarnings("java:S2095")
     @Override
     protected @NotNull DatabaseWrapper createContainerWrapper() {
-        final MSSQLServerContainer container = new MSSQLServerContainer(DockerImageName.parse(getImageName()).withTag(getVersion()));
-        container.withUrlParam("encrypt", "false");
-
-        return new DockerDatabaseWrapper(container,
+        return new DockerDatabaseWrapper(new MSSQLServerContainer(
+                DockerImageName.parse(getImageName()).withTag(getVersion())
+        )
+                .withUrlParam("encrypt", "false"),
                 this
         ) {
             @Override
@@ -39,6 +40,7 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
 
         return "jdbc:sqlserver://" + container.getHost() + ":" + container.getMappedPort(MSSQLServerContainer.MS_SQL_SERVER_PORT)+";databaseName="+getCatalog()+";encrypt=false";
     }
+
     @Override
     protected String[] getSetupSql() {
         return new String[]{
@@ -50,15 +52,15 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
                 "CREATE DATABASE " + getAltCatalog(),
                 "EXEC lbcat..sp_addsrvrolemember @loginame = N'" + getUsername() + "', @rolename = N'sysadmin'",
 
-            "USE [" + getCatalog() + "]",
+                "USE [" + getCatalog() + "]",
 //                "ALTER DATABASE ["+getCatalog()+"] MODIFY FILEGROUP [PRIMARY] DEFAULT",
-            "ALTER DATABASE [" + getCatalog() + "] ADD FILEGROUP [" + getAltTablespace() + "]",
+                "ALTER DATABASE [" + getCatalog() + "] ADD FILEGROUP [" + getAltTablespace() + "]",
 
-            "ALTER DATABASE [" + getCatalog() + "] ADD FILE ( NAME = N'" + getAltTablespace() + "', FILENAME = N'/tmp/" + getAltTablespace() + ".ndf' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [" + getAltTablespace() + "]",
+                "ALTER DATABASE [" + getCatalog() + "] ADD FILE ( NAME = N'" + getAltTablespace() + "', FILENAME = N'/tmp/" + getAltTablespace() + ".ndf' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [" + getAltTablespace() + "]",
                 "CREATE SCHEMA [" + getAltSchema() + "] AUTHORIZATION [dbo]",
                 "USE [" + getAltCatalog() + "]",
-            "ALTER DATABASE [" + getAltCatalog() + "] ADD FILEGROUP [" + getAltTablespace() + "]",
-            "ALTER DATABASE [" + getAltCatalog() + "] ADD FILE ( NAME = N'" + getAltTablespace() + "', FILENAME = N'/tmp/" + getAltTablespace() + ".ndf' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [" + getAltTablespace() + "]",
+                "ALTER DATABASE [" + getAltCatalog() + "] ADD FILEGROUP [" + getAltTablespace() + "]",
+                "ALTER DATABASE [" + getAltCatalog() + "] ADD FILE ( NAME = N'" + getAltTablespace() + "', FILENAME = N'/tmp/" + getAltTablespace() + ".ndf' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [" + getAltTablespace() + "]",
                 "CREATE SCHEMA [" + getAltSchema() + "] AUTHORIZATION [dbo]"
         };
     }
