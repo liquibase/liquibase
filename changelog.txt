@@ -1,6 +1,51 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.12.0 (2022.06.16)
+
+## Enhancements
+* Changed value modifier to make StandardLockService extendable for future extension by @Cliftonz in https://github.com/liquibase/liquibase/pull/2785
+* Added liquibase.showBanner global configuration setting by @nvoxland in https://github.com/liquibase/liquibase/pull/2871
+* Quality Checks for Databases (DAT-9298) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2715
+* Added configuration options for missing property handling by @dwieland in https://github.com/liquibase/liquibase/pull/2656
+* Add ConfiguredValueModifier extension point for plugins by @mcred in https://github.com/liquibase/liquibase/pull/2252
+* Added showBanner configuration to maven by @nvoxland in https://github.com/liquibase/liquibase/pull/2933
+* Added new argument to preserve schema case DAT-10027 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2888
+* Introduced "latest" xsd file path by @nvoxland in https://github.com/liquibase/liquibase/pull/2886
+* Moved Snowflake support into standard liquibase [DAT-10294]  by @KushnirykOleh in https://github.com/liquibase/liquibase/pull/2841
+
+## JDBC Driver and Third-Party Library Updates
+* Added connector-api.jar to internal/lib by @nvoxland in https://github.com/liquibase/liquibase/pull/2873
+* Upgraded mysql-connector-java from 8.0.28 to 8.0.29 by @dependabot in https://github.com/liquibase/liquibase/pull/2798
+* Move opencsv to be non-shaded by @nvoxland in https://github.com/liquibase/liquibase/pull/2903
+* Added snowflake driver to CLI by @nvoxland in https://github.com/liquibase/liquibase/pull/2931
+* Upgraded mssql-jdbc from 10.2.0.jre8 to 10.2.1.jre8 by @dependabot in https://github.com/liquibase/liquibase/pull/2846
+
+## Fixes
+* Fixed BLOBs in loadData for MySQL/MariaDB  by @MichaelCkr in https://github.com/liquibase/liquibase/pull/2595
+* Fixed getting ENUM column values from Mysql database having multiple schemas by @akatiyar in https://github.com/liquibase/liquibase/pull/2616
+* Added logic to Derby.getDefaultDriver() to check for availability of different driver classes by @AlexanderSashchenko in https://github.com/liquibase/liquibase/pull/2571
+* Fixed TableOutput spaces when using long words (DAT-10069) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2879
+* Fixed addAutoIncrement startValue and incrementBy support on postgresql by @nvoxland in https://github.com/liquibase/liquibase/pull/2588
+* Support non-classpath: protocols in Spring by @reallyinsane in https://github.com/liquibase/liquibase/pull/2524
+* Fixed #2780: AddColumnChange with schema and NOT NULL constraint fails by @MartinRied in https://github.com/liquibase/liquibase/pull/2781
+* Make extension matching for SQL parsers case-insensitve DAT-10265 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2884
+* Restored outputDefaultSchema and outputDefaultCatalog command arguments by @nvoxland in https://github.com/liquibase/liquibase/pull/2834
+* Quote liquibase.jar path in bash launcher by @nvoxland in https://github.com/liquibase/liquibase/pull/2885
+* Fix for working with Firebird 2 and newer versions. Fixes nullables and boolean type. by @mngsgoncalves in https://github.com/liquibase/liquibase/pull/2277
+* Fixed issue if change changelog object is null by @kamalnigam in https://github.com/liquibase/liquibase/pull/2837
+* Filter out license key strings for Hub communication DAT-10522 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2926
+* Specify which parameter is missing in the error message by @bendem in https://github.com/liquibase/liquibase/pull/2567
+* Split license information into OSS vs. Pro directories by @nvoxland in https://github.com/liquibase/liquibase/pull/2868
+* Use the method setBlob to insert blob data by @xjodoin in https://github.com/liquibase/liquibase/pull/605
+* Smooth out differences in "./" paths by @nvoxland in https://github.com/liquibase/liquibase/pull/2915
+* Include inherited labels in databasechangelog table by @nvoxland in https://github.com/liquibase/liquibase/pull/2870
+* Restored OSGi headers by @nvoxland in https://github.com/liquibase/liquibase/pull/2924
+* Working on better Git Bash console solution DAT-10230 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2882
+* close InputStream in SQLFileChange (DAT-9855) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2920
+* Support prepared statements for query by @fbiville in https://github.com/liquibase/liquibase/pull/2913
+* Implement NOT VALID for Postgres databases by @coenvk in https://github.com/liquibase/liquibase/pull/2600
+
 Changes in version 4.11.0 (2022.05.19)
 
 ## Enhancements
