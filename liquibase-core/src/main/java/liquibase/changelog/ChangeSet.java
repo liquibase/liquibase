@@ -1,7 +1,6 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
-import liquibase.LabelExpression;
 import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.*;
@@ -44,6 +43,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * is calculated at run time when ValidatorVisitor is being called
      */
     private CheckSum storedCheckSum;
+
+    public static final String AND = " AND ";
+    public static final String COMMA = ",";
+    public static final String WHITESPACE = " ";
+    public static final String OPEN_BRACKET = "(";
+    public static final String CLOSE_BRACKET = ")";
 
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN, MARK_RAN, INVALID_MD5SUM
@@ -937,6 +942,69 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             changeLog = changeLog.getParentChangeLog();
         }
         return Collections.unmodifiableCollection(labels);
+    }
+
+    /**
+     *
+     * Build and return a string which contains both the change set and inherited context
+     *
+     * @return  String
+     *
+     */
+    public String buildFullContext() {
+        StringBuilder contextExpression = new StringBuilder();
+        boolean notFirstContext = false;
+        for (ContextExpression inheritableContext : getInheritableContexts()) {
+            appendContext(contextExpression, inheritableContext.toString(), notFirstContext);
+            notFirstContext = true;
+        }
+        ContextExpression changeSetContext = getContexts();
+        if ((changeSetContext != null) && !changeSetContext.isEmpty()) {
+            appendContext(contextExpression, changeSetContext.toString(), notFirstContext);
+        }
+        return StringUtil.trimToNull(contextExpression.toString());
+    }
+
+    /**
+     *
+     * Build and return a string which contains both the change set and inherited labels
+     *
+     * @return  String
+     *
+     */
+    public String buildFullLabels() {
+        StringBuilder labels = new StringBuilder();
+        boolean notFirstLabel = false;
+        for (Labels inheritableLabel : getInheritableLabels()) {
+            appendLabels(labels, inheritableLabel.toString(), notFirstLabel);
+            notFirstLabel = true;
+        }
+        Labels changeSetLabels = getLabels();
+        if ((changeSetLabels != null) && !changeSetLabels.isEmpty()) {
+            appendLabels(labels, changeSetLabels.toString(), notFirstLabel);
+        }
+        return StringUtil.trimToNull(labels.toString());
+    }
+
+    private void appendLabels(StringBuilder existingLabels, String labelToAppend, boolean notFirstContext) {
+        if (notFirstContext) {
+            existingLabels.append(COMMA);
+        }
+        existingLabels.append(labelToAppend);
+    }
+
+    private void appendContext(StringBuilder contextExpression, String contextToAppend, boolean notFirstContext) {
+        boolean complexExpression = contextToAppend.contains(COMMA) || contextToAppend.contains(WHITESPACE);
+        if (notFirstContext) {
+            contextExpression.append(AND);
+        }
+        if (complexExpression) {
+            contextExpression.append(OPEN_BRACKET);
+        }
+        contextExpression.append(contextToAppend);
+        if (complexExpression) {
+            contextExpression.append(CLOSE_BRACKET);
+        }
     }
 
     public DatabaseChangeLog getChangeLog() {
