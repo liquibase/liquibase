@@ -4,6 +4,7 @@ import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.core.AddAutoIncrementChange
 import liquibase.change.core.CreateTableChange
+import liquibase.database.ObjectQuotingStrategy
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.statement.DatabaseFunction
@@ -12,7 +13,7 @@ import liquibase.statement.SequenceNextValueFunction
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.sql.Time
+import java.beans.PropertyDescriptor
 
 class ObjectUtilTest extends Specification {
 
@@ -75,11 +76,101 @@ class ObjectUtilTest extends Specification {
         ObjectUtil.convert(input, targetClass) == expected
 
         where:
-        input                                  | targetClass | expected
-        "xyz"                                  | String      | "xyz"
-        "123"                                  | Integer     | 123
-        "78bff7f0-dd80-4f53-9bb3-f3cbb9a15ba5" | UUID        | UUID.fromString("78bff7f0-dd80-4f53-9bb3-f3cbb9a15ba5")
-        "2021-05-09 00:54:57.574616"           | Date        | new ISODateFormat().parse("2021-05-09 00:54:57.574616")
-        "2021-05-09"                           | Date        | new ISODateFormat().parse("2021-05-09")
+        input                                  | targetClass           | expected
+        null                                   | String                | null
+        "xyz"                                  | String                | "xyz"
+        "78bff7f0-dd80-4f53-9bb3-f3cbb9a15ba5" | UUID                  | UUID.fromString("78bff7f0-dd80-4f53-9bb3-f3cbb9a15ba5")
+        "2021-05-09 00:54:57.574616"           | Date                  | new ISODateFormat().parse("2021-05-09 00:54:57.574616")
+        "2021-05-09"                           | Date                  | new ISODateFormat().parse("2021-05-09")
+        ObjectQuotingStrategy.LEGACY           | String                | "LEGACY"
+        "LEGACY"                               | ObjectQuotingStrategy | ObjectQuotingStrategy.LEGACY
+        "1"                                    | Integer               | Integer.valueOf(1)
+        Long.valueOf(1)                        | Integer               | Integer.valueOf(1)
+        Long.valueOf(1)                        | Short                 | Short.valueOf("1")
+        Integer.valueOf(1)                     | Long                  | Long.valueOf(1)
+        Long.valueOf(1)                        | Byte                  | Byte.valueOf("1")
+        Long.valueOf(1)                        | BigInteger            | BigInteger.valueOf(1)
+        Float.valueOf(2.3)                     | BigDecimal            | BigDecimal.valueOf(2.3)
+        BigDecimal.valueOf(2.3)                | Float                 | Float.valueOf(2.3)
+
+        ""                                     | Integer               | Integer.valueOf(0)
+        "1"                                    | Integer               | Integer.valueOf(1)
+        "1"                                    | Short                 | Short.valueOf("1")
+        "1"                                    | Long                  | Long.valueOf(1)
+        "1"                                    | Byte                  | Byte.valueOf("1")
+        "1"                                    | BigInteger            | BigInteger.valueOf(1)
+        "2.3"                                  | BigDecimal            | BigDecimal.valueOf(2.3)
+        "2.3"                                  | Float                 | Float.valueOf(2.3)
+
+        "true"                                 | Boolean               | true
+        "TruE"                                 | Boolean               | true
+        "t"                                    | Boolean               | true
+        "T"                                    | Boolean               | true
+        "yes"                                  | Boolean               | true
+        "false"                                | Boolean               | false
+
+        [1, 2, 3] as Object[]                  | List                  | [1, 2, 3] as List
+        [1, 2, 3] as Set                       | List                  | [1, 2, 3] as List
+        "a value"                              | StringClauses         | new StringClauses().append("a value")
+        Object.class.name                      | Class                 | Object
+        "/path/to/file.txt"                    | File                  | new File("/path/to/file.txt")
+
     }
+
+    @Unroll
+    def getPropertyType() {
+        expect:
+        ObjectUtil.getPropertyType(object, property) == expected
+
+        where:
+        object            | property  | expected
+        new Date(1821212) | "time"    | long
+        new Date(1821212) | "invalid" | null
+        null              | "time"    | null
+    }
+
+    @Unroll
+    def setProperty() {
+        given:
+        def object = new CreateTableChange()
+
+        when:
+        ObjectUtil.setProperty(object, "tableName", propertyValue)
+
+        then:
+        object.tableName == expectedValue
+
+        where:
+        propertyValue | expectedValue
+        "new value"   | "new value"
+        123           | "123"
+    }
+
+    @Unroll
+    def defaultIfNull() {
+        expect:
+        ObjectUtil.defaultIfNull(input, value) == expected
+
+        where:
+        input | value | expected
+        "1"   | null  | "1"
+        "1"   | "2"   | "1"
+        null  | "2"   | "2"
+        null  | null  | null
+    }
+
+    def "getDescriptors"() {
+        when:
+        def descriptors = ObjectUtil.getDescriptors(CreateTableChange)
+
+        def descriptorsMap = new HashMap<String, PropertyDescriptor>()
+        for (def descriptor : descriptors) {
+            descriptorsMap[descriptor.name] = descriptor
+        }
+
+        then:
+        descriptorsMap["columns"].readMethod.name == "getColumns"
+        descriptorsMap["columns"].writeMethod.name == "setColumns"
+    }
+
 }

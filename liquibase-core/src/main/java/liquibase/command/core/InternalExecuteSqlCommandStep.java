@@ -65,7 +65,7 @@ public class InternalExecuteSqlCommandStep extends AbstractCommandStep {
         }
 
         String out = "";
-        String[] sqlStrings = StringUtil.processMutliLineSQL(sqlText, true, true, commandScope.getArgumentValue(DELIMITER_ARG));
+        String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, commandScope.getArgumentValue(DELIMITER_ARG));
         for (String sqlString : sqlStrings) {
             if (sqlString.toLowerCase().matches("\\s*select .*")) {
                 List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sqlString));

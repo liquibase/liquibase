@@ -200,7 +200,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     continue;
                 }
 
-                if (type == DatabaseMetaData.tableIndexStatistic) {
+                if (!(database instanceof H2Database) && type == DatabaseMetaData.tableIndexStatistic) {
                     continue;
                 }
 

@@ -1,9 +1,9 @@
-Liquibase Version ${liquibase.version}
+Liquibase Version ${project.version}
 
 
 Getting Started
 --------------------------------------------
-Thanks for downloading and installing Liquibase ${liquibase.version} from Datical.
+Thanks for downloading and installing Liquibase ${project.version} from Liquibase.
 
 By using the installer, you already have all the dependencies, directories, config, 
 and properties files to get started exploring the Liquibase examples provided, which 
@@ -77,15 +77,14 @@ complex database.
 
 To start the example database: 
     * open your command line or Terminal app
-    * navigate to the directory where you placed "examples" directory
-    * run `examples/start-h2`.
+    * run `liquibase init start-h2`.
 
 To stop the example database:
-    * run `ctrl-c' in the terminal running examples/start-h2
+    * run `ctrl-c' in the terminal running `liquibase init start-h2`
 
 Notes
 
-Running `examples/start-h2` starts local H2 databases that listen on port 9090, and 
+Running `liquibase init start-h2` starts local H2 databases that listen on port 9090, and
 it opens a browser to the database console on the same port. 
     * The Example h2 databases do not store data and will reset when the start-h2 
       process ends via "ctrl-c".
@@ -254,5 +253,5 @@ Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here:
 https://support.liquibase.org/
 
 
-Copyright 2020 Datical, Inc. All rights reserved. The program is subject to the 
+Copyright 2021 Liquibase, Inc. All rights reserved. The program is subject to the
 license agreement, copyright, trademark, patent, and other laws.

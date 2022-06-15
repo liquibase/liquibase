@@ -107,7 +107,7 @@ public class LiquibaseConfiguration implements SingletonObject {
 
 
     /**
-     * Searches for the given keys in the current providers.
+     * Searches for the given keys in the current providers and applies any applicable modifiers.
      *
      * @param keyAndAliases The first element should be the canonical key name, with later elements being aliases. At least one element must be provided.
      * @return the value for the key, or null if not configured.
@@ -126,6 +126,8 @@ public class LiquibaseConfiguration implements SingletonObject {
                 details.override(providerValue);
             }
         }
+
+        Scope.getCurrentScope().getSingleton(ConfiguredValueModifierFactory.class).override(details);
 
         final String foundValue = String.valueOf(details.getValue());
         if (!foundValue.equals(lastLoggedKeyValues.get(keyAndAliases[0]))) {
@@ -190,20 +192,23 @@ public class LiquibaseConfiguration implements SingletonObject {
     }
 
     /**
-     * @return the registered {@link ConfigurationDefinition} asssociated with this key. Null if none match.
+     * @return the registered {@link ConfigurationDefinition} associated with this key. Null if none match.
      */
     public ConfigurationDefinition<?> getRegisteredDefinition(String key) {
         for (ConfigurationDefinition<?> def : getRegisteredDefinitions(true)) {
-            if (def.getKey().equalsIgnoreCase(key)) {
-                return def;
+            List<String> keys = new ArrayList<>();
+            keys.add(def.getKey());
+            keys.addAll(def.getAliasKeys());
+
+            for (String keyName : keys) {
+                if (keyName.equalsIgnoreCase(key)) {
+                    return def;
+                }
+                if (keyName.replace(".", "").equalsIgnoreCase(key)) {
+                    return def;
+                }
             }
-            final Set<String> aliasKeys = def.getAliasKeys();
-            if (aliasKeys != null && aliasKeys.contains(def.getKey())) {
-                return def;
-            }
-            if(def.getKey().replace(".","").equalsIgnoreCase(key)) {
-                return def;
-            }
+            
         }
         return null;
     }

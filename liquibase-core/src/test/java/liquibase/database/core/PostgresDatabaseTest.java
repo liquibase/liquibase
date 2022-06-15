@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
@@ -158,7 +159,7 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
 //    }
 
     private void assertPrimaryKeyName(String expected, String actual) {
-        assertTrue(expected.getBytes(PostgresDatabase.CHARSET).length <= PostgresDatabase.PGSQL_PK_BYTES_LIMIT);
+        assertTrue(expected.getBytes(GlobalConfiguration.FILE_ENCODING.getCurrentValue()).length <= PostgresDatabase.PGSQL_PK_BYTES_LIMIT);
         assert expected.equals(actual) : "Invalid " + actual + " vs expected " + expected;
     }
 

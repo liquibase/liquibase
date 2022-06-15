@@ -1,11 +1,10 @@
 package liquibase.integration.commandline;
 
-import liquibase.Scope;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
+import liquibase.configuration.ConfigurationValueConverter;
 
 import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 /**
@@ -22,10 +21,12 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<Boolean> INCLUDE_SYSTEM_CLASSPATH;
     public static final ConfigurationDefinition<String> DEFAULTS_FILE;
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
+    public static final ConfigurationDefinition<String> LOG_CHANNELS;
     public static final ConfigurationDefinition<File> LOG_FILE;
     public static final ConfigurationDefinition<File> OUTPUT_FILE;
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<ArgumentConverter> ARGUMENT_CONVERTER;
+    public static final ConfigurationDefinition<String> MONITOR_PERFORMANCE;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -58,40 +59,28 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
 
         LOG_LEVEL = builder.define("logLevel", Level.class)
                 .setDefaultValue(Level.OFF,"Controls which logs get set to stderr AND to any log file. The CLI defaults, if log file set, to SEVERE. Others vary by integration. The official log levels are: OFF, SEVERE, WARNING, INFO, FINE")
-                .setValueHandler(value -> {
-                    if (value == null) {
-                        return null;
-                    }
-                    if (value instanceof Level) {
-                        return (Level) value;
-                    }
-                    String stringLevel = String.valueOf(value).toUpperCase();
-                    if (stringLevel.equals("DEBUG")) {
-                        return Level.FINE;
-                    } else if (stringLevel.equals("WARN")) {
-                        return Level.WARNING;
-                    } else if (stringLevel.equals("ERROR")) {
-                        return Level.SEVERE;
-                    }
+                .setValueHandler(ConfigurationValueConverter.LOG_LEVEL)
+                .build();
 
-                    try {
-                        return Level.parse(stringLevel);
-                    } catch (IllegalArgumentException e) {
-                        Scope.getCurrentScope().getUI().sendErrorMessage("WARNING:  Unknown log level " + stringLevel);
-                        return Level.INFO;
-                    }
-                })
+        LOG_CHANNELS = builder.define("logChannels", String.class)
+                .setDefaultValue("liquibase", "Controls which log channels have their level set by the liquibase.logLevel setting. Comma separate multiple values. To set the level of all channels, use 'all'. Example: liquibase,org.mariadb.jdbc")
                 .build();
 
         LOG_FILE = builder.define("logFile", File.class).build();
         OUTPUT_FILE = builder.define("outputFile", File.class).build();
+
+        MONITOR_PERFORMANCE = builder.define("monitorPerformance", String.class)
+                .setDescription("Enable performance tracking. Set to 'false' to disable. If set to 'true', data is stored to a `liquibase-TIMESTAMP.jfr` file in your working directory. Any other value will enable tracking and be used as the name of the file to write the data to.")
+                .setDefaultValue("false")
+                .build();
 
         ARGUMENT_CONVERTER = builder.define("argumentConverter", ArgumentConverter.class)
                 .setInternal(true)
                 .setDescription("Configured by the integration to convert arguments in user messages to something that matches the formats they expect")
                 .setDefaultValue(argument -> argument)
                 .build();
-    }
+
+   }
 
     public interface ArgumentConverter {
         String convert(String argument);

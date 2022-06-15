@@ -299,7 +299,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        if ((quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
+        if ((getObjectQuotingStrategy() == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
                 ( objectName == null) || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
             return objectName;
         } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
@@ -1440,7 +1440,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         getDefaultDatabaseProductName()));
             }
             String sequenceName = databaseFunction.getValue();
-            String sequenceSchemaName = ((SequenceNextValueFunction) databaseFunction).getSequenceSchemaName();
+            String sequenceSchemaName = databaseFunction.getSchemaName();
 
             sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
             if (sequenceNextValueFunction.contains("'")) {
@@ -1458,7 +1458,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         getDefaultDatabaseProductName()));
             }
 
-            String sequenceSchemaName = ((SequenceCurrentValueFunction) databaseFunction).getSequenceSchemaName();
+            String sequenceSchemaName = databaseFunction.getSchemaName();
             String sequenceName = databaseFunction.getValue();
             sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
 
@@ -1475,7 +1475,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    private boolean isCurrentTimeFunction(final String functionValue) {
+    protected boolean isCurrentTimeFunction(final String functionValue) {
         if (functionValue == null) {
             return false;
         }

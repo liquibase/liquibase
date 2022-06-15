@@ -46,6 +46,10 @@ public class MD5Util {
     }
 
     public static String computeMD5(InputStream stream) {
+        if (stream == null) {
+            return null;
+        }
+
         MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");

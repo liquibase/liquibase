@@ -6,6 +6,7 @@ import liquibase.command.core.InternalSyncHubCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.util.UUID;
 
@@ -22,6 +23,7 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.hubConnectionId"
      */
+    @PropertyElement
     protected String hubConnectionId;
 
     /**
@@ -29,6 +31,7 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.hubProjectId"
      */
+    @PropertyElement
     protected String hubProjectId;
 
     @Override

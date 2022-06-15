@@ -8,6 +8,7 @@ import liquibase.change.*;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
@@ -105,6 +106,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * File changeSet is defined in.  May be a logical/non-physical string.  It is included in the unique identifier to allow duplicate id+author combinations in different files
      */
     private String filePath = "UNKNOWN CHANGE LOG";
+
+
+    /**
+     * A logicalFilePath if defined
+     */
+    private String logicalFilePath;
 
     /**
      * File path stored in the databasechangelog table. It should be the same as filePath, but not always.
@@ -255,8 +262,23 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.dbmsSet = DatabaseList.toDbmsSet(dbmsList);
     }
 
+    /**
+     * @return either this object's logicalFilePath or the changelog's filepath (logical or physical) if not.
+     */
     public String getFilePath() {
         return filePath;
+    }
+
+    /**
+     * The logical file path defined directly on this node. Return null if not set.
+     * @return
+     */
+    public String getLogicalFilePath() {
+        return logicalFilePath;
+    }
+
+    public void setLogicalFilePath(String logicalFilePath) {
+        this.logicalFilePath = logicalFilePath;
     }
 
     public String getStoredFilePath() {
@@ -331,7 +353,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             this.objectQuotingStrategy = ObjectQuotingStrategy.LEGACY;
         }
 
-        this.filePath = StringUtil.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
+        this.logicalFilePath = StringUtil.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
+
+        this.filePath = logicalFilePath;
         if (filePath == null) {
             if (changeLog != null) {
                 filePath = changeLog.getFilePath();
@@ -470,7 +494,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (value instanceof String) {
                 String finalValue = StringUtil.trimToNull((String) value);
                 if (finalValue != null) {
-                    String[] strings = StringUtil.processMutliLineSQL(finalValue, true, true, ";");
+                    String[] strings = StringUtil.processMultiLineSQL(finalValue, true, true, ";");
                     for (String string : strings) {
                         addRollbackChange(new RawSQLChange(string));
                         foundValue = true;
@@ -696,7 +720,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         if (getRunWith() == null || originalExecutor instanceof LoggingExecutor) {
             return originalExecutor;
         }
-        Executor customExecutor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(getRunWith(), database);
+        String executorName = ChangeSet.lookupExecutor(getRunWith());
+        Executor customExecutor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(executorName, database);
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, customExecutor);
         List<Change> changes = getChanges();
         for (Change change : changes) {
@@ -710,6 +735,33 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
         return originalExecutor;
+    }
+
+    /**
+     *
+     * Look for a configuration property that matches liquibase.<executor name>.executor
+     * and if found, return its value as the executor name
+     *
+     * @param   executorName                     The value from the input changeset runWith attribute
+     * @return  String                           The mapped value
+     *
+     */
+    public static String lookupExecutor(String executorName) {
+        if (StringUtil.isEmpty(executorName)) {
+            return null;
+        }
+        String key = "liquibase." + executorName.toLowerCase() + ".executor";
+        String replacementExecutorName =
+            (String)Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, key).getValue();
+        if (replacementExecutorName != null) {
+            Scope.getCurrentScope().getLog(ChangeSet.class).info("Mapped '" + executorName + "' to executor '" + replacementExecutorName + "'");
+            return replacementExecutorName;
+        } else if (executorName.equalsIgnoreCase("native")) {
+            String message = "Unable to locate an executor for 'runWith=" + executorName + "'.  You must specify a valid executor name.";
+            Scope.getCurrentScope().getLog(ChangeSet.class).warning(message);
+            Scope.getCurrentScope().getUI().sendErrorMessage("WARNING: " + message);
+        }
+        return executorName;
     }
 
     public void rollback(Database database) throws RollbackFailedException {
@@ -823,6 +875,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return contexts;
     }
 
+    public ChangeSet setContexts(ContextExpression contexts) {
+        this.contexts = contexts;
+        return this;
+    }
+
     public Labels getLabels() {
         return labels;
     }
@@ -844,7 +901,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public boolean isInheritableIgnore() {
-        DatabaseChangeLog changeLog = getChangeLog();
+       DatabaseChangeLog changeLog = getChangeLog();
+        if (changeLog == null) {
+            return false;
+        }
+
         return changeLog.isIncludeIgnore();
     }
 
@@ -865,17 +926,17 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return Collections.unmodifiableCollection(expressions);
     }
 
-    public Collection<LabelExpression> getInheritableLabels() {
-        Collection<LabelExpression> expressions = new ArrayList<LabelExpression>();
+    public Collection<Labels> getInheritableLabels() {
+        Collection<Labels> labels = new ArrayList<>();
         DatabaseChangeLog changeLog = getChangeLog();
         while (changeLog != null) {
-            LabelExpression expression = changeLog.getIncludeLabels();
-            if (expression != null && !expression.isEmpty()) {
-                expressions.add(expression);
+            Labels includeLabels = changeLog.getIncludeLabels();
+            if (includeLabels != null && !includeLabels.isEmpty()) {
+                labels.add(includeLabels);
             }
             changeLog = changeLog.getParentChangeLog();
         }
-        return Collections.unmodifiableCollection(expressions);
+        return Collections.unmodifiableCollection(labels);
     }
 
     public DatabaseChangeLog getChangeLog() {
@@ -1093,7 +1154,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 Arrays.asList(
                         "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
                         "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
-                        "objectQuotingStrategy", "created"
+                "logicalFilePath", "created"
                 )
         );
     }
@@ -1176,6 +1237,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         if ("created".equals(field)) {
             return getCreated();
+        }
+
+        if ("logicalFilePath".equals(field)) {
+        	return getLogicalFilePath();
         }
 
         if ("rollback".equals(field)) {

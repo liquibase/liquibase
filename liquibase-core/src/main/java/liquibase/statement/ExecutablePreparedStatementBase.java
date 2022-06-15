@@ -5,6 +5,8 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
@@ -14,9 +16,9 @@ import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.file.FilenameUtils;
+import liquibase.util.FilenameUtil;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -87,7 +89,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 } catch (IOException ignore) {
                 }
             }
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
         }
     }
 
@@ -134,6 +136,19 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 stmt.setObject(i, col.getValue(), Types.OTHER);
             } else if (LoadDataChange.LOAD_DATA_TYPE.BLOB.name().equalsIgnoreCase(col.getType())) {
                 stmt.setBlob(i, new ByteArrayInputStream(Base64.getDecoder().decode(col.getValue())));
+            } else if (LoadDataChange.LOAD_DATA_TYPE.CLOB.name().equalsIgnoreCase(col.getType())) {
+                try {
+                    if (database instanceof PostgresDatabase || database instanceof SQLiteDatabase) {
+                        // JDBC driver does not have the .createClob() call implemented yet
+                        stmt.setString(i, col.getValue());
+                    } else {
+                        Clob clobValue = stmt.getConnection().createClob();
+                        clobValue.setString(1, col.getValue());
+                        stmt.setClob(i, clobValue);
+                    }
+                } catch (SQLFeatureNotSupportedException e) {
+                    stmt.setString(i, col.getValue());
+                }
             } else {
                 stmt.setString(i, col.getValue());
             }
@@ -183,9 +198,9 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             try {
                 LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
                 if (lob.length <= Integer.MAX_VALUE) {
-                    stmt.setBinaryStream(i, lob.content, (int) lob.length);
+                    stmt.setBlob(i, lob.content, (int) lob.length);
                 } else {
-                    stmt.setBinaryStream(i, lob.content, lob.length);
+                    stmt.setBlob(i, lob.content, lob.length);
                 }
             } catch (IOException | LiquibaseException e) {
                 throw new DatabaseException(e.getMessage(), e); // wrap
@@ -348,36 +363,9 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     private String getFileName(String fileName) {
-        //  Most of this method were copy-pasted from XMLChangeLogSAXHandler#handleIncludedChangeLog()
-
         String relativeBaseFileName = changeSet.getChangeLog().getPhysicalFilePath();
 
-        // workaround for FilenameUtils.normalize() returning null for relative paths like ../conf/liquibase.xml
-        String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeBaseFileName), fileName);
-        if (tempFile != null) {
-            fileName = tempFile;
-        } else {
-            fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;
-        }
-
-        return fileName;
-    }
-
-    /**
-     * Gets absolute and normalized path for path.
-     * If path is relative, absolute path is calculated relative to change log file.
-     *
-     * @param path Absolute or relative path.
-     * @return Absolute and normalized path.
-     */
-    public String getAbsolutePath(String path) {
-        String p = path;
-        File f = new File(p);
-        if (!f.isAbsolute()) {
-            String basePath = FilenameUtils.getFullPath(changeSet.getChangeLog().getPhysicalFilePath());
-            p = FilenameUtils.normalize(basePath + p);
-        }
-        return p;
+        return FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
     }
 
     @Override

@@ -6,6 +6,7 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.io.Writer;
  * @author JAmes Atwill
  * @goal changelogSyncSQL
  */
+@SuppressWarnings("java:S2095")
 public class LiquibaseChangeLogSyncSQLMojo extends
 		AbstractLiquibaseChangeLogMojo {
 
@@ -28,12 +30,14 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 	 *            default-value=
 	 *            "${project.build.directory}/liquibase/migrate.sql"
 	 */
+	@PropertyElement
 	protected File migrationSqlOutputFile;
 
 	/**
 	 * Update to the changeSet with the given tag command.
 	 * @parameter property="liquibase.toTag"
 	 */
+	@PropertyElement
 	protected String toTag;
 
 	/** The writer for writing the migration SQL. */
@@ -54,14 +58,6 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 	}
 
 	@Override
-	protected boolean isPromptOnNonLocalDatabase() {
-		// Always run on an non-local database as we are not actually modifying
-		// the database
-		// when run on it.
-		return false;
-	}
-
-	@Override
 	protected Liquibase createLiquibase(Database db)
 			throws MojoExecutionException {
 		Liquibase liquibase = super.createLiquibase(db);
@@ -78,7 +74,7 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 									+ migrationSqlOutputFile.getAbsolutePath());
 				}
 			}
-			outputWriter = getOutputWriter(migrationSqlOutputFile);;
+			outputWriter = getOutputWriter(migrationSqlOutputFile);
 		} catch (IOException e) {
 			getLog().error(e);
 			throw new MojoExecutionException(

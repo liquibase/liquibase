@@ -17,6 +17,7 @@ class CommandScopeTest extends Specification {
         when:
         def scope = new CommandScope("mock")
 
+        Scope.getCurrentScope().getSingleton(CommandFactory.class).unregister("mock command")
         def arg = new CommandBuilder([["mock command"]] as String[][]).argument(argumentName, String).defaultValue(defaultValue).build()
 
         def scopeId = Scope.enter([
@@ -41,15 +42,17 @@ class CommandScopeTest extends Specification {
         Scope.exit(scopeId)
 
         where:
-        argumentName        | defaultValue               | passedArg              | passedValue       | expectedValue          | expectedActualKey                        | expectedSource                            | expectedRequestedKey
-        "arg1"              | null                       | "arg1"                 | "arg 1"           | "arg 1"                | "arg1"                                   | "Command argument"                        | "liquibase.command.arg1"
-        "unsetArg"          | null                       | null                   | null              | null                   | "liquibase.command.unsetArg"             | "No configured value found" | "liquibase.command.unsetArg"
-        "argWithDefault"    | "default value"            | null                   | null              | "default value"        | "liquibase.command.mock.argWithDefault"  | "Default value"                           | "liquibase.command.mock.argWithDefault"
-        "setArgWithDefault" | "overridden default value" | "setArgWithDefault"    | "set arg value"   | "set arg value"        | "setArgWithDefault"                      | "Command argument"                        | "liquibase.command.mock.setArgWithDefault"
-        "argSetFromScope"   | null                       | null                   | null              | "value from scope"     | "liquibase.command.mock.argSetFromScope" | "Scoped value"                            | "liquibase.command.mock.argSetFromScope"
-        "otherArgInScope"   | null                       | null                   | null              | "other value in scope" | "liquibase.command.otherArgInScope"      | "Scoped value"                            | "liquibase.command.otherArgInScope"
-        "argSavedKabobCase" | null                       | "arg-saved-kabob-case" | "kabob value"     | "kabob value"          | "arg-saved-kabob-case"                   | "Command argument"                        | "liquibase.command.argSavedKabobCase"
-        "argSavedUpperCase" | null                       | "ARGSAVEDUPPERCASE"    | "uppercase value" | "uppercase value"      | "ARGSAVEDUPPERCASE"                      | "Command argument"                        | "liquibase.command.argSavedUpperCase"
+        argumentName        | defaultValue               | passedArg              | passedValue       | expectedValue          | expectedActualKey                        | expectedSource              | expectedRequestedKey
+        "arg1"              | null                       | "arg1"                 | "arg 1"           | "arg 1"                | "arg1"                                   | "Command argument"          | "liquibase.command.mock.arg1"
+        "unsetArg"          | null                       | null                   | null              | null                   | "liquibase.command.mock.unsetArg"        | "No configured value found" | "liquibase.command.mock.unsetArg"
+        "argWithDefault"    | "default value"            | null                   | null              | "default value"        | "liquibase.command.mock.argWithDefault"  | "Default value"             | "liquibase.command.mock.argWithDefault"
+        "setArgWithDefault" | "overridden default value" | "setArgWithDefault"    | "set arg value"   | "set arg value"        | "setArgWithDefault"                      | "Command argument"          | "liquibase.command.mock.setArgWithDefault"
+        "argSetFromScope"   | "default value"            | null                   | null              | "value from scope"     | "liquibase.command.mock.argSetFromScope" | "Scoped value"              | "liquibase.command.mock.argSetFromScope"
+        "argSetFromScope"   | null                       | null                   | null              | "value from scope"     | "liquibase.command.mock.argSetFromScope" | "Scoped value"              | "liquibase.command.mock.argSetFromScope"
+        "otherArgInScope"   | null                       | null                   | null              | "other value in scope" | "liquibase.command.otherArgInScope"      | "Scoped value"              | "liquibase.command.otherArgInScope"
+        "otherArgInScope"   | "default value"            | null                   | null              | "other value in scope" | "liquibase.command.otherArgInScope"      | "Scoped value"              | "liquibase.command.otherArgInScope"
+        "argSavedKabobCase" | null                       | "arg-saved-kabob-case" | "kabob value"     | "kabob value"          | "arg-saved-kabob-case"                   | "Command argument"          | "liquibase.command.mock.argSavedKabobCase"
+        "argSavedUpperCase" | null                       | "ARGSAVEDUPPERCASE"    | "uppercase value" | "uppercase value"      | "ARGSAVEDUPPERCASE"                      | "Command argument"          | "liquibase.command.mock.argSavedUpperCase"
     }
 
     def "constructor fails for unknown commands"() {

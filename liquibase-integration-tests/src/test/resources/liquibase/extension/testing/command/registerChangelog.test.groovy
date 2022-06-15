@@ -2,7 +2,6 @@ package liquibase.extension.testing.command
 
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
-import liquibase.extension.testing.setup.SetupCreateTempResources
 import liquibase.hub.core.MockHubService
 
 import java.util.regex.Pattern
@@ -32,6 +31,33 @@ Optional Args:
                 statusCode   : 0,
                 registeredChangeLogId  : { MockHubService.randomUUID.toString() }
         ]
+    }
+
+    run "Happy path, supply hub project name when prompted interactively", {
+        arguments = [
+                changelogFile: "changelogs/hsqldb/complete/registered-changelog-test.xml",
+        ]
+        setup {
+            createTempResource "changelogs/hsqldb/complete/rollback.changelog.xml", "changelogs/hsqldb/complete/registered-changelog-test.xml"
+        }
+        testUI = new CommandTests.TestUIWithAnswers(["c", "project name here"] as String[])
+        expectedUI = "Please enter your Project name and press [enter]"
+        expectedResults = [
+                statusCode   : 0,
+                registeredChangeLogId  : { MockHubService.randomUUID.toString() }
+        ]
+    }
+
+    run "Name is too long", {
+        arguments = [
+                hubProjectName   : "String longer than 255 characters qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+                changelogFile: "changelogs/hsqldb/complete/registered-changelog-test.xml",
+        ]
+        setup {
+            createTempResource "changelogs/hsqldb/complete/rollback.changelog.xml", "changelogs/hsqldb/complete/registered-changelog-test.xml"
+        }
+        expectedException = CommandExecutionException.class
+        expectedExceptionMessage = "The project name you gave is longer than 255 characters"
     }
 
     run "Run with already-registered changelog throws an exception", {

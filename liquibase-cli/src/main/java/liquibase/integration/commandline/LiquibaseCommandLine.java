@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandDefinition;
 import liquibase.command.CommandFactory;
+import liquibase.command.CommandFailedException;
 import liquibase.command.core.*;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueProvider;
@@ -12,29 +13,35 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.hub.HubConfiguration;
+import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
-import liquibase.logging.LogMessageFilter;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.ui.ConsoleUIService;
+import liquibase.ui.UIService;
+import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.time.Duration;
 import java.util.*;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -101,7 +108,7 @@ public class LiquibaseCommandLine {
         this.legacyPositionalArguments.put("futurerollbackcountsql", FutureRollbackCountSqlCommandStep.COUNT_ARG.getName());
         this.legacyPositionalArguments.put("futurerollbackfromtagsql", FutureRollbackFromTagSqlCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("tag", TagCommandStep.TAG_ARG.getName());
-        this.legacyPositionalArguments.put("tagExists", TagExistsCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("tagexists", TagExistsCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollback", RollbackCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollbacksql", RollbackSqlCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollbacktodate", RollbackToDateCommandStep.DATE_ARG.getName());
@@ -121,6 +128,7 @@ public class LiquibaseCommandLine {
                 "outputDefaultCatalog",
                 "changelogFile",
                 "hubConnectionId",
+                "hubProjectId",
                 "contexts",
                 "labels",
                 "diffTypes",
@@ -158,7 +166,6 @@ public class LiquibaseCommandLine {
                 "liquibaseSchemaName",
                 "databaseChangeLogTableName",
                 "databaseChangeLogLockTableName",
-                "databaseChangeLogTablespaceName",
                 "classpath",
                 "propertyProviderClass",
                 "promptForNonLocalDatabase",
@@ -245,8 +252,10 @@ public class LiquibaseCommandLine {
                     || exception instanceof CommandLineParsingException) {
                 System.err.println("Error parsing command line: " + bestMessage);
                 printUsage = true;
+            } else if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
+                System.err.println(bestMessage);
             } else {
-                System.err.println("Unexpected error running Liquibase: " + bestMessage);
+                System.err.println("\nUnexpected error running Liquibase: " + bestMessage);
                 System.err.println();
 
                 if (Level.OFF.equals(this.configuredLogLevel)) {
@@ -272,7 +281,10 @@ public class LiquibaseCommandLine {
         } catch (IOException e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Error closing stream: " + e.getMessage(), e);
         }
-
+        if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
+            CommandFailedException cfe = (CommandFailedException) exception.getCause();
+            return cfe.getExitCode();
+        }
         return 1;
     }
 
@@ -299,9 +311,27 @@ public class LiquibaseCommandLine {
 
                     if (!wasHelpOrVersionRequested()) {
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
-                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion()));
-                        Scope.getCurrentScope().getUI().sendMessage(Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService().getLicenseInfo());
+                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersionInfo()));
+
+                        final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+                        if (licenseService == null) {
+                            Scope.getCurrentScope().getUI().sendMessage("WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.");
+                        } else {
+                            Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                        }
                     }
+
+                    CommandLine.ParseResult subcommandParseResult = commandLine.getParseResult();
+                    while (subcommandParseResult.hasSubcommand()) {
+                        subcommandParseResult = subcommandParseResult.subcommand();
+                    }
+
+                    Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
+                    if (changelogParameters.size() != 0) {
+                        Main.newCliChangelogParameters = changelogParameters;
+                    }
+
+                    enableMonitoring();
 
                     int response = commandLine.execute(finalArgs);
 
@@ -338,6 +368,54 @@ public class LiquibaseCommandLine {
             return 1;
         } finally {
             cleanup();
+        }
+    }
+
+    protected void enableMonitoring() {
+        final liquibase.logging.Logger log = Scope.getCurrentScope().getLog(getClass());
+
+        try {
+            final String monitorPerformanceValue = LiquibaseCommandLineConfiguration.MONITOR_PERFORMANCE.getCurrentValue();
+            if (monitorPerformanceValue == null || monitorPerformanceValue.equalsIgnoreCase("false")) {
+                log.fine("Performance monitoring disabled");
+                return;
+            }
+
+            final String version = System.getProperty("java.version");
+            final String[] splitVersion = version.split("\\.", 2);
+            if (Integer.parseInt(splitVersion[0]) < 11) {
+                Scope.getCurrentScope().getUI().sendMessage("Performance monitoring requires Java 11 or greater. Version " + version + " is not supported.");
+                return;
+            }
+
+
+            String filename = monitorPerformanceValue;
+            if (filename.equalsIgnoreCase("true")) {
+                filename = "liquibase-" + new ISODateFormat().format(new Date()).replaceAll("\\W", "_") + ".jfr";
+            }
+            if (!filename.endsWith(".jfr")) {
+                filename = filename + ".jfr";
+            }
+
+            final Class<?> configurationClass = Class.forName("jdk.jfr.Configuration");
+            final Class<?> recordingClass = Class.forName("jdk.jfr.Recording");
+            Object configuration = configurationClass.getMethod("getConfiguration", String.class).invoke(null, "profile");
+            Object recording = recordingClass.getConstructor(configurationClass).newInstance(configuration);
+            recordingClass.getMethod("setMaxSize", long.class).invoke(recording, 0L);
+            recordingClass.getMethod("setMaxAge", Duration.class).invoke(recording, (Duration) null);
+            recordingClass.getMethod("setDumpOnExit", boolean.class).invoke(recording, true);
+            recordingClass.getMethod("setToDisk", boolean.class).invoke(recording, true);
+            final File filePath = new File(filename).getAbsoluteFile();
+            filePath.getParentFile().mkdirs();
+
+            recordingClass.getMethod("setDestination", Path.class).invoke(recording, filePath.toPath());
+            recordingClass.getMethod("start").invoke(recording);
+
+            Scope.getCurrentScope().getUI().sendMessage("Saving performance data to " + filePath.getAbsolutePath());
+        } catch (Throwable e) {
+            final String message = "Error enabling performance monitoring: " + e.getMessage();
+            Scope.getCurrentScope().getUI().sendMessage(message);
+            log.warning(message, e);
         }
     }
 
@@ -405,7 +483,7 @@ public class LiquibaseCommandLine {
         return returnList.toArray(new String[0]);
     }
 
-    private List<ConfigurationValueProvider> registerValueProviders(String[] args) {
+    private List<ConfigurationValueProvider> registerValueProviders(String[] args) throws IOException {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
         List<ConfigurationValueProvider> returnList = new ArrayList<>();
 
@@ -414,16 +492,42 @@ public class LiquibaseCommandLine {
         returnList.add(argumentProvider);
 
         final ConfiguredValue<String> defaultsFileConfig = LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue();
+        /*
+         * The installed licenses are cleared from the license service. Clearing the licenses
+         * forces the license service to reinstall the licenses.
+         *
+         * The call to LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue() above will check
+         * the environment variables for a value, and that requires a valid license. Thus, if the user has a license
+         * key specified in both an environment variable and in their defaults file (using different property names),
+         * the value in the defaults file will not be seen, despite it possibly being more preferred than the value
+         * in the environment variable, because the DefaultsFileValueProvider hasn't been registered yet.
+         */
+        LicenseServiceFactory licenseServiceFactory = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class);
+        if (licenseServiceFactory != null) {
+            LicenseService licenseService = licenseServiceFactory.getLicenseService();
+            if (licenseService != null) {
+                licenseService.reset();
+            }
+        }
+
         final File defaultsFile = new File(defaultsFileConfig.getValue());
         if (defaultsFile.exists()) {
             final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsFile);
             liquibaseConfiguration.registerProvider(fileProvider);
             returnList.add(fileProvider);
         } else {
-            Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
-            if (!defaultsFileConfig.wasDefaultValueUsed()) {
-                //can't use UI since it's not configured correctly yet
-                System.err.println("Could not find defaults file " + defaultsFile.getAbsolutePath());
+            final InputStream defaultsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
+            if (defaultsStream == null) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
+                if (!defaultsFileConfig.wasDefaultValueUsed()) {
+                    //can't use UI since it's not configured correctly yet
+                    System.err.println("Could not find defaults file " + defaultsFileConfig.getValue());
+                }
+            } else {
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File in classpath " + defaultsFileConfig.getValue());
+                liquibaseConfiguration.registerProvider(fileProvider);
+                returnList.add(fileProvider);
+
             }
         }
 
@@ -441,7 +545,6 @@ public class LiquibaseCommandLine {
             Scope.getCurrentScope().getLog(getClass()).fine("Cannot find local defaultsFile " + defaultsFile.getAbsolutePath());
         }
 
-
         return returnList;
     }
 
@@ -458,7 +561,18 @@ public class LiquibaseCommandLine {
         returnMap.putAll(configureLogging());
         returnMap.putAll(configureResourceAccessor(classLoader));
 
-        ConsoleUIService ui = new ConsoleUIService();
+        ConsoleUIService ui = null;
+        List<UIService> uiServices = Scope.getCurrentScope().getServiceLocator().findInstances(UIService.class);
+        for (UIService uiService : uiServices) {
+            if (uiService instanceof ConsoleUIService) {
+                ui = (ConsoleUIService) uiService;
+                break;
+            }
+        }
+        if (ui == null) {
+            ui = new ConsoleUIService();
+        }
+
         ui.setAllowPrompt(true);
         ui.setOutputStream(System.err);
         returnMap.put(Scope.Attr.ui.name(), ui);
@@ -471,16 +585,7 @@ public class LiquibaseCommandLine {
     }
 
     private void configureVersionInfo() {
-        getRootCommand(this.commandLine).getCommandSpec().version(
-                CommandLineUtils.getBanner(),
-                String.format("Running Java under %s (Version %s)",
-                        System.getProperties().getProperty("java.home"),
-                        System.getProperty("java.version")
-                ),
-                "",
-                "Liquibase Version: " + LiquibaseUtil.getBuildVersion(),
-                Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService().getLicenseInfo()
-        );
+        getRootCommand(this.commandLine).getCommandSpec().versionProvider(new LiquibaseVersionProvider());
     }
 
     protected Map<String, Object> configureLogging() throws IOException {
@@ -508,16 +613,13 @@ public class LiquibaseCommandLine {
     private void configureLogging(Level logLevel, File logFile) throws IOException {
         configuredLogLevel = logLevel;
 
-        System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
-
-        java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
-
         final JavaLogService logService = (JavaLogService) Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
+        java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
         logService.setParent(liquibaseLogger);
 
+        System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
 
         java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
-
         Level cliLogLevel = logLevel;
 
         if (logFile != null) {
@@ -535,15 +637,29 @@ public class LiquibaseCommandLine {
             cliLogLevel = Level.OFF;
         }
 
-        rootLogger.setLevel(logLevel);
-        liquibaseLogger.setLevel(logLevel);
+        final String configuredChannels = LiquibaseCommandLineConfiguration.LOG_CHANNELS.getCurrentValue();
+        List<String> channels;
+        if (configuredChannels.equalsIgnoreCase("all")) {
+            channels = new ArrayList<>(Arrays.asList("", "liquibase"));
+        } else {
+            channels = StringUtil.splitAndTrim(configuredChannels, ",");
+
+            if (logLevel == Level.OFF) {
+                channels.add("");
+            }
+        }
+
+        for (String channel : channels) {
+            if (channel.equalsIgnoreCase("all")) {
+                channel = "";
+            }
+            java.util.logging.Logger.getLogger(channel).setLevel(logLevel);
+        }
 
         for (Handler handler : rootLogger.getHandlers()) {
             if (handler instanceof ConsoleHandler) {
                 handler.setLevel(cliLogLevel);
             }
-
-            handler.setFilter(new SecureLogFilter(logService.getFilter()));
         }
     }
 
@@ -616,11 +732,21 @@ public class LiquibaseCommandLine {
 
             configureHelp(subCommandSpec, false);
 
+            //
+            // Add to the usageMessage footer if the CommandDefinition has a footer
+            //
+            if (commandDefinition.getHelpFooter() != null) {
+                String[] usageMessageFooter = subCommandSpec.usageMessage().footer();
+                List<String> list = new ArrayList<>(Arrays.asList(usageMessageFooter));
+                list.add(commandDefinition.getHelpFooter());
+                subCommandSpec.usageMessage().footer(list.toArray(new String[0]));
+            }
+
             String shortDescription = commandDefinition.getShortDescription();
             String displayDescription = shortDescription;
-            String legacyCommand = commandName[commandName.length-1];
-            String camelCaseCommand  = StringUtil.toCamelCase(legacyCommand);
-            if (! legacyCommand.equals(camelCaseCommand)) {
+            String legacyCommand = commandName[commandName.length - 1];
+            String camelCaseCommand = StringUtil.toCamelCase(legacyCommand);
+            if (!legacyCommand.equals(camelCaseCommand)) {
                 displayDescription = "\n" + shortDescription + "\n[deprecated: " + camelCaseCommand + "]";
             }
 
@@ -647,16 +773,29 @@ public class LiquibaseCommandLine {
                     String argDisplaySuffix = "";
                     String argName = argNames[i];
                     String camelCaseArg = StringUtil.toCamelCase(argName.substring(2));
-                    if (! argName.equals("--" + camelCaseArg)) {
+                    if (!argName.equals("--" + camelCaseArg)) {
                         argDisplaySuffix = "\n[deprecated: --" + camelCaseArg + "]";
                     }
 
-                    String description =
-                        "\n(liquibase.command." + def.getName() + " OR liquibase.command." +
-                            StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
-                        "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " +
-                            toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
-                                "." + def.getName()) + ")" + argDisplaySuffix;
+                    //
+                    // Determine if this is a group command and set the property/environment display strings accordingly
+                    //
+                    String description;
+                    if (commandDefinition.getName().length > 1) {
+                        String propertyStringToPresent = "\n(liquibase.command." +
+                                StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")";
+                        String envStringToPresent =
+                                toEnvVariable("\n(liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
+                                        "." + def.getName()) + ")" + argDisplaySuffix;
+                        description = propertyStringToPresent + envStringToPresent;
+                    } else {
+                        description =
+                                "\n(liquibase.command." + def.getName() + " OR liquibase.command." +
+                                        StringUtil.join(commandDefinition.getName(), ".") + "." + def.getName() + ")\n" +
+                                        "(" + toEnvVariable("liquibase.command." + def.getName()) + " OR " +
+                                        toEnvVariable("liquibase.command." + StringUtil.join(commandDefinition.getName(), ".") +
+                                                "." + def.getName()) + ")" + argDisplaySuffix;
+                    }
 
                     if (def.getDefaultValue() != null) {
                         if (def.getDefaultValueDescription() == null) {
@@ -687,6 +826,15 @@ public class LiquibaseCommandLine {
                     }
 
                     subCommandSpec.addOption(builder.build());
+
+                    if (argName.equals("--changelog-file")) {
+                        final CommandLine.Model.OptionSpec.Builder paramBuilder = (CommandLine.Model.OptionSpec.Builder) CommandLine.Model.OptionSpec.builder("-D")
+                                .required(false)
+                                .type(HashMap.class)
+                                .description("Pass a name/value pair for substitution in the changelog(s)\nPass as -D<property.name>=<property.value>\n[deprecated: set changelog properties in defaults file or environment variables]")
+                                .mapFallbackValue("");
+                        subCommandSpec.add(paramBuilder.build());
+                    }
                 }
             }
 
@@ -698,13 +846,13 @@ public class LiquibaseCommandLine {
                         .hidden(true);
                 subCommandSpec.addOption(builder.build());
                 String kabobArg = StringUtil.toKabobCase(legacyArg);
-                if (! kabobArg.equals(legacyArg)) {
+                if (!kabobArg.equals(legacyArg)) {
                     final CommandLine.Model.OptionSpec.Builder kabobOptionBuilder =
-                        CommandLine.Model.OptionSpec.builder("--" + kabobArg)
-                            .required(false)
-                            .type(String.class)
-                            .hidden(true)
-                            .description("Legacy CLI argument");
+                            CommandLine.Model.OptionSpec.builder("--" + kabobArg)
+                                    .required(false)
+                                    .type(String.class)
+                                    .hidden(true)
+                                    .description("Legacy CLI argument");
                     subCommandSpec.addOption(kabobOptionBuilder.build());
                 }
             }
@@ -716,16 +864,16 @@ public class LiquibaseCommandLine {
 
     private CommandLine.Model.OptionSpec.Builder createArgBuilder(CommandArgumentDefinition<?> def, String argName) {
         return CommandLine.Model.OptionSpec.builder(argName)
-                                .required(false)
-                                .converters(value -> {
-                                    if (def.getDataType().equals(Boolean.class)) {
-                                        if (value.equals("")) {
-                                            return "true";
-                                        }
-                                    }
-                                    return value;
-                                })
-                                .type(String.class);
+                .required(false)
+                .converters(value -> {
+                    if (def.getDataType().equals(Boolean.class)) {
+                        if (value.equals("")) {
+                            return "true";
+                        }
+                    }
+                    return value;
+                })
+                .type(String.class);
     }
 
     private List<String[]> expandCommandNames(CommandDefinition commandDefinition) {
@@ -759,6 +907,11 @@ public class LiquibaseCommandLine {
                 parent = addSubcommandGroup(groupName, commandDefinition, parent);
             } else {
                 parent = commandGroup.getCommandSpec();
+                if (commandDefinition.getGroupHelpFooter() != null) {
+                    List<String> list = new ArrayList<>();
+                    list.add(commandDefinition.getHelpFooter());
+                    parent.usageMessage().footer(list.toArray(new String[0]));
+                }
             }
             configureSubcommandGroup(parent, groupName, commandDefinition);
         }
@@ -784,7 +937,12 @@ public class LiquibaseCommandLine {
         final CommandLine.Model.CommandSpec groupSpec = CommandLine.Model.CommandSpec.wrapWithoutInspection(null, defaultFactory);
 
         configureHelp(groupSpec, false);
-
+        if (commandDefinition.getHelpFooter() != null) {
+            String[] usageMessageFooter = groupSpec.usageMessage().footer();
+            List<String> list = new ArrayList<>(Arrays.asList(usageMessageFooter));
+            list.add(commandDefinition.getHelpFooter());
+            groupSpec.usageMessage().footer(list.toArray(new String[0]));
+        }
 
         groupSpec.optionsCaseInsensitive(true);
         groupSpec.subcommandsCaseInsensitive(true);
@@ -830,9 +988,9 @@ public class LiquibaseCommandLine {
                 if (i == 0) {
                     String primaryArg = argNames[i];
                     String camelCaseArg = StringUtil.toCamelCase(primaryArg.substring(2));
-                    if (! primaryArg.equals("--" + camelCaseArg)) {
+                    if (!primaryArg.equals("--" + camelCaseArg)) {
                         description = "\n" + description +
-                            "\n[deprecated: --" + camelCaseArg + "]";
+                                "\n[deprecated: --" + camelCaseArg + "]";
                     }
                 }
 
@@ -857,20 +1015,20 @@ public class LiquibaseCommandLine {
         //
         for (String arg : legacyNoLongerGlobalArguments) {
             final CommandLine.Model.OptionSpec.Builder optionBuilder =
-                CommandLine.Model.OptionSpec.builder("--" + arg)
-                    .required(false)
-                    .type(String.class)
-                    .hidden(true)
-                    .description("Legacy global argument");
+                    CommandLine.Model.OptionSpec.builder("--" + arg)
+                            .required(false)
+                            .type(String.class)
+                            .hidden(true)
+                            .description("Legacy global argument");
             rootCommandSpec.addOption(optionBuilder.build());
             String kabobArg = StringUtil.toKabobCase(arg);
-            if (! kabobArg.equals(arg)) {
+            if (!kabobArg.equals(arg)) {
                 final CommandLine.Model.OptionSpec.Builder kabobOptionBuilder =
-                    CommandLine.Model.OptionSpec.builder("--" + kabobArg)
-                        .required(false)
-                        .type(String.class)
-                        .hidden(true)
-                        .description("Legacy global argument");
+                        CommandLine.Model.OptionSpec.builder("--" + kabobArg)
+                                .required(false)
+                                .type(String.class)
+                                .hidden(true)
+                                .description("Legacy global argument");
                 rootCommandSpec.addOption(kabobOptionBuilder.build());
             }
         }
@@ -885,7 +1043,7 @@ public class LiquibaseCommandLine {
                 "- Environment values (env variable listed above)\n" +
                 "- Defaults file (configuration key OR argument name)\n\n" +
                 "Full documentation is available at\n" +
-                "http://www.liquibase.org";
+                "https://docs.liquibase.com";
 
 
         commandSpec.addOption(CommandLine.Model.OptionSpec.builder("--help", "-h")
@@ -919,28 +1077,155 @@ public class LiquibaseCommandLine {
     }
 
     protected static String[] toArgNames(ConfigurationDefinition<?> def) {
-        LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        returnList.add("--" + StringUtil.toKabobCase(def.getKey().replaceFirst("^liquibase.", "")).replace(".", "-"));
-        returnList.add("--" + StringUtil.toKabobCase(def.getKey()).replace(".", "-"));
-        returnList.add("--" + def.getKey().replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
+        List<String> keys = new ArrayList<>();
+        keys.add(def.getKey());
+        keys.addAll(def.getAliasKeys());
 
-        return returnList.toArray(new String[0]);
+        List<String> returns = new CaseInsensitiveList();
+        for (String key : keys) {
+            insertWithoutDuplicates(returns, "--" + StringUtil.toKabobCase(key.replaceFirst("^liquibase.", "")).replace(".", "-"));
+            insertWithoutDuplicates(returns, "--" + StringUtil.toKabobCase(key.replace(".", "-")));
+            insertWithoutDuplicates(returns, "--" + key.replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
+            insertWithoutDuplicates(returns, "--" + key.replaceAll("\\.", ""));
+        }
+
+        return returns.toArray(new String[0]);
     }
 
-    public static class SecureLogFilter implements Filter {
-
-        private LogMessageFilter filter;
-
-        public SecureLogFilter(LogMessageFilter filter) {
-            this.filter = filter;
+    private static class CaseInsensitiveList extends ArrayList<String> {
+        @Override
+        public boolean contains(Object o) {
+            String paramStr = (String) o;
+            for (String s : this) {
+                if (paramStr.equalsIgnoreCase(s)) {
+                    return true;
+                }
+            }
+            return false;
         }
+    }
+
+    private static void insertWithoutDuplicates(List<String> returnList, String key) {
+        if (returnList.contains(key)) {
+            return;
+        }
+        returnList.add(key);
+    }
+
+    private static class LiquibaseVersionProvider implements CommandLine.IVersionProvider {
 
         @Override
-        public boolean isLoggable(LogRecord record) {
-            final String filteredMessage = filter.filterMessage(record.getMessage());
+        public String[] getVersion() throws Exception {
+            final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+            String licenseInfo = "";
+            if (licenseService == null) {
+                licenseInfo = "WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.";
+            } else {
+                licenseInfo = licenseService.getLicenseInfo();
+            }
 
-            final boolean equals = filteredMessage.equals(record.getMessage());
-            return equals;
+            final Path workingDirectory = Paths.get(".").toAbsolutePath();
+
+            String liquibaseHome;
+            Path liquibaseHomePath = null;
+            try {
+                liquibaseHomePath = new File(ObjectUtil.defaultIfNull(System.getenv("LIQUIBASE_HOME"), workingDirectory.toAbsolutePath().toString())).getAbsoluteFile().getCanonicalFile().toPath();
+                liquibaseHome = liquibaseHomePath.toString();
+            } catch (IOException e) {
+                liquibaseHome = "Cannot resolve LIQUIBASE_HOME: " + e.getMessage();
+            }
+
+            Map<String, LibraryInfo> libraryInfo = new HashMap<>();
+
+            final ClassLoader classLoader = getClass().getClassLoader();
+            if (classLoader instanceof URLClassLoader) {
+                for (URL url : ((URLClassLoader) classLoader).getURLs()) {
+                    if (!url.toExternalForm().startsWith("file:")) {
+                        continue;
+                    }
+                    final File file = new File(url.toURI());
+                    if (file.getName().equals("liquibase.jar")) {
+                        continue;
+                    }
+                    if (file.exists() && file.getName().toLowerCase().endsWith(".jar")) {
+                        final LibraryInfo thisInfo = getLibraryInfo(file);
+                        libraryInfo.putIfAbsent(thisInfo.name, thisInfo);
+                    }
+                }
+            }
+
+            final StringBuilder libraryDescription = new StringBuilder("Libraries:\n");
+            if (libraryInfo.size() == 0) {
+                libraryDescription.append("- UNKNOWN");
+            } else {
+                for (LibraryInfo info : new TreeSet<>(libraryInfo.values())) {
+                    String filePath = info.file.getCanonicalPath();
+
+                    if (liquibaseHomePath != null && info.file.toPath().startsWith(liquibaseHomePath)) {
+                        filePath = liquibaseHomePath.relativize(info.file.toPath()).toString();
+                    }
+                    if (info.file.toPath().startsWith(workingDirectory)) {
+                        filePath = workingDirectory.relativize(info.file.toPath()).toString();
+                    }
+
+                    libraryDescription.append("- "). append(filePath).append(": ").append(info.name).append(" ").append(info.version).append("\n");
+                }
+            }
+
+            return new String[]{
+                    CommandLineUtils.getBanner(),
+                    String.format("Liquibase Home: %s", liquibaseHome),
+                    String.format("Java Home %s (Version %s)",
+                            System.getProperties().getProperty("java.home"),
+                            System.getProperty("java.version")
+                    ),
+                    libraryDescription.toString(),
+                    "",
+                    "Liquibase Version: " + LiquibaseUtil.getBuildVersionInfo(),
+                    licenseInfo,
+            };
+        }
+
+        private LibraryInfo getLibraryInfo(File pathEntryFile) throws IOException {
+            try (final JarFile jarFile = new JarFile(pathEntryFile)) {
+                final LibraryInfo libraryInfo = new LibraryInfo();
+                libraryInfo.file = pathEntryFile;
+
+                final Manifest manifest = jarFile.getManifest();
+                libraryInfo.name = getValue(manifest, "Bundle-Name", "Implementation-Title");
+                libraryInfo.version = getValue(manifest, "Bundle-Version", "Implementation-Version");
+
+                if (libraryInfo.name == null) {
+                    libraryInfo.name = pathEntryFile.getName().replace(".jar", "");
+                }
+                if (libraryInfo.version == null) {
+                    libraryInfo.version = "UNKNOWN";
+                }
+                return libraryInfo;
+            }
+        }
+
+        private String getValue(Manifest manifest, String... keys) {
+            for (String key : keys) {
+                String value = manifest.getMainAttributes().getValue(key);
+                if (value != null) {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+
+        private static class LibraryInfo implements Comparable<LibraryInfo> {
+            private String name;
+            private File file;
+            private String version;
+
+            @Override
+            public int compareTo(LibraryInfo o) {
+                return this.file.compareTo(o.file);
+            }
         }
     }
+
 }

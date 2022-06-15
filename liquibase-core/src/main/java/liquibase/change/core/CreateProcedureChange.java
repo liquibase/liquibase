@@ -1,9 +1,9 @@
 package liquibase.change.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
@@ -212,7 +212,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             String relativeTo = null;
             final Boolean isRelative = isRelativeToChangelogFile();
             if (isRelative != null && isRelative) {
-                relativeTo = getChangeSet().getFilePath();
+                relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
             }
             return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {

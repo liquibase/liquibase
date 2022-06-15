@@ -1,8 +1,15 @@
 package liquibase.sqlgenerator.core
 
-
+import liquibase.Scope
+import liquibase.database.core.DB2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.OracleDatabase
+import liquibase.database.core.PostgresDatabase
+import liquibase.executor.ExecutorService
+import liquibase.parser.ChangeLogParserConfiguration
+import liquibase.sdk.executor.MockExecutor
+import liquibase.sql.Sql
+import liquibase.sql.UnparsedSql
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -48,28 +55,56 @@ class CreateProcedureGeneratorTest extends Specification {
 
     @Unroll
     def "addSchemaToText for databases"() {
-      when:
-      String sql = CreateProcedureGenerator.addSchemaToText(body, "MYSCHEMA", "PROCEDURE", database)
-      then:
-      sql != null && sql.contains(expectedSchema)
+        when:
+        String sql = CreateProcedureGenerator.addSchemaToText(body, "MYSCHEMA", "PROCEDURE", database)
+        then:
+        sql != null && sql.contains(expectedSchema)
 
-      where:
-      [database, body, expectedSchema] <<
-      [[new MSSQLDatabase(),
-      """
+        where:
+        [database, body, expectedSchema] <<
+                [[new MSSQLDatabase(),
+                  """
       CREATE PROCEDURE [procPrintHelloWorld] AS
       BEGIN
       PRINT N'Hello, World! I am a MSSQL procedure.'
       END
        """, "MYSCHEMA.[procPrintHelloWorld]"],
-       [new OracleDatabase(),
-       """
+                 [new OracleDatabase(),
+                  """
         CREATE OR REPLACE PACKAGE PKG1 AS
         PROCEDURE add_test (col1_in NUMBER, col2_in CHAR);
         PROCEDURE del_test (col1_in NUMBER);
         END PKG1;
         """,
-        "PACKAGE PKG1"
-      ]]
+                  "PACKAGE PKG1"
+                 ]]
+    }
+
+    @Unroll
+    def surroundWithSchemaSets() {
+        when:
+        List<Sql> sql = new ArrayList<>([new UnparsedSql("passed sql 1"), new UnparsedSql("passed sql 2")])
+
+        database.setDefaultSchemaName("main_schema")
+
+
+        def executorService = Scope.currentScope.getSingleton(ExecutorService)
+        executorService.setExecutor("jdbc", database, new MockExecutor())
+        Scope.child(ChangeLogParserConfiguration.USE_PROCEDURE_SCHEMA.getKey(), false, {
+            CreateProcedureGenerator.surroundWithSchemaSets(sql, schemaName, database)
+        })
+        executorService.reset()
+
+        then:
+        sql*.toString().join("\n").toString() == expected
+
+        where:
+        schemaName | database             | expected
+        null       | new OracleDatabase() | "passed sql 1;\npassed sql 2;"
+        ""         | new OracleDatabase() | "passed sql 1;\npassed sql 2;"
+        "other"    | new OracleDatabase() | "ALTER SESSION SET CURRENT_SCHEMA=other;\npassed sql 1;\npassed sql 2;\nALTER SESSION SET CURRENT_SCHEMA=MAIN_SCHEMA;"
+        "other"    | new DB2Database()    | "SET CURRENT SCHEMA other;\npassed sql 1;\npassed sql 2;\nSET CURRENT SCHEMA MAIN_SCHEMA;"
+        "other"    | new PostgresDatabase() | "SET SEARCH_PATH TO other, main_schema;\npassed sql 1;\npassed sql 2;\nSET CURRENT SCHEMA main_schema;"
+
     }
 }

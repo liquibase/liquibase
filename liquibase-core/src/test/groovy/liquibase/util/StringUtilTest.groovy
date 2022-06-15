@@ -1,5 +1,6 @@
 package liquibase.util
 
+import liquibase.change.core.CreateTableChange
 import org.hamcrest.Matchers
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -11,7 +12,7 @@ class StringUtilTest extends Specification {
     @Unroll
     def "processMultilineSql examples"() {
         expect:
-        that Arrays.asList(StringUtil.processMutliLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
+        that Arrays.asList(StringUtil.processMultiLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
 
         where:
         stripComments | splitStatements | endDelimiter | rawString                                                                                                                                                                                           | expected
@@ -242,10 +243,13 @@ class StringUtilTest extends Specification {
         StringUtil.toKabobCase(input) == expected
 
         where:
-        input       | expected
-        "a"         | "a"
-        "testValue" | "test-value"
-        null        | null
+        input           | expected
+        "a"             | "a"
+        "testValue"     | "test-value"
+        "testValueHere" | "test-value-here"
+        "TestValueHere" | "test-value-here"
+        "sQL"           | "s-q-l"
+        null            | null
     }
 
     @Unroll
@@ -254,10 +258,427 @@ class StringUtilTest extends Specification {
         StringUtil.toCamelCase(input) == expected
 
         where:
-        input        | expected
-        "a"          | "a"
-        "test-Value" | "testValue"
-        "test_Value" | "testValue"
-        null         | null
+        input             | expected
+        "a"               | "a"
+        "test-value"      | "testValue"
+        "test-Value"      | "testValue"
+        "test_value"      | "testValue"
+        "test-value_here" | "testValueHere"
+        "testValue"       | "testValue"
+        "testValue"       | "testValue"
+        "s-q-l"           | "sQL"
+        null              | null
+    }
+
+    @Unroll
+    def join() {
+        expect:
+        StringUtil.join(input, delimiter) == expected
+
+        where:
+        input                   | delimiter | expected
+        []                      | "x"       | ""
+        ["a", "b"] as List      | ","       | "a,b"
+        ["a", "b", "c"] as List | " X "     | "a X b X c"
+        ["a", "b"] as String[]  | ","       | "a,b"
+        [1, 2] as Integer[]     | ","       | "1,2"
+        [1, 2] as int[]         | ","       | "1,2"
+        ["a", "b"] as TreeSet   | ","       | "a,b"
+        ["a": 1, "b": 2] as Map | ","       | "a=1,b=2"
+    }
+
+    @Unroll
+    def "join with complex options"() {
+        when:
+        def extensible = new CreateTableChange()
+        extensible.set("schemaName", "schema_name")
+        extensible.set("tableName", "table_name")
+
+        then:
+        StringUtil.join(["a", null, "b"], "/", new StringUtil.StringUtilFormatter() {
+            @Override
+            String toString(Object obj) {
+                return "X" + obj + "X"
+            }
+        }) == "XaX/XnullX/XbX"
+
+        StringUtil.join(["c", "a", null, "b"], "/", new StringUtil.StringUtilFormatter() {
+            @Override
+            String toString(Object obj) {
+                return "X" + obj + "X"
+            }
+        }, true) == "XaX/XbX/XcX/XnullX"
+
+        StringUtil.join(extensible, ", ") == "schemaName=schema_name, tableName=table_name"
+    }
+
+    @Unroll
+    def splitAndTrim() {
+        expect:
+        StringUtil.splitAndTrim(input, regexp) == expected
+
+        where:
+        input               | regexp | expected
+        " a  , value, here" | ","    | ["a", "value", "here"]
+        null                | ","    | null
+        ""                  | "X"    | [""]
+    }
+
+    def repeat() {
+        expect:
+        StringUtil.repeat("xa", 4) == "xaxaxaxa";
+        StringUtil.repeat("x", 0) == "";
+    }
+
+    def indent() {
+        expect:
+        StringUtil.indent("a string") == "    a string"
+        StringUtil.indent("a string", 6) == "      a string"
+        StringUtil.indent("a string", 0) == "a string"
+        StringUtil.indent(null, 3) == null
+    }
+
+    def "uppercaseFirst"() {
+        expect:
+        StringUtil.upperCaseFirst(null) == null
+        StringUtil.upperCaseFirst("") == ""
+        StringUtil.upperCaseFirst("a") == "A"
+        StringUtil.upperCaseFirst("abc") == "Abc"
+    }
+
+    def "lowercaseFirst"() {
+        expect:
+        StringUtil.lowerCaseFirst(null) == null
+        StringUtil.lowerCaseFirst("") == ""
+        StringUtil.lowerCaseFirst("A") == "a"
+        StringUtil.lowerCaseFirst("ABC") == "aBC"
+    }
+
+
+    def "hasLowerCase"() {
+        expect:
+        !StringUtil.hasLowerCase(null)
+        !StringUtil.hasLowerCase("")
+        !StringUtil.hasLowerCase("ABC")
+        StringUtil.hasLowerCase("aBc")
+        StringUtil.hasLowerCase("abC")
+        !StringUtil.hasLowerCase("ABC")
+    }
+
+    def "hasUpperCase"() {
+        expect:
+        !StringUtil.hasUpperCase(null)
+        !StringUtil.hasUpperCase("")
+        StringUtil.hasUpperCase("ABC")
+        StringUtil.hasUpperCase("AbC")
+        StringUtil.hasUpperCase("aBC")
+        !StringUtil.hasUpperCase("abc")
+    }
+
+    def "standardizeLineEndings"() {
+        expect:
+        StringUtil.standardizeLineEndings(null) == null
+        StringUtil.standardizeLineEndings("") == ""
+        StringUtil.standardizeLineEndings("a\r\nb\r\n") == "a\nb\n"
+        StringUtil.standardizeLineEndings("a\rb\r") == "a\nb\n"
+        StringUtil.standardizeLineEndings("a\nb\n") == "a\nb\n"
+    }
+
+    @Unroll
+    def "isAscii"() {
+        expect:
+        StringUtil.isAscii(input) == expected
+
+        where:
+        input | expected
+        null  | true
+        ""    | true
+        "a"   | true
+        "abc" | true
+        "ab¢" | false
+    }
+
+    @Unroll
+    def "escapeHtml"() {
+        expect:
+        StringUtil.escapeHtml(input) == expected
+
+        where:
+        input | expected
+        null  | null
+        ""    | ""
+        "abc" | "abc"
+        "ab¢" | "ab&#162;"
+    }
+
+    @Unroll
+    def "isEmpty and isNotEmpty"() {
+        expect:
+        StringUtil.isEmpty(input) == empty
+        StringUtil.isNotEmpty(input) == !empty
+
+        where:
+        input | empty
+        null  | true
+        ""    | true
+        "a"   | false
+        "abc" | false
+    }
+
+    @Unroll
+    def "startsWith"() {
+        expect:
+        StringUtil.startsWith(value, startsWith) == expected
+
+        where:
+        value | startsWith | expected
+        null  | "x"        | false
+        ""    | "x"        | false
+        "a"   | "x"        | false
+        "ax"  | "x"        | false
+        "abc" | "ab"       | true
+    }
+
+    @Unroll
+    def "isWhitespace"() {
+        expect:
+        StringUtil.isWhitespace(value) == expected
+
+        where:
+        value | expected
+        null  | true
+        ""    | true
+        "a"   | false
+        "a x" | false
+        "   " | true
+    }
+
+    @Unroll
+    def "isMinimumVersion"() {
+        expect:
+        StringUtil.isMinimumVersion(version, major, minor, patch) == expected
+
+        where:
+        version  | major | minor | patch | expected
+        null     | 1     | 1     | 1     | true
+        "10"     | 1     | 2     | 3     | false
+        "10"     | 10    | 0     | 0     | true
+        "10"     | 10    | 5     | 1     | true
+        "10.2"   | 10    | 0     | 1     | false
+        "10.2"   | 10    | 5     | 3     | true
+        "10.2.8" | 10    | 1     | 9     | false
+        "10.2.8" | 10    | 2     | 9     | true
+    }
+
+    @Unroll
+    def "limitSize"() {
+        expect:
+        StringUtil.limitSize(input, length) == expected
+
+        where:
+        input        | length | expected
+        null         | 3      | null
+        ""           | 3      | ""
+        "abc"        | 3      | "abc"
+        "abcde"      | 3      | "..."
+        "abcdefghij" | 5      | "ab..."
+    }
+
+    def randomIdentifer() {
+        expect:
+        StringUtil.randomIdentifer(5).length() == 5
+        StringUtil.randomIdentifer(5) != StringUtil.randomIdentifer(5)
+    }
+
+    @Unroll
+    def defaultValueFormatter() {
+        expect:
+        new StringUtil.DefaultFormatter().toString(input) == expected
+
+        where:
+        input                  | expected
+        null                   | null
+        ""                     | ""
+        "abc"                  | "abc"
+        Object                 | "java.lang.Object"
+        new String[0]          | null
+        ["a", "b"] as String[] | "[a, b]"
+        []                     | null
+        ["a", "b"]             | "[a, b]"
+    }
+
+    @Unroll
+    def equalsIgnoreCaseAndEmpty() {
+        expect:
+        StringUtil.equalsIgnoreCaseAndEmpty(s1, s2) == expected
+
+        where:
+        s1   | s2      | expected
+        ""   | ""      | true
+        "a"  | "b"     | false
+        "  " | "     " | true
+        "  " | null    | true
+        null | null    | true
+        null | " "     | true
+        "a"  | null    | false
+        null | "a"     | false
+        "a"  | "a"     | true
+        "a"  | "A"     | true
+    }
+
+
+    @Unroll
+    def "trimRight"() {
+        expect:
+        StringUtil.trimRight(value) == expected
+
+        where:
+        value   | expected
+        null    | null
+        ""      | ""
+        "a   "  | "a"
+        "   a " | "   a"
+        "\na\n" | "\na"
+    }
+
+    @Unroll
+    def getLastBlockComment() {
+        expect:
+        StringUtil.getLastBlockComment(sql) == expected
+
+        where:
+        sql                                    | expected
+        null                                   | null
+        "abc"                                  | null
+        "select * from x"                      | null
+        "select * from /* a comment here */ x" | null
+        "select * from /* a comment here */"   | "/* a comment here */"
+    }
+
+    @Unroll
+    def getLastLineComment() {
+        expect:
+        StringUtil.getLastLineComment(sql) == expected
+
+        where:
+        sql                               | expected
+        null                              | null
+        "abc"                             | null
+        "select * from x"                 | null
+        "select * from -- a comment here" | "-- a comment here"
+    }
+
+    @Unroll
+    def stripSqlCommentsAndWhitespacesFromTheEnd() {
+        expect:
+        StringUtil.stripSqlCommentsAndWhitespacesFromTheEnd(sql) == expected
+
+        where:
+        sql                                    | expected
+        null                                   | null
+        "abc"                                  | "abc"
+        "select * from x"                      | "select * from x"
+        "select * from -- a comment here"      | "select * from"
+        "select * from /* a comment here */ x" | "select * from /* a comment here */ x"
+        "select * from /* a comment here */"   | "select * from"
+
+    }
+
+    @Unroll
+    def equalsNullWord() {
+        expect:
+        StringUtil.equalsWordNull(input) == expected
+
+        where:
+        input     | expected
+        null      | false
+        "abc"     | false
+        "null"    | true
+        "NULL"    | true
+        "  null " | false
+
+    }
+
+    @Unroll
+    def "stripEnclosingQuotes"() {
+        expect:
+        StringUtil.stripEnclosingQuotes(input) == expected
+
+        where:
+        input           | expected
+        ""              | ""
+        "a"             | "a"
+        "\""            | "\""
+        "\"testValue\"" | "testValue"
+        "'testValue'"   | "testValue"
+        "\"testValue"   | "\"testValue"
+    }
+
+    @Unroll
+    def "wrap"() {
+        expect:
+        StringUtil.wrap(input, point, padding) == expected
+
+        where:
+        input           | point | padding | expected
+        null            | 5     | 3       | null
+        "a b c d e f g" | 5     | 3       | "a b c${System.lineSeparator()}   d e f${System.lineSeparator()}   g"
+        "abcdefg"       | 5     | 3       | "abcdefg"
+        "abc defg"      | 5     | 3       | "abc${System.lineSeparator()}   defg"
+    }
+
+    @Unroll
+    def "splitCamelCase"() {
+        expect:
+        StringUtil.splitCamelCase(input) == expected
+
+        where:
+        input       | camel | expected
+        null        | true  | null
+        null        | false | null
+        ""          | true  | []
+        "abc"       | true  | ["abc"]
+        "aBc"       | true  | ["a", "Bc"]
+        "aBcdeFghI" | true  | ["a", "Bcde", "Fgh", "I"]
+        "abCDef"    | true  | ["ab", "C", "Def"]
+    }
+
+    @Unroll
+    def getBytesWithEncoding() {
+        expect:
+        StringUtil.getBytesWithEncoding(input) == expected
+
+        where:
+        input | expected
+        null  | null
+        "abc" | [97, 98, 99] as byte[]
+
+    }
+
+    @Unroll
+    def "isNumeric"() {
+        expect:
+        StringUtil.isNumeric(input) == expected
+
+        where:
+        input  | expected
+        null   | false
+        ""     | false
+        "1.0s" | false
+        "-1"   | false
+        "1.0"  | false
+        "1"    | true
+    }
+
+    @Unroll
+    def "isEmpty"() {
+        expect:
+        StringUtil.isEmpty(input) == expected
+
+        where:
+        input | expected
+        null  | true
+        ""    | true
+        "s"   | false
     }
 }

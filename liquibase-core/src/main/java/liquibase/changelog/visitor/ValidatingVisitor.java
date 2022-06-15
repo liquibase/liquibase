@@ -31,6 +31,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private Map<String, RanChangeSet> ranIndex;
     private Database database;
 
+    //
+    // Added for test
+    //
+    public ValidatingVisitor() {
+    }
+
     public ValidatingVisitor(List<RanChangeSet> ranChangeSets) {
         ranIndex = new HashMap<>();
         for(RanChangeSet changeSet:ranChangeSets) {
@@ -45,7 +51,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             if (preconditions == null) {
                 return;
             }
-            preconditions.check(database, changeLog, null, null);
+            final ValidationErrors foundErrors = preconditions.validate(database);
+            if (foundErrors.hasErrors()) {
+                this.validationErrors.addAll(foundErrors);
+            } else {
+                preconditions.check(database, changeLog, null, null);
+            }
         } catch (PreconditionFailedException e) {
             Scope.getCurrentScope().getLog(getClass()).fine("Precondition Failed: "+e.getMessage(), e);
             failedPreconditions.addAll(e.getFailedPreconditions());

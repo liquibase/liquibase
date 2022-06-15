@@ -5,8 +5,6 @@ package liquibase.statement;
  */
 public class SequenceNextValueFunction extends DatabaseFunction {
 
-    private String sequenceSchemaName;
-
     public SequenceNextValueFunction() {
         this("UNSET");
     }
@@ -15,16 +13,21 @@ public class SequenceNextValueFunction extends DatabaseFunction {
         super(sequenceName);
     }
 
-    public SequenceNextValueFunction(String sequenceName, String sequenceSchemaName) {
-        super(sequenceName);
-        setSequenceSchemaName(sequenceSchemaName);
+    public SequenceNextValueFunction(String sequenceSchemaName, String sequenceName) {
+        super(sequenceSchemaName, sequenceName);
     }
 
+    /**
+     * @deprecated use {@link #getSchemaName()}
+     */
     public String getSequenceSchemaName() {
-        return sequenceSchemaName;
+        return this.getSchemaName();
     }
 
+    /**
+     * @deprecated use {@link #getSchemaName()}
+     */
     public void setSequenceSchemaName(String sequenceSchemaName) {
-        this.sequenceSchemaName = sequenceSchemaName;
+        super.setSchemaName(sequenceSchemaName);
     }
 }

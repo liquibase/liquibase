@@ -5,11 +5,12 @@ import liquibase.command.CommandScope;
 import liquibase.command.core.RegisterChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
+
 import java.io.File;
 import java.util.*;
 
@@ -27,6 +28,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
      *
      * @parameter property="liquibase.hubProjectId"
      */
+    @PropertyElement
     protected String hubProjectId;
 
     /**
@@ -36,6 +38,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
      * @parameter property="liquibase.hubProjectName"
      *
      */
+    @PropertyElement
     protected String hubProjectName;
 
     @Override

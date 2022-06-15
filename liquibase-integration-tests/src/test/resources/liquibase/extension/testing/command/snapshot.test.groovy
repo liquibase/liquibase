@@ -12,6 +12,7 @@ Short Description: Capture the current state of the database
 Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -24,7 +25,9 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
-  snapshotFormat (String) Output format to use (JSON or YAML
+  schemas (String) The schemas to snapshot
+    Default: null
+  snapshotFormat (String) Output format to use (JSON, YAML, or TXT)
     Default: null
   username (String) Username to use to connect to the database
     Default: null
@@ -66,7 +69,96 @@ Optional Args:
         }
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                snapshot: { CommandTests.NOT_NULL }
+        ]
+    }
+
+    run "Happy path with schemas", {
+        arguments = [
+                url      : { it.url },
+                username : { it.username },
+                password : { it.password },
+                schemas  : "public"
+        ]
+        setup {
+            database = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new TagDatabaseChange(
+                            tag: "version_2.0"
+                    ),
+                    new CreateTableChange(
+                            tableName: "liquibaseRunInfo",
+                            columns: [
+                                    ColumnConfig.fromName("timesRan")
+                                            .setType("INT")
+                            ]
+                    ),
+            ]
+        }
+
+        expectedOutput = [CommandTests.assertContains("Catalog & Schema:", 1)]
+
+        expectedResults = [
+                statusCode   : 0,
+                snapshot: { CommandTests.NOT_NULL }
+        ]
+    }
+
+    run "Happy path with multiple schemas", {
+        arguments = [
+                url      : { it.url },
+                username : { it.username },
+                password : { it.password },
+                schemas  : "users,public"
+        ]
+        setup {
+            database = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new TagDatabaseChange(
+                            tag: "version_2.0"
+                    ),
+                    new CreateTableChange(
+                            tableName: "liquibaseRunInfo",
+                            columns: [
+                                    ColumnConfig.fromName("timesRan")
+                                            .setType("INT")
+                            ]
+                    ),
+            ]
+        }
+
+        expectedOutput = [CommandTests.assertContains("Catalog & Schema:", 1)]
+
+        expectedResults = [
+                statusCode   : 0,
+                snapshot: { CommandTests.NOT_NULL }
         ]
     }
 
@@ -116,7 +208,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                snapshot: { CommandTests.NOT_NULL }
         ]
     }
 

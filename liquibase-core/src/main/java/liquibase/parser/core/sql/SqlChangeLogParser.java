@@ -14,11 +14,12 @@ import liquibase.util.StreamUtil;
 import java.io.IOException;
 import java.io.InputStream;
 
+@SuppressWarnings("java:S2583")
 public class SqlChangeLogParser implements ChangeLogParser {
 
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        return changeLogFile.endsWith(".sql");
+        return changeLogFile.toLowerCase().endsWith(".sql");
     }
 
     @Override

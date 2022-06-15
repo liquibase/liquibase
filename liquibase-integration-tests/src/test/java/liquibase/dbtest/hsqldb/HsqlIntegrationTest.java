@@ -14,12 +14,6 @@ public class HsqlIntegrationTest extends AbstractIntegrationTest {
         super("hsqldb", DatabaseFactory.getInstance().getDatabase("hsqldb"));
     }
 
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        // Hsqldb is an in-process database
-        return true;
-    }
-
 
     @Override
     public void setUp() throws Exception {

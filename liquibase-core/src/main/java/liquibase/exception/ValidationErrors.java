@@ -5,6 +5,7 @@ import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.precondition.Precondition;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -33,24 +34,54 @@ public class ValidationErrors {
         this.change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName();
     }
 
+    public ValidationErrors(Precondition precondition) {
+        this.change = precondition.getName();
+    }
+
     public String getChangeName() {
         return this.change;
     }
 
+    /**
+     * Convenience method for {@link #checkRequiredField(String, Object, String, boolean)} with allowEmptyValue=false
+     */
     public ValidationErrors checkRequiredField(String requiredFieldName, Object value) {
-        return checkRequiredField(requiredFieldName, value, null);
+        return checkRequiredField(requiredFieldName, value, false);
     }
 
+    /**
+     * Convenience method for {@link #checkRequiredField(String, Object, String, boolean)} with a null postfix
+     */
+    public ValidationErrors checkRequiredField(String requiredFieldName, Object value, boolean allowEmptyValue) {
+        return checkRequiredField(requiredFieldName, value, null, allowEmptyValue);
+    }
+
+    /**
+     * Convenience method for {@link #checkRequiredField(String, Object, String, boolean)} with allowEmptyValue=false
+     */
     public ValidationErrors checkRequiredField(String requiredFieldName, Object value, String postfix) {
+        return checkRequiredField(requiredFieldName, value, postfix, false);
+    }
+
+    /**
+     * Checks that the the given value is set.
+     * @param allowEmptyValue  If true, empty string and empty arrays are allowed. If false, they are not.
+     */
+    public ValidationErrors checkRequiredField(String requiredFieldName, Object value, String postfix, boolean allowEmptyValue) {
         String err = null;
         if (value == null) {
             err = requiredFieldName + " is required";
-        } else if ((value instanceof Collection && ((Collection<?>) value).isEmpty())
-                || (value instanceof Object[] && ((Object[]) value).length == 0)) {
-            err = "No " + requiredFieldName + " defined";
-        } else if (value instanceof String && StringUtil.trimToNull((String) value) == null) {
-            err = requiredFieldName + " is empty";
         }
+
+        if (!allowEmptyValue) {
+            if ((value instanceof Collection && ((Collection<?>) value).isEmpty())
+                    || (value instanceof Object[] && ((Object[]) value).length == 0)) {
+                err = "No " + requiredFieldName + " defined";
+            } else if (value instanceof String && StringUtil.trimToNull((String) value) == null) {
+                err = requiredFieldName + " is empty";
+            }
+        }
+
         if (err != null) {
             addError(err + (this.change == null ? "" : " for " + this.change)
                     + (postfix == null ? "" : postfix));

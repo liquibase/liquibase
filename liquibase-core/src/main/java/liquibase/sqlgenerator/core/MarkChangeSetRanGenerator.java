@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.ContextExpression;
+import liquibase.Labels;
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -29,6 +30,9 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     public static final String CLOSE_BRACKET = ")";
     public static final String WHITESPACE = " ";
     public static final String COMMA = ",";
+    private static final String COMMENTS = "COMMENTS";
+    private static final String CONTEXTS = "CONTEXTS";
+    private static final String LABELS = "LABELS";
 
     @Override
     public ValidationErrors validate(MarkChangeSetRanStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
@@ -69,6 +73,9 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addNewColumnValue("EXECTYPE", statement.getExecType().value)
                         .addNewColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId())
+                        .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
+                        .addNewColumnValue(CONTEXTS, getContextsColumn(changeSet))
+                        .addNewColumnValue(LABELS, getLabelsColumn(changeSet))
                         .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
                                 "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
                                 "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
@@ -86,12 +93,10 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                             .addColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
                             .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                             .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
-                        .addColumnValue("COMMENTS", limitSize(StringUtil.trimToEmpty(changeSet.getComments())))
-                        .addColumnValue("EXECTYPE", statement.getExecType().value)
-                        .addColumnValue("CONTEXTS", ((changeSet.getContexts() == null) || changeSet.getContexts()
-                                .isEmpty()) ? null : buildFullContext(changeSet))
-                        .addColumnValue("LABELS", ((changeSet.getLabels() == null) || changeSet.getLabels().isEmpty()
-                        ) ? null : changeSet.getLabels().toString())
+                            .addColumnValue(COMMENTS, getCommentsColumn(changeSet))
+                            .addColumnValue("EXECTYPE", statement.getExecType().value)
+                            .addColumnValue(CONTEXTS, getContextsColumn(changeSet))
+                            .addColumnValue(LABELS, getLabelsColumn(changeSet))
                         .addColumnValue("LIQUIBASE", StringUtil.limitSize(LiquibaseUtil.getBuildVersion()
                                                                                             .replaceAll("SNAPSHOT", "SNP")
                                                                                             .replaceAll("beta", "b")
@@ -113,6 +118,18 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         }
     }
 
+    private String getCommentsColumn(ChangeSet changeSet) {
+        return limitSize(StringUtil.trimToEmpty(changeSet.getComments()));
+    }
+
+    protected String getContextsColumn(ChangeSet changeSet) {
+        return buildFullContext(changeSet);
+    }
+
+    protected String getLabelsColumn(ChangeSet changeSet) {
+        return buildFullLabels(changeSet);
+    }
+
     private String buildFullContext(ChangeSet changeSet) {
         StringBuilder contextExpression = new StringBuilder();
         boolean notFirstContext = false;
@@ -124,7 +141,28 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         if ((changeSetContext != null) && !changeSetContext.isEmpty()) {
             appendContext(contextExpression, changeSetContext.toString(), notFirstContext);
         }
-        return contextExpression.toString();
+        return StringUtil.trimToNull(contextExpression.toString());
+    }
+
+    private String buildFullLabels(ChangeSet changeSet) {
+        StringBuilder labels = new StringBuilder();
+        boolean notFirstLabel = false;
+        for (Labels inheritableLabel : changeSet.getInheritableLabels()) {
+            appendLabels(labels, inheritableLabel.toString(), notFirstLabel);
+            notFirstLabel = true;
+        }
+        Labels changeSetLabels = changeSet.getLabels();
+        if ((changeSetLabels != null) && !changeSetLabels.isEmpty()) {
+            appendLabels(labels, changeSetLabels.toString(), notFirstLabel);
+        }
+        return StringUtil.trimToNull(labels.toString());
+    }
+
+    private void appendLabels(StringBuilder existingLabels, String labelToAppend, boolean notFirstContext) {
+        if (notFirstContext) {
+            existingLabels.append(COMMA);
+        }
+        existingLabels.append(labelToAppend);
     }
 
     private void appendContext(StringBuilder contextExpression, String contextToAppend, boolean notFirstContext) {

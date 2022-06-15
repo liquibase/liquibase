@@ -36,8 +36,12 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
 	    for(ColumnConfig column : getColumns()) {
 	    	params.append(database.escapeColumnName(getCatalogName(), getSchemaName(), getTableName(), column.getName()));
 	    	params.append(" = ");
-	        params.append("?, ");
-	        cols.add(column);
+			if (column.getValueObject() instanceof DatabaseFunction) {
+				params.append(column.getValueObject()).append(", ");
+			} else {
+				params.append("?, ");
+				cols.add(column);
+			}
 	    }
 	    params.deleteCharAt(params.lastIndexOf(" "));
 	    params.deleteCharAt(params.lastIndexOf(","));

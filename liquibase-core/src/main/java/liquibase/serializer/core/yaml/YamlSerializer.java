@@ -21,7 +21,6 @@ import org.yaml.snakeyaml.representer.Represent;
 import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.resolver.Resolver;
 
-import java.beans.IntrospectionException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -109,7 +108,8 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                     }
                     for (int i = 0; i < valueAsList.size(); i++) {
                         if (valueAsList.get(i) instanceof LiquibaseSerializable) {
-                            valueAsList.set(i, toMap((LiquibaseSerializable) valueAsList.get(i)));
+                            Object m = convertToMap(valueAsList, i);
+                            valueAsList.set(i, m);
                         }
                     }
                     value = valueAsList;
@@ -120,8 +120,12 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                         continue;
                     }
 
-                    for (Object key : ((Map) value).keySet()) {
+                    for (Object key : new HashSet<>(((Map) value).keySet())) {
                         Object mapValue = ((Map) value).get(key);
+                        if (mapValue == null) {
+                            ((Map) value).remove(key);
+                        }
+
                         if (mapValue instanceof LiquibaseSerializable) {
                             ((Map) value).put(key, toMap((LiquibaseSerializable) mapValue));
                         } else if (mapValue instanceof Collection) {
@@ -147,6 +151,10 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         Map<String, Object> containerMap = new HashMap<>();
         containerMap.put(object.getSerializedObjectName(), objectMap);
         return containerMap;
+    }
+
+    protected Object convertToMap(List valueAsList, int index) {
+        return toMap((LiquibaseSerializable) valueAsList.get(index));
     }
 
     protected Comparator<String> getComparator(LiquibaseSerializable object) {

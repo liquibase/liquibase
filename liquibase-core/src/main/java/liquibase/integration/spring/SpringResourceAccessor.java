@@ -5,6 +5,7 @@ import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.InputStreamList;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.ContextResource;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
@@ -19,9 +20,15 @@ import java.util.TreeSet;
 public class SpringResourceAccessor extends AbstractResourceAccessor {
 
     private final ResourceLoader resourceLoader;
+    private final DefaultResourceLoader fallbackResourceLoader;
 
     public SpringResourceAccessor(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
+        if (resourceLoader == null) {
+            this.fallbackResourceLoader = new DefaultResourceLoader(Thread.currentThread().getContextClassLoader());
+        } else {
+            this.fallbackResourceLoader = new DefaultResourceLoader(resourceLoader.getClassLoader());
+        }
     }
 
     @Override
@@ -102,7 +109,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
             if (url.contains("!")) {
                 return url.replaceFirst(".*!", "");
             } else {
-                while (!resourceLoader.getResource("classpath:" + url).exists()) {
+                while (!getResource("classpath:" + url).exists()) {
                     String newUrl = url.replaceFirst("^/?.*?/", "");
                     if (newUrl.equals(url)) {
                         throw new UnexpectedLiquibaseException("Could determine path for " + resource.getURL().toExternalForm());
@@ -132,7 +139,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
             relativeTo = relativeTo.replace("\\", "/");
 
             boolean relativeIsFile;
-            Resource rootResource = resourceLoader.getResource(relativeTo);
+            Resource rootResource = getResource(relativeTo);
             relativeIsFile = resourceIsFile(rootResource);
 
             if (relativeIsFile) {
@@ -142,6 +149,21 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
             }
         }
         return searchPath;
+    }
+
+    /**
+     * Looks up the given resource.
+     */
+    protected Resource getResource(String resourcePath) {
+        //some ResourceLoaders (FilteredReactiveWebContextResource) lie about whether they exist or not which can confuse the rest of the code.
+        //check the "fallback" loader first, and if that can't find it use the "real" one.
+        // The fallback one should be more reasonable in it's `exists()` function
+        Resource defaultLoaderResource = fallbackResourceLoader.getResource(resourcePath);
+        if (defaultLoaderResource.exists()) {
+            return defaultLoaderResource;
+        }
+
+        return resourceLoader.getResource(resourcePath);
     }
 
     /**
@@ -163,12 +185,14 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
      * Default implementation adds "classpath:" and removes duplicated /'s and classpath:'s
      */
     protected String finalizeSearchPath(String searchPath) {
+        if(searchPath.matches("^classpath\\*?:.*")) {
+            searchPath = searchPath.replace("classpath:","").replace("classpath*:","");
+            searchPath = "classpath*:/" +searchPath;
+        } else if(!searchPath.matches("^\\w+:.*")) {
+            searchPath = "classpath*:/" +searchPath;
+        }
         searchPath = searchPath.replace("\\", "/");
-        searchPath = searchPath.replaceAll("classpath\\*?:", "");
-        searchPath = "/" + searchPath;
         searchPath = searchPath.replaceAll("//+", "/");
-
-        searchPath = "classpath*:" + searchPath;
 
         return searchPath;
     }

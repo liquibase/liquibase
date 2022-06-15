@@ -9,6 +9,7 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.*;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
      *
      * @parameter property="liquibase.deploymentId"
      */
+    @PropertyElement
     protected String deploymentId;
 
     /**
@@ -38,6 +40,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
      *
      * @parameter property="liquibase.force"
      */
+    @PropertyElement
     protected String force;
 
     /**
@@ -45,6 +48,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
      *
      * @parameter property="liquibase.outputFile"
      */
+    @PropertyElement
     protected String outputFile;
 
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -60,11 +64,6 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         //
         // Check the Pro license
         //
-        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
-        if (!hasProLicense) {
-            throw new LiquibaseException(
-                    "The command 'rollbackOneUpdateSQL' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
-        }
         Database database = liquibase.getDatabase();
         CommandScope liquibaseCommand = new CommandScope("internalRollbackOneUpdateSQL");
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);

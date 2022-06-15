@@ -7,7 +7,7 @@ public class MockConsoleWrapper extends ConsoleUIService.ConsoleWrapper {
     final private List<String> responses;
 
     public MockConsoleWrapper(String... responses) {
-        super(null);
+        super(null, false);
         this.responses = new ArrayList<>(Arrays.asList(responses));
     }
 

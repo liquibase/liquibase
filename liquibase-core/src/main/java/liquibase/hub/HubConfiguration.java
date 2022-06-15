@@ -25,7 +25,15 @@ public class HubConfiguration implements AutoloadedConfigurations {
 
         LIQUIBASE_HUB_API_KEY = builder.define("apiKey", String.class)
                 .setDescription("Liquibase Hub API key for operations")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .setValueObfuscator(value -> {
+                    if (value == null) {
+                        return null;
+                    }
+                    if (value.length() < 5) {
+                        return value;
+                    }
+                    return value.substring(0, 4) + "****";
+                })
                 .build();
 
         LIQUIBASE_HUB_URL = builder.define("url", String.class)

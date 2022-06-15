@@ -17,6 +17,7 @@ Long Description: NOT SET
 Required Args:
   referenceUrl (String) The JDBC reference database connection URL
   url (String) The JDBC target database connection URL
+    OBFUSCATED
 Optional Args:
   diffTypes (String) Types of objects to compare
     Default: null
@@ -386,6 +387,7 @@ Changed Column(s): NONE
 
         }
         expectedException = CommandValidationException.class
+        expectedExceptionMessage = "Invalid argument 'referenceUrl': missing required argument"
     }
 
     run "Run without any arguments throws an exception", {

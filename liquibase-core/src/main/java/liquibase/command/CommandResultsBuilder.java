@@ -3,9 +3,7 @@ package liquibase.command;
 import liquibase.Scope;
 import liquibase.util.StringUtil;
 
-import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -57,12 +55,18 @@ public class CommandResultsBuilder {
         return addResult(definition.getName(), value);
     }
 
+    public CommandFailedException commandFailed(String message, int exitCode) {
+        return new CommandFailedException(this.build(), exitCode, message);
+    }
+
     /**
      * Collects the results and flushes the output stream.
      */
     CommandResults build() {
         try {
-            outputStream.flush();
+            if (this.outputStream != null) {
+                outputStream.flush();
+            }
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Error flushing " + StringUtil.join(commandScope.getCommand().getName(), " ") + " output: " + e.getMessage(), e);
         }

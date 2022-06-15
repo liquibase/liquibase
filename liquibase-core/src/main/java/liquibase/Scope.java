@@ -11,6 +11,7 @@ import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
 import liquibase.logging.core.LogServiceFactory;
+import liquibase.osgi.Activator;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
@@ -20,8 +21,6 @@ import liquibase.ui.UIService;
 import liquibase.util.SmartMap;
 import liquibase.util.StringUtil;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -50,9 +49,14 @@ public class Scope {
         executeMode,
         lineSeparator,
         serviceLocator,
+
+        /**
+         * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
+         */
         fileEncoding,
         databaseChangeLog,
         changeSet,
+        osgiPlatform
     }
 
     private static ScopeManager scopeManager;
@@ -66,6 +70,8 @@ public class Scope {
     public static Scope getCurrentScope() {
         if (scopeManager == null) {
             scopeManager = new SingletonScopeManager();
+        }
+        if (scopeManager.getCurrentScope() == null) {
             Scope rootScope = new Scope();
             scopeManager.setCurrentScope(rootScope);
 
@@ -91,11 +97,12 @@ public class Scope {
             }
 
             rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
+            rootScope.values.put(Attr.osgiPlatform.name(), Activator.OSGIContainerChecker.isOsgiPlatform());
         }
         return scopeManager.getCurrentScope();
     }
 
-    public static void setScopeManager(ScopeManager scopeManager)  {
+    public static void setScopeManager(ScopeManager scopeManager) {
         Scope currentScope = getCurrentScope();
         if (currentScope == null) {
             currentScope = new Scope();
@@ -121,7 +128,14 @@ public class Scope {
     private Scope() {
     }
 
+    /**
+     * @param parent      The new Scopes parent in the hierarchy of Scopes, not null.
+     * @param scopeValues The values for the new Scope.
+     */
     protected Scope(Scope parent, Map<String, Object> scopeValues) {
+        if (parent == null) {
+            throw new UnexpectedLiquibaseException("Cannot pass a null parent to a new Scope. Use Scope.child to correctly create a nested scope");
+        }
         this.parent = parent;
         if (scopeValues != null) {
             for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
@@ -161,14 +175,14 @@ public class Scope {
         child(listener, null, runner);
     }
 
-    public static void child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunner runner) throws Exception{
+    public static void child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunner runner) throws Exception {
         child(listener, scopeValues, () -> {
             runner.run();
             return null;
         });
     }
 
-    public static <T> T child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunnerWithReturn<T> runner) throws Exception{
+    public static <T> T child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunnerWithReturn<T> runner) throws Exception {
         String scopeId = enter(listener, scopeValues);
 
         try {
@@ -207,12 +221,13 @@ public class Scope {
 
     /**
      * Exits the scope started with {@link #enter(LiquibaseListener, Map)}
+     *
      * @param scopeId The id of the scope to exit. Throws an exception if the name does not match the current scope.
      */
     public static void exit(String scopeId) throws Exception {
         Scope currentScope = getCurrentScope();
         if (!currentScope.scopeId.equals(scopeId)) {
-            throw new RuntimeException("Cannot end scope "+scopeId+" when currently at scope "+currentScope.scopeId);
+            throw new RuntimeException("Cannot end scope " + scopeId + " when currently at scope " + currentScope.scopeId);
         }
 
         scopeManager.setCurrentScope(currentScope.getParent());
@@ -355,6 +370,9 @@ public class Scope {
         return get(Attr.lineSeparator, System.lineSeparator());
     }
 
+    /**
+     * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
+     */
     public Charset getFileEncoding() {
         return get(Attr.fileEncoding, Charset.defaultCharset());
     }
@@ -402,6 +420,7 @@ public class Scope {
     public interface ScopedRunner<T> {
         void run() throws Exception;
     }
+
     public interface ScopedRunnerWithReturn<T> {
         T run() throws Exception;
     }

@@ -19,7 +19,8 @@ public class RenameSequenceGenerator extends AbstractSqlGenerator<RenameSequence
             && !(database instanceof FirebirdDatabase)
             && !(database instanceof H2Database)
             && !(database instanceof HsqlDatabase)
-            && !(database instanceof InformixDatabase);
+            && !(database instanceof InformixDatabase)
+            && !(database instanceof SQLiteDatabase);
     }
 
     @Override
@@ -39,7 +40,7 @@ public class RenameSequenceGenerator extends AbstractSqlGenerator<RenameSequence
         } else if (database instanceof OracleDatabase) {
             sql = "RENAME " + database.escapeObjectName(statement.getOldSequenceName(), Sequence.class) + " TO " + database.escapeObjectName(statement.getNewSequenceName(), Sequence.class);
         } else if( database instanceof MSSQLDatabase){
-            sql = "SP_RENAME " + database.escapeObjectName(statement.getOldSequenceName(), Sequence.class) + " ," + database.escapeObjectName(statement.getNewSequenceName(),Sequence.class);
+            sql = "sp_rename " + database.escapeObjectName(statement.getOldSequenceName(), Sequence.class) + " ," + database.escapeObjectName(statement.getNewSequenceName(),Sequence.class);
         } else {
             sql = "ALTER SEQUENCE " + database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldSequenceName()) + " RENAME TO " + database.escapeObjectName(statement.getNewSequenceName(), Sequence.class);
         }

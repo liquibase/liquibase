@@ -21,7 +21,10 @@ public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
+    public static final CommandArgumentDefinition<String> INCLUDE_TABLESPACE_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
+    public static final CommandArgumentDefinition<Boolean> INCLUDE_SCHEMA_ARG;
+    public static final CommandArgumentDefinition<Boolean> INCLUDE_CATALOG_ARG;
     public static final CommandArgumentDefinition<String> DIFF_TYPES_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
@@ -39,7 +42,7 @@ public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
                 .description("The reference default schema name to use for the database connection").build();
         REFERENCE_DEFAULT_CATALOG_NAME_ARG = builder.argument("referenceDefaultCatalogName", String.class)
                 .description("The reference default catalog name to use for the database connection").build();
-        URL_ARG = builder.argument("url", String.class).required()
+        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
                 .description("The JDBC target database connection URL").build();
         DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
                 .description("The default schema name to use for the database connection").build();
@@ -49,20 +52,28 @@ public class DiffChangelogCommandStep extends AbstractCliWrapperCommandStep {
                 .description("The JDBC driver class").build();
         DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
                 .description("The JDBC driver properties file").build();
-        USERNAME_ARG = builder.argument("username", String.class)
+        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
                 .description("The target database username").build();
-        PASSWORD_ARG = builder.argument("password", String.class)
+        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
                 .description("The target database password")
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
-        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
+        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
                 .description("Changelog file to write results").build();
         EXCLUDE_OBJECTS_ARG = builder.argument("excludeObjects", String.class)
                 .description("Objects to exclude from diff").build();
         INCLUDE_OBJECTS_ARG = builder.argument("includeObjects", String.class)
                 .description("Objects to include in diff").build();
+        INCLUDE_TABLESPACE_ARG = builder.argument("includeTablespace", String.class)
+            .description("Include the tablespace attribute in the changelog").build();
         SCHEMAS_ARG = builder.argument("schemas", String.class)
                 .description("Schemas to include in diff").build();
+        INCLUDE_SCHEMA_ARG = builder.argument("includeSchema", Boolean.class)
+                .defaultValue(false)
+                .description("If true, the schema will be included in generated changeSets").build();
+        INCLUDE_CATALOG_ARG = builder.argument("includeCatalog", Boolean.class)
+                .defaultValue(false)
+                .description("If true, the catalog will be included in generated changeSets").build();
         DIFF_TYPES_ARG = builder.argument("diffTypes", String.class)
                 .description("Types of objects to compare").build();
     }
