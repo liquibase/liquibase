@@ -5,6 +5,7 @@ import java.util.Arrays;
 import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.core.Data;
 import liquibase.util.StringUtil;
 
 
@@ -49,7 +50,16 @@ public class MariaDBDatabase extends MySQLDatabase {
         int major = 0;
         int minor = 0;
         int patch = 0;
+        String productVersion = null;
 
+        try {
+            productVersion = getDatabaseProductVersion();
+            if (productVersion.toLowerCase().contains("clustrix")) {
+                return 6;
+            }
+        } catch (DatabaseException dbe) {
+
+        }
         try {
             major = getDatabaseMajorVersion();
             minor = getDatabaseMinorVersion();

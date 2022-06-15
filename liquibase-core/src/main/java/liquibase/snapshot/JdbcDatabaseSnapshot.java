@@ -415,9 +415,20 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                 try {
-                    return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database)
+                    List<CachedRow> returnList =
+                        extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database)
                             .getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database)
                             .getJdbcSchemaName(catalogAndSchema), SQL_FILTER_MATCH_ALL, SQL_FILTER_MATCH_ALL));
+                    //
+                    // IF MARIADB
+                    // Query to get actual data types and then map each column to its CachedRow
+                    //
+                    if (database instanceof MariaDBDatabase) {
+                        //
+                        // Query for actual data types
+                        //
+                    }
+                    return returnList;
                 } catch (SQLException e) {
                     if (shouldReturnEmptyColumns(e)) {
                         return new ArrayList<>();
