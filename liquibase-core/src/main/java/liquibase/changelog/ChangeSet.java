@@ -44,11 +44,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private CheckSum storedCheckSum;
 
-    public static final String AND = " AND ";
-    public static final String COMMA = ",";
-    public static final String WHITESPACE = " ";
-    public static final String OPEN_BRACKET = "(";
-    public static final String CLOSE_BRACKET = ")";
+    private static final String AND = " AND ";
+    private static final String COMMA = ",";
+    private static final String WHITESPACE = " ";
+    private static final String OPEN_BRACKET = "(";
+    private static final String CLOSE_BRACKET = ")";
 
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN, MARK_RAN, INVALID_MD5SUM
