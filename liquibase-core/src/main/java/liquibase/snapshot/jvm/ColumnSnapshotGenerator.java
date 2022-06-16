@@ -466,37 +466,21 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             return type;
         }
 
+        //
+        // If this is a MariaDB database, for DATETIME columns where the
+        // data type ID is Types.OTHER, we assign the actual data type string
+        // that was retrieved earlier, so that we do not ignore the
+        // precision parameter, i.e. DATETIME(6) in the generated SQL
+        // NOTE:
+        // This issue was discovered with a MariaDB Xpand instance, but the
+        // solution can apply to plain MariaDB as well
+        //
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
         String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
-        if (database instanceof MariaDBDatabase && columnTypeName.startsWith("DATETIME") && dataType == Types.OTHER) {
-            String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
-            String selectStatement =
-               "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS " +
-               "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "' AND TABLE_NAME = '" + rawTableName + "' AND COLUMN_NAME = '" + column.getName() + "'";
-            Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
-            Statement statement = null;
-            ResultSet columnSelectRS = null;
-            try {
-                statement = underlyingConnection.createStatement();
-                columnSelectRS = statement.executeQuery(selectStatement);
-                while (columnSelectRS.next()) {
-                    String actualDataType = columnSelectRS.getString("DATA_TYPE");
-                    columnTypeName = actualDataType.toUpperCase();
-                    dataType = Types.TIMESTAMP;
-                }
-            } catch (SQLException sqle) {
-
-            } finally {
-                try {
-                    if (statement != null) {
-                        statement.close();
-                    }
-                    if (columnSelectRS != null) {
-                        columnSelectRS.close();
-                    }
-                } catch (SQLException ignore) {
-                }
-            }
+        String actualDataType = columnMetadataResultSet.getString("ACTUAL_DATA_TYPE");
+        if (database instanceof MariaDBDatabase && columnTypeName.startsWith("DATETIME") && dataType == Types.OTHER && actualDataType != null) {
+            columnTypeName = actualDataType;
+            dataType = Types.TIMESTAMP;
         }
 
         if (database instanceof MSSQLDatabase) {

@@ -88,7 +88,7 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
                 MySQLDatabase.class);
         assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, `description`, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
-                        "('a', 'b', 'c', current_timestamp(), 1, " +
+                        "('a', 'b', 'c', now(), 1, " +
                         "'8:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
                         " null)",
                 MariaDBDatabase.class);

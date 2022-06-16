@@ -30,7 +30,7 @@ public class MariaDBDatabaseTest extends AbstractJdbcDatabaseTest {
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        Assert.assertEquals("CURRENT_TIMESTAMP()", getDatabase().getCurrentDateTimeFunction());
+        Assert.assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 
     @Test

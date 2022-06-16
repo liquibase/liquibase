@@ -1,12 +1,11 @@
 package liquibase.database.core;
 
-import java.util.Arrays;
-
 import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.structure.core.Data;
 import liquibase.util.StringUtil;
+
+import java.util.Arrays;
 
 
 /**
@@ -23,7 +22,6 @@ public class MariaDBDatabase extends MySQLDatabase {
            "boolean", "tinyint", "smallint", "mediumint", "int", "integer", "bigint", "dec", "numeric",
            "fixed", "float", "bit"
         ));
-        super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP()");
     }
 
     @Override
@@ -54,7 +52,7 @@ public class MariaDBDatabase extends MySQLDatabase {
 
         try {
             productVersion = getDatabaseProductVersion();
-            if (productVersion.toLowerCase().contains("clustrix")) {
+            if (productVersion != null && productVersion.toLowerCase().contains("clustrix")) {
                 return 6;
             }
         } catch (DatabaseException dbe) {
