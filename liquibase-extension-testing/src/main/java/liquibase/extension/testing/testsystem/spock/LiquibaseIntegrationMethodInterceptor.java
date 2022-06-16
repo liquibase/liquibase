@@ -88,4 +88,14 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
     private static TestSystem readContainerFromField(FieldInfo f, IMethodInvocation invocation) {
         return (TestSystem) f.readValue(invocation.getInstance());
     }
+
+    /**
+     * Required for executing Spock cleanupSpec fixture method.
+     *
+     * @param invocation the cleanup method invocation
+     */
+    @Override
+    public void interceptCleanupSpecMethod(IMethodInvocation invocation) throws Throwable {
+        invocation.proceed();
+    }
 }
