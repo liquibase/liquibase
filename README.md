@@ -75,4 +75,4 @@ LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.co
 
 [Liquibase Blog](https://www.liquibase.org/blog)
 
-[Get Support & Advanced Features](https://www.liquibase.com/contact)
+[Get Support & Advanced Features](https://liquibase.com/pricing)
