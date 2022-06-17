@@ -38,7 +38,7 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
     public String getConnectionUrl() {
         final JdbcDatabaseContainer container = ((DockerDatabaseWrapper) wrapper).getContainer();
 
-        return "jdbc:sqlserver://" + container.getHost() + ":" + container.getMappedPort(MSSQLServerContainer.MS_SQL_SERVER_PORT) + ";databaseName=" + getCatalog() + ";trustServerCertificate=true;encrypt=false";
+        return "jdbc:sqlserver://" + container.getHost() + ":" + container.getMappedPort(MSSQLServerContainer.MS_SQL_SERVER_PORT)+";databaseName="+getCatalog()+";encrypt=false";
     }
 
     @Override

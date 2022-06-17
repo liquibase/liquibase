@@ -103,7 +103,7 @@ class CreateProcedureGeneratorTest extends Specification {
         null       | new OracleDatabase() | "passed sql 1;\npassed sql 2;"
         ""         | new OracleDatabase() | "passed sql 1;\npassed sql 2;"
         "other"    | new OracleDatabase() | "ALTER SESSION SET CURRENT_SCHEMA=other;\npassed sql 1;\npassed sql 2;\nALTER SESSION SET CURRENT_SCHEMA=MAIN_SCHEMA;"
-        "other"    | new DB2Database()    | "SET CURRENT SCHEMA other;\npassed sql 1;\npassed sql 2;\nSET CURRENT SCHEMA MAIN_SCHEMA;"
+        "other"    | new DB2Database()    | "SET CURRENT SCHEMA other;\npassed sql 1;\npassed sql 2;\nSET CURRENT SCHEMA main_schema;"
         "other"    | new PostgresDatabase() | "SET SEARCH_PATH TO other, main_schema;\npassed sql 1;\npassed sql 2;\nSET CURRENT SCHEMA main_schema;"
 
     }
