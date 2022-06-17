@@ -151,6 +151,11 @@ create table table88 (
 create table table99 (
     id int primary key
 );
+
+-- changeset the_user:theid context:oldstyle
+create table old_style_context (
+    id int primary key
+);
 """.trim()
 
     private static final String END_DELIMITER_CHANGELOG = """
@@ -218,7 +223,7 @@ grant execute on any_procedure_name to ANY_USER3/
 
         changeLog.getLogicalFilePath() == "asdf.sql"
 
-        changeLog.getChangeSets().size() == 21
+        changeLog.getChangeSets().size() == 22
 
         changeLog.getChangeSets().get(0).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(0).getId() == "1"
@@ -343,6 +348,8 @@ grant execute on any_procedure_name to ANY_USER3/
         changeLog.getChangeSets().get(19).getId().equalsIgnoreCase("<the_user>")
 
         changeLog.getChangeSets().get(20).getId().equalsIgnoreCase("+the_user+")
+
+        changeLog.getChangeSets().get(21).getContextFilter().toString() == "oldstyle"
     }
 
     def "parse change set with colon in ID"() throws Exception {

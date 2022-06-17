@@ -231,7 +231,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     Matcher runOnChangePatternMatcher = runOnChangePattern.matcher(line);
                     Matcher runAlwaysPatternMatcher = runAlwaysPattern.matcher(line);
                     Matcher contextPatternMatcher = contextPattern.matcher(line);
-                    Matcher contextFilterPatternMatcher = contextPattern.matcher(line);
+                    Matcher contextFilterPatternMatcher = contextFilterPattern.matcher(line);
                     Matcher labelsPatternMatcher = labelsPattern.matcher(line);
                     Matcher runInTransactionPatternMatcher = runInTransactionPattern.matcher(line);
                     Matcher dbmsPatternMatcher = dbmsPattern.matcher(line);
