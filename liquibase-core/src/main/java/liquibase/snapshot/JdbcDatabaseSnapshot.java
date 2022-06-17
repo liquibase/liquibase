@@ -465,16 +465,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     selectStatement += " AND TABLE_NAME='" + tableName + "'";
                 }
                 Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
-                Statement statement = null;
-                ResultSet columnSelectRS = null;
-                try {
+                try (Statement statement = underlyingConnection.createStatement(); ResultSet columnSelectRS = statement.executeQuery(selectStatement)) {
                     //
                     // Iterate the result set from the query and match the rows
                     // to the rows that were returned by getColumns() in order
                     // to assign the actual DATA_TYPE string to the appropriate row.
                     //
-                    statement = underlyingConnection.createStatement();
-                    columnSelectRS = statement.executeQuery(selectStatement);
                     while (columnSelectRS.next()) {
                         String selectedTableName = columnSelectRS.getString("TABLE_NAME");
                         String selectedColumnName = columnSelectRS.getString("COLUMN_NAME");
@@ -482,11 +478,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         for (CachedRow row : returnList) {
                             String rowTableName = row.getString("TABLE_NAME");
                             String rowColumnName = row.getString("COLUMN_NAME");
-                            String rowDataType = row.getString("TYPE_NAME");
+                            String rowTypeName = row.getString("TYPE_NAME");
+                            int rowDataType = row.getInt("DATA_TYPE");
                             if (rowTableName.equalsIgnoreCase(selectedTableName) &&
                                 rowColumnName.equalsIgnoreCase(selectedColumnName) &&
-                                ! rowDataType.equalsIgnoreCase(actualDataType)) {
-                                row.set("ACTUAL_DATA_TYPE", actualDataType);
+                                rowTypeName.equalsIgnoreCase("datetime") &&
+                                rowDataType == Types.OTHER &&
+                                !rowTypeName.equalsIgnoreCase(actualDataType)) {
+                                row.set("TYPE_NAME", actualDataType);
+                                row.set("DATA_TYPE", Types.TIMESTAMP);
                                 break;
                             }
                         }
@@ -495,16 +495,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     //
                     // Do not stop
                     //
-                } finally {
-                    try {
-                        if (statement != null) {
-                            statement.close();
-                        }
-                        if (columnSelectRS != null) {
-                            columnSelectRS.close();
-                        }
-                    } catch (SQLException ignore) {
-                    }
                 }
             }
 

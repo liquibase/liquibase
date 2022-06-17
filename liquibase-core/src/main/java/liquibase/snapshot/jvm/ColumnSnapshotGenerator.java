@@ -466,22 +466,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             return type;
         }
 
-        //
-        // If this is a MariaDB database, for DATETIME columns where the
-        // data type ID is Types.OTHER, we assign the actual data type string
-        // that was retrieved earlier, so that we do not ignore the
-        // precision parameter, i.e. DATETIME(6) in the generated SQL
-        // NOTE:
-        // This issue was discovered with a MariaDB Xpand instance, but the
-        // solution can apply to plain MariaDB as well
-        //
-        int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
         String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
-        String actualDataType = columnMetadataResultSet.getString("ACTUAL_DATA_TYPE");
-        if (database instanceof MariaDBDatabase && columnTypeName.startsWith("DATETIME") && dataType == Types.OTHER && actualDataType != null) {
-            columnTypeName = actualDataType;
-            dataType = Types.TIMESTAMP;
-        }
 
         if (database instanceof MSSQLDatabase) {
             if ("numeric() identity".equalsIgnoreCase(columnTypeName)) {
@@ -550,6 +535,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
 
+        int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
         Integer columnSize = null;
         Integer decimalDigits = null;
 
