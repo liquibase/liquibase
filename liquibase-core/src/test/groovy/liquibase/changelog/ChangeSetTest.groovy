@@ -567,4 +567,25 @@ public class ChangeSetTest extends Specification {
         null     | null
     }
 
+    def isInheritableIgnore() {
+        when:
+        def changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, null);
+
+        then:
+        !changeSet.isInheritableIgnore()
+
+        when:
+        def parent = new DatabaseChangeLog("com/example/test.xml")
+        changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, parent);
+
+        then:
+        !changeSet.isInheritableIgnore()
+
+        when:
+        parent.setIncludeIgnore(true)
+
+        then:
+        changeSet.isInheritableIgnore()
+    }
+
 }

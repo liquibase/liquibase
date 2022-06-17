@@ -17,10 +17,7 @@ liquibase:
         altTablespace: liquibase2
         keepRunning: true
 
-      test: hub,h2,hsqldb,sqlite
-
-      hub:
-        url: http://localhost:8888
+      test: h2,hsqldb,sqlite
 
       cockroachdb:
         version: latest-v21.2
@@ -54,7 +51,7 @@ liquibase:
 
       mssql:
         imageName: mcr.microsoft.com/mssql/server
-        version: 2017-CU12
+        version: 2017-latest
         setup:
           username: SA
           password: A_Str0ng_Required_Password

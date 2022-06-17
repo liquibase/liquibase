@@ -29,6 +29,13 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION;
     public static final ConfigurationDefinition<Boolean> INCLUDE_CATALOG_IN_SPECIFICATION;
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
+    public static final ConfigurationDefinition<Boolean> PRESERVE_SCHEMA_CASE;
+    public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
+
+    /**
+     * @deprecated No longer used
+     */
+    @Deprecated
     public static final ConfigurationDefinition<Boolean> FILTER_LOG_MESSAGES;
     public static final ConfigurationDefinition<Boolean> HEADLESS;
     public static final ConfigurationDefinition<Boolean> STRICT;
@@ -155,8 +162,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         FILTER_LOG_MESSAGES = builder.define("filterLogMessages", Boolean.class)
-                .setDescription("Should Liquibase filter log messages for potentially insecure data?")
-                .setDefaultValue(true)
+                .setDescription("DEPRECATED: No longer used")
+                .setCommonlyUsed(false)
                 .build();
 
         HEADLESS = builder.define("headless", Boolean.class)
@@ -179,6 +186,16 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         SECURE_PARSING = builder.define("secureParsing", Boolean.class)
                 .setDescription("If true, remove functionality from file parsers which could be used insecurely. Examples include (but not limited to) disabling remote XML entity support.")
+                .setDefaultValue(true)
+                .build();
+
+        PRESERVE_SCHEMA_CASE = builder.define("preserveSchemaCase", Boolean.class)
+                .setDescription("Should liquibase treat schema and catalog names as case sensitive?")
+                .setDefaultValue(false)
+                .build();
+
+        SHOW_BANNER = builder.define("showBanner", Boolean.class)
+                .setDescription("If true, show a Liquibase banner on startup.")
                 .setDefaultValue(true)
                 .build();
     }

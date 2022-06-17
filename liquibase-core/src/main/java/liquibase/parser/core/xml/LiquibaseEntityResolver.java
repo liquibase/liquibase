@@ -1,8 +1,11 @@
 package liquibase.parser.core.xml;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.logging.Logger;
-import liquibase.resource.*;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.InputStreamList;
+import liquibase.resource.ResourceAccessor;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
@@ -34,17 +37,25 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 .replace("http://www.liquibase.org/xml/ns/migrator/", "http://www.liquibase.org/xml/ns/dbchangelog/")
                 .replaceFirst("https?://", "");
 
-
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         InputStreamList streams = resourceAccessor.openStreams(null, path);
         if (streams.isEmpty()) {
             streams = getFallbackResourceAccessor().openStreams(null, path);
 
             if (streams.isEmpty()) {
-                log.fine("Unable to resolve XML entity locally. Will load from network.");
-                return null;
+                if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
+                    String errorMessage = "Unable to resolve xml entity " + systemId + " locally: " +
+                            GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
+                            "Set it to 'false' to allow remote lookups of xsd files.";
+                    throw new XSDLookUpException(errorMessage);
+                } else {
+                    log.fine("Unable to resolve XML entity locally. Will load from network.");
+                    return null;
+                }
             }
-        } else if (streams.size() == 1) {
+        }
+
+        if (streams.size() == 1) {
             log.fine("Found XML entity at " + streams.getURIs().get(0));
         } else if (streams.size() > 1) {
             log.warning("Found " + streams.size() + " copies of " + systemId + ". Using " + streams.getURIs().get(0));
@@ -77,7 +88,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-        Scope.getCurrentScope().getLog(getClass()).warning("Current XML parsers seems to not support EntityResolver2. External entities won't be correctly loaded");
+        Scope.getCurrentScope().getLog(getClass()).warning("The current XML parser does not seems to not support EntityResolver2. External entities may not be correctly loaded");
         return resolveEntity(null, publicId, null, systemId);
     }
 }

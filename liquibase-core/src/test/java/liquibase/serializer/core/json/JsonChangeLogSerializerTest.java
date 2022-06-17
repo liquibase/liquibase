@@ -59,7 +59,8 @@ public class JsonChangeLogSerializerTest {
                 "              \"onFail\": \"CONTINUE\",\n" +
                 "              \"onSqlOutput\": \"TEST\"\n" +
                 "            }\n" +
-                "          }]\n" +
+                "          }\n" +
+                "        ]\n" +
                 "        ,\n" +
                 "        \"onError\": \"CONTINUE\",\n" +
                 "        \"onFail\": \"MARK_RAN\",\n" +
@@ -102,10 +103,12 @@ public class JsonChangeLogSerializerTest {
                 "                \"defaultValueSequenceNext\": \"seq_me\",\n" +
                 "                \"name\": \"col2\"\n" +
                 "              }\n" +
-                "            }]\n" +
+                "            }\n" +
+                "          ]\n" +
                 "          \n" +
                 "        }\n" +
-                "      }]\n" +
+                "      }\n" +
+                "    ]\n" +
                 "    \n" +
                 "  }\n" +
                 "}\n", serializedJson);

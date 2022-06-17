@@ -12,6 +12,7 @@ Short Description: List all deployed changesets and their deployment ID
 Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changelogFile (String) The root changelog
     Default: null
@@ -61,15 +62,11 @@ Optional Args:
         }
 
         expectedOutput = [
-                Pattern.compile("""
-- Database updated at \\d+/\\d+.+. Applied 4 changeset\\(s\\) in \\d+.\\d+s, DeploymentId: \\d+
-  db/changelog/db.changelog-master.xml::1::nvoxland
-  db/changelog/sql/create_test2.sql::raw::includeAll
-  db/changelog/sql/create_test3.sql::raw::includeAll
-  db/changelog/changelog-x.xml::1571079854679-2::nathan \\(generated\\)
-""".replace("\r", "").trim())
-        ]
-
+~/- Database updated at .+\. Applied 4 changeset\(s\) in \d+.\d+s, DeploymentId: \d+
+\s+db\/changelog\/db.changelog-master.xml::1::nvoxland
+\s+db\/changelog\/sql\/create_test2.sql::raw::includeAll
+\s+db\/changelog\/sql\/create_test3.sql::raw::includeAll
+\s+db\/changelog\/changelog-x.xml::1571079854679-2::nathan \(generated\)/]
         expectedResults = [
                 deployments: "1 past deployments",
                 statusCode : 0

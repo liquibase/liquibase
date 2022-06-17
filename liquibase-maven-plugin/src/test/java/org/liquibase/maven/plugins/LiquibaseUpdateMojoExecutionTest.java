@@ -53,12 +53,12 @@ public class LiquibaseUpdateMojoExecutionTest extends AbstractLiquibaseMojoTest 
 //        assertEquals("wrong value for notoverridden", "notoverridden", notoverridden.get());
 //
 //    }
-
-    private static Optional<String> getChangeLogParameter(List<ChangeLogParameters.ChangeLogParameter> params, String paramName){
-        return params.stream()
-                .filter(p -> paramName.equalsIgnoreCase(p.getKey()))
-                .map(ChangeLogParameters.ChangeLogParameter::getValue)
-                .map(Object::toString)
-                .findFirst();
-    }
+//
+//    private static Optional<String> getChangeLogParameter(List<ChangeLogParameters.ChangeLogParameter> params, String paramName){
+//        return params.stream()
+//                .filter(p -> paramName.equalsIgnoreCase(p.getKey()))
+//                .map(ChangeLogParameters.ChangeLogParameter::getValue)
+//                .map(Object::toString)
+//                .findFirst();
+//    }
 }
