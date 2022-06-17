@@ -112,6 +112,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern contextPattern = Pattern.compile(".*context:(\".*\"|\\S*).*", Pattern.CASE_INSENSITIVE);
+            Pattern contextFilterPattern = Pattern.compile(".*contextFilter:(\".*\"|\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern logicalFilePathPattern = Pattern.compile(".*logicalFilePath:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern changeLogIdPattern = Pattern.compile(".*changeLogId:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern labelsPattern = Pattern.compile(".*labels:(\\S*).*", Pattern.CASE_INSENSITIVE);
@@ -230,6 +231,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     Matcher runOnChangePatternMatcher = runOnChangePattern.matcher(line);
                     Matcher runAlwaysPatternMatcher = runAlwaysPattern.matcher(line);
                     Matcher contextPatternMatcher = contextPattern.matcher(line);
+                    Matcher contextFilterPatternMatcher = contextPattern.matcher(line);
                     Matcher labelsPatternMatcher = labelsPattern.matcher(line);
                     Matcher runInTransactionPatternMatcher = runInTransactionPattern.matcher(line);
                     Matcher dbmsPatternMatcher = dbmsPattern.matcher(line);
@@ -250,8 +252,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     String endDelimiter = parseString(endDelimiterPatternMatcher);
                     rollbackEndDelimiter = parseString(rollbackEndDelimiterPatternMatcher);
                     String context = StringUtil.trimToNull(
-                        StringUtil.trimToEmpty(parseString(contextPatternMatcher)).replaceFirst("^\"", "").replaceFirst("\"$", "") //remove surrounding quotes if they're in there
+                        StringUtil.trimToEmpty(parseString(contextFilterPatternMatcher)).replaceFirst("^\"", "").replaceFirst("\"$", "") //remove surrounding quotes if they're in there
                     );
+                    if (context == null) {
+                        context = StringUtil.trimToNull(
+                                StringUtil.trimToEmpty(parseString(contextPatternMatcher)).replaceFirst("^\"", "").replaceFirst("\"$", "") //remove surrounding quotes if they're in there
+                        );
+                    }
+
                     if (context != null) {
                         context = changeLogParameters.expandExpressions(context, changeLog);
                     }

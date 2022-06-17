@@ -176,7 +176,7 @@ public class ChangeLogIterator {
 
     protected String createKey(ChangeSet changeSet) {
         Labels labels = changeSet.getLabels();
-        ContextExpression contexts = changeSet.getContexts();
+        ContextExpression contexts = changeSet.getContextFilter();
 
         return changeSet.toString(true)
                 + ":" + (labels == null ? null : labels.toString())

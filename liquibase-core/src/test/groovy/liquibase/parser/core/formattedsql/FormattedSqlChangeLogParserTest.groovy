@@ -19,7 +19,7 @@ import spock.lang.Unroll
 
 import static spock.util.matcher.HamcrestSupport.that
 
-public class FormattedSqlChangeLogParserTest extends Specification {
+class FormattedSqlChangeLogParserTest extends Specification {
 
     private static final String VALID_CHANGELOG = """
 --liquibase formatted sql
@@ -34,7 +34,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
 select * from \${tableNameProp};
 
 
---changeset "n voxland":"change 2" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
+--changeset "n voxland":"change 2" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true contextFilter:y dbms:mysql runInTransaction:false failOnError:false)
 create table table1 (
     id int primary key
 );
@@ -72,7 +72,7 @@ create table mysql_boo (
 );
 -- rollback drop table mysql_boo;
 
--- changeset multicontext:1 context:first,second,third
+-- changeset multicontext:1 contextFilter:first,second,third
 select 1;
 
 --changeset bboisvert:with_preconditions
@@ -84,7 +84,7 @@ create table my_table (
 );
 -- rollback drop table my_table;
 
---changeset complexContext:1 context:"a or b"
+--changeset complexContext:1 contextFilter:"a or b"
 select 1
 
 -- changeset the_user:the_user-1 runWith:\${runWith}
@@ -230,7 +230,7 @@ grant execute on any_procedure_name to ANY_USER3/
         assert !changeLog.getChangeSets().get(0).isAlwaysRun()
         assert !changeLog.getChangeSets().get(0).isRunOnChange()
         assert changeLog.getChangeSets().get(0).isRunInTransaction()
-        assert changeLog.getChangeSets().get(0).getContexts().isEmpty()
+        assert changeLog.getChangeSets().get(0).getContextFilter().isEmpty()
         changeLog.getChangeSets().get(0).getDbmsSet() == null
 
 
@@ -247,7 +247,7 @@ grant execute on any_procedure_name to ANY_USER3/
         assert changeLog.getChangeSets().get(1).isAlwaysRun()
         assert changeLog.getChangeSets().get(1).isRunOnChange()
         assert !changeLog.getChangeSets().get(1).isRunInTransaction()
-        changeLog.getChangeSets().get(1).getContexts().toString() == "y"
+        changeLog.getChangeSets().get(1).getContextFilter().toString() == "y"
         StringUtil.join(changeLog.getChangeSets().get(1).getDbmsSet(), ",") == "mysql"
         changeLog.getChangeSets().get(1).rollback.changes.size() == 1
         ((RawSQLChange) changeLog.getChangeSets().get(1).rollback.changes[0]).getSql().replace("\r\n", "\n") == "delete from table1;\ndrop table table1;"
@@ -298,9 +298,9 @@ grant execute on any_procedure_name to ANY_USER3/
         assert changeLog.getChangeSets().get(7).getChanges().get(0) instanceof RawSQLChange
         ((RawSQLChange) changeLog.getChangeSets().get(7).getChanges().get(0)).getSql() == "select 1;"
         changeLog.getChangeSets().get(7).rollback.changes.size() == 0
-        assert changeLog.getChangeSets().get(7).getContexts().toString().contains("first")
-        assert changeLog.getChangeSets().get(7).getContexts().toString().contains("second")
-        assert changeLog.getChangeSets().get(7).getContexts().toString().contains("third")
+        assert changeLog.getChangeSets().get(7).getContextFilter().toString().contains("first")
+        assert changeLog.getChangeSets().get(7).getContextFilter().toString().contains("second")
+        assert changeLog.getChangeSets().get(7).getContextFilter().toString().contains("third")
 
         changeLog.getChangeSets().get(10).getRunWith() == "sqlplus"
 
@@ -328,7 +328,7 @@ grant execute on any_procedure_name to ANY_USER3/
         assert cs.rollback.changes[0] instanceof RawSQLChange
         ((RawSQLChange) cs.rollback.changes[0]).getSql() == "drop table my_table;"
 
-        changeLog.getChangeSets().get(9).getContexts().toString() == "a or b"
+        changeLog.getChangeSets().get(9).getContextFilter().toString() == "a or b"
 
         changeLog.getChangeSets().get(11).getId().equalsIgnoreCase("CREATE_PROCEDURE_[dbo].[CustOrderHist1]")
 

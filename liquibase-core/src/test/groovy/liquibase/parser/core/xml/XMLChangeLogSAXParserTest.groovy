@@ -60,7 +60,7 @@ class XMLChangeLogSAXParserTest extends Specification {
         changeSets.size() == 8
         changeSets.get(0).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(1).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
-        changeSets.get(1).getContexts().getContexts().size() == 1
+        changeSets.get(1).getContextFilter().getContexts().size() == 1
         changeSets.get(2).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(2).getLabels().getLabels().size() == 1
         changeSets.get(3).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"

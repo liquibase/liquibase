@@ -22,9 +22,9 @@ public interface SqlVisitor extends LiquibaseSerializable {
 
     boolean isApplyToRollback();
 
-    ContextExpression getContexts();
+    ContextExpression getContextFilter();
 
-    void setContexts(ContextExpression contexts);
+    void setContextFilter(ContextExpression contextFilter);
 
     Labels getLabels();
     void setLabels(Labels labels);

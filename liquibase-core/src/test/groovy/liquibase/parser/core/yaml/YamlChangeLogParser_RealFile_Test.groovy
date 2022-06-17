@@ -386,9 +386,9 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((InsertDataChange) changeLog.getChangeSet(path, "nvoxland", "multiple changes").changes[3]).columns[0].valueNumeric == 4
 
         and: "changeSet level attributes are parsed correctly"
-        that changeLog.getChangeSet(path, "nvoxland", "context and dbms").contexts.contexts, containsInAnyOrder(["test", "qa"].toArray())
+        that changeLog.getChangeSet(path, "nvoxland", "context and dbms").contextFilter.contexts, containsInAnyOrder(["test", "qa"].toArray())
         that changeLog.getChangeSet(path, "nvoxland", "context and dbms").dbmsSet, containsInAnyOrder(["mock", "oracle"].toArray())
-        changeLog.getChangeSet(path, "nvoxland", "standard changeSet").contexts.contexts.size() == 0
+        changeLog.getChangeSet(path, "nvoxland", "standard changeSet").contextFilter.contexts.size() == 0
         changeLog.getChangeSet(path, "nvoxland", "standard changeSet").dbmsSet == null
 
         assert changeLog.getChangeSet(path, "nvoxland", "runAlways set").isAlwaysRun()
@@ -460,25 +460,25 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).replace == "with_modifysql"
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).with == "after_modifysql"
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).applicableDbms == null
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).contexts == null
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).contextFilter == null
         assert !((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).applyToRollback
 
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).replace == ")"
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).with == ""
         that(((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).getApplicableDbms(), containsInAnyOrder(["mysql", "mock"].toArray()))
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).contexts == null
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).contextFilter == null
 
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).value == " , name varchar(255) )"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).contexts == null
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).contextFilter == null
         that(((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).applicableDbms, containsInAnyOrder(["mysql", "mock"].toArray()))
         assert ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).applyToRollback
 
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).value == " partitioned by stuff"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).contexts.toString() == "prod, qa"
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).contextFilter.toString() == "prod, qa"
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).applicableDbms == null
 
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).value == " engine innodb"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).contexts.toString() == "prod"
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).contextFilter.toString() == "prod"
         that(((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).getApplicableDbms(), containsInAnyOrder(["mysql"].toArray()))
 
         and: "utf8 is read correctly"

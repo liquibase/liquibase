@@ -133,11 +133,11 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     private String buildFullContext(ChangeSet changeSet) {
         StringBuilder contextExpression = new StringBuilder();
         boolean notFirstContext = false;
-        for (ContextExpression inheritableContext : changeSet.getInheritableContexts()) {
+        for (ContextExpression inheritableContext : changeSet.getInheritableContextFilter()) {
             appendContext(contextExpression, inheritableContext.toString(), notFirstContext);
             notFirstContext = true;
         }
-        ContextExpression changeSetContext = changeSet.getContexts();
+        ContextExpression changeSetContext = changeSet.getContextFilter();
         if ((changeSetContext != null) && !changeSetContext.isEmpty()) {
             appendContext(contextExpression, changeSetContext.toString(), notFirstContext);
         }
