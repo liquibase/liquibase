@@ -93,6 +93,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern altPreconditionsOneDashPattern = Pattern.compile("\\s*\\-[\\s]*preconditions\\s.*", Pattern.CASE_INSENSITIVE);
             Pattern preconditionPattern = Pattern.compile("\\s*\\-\\-[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", Pattern.CASE_INSENSITIVE);
             Pattern altPreconditionOneDashPattern = Pattern.compile("\\s*\\-[\\s]*precondition(.*)", Pattern.CASE_INSENSITIVE);
+            Pattern openMultilineCommentPattern = Pattern.compile("(?<uncommented>.*)/\\*(?<commented>.*)", Pattern.CASE_INSENSITIVE);
+            Pattern closeMultilineCommentPattern = Pattern.compile(".*\\*/(?<uncommented>.*)", Pattern.CASE_INSENSITIVE);
 
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -128,8 +130,33 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
             int count = 0;
             String line;
+            boolean insideMultilineComment = false;
             while ((line = reader.readLine()) != null) {
                 count++;
+                Matcher openMultilineCommentMatcher = openMultilineCommentPattern.matcher(line);
+                if (openMultilineCommentMatcher.matches() && !insideMultilineComment) {
+                    insideMultilineComment = true;
+                    // set the line to the part of the string that is uncommented
+                    line = openMultilineCommentMatcher.group("uncommented");
+                    // check if there is a close of the multiline comment in the remainder of the same line
+                    String commented = openMultilineCommentMatcher.group("commented");
+                    Matcher closeMultilineCommentMatcher = closeMultilineCommentPattern.matcher(commented);
+                    if (closeMultilineCommentMatcher.matches()) {
+                        line += closeMultilineCommentMatcher.group("uncommented");
+                        insideMultilineComment = false;
+                    }
+                } else {
+                    Matcher closeMultilineCommentMatcher = closeMultilineCommentPattern.matcher(line);
+                    if (insideMultilineComment && closeMultilineCommentMatcher.matches()) {
+                        line = closeMultilineCommentMatcher.group("uncommented");
+                        insideMultilineComment = false;
+                    }
+                }
+
+                if (insideMultilineComment) {
+                    continue;
+                }
+
                 Matcher commentMatcher = commentPattern.matcher(line);
                 Matcher propertyPatternMatcher = propertyPattern.matcher(line);
                 Matcher altPropertyPatternMatcher = altPropertyOneDashPattern.matcher(line);
