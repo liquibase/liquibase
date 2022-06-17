@@ -231,7 +231,11 @@ public class LiquibaseCommandLine {
             bestMessage = bestMessage.replace("Unexpected error running Liquibase: ", "");
         }
 
-        Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
+        if (cause instanceof CommandFailedException && ((CommandFailedException) cause).isExpected()) {
+            Scope.getCurrentScope().getLog(getClass()).severe(bestMessage);
+        } else {
+            Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
+        }
 
         boolean printUsage = false;
         try (final StringWriter suggestionWriter = new StringWriter();
