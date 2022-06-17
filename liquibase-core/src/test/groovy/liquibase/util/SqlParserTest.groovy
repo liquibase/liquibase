@@ -28,6 +28,10 @@ class SqlParserTest extends Specification {
         "a\nstring\n\nwith\nnewlines"                                                                      | ["a", "string", "with", "newlines"]
         "a string /* with a comment */ here"                                                               | ["a", "string", "here"]
         "a string /* with a 'quoted' comment */ here"                                                      | ["a", "string", "here"]
+        "a string /* with a \n'quoted' comment */ here"                                                    | ["a", "string", "here"]
+        "a string /* with a \r\n'quoted' comment */ here"                                                  | ["a", "string", "here"]
+        """a string /* with a
+'quoted' comment */ here"""                                                                                | ["a", "string", "here"]
         "one string; and another"                                                                          | ["one", "string", ";", "and", "another"]
         "'a quoted semicolon; here' and /* a commented semicolon; here */"                                 | ["'a quoted semicolon; here'", "and"]
         "--here is a comment\nand a statement;\nand another --followed by a comment"                       | ["and", "a", "statement", ";", "and", "another"]
