@@ -388,13 +388,20 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                 try {
-                    return extract(
+                    List<CachedRow> returnList =
+                       extract(
                             databaseMetaData.getColumns(
                                     ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema),
                                     ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema),
                                     tableName,
                                     SQL_FILTER_MATCH_ALL)
                     );
+                    //
+                    // IF MARIADB
+                    // Query to get actual data types and then map each column to its CachedRow
+                    //
+                    determineActualDataTypes(returnList, tableName);
+                    return returnList;
                 } catch (SQLException e) {
                     if (shouldReturnEmptyColumns(e)) { //view with table already dropped. Act like it has no columns.
                         return new ArrayList<>();
@@ -415,15 +422,79 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                 try {
-                    return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database)
+                    List<CachedRow> returnList =
+                        extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database)
                             .getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database)
                             .getJdbcSchemaName(catalogAndSchema), SQL_FILTER_MATCH_ALL, SQL_FILTER_MATCH_ALL));
+                    //
+                    // IF MARIADB
+                    // Query to get actual data types and then map each column to its CachedRow
+                    //
+                    determineActualDataTypes(returnList, null);
+                    return returnList;
                 } catch (SQLException e) {
                     if (shouldReturnEmptyColumns(e)) {
                         return new ArrayList<>();
                     } else {
                         throw e;
                     }
+                }
+            }
+
+            //
+            // For MariaDB, query for the data type column so that we can correctly
+            // set the DATETIME(6) type if specified
+            //
+            private void determineActualDataTypes(List<CachedRow> returnList, String tableName) {
+                //
+                // If not MariaDB then just return
+                //
+                if (!(database instanceof MariaDBDatabase)) {
+                    return;
+                }
+
+                //
+                // Query for actual data type for column. The actual DATA_TYPE column string is
+                // not returned by the DatabaseMetadata.getColumns() query, and it is needed
+                // to capture DATETIME(<precision>) data types.
+                //
+                String selectStatement =
+                    "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS " +
+                    "WHERE TABLE_SCHEMA = '" + schemaName + "'";
+                if (tableName != null) {
+                    selectStatement += " AND TABLE_NAME='" + tableName + "'";
+                }
+                Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+                try (Statement statement = underlyingConnection.createStatement(); ResultSet columnSelectRS = statement.executeQuery(selectStatement)) {
+                    //
+                    // Iterate the result set from the query and match the rows
+                    // to the rows that were returned by getColumns() in order
+                    // to assign the actual DATA_TYPE string to the appropriate row.
+                    //
+                    while (columnSelectRS.next()) {
+                        String selectedTableName = columnSelectRS.getString("TABLE_NAME");
+                        String selectedColumnName = columnSelectRS.getString("COLUMN_NAME");
+                        String actualDataType = columnSelectRS.getString("DATA_TYPE");
+                        for (CachedRow row : returnList) {
+                            String rowTableName = row.getString("TABLE_NAME");
+                            String rowColumnName = row.getString("COLUMN_NAME");
+                            String rowTypeName = row.getString("TYPE_NAME");
+                            int rowDataType = row.getInt("DATA_TYPE");
+                            if (rowTableName.equalsIgnoreCase(selectedTableName) &&
+                                rowColumnName.equalsIgnoreCase(selectedColumnName) &&
+                                rowTypeName.equalsIgnoreCase("datetime") &&
+                                rowDataType == Types.OTHER &&
+                                !rowTypeName.equalsIgnoreCase(actualDataType)) {
+                                row.set("TYPE_NAME", actualDataType);
+                                row.set("DATA_TYPE", Types.TIMESTAMP);
+                                break;
+                            }
+                        }
+                    }
+                } catch (SQLException sqle) {
+                    //
+                    // Do not stop
+                    //
                 }
             }
 
