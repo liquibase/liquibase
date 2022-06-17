@@ -55,7 +55,7 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
-            <version>5.0.0</version>
+            <version>6.0.0</version>
         </dependency>        
 
         <dependency>
