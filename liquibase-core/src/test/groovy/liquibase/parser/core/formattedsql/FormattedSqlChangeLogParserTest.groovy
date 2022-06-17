@@ -364,6 +364,46 @@ grant execute on any_procedure_name to ANY_USER3/
         assert changeSet.getId() == "ID:1"
     }
 
+    def "changeset ignored with multiline comment"() throws Exception {
+        when:
+        String changeLogWithOneGoodOneBad = "   \n\n" +
+                "--liquibase formatted sql\n\n" +
+                "/*\n" +
+                "--changeset SteveZ:\"ID:1\" labels:onlytest\n" +
+                "CREATE TABLE contacts (" +
+                "id int," +
+                "firstname VARCHAR(255)," +
+                "lastname VARCHAR(255))" +
+                ");\n" +
+                "*/\n"
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneGoodOneBad).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().isEmpty()
+    }
+
+    def "multiline comment used in a single line"() throws Exception {
+        when:
+        String changeLogWithOneGoodOneBad = "   \n\n" +
+                "--liquibase formatted sql\n\n" +
+                "--changeset SteveZ:\"ID:1\" /*labels:onlytest*/\n" +
+                "CREATE TABLE contacts (" +
+                "/*id int,*/" +
+                "firstname /*VARCHAR(255)," +
+                "lastname*/ VARCHAR(254))" +
+                ");\n"
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOneGoodOneBad).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        ChangeSet changeSet = changeLog.getChangeSets().get(0)
+        assert changeSet.getAuthor() == "SteveZ"
+        assert changeSet.getId() == "ID:1"
+        changeSet.getLabels().isEmpty()
+        ((RawSQLChange) changeSet.getChanges().get(0)).getSql() == "CREATE TABLE contacts (firstname  VARCHAR(254)));"
+    }
+
     def "parse change set with invalid change set attributes"() throws Exception {
         when:
         String changeLogWithInvalidChangeSetAttributes =
