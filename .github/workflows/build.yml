@@ -141,20 +141,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-2019 ]
         java: [ 8, 11, 17, 18 ]
-        exclude:
-          # exclude non-java 8 on macos and windows builds
-          - os: macos-latest
-            java: 11
-          - os: windows-2019
-            java: 11
-          - os: macos-latest
-            java: 17
-          - os: windows-2019
-            java: 17
-          - os: macos-latest
-            java: 18
-          - os: windows-2019
-            java: 18
+
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
@@ -212,7 +199,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 11
-          distribution: 'adopt'
+          distribution: 'temurin'
           cache: 'maven'
       - name: Cache SonarCloud packages
         uses: actions/cache@v3.0.3
