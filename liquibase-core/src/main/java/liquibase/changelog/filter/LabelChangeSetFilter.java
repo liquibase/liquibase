@@ -36,7 +36,7 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
             return new ChangeSetFilterResult(true, "No runtime labels specified, all labels will run", this.getClass());
         }
 
-        Collection<LabelExpression> inheritableLabels = changeSet.getInheritableLabels();
+        Collection<Labels> inheritableLabels = changeSet.getInheritableLabels();
         if ((changeSet.getLabels() == null || changeSet.getLabels().isEmpty()) &&
             (inheritableLabels == null || inheritableLabels.isEmpty())) {
             return new ChangeSetFilterResult(true, "Change set runs under all labels", this.getClass());

@@ -82,6 +82,7 @@
         <module>liquibase-dist</module>
         <module>liquibase-extension-examples</module>
         <module>liquibase-extension-testing</module>
+        <module>liquibase-snowflake</module>
     </modules>
 
     <dependencies>
@@ -117,13 +118,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.5.1</version>
+            <version>4.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
-            <version>4.5.1</version>
+            <version>4.6.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -184,7 +185,7 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>10.2.0.jre8</version>
+            <version>10.2.1.jre8</version>
             <scope>test</scope>
         </dependency>
 
@@ -223,6 +224,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>net.snowflake</groupId>
+            <artifactId>snowflake-jdbc</artifactId>
+            <version>3.13.19</version>
+        </dependency>
+
 
         <!-- needed for newer java versions -->
         <dependency>
@@ -234,7 +241,7 @@
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-core</artifactId>
-            <version>2.3.0.1</version>
+            <version>4.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

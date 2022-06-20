@@ -307,7 +307,9 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        if ((getObjectQuotingStrategy() == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
+        if (isCatalogOrSchemaType(objectType) && preserveCaseIfRequested() == CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE) {
+            return objectName;
+        } else if ((getObjectQuotingStrategy() == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
                 ( objectName == null) || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
             return objectName;
         } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
@@ -315,6 +317,16 @@ public abstract class AbstractJdbcDatabase implements Database {
         } else {
             return objectName.toLowerCase(Locale.US);
         }
+    }
+
+    private boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
+        return objectType.equals(Catalog.class) || objectType.equals(Schema.class);
+    }
+    private CatalogAndSchema.CatalogAndSchemaCase preserveCaseIfRequested() {
+        if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
+           return CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE;
+        }
+        return getSchemaAndCatalogCase();
     }
 
     @Override
@@ -331,7 +343,9 @@ public abstract class AbstractJdbcDatabase implements Database {
 
         if ((defaultSchemaName == null) && (connection != null)) {
             defaultSchemaName = getConnectionSchemaName();
-            Scope.getCurrentScope().getLog(getClass()).info("Set default schema name to " + defaultSchemaName);
+            if (defaultSchemaName != null) {
+                Scope.getCurrentScope().getLog(getClass()).info("Set default schema name to " + defaultSchemaName);
+            }
         }
 
         return defaultSchemaName;
@@ -1010,6 +1024,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (isCatalogOrSchemaType(objectType) && preserveCaseIfRequested() == CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE) {
+            return true;
+        }
         return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || NON_WORD_PATTERN.matcher(objectName).matches();
     }
 
