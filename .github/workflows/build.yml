@@ -141,7 +141,12 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-2019 ]
         java: [ 8, 11, 17, 18 ]
-
+        exclude:
+          # exclude some windows builds
+          - os: windows-2019
+            java: 11
+          - os: windows-2019
+            java: 17
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
