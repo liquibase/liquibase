@@ -30,7 +30,6 @@ jobs:
           - liquibase-oracle
           - liquibase-postgresql
           - liquibase-redshift
-          - liquibase-snowflake
           - liquibase-sqlfire
           - liquibase-teradata
           - liquibase-vertica
