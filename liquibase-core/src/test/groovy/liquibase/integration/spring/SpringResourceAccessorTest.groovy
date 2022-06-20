@@ -92,6 +92,7 @@ class SpringResourceAccessorTest extends Specification {
         "classpath*:/path/to/file" | "classpath*:/path/to/file"
         "classpath*:path/to/file" | "classpath*:/path/to/file"
         "file:/path/to/file" | "file:/path/to/file"
+        "classpath*:/org/camunda/bpm/engine/db/liquibase/../upgrade/mysql_engine_7.16_to_7.17.sql" |"classpath*:/org/camunda/bpm/engine/db/upgrade/mysql_engine_7.16_to_7.17.sql"
     }
 
 
