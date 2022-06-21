@@ -3,6 +3,7 @@ package liquibase.command;
 import liquibase.Scope;
 import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
+import liquibase.exception.CommandValidationException;
 import liquibase.util.StringUtil;
 
 import java.io.OutputStream;
@@ -131,11 +132,7 @@ public class CommandScope {
         return this;
     }
 
-    /**
-     * Executes the command in this scope, and returns the results.
-     */
-    public CommandResults execute() throws CommandExecutionException {
-        CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
+    public void validate() throws CommandValidationException {
         for (ConfigurationValueProvider provider : Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getProviders()) {
             provider.validate(this);
         }
@@ -151,6 +148,15 @@ public class CommandScope {
         for (CommandStep step : pipeline) {
             step.validate(this);
         }
+    }
+
+    /**
+     * Executes the command in this scope, and returns the results.
+     */
+    public CommandResults execute() throws CommandExecutionException {
+        CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
+        final List<CommandStep> pipeline = commandDefinition.getPipeline();
+        validate();
         try {
             for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
