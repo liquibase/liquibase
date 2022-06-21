@@ -30,18 +30,14 @@ class ExpressionExpander {
             int nextChar = reader.read();
             while (nextChar != -1) {
                 if (nextChar == '$') {
-                    reader.mark(1);
                     if (reader.read() == '{') {
-                        reader.mark(1);
-                        if (enableEscaping && reader.read() == ':') {
-                            stringBuilder.append("${");
-                            stringBuilder.append(expandExpressions(reader, changeLog, true).trim());
-                            stringBuilder.append("}");
+                        String paramExpression = expandExpressions(reader, changeLog, true);
+
+                        Object paramValue;
+                        if (paramExpression.startsWith(":") && enableEscaping) {
+                            paramValue = "${" + paramExpression.substring(1).trim() + "}";
                         } else {
-                            inExpression = true;
-                            reader.reset();
-                            String paramExpression = expandExpressions(reader, changeLog, true);
-                            Object paramValue = parameters.getValue(paramExpression.trim(), changeLog);
+                            paramValue = parameters.getValue(paramExpression.trim(), changeLog);
 
                             if (paramValue == null) {
                                 final ChangeLogParserConfiguration.MissingPropertyMode missingPropertyMode = ChangeLogParserConfiguration.MISSING_PROPERTY_MODE.getCurrentValue();
@@ -62,11 +58,13 @@ class ExpressionExpander {
                                     paramValue = expandExpressions((String) paramValue, changeLog);
                                 }
                             }
-                            stringBuilder.append(paramValue);
                         }
+
+                        stringBuilder.append(paramValue);
                     } else {
-                        reader.reset();
-                        stringBuilder.append("$");
+                        stringBuilder.append("${");
+                        nextChar = reader.read();
+                        continue;
                     }
                 } else {
                     if (nextChar == '}' && inExpression) {
