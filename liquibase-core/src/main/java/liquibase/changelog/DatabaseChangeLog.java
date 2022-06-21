@@ -209,10 +209,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         for (ChangeSet changeSet : changeSets) {
             final String normalizedPath = normalizePath(changeSet.getFilePath());
             if (normalizedPath != null &&
-                normalizedPath.equalsIgnoreCase(normalizePath(path)) &&
-                changeSet.getAuthor().equalsIgnoreCase(author) &&
-                changeSet.getId().equalsIgnoreCase(id) &&
-                isDbmsMatch(changeSet.getDbmsSet())) {
+                    normalizedPath.equalsIgnoreCase(normalizePath(path)) &&
+                    changeSet.getAuthor().equalsIgnoreCase(author) &&
+                    changeSet.getId().equalsIgnoreCase(id) &&
+                    isDbmsMatch(changeSet.getDbmsSet())) {
                 return changeSet;
             }
         }
@@ -534,7 +534,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 ignore);
     }
 
-        public void includeAll(String pathName,
+    public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
                            boolean errorIfMissingOrEmpty,
@@ -648,7 +648,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         String relativeBaseFileName = this.getPhysicalFilePath();
         if (isRelativePath) {
             relativeBaseFileName = relativeBaseFileName.replaceFirst("classpath:", "");
-            fileName =  FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
+            fileName = FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
         }
 
         fileName = fileName.replaceFirst("classpath:", "");
@@ -761,9 +761,18 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
+    /**
+     * Controls what to do when including a file with a format that isn't recognized by a changelog parser.
+     */
     public enum OnUnknownFileFormat {
+
+        /** Silently skip unknown files.*/
         SKIP,
+
+        /**  Log a warning about the file not being in a recognized format, but continue on */
         WARN,
+
+        /** Fail parsing with an error */
         FAIL
     }
 
