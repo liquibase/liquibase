@@ -36,8 +36,10 @@ public class JsonChangeLogSerializerTest {
         addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col2").setDefaultValueDate(
                 cal.getTime()));
         addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col2").setDefaultValueSequenceNext(new SequenceNextValueFunction("seq_me")));
-        ChangeSet changeSet = new ChangeSet("1", "nvoxland", false, false, "path/to/file.json", null, null, null);
+        ChangeSet changeSet = new ChangeSet("1", "nvoxland", false, false, "path/to/file.json", null, null,false, null);
         changeSet.setPreconditions(newSamplePreconditions());
+        changeSet.setRunOrder("last");
+        changeSet.setIgnore(true);
         changeSet.addChange(addColumnChange);
         //when
         String serializedJson = new JsonChangeLogSerializer().serialize(changeSet, true);
@@ -46,6 +48,7 @@ public class JsonChangeLogSerializerTest {
                 "  \"changeSet\": {\n" +
                 "    \"id\": \"1\",\n" +
                 "    \"author\": \"nvoxland\",\n" +
+                "    \"ignore\": true,\n" +
                 "    \"objectQuotingStrategy\": \"LEGACY\",\n" +
                 "    \"preconditions\": {\n" +
                 "      \"preConditions\": {\n" +
@@ -64,6 +67,8 @@ public class JsonChangeLogSerializerTest {
                 "        \"onSqlOutput\": \"FAIL\"\n" +
                 "      }\n" +
                 "    },\n" +
+                "    \"runInTransaction\": false,\n" +
+                "    \"runOrder\": \"last\",\n" +
                 "    \"changes\": [\n" +
                 "      {\n" +
                 "        \"addColumn\": {\n" +
