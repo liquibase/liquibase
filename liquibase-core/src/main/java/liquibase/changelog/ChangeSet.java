@@ -1219,11 +1219,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     @Override
     public Set<String> getSerializableFields() {
         return new LinkedHashSet<>(
-                Arrays.asList(
-                        "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
-                        "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
-                "logicalFilePath", "created"
-                )
+            Arrays.asList(
+                "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
+                "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
+                "logicalFilePath", "created", "runInTransaction", "runOrder", "ignore"
+            )
         );
     }
 
@@ -1314,6 +1314,26 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         if ("rollback".equals(field)) {
             if ((rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty()) {
                 return rollback;
+            } else {
+                return null;
+            }
+        }
+
+        if ("runInTransaction".equals(field)) {
+            if (!this.isRunInTransaction()) {
+                return false;
+            } else {
+                return null;
+            }
+        }
+
+        if ("runOrder".equals(field)) {
+            return getRunOrder();
+        }
+
+        if ("ignore".equals(field)) {
+            if (this.isIgnore()) {
+                return true;
             } else {
                 return null;
             }

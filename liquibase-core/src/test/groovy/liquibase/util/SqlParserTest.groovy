@@ -46,6 +46,7 @@ class SqlParserTest extends Specification {
         "a ~ b"                                                                                            | ["a", "~", "b"]
         "a > b"                                                                                            | ["a", ">", "b"]
         "a <> b"                                                                                           | ["a", "<", ">", "b"]
+        "a != '\\\\' here"                                                                                      | ["a", "!", "=", "'\\\\'", "here"]
 
     }
 
