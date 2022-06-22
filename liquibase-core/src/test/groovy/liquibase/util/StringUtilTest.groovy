@@ -15,7 +15,7 @@ class StringUtilTest extends Specification {
         that Arrays.asList(StringUtil.processMultiLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
 
         where:
-        stripComments | splitStatements | endDelimiter | rawString                                                                                                                                                                                           | expected
+        stripComments | splitStatements | endDelimiter | rawString                                                                                                                                                                                              | expected
         true          | true            | null         | "/**\nSome comments go here\n**/\ncreate table sqlfilerollback (id int);\n\n/**\nSome morecomments go here\n**/\ncreate table sqlfilerollback2 (id int);"                                           | ["create table sqlfilerollback (id int)", "create table sqlfilerollback2 (id int)"]
         true          | true            | null         | "/*\nThis is a test comment of MS-SQL script\n*/\n\nSelect * from Test;\nUpdate Test set field = 1"                                                                                                 | ["Select * from Test", "Update Test set field = 1"]
         true          | true            | null         | "some sql/*Some text\nmore text*/more sql"                                                                                                                                                          | ["some sqlmore sql"]
