@@ -30,11 +30,14 @@ class ExpressionExpander {
             int nextChar = reader.read();
             while (nextChar != -1) {
                 if (nextChar == '$') {
+                    reader.mark(1);
                     if (reader.read() == '{') {
                         String paramExpression = expandExpressions(reader, changeLog, true);
 
                         Object paramValue;
-                        if (paramExpression.startsWith(":") && enableEscaping) {
+                        if (paramExpression.startsWith("${")) {
+                            paramValue = paramExpression; //was not actually a valid expression
+                        } else if (paramExpression.startsWith(":") && enableEscaping) {
                             paramValue = "${" + paramExpression.substring(1).trim() + "}";
                         } else {
                             paramValue = parameters.getValue(paramExpression.trim(), changeLog);
@@ -62,7 +65,8 @@ class ExpressionExpander {
 
                         stringBuilder.append(paramValue);
                     } else {
-                        stringBuilder.append("${");
+                        stringBuilder.append("$");
+                        reader.reset();
                         nextChar = reader.read();
                         continue;
                     }
@@ -80,6 +84,11 @@ class ExpressionExpander {
             // Unreachable as we initialize the StringReader with a non-null string
         }
 
-        return stringBuilder.toString();
+        if (inExpression) {
+            //never got to the trailing `}`, return the string as-is
+            return "${"+stringBuilder;
+        } else {
+            return stringBuilder.toString();
+        }
     }
 }
