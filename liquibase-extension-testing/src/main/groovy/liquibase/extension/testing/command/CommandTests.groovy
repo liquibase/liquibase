@@ -1105,6 +1105,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupModifyTextFile(textFile, originalString, newString))
         }
 
+        void modifyDbCredentials(File textFile) {
+            this.setups.add(new SetupModifyDbCredentials(textFile))
+        }
         private void validate() throws IllegalArgumentException {
 
         }
