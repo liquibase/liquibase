@@ -1,17 +1,5 @@
 package liquibase.database;
 
-import liquibase.CatalogAndSchema;
-import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
-import liquibase.exception.*;
-import liquibase.servicelocator.PrioritizedService;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SqlStatement;
-import liquibase.structure.DatabaseObject;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
@@ -19,6 +7,21 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import liquibase.CatalogAndSchema;
+import liquibase.change.Change;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DatabaseHistoryException;
+import liquibase.exception.DateParseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.servicelocator.PrioritizedService;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SqlStatement;
+import liquibase.structure.DatabaseObject;
 
 /**
  * Interface that every DBMS supported by this software must implement. Most methods belong into ont of these
@@ -29,7 +32,7 @@ import java.util.Locale;
  * <li>creating strings for use in SQL statements, e.g. literals for dates, time, numerals, etc.</li>
  * </ul>
  */
-public interface Database extends PrioritizedService {
+public interface Database extends PrioritizedService, AutoCloseable {
 
     String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase(Locale.US);
     String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase(Locale.US);
@@ -290,6 +293,7 @@ public interface Database extends PrioritizedService {
 
     String escapeStringForDatabase(String string);
 
+    @Override
     void close() throws DatabaseException;
 
     boolean supportsRestrictForeignKeys();
