@@ -322,7 +322,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultCatalogName() {//NOPMD
-        return (super.getDefaultCatalogName() == null) ? null : super.getDefaultCatalogName().toUpperCase(Locale.US);
+        String defaultCatalogName = super.getDefaultCatalogName();
+        if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
+            return defaultCatalogName;
+        }
+        return (defaultCatalogName == null) ? null : defaultCatalogName.toUpperCase(Locale.US);
     }
 
     /**
