@@ -12,6 +12,11 @@ public class UnclosableOutputStream extends FilterOutputStream {
         super(out);
     }
 
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        out.write(b, off, len);
+    }
+
     /**
      * This method does not actually close the underlying stream, but rather only flushes it. Callers should not be
      * closing the stream they are given.
