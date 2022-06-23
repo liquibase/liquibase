@@ -43,8 +43,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 while (firstLine.trim().isEmpty() && reader.ready()) {
                     firstLine = reader.readLine();
                 }
-
-                return (firstLine != null) && firstLine.matches("\\-\\-\\s*liquibase formatted.*");
+                Pattern firstLinePattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
+                return (firstLine != null) && firstLinePattern.matcher(firstLine).matches();
             } else {
                 return false;
             }
