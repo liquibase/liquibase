@@ -1,5 +1,15 @@
 package liquibase.database.core;
 
+import static java.util.ResourceBundle.getBundle;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.ResourceBundle;
+import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
+import org.junit.Test;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
@@ -7,6 +17,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.core.TimestampType;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.resource.ResourceAccessor;
@@ -16,18 +27,6 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.test.JUnitResourceAccessor;
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.ResourceBundle;
-
-import static java.util.ResourceBundle.getBundle;
-import static org.junit.Assert.*;
-
-import org.hamcrest.CoreMatchers;
-import org.junit.Test;
 
 /**
  * Tests for {@link liquibase.database.core.OracleDatabase}.
@@ -93,13 +92,16 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
     public void testGetDefaultDriver() {
-        Database database = new OracleDatabase();
+        try (Database database = new OracleDatabase()) {
+          assertEquals("The correct JDBC driver class name is reported if the URL is a Oracle JDBC URL",
+                  "oracle.jdbc.OracleDriver", database.getDefaultDriver("jdbc:oracle:thin:@localhost/XE"));
 
-        assertEquals("The correct JDBC driver class name is reported if the URL is a Oracle JDBC URL",
-                "oracle.jdbc.OracleDriver", database.getDefaultDriver("jdbc:oracle:thin:@localhost/XE"));
-
-        assertNull("No JDBC driver class is returned if the URL is NOT an Oracle Database JDBC URL.",
-                database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
+          assertNull("No JDBC driver class is returned if the URL is NOT an Oracle Database JDBC URL.",
+                  database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
+        } catch (DatabaseException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
     }
 
     @Test

@@ -1,10 +1,14 @@
 package liquibase.database.core;
 
-import liquibase.database.*;
-import liquibase.test.JUnitResourceAccessor;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
+import liquibase.database.AbstractJdbcDatabaseTest;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.exception.DatabaseException;
 
 /**
  * Tests for {@link MSSQLDatabase}
@@ -35,29 +39,38 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
 
     @Test
     public void getDefaultDriver() {
-        Database database = new MSSQLDatabase();
+        try (Database database = new MSSQLDatabase()) {
+          assertEquals("com.microsoft.sqlserver.jdbc.SQLServerDriver", database.getDefaultDriver("jdbc:sqlserver://localhost;databaseName=liquibase"));
 
-        assertEquals("com.microsoft.sqlserver.jdbc.SQLServerDriver", database.getDefaultDriver("jdbc:sqlserver://localhost;databaseName=liquibase"));
-
-        assertNull(database.getDefaultDriver("jdbc:oracle:thin://localhost;databaseName=liquibase"));
+          assertNull(database.getDefaultDriver("jdbc:oracle:thin://localhost;databaseName=liquibase"));
+        } catch (DatabaseException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
     }
 
     @Override
     @Test
     public void escapeTableName_noSchema() {
-        Database database = new MSSQLDatabase();
-        assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
-        assertEquals("[tableName€]", database.escapeTableName(null, null, "tableName€"));
+        try (Database database = new MSSQLDatabase()) {
+          assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
+          assertEquals("[tableName€]", database.escapeTableName(null, null, "tableName€"));
+        } catch (DatabaseException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
     }
 
     @Override
     @Test
     public void escapeTableName_withSchema() {
-        Database database = new MSSQLDatabase();
-        assertEquals("catalogName.schemaName.tableName", database.escapeTableName("catalogName", "schemaName",
-            "tableName"));
-        assertEquals("[catalogName€].[schemaName€].[tableName€]", database.escapeTableName("catalogName€",
-            "schemaName€", "tableName€"));
+        try (Database database = new MSSQLDatabase()) {
+          assertEquals("catalogName.schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+          assertEquals("[catalogName€].[schemaName€].[tableName€]", database.escapeTableName("catalogName€", "schemaName€", "tableName€"));
+        } catch (DatabaseException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
     }
     private Database createOfflineDatabase(String url) throws Exception {
         return DatabaseFactory.getInstance().openDatabase(url, null, null, null, null);

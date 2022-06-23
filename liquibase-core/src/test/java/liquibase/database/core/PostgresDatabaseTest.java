@@ -5,6 +5,7 @@ import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.exception.DatabaseException;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 import org.junit.Assert;
@@ -50,11 +51,14 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
     public void testGetDefaultDriver() {
-        Database database = new PostgresDatabase();
+        try (Database database = new PostgresDatabase()) {
+          assertEquals("org.postgresql.Driver", database.getDefaultDriver("jdbc:postgresql://localhost/liquibase"));
 
-        assertEquals("org.postgresql.Driver", database.getDefaultDriver("jdbc:postgresql://localhost/liquibase"));
-
-        assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
+          assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
+        } catch (DatabaseException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
     }
 
 
