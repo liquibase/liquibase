@@ -18,6 +18,8 @@ on:
 
 jobs:
   check_build_safety:
+    permissions:
+      contents: none
     name: Check if Build should be done
     runs-on: ubuntu-latest
     steps:
