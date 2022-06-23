@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
+import liquibase.io.UnclosableOutputStream;
 import liquibase.util.StringUtil;
 
 import java.io.OutputStream;
@@ -127,7 +128,12 @@ public class CommandScope {
      * Think "what would be piped out", not "what the user is told about what is happening".
      */
     public CommandScope setOutput(OutputStream outputStream) {
-        this.outputStream = outputStream;
+        /*
+        This is an UncloseableOutputStream because we do not want individual command steps to inadvertently (or
+        intentionally) close the System.out OutputStream. Closing System.out renders it unusable for other command
+        steps which expect it to still be open.
+         */
+        this.outputStream = new UnclosableOutputStream(outputStream);
 
         return this;
     }
