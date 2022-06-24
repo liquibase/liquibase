@@ -8,6 +8,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.BomAwareInputStream;
 import liquibase.util.FileUtil;
+import liquibase.util.LiquibaseUtil;
 import org.xml.sax.*;
 
 import javax.xml.XMLConstants;
@@ -18,8 +19,12 @@ import java.io.InputStream;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
-    public static final String LIQUIBASE_SCHEMA_VERSION = "4.6";
+    public static final String LIQUIBASE_SCHEMA_VERSION;
     private SAXParserFactory saxParserFactory;
+
+    static {
+        LIQUIBASE_SCHEMA_VERSION = computeSchemaVersion(LiquibaseUtil.getBuildVersion());
+    }
 
     private final LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
 
@@ -150,5 +155,18 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         } catch (SAXNotRecognizedException | SAXNotSupportedException ignored) {
             //ok, parser need not support it
         }
+    }
+
+    static String computeSchemaVersion(String version) {
+        String finalVersion = null;
+
+        if (version != null && version.contains(".")) {
+            String[] splitVersion = version.split("\\.");
+            finalVersion = splitVersion[0] + "." + splitVersion[1];
+        }
+        if (finalVersion == null) {
+            finalVersion = "next";
+        }
+        return finalVersion;
     }
 }

@@ -3,6 +3,8 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -52,6 +54,16 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * Suffix for fields that are representing a default value for a another field.
      */
     private static final String DEFAULT_FIELD_SUFFIX = "Default";
+
+    /**
+     *
+     * Specifies whether to preserve the case of schemas and catalogs
+     *
+     * @parameter property="liquibase.preserveSchemaCase"
+     *
+     */
+    @PropertyElement
+    protected Boolean preserveSchemaCase;
 
     /**
      * Specifies the driver class name to use for the database connection.
@@ -270,6 +282,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String databaseChangeLogTableName;
+
     /**
      * Specifies the table name to use for the DATABASECHANGELOGLOCK table.
      *
@@ -277,6 +290,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String databaseChangeLogLockTableName;
+
+    /**
+     * Show the liquibase banner in output.
+     *
+     * @parameter property="liquibase.showBanner"
+     */
+    @PropertyElement
+    protected boolean showBanner = true;
 
     /**
      * Specifies the server ID in the Maven <i>settings.xml</i> to use when authenticating.
@@ -312,20 +333,36 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     private File driverPropertiesFile;
 
-    private boolean hasProLicense;
-
     /**
-     * Specifies your Liquibase Pro license key.
+     * Specifies your Liquibase Pro license key. This has been deprecated in favor of using
+     * "liquibase.liquibaseLicenseKey", but this property will continue to be operational.
      *
      * @parameter property="liquibase.liquibaseProLicenseKey"
      */
     @PropertyElement
-    protected String liquibaseProLicenseKey;
+    @Deprecated
+    private String liquibaseProLicenseKey;
+
+    /**
+     * Specifies your Liquibase license key.
+     *
+     * @parameter property="liquibase.licenseKey"
+     */
+    @PropertyElement
+    private String liquibaseLicenseKey;
 
     protected String commandName;
 
-    protected boolean hasProLicense() {
-        return hasProLicense;
+    /**
+     * Get the specified license key. This first checks liquibaseLicenseKey and if no key is found, then returns
+     * liquibaseProLicenseKey.
+     */
+    protected String getLicenseKey() {
+        if (StringUtil.isNotEmpty(liquibaseLicenseKey)) {
+            return liquibaseLicenseKey;
+        } else {
+            return liquibaseProLicenseKey;
+        }
     }
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
@@ -403,20 +440,21 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         }
                     }
                 }
-                scopeValues.put("integrationDetails", integrationDetails);
 
-                final Map pluginContext = this.getPluginContext();
-                System.out.println(pluginContext.keySet());
+                //
+                // Add properties to this top-level scope
+                //
+                scopeValues.put("integrationDetails", integrationDetails);
+                scopeValues.put("liquibase.licenseKey", getLicenseKey());
+                String key = GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey();
+                scopeValues.put(key, preserveSchemaCase);
                 Scope.child(scopeValues, () -> {
 
                     configureFieldsAndValues();
 
-                    //
-                    // Check for a LiquibasePro license
-                    //
-                    hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
-
-                    getLog().info(CommandLineUtils.getBanner());
+                    if (showBanner) {
+                        getLog().info(CommandLineUtils.getBanner());
+                    }
 
                     // Displays the settings for the Mojo depending of verbosity mode.
                     displayMojoSettings();
@@ -478,7 +516,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                             }
                         }
                         setupBindInfoPackage();
-                        performLiquibaseTask(liquibase);
+
+                        //
+                        // Add another scope child with a map so that
+                        // we can set the preserveSchemaCase property,
+                        // which might have been specified in a defaults file
+                        //
+                        Map<String, Object> innerScopeValues = new HashMap<>();
+                        innerScopeValues.put(key, preserveSchemaCase);
+                        Scope.child(innerScopeValues, () -> {
+                            performLiquibaseTask(liquibase);
+                        });
                     } catch (LiquibaseException e) {
                         cleanup(database);
                         throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
@@ -570,6 +618,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 parsePropertiesFile(is);
                 getLog().info(MavenUtils.LOG_SEPARATOR);
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+            try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
+                if (is == null) {
+                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
+                }
+
+                LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(is, "Property file "+propertyFile);
+                liquibaseConfiguration.registerProvider(fileProvider);
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }

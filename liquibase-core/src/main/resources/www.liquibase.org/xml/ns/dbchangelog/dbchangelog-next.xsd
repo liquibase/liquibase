@@ -203,6 +203,7 @@
                             <xsd:attribute name="resourceComparator" type="xsd:string"/>
                             <xsd:attribute name="filter" type="xsd:string"/>
                             <xsd:attribute name="context" type="xsd:string"/>
+                            <xsd:attribute name="labels" type="xsd:string"/>
                             <xsd:anyAttribute namespace="##other" processContents="lax"/>
                         </xsd:complexType>
                     </xsd:element>
@@ -557,6 +558,8 @@
             <xsd:attribute name="columnDataType" type="xsd:string"/>
             <xsd:attribute name="startWith" type="xsd:long"/>
             <xsd:attribute name="incrementBy" type="xsd:long"/>
+            <xsd:attribute name="defaultOnNull" type="booleanExp"/>
+            <xsd:attribute name="generationType" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -602,7 +605,7 @@
         <xsd:attribute name="separator" type="nonEmptyString" default=","/>
         <xsd:attribute name="quotchar" type="nonEmptyString" default="&quot;"/>
         <xsd:attribute name="commentLineStartsWith" type="nonEmptyString" default="#"/>
-        <xsd:attribute name="usePreparedStatements" type="booleanExp" default="false"/>
+        <xsd:attribute name="usePreparedStatements" type="booleanExp"/>
     </xsd:attributeGroup>
 
     <xsd:element name="loadData">

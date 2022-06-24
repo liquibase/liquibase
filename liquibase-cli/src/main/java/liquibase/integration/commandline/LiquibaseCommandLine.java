@@ -13,7 +13,6 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -30,7 +29,6 @@ import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
 import java.io.*;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -233,7 +231,11 @@ public class LiquibaseCommandLine {
             bestMessage = bestMessage.replace("Unexpected error running Liquibase: ", "");
         }
 
-        Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
+        if (cause instanceof CommandFailedException && ((CommandFailedException) cause).isExpected()) {
+            Scope.getCurrentScope().getLog(getClass()).severe(bestMessage);
+        } else {
+            Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
+        }
 
         boolean printUsage = false;
         try (final StringWriter suggestionWriter = new StringWriter();
@@ -492,6 +494,24 @@ public class LiquibaseCommandLine {
         returnList.add(argumentProvider);
 
         final ConfiguredValue<String> defaultsFileConfig = LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue();
+        /*
+         * The installed licenses are cleared from the license service. Clearing the licenses
+         * forces the license service to reinstall the licenses.
+         *
+         * The call to LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentConfiguredValue() above will check
+         * the environment variables for a value, and that requires a valid license. Thus, if the user has a license
+         * key specified in both an environment variable and in their defaults file (using different property names),
+         * the value in the defaults file will not be seen, despite it possibly being more preferred than the value
+         * in the environment variable, because the DefaultsFileValueProvider hasn't been registered yet.
+         */
+        LicenseServiceFactory licenseServiceFactory = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class);
+        if (licenseServiceFactory != null) {
+            LicenseService licenseService = licenseServiceFactory.getLicenseService();
+            if (licenseService != null) {
+                licenseService.reset();
+            }
+        }
+
         final File defaultsFile = new File(defaultsFileConfig.getValue());
         if (defaultsFile.exists()) {
             final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsFile);
@@ -1150,7 +1170,12 @@ public class LiquibaseCommandLine {
                         filePath = workingDirectory.relativize(info.file.toPath()).toString();
                     }
 
-                    libraryDescription.append("- "). append(filePath).append(": ").append(info.name).append(" ").append(info.version).append("\n");
+                    libraryDescription.append("- ")
+                            .append(filePath).append(":")
+                            .append(" ").append(info.name)
+                            .append(" ").append(info.version == null ? "UNKNOWN" : info.version)
+                            .append(info.vendor == null ? "" : " By " + info.vendor)
+                            .append("\n");
                 }
             }
 
@@ -1174,14 +1199,12 @@ public class LiquibaseCommandLine {
                 libraryInfo.file = pathEntryFile;
 
                 final Manifest manifest = jarFile.getManifest();
-                libraryInfo.name = getValue(manifest, "Bundle-Name", "Implementation-Title");
-                libraryInfo.version = getValue(manifest, "Bundle-Version", "Implementation-Version");
+                libraryInfo.name = getValue(manifest, "Bundle-Name", "Implementation-Title", "Specification-Title");
+                libraryInfo.version = getValue(manifest, "Bundle-Version", "Implementation-Version", "Specification-Version");
+                libraryInfo.vendor = getValue(manifest, "Bundle-Vendor", "Implementation-Vendor", "Specification-Vendor");
 
                 if (libraryInfo.name == null) {
                     libraryInfo.name = pathEntryFile.getName().replace(".jar", "");
-                }
-                if (libraryInfo.version == null) {
-                    libraryInfo.version = "UNKNOWN";
                 }
                 return libraryInfo;
             }
@@ -1199,6 +1222,7 @@ public class LiquibaseCommandLine {
 
 
         private static class LibraryInfo implements Comparable<LibraryInfo> {
+            private String vendor;
             private String name;
             private File file;
             private String version;

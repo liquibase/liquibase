@@ -1,4 +1,4 @@
-Liquibase License Information
+Liquibase License Information (Used by Liquibase OSS)
 Version: ${project.version}
 
 Liquibase ships with 3rd party components using the following licenses:
@@ -23,15 +23,10 @@ Apache 2.0 License
 - info.picocli:picocli
 - org.xerial:sqlite-jdbc
 - com.opencsv:opencsv
-- commons-codec:commons-codec
+- net.snowflake:snowflake-jdbc
 - org.apache.commons:commons-lang3
 - org.apache.commons:commons-text
 - org.apache.commons:commons-collections4
-- com.fasterxml.jackson.module:jackson-module-jaxb-annotations
-- com.fasterxml.jackson.core:jackson-core
-- com.fasterxml.jackson.core:jackson-databind
-- com.fasterxml.jackson.core:jackson-annotations
-- com.github.jsqlparser:jsqlparser (Dual licence: Apache 2.0, LGPL 2.1)
 
 BSD 2 Clause License
 - org.hsqldb:hsqldb
@@ -41,6 +36,7 @@ BSD 3 Clause License
 - org.firebirdsql.jdbc:jaybird (Dual License: LGPL, BSD-3 Clause)
 
 CDDL 1.1 License
+- javax.resource:connector-api
 - javax.xml.bind:jaxb-api
 
 Eclipse Distribution 1.0 License
@@ -55,9 +51,6 @@ Eclipse Public 2.0 License
 
 IBM International Program License Agreement (IPLA)
 - com.ibm.db2:jcc
-
-GNU Affero General Public License (AGPL) version 3
-- net.java.truelicense:truelicense
 
 GNU Lesser General Public License (LGPL) 3.0
 - org.mariadb.jdbc:mariadb-java-client (Dual license: LGPL 2.1, LGPL 3.0)
