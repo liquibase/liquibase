@@ -53,7 +53,7 @@ public class NumberType extends LiquibaseDataType {
                         return new DatabaseDataType("numeric");
                     }
                 } catch (NumberFormatException e) {
-                    return new DatabaseDataType("numeric");
+                    return new DatabaseDataType("numeric", getParameters());
                 }
             }
             return new DatabaseDataType("numeric", getParameters());

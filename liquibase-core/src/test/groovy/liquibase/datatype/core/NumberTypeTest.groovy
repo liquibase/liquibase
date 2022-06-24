@@ -23,6 +23,6 @@ class NumberTypeTest extends Specification {
         [1]        | new PostgresDatabase() | "numeric(1)"
         [2000]     | new PostgresDatabase() | "numeric"
         ["1", "2"] | new PostgresDatabase() | "numeric(1, 2)"
-        ["*", "0"] | new PostgresDatabase() | "numeric"
+        ["*", "0"] | new PostgresDatabase() | "numeric(*, 0)"
     }
 }
