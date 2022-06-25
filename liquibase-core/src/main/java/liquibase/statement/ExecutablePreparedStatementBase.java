@@ -422,18 +422,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     @java.lang.SuppressWarnings("squid:S2095")
     private InputStream getResourceAsStream(String valueLobFile) throws IOException, LiquibaseException {
         String fileName = getFileName(valueLobFile);
-        InputStreamList streams = this.resourceAccessor.openStreams(null, fileName);
-        if ((streams == null) || streams.isEmpty()) {
-            return null;
-        }
-        if (streams.size() > 1) {
-            for (InputStream stream : streams) {
-                stream.close();
-            }
-
-            throw new IOException(streams.size() + " matched " + valueLobFile);
-        }
-        return streams.iterator().next();
+        return this.resourceAccessor.openStream(null, fileName);
     }
 
     private String getFileName(String fileName) {
