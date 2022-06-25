@@ -25,7 +25,7 @@ public class FileSystemSearchPathHandler extends AbstractSearchPathHandler {
         return PRIORITY_DEFAULT;
     }
 
-    public ResourceAccessor parse(String root) {
+    public ResourceAccessor getResourceAccessor(String root) {
         return new FileSystemResourceAccessor(new File(root.replace("\\", "/")));
     }
 }

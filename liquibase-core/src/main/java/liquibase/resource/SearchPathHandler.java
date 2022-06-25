@@ -19,5 +19,5 @@ public interface SearchPathHandler extends Plugin {
      *
      * @throws IOException if the path is invalid
      */
-    ResourceAccessor parse(String root) throws IOException;
+    ResourceAccessor getResourceAccessor(String root) throws IOException;
 }

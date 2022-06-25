@@ -25,11 +25,11 @@ public class SearchPathHandlerFactory extends AbstractPluginFactory<SearchPathHa
     /**
      * Creates the {@link ResourceAccessor} for the given path.
      */
-    public ResourceAccessor parse(String root) throws IOException {
+    public ResourceAccessor getResourceAccessor(String root) throws IOException {
         final SearchPathHandler plugin = getPlugin(root);
         if (plugin == null) {
             throw new IOException("Cannot parse resource location: '" + root + "'");
         }
-        return plugin.parse(root);
+        return plugin.getResourceAccessor(root);
     }
 }
