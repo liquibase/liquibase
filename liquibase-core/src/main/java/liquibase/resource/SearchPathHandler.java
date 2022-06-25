@@ -7,7 +7,7 @@ import java.io.IOException;
 /**
  * Interface for plugins that can create {@link ResourceAccessor}s out of the values in {@link liquibase.GlobalConfiguration#SEARCH_PATHS}.
  */
-public interface SearchPathParser extends Plugin {
+public interface SearchPathHandler extends Plugin {
 
     /**
      * Priority of this parser for the given path. The implementation with the highest priority will be used.

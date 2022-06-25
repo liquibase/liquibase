@@ -3,9 +3,9 @@ package liquibase.resource;
 import java.io.File;
 
 /**
- * {@link SearchPathParser} that converts the path into a {@link FileSystemResourceAccessor}.
+ * {@link SearchPathHandler} that converts the path into a {@link FileSystemResourceAccessor}.
  */
-public class FileSystemSearchPathParser extends AbstractSearchPathParser {
+public class FileSystemSearchPathHandler extends AbstractSearchPathHandler {
 
     /**
      * Returns {@link #PRIORITY_DEFAULT} for all paths except for ones that are for a non-"file:" protocol.

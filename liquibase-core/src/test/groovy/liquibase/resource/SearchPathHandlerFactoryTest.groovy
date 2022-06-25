@@ -4,17 +4,17 @@ import liquibase.Scope
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class SearchPathParserFactoryTest extends Specification {
+class SearchPathHandlerFactoryTest extends Specification {
 
     def "parse file path"() {
         expect:
-        Scope.getCurrentScope().getSingleton(SearchPathParserFactory).parse("a/path/here") instanceof FileSystemResourceAccessor
+        Scope.getCurrentScope().getSingleton(SearchPathHandlerFactory).parse("a/path/here") instanceof FileSystemResourceAccessor
     }
 
     @Unroll
     def "parse unparseable file path: #input"() {
         when:
-        Scope.getCurrentScope().getSingleton(SearchPathParserFactory).parse(input) instanceof FileSystemResourceAccessor
+        Scope.getCurrentScope().getSingleton(SearchPathHandlerFactory).parse(input) instanceof FileSystemResourceAccessor
 
         then:
         def e = thrown(IOException)
