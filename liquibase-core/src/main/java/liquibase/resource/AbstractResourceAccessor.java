@@ -40,7 +40,7 @@ public abstract class AbstractResourceAccessor extends AbstractExtensibleObject 
             if (mode == GlobalConfiguration.DuplicateFileMode.ERROR) {
                 throw new IOException(message);
             } else if (mode == GlobalConfiguration.DuplicateFileMode.WARN) {
-                log.warning(message + "  Using " + streamList.getURIs().get(0));
+                log.warning(message + "  Using " + streamList.getURIs().get(0)+". To fail when duplicates are found, set liquibase.duplicateFileMode=ERROR");
 
                 InputStream returnStream = null;
                 final Iterator<InputStream> iterator = streamList.iterator();
