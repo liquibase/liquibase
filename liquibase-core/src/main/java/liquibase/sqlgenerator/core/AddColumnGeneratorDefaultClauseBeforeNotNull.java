@@ -89,10 +89,6 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
             alterTable += " AFTER " + database.escapeColumnName(statement.getSchemaName(), statement.getSchemaName(), statement.getTableName(), statement.getAddAfterColumn());
         }
 
-        if (statement.getAddAtPosition() != null) {
-            alterTable += " POSITION " + statement.getAddAtPosition();
-        }
-
         return alterTable;
     }
 

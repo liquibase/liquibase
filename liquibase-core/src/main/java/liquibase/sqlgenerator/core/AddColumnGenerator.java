@@ -77,9 +77,8 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             validationErrors.checkDisallowedField("addBeforeColumn", statement.getAddBeforeColumn(), database, database.getClass());
         }
 
-        if (!(database instanceof FirebirdDatabase)) {
-            validationErrors.checkDisallowedField("addAtPosition", statement.getAddAtPosition(), database, database.getClass());
-        }
+        //no databases liquibase supports currently supports adding columns at a given position. Firebird only allows position on alters
+        validationErrors.checkDisallowedField("addAtPosition", statement.getAddAtPosition(), database, database.getClass());
 
         return validationErrors;
     }
