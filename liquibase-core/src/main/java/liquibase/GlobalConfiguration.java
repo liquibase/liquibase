@@ -203,7 +203,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         DUPLICATE_FILE_MODE = builder.define("duplicateFileMode", DuplicateFileMode.class)
                 .setDescription("How to handle multiple files being found in the search path that have duplicate paths. Options are WARN (log warning and choose one at random) or ERROR (fail current operation)")
-                .setDefaultValue(DuplicateFileMode.WARN)
+                .setDefaultValue(DuplicateFileMode.ERROR)
                 .build();
     }
 
