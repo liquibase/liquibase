@@ -65,17 +65,15 @@ For questions regarding Liquibase, you can submit an email to support@liquibase.
 or submit a post on stack overflow and use the #liquibase tag: 
 https://stackoverflow.com/questions/tagged/liquibase
 
-You can also post questions to these Liquibase forums:
-Liquibase User Forum: https://forum.liquibase.org/#Forum/liquibase-users
-Liquibase Developer Forum: https://forum.liquibase.org/#Forum/liquibase-development
+You can also post questions to the Liquibase forum: https://forum.liquibase.org
 
-Liquibase Documentation: http://liquibase.org/documentation
+Liquibase Documentation: https://docs.liquibase.com
 
-Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here: https://support.liquibase.org
+Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here: https://liquibase.com/pricing
 
 
 ----------------------------------------
 The program is subject to the license agreement, copyright, trademark, patent, and other laws.
-Copyright 2021 Liquibase, Inc. All rights reserved.
+Copyright ${current.year} Liquibase, Inc. All rights reserved.
 
 
