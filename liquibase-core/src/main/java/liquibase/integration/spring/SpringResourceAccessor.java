@@ -9,6 +9,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -193,6 +194,8 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         }
         searchPath = searchPath.replace("\\", "/");
         searchPath = searchPath.replaceAll("//+", "/");
+
+        searchPath = StringUtils.cleanPath(searchPath);
 
         return searchPath;
     }

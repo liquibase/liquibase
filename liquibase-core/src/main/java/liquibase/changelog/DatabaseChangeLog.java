@@ -209,10 +209,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         for (ChangeSet changeSet : changeSets) {
             final String normalizedPath = normalizePath(changeSet.getFilePath());
             if (normalizedPath != null &&
-                normalizedPath.equalsIgnoreCase(normalizePath(path)) &&
-                changeSet.getAuthor().equalsIgnoreCase(author) &&
-                changeSet.getId().equalsIgnoreCase(id) &&
-                isDbmsMatch(changeSet.getDbmsSet())) {
+                    normalizedPath.equalsIgnoreCase(normalizePath(path)) &&
+                    changeSet.getAuthor().equalsIgnoreCase(author) &&
+                    changeSet.getId().equalsIgnoreCase(id) &&
+                    isDbmsMatch(changeSet.getDbmsSet())) {
                 return changeSet;
             }
         }
@@ -375,7 +375,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                             includeContexts,
                             labels,
                             ignore,
-                            true);
+                            OnUnknownFileFormat.FAIL);
                 } catch (LiquibaseException e) {
                     throw new SetupException(e);
                 }
@@ -534,7 +534,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 ignore);
     }
 
-        public void includeAll(String pathName,
+    public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
                            boolean errorIfMissingOrEmpty,
@@ -585,7 +585,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
             for (String path : resources) {
                 Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + path);
-                include(path, false, resourceAccessor, includeContexts, labels, ignore, false);
+                include(path, false, resourceAccessor, includeContexts, labels, ignore, OnUnknownFileFormat.WARN);
             }
         } catch (Exception e) {
             throw new SetupException(e);
@@ -618,13 +618,27 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 logEveryUnknownFileFormat);
     }
 
-        public boolean include(String fileName,
+    /**
+     * @deprecated
+     */
+    public boolean include(String fileName,
                            boolean isRelativePath,
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContexts,
                            Labels labels,
                            Boolean ignore,
                            boolean logEveryUnknownFileFormat)
+            throws LiquibaseException {
+        return include(fileName, isRelativePath, resourceAccessor, includeContexts, labels, ignore, logEveryUnknownFileFormat ? OnUnknownFileFormat.WARN : OnUnknownFileFormat.SKIP);
+    }
+
+    public boolean include(String fileName,
+                           boolean isRelativePath,
+                           ResourceAccessor resourceAccessor,
+                           ContextExpression includeContexts,
+                           Labels labels,
+                           Boolean ignore,
+                           OnUnknownFileFormat onUnknownFileFormat)
             throws LiquibaseException {
 
         if (".svn".equalsIgnoreCase(fileName) || "cvs".equalsIgnoreCase(fileName)) {
@@ -634,7 +648,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         String relativeBaseFileName = this.getPhysicalFilePath();
         if (isRelativePath) {
             relativeBaseFileName = relativeBaseFileName.replaceFirst("classpath:", "");
-            fileName =  FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
+            fileName = FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
         }
 
         fileName = fileName.replaceFirst("classpath:", "");
@@ -663,9 +677,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
         } catch (UnknownChangelogFormatException e) {
+            if (onUnknownFileFormat == OnUnknownFileFormat.FAIL) {
+                throw e;
+            }
             // This matches only an extension, but filename can be a full path, too. Is it right?
             boolean matchesFileExtension = StringUtil.trimToEmpty(fileName).matches("\\.\\w+$");
-            if (matchesFileExtension || logEveryUnknownFileFormat) {
+            if (matchesFileExtension || onUnknownFileFormat == OnUnknownFileFormat.WARN) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
                         "included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type"
                 );
@@ -742,6 +759,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         public void addNestedPrecondition(Precondition precondition) {
             super.addNestedPrecondition(precondition);
         }
+    }
+
+    /**
+     * Controls what to do when including a file with a format that isn't recognized by a changelog parser.
+     */
+    public enum OnUnknownFileFormat {
+
+        /** Silently skip unknown files.*/
+        SKIP,
+
+        /**  Log a warning about the file not being in a recognized format, but continue on */
+        WARN,
+
+        /** Fail parsing with an error */
+        FAIL
     }
 
 }
