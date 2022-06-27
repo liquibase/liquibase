@@ -136,6 +136,12 @@ public class ChangeSetTest extends Specification {
                 continue
             } else if (param == "objectQuotingStrategy") {
                 testValue[param] = "QUOTE_ONLY_RESERVED_WORDS"
+            } else if (param == "runInTransaction") {
+                testValue[param] = "false"
+            } else if (param == "runOrder") {
+                testValue[param] = "last"
+            } else if (param == "ignore") {
+                testValue[param] = "true"
             } else {
                 testValue[param] = "value for ${param}"
             }
@@ -559,6 +565,27 @@ public class ChangeSetTest extends Specification {
         dbmsList | expectedValue
         ""       | null
         null     | null
+    }
+
+    def isInheritableIgnore() {
+        when:
+        def changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, null);
+
+        then:
+        !changeSet.isInheritableIgnore()
+
+        when:
+        def parent = new DatabaseChangeLog("com/example/test.xml")
+        changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, parent);
+
+        then:
+        !changeSet.isInheritableIgnore()
+
+        when:
+        parent.setIncludeIgnore(true)
+
+        then:
+        changeSet.isInheritableIgnore()
     }
 
 }

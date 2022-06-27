@@ -43,8 +43,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 while (firstLine.trim().isEmpty() && reader.ready()) {
                     firstLine = reader.readLine();
                 }
-
-                return (firstLine != null) && firstLine.matches("\\-\\-\\s*liquibase formatted.*");
+                Pattern firstLinePattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
+                return (firstLine != null) && firstLinePattern.matcher(firstLine).matches();
             } else {
                 return false;
             }
@@ -451,7 +451,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         String context = null;
         String labels = null;
         String dbms = null;
-        boolean global = false;
+        boolean global = true;
         for (int i = 1; i <= propertyPatternMatcher.groupCount(); i++) {
             String temp = propertyPatternMatcher.group(i);
             String[] parts = temp.split(":");

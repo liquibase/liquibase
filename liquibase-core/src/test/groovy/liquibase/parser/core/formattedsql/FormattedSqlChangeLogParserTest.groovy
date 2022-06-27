@@ -186,11 +186,34 @@ grant execute on any_procedure_name to ANY_USER3/
                     "-precondition 123\n" +
                     "select 1;"
 
+    private static final String VALID_ALL_CAPS_CHANGELOG = """
+--LIQUIBASE FORMATTED SQL
+
+--CHANGESET SOME_USER:ALL_CAPS_SCRIPT_1
+CREATE TABLE ALL_CAPS_TABLE_1 (
+    ID INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    NAME VARCHAR(50) NOT NULL,
+    ADDRESS1 VARCHAR(50),
+    ADDRESS2 VARCHAR(50),
+    CITY VARCHAR(30)
+)
+
+--CHANGESET SOME_USER:ALL_CAPS_SCRIPT_2
+CREATE TABLE ALL_CAPS_TABLE_2 (
+    ID INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    NAME VARCHAR(50) NOT NULL,
+    ADDRESS1 VARCHAR(50),
+    ADDRESS2 VARCHAR(50),
+    CITY VARCHAR(30)
+)
+"""
+
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
         assert !new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.SQL", new JUnitResourceAccessor())
+        assert new MockFormattedSqlChangeLogParser(VALID_ALL_CAPS_CHANGELOG).supports("BLAH.SQL", new JUnitResourceAccessor())
     }
 
     def invalidPrecondition() throws Exception {
@@ -639,6 +662,14 @@ grant execute on any_procedure_name to ANY_USER3/
         where:
         example                                                                                                       | expected
         "--liquibase formatted sql\n--changeset John Doe:12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"      | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
+    }
+
+    def parse_withAllCaps() {
+        when:
+        def changeLog = new MockFormattedSqlChangeLogParser(VALID_ALL_CAPS_CHANGELOG).parse("ALL_CAPS.SQL", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 2
     }
 
     @LiquibaseService(skip = true)
