@@ -166,10 +166,9 @@ public abstract class BaseLiquibaseTask extends Task {
      * @return A ResourceAccessor.
      */
     private ResourceAccessor createResourceAccessor(AntClassLoader classLoader) {
-        return new CompositeResourceAccessor(
+        return new SearchPathResourceAccessor(getSearchPath(),
                 new AntResourceAccessor(classLoader, getChangeLogDirectory()),
-                new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader()),
-                new SearchPathResourceAccessor(getSearchPath())
+                new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader())
         );
     }
 

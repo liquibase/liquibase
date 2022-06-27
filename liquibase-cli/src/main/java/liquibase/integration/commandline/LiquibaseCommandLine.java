@@ -674,9 +674,8 @@ public class LiquibaseCommandLine {
     private Map<String, Object> configureResourceAccessor(ClassLoader classLoader) {
         Map<String, Object> returnMap = new HashMap<>();
 
-        returnMap.put(Scope.Attr.resourceAccessor.name(), new CompositeResourceAccessor(
+        returnMap.put(Scope.Attr.resourceAccessor.name(), new SearchPathResourceAccessor(
                 new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
-                new SearchPathResourceAccessor(),
                 new CommandLineResourceAccessor(classLoader)));
 
         return returnMap;

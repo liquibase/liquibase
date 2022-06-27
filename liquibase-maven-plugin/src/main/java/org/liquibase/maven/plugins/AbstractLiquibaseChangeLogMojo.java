@@ -138,7 +138,6 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
         resourceAccessors.add(new MavenResourceAccessor(cl));
         resourceAccessors.add(new FileSystemResourceAccessor(project.getBasedir()));
-        resourceAccessors.add(new SearchPathResourceAccessor(searchPath));
         resourceAccessors.add(new ClassLoaderResourceAccessor(getClass().getClassLoader()));
 
         if (changeLogDirectory != null) {
@@ -146,7 +145,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
             resourceAccessors.add(new FileSystemResourceAccessor(new File(changeLogDirectory)));
         }
 
-        return new CompositeResourceAccessor(resourceAccessors);
+        return new SearchPathResourceAccessor(searchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 
     @Override

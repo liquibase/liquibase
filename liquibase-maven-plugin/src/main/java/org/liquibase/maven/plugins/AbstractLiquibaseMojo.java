@@ -709,7 +709,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
         ResourceAccessor mFO = new MavenResourceAccessor(cl);
         ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir());
-        return new CompositeResourceAccessor(mFO, fsFO, new SearchPathResourceAccessor(searchPath));
+        return new SearchPathResourceAccessor(searchPath, mFO, fsFO);
     }
 
     /**
