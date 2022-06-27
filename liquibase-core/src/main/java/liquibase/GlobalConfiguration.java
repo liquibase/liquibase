@@ -41,7 +41,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> STRICT;
     public static final ConfigurationDefinition<Integer> DDL_LOCK_TIMEOUT;
     public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
-    public static final ConfigurationDefinition<String> SEARCH_PATHS;
+    public static final ConfigurationDefinition<String> SEARCH_PATH;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -200,7 +200,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(true)
                 .build();
 
-        SEARCH_PATHS = builder.define("searchPath", String.class)
+        SEARCH_PATH = builder.define("searchPath", String.class)
                 .setDescription("Location(s) to search for files such as changelog files in. Multiple paths can be specified by separating them with commas.")
                 .build();
     }

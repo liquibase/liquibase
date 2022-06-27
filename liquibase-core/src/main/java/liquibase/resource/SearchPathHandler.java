@@ -5,7 +5,7 @@ import liquibase.plugin.Plugin;
 import java.io.IOException;
 
 /**
- * Interface for plugins that can create {@link ResourceAccessor}s out of the values in {@link liquibase.GlobalConfiguration#SEARCH_PATHS}.
+ * Interface for plugins that can create {@link ResourceAccessor}s out of the values in {@link liquibase.GlobalConfiguration#SEARCH_PATH}.
  */
 public interface SearchPathHandler extends Plugin {
 
