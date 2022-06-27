@@ -333,6 +333,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
+    @SuppressWarnings("java:S2583")
     private LOBContent<InputStream> toBinaryStream(String valueLobFile) throws LiquibaseException, IOException {
         InputStream in = getResourceAsStream(valueLobFile);
 
@@ -376,6 +377,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
+    @SuppressWarnings("java:S2583")
     private LOBContent<Reader> toCharacterStream(String valueLobFile, String encoding)
             throws IOException, LiquibaseException {
         InputStream in = getResourceAsStream(valueLobFile);
@@ -419,7 +421,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
-    @java.lang.SuppressWarnings("squid:S2095")
+    @SuppressWarnings("squid:S2095")
     private InputStream getResourceAsStream(String valueLobFile) throws IOException, LiquibaseException {
         String fileName = getFileName(valueLobFile);
         return this.resourceAccessor.openStream(null, fileName);
