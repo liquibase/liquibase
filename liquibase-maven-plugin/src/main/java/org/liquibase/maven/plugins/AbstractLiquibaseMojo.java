@@ -351,6 +351,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement
     private String liquibaseLicenseKey;
 
+    /**
+     * Specifies your psql path.
+     *
+     * @parameter property="liquibase.psqlPath"
+     */
+    @PropertyElement
+    protected String psqlPath;
+
     protected String commandName;
 
     /**

@@ -41,9 +41,12 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> STRICT;
     public static final ConfigurationDefinition<Integer> DDL_LOCK_TIMEOUT;
     public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
+    public static final ConfigurationDefinition<String> PSQL_PATH;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
+
+        PSQL_PATH = builder.define("liquibase.psqlPath", String.class).setDefaultValue(null).build();
 
         DATABASECHANGELOG_TABLE_NAME = builder.define("databaseChangelogTableName", String.class)
                 .addAliasKey("liquibase.databaseChangeLogTableName")
