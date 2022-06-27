@@ -201,7 +201,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         SEARCH_PATH = builder.define("searchPath", String.class)
-                .setDescription("Location(s) to search for files such as changelog files in. Multiple paths can be specified by separating them with commas.")
+                .setDescription("Complete list of Location(s) to search for files such as changelog files in. Multiple paths can be specified by separating them with commas.")
                 .build();
     }
 }

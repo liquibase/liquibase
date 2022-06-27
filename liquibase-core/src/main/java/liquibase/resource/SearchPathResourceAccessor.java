@@ -2,6 +2,7 @@ package liquibase.resource;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
@@ -14,37 +15,41 @@ import java.io.IOException;
 public class SearchPathResourceAccessor extends CompositeResourceAccessor {
 
     /**
-     * Creates itself with the value in {@link GlobalConfiguration#SEARCH_PATH}.
+     * Calls {@link #SearchPathResourceAccessor(String, ResourceAccessor...)} with the current value of {@link GlobalConfiguration#SEARCH_PATH}.
      */
-    public SearchPathResourceAccessor(ResourceAccessor... additionalAccessors) {
-        this(GlobalConfiguration.SEARCH_PATH.getCurrentValue(), additionalAccessors);
+    public SearchPathResourceAccessor(ResourceAccessor... defaultAccessors) {
+        this(GlobalConfiguration.SEARCH_PATH.getCurrentValue(), defaultAccessors);
     }
 
     /**
      * Creates itself with the given searchPath value.
      * If any of the paths in {@link GlobalConfiguration#SEARCH_PATH} are invalid, an error is logged but no exception is thrown from this method.
+     *
+     * @param defaultAccessors Only uses these asccessors if searchPath is null.
      */
-    public SearchPathResourceAccessor(String searchPath, ResourceAccessor... additionalAccessors) {
-        if (searchPath != null) {
+    public SearchPathResourceAccessor(String searchPath, ResourceAccessor... defaultAccessors) {
+
+        final Logger log = Scope.getCurrentScope().getLog(getClass());
+        if (searchPath == null) {
+            for (ResourceAccessor accessor : defaultAccessors) {
+                this.addResourceAccessor(accessor);
+            }
+        } else {
             final SearchPathHandlerFactory parserFactory = Scope.getCurrentScope().getSingleton(SearchPathHandlerFactory.class);
             StringUtil.splitAndTrim(searchPath, ",").forEach(path -> {
                 try {
                     addResourceAccessor(parserFactory.getResourceAccessor(path));
                 } catch (IOException e) {
                     Scope.getCurrentScope().getUI().sendMessage(e.getMessage());
-                    Scope.getCurrentScope().getLog(getClass()).severe(e.getMessage(), e);
+                    log.severe(e.getMessage(), e);
                 }
             });
-        }
-
-        for (ResourceAccessor accessor : additionalAccessors) {
-            this.addResourceAccessor(accessor);
         }
 
         String logMessage = "Overall search path: " + System.lineSeparator();
         for (String location : describeLocations()) {
             logMessage += "  - " + location + System.lineSeparator();
         }
-        Scope.getCurrentScope().getLog(getClass()).fine(logMessage.trim());
+        log.fine(logMessage.trim());
     }
 }
