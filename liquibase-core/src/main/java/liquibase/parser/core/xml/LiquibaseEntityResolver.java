@@ -6,12 +6,15 @@ import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.LiquibaseUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Finds the Liquibase schema from the classpath rather than fetching it over the Internet.
@@ -36,6 +39,8 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         String path = systemId.toLowerCase()
                 .replace("http://www.liquibase.org/xml/ns/migrator/", "http://www.liquibase.org/xml/ns/dbchangelog/")
                 .replaceFirst("https?://", "");
+
+        warnForMismatchedXsdVersion(systemId);
 
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         InputStreamList streams = resourceAccessor.openStreams(null, path);
@@ -68,6 +73,31 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
         return source;
 
+    }
+
+    /**
+     * Print a warning message to the logs and UI if the build version does not match the XSD version. This is a best
+     * effort check, this method will never throw an exception.
+     */
+    private void warnForMismatchedXsdVersion(String systemId) {
+        try {
+            Pattern versionPattern = Pattern.compile("(?:-pro-|-)(?<version>[\\d.]*)\\.xsd");
+            Matcher versionMatcher = versionPattern.matcher(systemId);
+            boolean found = versionMatcher.find();
+            if (found) {
+                String buildVersion = LiquibaseUtil.getBuildVersion();
+                if (!buildVersion.equals("DEV")) {
+                    String xsdVersion = versionMatcher.group("version");
+                    if (!buildVersion.startsWith(xsdVersion)) {
+                        String msg = "WARNING: An older version of the XSD is specified in the changelog's <databaseChangeLog> header. This can lead to unexpected outcomes. Please update it to '" + buildVersion + "'. Learn more at https://docs.liquibase.com";
+                        Scope.getCurrentScope().getLog(getClass()).warning(msg);
+                        Scope.getCurrentScope().getUI().sendMessage(msg);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to compare XSD version with build version.", e);
+        }
     }
 
     /**
