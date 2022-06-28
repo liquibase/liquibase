@@ -25,11 +25,6 @@ import liquibase.util.StringUtil;
 
 public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSetRanStatement> {
 
-    public static final String AND = " AND ";
-    public static final String OPEN_BRACKET = "(";
-    public static final String CLOSE_BRACKET = ")";
-    public static final String WHITESPACE = " ";
-    public static final String COMMA = ",";
     private static final String COMMENTS = "COMMENTS";
     private static final String CONTEXTS = "CONTEXTS";
     private static final String LABELS = "LABELS";
@@ -123,60 +118,11 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     }
 
     protected String getContextsColumn(ChangeSet changeSet) {
-        return buildFullContext(changeSet);
+        return changeSet.buildFullContext();
     }
 
     protected String getLabelsColumn(ChangeSet changeSet) {
-        return buildFullLabels(changeSet);
-    }
-
-    private String buildFullContext(ChangeSet changeSet) {
-        StringBuilder contextExpression = new StringBuilder();
-        boolean notFirstContext = false;
-        for (ContextExpression inheritableContext : changeSet.getInheritableContexts()) {
-            appendContext(contextExpression, inheritableContext.toString(), notFirstContext);
-            notFirstContext = true;
-        }
-        ContextExpression changeSetContext = changeSet.getContexts();
-        if ((changeSetContext != null) && !changeSetContext.isEmpty()) {
-            appendContext(contextExpression, changeSetContext.toString(), notFirstContext);
-        }
-        return StringUtil.trimToNull(contextExpression.toString());
-    }
-
-    private String buildFullLabels(ChangeSet changeSet) {
-        StringBuilder labels = new StringBuilder();
-        boolean notFirstLabel = false;
-        for (Labels inheritableLabel : changeSet.getInheritableLabels()) {
-            appendLabels(labels, inheritableLabel.toString(), notFirstLabel);
-            notFirstLabel = true;
-        }
-        Labels changeSetLabels = changeSet.getLabels();
-        if ((changeSetLabels != null) && !changeSetLabels.isEmpty()) {
-            appendLabels(labels, changeSetLabels.toString(), notFirstLabel);
-        }
-        return StringUtil.trimToNull(labels.toString());
-    }
-
-    private void appendLabels(StringBuilder existingLabels, String labelToAppend, boolean notFirstContext) {
-        if (notFirstContext) {
-            existingLabels.append(COMMA);
-        }
-        existingLabels.append(labelToAppend);
-    }
-
-    private void appendContext(StringBuilder contextExpression, String contextToAppend, boolean notFirstContext) {
-        boolean complexExpression = contextToAppend.contains(COMMA) || contextToAppend.contains(WHITESPACE);
-        if (notFirstContext) {
-            contextExpression.append(AND);
-        }
-        if (complexExpression) {
-            contextExpression.append(OPEN_BRACKET);
-        }
-        contextExpression.append(contextToAppend);
-        if (complexExpression) {
-            contextExpression.append(CLOSE_BRACKET);
-        }
+        return changeSet.buildFullLabels();
     }
 
     private String limitSize(String string) {

@@ -56,6 +56,16 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private static final String DEFAULT_FIELD_SUFFIX = "Default";
 
     /**
+     *
+     * Specifies whether to preserve the case of schemas and catalogs
+     *
+     * @parameter property="liquibase.preserveSchemaCase"
+     *
+     */
+    @PropertyElement
+    protected Boolean preserveSchemaCase;
+
+    /**
      * Specifies the driver class name to use for the database connection.
      *
      * @parameter property="liquibase.driver"
@@ -430,11 +440,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         }
                     }
                 }
+
+                //
+                // Add properties to this top-level scope
+                //
                 scopeValues.put("integrationDetails", integrationDetails);
                 scopeValues.put("liquibase.licenseKey", getLicenseKey());
-
-                final Map pluginContext = this.getPluginContext();
-                System.out.println(pluginContext.keySet());
+                String key = GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey();
+                scopeValues.put(key, preserveSchemaCase);
                 Scope.child(scopeValues, () -> {
 
                     configureFieldsAndValues();
@@ -503,7 +516,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                             }
                         }
                         setupBindInfoPackage();
-                        performLiquibaseTask(liquibase);
+
+                        //
+                        // Add another scope child with a map so that
+                        // we can set the preserveSchemaCase property,
+                        // which might have been specified in a defaults file
+                        //
+                        Map<String, Object> innerScopeValues = new HashMap<>();
+                        innerScopeValues.put(key, preserveSchemaCase);
+                        Scope.child(innerScopeValues, () -> {
+                            performLiquibaseTask(liquibase);
+                        });
                     } catch (LiquibaseException e) {
                         cleanup(database);
                         throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);

@@ -5,6 +5,7 @@ import liquibase.Labels
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.exception.SetupException
+import liquibase.exception.UnknownChangeLogParameterException
 import liquibase.parser.core.ParsedNode
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
@@ -362,6 +363,42 @@ create view sql_view as select * from sql_table;'''
         then:
         changeLogFile.changeSets.collect { it.filePath } == []
 
+    }
+
+    def "include fails if no parser supports the file"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/test1.invalid"]])
+                , resourceAccessor)
+
+
+        then:
+        def e = thrown(SetupException)
+        e.message == "Cannot find parser that supports com/example/test1.invalid"
+    }
+
+    def "include fails if file does not exist"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/invalid.xml"]])
+                , resourceAccessor)
+
+
+        then:
+        def e = thrown(SetupException)
+        e.message.startsWith("The file com/example/invalid.xml was not found in")
     }
 
     @Unroll
