@@ -1,11 +1,17 @@
 package liquibase.resource;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 
 /**
- * {@link SearchPathHandler} that converts the path into a {@link FileSystemResourceAccessor}.
+ * {@link PathHandler} that converts the path into a {@link FileSystemResourceAccessor}.
  */
-public class FileSystemSearchPathHandler extends AbstractSearchPathHandler {
+public class FileSystemPathHandler extends AbstractPathHandler {
 
     /**
      * Returns {@link #PRIORITY_DEFAULT} for all paths except for ones that are for a non-"file:" protocol.
@@ -27,5 +33,13 @@ public class FileSystemSearchPathHandler extends AbstractSearchPathHandler {
 
     public ResourceAccessor getResourceAccessor(String root) {
         return new FileSystemResourceAccessor(new File(root.replace("\\", "/")));
+    }
+    @Override
+    public InputStream open(String path) throws IOException {
+        try {
+            return Files.newInputStream(Paths.get(path));
+        } catch (NoSuchFileException e) {
+            throw new IOException("File '"+path+"' does not exist");
+        }
     }
 }

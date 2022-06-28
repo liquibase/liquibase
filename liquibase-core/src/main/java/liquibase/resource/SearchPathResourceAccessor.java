@@ -35,7 +35,7 @@ public class SearchPathResourceAccessor extends CompositeResourceAccessor {
                 this.addResourceAccessor(accessor);
             }
         } else {
-            final SearchPathHandlerFactory parserFactory = Scope.getCurrentScope().getSingleton(SearchPathHandlerFactory.class);
+            final PathHandlerFactory parserFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
             StringUtil.splitAndTrim(searchPath, ",").forEach(path -> {
                 try {
                     addResourceAccessor(parserFactory.getResourceAccessor(path));
