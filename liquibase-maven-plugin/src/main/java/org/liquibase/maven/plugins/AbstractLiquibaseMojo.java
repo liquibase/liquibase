@@ -354,7 +354,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Specifies your psql path.
      *
-     * @parameter property="liquibase.psqlPath"
+     * @parameter property="liquibase.psql.path"
      */
     @PropertyElement
     protected String psqlPath;
@@ -416,6 +416,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 Map<String, Object> scopeValues = new HashMap<>();
                 scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
                 scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
+                scopeValues.put("liquibase.psql.path", psqlPath);
 
                 IntegrationDetails integrationDetails = new IntegrationDetails();
                 integrationDetails.setName("maven");
