@@ -69,16 +69,16 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             validationErrors.addError("Cannot add a non-primary key identity column");
         }
 
-        // TODO is this feature valid for other databases?
-        if ((statement.getAddAfterColumn() != null) && !(database instanceof MySQLDatabase)) {
-            validationErrors.addError("Cannot add column on specific position");
+        if (!(database instanceof MySQLDatabase || database instanceof H2Database)) {
+            validationErrors.checkDisallowedField("addAfterColumn", statement.getAddAfterColumn(), database, database.getClass());
         }
-        if ((statement.getAddBeforeColumn() != null) && !((database instanceof H2Database) || (database instanceof HsqlDatabase))) {
-            validationErrors.addError("Cannot add column on specific position");
+
+        if (!((database instanceof H2Database || database instanceof HsqlDatabase))) {
+            validationErrors.checkDisallowedField("addBeforeColumn", statement.getAddBeforeColumn(), database, database.getClass());
         }
-        if ((statement.getAddAtPosition() != null) && !(database instanceof FirebirdDatabase)) {
-            validationErrors.addError("Cannot add column on specific position");
-        }
+
+        //no databases liquibase supports currently supports adding columns at a given position. Firebird only allows position on alters
+        validationErrors.checkDisallowedField("addAtPosition", statement.getAddAtPosition(), database, database.getClass());
 
         return validationErrors;
     }
@@ -186,8 +186,12 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             alterTable += " COMMENT '" + database.escapeStringForDatabase(StringUtil.trimToEmpty(statement.getRemarks())) + "' ";
         }
 
+        if ((statement.getAddBeforeColumn() != null) && !statement.getAddBeforeColumn().isEmpty()) {
+            alterTable += " BEFORE " + database.escapeColumnName(statement.getSchemaName(), statement.getSchemaName(), statement.getTableName(), statement.getAddBeforeColumn()) + " ";
+        }
+
         if ((statement.getAddAfterColumn() != null) && !statement.getAddAfterColumn().isEmpty()) {
-            alterTable += " AFTER `" + statement.getAddAfterColumn() + "` ";
+            alterTable += " AFTER " + database.escapeColumnName(statement.getSchemaName(), statement.getSchemaName(), statement.getTableName(), statement.getAddAfterColumn());
         }
 
         return alterTable;
