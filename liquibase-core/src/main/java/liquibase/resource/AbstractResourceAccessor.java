@@ -25,7 +25,7 @@ public abstract class AbstractResourceAccessor extends AbstractExtensibleObject 
         if (streamList == null || streamList.size() == 0) {
             return null;
         } else if (streamList.size() > 1) {
-            String message = "Found " + streamList.size() + " files matching '" + streamPath + "':" + System.lineSeparator();
+            String message = "Found " + streamList.size() + " files with the path '" + streamPath + "':" + System.lineSeparator();
             for (URI uri : streamList.getURIs()) {
                 message += "    - " + uri.toString() + System.lineSeparator();
             }
@@ -33,14 +33,19 @@ public abstract class AbstractResourceAccessor extends AbstractExtensibleObject 
             for (String location : Scope.getCurrentScope().getResourceAccessor().describeLocations()) {
                 message += "    - " + location + System.lineSeparator();
             }
+            message += "  You can limit the search path to remove duplicates with the liquibase.searchPath setting.";
 
             final GlobalConfiguration.DuplicateFileMode mode = GlobalConfiguration.DUPLICATE_FILE_MODE.getCurrentValue();
             final Logger log = Scope.getCurrentScope().getLog(getClass());
 
             if (mode == GlobalConfiguration.DuplicateFileMode.ERROR) {
-                throw new IOException(message);
+                throw new IOException(message + " Or, if you KNOW these are the exact same file you can set liquibase.duplicateFileMode=WARN.");
             } else if (mode == GlobalConfiguration.DuplicateFileMode.WARN) {
-                log.warning(message + "  Using " + streamList.getURIs().get(0)+". To fail when duplicates are found, set liquibase.duplicateFileMode=ERROR");
+                final String warnMessage = message + System.lineSeparator() +
+                        "  To fail when duplicates are found, set liquibase.duplicateFileMode=ERROR" + System.lineSeparator() +
+                        "  Choosing: " + streamList.getURIs().get(0);
+                Scope.getCurrentScope().getUI().sendMessage(warnMessage);
+                log.warning(warnMessage);
 
                 InputStream returnStream = null;
                 final Iterator<InputStream> iterator = streamList.iterator();
