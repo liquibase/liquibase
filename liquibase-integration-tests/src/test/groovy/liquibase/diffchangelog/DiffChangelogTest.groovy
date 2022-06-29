@@ -36,6 +36,7 @@ CREATE SEQUENCE $sequenceName INCREMENT 5 START 100;
 CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'));
 """
         postgres.executeSql(sql)
+        postgres.getConnection().commit()
 
         Database refDatabase = DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
         boolean b = SnapshotGeneratorFactory.instance.has(new Sequence(null, "public", sequenceName), refDatabase)
