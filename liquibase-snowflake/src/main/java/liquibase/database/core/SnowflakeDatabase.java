@@ -155,11 +155,6 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
         return null;
     }
 
-    @Override
-    public boolean supportsSchemas() {
-        return true;
-    }
-
     private Set<String> getDefaultReservedWords() {
         /*
          * List taken from
