@@ -359,6 +359,61 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement
     protected String psqlPath;
 
+    /**
+     * Specifies whether to keep generated psql files.
+     *
+     * @parameter property="liquibase.psql.keep"
+     */
+    @PropertyElement
+    protected Boolean psqlKeepTemp;
+
+    /**
+     * Specifies the name of generated psql files.
+     *
+     * @parameter property="liquibase.psql.keep.temp.name"
+     */
+    @PropertyElement
+    protected String psqlKeepTempName;
+
+    /**
+     * Specifies where to keep generated psql files.
+     *
+     * @parameter property="liquibase.psql.keep.temp.path"
+     */
+    @PropertyElement
+    protected String psqlKeepTempPath;
+
+    /**
+     * Specifies additional psql args.
+     *
+     * @parameter property="liquibase.psql.args"
+     */
+    @PropertyElement
+    protected String psqlArgs;
+
+    /**
+     * Specifies psql executor name.
+     *
+     * @parameter property="liquibase.psql.executor"
+     */
+    @PropertyElement
+    protected String psqlExecutorName;
+
+    /**
+     * Specifies psql timeout.
+     *
+     * @parameter property="liquibase.psql.timeout"
+     */
+    @PropertyElement
+    protected Integer psqlTimeout;
+
+    /**
+     * Specifies where to output psql logs.
+     *
+     * @parameter property="liquibase.psql.executor"
+     */
+    @PropertyElement
+    protected String psqlLogFile;
     protected String commandName;
 
     /**
@@ -416,7 +471,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 Map<String, Object> scopeValues = new HashMap<>();
                 scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
                 scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
-                scopeValues.put("liquibase.psql.path", psqlPath);
 
                 IntegrationDetails integrationDetails = new IntegrationDetails();
                 integrationDetails.setName("maven");
@@ -457,6 +511,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 scopeValues.put("liquibase.licenseKey", getLicenseKey());
                 String key = GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey();
                 scopeValues.put(key, preserveSchemaCase);
+                scopeValues.putAll(getNativeProperties());
                 Scope.child(scopeValues, () -> {
 
                     configureFieldsAndValues();
@@ -881,4 +936,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
+    private Map<String, Object> getNativeProperties() {
+        Map<String, Object> nativeProperties = new HashMap<>();
+        // Don't add properties if they are null
+        nativeProperties.computeIfAbsent("liquibase.psql.path", val -> psqlPath);
+        nativeProperties.computeIfAbsent("liquibase.psql.keep.temp", val -> psqlKeepTemp);
+        nativeProperties.computeIfAbsent("liquibase.psql.keep.temp.name", val -> psqlKeepTempName);
+        nativeProperties.computeIfAbsent("liquibase.psql.keep.temp.path", val -> psqlKeepTempPath);
+        nativeProperties.computeIfAbsent("liquibase.psql.args", val -> psqlArgs);
+        nativeProperties.computeIfAbsent("liquibase.psql.executor", val -> psqlExecutorName);
+        nativeProperties.computeIfAbsent("liquibase.psql.timeout", val -> psqlTimeout);
+        nativeProperties.computeIfAbsent("liquibase.psql.logFile", val -> psqlPath);
+        return nativeProperties;
+    }
 }
