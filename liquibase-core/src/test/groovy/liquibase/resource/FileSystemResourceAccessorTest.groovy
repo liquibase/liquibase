@@ -112,7 +112,7 @@ class FileSystemResourceAccessorTest extends Specification {
 
         then:
         def e = thrown(IOException)
-        e.message.startsWith("Found 3 files matching 'com/example/everywhere/file-everywhere.txt':")
+        e.message.startsWith("Found 3 files with the path 'com/example/everywhere/file-everywhere.txt':")
         e.message.contains("file-everywhere.txt")
         e.message.contains("test-classes")
         e.message.contains("simple-files.jar")
