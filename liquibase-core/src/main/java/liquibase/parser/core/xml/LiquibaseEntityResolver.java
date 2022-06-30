@@ -23,6 +23,11 @@ import java.util.regex.Pattern;
 public class LiquibaseEntityResolver implements EntityResolver2 {
 
     private static ClassLoaderResourceAccessor fallbackResourceAccessor;
+    private boolean shouldWarnOnMismatchedXsdVersion = false;
+    /**
+     * The warning message should only be printed once.
+     */
+    private static boolean hasWarnedAboutMismatchedXsdVersion = false;
 
     @Override
     @java.lang.SuppressWarnings("squid:S2095")
@@ -40,7 +45,9 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 .replace("http://www.liquibase.org/xml/ns/migrator/", "http://www.liquibase.org/xml/ns/dbchangelog/")
                 .replaceFirst("https?://", "");
 
-        warnForMismatchedXsdVersion(systemId);
+        if (shouldWarnOnMismatchedXsdVersion && !hasWarnedAboutMismatchedXsdVersion) {
+            warnForMismatchedXsdVersion(systemId);
+        }
 
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         InputStreamList streams = resourceAccessor.openStreams(null, path);
@@ -89,8 +96,9 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 if (!buildVersion.equals("DEV")) {
                     String xsdVersion = versionMatcher.group("version");
                     if (!buildVersion.startsWith(xsdVersion)) {
-                        String msg = "WARNING: An older version of the XSD is specified in the changelog's <databaseChangeLog> header. This can lead to unexpected outcomes. Please update it to '" + buildVersion + "'. Learn more at https://docs.liquibase.com";
-                        Scope.getCurrentScope().getLog(getClass()).warning(msg);
+                        hasWarnedAboutMismatchedXsdVersion = true;
+                        String msg = "INFO: An older version of the XSD is specified in the changelog's <databaseChangeLog> header. This can lead to unexpected outcomes. Please update it to '" + buildVersion + "'. Learn more at https://docs.liquibase.com";
+                        Scope.getCurrentScope().getLog(getClass()).info(msg);
                         Scope.getCurrentScope().getUI().sendMessage(msg);
                     }
                 }
@@ -120,5 +128,13 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
         Scope.getCurrentScope().getLog(getClass()).warning("The current XML parser does not seems to not support EntityResolver2. External entities may not be correctly loaded");
         return resolveEntity(null, publicId, null, systemId);
+    }
+
+    /**
+     * When set to true, a warning will be printed to the console if the XSD version used does not match the version
+     * of Liquibase. If "latest" is used as the XSD version, no warning is printed.
+     */
+    public void setShouldWarnOnMismatchedXsdVersion(boolean shouldWarnOnMismatchedXsdVersion) {
+        this.shouldWarnOnMismatchedXsdVersion = shouldWarnOnMismatchedXsdVersion;
     }
 }

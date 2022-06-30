@@ -36,17 +36,19 @@ class LiquibaseEntityResolverTest extends Specification {
         def originalProperties = LiquibaseUtil.liquibaseBuildProperties
         LiquibaseUtil.liquibaseBuildProperties = new Properties()
         LiquibaseUtil.liquibaseBuildProperties.put("build.version", buildVersion)
+        def er = new LiquibaseEntityResolver()
+        er.setShouldWarnOnMismatchedXsdVersion(true)
 
         expect:
         Scope.child([
                 (Scope.Attr.ui.name())        : uiService
         ], {
-            new LiquibaseEntityResolver().resolveEntity(null, null, null, systemId)
+            er.resolveEntity(null, null, null, systemId)
         } as Scope.ScopedRunnerWithReturn<InputSource>) != null
 
         // This is an ugly assertion line, it is essentially saying, either we expect the message, so make sure it's there
         // or we expect no message, so make sure there are no messages.
-        ((expectedWarningMessage && uiService.getMessages().contains("WARNING: An older version of the XSD is specified in the changelog's <databaseChangeLog> header. This can lead to unexpected outcomes. Please update it to '" + buildVersion + "'. Learn more at https://docs.liquibase.com"))
+        ((expectedWarningMessage && uiService.getMessages().contains("INFO: An older version of the XSD is specified in the changelog's <databaseChangeLog> header. This can lead to unexpected outcomes. Please update it to '" + buildVersion + "'. Learn more at https://docs.liquibase.com"))
         || (!expectedWarningMessage && uiService.getMessages().isEmpty()))
 
         cleanup:

@@ -33,6 +33,7 @@ import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.core.CompositeLogService;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
+import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
@@ -364,8 +365,21 @@ public class Liquibase implements AutoCloseable {
 
 
     public DatabaseChangeLog getDatabaseChangeLog() throws LiquibaseException {
+        return getDatabaseChangeLog(false);
+    }
+
+    /**
+     * @param shouldWarnOnMismatchedXsdVersion When set to true, a warning will be printed to the console if the XSD
+     *                                         version used does not match the version of Liquibase. If "latest" is used
+     *                                         as the XSD version, no warning is printed. If the changelog is not xml
+     *                                         format, no warning is printed.
+     */
+    public DatabaseChangeLog getDatabaseChangeLog(boolean shouldWarnOnMismatchedXsdVersion) throws LiquibaseException {
         if (databaseChangeLog == null && changeLogFile != null) {
             ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
+            if (parser instanceof XMLChangeLogSAXParser) {
+                ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(shouldWarnOnMismatchedXsdVersion);
+            }
             databaseChangeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
         }
 
@@ -2278,7 +2292,7 @@ public class Liquibase implements AutoCloseable {
      */
     public void validate() throws LiquibaseException {
 
-        DatabaseChangeLog changeLog = getDatabaseChangeLog();
+        DatabaseChangeLog changeLog = getDatabaseChangeLog(true);
         changeLog.validate(database);
     }
 
