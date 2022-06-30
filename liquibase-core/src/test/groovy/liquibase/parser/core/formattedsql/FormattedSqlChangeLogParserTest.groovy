@@ -11,6 +11,7 @@ import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
 import liquibase.resource.ResourceAccessor
 import liquibase.servicelocator.LiquibaseService
+import liquibase.statement.SqlStatement
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StringUtil
 import org.hamcrest.Matchers
@@ -169,6 +170,19 @@ grant /*Beware, this comment should not be seen as a delimiter! */
 grant execute on any_procedure_name to ANY_USER2/
 grant execute on any_procedure_name to ANY_USER3/
 -- rollback drop PROCEDURE refresh_all_fos_permission_views/
+"""
+
+    private static final String ORACLE_QUOTED_STRING_CHANGELOG_WITH_END_DELIMITER = """
+--liquibase formatted sql
+
+--changeset jsg:1d endDelimiter:/ rollbackEndDelimiter:/
+--comment works in 4.8.0, not in 4.9.0
+begin
+testproc(
+p1 => q'{'/'}'
+);
+end;
+/
 """
 
     private static final String INVALID_CHANGELOG = "select * from table1"
@@ -631,22 +645,23 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         "--liquibase formatted sql\n\n--changeset John Doe:12345 dbms:,db2,\ncreate table test (id int);\n"     | null
     }
 
-    def parse_withEndDelimiter() throws Exception {
-        expect:
+    def parse_withEndDelimiter(String changeString, Integer statementCount, String[] expectedStatements) throws Exception {
+        when:
         ChangeLogParameters params = new ChangeLogParameters()
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(END_DELIMITER_CHANGELOG).parse("asdf.sql", params, new JUnitResourceAccessor())
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeString).parse("asdf.sql", params, new JUnitResourceAccessor())
 
+        then:
         changeLog.getLogicalFilePath() == "asdf.sql"
         changeLog.getChangeSets().size() == 1
         changeLog.getChangeSets().get(0).getChanges().size() == 1
         def statements = changeLog.getChangeSets().get(0).getChanges().get(0).generateStatements(new MockDatabase())
-        statements.size() == 4
-        statements[0].toString() == "CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n" +
-                "    DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);\n" +
-                "END reany_procedure_name;"
-        statements[1].toString() == "grant \n    execute on any_procedure_name to ANY_USER1"
-        statements[2].toString() == "grant execute on any_procedure_name to ANY_USER2"
-        statements[3].toString() == "grant execute on any_procedure_name to ANY_USER3"
+        statements.size() == statementCount
+        statements.eachWithIndex { SqlStatement entry, int i -> assert expectedStatements[i] == entry.toString() }
+
+        where:
+        changeString                                      | statementCount | expectedStatements
+        END_DELIMITER_CHANGELOG                           | 4              | ["CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n    DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);\nEND reany_procedure_name;", "grant \n    execute on any_procedure_name to ANY_USER1", "grant execute on any_procedure_name to ANY_USER2", "grant execute on any_procedure_name to ANY_USER3"]
+        ORACLE_QUOTED_STRING_CHANGELOG_WITH_END_DELIMITER | 1              | ["begin\ntestproc(\np1 => q'{'/'}'\n);\nend;"]
     }
 
     @Unroll("#featureName: #example")
