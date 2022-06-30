@@ -165,7 +165,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             finalVersion = splitVersion[0] + "." + splitVersion[1];
         }
         if (finalVersion == null) {
-            finalVersion = "next";
+            finalVersion = "latest";
         }
         return finalVersion;
     }
