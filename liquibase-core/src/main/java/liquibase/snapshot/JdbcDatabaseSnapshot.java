@@ -392,8 +392,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                        extract(
                             databaseMetaData.getColumns(
                                     ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema),
-                                    ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema),
-                                    tableName,
+                                    escapeForLike(((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), database),
+                                    escapeForLike(tableName, database),
                                     SQL_FILTER_MATCH_ALL)
                     );
                     //
@@ -424,8 +424,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 try {
                     List<CachedRow> returnList =
                         extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database)
-                            .getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database)
-                            .getJdbcSchemaName(catalogAndSchema), SQL_FILTER_MATCH_ALL, SQL_FILTER_MATCH_ALL));
+                                    .getJdbcCatalogName(catalogAndSchema),
+                            escapeForLike(((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), database),
+                            SQL_FILTER_MATCH_ALL, SQL_FILTER_MATCH_ALL));
                     //
                     // IF MARIADB
                     // Query to get actual data types and then map each column to its CachedRow

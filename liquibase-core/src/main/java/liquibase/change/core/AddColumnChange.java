@@ -157,14 +157,9 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             addColumnStatement.setDefaultValueConstraintName(column.getDefaultValueConstraintName());
             addColumnStatement.setComputed(column.getComputed());
 
-            if ((database instanceof MySQLDatabase) && (column.getAfterColumn() != null)) {
-                addColumnStatement.setAddAfterColumn(column.getAfterColumn());
-            } else if (((database instanceof HsqlDatabase) || (database instanceof H2Database))
-                       && (column.getBeforeColumn() != null)) {
-                addColumnStatement.setAddBeforeColumn(column.getBeforeColumn());
-            } else if ((database instanceof FirebirdDatabase) && (column.getPosition() != null)) {
-                addColumnStatement.setAddAtPosition(column.getPosition());
-            }
+            addColumnStatement.setAddAfterColumn(column.getAfterColumn());
+            addColumnStatement.setAddBeforeColumn(column.getBeforeColumn());
+            addColumnStatement.setAddAtPosition(column.getPosition());
 
             addColumnStatements.add(addColumnStatement);
 
