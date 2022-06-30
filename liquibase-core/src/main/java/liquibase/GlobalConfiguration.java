@@ -32,6 +32,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> PRESERVE_SCHEMA_CASE;
     public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
 
+    public static final ConfigurationDefinition<DuplicateFileMode> DUPLICATE_FILE_MODE;
+
     /**
      * @deprecated No longer used
      */
@@ -198,5 +200,15 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDescription("If true, show a Liquibase banner on startup.")
                 .setDefaultValue(true)
                 .build();
+
+        DUPLICATE_FILE_MODE = builder.define("duplicateFileMode", DuplicateFileMode.class)
+                .setDescription("How to handle multiple files being found in the search path that have duplicate paths. Options are WARN (log warning and choose one at random) or ERROR (fail current operation)")
+                .setDefaultValue(DuplicateFileMode.ERROR)
+                .build();
+    }
+
+    public enum DuplicateFileMode {
+        WARN,
+        ERROR,
     }
 }
