@@ -581,14 +581,21 @@ public abstract class AbstractJdbcDatabase implements Database {
 
         if (generateStartWith || generateIncrementBy) {
             autoIncrementClause += getAutoIncrementOpening();
-
+            if(getShortName().equals("h2")) {
+                autoIncrementClause+= " START WITH ";
+            }
             if (generateStartWith) {
                 autoIncrementClause += String.format(getAutoIncrementStartWithClause(), (startWith == null) ? defaultAutoIncrementStartWith : startWith);
             }
 
             if (generateIncrementBy) {
                 if (generateStartWith) {
-                    autoIncrementClause += ", ";
+                    if(getShortName().equals("h2"))
+                        autoIncrementClause += " INCREMENT BY ";
+                    else{
+                        if(!getShortName().equals("hsqldb"))
+                            autoIncrementClause += ", ";
+                    }
                 }
 
                 autoIncrementClause += String.format(getAutoIncrementByClause(), (incrementBy == null) ? defaultAutoIncrementBy : incrementBy);

@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -38,6 +39,13 @@ public class AddAutoIncrementGeneratorMySQL extends AddAutoIncrementGenerator {
         }
 
         return sql;
+    }
+
+    @Override
+    public ValidationErrors validate(AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        ValidationErrors validationErrors = super.validate(statement, database, sqlGeneratorChain);
+        validationErrors.checkDisallowedField("incrementBy",statement.getIncrementBy(),database,MySQLDatabase.class);
+        return validationErrors;
     }
 
     private Sql[] concact(Sql[] origSql, UnparsedSql unparsedSql) {
