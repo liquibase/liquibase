@@ -38,6 +38,7 @@ class LiquibaseEntityResolverTest extends Specification {
         LiquibaseUtil.liquibaseBuildProperties.put("build.version", buildVersion)
         def er = new LiquibaseEntityResolver()
         er.setShouldWarnOnMismatchedXsdVersion(true)
+        er.hasWarnedAboutMismatchedXsdVersion = false
 
         expect:
         Scope.child([
