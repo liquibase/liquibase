@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
+import liquibase.database.AbstractHsqlAndH2Database;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -14,6 +15,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtil;
 
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,7 +28,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class H2Database extends AbstractJdbcDatabase {
+public class H2Database extends AbstractHsqlAndH2Database {
 
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
@@ -321,6 +323,7 @@ public class H2Database extends AbstractJdbcDatabase {
     public boolean supportsDropTableCascadeConstraints() {
         return true;
     }
+
 
     @Override
     public void setConnection(DatabaseConnection conn) {

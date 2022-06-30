@@ -310,7 +310,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (isCatalogOrSchemaType(objectType) && preserveCaseIfRequested() == CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE) {
             return objectName;
         } else if ((getObjectQuotingStrategy() == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
-                ( objectName == null) || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
+                (objectName == null) || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
             return objectName;
         } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
             return objectName.toUpperCase(Locale.US);
@@ -322,9 +322,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
         return objectType.equals(Catalog.class) || objectType.equals(Schema.class);
     }
+
     private CatalogAndSchema.CatalogAndSchemaCase preserveCaseIfRequested() {
         if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
-           return CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE;
+            return CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE;
         }
         return getSchemaAndCatalogCase();
     }
@@ -368,6 +369,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Overwrite this method to get the default schema name for the connection.
      * If you only need to change the statement that obtains the current schema then override
+     *
      * @see AbstractJdbcDatabase#getConnectionSchemaNameCallStatement()
      */
     protected String getConnectionSchemaName() {
@@ -395,9 +397,10 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Used to obtain the connection schema name through a statement
      * Override this method to change the statement.
      * Only override this if getConnectionSchemaName is left unchanges or is using this method.
+     *
      * @see AbstractJdbcDatabase#getConnectionSchemaName()
      */
-    protected SqlStatement getConnectionSchemaNameCallStatement(){
+    protected SqlStatement getConnectionSchemaNameCallStatement() {
         return new RawCallStatement("call current_schema");
     }
 
@@ -485,7 +488,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return getTimeLiteral(((java.sql.Time) date));
         } else if (date instanceof java.sql.Timestamp) {
             return getDateTimeLiteral(((java.sql.Timestamp) date));
-        } else if(date instanceof java.util.Date) {
+        } else if (date instanceof java.util.Date) {
             return getDateTimeLiteral(new java.sql.Timestamp(date.getTime()));
         } else {
             throw new RuntimeException("Unexpected type: " + date.getClass().getName());
@@ -581,21 +584,14 @@ public abstract class AbstractJdbcDatabase implements Database {
 
         if (generateStartWith || generateIncrementBy) {
             autoIncrementClause += getAutoIncrementOpening();
-            if(getShortName().equals("h2")) {
-                autoIncrementClause+= " START WITH ";
-            }
             if (generateStartWith) {
                 autoIncrementClause += String.format(getAutoIncrementStartWithClause(), (startWith == null) ? defaultAutoIncrementStartWith : startWith);
             }
 
             if (generateIncrementBy) {
                 if (generateStartWith) {
-                    if(getShortName().equals("h2"))
-                        autoIncrementClause += " INCREMENT BY ";
-                    else{
-                        if(!getShortName().equals("hsqldb"))
-                            autoIncrementClause += ", ";
-                    }
+                    autoIncrementClause += ", ";
+
                 }
 
                 autoIncrementClause += String.format(getAutoIncrementByClause(), (incrementBy == null) ? defaultAutoIncrementBy : incrementBy);
@@ -765,8 +761,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     /*
-    * Check if given string starts with numeric values that may cause problems and should be escaped.
-    */
+     * Check if given string starts with numeric values that may cause problems and should be escaped.
+     */
     protected boolean startsWithNumeric(final String objectName) {
         return STARTS_WITH_NUMBER_PATTERN.matcher(objectName).matches();
     }
@@ -804,7 +800,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
             final long changeSetStarted = System.currentTimeMillis();
             CompareControl compareControl = new CompareControl(
-                    new CompareControl.SchemaComparison[] {
+                    new CompareControl.SchemaComparison[]{
                             new CompareControl.SchemaComparison(
                                     CatalogAndSchema.DEFAULT,
                                     schemaToDrop)},
@@ -856,7 +852,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public boolean supportsDropTableCascadeConstraints() {
         return ((this instanceof SQLiteDatabase) || (this instanceof SybaseDatabase) || (this instanceof
-            SybaseASADatabase) || (this instanceof PostgresDatabase) || (this instanceof OracleDatabase));
+                SybaseASADatabase) || (this instanceof PostgresDatabase) || (this instanceof OracleDatabase));
     }
 
     @Override
@@ -865,7 +861,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return false;
         }
         if ((example.getSchema() != null) && (example.getSchema().getName() != null) && "information_schema"
-            .equalsIgnoreCase(example.getSchema().getName())) {
+                .equalsIgnoreCase(example.getSchema().getName())) {
             return true;
         }
         if ((example instanceof Table) && getSystemTables().contains(example.getName())) {
@@ -1271,7 +1267,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Default implementation, just look for "local" IPs. If the database returns a null URL we return false since we don't know it's safe to run the update.
      *
      * @throws liquibase.exception.DatabaseException
-     *
      */
     @Override
     public boolean isSafeToRunUpdate() throws DatabaseException {
@@ -1311,7 +1306,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(statement, sqlVisitors);
             } catch (DatabaseException e) {
                 if (statement.continueOnError()) {
-                    Scope.getCurrentScope().getLog(getClass()).severe("Error executing statement '"+statement.toString()+"', but continuing", e);
+                    Scope.getCurrentScope().getLog(getClass()).severe("Error executing statement '" + statement.toString() + "', but continuing", e);
                 } else {
                     throw e;
                 }
@@ -1321,7 +1316,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws
-        IOException {
+            IOException {
         SqlStatement[] statements = change.generateStatements(this);
         for (SqlStatement statement : statements) {
             for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
@@ -1478,7 +1473,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (sequenceNextValueFunction.contains("'")) {
                 /* For PostgreSQL, the quotes around dangerous identifiers (e.g. mixed-case) need to stay in place,
                  * or else PostgreSQL will not be able to find the sequence. */
-                if (! (this instanceof PostgresDatabase)) {
+                if (!(this instanceof PostgresDatabase)) {
                     sequenceName = sequenceName.replace("\"", "");
                 }
             }
@@ -1497,7 +1492,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (sequenceCurrentValueFunction.contains("'")) {
                 /* For PostgreSQL, the quotes around dangerous identifiers (e.g. mixed-case) need to stay in place,
                  * or else PostgreSQL will not be able to find the sequence. */
-                if (! (this instanceof PostgresDatabase)) {
+                if (!(this instanceof PostgresDatabase)) {
                     sequenceName = sequenceName.replace("\"", "");
                 }
             }
@@ -1579,7 +1574,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public String getSystemSchema(){
+    public String getSystemSchema() {
         return "information_schema";
     }
 
@@ -1650,7 +1645,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (connection instanceof OfflineConnection) {
             return false;
         } else if (connection instanceof JdbcConnection) {
-            return ((JdbcConnection)getConnection()).supportsBatchUpdates();
+            return ((JdbcConnection) getConnection()).supportsBatchUpdates();
         } else {
             // Normally, the connection can only be one of the two above types. But if, for whatever reason, it is
             // not, let's err on the safe side.
@@ -1671,6 +1666,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     /**
      * This logic is used when db support catalogs
+     *
      * @return UPPER_CASE by default
      */
     @Override

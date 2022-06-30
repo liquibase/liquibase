@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.database.AbstractHsqlAndH2Database;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
@@ -13,10 +14,13 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static liquibase.statement.DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER;
 
-public class HsqlDatabase extends AbstractJdbcDatabase {
+public class HsqlDatabase extends AbstractHsqlAndH2Database {
+
     private static final Map<String, HashSet<String>> SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP;
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
