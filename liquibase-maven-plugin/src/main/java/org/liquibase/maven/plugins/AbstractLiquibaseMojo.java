@@ -362,7 +362,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Specifies whether to keep generated psql files.
      *
-     * @parameter property="liquibase.psql.keep"
+     * @parameter property="liquibase.psql.keep.temp"
      */
     @PropertyElement
     protected Boolean psqlKeepTemp;
@@ -410,7 +410,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Specifies where to output psql logs.
      *
-     * @parameter property="liquibase.psql.executor"
+     * @parameter property="liquibase.psql.logFile"
      */
     @PropertyElement
     protected String psqlLogFile;
@@ -426,7 +426,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Specifies whether to keep generated sqlplus files.
      *
-     * @parameter property="liquibase.sqlplus.keep"
+     * @parameter property="liquibase.sqlplus.keep.temp"
      */
     @PropertyElement
     protected Boolean sqlPlusKeepTemp;
@@ -482,7 +482,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Specifies where to output sqlplus logs.
      *
-     * @parameter property="liquibase.sqlplus.executor"
+     * @parameter property="liquibase.sqlplus.logFile"
      */
     @PropertyElement
     protected String sqlPlusLogFile;
@@ -498,7 +498,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Specifies whether to keep generated sqlcmd files.
      *
-     * @parameter property="liquibase.sqlcmd.keep"
+     * @parameter property="liquibase.sqlcmd.keep.temp"
      */
     @PropertyElement
     protected Boolean sqlcmdKeepTemp;
@@ -554,7 +554,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Specifies where to output sqlcmd logs.
      *
-     * @parameter property="liquibase.sqlcmd.executor"
+     * @parameter property="liquibase.sqlcmd.logFile"
      */
     @PropertyElement
     protected String sqlcmdLogFile;
