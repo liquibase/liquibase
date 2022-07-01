@@ -163,7 +163,7 @@ public class StringUtil {
                         return false;
                     }
                 }
-                return piece.equalsIgnoreCase(endDelimiter.toLowerCase());
+                return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
             } else {
                 return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece + piece).toLowerCase().matches("[\\s\n\r]*" + endDelimiter.toLowerCase());
             }
