@@ -43,6 +43,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> STRICT;
     public static final ConfigurationDefinition<Integer> DDL_LOCK_TIMEOUT;
     public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
+    public static final ConfigurationDefinition<Boolean> DIFF_COLUMN_DEFAULT_VALUE_CONSTRAINT_NAME;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -204,6 +205,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         DUPLICATE_FILE_MODE = builder.define("duplicateFileMode", DuplicateFileMode.class)
                 .setDescription("How to handle multiple files being found in the search path that have duplicate paths. Options are WARN (log warning and choose one at random) or ERROR (fail current operation)")
                 .setDefaultValue(DuplicateFileMode.ERROR)
+                .build();
+
+        DIFF_COLUMN_DEFAULT_VALUE_CONSTRAINT_NAME = builder.define("diffColumnDefaultValueConstraintName", Boolean.class)
+                .setDescription("Should Liquibase compare column default value constraint name in diff operation?")
+                .setDefaultValue(true)
                 .build();
     }
 
