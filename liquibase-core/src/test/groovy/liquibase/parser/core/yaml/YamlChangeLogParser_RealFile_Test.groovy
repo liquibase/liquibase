@@ -300,6 +300,15 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert e.message.startsWith("Syntax error in file liquibase/parser/core/yaml/malformedChangeLog.yaml")
     }
 
+    def "ChangeLogParseException thrown if changelog has two databaseChangeLog tags"() throws Exception {
+        when:
+        new YamlChangeLogParser().parse("liquibase/parser/core/yaml/malformedDoubleChangeLog.yaml", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        assert e.message.startsWith("Syntax error in file liquibase/parser/core/yaml/malformedDoubleChangeLog.yaml")
+    }
+
     def "elements that don't correspond to anything in liquibase are ignored"() throws Exception {
         def path = "liquibase/parser/core/yaml/unusedTagsChangeLog.yaml"
         expect:
