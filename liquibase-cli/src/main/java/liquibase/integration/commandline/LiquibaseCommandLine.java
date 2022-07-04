@@ -21,10 +21,7 @@ import liquibase.logging.core.JavaLogService;
 import liquibase.resource.*;
 import liquibase.ui.ConsoleUIService;
 import liquibase.ui.UIService;
-import liquibase.util.ISODateFormat;
-import liquibase.util.LiquibaseUtil;
-import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtil;
+import liquibase.util.*;
 import picocli.CommandLine;
 
 import java.io.*;
@@ -382,10 +379,8 @@ public class LiquibaseCommandLine {
                 return;
             }
 
-            final String version = System.getProperty("java.version");
-            final String[] splitVersion = version.split("\\.", 2);
-            if (Integer.parseInt(splitVersion[0]) < 11) {
-                Scope.getCurrentScope().getUI().sendMessage("Performance monitoring requires Java 11 or greater. Version " + version + " is not supported.");
+            if (SystemUtil.getJavaMajorVersion() < 11) {
+                Scope.getCurrentScope().getUI().sendMessage("Performance monitoring requires Java 11 or greater. Version " + SystemUtil.getJavaVersion() + " is not supported.");
                 return;
             }
 

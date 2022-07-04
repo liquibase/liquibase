@@ -1,5 +1,7 @@
 package liquibase.resource
 
+import liquibase.GlobalConfiguration
+import liquibase.Scope
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -102,17 +104,29 @@ class FileSystemResourceAccessorTest extends Specification {
         ]
     }
 
-    def "openStream throws an error if multiple files match"() {
+    def "openStream throws an error if multiple files match and duplicateFileMode == error"() {
         when:
-        simpleTestAccessor.openStream(null, "com/example/everywhere/file-everywhere.txt",)
+        Scope.child(GlobalConfiguration.DUPLICATE_FILE_MODE.getKey(), GlobalConfiguration.DuplicateFileMode.ERROR, { ->
+            simpleTestAccessor.openStream(null, "com/example/everywhere/file-everywhere.txt",)
+        } as Scope.ScopedRunner)
 
         then:
         def e = thrown(IOException)
-        e.message.startsWith("Found 3 files that match com/example/everywhere/file-everywhere.txt: file:")
+        e.message.startsWith("Found 3 files with the path 'com/example/everywhere/file-everywhere.txt':")
         e.message.contains("file-everywhere.txt")
         e.message.contains("test-classes")
         e.message.contains("simple-files.jar")
         e.message.contains("simple-files.zip")
+    }
+
+    def "openStream does not throw an error if multiple files match and duplicateFileMode == warn"() {
+        when:
+        Scope.child(GlobalConfiguration.DUPLICATE_FILE_MODE.getKey(), GlobalConfiguration.DuplicateFileMode.WARN, { ->
+            simpleTestAccessor.openStream(null, "com/example/everywhere/file-everywhere.txt",)
+        } as Scope.ScopedRunner)
+
+        then:
+        noExceptionThrown()
     }
 
     def "openStream returns null if nothing matches"() {
