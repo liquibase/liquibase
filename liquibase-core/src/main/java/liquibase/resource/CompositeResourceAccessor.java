@@ -7,6 +7,7 @@ import java.util.*;
 
 /**
  * A {@link liquibase.resource.ResourceAccessor} that contains multiple sub-accessors and combines the results of all of them.
+ * For the "overall" aggregate resource accessor, integrations should generally use {@link SearchPathResourceAccessor} instead of this.
  */
 public class CompositeResourceAccessor extends AbstractResourceAccessor {
 
