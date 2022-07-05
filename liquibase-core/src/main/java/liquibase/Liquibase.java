@@ -691,7 +691,7 @@ public class Liquibase implements AutoCloseable {
                 /* We have no other choice than to save the current Executer here. */
                 @SuppressWarnings("squid:S1941")
                 Executor oldTemplate = getAndReplaceJdbcExecutor(output);
-                outputHeader("Update " + changesToApply + " Change Sets Database Script");
+                outputHeader("Update " + changesToApply + " Changesets Database Script");
 
                 update(changesToApply, contexts, labelExpression);
 
@@ -2056,7 +2056,7 @@ public class Liquibase implements AutoCloseable {
                 out.append(StreamUtil.getLineSeparator());
             } else {
                 out.append(String.valueOf(unrunChangeSets.size()));
-                out.append(" change sets have not been applied to ");
+                out.append(" changesets have not been applied to ");
                 out.append(getDatabase().getConnection().getConnectionUserName());
                 out.append("@");
                 out.append(getDatabase().getConnection().getURL());
