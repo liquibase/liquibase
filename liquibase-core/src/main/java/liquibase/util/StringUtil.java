@@ -69,7 +69,7 @@ public class StringUtil {
         String previousPiece = null;
         boolean previousDelimiter = false;
         List<Object> parsedArray = Arrays.asList(parsed.toArray(true));
-        if (endDelimiter.equalsIgnoreCase("/")) {
+        if (endDelimiter != null && endDelimiter.equalsIgnoreCase("/")) {
             endDelimiter = "\n/";
         }
         for (Object piece : mergeTokens(parsedArray, endDelimiter)) {
