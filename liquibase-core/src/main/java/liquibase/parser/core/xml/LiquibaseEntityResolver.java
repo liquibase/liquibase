@@ -42,16 +42,20 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         if (streams.isEmpty()) {
             streams = getFallbackResourceAccessor().openStreams(null, path);
 
-            if (streams.isEmpty() && GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
-                String errorMessage = "Unable to resolve xml entity " + systemId + " locally: " +
-                        GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
-                        "Set it to 'false' to allow remote lookups of xsd files.";
-                throw new XSDLookUpException(errorMessage);
-            } else {
-                log.fine("Unable to resolve XML entity locally. Will load from network.");
-                return null;
+            if (streams.isEmpty()) {
+                if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
+                    String errorMessage = "Unable to resolve xml entity " + systemId + " locally: " +
+                            GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
+                            "Set it to 'false' to allow remote lookups of xsd files.";
+                    throw new XSDLookUpException(errorMessage);
+                } else {
+                    log.fine("Unable to resolve XML entity locally. Will load from network.");
+                    return null;
+                }
             }
-        } else if (streams.size() == 1) {
+        }
+
+        if (streams.size() == 1) {
             log.fine("Found XML entity at " + streams.getURIs().get(0));
         } else if (streams.size() > 1) {
             log.warning("Found " + streams.size() + " copies of " + systemId + ". Using " + streams.getURIs().get(0));
@@ -84,7 +88,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-        Scope.getCurrentScope().getLog(getClass()).warning("Current XML parsers seems to not support EntityResolver2. External entities won't be correctly loaded");
+        Scope.getCurrentScope().getLog(getClass()).warning("The current XML parser does not seems to not support EntityResolver2. External entities may not be correctly loaded");
         return resolveEntity(null, publicId, null, systemId);
     }
 }

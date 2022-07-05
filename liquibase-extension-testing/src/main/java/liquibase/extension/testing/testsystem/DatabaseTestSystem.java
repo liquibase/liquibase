@@ -149,6 +149,14 @@ public abstract class DatabaseTestSystem extends TestSystem {
             } else {
                 Scope.getCurrentScope().getLog(getClass()).fine("Using driver from " + driverJar);
                 Path driverPath = DownloadUtil.downloadMavenArtifact(driverJar);
+                //
+                // NOTE:
+                // This call to construct the URLClassLoader is problematic in certain instances
+                // It can cause the Class.forName call below to fail to find the DriverManager class
+                // Removing the parent classloader argument of null seems to fix the issues, but we really need
+                // to investigate more, so I am leaving the code the way it is.  If you do not define the
+                // driverJar property in the configuration file, you will not hit this issue.
+                //
                 final URLClassLoader isolatedClassloader = new URLClassLoader(new URL[]{
                         driverPath.toUri().toURL(),
                 }, null);
@@ -305,5 +313,11 @@ public abstract class DatabaseTestSystem extends TestSystem {
      * Define SQL to run by {@link #setup()}
      */
     protected abstract String[] getSetupSql();
+
+    public boolean executeSql(String sql) throws SQLException {
+        try (Statement statement = getConnection().createStatement()) {
+            return statement.execute(sql);
+        }
+    }
 
 }

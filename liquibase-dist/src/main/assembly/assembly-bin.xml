@@ -13,7 +13,6 @@
             <lineEnding>unix</lineEnding>
             <includes>
                 <include>liquibase</include>
-                <include>examples/start-h2</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
@@ -51,6 +50,26 @@
             <includes>
                 <include>**/*</include>
             </includes>
+            <excludes>
+                <exclude>**/start-h2*</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../liquibase-core/target/classes/liquibase/examples</directory>
+            <outputDirectory>examples</outputDirectory>
+            <includes>
+                <include>**/start-h2</include>
+            </includes>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../liquibase-core/target/classes/liquibase/examples</directory>
+            <outputDirectory>examples</outputDirectory>
+            <includes>
+                <include>**/start-h2.bat</include>
+            </includes>
+            <lineEnding>dos</lineEnding>
         </fileSet>
     </fileSets>
     <files>
@@ -75,12 +94,16 @@
     </files>
     <dependencySets>
         <dependencySet>
-            <outputDirectory>lib</outputDirectory>
+            <outputFileNameMapping> ${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputDirectory>internal/lib</outputDirectory>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <scope>runtime</scope>
             <includes>
+                <include>com.opencsv:opencsv:</include>
                 <include>org.yaml:snakeyaml:jar:</include>
                 <include>javax.xml.bind:jaxb-api:jar:</include>
-                <include>com.sun.xml.bind:jaxb-impl:jar:</include>
-                <include>com.sun.xml.bind:jaxb-core:jar:</include>
+                <include>org.glassfish.jaxb:jaxb-runtime:jar:</include>
+                <include>org.glassfish.jaxb:jaxb-core:jar:</include>
                 <include>info.picocli:picocli:jar:</include>
 
                 <include>com.h2database:h2:jar:</include>
@@ -92,11 +115,27 @@
                 <include>org.xerial:sqlite-jdbc:jar:</include>
                 <include>com.ibm.db2:jcc:jar:</include>
                 <include>org.firebirdsql.jdbc:jaybird:</include>
+                <include>net.snowflake:snowflake-jdbc:</include>
+
+                <include>javax.resource:connector-api:</include>
 
                 <!-- CANNOT SHIP FOR LICENSE REASONS -->
                 <!-- <include>mysql:mysql-connector-java:jar</include>-->
-
             </includes>
+
+            <!-- some libraries lie about compile vs. runtime dependencies. Or we don't hit code that uses these. So exclude them manually. -->
+            <excludes>
+                <exclude>org.antlr:antlr4-runtime:jar:</exclude>  <!-- from connector-api -->
+                <exclude>org.checkerframework:checker-qual:jar:</exclude> <!-- from postgresql -->
+                <exclude>commons-beanutils:commons-beanutils:jar:</exclude> <!-- from opencsv -->
+                <exclude>org.glassfish.jaxb:txw2:jar:</exclude> <!-- from jaxb-core -->
+                <exclude>org.eclipse.angus:angus-activation:jar:</exclude> <!-- from jaxb-core -->
+                <exclude>com.sun.istack:istack-commons-runtime:jar:</exclude> <!-- from jaxb-core -->
+                <exclude>jakarta.activation:jakarta.activation-api:jar:</exclude> <!-- from jaxb-core -->
+                <exclude>jakarta.xml.bind:jakarta.xml.bind-api:jar:</exclude> <!-- from jaxb-runtime -->
+                <exclude>com.sun.activation:jakarta.activation:jar:</exclude> <!-- from jaxb-runtime -->
+                <exclude>javax.activation:javax.activation-api:jar:</exclude> <!-- from jaxb-api -->
+            </excludes>
         </dependencySet>
     </dependencySets>
 

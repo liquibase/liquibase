@@ -12,6 +12,7 @@ Short Description: Capture the current state of the database
 Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -26,7 +27,7 @@ Optional Args:
     OBFUSCATED
   schemas (String) The schemas to snapshot
     Default: null
-  snapshotFormat (String) Output format to use (JSON or YAML
+  snapshotFormat (String) Output format to use (JSON, YAML, or TXT)
     Default: null
   username (String) Username to use to connect to the database
     Default: null
@@ -68,7 +69,8 @@ Optional Args:
         }
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                snapshot: { CommandTests.NOT_NULL }
         ]
     }
 
@@ -111,7 +113,8 @@ Optional Args:
         expectedOutput = [CommandTests.assertContains("Catalog & Schema:", 1)]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                snapshot: { CommandTests.NOT_NULL }
         ]
     }
 
@@ -154,7 +157,8 @@ Optional Args:
         expectedOutput = [CommandTests.assertContains("Catalog & Schema:", 1)]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                snapshot: { CommandTests.NOT_NULL }
         ]
     }
 
@@ -204,7 +208,8 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                snapshot: { CommandTests.NOT_NULL }
         ]
     }
 

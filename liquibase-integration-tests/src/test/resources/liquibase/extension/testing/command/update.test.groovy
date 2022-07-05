@@ -1,5 +1,6 @@
 package liquibase.extension.testing.command
 
+import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
 
 import java.util.regex.Pattern
@@ -12,6 +13,7 @@ Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changeExecListenerClass (String) Fully-qualified class which specifies a ChangeExecListener
     Default: null
@@ -59,6 +61,15 @@ Optional Args:
                 url: ""
         ]
         expectedException = CommandValidationException.class
+    }
+
+    run "Run with a URL that has credentials", {
+        arguments = [
+                url:        { it.url + "?user=sa&password=\"\"" },
+                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+        ]
+        expectedException = CommandExecutionException.class
+        expectedExceptionMessage = "Connection could not be created to jdbc:hsqldb:mem:lbcat?user=*****&password=*****"
     }
 
     run "Run without a changeLogFile throws an exception", {
