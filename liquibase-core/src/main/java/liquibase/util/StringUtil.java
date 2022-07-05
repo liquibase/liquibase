@@ -69,6 +69,9 @@ public class StringUtil {
         String previousPiece = null;
         boolean previousDelimiter = false;
         List<Object> parsedArray = Arrays.asList(parsed.toArray(true));
+        if (endDelimiter.equalsIgnoreCase("/")) {
+            endDelimiter = "\n/";
+        }
         for (Object piece : mergeTokens(parsedArray, endDelimiter)) {
             if (splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
                 String trimmedString = StringUtil.trimToNull(currentString.toString());
@@ -157,13 +160,18 @@ public class StringUtil {
             return ";".equals(piece) || (("go".equalsIgnoreCase(piece) || "/".equals(piece)) && ((previousPiece ==
                     null) || previousPiece.endsWith("\n")));
         } else {
+            if ("\n/".equals(endDelimiter)) {
+                if (previousPiece != null && previousPiece.endsWith("/") && piece.startsWith("\n")) {
+                    return true;
+                }
+            }
             if (endDelimiter.length() == 1) {
                 if ("/".equals(endDelimiter)) {
                     if (previousPiece != null && previousPiece.endsWith("*")) {
                         return false;
                     }
                 }
-                return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
+                return piece.equalsIgnoreCase(endDelimiter.toLowerCase());
             } else {
                 return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece + piece).toLowerCase().matches("[\\s\n\r]*" + endDelimiter.toLowerCase());
             }
