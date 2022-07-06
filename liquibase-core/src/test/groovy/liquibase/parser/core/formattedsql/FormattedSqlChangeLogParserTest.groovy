@@ -166,13 +166,17 @@ END reany_procedure_name;
 
 
 grant /*Beware, this comment should not be seen as a delimiter! */
-    execute on any_procedure_name to ANY_USER1/
-grant execute on any_procedure_name to ANY_USER2/
-grant execute on any_procedure_name to ANY_USER3/
--- rollback drop PROCEDURE refresh_all_fos_permission_views/
+    execute on any_procedure_name to ANY_USER1
+/
+grant execute on any_procedure_name to ANY_USER2
+/
+grant execute on any_procedure_name to ANY_USER3
+/
+-- rollback drop PROCEDURE refresh_all_fos_permission_views
+/
 """
 
-    private static final String ORACLE_QUOTED_STRING_CHANGELOG_WITH_END_DELIMITER = """
+    private static final String ORACLE_QUOTED_STRING_END_DELIMITER_CHANGELOG = """
 --liquibase formatted sql
 
 --changeset jsg:1d endDelimiter:/ rollbackEndDelimiter:/
@@ -183,6 +187,23 @@ p1 => q'{'/'}'
 );
 end;
 /
+"""
+
+    private static final String SINGLE_CHARACTER_END_DELIMITER_CHANGELOG = """
+--liquibase formatted sql
+
+-- changeset abcd:1 runOnChange:true endDelimiter:X
+CREATE OR REPLACE PROCEDURE any_procedure_name is
+BEGIN
+    DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);
+END reany_procedure_name;X
+
+
+grant /*Beware, this comment should not be seen as a delimiter! */
+    execute on any_procedure_name to ANY_USER1;X
+grant execute on any_procedure_name to ANY_USER2;X
+grant execute on any_procedure_name to ANY_USER3;
+-- rollback drop PROCEDURE refresh_all_fos_permission_views;X
 """
 
     private static final String INVALID_CHANGELOG = "select * from table1"
@@ -645,7 +666,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         "--liquibase formatted sql\n\n--changeset John Doe:12345 dbms:,db2,\ncreate table test (id int);\n"     | null
     }
 
-    def parse_withEndDelimiter(String changeString, Integer statementCount, String[] expectedStatements) throws Exception {
+    def parse_withEndDelimiter(String changeString, String[] expectedStatements) throws Exception {
         when:
         ChangeLogParameters params = new ChangeLogParameters()
         DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeString).parse("asdf.sql", params, new JUnitResourceAccessor())
@@ -655,13 +676,14 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         changeLog.getChangeSets().size() == 1
         changeLog.getChangeSets().get(0).getChanges().size() == 1
         def statements = changeLog.getChangeSets().get(0).getChanges().get(0).generateStatements(new MockDatabase())
-        statements.size() == statementCount
+        statements.size() == expectedStatements.size()
         statements.eachWithIndex { SqlStatement entry, int i -> assert expectedStatements[i] == entry.toString() }
 
         where:
-        changeString                                      | statementCount | expectedStatements
-        END_DELIMITER_CHANGELOG                           | 4              | ["CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n    DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);\nEND reany_procedure_name;", "grant \n    execute on any_procedure_name to ANY_USER1", "grant execute on any_procedure_name to ANY_USER2", "grant execute on any_procedure_name to ANY_USER3"]
-        ORACLE_QUOTED_STRING_CHANGELOG_WITH_END_DELIMITER | 1              | ["begin\ntestproc(\np1 => q'{'/'}'\n);\nend;"]
+        changeString                                 | expectedStatements
+        END_DELIMITER_CHANGELOG                      | ["CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n    DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);\nEND reany_procedure_name;", "grant \n    execute on any_procedure_name to ANY_USER1", "grant execute on any_procedure_name to ANY_USER2", "grant execute on any_procedure_name to ANY_USER3"]
+        ORACLE_QUOTED_STRING_END_DELIMITER_CHANGELOG | ["begin\ntestproc(\np1 => q'{'/'}'\n);\nend;"]
+        SINGLE_CHARACTER_END_DELIMITER_CHANGELOG     | ["CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n    DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);\nEND reany_procedure_name;", "grant \n    execute on any_procedure_name to ANY_USER1;", "grant execute on any_procedure_name to ANY_USER2;", "grant execute on any_procedure_name to ANY_USER3;"]
     }
 
     @Unroll("#featureName: #example")
