@@ -301,9 +301,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
         final Logger log = Scope.getCurrentScope().getLog(getClass());
-        final UIService ui = Scope.getCurrentScope().getUI();
         for (String message : validatingVisitor.getWarnings().getMessages()) {
-            ui.sendMessage("WARNING: "+message);
             log.warning(message);
         }
 
