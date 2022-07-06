@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -20,6 +21,7 @@ import liquibase.util.StreamUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(StreamUtil.class)
+@PowerMockIgnore({"jdk.internal.reflect.*"})
 public class ResourceAccessorXsdStreamResolverTest {
 
 	private static final String XSD_FILE = "xsdFile";

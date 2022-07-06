@@ -3,8 +3,6 @@ package liquibase.parser.core.xml;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.junit.runner.RunWith;
-
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
