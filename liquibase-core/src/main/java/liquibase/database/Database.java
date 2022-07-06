@@ -270,7 +270,7 @@ public interface Database extends PrioritizedService {
     RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
     /**
-     * After the change set has been ran against the database this method will update the change log table
+     * After the changeset has been ran against the database this method will update the change log table
      * with the information.
      */
     void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException;

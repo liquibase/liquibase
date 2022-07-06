@@ -495,7 +495,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(changeLog,
                             new ShouldRunChangeSetFilter(database),
@@ -612,7 +612,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(changeLog,
@@ -868,7 +868,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(database.getRanChangeSetList(), changeLog,
                             new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
@@ -1140,7 +1140,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
@@ -1308,7 +1308,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
@@ -1466,7 +1466,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     ChangeLogIterator listLogIterator = buildChangeLogIterator(tag, changeLog, contexts, labelExpression);
 

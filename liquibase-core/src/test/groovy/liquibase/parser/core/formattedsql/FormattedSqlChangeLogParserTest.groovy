@@ -368,7 +368,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         changeLog.getChangeSets().get(20).getId().equalsIgnoreCase("+the_user+")
     }
 
-    def "parse change set with colon in ID"() throws Exception {
+    def "parse changeset with colon in ID"() throws Exception {
         when:
         String changeLogWithOneGoodOneBad = "   \n\n" +
                 "--liquibase formatted sql\n\n" +
@@ -387,7 +387,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         assert changeSet.getId() == "ID:1"
     }
 
-    def "parse change set with invalid change set attributes"() throws Exception {
+    def "parse changeset with invalid changeset attributes"() throws Exception {
         when:
         String changeLogWithInvalidChangeSetAttributes =
                 "--liquibase formatted sql\n\n" +
@@ -405,7 +405,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         assert e
     }
 
-    def "parse change set with one good one bad"() throws Exception {
+    def "parse changeset with one good one bad"() throws Exception {
         when:
         String changeLogWithOneGoodOneBad = "   \n\n" +
                 "--liquibase formatted sql\n\n" +
@@ -424,7 +424,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         thrown(ChangeLogParseException)
     }
 
-    def "parse change set with only author"() throws Exception {
+    def "parse changeset with only author"() throws Exception {
         when:
         String changeLogWithOnlyAuthor= "   \n\n" +
                 "--liquibase formatted sql\n\n" +
@@ -569,7 +569,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         then:
         def e = thrown(ChangeLogParseException)
         assert e : "ChangeLogParseException should be thrown"
-        assert e.getMessage().contains("do not allow comment lines outside of change sets")
+        assert e.getMessage().contains("do not allow comment lines outside of changesets")
     }
 
     def parse_withWithIgnoreNotIgnoreLines() {

@@ -27,7 +27,7 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMojo {
     /**
-     * Specifies the Deployment ID in the DATABASECHANGELOG table for all change sets you
+     * Specifies the Deployment ID in the DATABASECHANGELOG table for all changesets you
      * want to rollback.
      *
      * @parameter property="liquibase.deploymentId"
