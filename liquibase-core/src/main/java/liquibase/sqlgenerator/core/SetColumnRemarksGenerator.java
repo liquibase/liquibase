@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -35,6 +36,16 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
             validationErrors.checkRequiredField("columnDataType", StringUtil.trimToNull(setColumnRemarksStatement.getColumnDataType()));
         }
         return validationErrors;
+    }
+
+    @Override
+    public Warnings warn(SetColumnRemarksStatement statementType, Database database, SqlGeneratorChain<SetColumnRemarksStatement> sqlGeneratorChain) {
+        final Warnings warnings = super.warn(statementType, database, sqlGeneratorChain);
+        if (database instanceof MySQLDatabase) {
+            warnings.addWarning("setColumnRemarks will lose primary key/autoincrement/not null settings for "+database.getShortName()+".  Use <sql> or <modifySql> and re-specify all configuration if this is the case");
+        }
+
+        return warnings;
     }
 
     @Override

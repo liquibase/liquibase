@@ -19,6 +19,7 @@ import liquibase.precondition.Precondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.ui.UIService;
 import liquibase.util.StringUtil;
 import liquibase.util.FilenameUtil;
 
@@ -299,8 +300,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         validatingVisitor.validate(database, this);
         logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
+        final Logger log = Scope.getCurrentScope().getLog(getClass());
+        final UIService ui = Scope.getCurrentScope().getUI();
         for (String message : validatingVisitor.getWarnings().getMessages()) {
-            Scope.getCurrentScope().getLog(getClass()).warning(message);
+            ui.sendMessage("WARNING: "+message);
+            log.warning(message);
         }
 
         if (!validatingVisitor.validationPassed()) {
