@@ -107,21 +107,49 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
     }
 
     @Test
-    public void h2IgnoresDataType() {
+    public void oldH2IgnoresDataType() throws Exception {
+        DatabaseConnection dbConnection = mock(DatabaseConnection.class);
+        H2Database h2Database = new H2Database();
+        h2Database.setConnection(dbConnection);
 
+        CreateSequenceStatement stmt = createSampleSqlStatement();
 
-        final CreateSequenceStatement stmt = new CreateSequenceStatement(null, null, "test_seq")
-                .setDataType("BIGINT");
-        ValidationErrors errors = new CreateSequenceGenerator().validate(stmt, new H2Database(), new MockSqlGeneratorChain());
+        // versions before 2.0 do not support the `with <dataType>` clause
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(1);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(4);
+
+        stmt.setDataType("BIGINT");
+        ValidationErrors errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
         assertThat(errors.getErrorMessages()).isEmpty();
         assertThat(errors.getWarningMessages()).isEmpty();
 
         stmt.setDataType("INT");
-        errors = new CreateSequenceGenerator().validate(stmt, new H2Database(), new MockSqlGeneratorChain());
+        errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
         assertThat(errors.getErrorMessages()).isEmpty();
-        assertEquals("H2 only creates BIGINT sequences. Ignoring requested type INT", errors.getWarningMessages().get(0));
-        assertEquals("CREATE SEQUENCE test_seq", new CreateSequenceGenerator().generateSql(stmt, new H2Database(), new MockSqlGeneratorChain())[0].toSql());
+        assertThat(errors.getWarningMessages()).containsExactly("This version of H2 only creates BIGINT sequences. Ignoring requested type INT");
 
+        String sql = generatorUnderTest.generateSql(stmt, h2Database, new MockSqlGeneratorChain())[0].toSql();
+        assertThat(sql).isEqualTo("CREATE SEQUENCE SCHEMA_NAME.SEQUENCE_NAME");
+
+        // since 2.0 `with <dataType>` *is* supported
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(2);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(0);
+
+        stmt.setDataType("BIGINT");
+        errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
+        assertThat(errors.getWarningMessages()).isEmpty();
+
+        sql = generatorUnderTest.generateSql(stmt, h2Database, new MockSqlGeneratorChain())[0].toSql();
+        assertThat(sql).isEqualTo("CREATE SEQUENCE SCHEMA_NAME.SEQUENCE_NAME AS BIGINT");
+
+        stmt.setDataType("INT");
+        errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
+        assertThat(errors.getWarningMessages()).isEmpty();
+
+        sql = generatorUnderTest.generateSql(stmt, h2Database, new MockSqlGeneratorChain())[0].toSql();
+        assertThat(sql).isEqualTo("CREATE SEQUENCE SCHEMA_NAME.SEQUENCE_NAME AS INT");
     }
 
 //    @Before
