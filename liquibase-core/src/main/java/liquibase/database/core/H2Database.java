@@ -2,7 +2,6 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
-import liquibase.database.AbstractHsqlAndH2Database;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -28,7 +27,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class H2Database extends AbstractHsqlAndH2Database {
+public class H2Database extends AbstractJdbcDatabase {
 
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
@@ -305,13 +304,13 @@ public class H2Database extends AbstractHsqlAndH2Database {
     }
 
     @Override
-    protected String getAutoIncrementStartWithClause() {
-	return "%d";
-    }
+    public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy, String generationType, Boolean defaultOnNull) {
+        final String clause = super.getAutoIncrementClause(startWith, incrementBy, generationType, defaultOnNull);
+        if (clause.startsWith("AUTO_INCREMENT")) {
+            return clause;
+        }
 
-    @Override
-    protected String getAutoIncrementByClause() {
-	return "%d";
+        return clause.replace(",", ""); //h2 doesn't use commas between the values
     }
 
     @Override
@@ -323,7 +322,6 @@ public class H2Database extends AbstractHsqlAndH2Database {
     public boolean supportsDropTableCascadeConstraints() {
         return true;
     }
-
 
     @Override
     public void setConnection(DatabaseConnection conn) {

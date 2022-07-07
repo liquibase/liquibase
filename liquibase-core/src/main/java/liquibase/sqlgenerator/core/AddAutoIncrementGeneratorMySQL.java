@@ -44,7 +44,7 @@ public class AddAutoIncrementGeneratorMySQL extends AddAutoIncrementGenerator {
     @Override
     public ValidationErrors validate(AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = super.validate(statement, database, sqlGeneratorChain);
-        validationErrors.checkDisallowedField("incrementBy",statement.getIncrementBy(),database,MySQLDatabase.class);
+        validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy(), database, MySQLDatabase.class);
         return validationErrors;
     }
 
