@@ -1,5 +1,10 @@
 package liquibase.database.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Assert;
+import org.junit.Test;
 import liquibase.GlobalConfiguration;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabaseTest;
@@ -8,10 +13,6 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
-import org.junit.Assert;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Tests for {@link PostgresDatabase}
@@ -50,14 +51,13 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         ; //TODO: test has troubles, fix later
     }
 
-    public void testGetDefaultDriver() {
+    public void testGetDefaultDriver() throws DatabaseException {
         try (Database database = new PostgresDatabase()) {
-          assertEquals("org.postgresql.Driver", database.getDefaultDriver("jdbc:postgresql://localhost/liquibase"));
+            assertEquals("org.postgresql.Driver", database.getDefaultDriver("jdbc:postgresql://localhost/liquibase"));
 
-          assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
-        } catch (DatabaseException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+            assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
+        } catch (final DatabaseException e) {
+            throw e;
         }
     }
 

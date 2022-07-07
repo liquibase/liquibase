@@ -24,7 +24,6 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
         return "Microsoft SQL Server";
     }
 
-
     @Override
     @Test
     public void supportsInitiallyDeferrableColumns() {
@@ -38,40 +37,38 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
     @Test
-    public void getDefaultDriver() {
+    public void getDefaultDriver() throws DatabaseException {
         try (Database database = new MSSQLDatabase()) {
-          assertEquals("com.microsoft.sqlserver.jdbc.SQLServerDriver", database.getDefaultDriver("jdbc:sqlserver://localhost;databaseName=liquibase"));
-
-          assertNull(database.getDefaultDriver("jdbc:oracle:thin://localhost;databaseName=liquibase"));
-        } catch (DatabaseException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+            assertEquals("com.microsoft.sqlserver.jdbc.SQLServerDriver", database.getDefaultDriver("jdbc:sqlserver://localhost;databaseName=liquibase"));
+    
+            assertNull(database.getDefaultDriver("jdbc:oracle:thin://localhost;databaseName=liquibase"));
+        } catch (final DatabaseException e) {
+            throw e;
         }
     }
 
     @Override
     @Test
-    public void escapeTableName_noSchema() {
+    public void escapeTableName_noSchema() throws DatabaseException {
         try (Database database = new MSSQLDatabase()) {
-          assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
-          assertEquals("[tableName€]", database.escapeTableName(null, null, "tableName€"));
-        } catch (DatabaseException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+            assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
+            assertEquals("[tableName€]", database.escapeTableName(null, null, "tableName€"));
+        } catch (final DatabaseException e) {
+            throw e;
         }
     }
 
     @Override
     @Test
-    public void escapeTableName_withSchema() {
+    public void escapeTableName_withSchema() throws DatabaseException {
         try (Database database = new MSSQLDatabase()) {
-          assertEquals("catalogName.schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
-          assertEquals("[catalogName€].[schemaName€].[tableName€]", database.escapeTableName("catalogName€", "schemaName€", "tableName€"));
-        } catch (DatabaseException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+            assertEquals("catalogName.schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+            assertEquals("[catalogName€].[schemaName€].[tableName€]", database.escapeTableName("catalogName€", "schemaName€", "tableName€"));
+        } catch (final DatabaseException e) {
+            throw e;
         }
     }
+
     private Database createOfflineDatabase(String url) throws Exception {
         return DatabaseFactory.getInstance().openDatabase(url, null, null, null, null);
     }
@@ -81,15 +78,15 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
         //
         // No exception should be thrown by call to setDefaultSchemaName
         //
-        Database database = createOfflineDatabase("offline:mssql");
+        final Database database = createOfflineDatabase("offline:mssql");
         database.setDefaultSchemaName("MySchema");
     }
 
     @Test
     public void isUnmodifiable() throws Exception {
-        Database database = createOfflineDatabase("offline:mssql");
+        final Database database = createOfflineDatabase("offline:mssql");
         assertTrue(database instanceof MSSQLDatabase);
-        MSSQLDatabase mssqlDatabase = (MSSQLDatabase)database;
+        final MSSQLDatabase mssqlDatabase = (MSSQLDatabase) database;
         assertTrue(mssqlDatabase.dataTypeIsNotModifiable("datetime"));
     }
 

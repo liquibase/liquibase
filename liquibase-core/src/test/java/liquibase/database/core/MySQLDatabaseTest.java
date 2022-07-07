@@ -21,7 +21,7 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
 
     @Override
     protected String getProductNameString() {
-      return "MySQL";
+        return "MySQL";
     }
 
     @Override
@@ -29,8 +29,6 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
     public void supportsInitiallyDeferrableColumns() {
         assertFalse(getDatabase().supportsInitiallyDeferrableColumns());
     }
-
-
 
     @Override
     @Test
@@ -40,7 +38,7 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
 
     @Test
     public void getCurrentDateTimeFunctionWithPrecision() {
-        MySQLDatabase mySQLDatabase = (MySQLDatabase) getDatabase();
+        final MySQLDatabase mySQLDatabase = (MySQLDatabase) getDatabase();
         Assert.assertEquals("NOW(1)", mySQLDatabase.getCurrentDateTimeFunction(1));
         Assert.assertEquals("NOW(2)", mySQLDatabase.getCurrentDateTimeFunction(2));
         Assert.assertEquals("NOW(5)", mySQLDatabase.getCurrentDateTimeFunction(5));
@@ -48,46 +46,45 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
 
     @Test
     public void generateDatabaseFunctionValue() {
-        MySQLDatabase mySQLDatabase = (MySQLDatabase) getDatabase();
+        final MySQLDatabase mySQLDatabase = (MySQLDatabase) getDatabase();
         assertEquals("NOW()", mySQLDatabase.generateDatabaseFunctionValue(new DatabaseFunction("CURRENT_TIMESTAMP()")));
         assertNull(mySQLDatabase.generateDatabaseFunctionValue(new DatabaseFunction(null)));
     }
 
     @Test
     public void generateDatabaseFunctionValueWithPrecision() {
-        MySQLDatabase mySQLDatabase = (MySQLDatabase) getDatabase();
+        final MySQLDatabase mySQLDatabase = (MySQLDatabase) getDatabase();
         assertEquals("NOW(2)", mySQLDatabase.generateDatabaseFunctionValue(new DatabaseFunction("CURRENT_TIMESTAMP(2)")));
         assertEquals("NOW(3)", mySQLDatabase.generateDatabaseFunctionValue(new DatabaseFunction("CURRENT_TIMESTAMP(3)")));
     }
 
     @Test
     public void generateDatabaseFunctionValueWithIncorrectPrecision() {
-        MySQLDatabase mySQLDatabase = (MySQLDatabase) getDatabase();
+        final MySQLDatabase mySQLDatabase = (MySQLDatabase) getDatabase();
         assertEquals("NOW()", mySQLDatabase.generateDatabaseFunctionValue(new DatabaseFunction("CURRENT_TIMESTAMP(string)")));
     }
 
-    public void testGetDefaultDriver() {
+    public void testGetDefaultDriver() throws DatabaseException {
         try (Database database = new MySQLDatabase()) {
-          assertEquals("com.mysql.cj.jdbc.Driver", database.getDefaultDriver("jdbc:mysql://localhost/liquibase"));
+            assertEquals("com.mysql.cj.jdbc.Driver", database.getDefaultDriver("jdbc:mysql://localhost/liquibase"));
 
-          assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
-        } catch (DatabaseException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+            assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
+        } catch (final DatabaseException e) {
+            throw e;
         }
     }
 
     @Override
     @Test
     public void escapeTableName_noSchema() {
-        Database database = getDatabase();
+        final Database database = getDatabase();
         assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
     }
 
     @Override
     @Test
     public void escapeTableName_withSchema() {
-        Database database = getDatabase();
+        final Database database = getDatabase();
         assertEquals("catalogName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
     }
 
