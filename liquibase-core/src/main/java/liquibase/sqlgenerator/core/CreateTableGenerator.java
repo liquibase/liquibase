@@ -43,6 +43,12 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createTableStatement.getTableName());
         validationErrors.checkRequiredField("columns", createTableStatement.getColumns());
+
+        if (createTableStatement.getAutoIncrementConstraints() != null) {
+            for (AutoIncrementConstraint constraint : createTableStatement.getAutoIncrementConstraints()) {
+                validationErrors.checkDisallowedField("incrementBy", constraint.getIncrementBy(), database, MySQLDatabase.class);
+            }
+        }
         return validationErrors;
     }
 
