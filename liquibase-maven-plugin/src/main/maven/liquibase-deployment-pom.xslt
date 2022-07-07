@@ -16,16 +16,16 @@
     <xsl:template match="maven:dependencies/maven:dependency[maven:groupId = 'org.liquibase'  and maven:artifactId != 'liquibase-core']"/>
 
     <!-- add liquibase-commercial dependency -->
-    <xsl:template match="maven:dependencies">
-        <xsl:copy-of select="."/>
+<!--    <xsl:template match="maven:dependencies">-->
+<!--        <xsl:copy-of select="."/>-->
 
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-commercial</artifactId>
-            <version>0-SNAPSHOT</version>
-            <scope>runtime</scope>
-        </dependency>
-    </xsl:template>
+<!--        <dependency xmlns="http://maven.apache.org/POM/4.0.0">-->
+<!--            <groupId>org.liquibase</groupId>-->
+<!--            <artifactId>liquibase-commercial</artifactId>-->
+<!--            <version>0-SNAPSHOT</version>-->
+<!--            <scope>runtime</scope>-->
+<!--        </dependency>-->
+<!--    </xsl:template>-->
 
     <!--
     Set module <name> as "Liquibase".
