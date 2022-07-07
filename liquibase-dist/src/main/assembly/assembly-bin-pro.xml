@@ -5,7 +5,7 @@
 	</formats>
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<componentDescriptors>
-		<componentDescriptor>src/main/assembly/components.xml</componentDescriptor>
+		<componentDescriptor>src/main/assembly/assembly-bin-common.xml</componentDescriptor>
 	</componentDescriptors>
 	<dependencySets>
 		<dependencySet>
@@ -13,7 +13,7 @@
 			<outputDirectory>internal/lib</outputDirectory>
 			<includes>
 				<include>
-					com.datical.lb:liquibase-commercial:jar:
+					org.liquibase:liquibase-commercial:jar:
 				</include>
 			</includes>
 		</dependencySet>

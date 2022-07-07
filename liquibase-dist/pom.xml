@@ -8,9 +8,9 @@
 	</parent>
 	<artifactId>liquibase-dist</artifactId>
 	<packaging>jar</packaging>
-	<description>
-		Liquibase is a tool for managing and executing database changes.
-	</description>
+
+    <description>Liquibase is a tool for managing and executing database changes.</description>
+
 	<properties>
 		<deploy.repositoryId>github</deploy.repositoryId>
 		<deploy.url>https://maven.pkg.github.com/liquibase</deploy.url>
@@ -40,7 +40,11 @@
 			<artifactId>liquibase-cli</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>liquibase-snowflake</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
@@ -184,6 +188,8 @@
 						<includes>
                             <include>${project.groupId}:liquibase-core</include>
                             <include>${project.groupId}:liquibase-cli</include>
+                            <include>${project.groupId}:liquibase-snowflake</include>
+                            <include>org.liquibase:liquibase-commercial</include>
 						</includes>
 					</artifactSet>
 					<filters>
@@ -317,7 +323,7 @@
 
 			<dependencies>
 				<dependency>
-                    <groupId>com.datical.lb</groupId>
+                    <groupId>org.liquibase</groupId>
                     <artifactId>liquibase-commercial</artifactId>
                     <version>${project.version}</version>
 				</dependency>

@@ -15,6 +15,18 @@
     <!-- remove all org.liquibase sub-module dependencies except liquibase-core -->
     <xsl:template match="maven:dependencies/maven:dependency[maven:groupId = 'org.liquibase'  and maven:artifactId != 'liquibase-core']"/>
 
+    <!-- add liquibase-commercial dependency -->
+    <xsl:template match="maven:dependencies">
+        <xsl:copy-of select="."/>
+
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-commercial</artifactId>
+            <version>0-SNAPSHOT</version>
+            <scope>runtime</scope>
+        </dependency>
+    </xsl:template>
+
     <!--
     Set module <name> as "Liquibase".
     We do not set it in the original pom.xml since it makes build output more confusing - nice to keep the capitalization consistent
