@@ -49,10 +49,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Writer;
+import java.io.*;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Supplier;
@@ -972,13 +969,11 @@ public class Liquibase implements AutoCloseable {
     protected void executeRollbackScript(String rollbackScript, List<ChangeSet> changeSets, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         String rollbackScriptContents;
-        try (InputStreamList streams = resourceAccessor.openStreams(null, rollbackScript)) {
-            if ((streams == null) || streams.isEmpty()) {
+        try (InputStream stream = resourceAccessor.openStream(null, rollbackScript)) {
+            if (stream == null) {
                 throw new LiquibaseException("WARNING: The rollback script '" + rollbackScript + "' was not located.  Please check your parameters. No rollback was performed");
-            } else if (streams.size() > 1) {
-                throw new LiquibaseException("Found multiple rollbackScripts named " + rollbackScript);
             }
-            rollbackScriptContents = StreamUtil.readStreamAsString(streams.iterator().next());
+            rollbackScriptContents = StreamUtil.readStreamAsString(stream);
         } catch (IOException e) {
             throw new LiquibaseException("Error reading rollbackScript " + executor + ": " + e.getMessage());
         }

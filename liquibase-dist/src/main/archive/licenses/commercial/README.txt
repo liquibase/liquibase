@@ -1,9 +1,10 @@
-Liquibase License Information (Used by Liquibase Pro)
+Liquibase License Information (Used by Liquibase Commercial)
 Version: ${project.version}
 
 Liquibase ships with 3rd party components using the following licenses:
 
 - Apache 2.0 License - https://opensource.org/licenses/Apache-2.0
+- GNU Affero General Public License version 3 https://opensource.org/licenses/AGPL-3.0
 
 Libraries and their licenses:
 

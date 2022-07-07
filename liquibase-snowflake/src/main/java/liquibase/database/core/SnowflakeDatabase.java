@@ -5,7 +5,10 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.SystemUtil;
 
 import java.math.BigInteger;
 import java.sql.ResultSet;
@@ -154,8 +157,29 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsSchemas() {
-        return true;
+    public void setConnection(DatabaseConnection conn) {
+        super.setConnection(conn);
+
+        configureSession();
+    }
+
+    @Override
+    public void rollback() throws DatabaseException {
+        super.rollback();
+        configureSession();
+    }
+
+    protected void configureSession() {
+        //Due to the snowflake driver's use of reflection on java.nio within the arrow support, queries fail with a "can't load class" error if the default arrow result format is returned
+        //This ensures we use the json format which does work with 17+
+        //We don't force it if we are running under java 17 since arrow does work for those versions
+        if (SystemUtil.getJavaMajorVersion() >= 17) {
+            try {
+                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement("alter session set jdbc_query_result_format = 'JSON'"));
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
+            }
+        }
     }
 
     private Set<String> getDefaultReservedWords() {

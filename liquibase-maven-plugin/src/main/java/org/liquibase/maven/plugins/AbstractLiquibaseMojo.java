@@ -15,6 +15,7 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.resource.SearchPathResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
 import org.apache.maven.artifact.manager.WagonManager;
@@ -54,6 +55,16 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * Suffix for fields that are representing a default value for a another field.
      */
     private static final String DEFAULT_FIELD_SUFFIX = "Default";
+
+    /**
+     *
+     * Specifies whether to preserve the case of schemas and catalogs
+     *
+     * @parameter property="liquibase.preserveSchemaCase"
+     *
+     */
+    @PropertyElement
+    protected Boolean preserveSchemaCase;
 
     /**
      * Specifies the driver class name to use for the database connection.
@@ -272,6 +283,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String databaseChangeLogTableName;
+
     /**
      * Specifies the table name to use for the DATABASECHANGELOGLOCK table.
      *
@@ -279,6 +291,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String databaseChangeLogLockTableName;
+
+    /**
+     * Show the liquibase banner in output.
+     *
+     * @parameter property="liquibase.showBanner"
+     */
+    @PropertyElement
+    protected boolean showBanner = true;
 
     /**
      * Specifies the server ID in the Maven <i>settings.xml</i> to use when authenticating.
@@ -292,6 +312,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     private Liquibase liquibase;
+
+    /**
+     * Specifies the locations where Liquibase can find your <i>changelog</i> files.
+     *
+     * @parameter property="liquibase.searchPath"
+     */
+    @PropertyElement
+    protected String searchPath;
+
 
     /**
      * A property-based collection of <i>changelog</i> properties to apply.
@@ -331,6 +360,222 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     private String liquibaseLicenseKey;
+
+    /**
+     * Specifies your psql path.
+     *
+     * @parameter property="liquibase.psql.path"
+     */
+    @PropertyElement
+    protected String psqlPath;
+
+    /**
+     * Specifies whether to keep generated psql files.
+     *
+     * @parameter property="liquibase.psql.keep.temp"
+     */
+    @PropertyElement
+    protected Boolean psqlKeepTemp;
+
+    /**
+     * Specifies the name of generated psql files.
+     *
+     * @parameter property="liquibase.psql.keep.temp.name"
+     */
+    @PropertyElement
+    protected String psqlKeepTempName;
+
+    /**
+     * Specifies where to keep generated psql files.
+     *
+     * @parameter property="liquibase.psql.keep.temp.path"
+     */
+    @PropertyElement
+    protected String psqlKeepTempPath;
+
+    /**
+     * Specifies additional psql args.
+     *
+     * @parameter property="liquibase.psql.args"
+     */
+    @PropertyElement
+    protected String psqlArgs;
+
+    /**
+     * Specifies psql executor name.
+     *
+     * @parameter property="liquibase.psql.executor"
+     */
+    @PropertyElement
+    protected String psqlExecutorName;
+
+    /**
+     * Specifies psql timeout.
+     *
+     * @parameter property="liquibase.psql.timeout"
+     */
+    @PropertyElement
+    protected Integer psqlTimeout;
+
+    /**
+     * Specifies where to output psql logs.
+     *
+     * @parameter property="liquibase.psql.logFile"
+     */
+    @PropertyElement
+    protected String psqlLogFile;
+
+    /**
+     * Specifies your sqlplus path.
+     *
+     * @parameter property="liquibase.sqlplus.path"
+     */
+    @PropertyElement
+    protected String sqlPlusPath;
+
+    /**
+     * Specifies whether to keep generated sqlplus files.
+     *
+     * @parameter property="liquibase.sqlplus.keep.temp"
+     */
+    @PropertyElement
+    protected Boolean sqlPlusKeepTemp;
+
+    /**
+     * Specifies the name of generated sqlplus files.
+     *
+     * @parameter property="liquibase.sqlplus.keep.temp.name"
+     */
+    @PropertyElement
+    protected String sqlPlusKeepTempName;
+
+    /**
+     * Specifies where to keep generated sqlplus files.
+     *
+     * @parameter property="liquibase.sqlplus.keep.temp.path"
+     */
+    @PropertyElement
+    protected String sqlPlusKeepTempPath;
+
+    /**
+     * Specifies whether to overwrite generated sqlplus files.
+     *
+     * @parameter property="liquibase.sqlplus.keep.temp.overwrite"
+     */
+    @PropertyElement
+    protected Boolean sqlPlusKeepTempOverwrite;
+
+    /**
+     * Specifies additional sqlplus args.
+     *
+     * @parameter property="liquibase.sqlplus.args"
+     */
+    @PropertyElement
+    protected String sqlPlusArgs;
+
+    /**
+     * Specifies sqlPlus executor name.
+     *
+     * @parameter property="liquibase.sqlplus.executor"
+     */
+    @PropertyElement
+    protected String sqlPlusExecutorName;
+
+    /**
+     * Specifies sqlplus timeout.
+     *
+     * @parameter property="liquibase.sqlplus.timeout"
+     */
+    @PropertyElement
+    protected Integer sqlPlusTimeout;
+
+    /**
+     * Specifies where to output sqlplus logs.
+     *
+     * @parameter property="liquibase.sqlplus.logFile"
+     */
+    @PropertyElement
+    protected String sqlPlusLogFile;
+    
+    /**
+     * Specifies your sqlcmd path.
+     *
+     * @parameter property="liquibase.sqlcmd.path"
+     */
+    @PropertyElement
+    protected String sqlcmdPath;
+
+    /**
+     * Specifies whether to keep generated sqlcmd files.
+     *
+     * @parameter property="liquibase.sqlcmd.keep.temp"
+     */
+    @PropertyElement
+    protected Boolean sqlcmdKeepTemp;
+
+    /**
+     * Specifies the name of generated sqlcmd files.
+     *
+     * @parameter property="liquibase.sqlcmd.keep.temp.name"
+     */
+    @PropertyElement
+    protected String sqlcmdKeepTempName;
+
+    /**
+     * Specifies where to keep generated sqlcmd files.
+     *
+     * @parameter property="liquibase.sqlcmd.keep.temp.path"
+     */
+    @PropertyElement
+    protected String sqlcmdKeepTempPath;
+
+    /**
+     * Specifies whether to overwrite generated sqlcmd files.
+     *
+     * @parameter property="liquibase.sqlcmd.keep.temp.overwrite"
+     */
+    @PropertyElement
+    protected Boolean sqlcmdKeepTempOverwrite;
+
+    /**
+     * Specifies additional sqlcmd args.
+     *
+     * @parameter property="liquibase.sqlcmd.args"
+     */
+    @PropertyElement
+    protected String sqlcmdArgs;
+
+    /**
+     * Specifies sqlcmd executor name.
+     *
+     * @parameter property="liquibase.sqlcmd.executor"
+     */
+    @PropertyElement
+    protected String sqlcmdExecutorName;
+
+    /**
+     * Specifies sqlcmd timeout.
+     *
+     * @parameter property="liquibase.sqlcmd.timeout"
+     */
+    @PropertyElement
+    protected Integer sqlcmdTimeout;
+
+    /**
+     * Specifies where to output sqlcmd logs.
+     *
+     * @parameter property="liquibase.sqlcmd.logFile"
+     */
+    @PropertyElement
+    protected String sqlcmdLogFile;
+
+    /**
+     * Specifies sqlcmd catalog name.
+     *
+     * @parameter property="liquibase.sqlcmd.catalogName"
+     */
+    @PropertyElement
+    protected String sqlcmdCatalogName;
 
     protected String commandName;
 
@@ -421,16 +666,22 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         }
                     }
                 }
+
+                //
+                // Add properties to this top-level scope
+                //
                 scopeValues.put("integrationDetails", integrationDetails);
                 scopeValues.put("liquibase.licenseKey", getLicenseKey());
-
-                final Map pluginContext = this.getPluginContext();
-                System.out.println(pluginContext.keySet());
+                String key = GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey();
+                scopeValues.put(key, preserveSchemaCase);
+                scopeValues.putAll(getNativeExecutorProperties());
                 Scope.child(scopeValues, () -> {
 
                     configureFieldsAndValues();
 
-                    getLog().info(CommandLineUtils.getBanner());
+                    if (showBanner) {
+                        getLog().info(CommandLineUtils.getBanner());
+                    }
 
                     // Displays the settings for the Mojo depending of verbosity mode.
                     displayMojoSettings();
@@ -492,7 +743,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                             }
                         }
                         setupBindInfoPackage();
-                        performLiquibaseTask(liquibase);
+
+                        //
+                        // Add another scope child with a map so that
+                        // we can set the preserveSchemaCase property,
+                        // which might have been specified in a defaults file
+                        //
+                        Map<String, Object> innerScopeValues = new HashMap<>();
+                        innerScopeValues.put(key, preserveSchemaCase);
+                        Scope.child(innerScopeValues, () -> {
+                            performLiquibaseTask(liquibase);
+                        });
                     } catch (LiquibaseException e) {
                         cleanup(database);
                         throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
@@ -665,7 +926,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
         ResourceAccessor mFO = new MavenResourceAccessor(cl);
         ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir());
-        return new CompositeResourceAccessor(mFO, fsFO);
+        return new SearchPathResourceAccessor(searchPath, mFO, fsFO);
     }
 
     /**
@@ -838,4 +1099,36 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
+    private Map<String, Object> getNativeExecutorProperties() {
+        Map<String, Object> nativeProperties = new HashMap<>();
+        // Don't add properties to the map if the value is null
+        nativeProperties.computeIfAbsent("liquibase.psql.path", val -> psqlPath);
+        nativeProperties.computeIfAbsent("liquibase.psql.keep.temp", val -> psqlKeepTemp);
+        nativeProperties.computeIfAbsent("liquibase.psql.keep.temp.name", val -> psqlKeepTempName);
+        nativeProperties.computeIfAbsent("liquibase.psql.keep.temp.path", val -> psqlKeepTempPath);
+        nativeProperties.computeIfAbsent("liquibase.psql.args", val -> psqlArgs);
+        nativeProperties.computeIfAbsent("liquibase.psql.executor", val -> psqlExecutorName);
+        nativeProperties.computeIfAbsent("liquibase.psql.timeout", val -> psqlTimeout);
+        nativeProperties.computeIfAbsent("liquibase.psql.logFile", val -> psqlLogFile);
+        nativeProperties.computeIfAbsent("liquibase.sqlplus.path", val -> sqlPlusPath);
+        nativeProperties.computeIfAbsent("liquibase.sqlplus.keep.temp", val -> sqlPlusKeepTemp);
+        nativeProperties.computeIfAbsent("liquibase.sqlplus.keep.temp.name", val -> sqlPlusKeepTempName);
+        nativeProperties.computeIfAbsent("liquibase.sqlplus.keep.temp.path", val -> sqlPlusKeepTempPath);
+        nativeProperties.computeIfAbsent("liquibase.sqlplus.keep.temp.overwrite", val -> sqlPlusKeepTempOverwrite);
+        nativeProperties.computeIfAbsent("liquibase.sqlplus.args", val -> sqlPlusArgs);
+        nativeProperties.computeIfAbsent("liquibase.sqlplus.executor", val -> sqlPlusExecutorName);
+        nativeProperties.computeIfAbsent("liquibase.sqlplus.timeout", val -> sqlPlusTimeout);
+        nativeProperties.computeIfAbsent("liquibase.sqlplus.logFile", val -> sqlPlusLogFile);
+        nativeProperties.computeIfAbsent("liquibase.sqlcmd.path", val -> sqlcmdPath);
+        nativeProperties.computeIfAbsent("liquibase.sqlcmd.keep.temp", val -> sqlcmdKeepTemp);
+        nativeProperties.computeIfAbsent("liquibase.sqlcmd.keep.temp.name", val -> sqlcmdKeepTempName);
+        nativeProperties.computeIfAbsent("liquibase.sqlcmd.keep.temp.path", val -> sqlcmdKeepTempPath);
+        nativeProperties.computeIfAbsent("liquibase.sqlcmd.keep.temp.overwrite", val -> sqlcmdKeepTempOverwrite);
+        nativeProperties.computeIfAbsent("liquibase.sqlcmd.args", val -> sqlcmdArgs);
+        nativeProperties.computeIfAbsent("liquibase.sqlcmd.executor", val -> sqlcmdExecutorName);
+        nativeProperties.computeIfAbsent("liquibase.sqlcmd.timeout", val -> sqlcmdTimeout);
+        nativeProperties.computeIfAbsent("liquibase.sqlcmd.logFile", val -> sqlcmdLogFile);
+        nativeProperties.computeIfAbsent("liquibase.sqlcmd.catalogName", val -> sqlcmdCatalogName);
+        return nativeProperties;
+    }
 }

@@ -13,24 +13,18 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.CommandValidationException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.*;
 import liquibase.ui.ConsoleUIService;
 import liquibase.ui.UIService;
-import liquibase.util.ISODateFormat;
-import liquibase.util.LiquibaseUtil;
-import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtil;
+import liquibase.util.*;
 import picocli.CommandLine;
 
 import java.io.*;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -233,7 +227,11 @@ public class LiquibaseCommandLine {
             bestMessage = bestMessage.replace("Unexpected error running Liquibase: ", "");
         }
 
-        Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
+        if (cause instanceof CommandFailedException && ((CommandFailedException) cause).isExpected()) {
+            Scope.getCurrentScope().getLog(getClass()).severe(bestMessage);
+        } else {
+            Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
+        }
 
         boolean printUsage = false;
         try (final StringWriter suggestionWriter = new StringWriter();
@@ -381,10 +379,8 @@ public class LiquibaseCommandLine {
                 return;
             }
 
-            final String version = System.getProperty("java.version");
-            final String[] splitVersion = version.split("\\.", 2);
-            if (Integer.parseInt(splitVersion[0]) < 11) {
-                Scope.getCurrentScope().getUI().sendMessage("Performance monitoring requires Java 11 or greater. Version " + version + " is not supported.");
+            if (SystemUtil.getJavaMajorVersion() < 11) {
+                Scope.getCurrentScope().getUI().sendMessage("Performance monitoring requires Java 11 or greater. Version " + SystemUtil.getJavaVersion() + " is not supported.");
                 return;
             }
 
@@ -673,7 +669,9 @@ public class LiquibaseCommandLine {
     private Map<String, Object> configureResourceAccessor(ClassLoader classLoader) {
         Map<String, Object> returnMap = new HashMap<>();
 
-        returnMap.put(Scope.Attr.resourceAccessor.name(), new CompositeResourceAccessor(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()), new CommandLineResourceAccessor(classLoader)));
+        returnMap.put(Scope.Attr.resourceAccessor.name(), new SearchPathResourceAccessor(
+                new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
+                new CommandLineResourceAccessor(classLoader)));
 
         return returnMap;
     }
@@ -693,7 +691,7 @@ public class LiquibaseCommandLine {
             for (String classpathEntry : classpathSoFar) {
                 File classPathFile = new File(classpathEntry);
                 if (!classPathFile.exists()) {
-                    throw new IllegalArgumentException(classPathFile.getAbsolutePath() + " does.not.exist");
+                    throw new IllegalArgumentException(classPathFile.getAbsolutePath() + " does not exist");
                 }
 
                 try {
@@ -1168,7 +1166,12 @@ public class LiquibaseCommandLine {
                         filePath = workingDirectory.relativize(info.file.toPath()).toString();
                     }
 
-                    libraryDescription.append("- "). append(filePath).append(": ").append(info.name).append(" ").append(info.version).append("\n");
+                    libraryDescription.append("- ")
+                            .append(filePath).append(":")
+                            .append(" ").append(info.name)
+                            .append(" ").append(info.version == null ? "UNKNOWN" : info.version)
+                            .append(info.vendor == null ? "" : " By " + info.vendor)
+                            .append("\n");
                 }
             }
 
@@ -1192,14 +1195,12 @@ public class LiquibaseCommandLine {
                 libraryInfo.file = pathEntryFile;
 
                 final Manifest manifest = jarFile.getManifest();
-                libraryInfo.name = getValue(manifest, "Bundle-Name", "Implementation-Title");
-                libraryInfo.version = getValue(manifest, "Bundle-Version", "Implementation-Version");
+                libraryInfo.name = getValue(manifest, "Bundle-Name", "Implementation-Title", "Specification-Title");
+                libraryInfo.version = getValue(manifest, "Bundle-Version", "Implementation-Version", "Specification-Version");
+                libraryInfo.vendor = getValue(manifest, "Bundle-Vendor", "Implementation-Vendor", "Specification-Vendor");
 
                 if (libraryInfo.name == null) {
                     libraryInfo.name = pathEntryFile.getName().replace(".jar", "");
-                }
-                if (libraryInfo.version == null) {
-                    libraryInfo.version = "UNKNOWN";
                 }
                 return libraryInfo;
             }
@@ -1217,6 +1218,7 @@ public class LiquibaseCommandLine {
 
 
         private static class LibraryInfo implements Comparable<LibraryInfo> {
+            private String vendor;
             private String name;
             private File file;
             private String version;

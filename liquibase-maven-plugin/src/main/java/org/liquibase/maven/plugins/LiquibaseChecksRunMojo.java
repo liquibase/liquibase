@@ -7,6 +7,10 @@ import liquibase.exception.CommandExecutionException;
 import liquibase.util.StringUtil;
 import org.liquibase.maven.property.PropertyElement;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+
 /**
  * Check the changelog for issues
  *
@@ -119,6 +123,12 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
     @PropertyElement
     protected String driverPropertiesFile;
 
+    /**
+     * @parameter property="liquibase.outputFile"
+     */
+    @PropertyElement
+    protected File outputFile;
+
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws CommandExecutionException {
         CommandScope liquibaseCommand = new CommandScope("checks", "run");
@@ -136,6 +146,13 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
         addArgumentIfNotEmpty(liquibaseCommand, defaultCatalogName, "defaultCatalogName");
         addArgumentIfNotEmpty(liquibaseCommand, driver, "driver");
         addArgumentIfNotEmpty(liquibaseCommand, driverPropertiesFile, "driverPropertiesFile");
+        if (outputFile != null) {
+            try {
+                liquibaseCommand.setOutput(new FileOutputStream(outputFile));
+            } catch (FileNotFoundException e) {
+                throw new CommandExecutionException(e);
+            }
+        }
         liquibaseCommand.addArgumentValue("checksIntegration", "maven");
         liquibaseCommand.execute();
     }

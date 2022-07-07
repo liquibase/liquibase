@@ -10,7 +10,6 @@ Liquibase ships with 3rd party components using the following licenses:
 - Eclipse Distribution 1.0 License - https://www.eclipse.org/org/documents/edl-v10.php
 - Eclipse Public 1.0 License - https://opensource.org/licenses/epl-1.0
 - Eclipse Public 2.0 License - https://opensource.org/licenses/epl-2.0
-- GNU Affero General Public License version 3 https://opensource.org/licenses/AGPL-3.0
 - IBM International Program License Agreement (IPLA) - https://www-40.ibm.com/software/sla/sladb.nsf/lilookup/1024954E51C94B03002587A4003CB520?OpenDocument
 - LPGL 3.0 License - https://opensource.org/licenses/LGPL-3.0
 - MIT License - https://opensource.org/licenses/MIT
@@ -23,6 +22,7 @@ Apache 2.0 License
 - info.picocli:picocli
 - org.xerial:sqlite-jdbc
 - com.opencsv:opencsv
+- net.snowflake:snowflake-jdbc
 - org.apache.commons:commons-lang3
 - org.apache.commons:commons-text
 - org.apache.commons:commons-collections4

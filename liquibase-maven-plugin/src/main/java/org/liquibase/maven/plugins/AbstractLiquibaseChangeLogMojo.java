@@ -8,10 +8,7 @@ import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubConfiguration;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
+import liquibase.resource.*;
 import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -148,7 +145,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
             resourceAccessors.add(new FileSystemResourceAccessor(new File(changeLogDirectory)));
         }
 
-        return new CompositeResourceAccessor(resourceAccessors);
+        return new SearchPathResourceAccessor(searchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 
     @Override
