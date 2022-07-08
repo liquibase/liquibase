@@ -187,6 +187,7 @@
                             <xsd:attribute name="id" type="xsd:string"/>
                             <xsd:attribute name="author" type="xsd:string"/>
                             <xsd:attribute name="file" type="xsd:string" use="required"/>
+                            <xsd:attribute name="runWith" type="xsd:string"/>
                             <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
                             <xsd:attribute name="context" type="xsd:string"/>
                             <xsd:attribute name="labels" type="xsd:string"/>
@@ -198,6 +199,7 @@
                     <xsd:element name="includeAll" minOccurs="0" maxOccurs="unbounded">
                         <xsd:complexType>
                             <xsd:attribute name="path" type="xsd:string" use="required"/>
+                            <xsd:attribute name="runWith" type="xsd:string"/>
                             <xsd:attribute name="errorIfMissingOrEmpty" type="booleanExp" default="true"/>
                             <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
                             <xsd:attribute name="resourceComparator" type="xsd:string"/>

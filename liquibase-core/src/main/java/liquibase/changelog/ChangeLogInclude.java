@@ -9,6 +9,7 @@ import java.util.Set;
 
 public class ChangeLogInclude extends AbstractLiquibaseSerializable implements ChangeLogChild {
     private String file;
+    private String runWith;
     private Boolean relativeToChangelogFile;
     private ContextExpression context;
 
@@ -33,6 +34,14 @@ public class ChangeLogInclude extends AbstractLiquibaseSerializable implements C
 
     public void setFile(String file) {
         this.file = file;
+    }
+
+    public String getRunWith() {
+        return runWith;
+    }
+
+    public void setRunWith(String runWith) {
+        this.runWith = runWith;
     }
 
     public Boolean getRelativeToChangelogFile() {

@@ -365,6 +365,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
                 }
                 path = path.replace('\\', '/');
+                String runWith = node.getChildValue(null, "runWith", String.class);
                 ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
                 Labels labels = new Labels(node.getChildValue(null, "labels", String.class));
                 Boolean ignore = node.getChildValue(null, "ignore", Boolean.class);
@@ -375,7 +376,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                             includeContexts,
                             labels,
                             ignore,
-                            OnUnknownFileFormat.FAIL);
+                            OnUnknownFileFormat.FAIL,
+                            runWith);
                 } catch (LiquibaseException e) {
                     throw new SetupException(e);
                 }
@@ -585,7 +587,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
             for (String path : resources) {
                 Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + path);
-                include(path, false, resourceAccessor, includeContexts, labels, ignore, OnUnknownFileFormat.WARN);
+                include(path, false, resourceAccessor, includeContexts, labels, ignore, OnUnknownFileFormat.WARN, "jdbc");
             }
         } catch (Exception e) {
             throw new SetupException(e);
@@ -629,7 +631,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            Boolean ignore,
                            boolean logEveryUnknownFileFormat)
             throws LiquibaseException {
-        return include(fileName, isRelativePath, resourceAccessor, includeContexts, labels, ignore, logEveryUnknownFileFormat ? OnUnknownFileFormat.WARN : OnUnknownFileFormat.SKIP);
+        return include(fileName, isRelativePath, resourceAccessor, includeContexts, labels, ignore, logEveryUnknownFileFormat ? OnUnknownFileFormat.WARN : OnUnknownFileFormat.SKIP, "jdbc");
     }
 
     public boolean include(String fileName,
@@ -638,7 +640,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ContextExpression includeContexts,
                            Labels labels,
                            Boolean ignore,
-                           OnUnknownFileFormat onUnknownFileFormat)
+                           OnUnknownFileFormat onUnknownFileFormat,
+                           String runWith)
             throws LiquibaseException {
 
         if (".svn".equalsIgnoreCase(fileName) || "cvs".equalsIgnoreCase(fileName)) {
@@ -666,6 +669,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 changeLog.setIncludeContexts(includeContexts);
                 changeLog.setIncludeLabels(labels);
                 changeLog.setIncludeIgnore(ignore != null ? ignore.booleanValue() : false);
+                changeLog.getChangeSets().forEach(changeSet -> changeSet.setRunWith(runWith));
             } finally {
                 if (rootChangeLog == null) {
                     ROOT_CHANGE_LOG.remove();
