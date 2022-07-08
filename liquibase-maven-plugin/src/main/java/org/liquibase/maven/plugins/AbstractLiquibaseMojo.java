@@ -577,6 +577,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement
     protected String sqlcmdCatalogName;
 
+    /**
+     * Arbitrary map of parameters that the underlying liquibase command will use. These arguments will be passed
+     * verbatim to the underlying liquibase command that is being run.
+     *
+     * @parameter property="liquibaseCommandArguments"
+     */
+    @PropertyElement
+    protected Map<String, Object> liquibaseCommandArguments;
+
     protected String commandName;
 
     /**

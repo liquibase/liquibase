@@ -9,6 +9,7 @@ import org.liquibase.maven.property.PropertyElement;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.Map;
 
 public abstract class AbstractLiquibaseFlowMojo extends AbstractLiquibaseMojo {
     /**
@@ -36,6 +37,9 @@ public abstract class AbstractLiquibaseFlowMojo extends AbstractLiquibaseMojo {
         CommandScope liquibaseCommand = new CommandScope(getCommandName());
         liquibaseCommand.addArgumentValue("flowFile", flowFile);
         liquibaseCommand.addArgumentValue("flowIntegration", "maven");
+        for (Map.Entry<String, Object> commandArgument : liquibaseCommandArguments.entrySet()) {
+            liquibaseCommand.addArgumentValue(commandArgument.getKey(), commandArgument.getValue());
+        }
         if (outputFile != null) {
             try {
                 liquibaseCommand.setOutput(new FileOutputStream(outputFile));
