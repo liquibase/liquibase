@@ -189,7 +189,6 @@
                             <include>${project.groupId}:liquibase-core</include>
                             <include>${project.groupId}:liquibase-cli</include>
                             <include>${project.groupId}:liquibase-snowflake</include>
-                            <include>org.liquibase:liquibase-commercial</include>
 						</includes>
 					</artifactSet>
 					<filters>
