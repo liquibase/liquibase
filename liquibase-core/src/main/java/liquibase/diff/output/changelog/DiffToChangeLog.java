@@ -772,7 +772,7 @@ public class DiffToChangeLog {
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
                     ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
-                            null, false, quotingStrategy, null);
+                            null, true, quotingStrategy, null);
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
                         changeSet.setLabels(diffOutputControl.getLabels());
@@ -782,7 +782,7 @@ public class DiffToChangeLog {
                 }
             } else {
                 ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, csContext,
-                        null, false, quotingStrategy, null);
+                        null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
                     changeSet.setLabels(diffOutputControl.getLabels());
