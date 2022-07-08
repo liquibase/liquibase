@@ -386,6 +386,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             case "includeAll": {
                 String path = node.getChildValue(null, "path", String.class);
                 String resourceFilterDef = node.getChildValue(null, "filter", String.class);
+                String runWith = node.getChildValue(null, "runWith", String.class);
                 if (resourceFilterDef == null) {
                     resourceFilterDef = node.getChildValue(null, "resourceFilter", String.class);
                 }
@@ -423,7 +424,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         resourceAccessor,
                         includeContexts,
                         labels,
-                        ignore);
+                        ignore,
+                        runWith);
                 break;
             }
             case "preConditions": {
@@ -533,7 +535,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 resourceAccessor,
                 includeContexts,
                 labels,
-                ignore);
+                ignore,
+                "jdbc");
     }
 
     public void includeAll(String pathName,
@@ -544,7 +547,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContexts,
                            Labels labels,
-                           boolean ignore)
+                           boolean ignore,
+                           String runWith)
             throws SetupException {
         try {
             if (pathName == null) {
@@ -587,7 +591,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
             for (String path : resources) {
                 Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + path);
-                include(path, false, resourceAccessor, includeContexts, labels, ignore, OnUnknownFileFormat.WARN, "jdbc");
+                include(path, false, resourceAccessor, includeContexts, labels, ignore, OnUnknownFileFormat.WARN, runWith);
             }
         } catch (Exception e) {
             throw new SetupException(e);
