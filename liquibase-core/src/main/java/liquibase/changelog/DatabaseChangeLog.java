@@ -673,7 +673,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 changeLog.setIncludeContexts(includeContexts);
                 changeLog.setIncludeLabels(labels);
                 changeLog.setIncludeIgnore(ignore != null ? ignore.booleanValue() : false);
-                changeLog.getChangeSets().forEach(changeSet -> changeSet.setRunWith(runWith));
+                changeLog.getChangeSets().forEach(changeSet -> {
+                    if (changeSet.getRunWith() == null) {
+                        // Only update runWith if it was not set otherwise the user is overriding the included runWith setting
+                        changeSet.setRunWith(runWith);
+                    }
+                });
             } finally {
                 if (rootChangeLog == null) {
                     ROOT_CHANGE_LOG.remove();
