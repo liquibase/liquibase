@@ -9,7 +9,6 @@ import java.util.Set;
 
 public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implements ChangeLogChild {
     private String path;
-
     private String runWith;
     private Boolean errorIfMissingOrEmpty;
     private Boolean relativeToChangelogFile;
