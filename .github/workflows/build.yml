@@ -396,7 +396,7 @@ jobs:
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}-deps.jar
-          cp download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT-deps.jar artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchFileName }}.jar
 
       - name: Archive Packages
         uses: actions/upload-artifact@v3
