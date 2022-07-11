@@ -372,8 +372,8 @@ jobs:
           mkdir -p artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip artifacts
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts/liquibase-0-SNAPSHOT-sources.jar
           cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts
@@ -384,14 +384,16 @@ jobs:
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-sources.jar artifacts
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-javadoc.jar artifacts
 
-          cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts
+          cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
+
+          cp download/liquibase-commercial/liquibase-commercial-0-SNAPSHOT.jar artifacts
 
           .github/util/sign-artifacts.sh artifacts
 
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.tar.gz
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchFileName }}.jar
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchFileName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchFileName }}.jar
