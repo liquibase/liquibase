@@ -373,7 +373,7 @@ jobs:
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.zip artifacts
           cp liquibase-dist/target/liquibase-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
-          cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts/liquibase-0-SNAPSHOT-sources.jar
+          cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts
