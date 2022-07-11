@@ -132,12 +132,12 @@ done
 
 
 ##### update zip/tar files
-cp $outdir/liquibase-$version.jar $workdir/liquibase.jar ##save versioned jar as unversioned to include in zip/tar
+cp $outdir/liquibase-core-$version.jar $workdir/internal/lib/liquibase-core.jar ##save versioned jar as unversioned to include in zip/tar
 
 ## Extract tar.gz and rebuild it back into the tar.gz and zip
 mkdir $workdir/tgz-repackage
 (cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-0-SNAPSHOT.tar.gz)
-cp $workdir/liquibase.jar $workdir/tgz-repackage/liquibase.jar
+cp $workdir/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
 find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
 (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
 (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)

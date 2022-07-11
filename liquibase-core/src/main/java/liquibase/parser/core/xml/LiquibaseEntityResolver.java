@@ -72,7 +72,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     /**
      * ResourceAccessor to use if the standard one does not have the XSD files in it.
-     * Returns a ClassLoaderResourceAccessor that checks the system classloader which should include the liquibase.jar.
+     * Returns a ClassLoaderResourceAccessor that checks the system classloader which should include the liquibase-core.jar.
      */
     protected ResourceAccessor getFallbackResourceAccessor() {
         if (fallbackResourceAccessor == null) {

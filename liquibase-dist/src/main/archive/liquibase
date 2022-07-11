@@ -37,6 +37,7 @@ if [ -z "${JAVA_HOME}" ]; then
 
   if [ -z "${JAVA_PATH}" ]; then
     echo "Cannot find java in your path. Install java or use the JAVA_HOME environment variable"
+    exit 1
   fi
 else
     #Use path in JAVA_HOME
@@ -47,4 +48,4 @@ fi
 JAVA_OPTS="${JAVA_OPTS-}"
 
 export LIQUIBASE_HOME
-"${JAVA_PATH}" $JAVA_OPTS -jar "$LIQUIBASE_HOME/liquibase.jar" ${1+"$@"}
+"${JAVA_PATH}" $JAVA_OPTS -jar "$LIQUIBASE_HOME/internal/lib/liquibase-core.jar" ${1+"$@"}
