@@ -1,6 +1,40 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.13.0 (2022.07.07)
+
+## Enhancements
+* Added new liquibase.duplicateFileMode setting by @nvoxland in https://github.com/liquibase/liquibase/pull/3006
+* Add additional info in CLI's --version output by @nvoxland in https://github.com/liquibase/liquibase/pull/2942
+* Added support for new "searchPath" global configuration by @nvoxland in https://github.com/liquibase/liquibase/pull/2917
+
+## Fixes
+* Hide CommandFailedException stacktrace when thrown to set exit code (DAT-9608) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2938
+* Update copyright year in txt files; also update links in txt files (DAT-10261) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2955
+* add support for default-catalog-name in SQL Server (DAT-10484) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2940
+* Make additional query for more column information for MariaDB DAT-8693 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2898
+* Include should fail if a parser cannot be found for the specified file by @nvoxland in https://github.com/liquibase/liquibase/pull/2972
+* Improved postgresql prepared statement performance by @nvoxland in https://github.com/liquibase/liquibase/pull/2914
+* Cleanup relative paths preventing sql files being found by the class loader by @marcsowen in https://github.com/liquibase/liquibase/pull/2932
+* Fix missing attributes in serialization by @tms-91 in https://github.com/liquibase/liquibase/pull/2585
+* Improved parsing of single-quoted strings by @nvoxland in https://github.com/liquibase/liquibase/pull/2949
+* DAT-10260: add outputFile argument in maven plugin for checks.run target by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2975
+* Formatted SQL files with uppercase in the liquibase attributes (DAT-10531) by @abrackx in https://github.com/liquibase/liquibase/pull/2985
+* handle empty or null input to stripComments method (DAT-10296) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2970
+* Fixed issue with parameter expression parsing by @nvoxland in https://github.com/liquibase/liquibase/pull/2984
+* Fixed before/after/at column arguments in addColumn by @nvoxland in https://github.com/liquibase/liquibase/pull/2943
+* Adds liquibase.psql.conf example (DAT-10303) by @abrackx in https://github.com/liquibase/liquibase/pull/2939
+* [DAT-10093] added schema escaping to getColumns call to jdbc metadata classes by @KushnirykOleh in https://github.com/liquibase/liquibase/pull/2895
+* Use "numeric" (without parameters) data type in PostgreSQL by @LonwoLonwo in https://github.com/liquibase/liquibase/pull/1906
+* Force "json" resultset formats in Snowflake when running Java 17+ by @nvoxland in https://github.com/liquibase/liquibase/pull/3019
+
+## JDBC Driver and Third-Party Library Updates
+* Upgraded jaxb-core from 2.3.0.1 to 4.0.0 by @dependabot in https://github.com/liquibase/liquibase/pull/2962
+* Upgraded snowflake-jdbc from 3.13.19 to 3.13.20 by @dependabot in https://github.com/liquibase/liquibase/pull/3001
+* Upgraded mariadb-java-client from 3.0.4 to 3.0.5 by @dependabot in https://github.com/liquibase/liquibase/pull/2881
+* Upgraded ojdbc8 from 21.5.0.0 to 21.6.0.0.1 by @dependabot in https://github.com/liquibase/liquibase/pull/2987
+* Upgraded h2 from 2.1.212 to 2.1.214 by @dependabot in https://github.com/liquibase/liquibase/pull/2944
+
 Changes in version 4.12.0 (2022.06.16)
 
 ## Enhancements
