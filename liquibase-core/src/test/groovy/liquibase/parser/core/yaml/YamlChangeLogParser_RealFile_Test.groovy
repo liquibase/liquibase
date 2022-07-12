@@ -300,29 +300,6 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert e.message.startsWith("Syntax error in file liquibase/parser/core/yaml/malformedChangeLog.yaml")
     }
 
-    def "elements that don't correspond to anything in liquibase are ignored"() throws Exception {
-        def path = "liquibase/parser/core/yaml/unusedTagsChangeLog.yaml"
-        expect:
-        DatabaseChangeLog changeLog = new YamlChangeLogParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
-
-        changeLog.getLogicalFilePath() == path
-        changeLog.getPhysicalFilePath() == path
-
-        changeLog.getPreconditions().getNestedPreconditions().size() == 0
-        changeLog.getChangeSets().size() == 1
-
-        ChangeSet changeSet = changeLog.getChangeSets().get(0);
-        changeSet.getAuthor() == "nvoxland"
-        changeSet.getId() == "1"
-        changeSet.getChanges().size() == 1
-        changeSet.getFilePath() == path
-        changeSet.getComments() == "Some comments go here"
-
-        Change change = changeSet.getChanges().get(0);
-        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName() == "createTable"
-        assert change instanceof CreateTableChange
-    }
-
     def "changeLog parameters are correctly expanded"() throws Exception {
         when:
         def params = new ChangeLogParameters(new MockDatabase());
