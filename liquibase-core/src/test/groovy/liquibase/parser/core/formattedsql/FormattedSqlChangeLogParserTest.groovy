@@ -513,6 +513,61 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         assert e.getMessage().toLowerCase().contains("-property name")
     }
 
+    def "parse strings that contain keywords not at the beginning"() throws Exception {
+        when:
+        def changeLog = new MockFormattedSqlChangeLogParser("""
+--liquibase formatted sql
+
+--changeset example:1
+not a property here
+- not a property here
+-- not a property here
+not a changeset here
+- not a changeset here
+-- not a changeset here
+not a rollback here
+- not a rollback here
+-- not a rollback here
+not a precondition here
+- not a precondition here
+-- not a precondition here
+not a comment here
+- not a comment here
+-- not a comment here
+not validCheckSum here
+- not validCheckSum here
+-- not validCheckSum here
+not ignoreLines here
+- not ignoreLines here
+-- not ignoreLines here
+""".trim()).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        StringUtil.standardizeLineEndings(((RawSQLChange) changeLog.getChangeSets()[0].getChanges()[0]).getSql().trim()) == StringUtil.standardizeLineEndings("""
+not a property here
+- not a property here
+-- not a property here
+not a changeset here
+- not a changeset here
+-- not a changeset here
+not a rollback here
+- not a rollback here
+-- not a rollback here
+not a precondition here
+- not a precondition here
+-- not a precondition here
+not a comment here
+- not a comment here
+-- not a comment here
+not validCheckSum here
+- not validCheckSum here
+-- not validCheckSum here
+not ignoreLines here
+- not ignoreLines here
+-- not ignoreLines here
+""".trim())
+    }
+
     def parse_withComment() throws Exception {
         when:
         String changeLogWithComment = "--liquibase formatted sql\n\n" +
