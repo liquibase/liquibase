@@ -105,7 +105,7 @@ Optional Args:
         ]
     }
 
-    run "Running diffChangelog should add change sets", {
+    run "Running diffChangelog should add changesets", {
         arguments = [
                 url              : { it.url },
                 username         : { it.username },
@@ -163,7 +163,7 @@ Optional Args:
         ]
     }
 
-    run "Running diffChangelog should add change sets in the correct order", {
+    run "Running diffChangelog should add changesets in the correct order", {
         arguments = [
                 url              : { it.altUrl },
                 username         : { it.altUsername },
