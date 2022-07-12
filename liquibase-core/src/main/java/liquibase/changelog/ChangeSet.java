@@ -1,6 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
+import liquibase.GlobalConfiguration;
 import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.*;
@@ -194,7 +195,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private PreconditionContainer preconditions;
 
-   /**
+    /**
      * ChangeSet level attribute to specify an Executor
      */
     private String runWith;
@@ -276,6 +277,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     /**
      * The logical file path defined directly on this node. Return null if not set.
+     *
      * @return
      */
     public String getLogicalFilePath() {
@@ -367,7 +369,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         } else {
             filePath = filePath.replaceAll("\\\\", "/")
-                               .replaceFirst("^/", "");
+                    .replaceFirst("^/", "");
 
         }
 
@@ -517,6 +519,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         Change change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).create(value.getName());
         if (change == null) {
+            if (value.getChildren().size() > 0 && GlobalConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(GlobalConfiguration.ChangelogParseMode.STRICT)) {
+                String message = "";
+                if (this.getChangeLog() != null && this.getChangeLog().getPhysicalFilePath() != null) {
+                    message = "Error parsing " + this.getChangeLog().getPhysicalFilePath() + ": ";
+                }
+                message += "Unknown change type '" + value.getName() + "'. Check the spelling/capitalization and/or whether any required Liquibase extensions are missing.";
+                throw new ParsedNodeException(message);
+            }
             return null;
         } else {
             change.load(value, resourceAccessor);
@@ -730,7 +740,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, customExecutor);
         List<Change> changes = getChanges();
         for (Change change : changes) {
-            if (! (change instanceof AbstractChange)) {
+            if (!(change instanceof AbstractChange)) {
                 continue;
             }
             final ResourceAccessor resourceAccessor = ((AbstractChange) change).getResourceAccessor();
@@ -743,13 +753,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     /**
-     *
      * Look for a configuration property that matches liquibase.<executor name>.executor
      * and if found, return its value as the executor name
      *
-     * @param   executorName                     The value from the input changeset runWith attribute
-     * @return  String                           The mapped value
-     *
+     * @param executorName The value from the input changeset runWith attribute
+     * @return String                           The mapped value
      */
     public static String lookupExecutor(String executorName) {
         if (StringUtil.isEmpty(executorName)) {
@@ -757,7 +765,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
         String key = "liquibase." + executorName.toLowerCase() + ".executor";
         String replacementExecutorName =
-            (String)Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, key).getValue();
+                (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, key).getValue();
         if (replacementExecutorName != null) {
             Scope.getCurrentScope().getLog(ChangeSet.class).info("Mapped '" + executorName + "' to executor '" + replacementExecutorName + "'");
             return replacementExecutorName;
@@ -906,7 +914,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public boolean isInheritableIgnore() {
-       DatabaseChangeLog changeLog = getChangeLog();
+        DatabaseChangeLog changeLog = getChangeLog();
         if (changeLog == null) {
             return false;
         }
@@ -945,11 +953,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     /**
-     *
      * Build and return a string which contains both the changeset and inherited context
      *
-     * @return  String
-     *
+     * @return String
      */
     public String buildFullContext() {
         StringBuilder contextExpression = new StringBuilder();
@@ -966,11 +972,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     /**
-     *
      * Build and return a string which contains both the changeset and inherited labels
      *
-     * @return  String
-     *
+     * @return String
      */
     public String buildFullLabels() {
         StringBuilder labels = new StringBuilder();
@@ -1219,11 +1223,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     @Override
     public Set<String> getSerializableFields() {
         return new LinkedHashSet<>(
-            Arrays.asList(
-                "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
-                "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
-                "logicalFilePath", "created", "runInTransaction", "runOrder", "ignore"
-            )
+                Arrays.asList(
+                        "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
+                        "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
+                        "logicalFilePath", "created", "runInTransaction", "runOrder", "ignore"
+                )
         );
     }
 
@@ -1308,7 +1312,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         if ("logicalFilePath".equals(field)) {
-        	return getLogicalFilePath();
+            return getLogicalFilePath();
         }
 
         if ("rollback".equals(field)) {

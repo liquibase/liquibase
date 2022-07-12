@@ -34,6 +34,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<DuplicateFileMode> DUPLICATE_FILE_MODE;
 
+    public static final ConfigurationDefinition<ChangelogParseMode> CHANGELOG_PARSE_MODE;
+
     /**
      * @deprecated No longer used
      */
@@ -210,10 +212,20 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         SEARCH_PATH = builder.define("searchPath", String.class)
                 .setDescription("Complete list of Location(s) to search for files such as changelog files in. Multiple paths can be specified by separating them with commas.")
                 .build();
+
+        CHANGELOG_PARSE_MODE = builder.define("changelogParseMode", ChangelogParseMode.class)
+                .setDescription("Configures how to handle unknown fields in changelog files. Possible values: STRICT which causes parsing to fail, and LAX which continues with the parsing.")
+                .setDefaultValue(ChangelogParseMode.STRICT)
+                .build();
     }
 
     public enum DuplicateFileMode {
         WARN,
         ERROR,
+    }
+
+    public enum ChangelogParseMode {
+        STRICT,
+        LAX,
     }
 }
