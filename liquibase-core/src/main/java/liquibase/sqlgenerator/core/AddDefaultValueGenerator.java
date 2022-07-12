@@ -24,7 +24,7 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
         Object defaultValue = addDefaultValueStatement.getDefaultValue();
 
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkRequiredField("defaultValue", defaultValue);
+        validationErrors.checkRequiredField("defaultValue", defaultValue, true);
         validationErrors.checkRequiredField("columnName", addDefaultValueStatement.getColumnName());
         validationErrors.checkRequiredField("tableName", addDefaultValueStatement.getTableName());
         if (!database.supportsSequences() && (defaultValue instanceof SequenceNextValueFunction)) {
@@ -44,7 +44,7 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
             LiquibaseDataType dataType = DataTypeFactory.getInstance().fromDescription(columnDataType, database);
             boolean typeMismatch = false;
             if (dataType instanceof BooleanType) {
-                if (!(defaultValue instanceof Boolean)) {
+                if (!(defaultValue instanceof Boolean) && !(defaultValue instanceof DatabaseFunction)) {
                     typeMismatch = true;
                 }
             } else if (dataType instanceof CharType) {

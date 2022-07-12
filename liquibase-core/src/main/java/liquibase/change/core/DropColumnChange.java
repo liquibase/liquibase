@@ -11,21 +11,31 @@ import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.DropColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Drops an existing column from a table.
  */
-@DatabaseChange(name = "dropColumn", description = "Drop existing column(s)", priority = ChangeMetaData
+@DatabaseChange(name = "dropColumn",
+        description = "Drop existing column(s).\n" +
+        "\n" +
+        "To drop a single column, use the simple form of this element where the tableName and " +
+        "columnName are specified as attributes. To drop several columns, specify the tableName " +
+        "as an attribute, and then specify a set of nested <column> tags. If nested <column> tags " +
+        "are present, the columnName attribute will be ignored.",
+        priority = ChangeMetaData
 .PRIORITY_DEFAULT, appliesTo = "column")
 public class DropColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
     
@@ -60,7 +70,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         return super.validate(database);
     }
     
-    @DatabaseChangeProperty(description = "Name of the column to drop", requiredForDatabase = "none",
+    @DatabaseChangeProperty(description = "Name of the column to drop, if dropping a single column", requiredForDatabase = "none",
         mustEqualExisting = "column")
     public String getColumnName() {
         return columnName;
@@ -103,7 +113,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     public SqlStatement[] generateStatements(Database database) {
         try {
             if (isMultiple()) {
-                return generateMultipeColumns(database);
+                return generateMultipleColumns(database);
             } else {
                 return generateSingleColumn(database);
             }
@@ -112,16 +122,16 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         }
     }
     
-    private SqlStatement[] generateMultipeColumns(Database database) throws DatabaseException {
+    private SqlStatement[] generateMultipleColumns(Database database) throws DatabaseException {
         List<SqlStatement> statements = new ArrayList<>();
         List<DropColumnStatement> dropStatements = new ArrayList<>();
-        
-        for (ColumnConfig column : columns) {
-            if (database instanceof SQLiteDatabase) {
-                // SQLite is special in that it needs multiple SQL statements (i.e. a whole table recreation!) to drop
-                // a single column.
-                statements.addAll(Arrays.asList(generateStatementsForSQLiteDatabase(database, column.getName())));
-            } else {
+
+        if (database instanceof SQLiteDatabase) {
+            // SQLite is special in that it needs multiple SQL statements (i.e. a whole table recreation!) to drop
+            // a single column.
+            statements.addAll(Arrays.asList(generateStatementsForSQLiteDatabase(database)));
+        } else {
+            for (ColumnConfig column : columns) {
                 dropStatements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), column
                 .getName()));
             }
@@ -143,7 +153,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     private SqlStatement[] generateSingleColumn(Database database) throws DatabaseException {
         if (database instanceof SQLiteDatabase) {
             // return special statements for SQLite databases
-            return generateStatementsForSQLiteDatabase(database, getColumnName());
+            return generateStatementsForSQLiteDatabase(database);
         }
         
         List<SqlStatement> statements = new ArrayList<>();
@@ -172,10 +182,12 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     
     }
     
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database, final String columnName) throws DatabaseException {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) throws DatabaseException {
         SqlStatement[] sqlStatements = null;
         // Since SQLite does not support a drop column statement, use alter table visitor to copy the table
         // except for the column (and index containing that column) to delete.
+
+        Set<String> removedColumnNames = columns.stream().map(ColumnConfig::getName).collect(Collectors.toSet());
 
         SQLiteDatabase.AlterTableVisitor alterTableVisitor = new SQLiteDatabase.AlterTableVisitor() {
             @Override
@@ -185,12 +197,12 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
 
             @Override
             public boolean copyThisColumn(ColumnConfig column) {
-                return !column.getName().equals(columnName);
+                return !removedColumnNames.contains(column.getName());
             }
 
             @Override
             public boolean createThisColumn(ColumnConfig column) {
-                return !column.getName().equals(columnName);
+                return !removedColumnNames.contains(column.getName());
             }
 
             @Override
@@ -198,7 +210,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
                 // don't create the index if it has the column we are dropping
                 boolean indexContainsColumn = false;
                 for (Column column : index.getColumns()) {
-                    if (column.getName().equals(columnName)) {
+                    if (removedColumnNames.contains(column.getName())) {
                         indexContainsColumn = true;
                     }
                 }
@@ -220,7 +232,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             for (ColumnConfig column : columns) {
                 names.add(column.getName());
             }
-            return "Columns " + StringUtils.join(names, ",") + " dropped from " + getTableName();
+            return "Columns " + StringUtil.join(names, ",") + " dropped from " + getTableName();
         } else {
             return "Column " + getTableName() + "." + getColumnName() + " dropped";
         }
@@ -246,7 +258,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     }
     
     @Override
-    @DatabaseChangeProperty(description = "Columns to be dropped.", requiredForDatabase = "none")
+    @DatabaseChangeProperty(description = "Columns to be dropped if dropping multiple columns. If this is populated, the columnName attribute is ignored.", requiredForDatabase = "none")
     public List<ColumnConfig> getColumns() {
         return columns;
     }

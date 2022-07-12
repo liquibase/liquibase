@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
@@ -51,7 +52,7 @@ public class AddLookupTableChange extends AbstractChange {
         ValidationErrors errors = super.validate(database);
         if (database instanceof Db2zDatabase) {
             if (this.getNewColumnDataType() == null) {
-                errors.addError("newColumnDataType is required for " + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " on " + database.getShortName());
+                errors.addError("newColumnDataType is required for " + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " on " + database.getShortName());
             }
         }
         return errors;

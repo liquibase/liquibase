@@ -4,10 +4,11 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
+import org.liquibase.maven.property.PropertyElement;
 
 /**
- * Applies the DatabaseChangeLogs to the database. Useful as part of the build
- * process.
+ * <p>Applies the DatabaseChangeLogs to the database. Useful as part of the build
+ * process.</p>
  * 
  * @author Peter Murray
  * @description Liquibase Update Maven plugin
@@ -17,8 +18,9 @@ public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
 
     /**
      * Whether or not to perform a drop on the database before executing the change.
-     * @parameter expression="${liquibase.dropFirst}" default-value="false"
+     * @parameter property="liquibase.dropFirst" default-value="false"
      */
+    @PropertyElement
     protected boolean dropFirst;
 
   @Override

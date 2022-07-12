@@ -10,8 +10,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +33,7 @@ public class IndexComparator implements DatabaseObjectComparator {
             hashes.add(databaseObject.getName().toLowerCase());
         }
 
-        Relation table = ((Index) databaseObject).getTable();
+        Relation table = ((Index) databaseObject).getRelation();
         if (table != null) {
             hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, chain.getSchemaComparisons(), accordingTo)));
         }
@@ -55,8 +54,8 @@ public class IndexComparator implements DatabaseObjectComparator {
         int thisIndexSize = thisIndex.getColumns().size();
         int otherIndexSize = otherIndex.getColumns().size();
 
-        if ((thisIndex.getTable() != null) && (otherIndex.getTable() != null)) {
-            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getTable(), otherIndex.getTable(), chain.getSchemaComparisons(), accordingTo)) {
+        if ((thisIndex.getRelation() != null) && (otherIndex.getRelation() != null)) {
+            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getRelation(), otherIndex.getRelation(), chain.getSchemaComparisons(), accordingTo)) {
                 return false;
             }
             if ((databaseObject1.getSchema() != null) && (databaseObject2.getSchema() != null) &&
@@ -121,7 +120,15 @@ public class IndexComparator implements DatabaseObjectComparator {
                     return false;
                 }
                 for (int i=0; i<referenceList.size(); i++) {
-                    if (!StringUtils.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtils.trimToEmpty(compareList.get(i).getName()))) {
+                    //
+                    // Check for nulls
+                    // If both reference and comparison objects are null then return true
+                    // else if only one is null then return false
+                    //
+                    if (referenceList.get(i) == null || compareList.get(i) == null) {
+                        return referenceList.get(i) == compareList.get(i);
+                    }
+                    if (!StringUtil.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtil.trimToEmpty(compareList.get(i).getName()))) {
                         return false;
                     }
                 }

@@ -1,5 +1,6 @@
 package liquibase.change.custom;
 
+import liquibase.Scope;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
@@ -13,6 +14,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.ObjectUtil;
 
 import java.util.*;
+import liquibase.util.OsgiUtil;
 
 /**
  * Adapts CustomChange implementations to the standard change system used by Liquibase.
@@ -25,7 +27,8 @@ import java.util.*;
     description = "Although Liquibase tries to provide a wide range of database refactorings, there are times you may" +
         " want to create your own custom refactoring class.\n" +
                 "\n" +
-                "To create your own custom refactoring, simply create a class that implements the liquibase.change.custom.CustomSqlChange or liquibase.change.custom.CustomTaskChange interface and use the <custom> tag in your change set.\n" +
+                "To create your own custom refactoring, simply create a class that implements the liquibase.change.custom.CustomSqlChange " +
+                "or liquibase.change.custom.CustomTaskChange interface and use the <custom> tag in your changeset.\n" +
                 "\n" +
                 "If your change can be rolled back, implement the liquibase.change.custom.CustomSqlRollback interface as well.\n" +
                 "\n" +
@@ -42,9 +45,7 @@ public class CustomChangeWrapper extends AbstractChange {
 
     private SortedSet<String> params = new TreeSet<>();
 
-    private Map<String, String> paramValues = new HashMap<>();
-
-    private ClassLoader classLoader;
+    private Map<String, String> paramValues = new LinkedHashMap<>();
 
     private boolean configured;
 
@@ -62,42 +63,28 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     /**
-     * Returns the classloader to use when creating the CustomChange instance in {@link #setClass(String)}.
-     */
-    @DatabaseChangeProperty(isChangeProperty = false)
-    public ClassLoader getClassLoader() {
-        return classLoader;
-    }
-
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
-    }
-
-
-
-    /**
-     * Specify the name of the class to use as the CustomChange. This method instantiates the class using {@link #getClassLoader()} or fallback methods
-     * and assigns it to {@link #getCustomChange()}.
-     * {@link #setClassLoader(ClassLoader)} must be called before this method. The passed class is constructed, but no parameters are set. They are set in {@link liquibase.change.Change#generateStatements(liquibase.database.Database)}
+     * Specify the name of the class to use as the CustomChange and assigns it to {@link #getCustomChange()}.
      */
     public CustomChangeWrapper setClass(String className) throws CustomChangeException {
         if (className == null) {
             return this;
         }
-        if (classLoader == null) {
-            throw new CustomChangeException("CustomChangeWrapper classLoader not set");
-        }
         this.className = className;
-            try {
+        try {
+           Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
+           if (Boolean.TRUE.equals(osgiPlatform)) {
+              customChange = (CustomChange)OsgiUtil.loadClass(className).getConstructor().newInstance();
+           } else {
+              try {
+                  customChange = (CustomChange) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+              } catch (ClassCastException e) { //fails in Ant in particular
                 try {
-                    customChange = (CustomChange) Class.forName(className, true, classLoader).newInstance();
-                } catch (ClassCastException e) { //fails in Ant in particular
-                    try {
-                        customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).newInstance();
-                    } catch (ClassNotFoundException e1) {
-                        customChange = (CustomChange) Class.forName(className).newInstance();
-                    }
+                  customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).getConstructor().newInstance();
+                } catch (ClassNotFoundException e1) {
+                  customChange = (CustomChange) Class.forName(className).getConstructor().newInstance();
                 }
+              }
+           }
         } catch (Exception e) {
             throw new CustomChangeException(e);
         }
@@ -258,7 +245,7 @@ public class CustomChangeWrapper extends AbstractChange {
             for (String param : params) {
                 ObjectUtil.setProperty(customChange, param, paramValues.get(param));
             }
-            customChange.setFileOpener(getResourceAccessor());
+            customChange.setFileOpener(Scope.getCurrentScope().getResourceAccessor());
             customChange.setUp();
 
             configured = true;
@@ -273,7 +260,7 @@ public class CustomChangeWrapper extends AbstractChange {
             case "class":
                 return SerializationType.NAMED_FIELD;
             case "param":
-                return SerializationType.NESTED_OBJECT;
+                return SerializationType.NAMED_FIELD;
             default:
                 throw new UnexpectedLiquibaseException("Unexpected CustomChangeWrapper field " + field);
         }
@@ -303,9 +290,12 @@ public class CustomChangeWrapper extends AbstractChange {
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        setClassLoader(resourceAccessor.toClassLoader());
         try {
-            setClass(parsedNode.getChildValue(null, "class", String.class));
+            String classNameValue = parsedNode.getChildValue(null, "class", String.class);
+            if (classNameValue == null) {
+                throw new ParsedNodeException("Custom change node has no 'class' attribute!");
+            }
+            setClass(classNameValue);
         } catch (CustomChangeException e) {
             throw new ParsedNodeException(e);
         }
@@ -327,12 +317,21 @@ public class CustomChangeWrapper extends AbstractChange {
             if (value != null) {
                 value = value.toString();
             }
-            this.setParam(child.getChildValue(null, "name", String.class), (String) value);
+            String paramName = child.getChildValue(null, "name", String.class);
+            if (paramName == null) {
+                throw new ParsedNodeException("Custom change param " + child + " does not have a 'name' attribute");
+            }
+            this.setParam(paramName, (String) value);
         }
 
         CustomChange customChange = null;
         try {
-            customChange = (CustomChange) Class.forName(className, false, resourceAccessor.toClassLoader()).newInstance();
+            Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
+            if (Boolean.TRUE.equals(osgiPlatform)) {
+                customChange = (CustomChange)OsgiUtil.loadClass(className).getConstructor().newInstance();
+            } else {
+                customChange = (CustomChange) Class.forName(className, false, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+            }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

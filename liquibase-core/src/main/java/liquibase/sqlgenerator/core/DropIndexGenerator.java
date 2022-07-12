@@ -9,7 +9,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropIndexStatement;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
 
     @Override
     public Sql[] generateSql(DropIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
+        List<String> associatedWith = StringUtil.splitAndTrim(statement.getAssociatedWith(), ",");
         if (associatedWith != null) {
             if (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT)) {
                 return new Sql[0];
@@ -45,7 +45,7 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         if (database instanceof MySQLDatabase) {
             return new Sql[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(null, null, statement.getIndexName()) + " ON " + database.escapeTableName(statement.getTableCatalogName(), schemaName, statement.getTableName()), getAffectedIndex(statement))};
         } else if (database instanceof MSSQLDatabase) {
-            return new Sql[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(null, null, statement.getIndexName()) + " ON " + database.escapeTableName(null, schemaName, statement.getTableName()), getAffectedIndex(statement))};
+            return new Sql[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(null, null, statement.getIndexName()) + " ON " + database.escapeTableName(statement.getTableCatalogName(), schemaName, statement.getTableName()), getAffectedIndex(statement))};
         } else if (database instanceof SybaseDatabase) {
             return new Sql[]{new UnparsedSql("DROP INDEX " + statement.getTableName() + "." + statement.getIndexName(), getAffectedIndex(statement))};
         } else if (database instanceof SybaseASADatabase) {
@@ -62,6 +62,6 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         if (statement.getTableName() != null) {
             table = (Table) new Table().setName(statement.getTableName()).setSchema(statement.getTableCatalogName(), statement.getTableSchemaName());
         }
-        return new Index().setName(statement.getIndexName()).setTable(table);
+        return new Index().setName(statement.getIndexName()).setRelation(table);
     }
 }

@@ -1,7 +1,7 @@
 package liquibase.sdk.executor;
 
 import liquibase.executor.LoggingExecutor;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.servicelocator.LiquibaseService;
 
 import java.io.StringWriter;

@@ -5,10 +5,14 @@ import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class Db2zDatabase extends AbstractDb2Database {
-
+	
+	// See https://www.ibm.com/support/knowledgecenter/en/SSEPEK_11.0.0/sqlref/src/tpc/db2z_limits.html#db2z_limits__limdt, 
+	// may not apply to older versions, caveat emptor 
+	private static final int MAX_DB2Z_TIMESTAMP_FRACTIONAL_DIGITS = 12;
+	
     public Db2zDatabase() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
@@ -18,7 +22,7 @@ public class Db2zDatabase extends AbstractDb2Database {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return conn.getDatabaseProductName().startsWith("DB2") && StringUtils.startsWith(conn.getDatabaseProductVersion(), "DSN");
+        return conn.getDatabaseProductName().startsWith("DB2") && StringUtil.startsWith(conn.getDatabaseProductVersion(), "DSN");
     }
 
     @Override
@@ -32,10 +36,24 @@ public class Db2zDatabase extends AbstractDb2Database {
     }
 
     @Override
+    public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
+        return objectName;
+    }
+
+    @Override
     public boolean isSystemObject(DatabaseObject example) {
         boolean isSystemIndex = example instanceof Index && example.getName() != null && example.getName().contains("_#_");
-        boolean isSystemColumn = example instanceof Column && StringUtils.startsWith(example.getName(), "DB2_GENERATED");
+        boolean isSystemColumn = example instanceof Column && StringUtil.startsWith(example.getName(), "DB2_GENERATED");
         return isSystemIndex || isSystemColumn || super.isSystemObject(example);
     }
 
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "DB2/z";
+    }
+
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+    	return MAX_DB2Z_TIMESTAMP_FRACTIONAL_DIGITS;
+    }
 }

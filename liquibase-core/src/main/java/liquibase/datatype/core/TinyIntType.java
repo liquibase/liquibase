@@ -16,6 +16,7 @@ public class TinyIntType  extends LiquibaseDataType {
 
     private boolean autoIncrement;
 
+    @Override
     public boolean isAutoIncrement() {
         return autoIncrement;
     }

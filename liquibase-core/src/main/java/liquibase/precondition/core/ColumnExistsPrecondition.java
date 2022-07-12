@@ -2,7 +2,6 @@ package liquibase.precondition.core;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ChangeSet;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
@@ -13,8 +12,8 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.JdbcUtil;
+import liquibase.util.StringUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -88,7 +87,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
 
     private void checkUsingSnapshot(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         Column example = new Column();
-        if (StringUtils.trimToNull(getTableName()) != null) {
+        if (StringUtil.trimToNull(getTableName()) != null) {
             example.setRelation(new Table().setName(database.correctObjectName(getTableName(), Table.class)).setSchema(new Schema(getCatalogName(), getSchemaName())));
         }
         example.setName(database.correctObjectName(getColumnName(), Column.class));
@@ -177,7 +176,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
             throw new PreconditionErrorException(e, changeLog, this);
 
         } finally {
-            JdbcUtils.closeStatement(statement);
+            JdbcUtil.closeStatement(statement);
         }
     }
 

@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
 
@@ -57,7 +57,7 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
     }
 
     public String getBaseColumnNames() {
-        return StringUtils.join(baseColumns, ", ", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+        return StringUtil.join(baseColumns, ", ", new StringUtil.StringUtilFormatter<ColumnConfig>() {
             @Override
             public String toString(ColumnConfig obj) {
                 return obj.getName();
@@ -82,7 +82,7 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
     }
 
     public String getReferencedColumnNames() {
-        return StringUtils.join(referencedColumns, ", ", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+        return StringUtil.join(referencedColumns, ", ", new StringUtil.StringUtilFormatter<ColumnConfig>() {
             @Override
             public String toString(ColumnConfig obj) {
                 return obj.getName();

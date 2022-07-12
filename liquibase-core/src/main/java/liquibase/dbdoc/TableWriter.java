@@ -38,7 +38,7 @@ public class TableWriter extends HTMLWriter {
             String remarks = column.getRemarks();
             cells.add(Arrays.asList(column.getType().toString(),
                     column.isNullable() ? "NULL" : "NOT NULL",
-                    "<A HREF=\"../columns/" + table.getSchema().getName().toLowerCase() + "." + table.getName().toLowerCase() + "." + column.getName().toLowerCase() + ".html" + "\">" + column.getName() + "</A>", (remarks != null) ? remarks : ""));
+                    "<A HREF=\"../columns/" + (table.getSchema().getName() != null ? table.getSchema().getName().toLowerCase() + "." : "") + table.getName().toLowerCase() + "." + column.getName().toLowerCase() + ".html" + "\">" + column.getName() + "</A>", (remarks != null) ? remarks : ""));
             //todo: add foreign key info to columns?
         }
 
@@ -63,7 +63,7 @@ public class TableWriter extends HTMLWriter {
                 cells.add(Arrays.asList((primaryKey != null && primaryKey.getBackingIndex() == index ? "Primary Key " : index.isUnique() ? "Unique " : "Non-Unique ") +
                         (index.getClustered() == null ? "" : (index.getClustered() ? "Clustered" : "Non-Clustered")),
                         index.getName(),
-                        index.getColumnNames().replace(index.getTable().getName() + ".","")));
+                        index.getColumnNames().replace(index.getRelation().getName() + ".","")));
             }
         writeTable("Current Table Indexes", cells, fileWriter);
         }

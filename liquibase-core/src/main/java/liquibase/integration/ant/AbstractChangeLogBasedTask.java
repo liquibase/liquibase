@@ -1,7 +1,7 @@
 package liquibase.integration.ant;
 
 import liquibase.LabelExpression;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
 
@@ -10,6 +10,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
+
+    private String searchPath;
     private String changeLogDirectory;
     private String changeLogFile;
     private String contexts;
@@ -42,7 +44,20 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
     public void setChangeLogDirectory(String changeLogDirectory) {
         this.changeLogDirectory = changeLogDirectory;
     }
-    
+
+    /**
+     * Gets the change log directory set from Ant.
+     * @return The change log directory resource.
+     */
+    @Override
+    public String getSearchPath() {
+        return searchPath;
+    }
+
+    public void setSearchPath(String searchPath) {
+        this.searchPath = searchPath;
+    }
+
     /**
      * Gets the change log file set from Ant.
      * @return The change log file resource.
@@ -81,7 +96,7 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
     }
 
     public String getOutputEncoding() {
-        return (StringUtils.trimToNull(outputEncoding) == null) ? getDefaultOutputEncoding() : outputEncoding.trim();
+        return (StringUtil.trimToNull(outputEncoding) == null) ? getDefaultOutputEncoding() : outputEncoding.trim();
     }
 
     public void setOutputEncoding(String outputEncoding) {

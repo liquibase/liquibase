@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.LiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
@@ -19,19 +20,17 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 
 	@Override
 	protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
-			String whereClause) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("MERGE INTO ");
-		sql.append(insertOrUpdateStatement.getTableName());
-		sql.append(" USING (VALUES (1)) ON ");
-		sql.append(whereClause);
-		sql.append(" WHEN NOT MATCHED THEN ");
-		return sql.toString();
+									String whereClause) {
+		return "MERGE INTO " +
+				insertOrUpdateStatement.getTableName() +
+				" USING (VALUES (1)) ON " +
+				whereClause +
+				" WHEN NOT MATCHED THEN ";
 	}
 
 	@Override
 	protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
-			SqlGeneratorChain sqlGeneratorChain) {
+										SqlGeneratorChain sqlGeneratorChain) {
 		StringBuilder columns = new StringBuilder();
 		StringBuilder values = new StringBuilder();
 
@@ -53,24 +52,28 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 
 	@Override
 	protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
-			String whereClause, SqlGeneratorChain sqlGeneratorChain) {
+										String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
+
+		if (insertOrUpdateStatement.getOnlyUpdate()) {
+			return super.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain);
+		}
 
 		StringBuilder sql = new StringBuilder("UPDATE SET ");
 
 //		String[] pkFields = insertOrUpdateStatement.getPrimaryKey().split(",");
 //		HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
 		for (String columnKey : insertOrUpdateStatement.getColumnValues().keySet()) {
-//			if (!hashPkFields.contains(columnKey)) {
+			if (insertOrUpdateStatement.getAllowColumnUpdate(columnKey)) {
 				sql.append(columnKey).append(" = ");
 				sql.append(convertToString(insertOrUpdateStatement.getColumnValue(columnKey), database));
 				sql.append(",");
-//			}
+			}
 		}
-        int lastComma = sql.lastIndexOf(",");
-        if (lastComma > -1) {
-            sql.deleteCharAt(lastComma);
-        }
-        return sql.toString();
+		int lastComma = sql.lastIndexOf(",");
+		if (lastComma > -1) {
+			sql.deleteCharAt(lastComma);
+		}
+		return sql.toString();
 	}
 
 	// Copied from liquibase.sqlgenerator.core.InsertOrUpdateGeneratorMySQL

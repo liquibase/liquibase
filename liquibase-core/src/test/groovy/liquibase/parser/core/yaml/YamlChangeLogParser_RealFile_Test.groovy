@@ -10,6 +10,7 @@ import com.example.liquibase.change.PrimaryKeyConfig
 import com.example.liquibase.change.UniqueConstraintConfig
 
 import liquibase.Contexts
+import liquibase.Scope
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
 import liquibase.change.CheckSum
@@ -31,7 +32,7 @@ import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.ObjectQuotingStrategy
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.CustomPreconditionWrapper
 import liquibase.precondition.core.AndPrecondition
@@ -113,6 +114,15 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         change.columns[2].constraints == null
     }
 
+    def "throws a nice validation error when changeSet node has typo in name"() throws ChangeLogParseException {
+        def path = "liquibase/parser/core/yaml/typoChangeLog.yaml"
+        when:
+        new YamlChangeLogParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+
+        then:
+        thrown(ChangeLogParseException.class)
+    }
+
     def "able to parse a changelog with multiple changeSets multiChangeSetChangeLog.yaml"() throws Exception {
         def path = "liquibase/parser/core/yaml/multiChangeSetChangeLog.yaml"
         when:
@@ -131,7 +141,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert !changeLog.getChangeSet(path, "nvoxland", "1").shouldAlwaysRun()
         assert !changeLog.getChangeSet(path, "nvoxland", "1").shouldRunOnChange()
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(0).getChanges().get(0)).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSets().get(0).getChanges().get(0)).getName() == "createTable"
         assert changeLog.getChangeSets().get(0).getChanges().get(0) instanceof CreateTableChange
 
         then:
@@ -144,10 +154,10 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert changeLog.getChangeSet(path, "nvoxland", "2").rollback.changes[0] instanceof RawSQLChange
         assert changeLog.getChangeSet(path, "nvoxland", "2").rollback.changes[1] instanceof RawSQLChange
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0)).getName() == "addColumn"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0)).getName() == "addColumn"
         assert changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0) instanceof AddColumnChange
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(1)).getName() == "addColumn"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(1)).getName() == "addColumn"
         assert changeLog.getChangeSets().get(1).getChanges().get(1) instanceof AddColumnChange
 
         changeLog.getChangeSet(path, "bob", "3").getChanges().size() == 1
@@ -156,7 +166,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert !changeLog.getChangeSet(path, "bob", "3").shouldAlwaysRun()
         assert !changeLog.getChangeSet(path, "bob", "3").shouldRunOnChange()
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "bob", "3").getChanges().get(0)).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSet(path, "bob", "3").getChanges().get(0)).getName() == "createTable"
         assert changeLog.getChangeSet(path, "bob", "3").getChanges().get(0) instanceof CreateTableChange
 
 
@@ -195,16 +205,16 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         changeLog.getPhysicalFilePath() == path
 
         changeLog.getPreconditions() != null
-        changeLog.getPreconditions().getNestedPreconditions().size() == 2
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().size() == 2
 
-        changeLog.getPreconditions().getNestedPreconditions().get(0).getName() == "runningAs"
-        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(0)).getUsername() == "testUser"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(0).getName() == "runningAs"
+        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(0)).getUsername() == "testUser"
 
-        changeLog.getPreconditions().getNestedPreconditions().get(1).getName() == "or"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(0).getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(0)).getType() == "mssql"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1).getName() == "or"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(0).getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(0)).getType() == "mssql"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
 
         changeLog.getChangeSets().size() == 1
     }
@@ -309,7 +319,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         changeSet.getComments() == "Some comments go here"
 
         Change change = changeSet.getChanges().get(0);
-        ChangeFactory.getInstance().getChangeMetaData(change).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName() == "createTable"
         assert change instanceof CreateTableChange
     }
 
@@ -549,6 +559,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((CreateIndexChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[2]).columns[0].name == "id"
         assert ((CreateIndexChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[2]).columns[0].constraints.isUnique()
 
+        ((LoadDataChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[3]).quotchar == "\""
         ((LoadDataChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[3]).columns[0].name == "id"
         ((LoadDataChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[3]).columns[1].name == "new_col"
         ((LoadDataChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[3]).columns[1].header == "new_col_header"
@@ -583,7 +594,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
 
     def "nested objects are parsed"() {
         setup:
-        ChangeFactory.getInstance().register(CreateTableExampleChange)
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).register(new CreateTableExampleChange())
 
         when:
         def path = "liquibase/parser/core/yaml/nestedObjectsChangeLog.yaml"
@@ -661,6 +672,6 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         change1.getUniqueConstraints().get(1).getKeyColumns().get(1).getDescending() == true
 
         cleanup:
-        ChangeFactory.getInstance().unregister("createTableExample");
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).unregister("createTableExample");
     }
 }

@@ -1,11 +1,18 @@
 package liquibase.integration.cdi;
 
+import liquibase.Scope;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.exception.LiquibaseException;
+import liquibase.logging.core.BufferedLogService;
+import liquibase.logging.core.CompositeLogService;
+import liquibase.logging.core.CompositeLogger;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.logging.Level;
 
 import static org.junit.Assert.*;
 
@@ -20,26 +27,61 @@ public class CDILiquibaseTest {
     @After
     public void clearProperty() {
         System.clearProperty("liquibase.shouldRun");
-        LiquibaseConfiguration.getInstance().reset();
+        System.clearProperty("liquibase.config.shouldRun");
+    }
+
+    private void validateRunningState(boolean shouldBeRunning) {
+        WeldContainer weld = new Weld().initialize();
+        CDILiquibase cdiLiquibase = weld.instance().select(CDILiquibase.class).get();
+        assertNotNull(cdiLiquibase);
+        assertEquals(shouldBeRunning, cdiLiquibase.isInitialized());
+        assertEquals(shouldBeRunning, cdiLiquibase.isUpdateSuccessful());
     }
 
     @Test
     public void shouldntRunWhenShouldRunIsFalse() {
         System.setProperty("liquibase.shouldRun", "false");
-        WeldContainer weld = new Weld().initialize();
-        CDILiquibase cdiLiquibase = weld.instance().select(CDILiquibase.class).get();
-        assertNotNull(cdiLiquibase);
-        assertFalse(cdiLiquibase.isInitialized());
-        assertFalse(cdiLiquibase.isUpdateSuccessful());
+        validateRunningState(false);
     }
 
     @Test
     public void shouldRunWhenShouldRunIsTrue() {
         System.setProperty("liquibase.shouldRun", "true");
-        WeldContainer weld = new Weld().initialize();
-        CDILiquibase cdiLiquibase = weld.instance().select(CDILiquibase.class).get();
-        assertNotNull(cdiLiquibase);
-        assertTrue(cdiLiquibase.isInitialized());
-        assertTrue(cdiLiquibase.isUpdateSuccessful());
+        validateRunningState(true);
+    }
+
+    @Test
+    public void shouldntRunWhenConfigShouldRunIsFalse() {
+        System.setProperty("liquibase.config.shouldRun", "false");
+        validateRunningState(false);
+    }
+
+    @Test
+    public void shouldRunWhenConfigShouldRunIsTrue() {
+        System.setProperty("liquibase.config.shouldRun", "true");
+        validateRunningState(true);
+    }
+
+    @Test
+    public void onStartupExceptionsAreCorrectlyHandled() throws Exception {
+        System.setProperty("liquibase.config.shouldRun", "true");
+        final CDILiquibase cdi = new CDILiquibase() {
+            @Override
+            protected void performUpdate() {
+                throw new IllegalArgumentException("Tested Exception");
+            }
+        };
+        cdi.config = new CDILiquibaseConfig();
+
+        BufferedLogService bufferLog = new BufferedLogService();
+        Scope.child(Scope.Attr.logService.name(), bufferLog, () -> {
+            try {
+                cdi.onStartup();
+                fail("Did not throw exception");
+            } catch (IllegalArgumentException e) {
+                assert e.getMessage().equals("Tested Exception");
+                assert bufferLog.getLogAsString(Level.SEVERE).contains("SEVERE Tested Exception");
+            }
+        });
     }
 }

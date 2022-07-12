@@ -1,9 +1,12 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MariaDBDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
@@ -14,7 +17,7 @@ import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -62,8 +65,8 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             if (!viewsMetadataRs.isEmpty()) {
                 CachedRow row = viewsMetadataRs.get(0);
                 String rawViewName = row.getString("TABLE_NAME");
-                String rawSchemaName = StringUtils.trimToNull(row.getString("TABLE_SCHEM"));
-                String rawCatalogName = StringUtils.trimToNull(row.getString("TABLE_CAT"));
+                String rawSchemaName = StringUtil.trimToNull(row.getString("TABLE_SCHEM"));
+                String rawCatalogName = StringUtil.trimToNull(row.getString("TABLE_CAT"));
                 String remarks = row.getString("REMARKS");
                 if (remarks != null) {
                     remarks = remarks.replace("''", "'"); //come back escaped sometimes
@@ -84,7 +87,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
                     // remove strange zero-termination seen on some Oracle view definitions
                     int length = definition.length();
-                    if (definition.charAt(length-1) == 0) {
+                    if (length > 0 && definition.charAt(length-1) == 0) {
                       definition = definition.substring(0, length-1);
                     }
 
@@ -96,6 +99,29 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
                         // Strip the schema definition because it can optionally be included in the tag attribute
                         definition = definition.replaceAll("(?i)\""+view.getSchema().getName()+"\"\\.", "");
+                    }
+
+                    definition = StringUtil.trimToNull(definition);
+                    if (definition == null) {
+                        definition = "[CANNOT READ VIEW DEFINITION]";
+                        String warningMessage = null;
+                        if (database instanceof MariaDBDatabase) {
+                            warningMessage =
+                                    "\nThe current MariaDB user does not have permissions to access view definitions needed for this Liquibase command.\n" +
+                                            "Please search the changelog for '[CANNOT READ VIEW DEFINITION]' to locate inaccessible objects. " +
+                                            "Learn more about altering permissions with suggested MariaDB GRANTs at https://docs.liquibase.com/workflows/liquibase-pro/mariadbgrants.html\n";
+
+                        } else if (database instanceof MySQLDatabase) {
+                            warningMessage =
+                                    "\nThe current MySQL user does not have permissions to access view definitions needed for this Liquibase command.\n" +
+                                    "Please search the changelog for '[CANNOT READ VIEW DEFINITION]' to locate inaccessible objects. This is\n" +
+                                    "potentially due to a known MySQL bug https://bugs.mysql.com/bug.php?id=22763. Learn more about altering\n" +
+                                    "permissions with suggested MySQL GRANTs at https://docs.liquibase.com/workflows/liquibase-pro/mysqlgrants.html\n";
+                        }
+                        if (warningMessage != null) {
+                            Scope.getCurrentScope().getUI().sendMessage("WARNING: " + warningMessage);
+                            Scope.getCurrentScope().getLog(getClass()).warning(warningMessage);
+                        }
                     }
 
                     view.setDefinition(definition);
@@ -130,7 +156,8 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                     view.setName(row.getString("TABLE_NAME"));
                     view.setSchema(new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName()));
                     view.setRemarks(row.getString("REMARKS"));
-                    view.setDefinition(row.getString("OBJECT_BODY"));
+                    String definition = StringUtil.standardizeLineEndings(row.getString("OBJECT_BODY"));
+                    view.setDefinition(definition);
                     if(database instanceof OracleDatabase) {
                         view.setAttribute("editioning", "Y".equals(row.getString("EDITIONING_VIEW")));
                     }
@@ -170,7 +197,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 //
 //                if ("TABLE".equals(type)) {
 //                    Table table = new Table(name);
-//                    table.setRemarks(StringUtils.trimToNull(remarks));
+//                    table.setRemarks(StringUtil.trimToNull(remarks));
 //                    table.setDatabase(database);
 //                    table.setSchema(schemaName);
 //                    snapshot.getTables().add(table);

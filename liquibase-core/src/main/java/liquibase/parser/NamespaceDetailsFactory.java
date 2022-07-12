@@ -1,10 +1,8 @@
 package liquibase.parser;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.serializer.LiquibaseSerializer;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
 
@@ -27,12 +25,9 @@ public class NamespaceDetailsFactory {
     }
 
     private NamespaceDetailsFactory() {
-        Class<? extends NamespaceDetails>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(NamespaceDetails.class);
-
-            for (Class<? extends NamespaceDetails> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+            for (NamespaceDetails details : Scope.getCurrentScope().getServiceLocator().findInstances(NamespaceDetails.class)) {
+                register(details);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -54,7 +49,7 @@ public class NamespaceDetailsFactory {
         }
 
         if (validNamespaceDetails.isEmpty()) {
-            LogService.getLog(getClass()).debug(LogType.LOG, "No parser namespace details associated with namespace '" + namespace + "' and parser " + parser.getClass().getName());
+            Scope.getCurrentScope().getLog(getClass()).fine("No parser namespace details associated with namespace '" + namespace + "' and parser " + parser.getClass().getName());
         }
 
         return validNamespaceDetails.iterator().next();
@@ -70,7 +65,7 @@ public class NamespaceDetailsFactory {
         }
 
         if (validNamespaceDetails.isEmpty()) {
-            LogService.getLog(getClass()).debug(LogType.LOG, "No serializer namespace details associated with namespace '" + namespace + "' and serializer " + serializer.getClass().getName());
+            Scope.getCurrentScope().getLog(getClass()).fine("No serializer namespace details associated with namespace '" + namespace + "' and serializer " + serializer.getClass().getName());
         }
 
         return validNamespaceDetails.iterator().next();

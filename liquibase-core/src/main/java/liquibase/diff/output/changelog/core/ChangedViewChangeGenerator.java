@@ -15,7 +15,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +67,7 @@ public class ChangedViewChangeGenerator extends AbstractChangeGenerator implemen
                 viewName = comparisonDatabase.escapeViewName(change.getCatalogName(), change.getSchemaName(), change.getViewName());
             }
             selectQuery = "CREATE OR REPLACE FORCE VIEW " + viewName
-                    + " (" + StringUtils.join(view.getColumns(), ", ", new StringUtils.StringUtilsFormatter() {
+                    + " (" + StringUtil.join(view.getColumns(), ", ", new StringUtil.StringUtilFormatter() {
                 @Override
                 public String toString(Object obj) {
                     if ((((Column) obj).getComputed() != null) && ((Column) obj).getComputed()) {

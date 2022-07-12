@@ -76,7 +76,7 @@
             <column name="dateTimeCol" valueDate="2007-08-09T13:14:15"/>
             <column name="bigintcol" valueNumeric="2"/>
         </insert>
-        <insert tableName="dataTypeTest" dbms="!derby">
+        <insert tableName="dataTypeTest" dbms="!derby,!cockroachdb">
           <column name="id" valueNumeric="2"/>
           <column name="dateCol" valueDate="current_datetime"/>
           <column name="timeCol" valueComputed="current_datetime"/>
@@ -155,10 +155,10 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="nullable-1" author="nvoxland" dbms="!firebird">
+    <changeSet id="nullable-1" author="nvoxland">
         <addNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)" defaultNullValue="testValue"/>
     </changeSet>
-    <changeSet id="nullable-2" author="nvoxland" dbms="!firebird">
+    <changeSet id="nullable-2" author="nvoxland">
         <dropNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)"/>
     </changeSet>
 
@@ -222,7 +222,7 @@
         </preConditions>
         <sql>More invalid SQL. should not run due to "continue"</sql>
     </changeSet>
-    
+
     <changeSet id="add-column-test1" author="alan">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -338,11 +338,11 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="makeNotnulltest" author="nvoxland" dbms="!firebird">
+    <changeSet id="makeNotnulltest" author="nvoxland">
         <addNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int"/>
     </changeSet>
 
-    <changeSet id="makenulltest" author="nvoxland" dbms="!firebird">
+    <changeSet id="makenulltest" author="nvoxland">
         <dropNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int"/>
     </changeSet>
 
@@ -998,7 +998,7 @@
 
 
     <sql>
-      <![CDATA[  
+      <![CDATA[
         insert into testutf8insert (stringvalue) values ('€');
         insert into testutf8insert (stringvalue) values ('£');
         ]]>
@@ -1117,6 +1117,54 @@
                     <foreignKeyConstraintExists foreignKeyName="fk_ref2" foreignKeyTableName="child_table"/>
                 </or>
             </not>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="output messages" author="nvoxland">
+        <output>Message using default target</output>
+        <output target="stdout">Message using stdout target</output>
+        <output target="stderr">Message using stderr target</output>
+    </changeSet>
+
+    <changeSet id="fkexists-without-table-setup" author="example">
+        <sql>
+            CREATE TABLE fkexists_table1 (
+                id INT PRIMARY KEY
+            )
+        </sql>
+        <sql>
+            CREATE TABLE fkexists_table2 (
+                id INT,
+                id2 INT,
+                CONSTRAINT fkexists_1
+                    FOREIGN KEY (id)
+                        REFERENCES fkexists_table1 (id)
+            )
+        </sql>
+        <rollback>
+            <sql>
+                DROP TABLE fkexists_table1
+            </sql>
+            <sql>
+                DROP TABLE fkexists_table2
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="example" id="fkexists-without-table-check">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="id2" baseTableName="fkexists_table2"
+                                 constraintName="fkexists_2"
+                                 referencedColumnNames="id" referencedTableName="fkexists_table1"/>
+    </changeSet>
+    <changeSet author="example" id="fkexists-without-table-check2">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
         </preConditions>
     </changeSet>
 

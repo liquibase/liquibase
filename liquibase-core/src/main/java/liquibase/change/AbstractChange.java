@@ -1,18 +1,20 @@
 package liquibase.change;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.plugin.AbstractPlugin;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
-import liquibase.util.beans.PropertyUtils;
+import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtil;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -29,10 +31,9 @@ import java.util.*;
  * and delegating logic to the {@link liquibase.sqlgenerator.SqlGenerator} objects created to do the actual change work.
  * Place the @DatabaseChangeProperty annotations on the read "get" methods to control property metadata.
  */
-public abstract class AbstractChange implements Change {
+public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     protected static final String NODENAME_COLUMN = "column";
-    private ResourceAccessor resourceAccessor;
 
     private ChangeSet changeSet;
 
@@ -63,7 +64,7 @@ public abstract class AbstractChange implements Change {
             }
 
             Set<ChangeParameterMetaData> params = new HashSet<>();
-            for (PropertyDescriptor property : PropertyUtils.getInstance().getDescriptors(getClass())) {
+            for (PropertyDescriptor property : ObjectUtil.getDescriptors(getClass())) {
                 if (isInvalidProperty(property)) {
                     continue;
                 }
@@ -72,7 +73,7 @@ public abstract class AbstractChange implements Change {
                 if (readMethod == null) {
                     try {
                         readMethod = this.getClass().getMethod(
-                            "is" + StringUtils.upperCaseFirst(property.getName())
+                            "is" + StringUtil.upperCaseFirst(property.getName())
                         );
                     } catch (NoSuchMethodException|SecurityException ignore) {
                         //it was worth a try
@@ -81,7 +82,7 @@ public abstract class AbstractChange implements Change {
                 if ((readMethod != null) && (writeMethod != null)) {
                     DatabaseChangeProperty annotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
                     if ((annotation == null) || annotation.isChangeProperty()) {
-                        params.add(createChangeParameterMetadata(property.getDisplayName()));
+                        params.add(createChangeParameterMetadata(property, readMethod));
                     }
                 }
 
@@ -113,11 +114,8 @@ public abstract class AbstractChange implements Change {
     protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName) {
 
         try {
-            String displayName = parameterName.replaceAll("([A-Z])", " $1");
-            displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
-
             PropertyDescriptor property = null;
-            for (PropertyDescriptor prop : PropertyUtils.getInstance().getDescriptors(getClass())) {
+            for (PropertyDescriptor prop : ObjectUtil.getDescriptors(getClass())) {
                 if (prop.getDisplayName().equals(parameterName)) {
                     property = prop;
                     break;
@@ -129,8 +127,20 @@ public abstract class AbstractChange implements Change {
 
             Method readMethod = property.getReadMethod();
             if (readMethod == null) {
-                readMethod = getClass().getMethod("is" + StringUtils.upperCaseFirst(property.getName()));
+                readMethod = getClass().getMethod("is" + StringUtil.upperCaseFirst(property.getName()));
             }
+            return createChangeParameterMetadata(property, readMethod);
+        } catch (IntrospectionException|NoSuchMethodException|SecurityException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    private ChangeParameterMetaData createChangeParameterMetadata(PropertyDescriptor property, Method readMethod) {
+        try {
+            String parameterName = property.getDisplayName();
+            String displayName = parameterName.replaceAll("([A-Z])", " $1");
+            displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
+
             Type type = readMethod.getGenericReturnType();
 
             DatabaseChangeProperty changePropertyAnnotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
@@ -146,9 +156,9 @@ public abstract class AbstractChange implements Change {
             String[] supportsDatabase = createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
 
             return new ChangeParameterMetaData(this, parameterName, displayName, description, examples, since,
-                type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType);
-        } catch (IntrospectionException|UnexpectedLiquibaseException|NoSuchMethodException|SecurityException e) {
-            throw new UnexpectedLiquibaseException(e);
+                type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType).withAccessors(readMethod, property.getWriteMethod());
+        } catch (UnexpectedLiquibaseException e) {
+            throw e;
         }
     }
 
@@ -161,7 +171,7 @@ public abstract class AbstractChange implements Change {
         if (changePropertyAnnotation == null) {
             return null;
         }
-        return StringUtils.trimToNull(changePropertyAnnotation.since());
+        return StringUtil.trimToNull(changePropertyAnnotation.since());
     }
 
     /**
@@ -173,7 +183,7 @@ public abstract class AbstractChange implements Change {
         if (changePropertyAnnotation == null) {
             return null;
         }
-        return StringUtils.trimToNull(changePropertyAnnotation.description());
+        return StringUtil.trimToNull(changePropertyAnnotation.description());
     }
 
     /**
@@ -219,7 +229,7 @@ public abstract class AbstractChange implements Change {
         }
 
         Map<String, Object> examples = new HashMap<>();
-        examples.put("all", StringUtils.trimToNull(changePropertyAnnotation.exampleValue()));
+        examples.put("all", StringUtil.trimToNull(changePropertyAnnotation.exampleValue()));
 
         return examples;
     }
@@ -369,7 +379,7 @@ public abstract class AbstractChange implements Change {
             } else if (statement.skipOnUnsupported()) {
                 warnings.addWarning(
                     statement.getClass().getName() + " is not supported on " + database.getShortName() +
-                        ", but " + ChangeFactory.getInstance().getChangeMetaData(this).getName() +
+                        ", but " + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() +
                         " will still execute");
             }
         }
@@ -388,14 +398,15 @@ public abstract class AbstractChange implements Change {
      */
     @Override
     public ValidationErrors validate(Database database) {
-        ValidationErrors changeValidationErrors = new ValidationErrors();
+        ValidationErrors changeValidationErrors = new ValidationErrors(this);
 
         // Record an error if a parameter is not set, but that parameter is required by database.
         for (ChangeParameterMetaData param :
-            ChangeFactory.getInstance().getChangeMetaData(this).getParameters().values()) {
-            if (param.isRequiredFor(database) && (param.getCurrentValue(this) == null)) {
-                changeValidationErrors.addError(param.getParameterName() + " is required for " +
-                    ChangeFactory.getInstance().getChangeMetaData(this).getName() + " on " + database.getShortName());
+                Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().values()) {
+            if (param.isRequiredFor(database)) {
+                changeValidationErrors.checkRequiredField (
+                        param.getParameterName(), param.getCurrentValue(this)
+                        , " on " + database.getShortName());
             }
         }
 
@@ -406,7 +417,7 @@ public abstract class AbstractChange implements Change {
 
         // Record warnings if statements are unsupported on database
         if (!generateStatementsVolatile(database)) {
-            String unsupportedWarning = ChangeFactory.getInstance().getChangeMetaData(this).getName()
+            String unsupportedWarning = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
                     + " is not supported on " + database.getShortName();
             boolean sawUnsupportedError = false;
 
@@ -475,7 +486,7 @@ public abstract class AbstractChange implements Change {
             for (Change inverse : inverses) {
                 if (!inverse.supports(database)) {
                     throw new RollbackImpossibleException(
-                        ChangeFactory.getInstance().getChangeMetaData(inverse).getName() + " is not supported on " +
+                        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(inverse).getName() + " is not supported on " +
                             database.getShortName()
                     );
                 }
@@ -505,18 +516,16 @@ public abstract class AbstractChange implements Change {
 
     /**
      * @inheritDoc
+     * @deprecated Should get from {@link Scope}
      */
     @DatabaseChangeProperty(isChangeProperty = false)
     public ResourceAccessor getResourceAccessor() {
-        return resourceAccessor;
+        return Scope.getCurrentScope().getResourceAccessor();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setResourceAccessor(ResourceAccessor resourceAccessor) {
-        this.resourceAccessor = resourceAccessor;
+        Scope.getCurrentScope().getLog(getClass()).info("As of Liquibase 4.0, cannot set resource accessor on "+getClass().getName()+". Must add it to the Scope");
     }
 
     /**
@@ -548,12 +557,12 @@ public abstract class AbstractChange implements Change {
      */
     @Override
     public Set<String> getSerializableFields() {
-        return ChangeFactory.getInstance().getChangeMetaData(this).getParameters().keySet();
+        return Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().keySet();
     }
 
     @Override
     public Object getSerializableFieldValue(String field) {
-        ChangeParameterMetaData fieldMetaData = ChangeFactory.getInstance().getChangeMetaData(this)
+        ChangeParameterMetaData fieldMetaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this)
             .getParameters().get(field);
         if (fieldMetaData == null) {
             return null;
@@ -563,12 +572,12 @@ public abstract class AbstractChange implements Change {
 
     @Override
     public String getSerializedObjectName() {
-        return ChangeFactory.getInstance().getChangeMetaData(this).getName();
+        return Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName();
     }
 
     @Override
     public SerializationType getSerializableFieldType(String field) {
-        return ChangeFactory.getInstance().getChangeMetaData(this).getParameters().get(field).getSerializationType();
+        return Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().get(field).getSerializationType();
     }
 
     @Override
@@ -583,13 +592,13 @@ public abstract class AbstractChange implements Change {
 
     @Override
     public String toString() {
-        return ChangeFactory.getInstance().getChangeMetaData(this).getName();
+        return Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName();
     }
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
-        this.setResourceAccessor(resourceAccessor);
+        ChangeMetaData metaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this);
+
         try {
             Collection<ChangeParameterMetaData> changeParameters = metaData.getParameters().values();
 
@@ -635,7 +644,7 @@ public abstract class AbstractChange implements Change {
                             && (!collectionType.isInterface())
                             && (!Modifier.isAbstract(collectionType.getModifiers()))
                         ) {
-                            String elementName = ((LiquibaseSerializable) collectionType.newInstance())
+                            String elementName = ((LiquibaseSerializable) collectionType.getConstructor().newInstance())
                                 .getSerializedObjectName();
                             List<ParsedNode> nodes = new ArrayList<>(
                                  parsedNode.getChildren(null, param.getParameterName())
@@ -662,13 +671,13 @@ public abstract class AbstractChange implements Change {
                                     if ((childNodes != null) && !childNodes.isEmpty()) {
                                         for (ParsedNode childNode : childNodes) {
                                             LiquibaseSerializable childObject =
-                                                (LiquibaseSerializable)collectionType.newInstance();
+                                                (LiquibaseSerializable)collectionType.getConstructor().newInstance();
                                             childObject.load(childNode, resourceAccessor);
                                             ((Collection) param.getCurrentValue(this)).add(childObject);
                                         }
                                     } else {
                                         LiquibaseSerializable childObject =
-                                            (LiquibaseSerializable) collectionType.newInstance();
+                                            (LiquibaseSerializable) collectionType.getConstructor().newInstance();
                                         childObject.load(node, resourceAccessor);
                                         ((Collection) param.getCurrentValue(this)).add(childObject);
                                     }
@@ -684,11 +693,11 @@ public abstract class AbstractChange implements Change {
                             ParsedNode child = parsedNode.getChild(null, param.getParameterName());
                             if (child != null) {
                                 LiquibaseSerializable serializableChild =
-                                    (LiquibaseSerializable) param.getDataTypeClass().newInstance();
+                                    (LiquibaseSerializable) param.getDataTypeClass().getConstructor().newInstance();
                                 serializableChild.load(child, resourceAccessor);
                                 param.setValue(this, serializableChild);
                             }
-                        } catch (InstantiationException|IllegalAccessException e) {
+                        } catch (ReflectiveOperationException e) {
                             throw new UnexpectedLiquibaseException(e);
                         }
                     }
@@ -699,10 +708,12 @@ public abstract class AbstractChange implements Change {
                     if ((childValue == null) && (param.getSerializationType() == SerializationType.DIRECT_VALUE)) {
                         childValue = parsedNode.getValue();
                     }
-                    param.setValue(this, childValue);
+                    if(null != childValue) {
+                        param.setValue(this, childValue);
+                    }
                 }
             }
-        } catch (InstantiationException|IllegalAccessException e) {
+        } catch (ReflectiveOperationException e) {
             throw new UnexpectedLiquibaseException(e);
         }
         customLoadLogic(parsedNode, resourceAccessor);
@@ -714,8 +725,8 @@ public abstract class AbstractChange implements Change {
     }
 
     protected ColumnConfig createEmptyColumnConfig(Class collectionType)
-        throws InstantiationException, IllegalAccessException {
-        return (ColumnConfig) collectionType.newInstance();
+        throws ReflectiveOperationException {
+        return (ColumnConfig) collectionType.getConstructor().newInstance();
     }
 
     protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor)
@@ -726,7 +737,7 @@ public abstract class AbstractChange implements Change {
     @Override
     public ParsedNode serialize() throws ParsedNodeException {
         ParsedNode node = new ParsedNode(null, getSerializedObjectName());
-        ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
+        ChangeMetaData metaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this);
         for (ChangeParameterMetaData param : metaData.getSetParameters(this).values()) {
             Object currentValue = param.getCurrentValue(this);
             currentValue = serializeValue(currentValue);
@@ -761,7 +772,7 @@ public abstract class AbstractChange implements Change {
 
     @Override
     public String getDescription() {
-        ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
+        ChangeMetaData metaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this);
         String description = metaData.getName();
 
         SortedSet<String> names = new TreeSet<>();
@@ -778,7 +789,7 @@ public abstract class AbstractChange implements Change {
         }
 
         if (!names.isEmpty()) {
-            description += " "+StringUtils.join(names, ", ");
+            description += " "+ StringUtil.join(names, ", ");
         }
 
         return description;

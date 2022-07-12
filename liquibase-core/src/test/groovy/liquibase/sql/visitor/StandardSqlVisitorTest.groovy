@@ -35,6 +35,6 @@ abstract class StandardSqlVisitorTest extends Specification {
     }
 
     def SqlVisitor createClass() {
-        Class.forName(getClass().getName().replaceAll('Test$', "")).newInstance()
+        Class.forName(getClass().getName().replaceAll('Test$', "")).getConstructor().newInstance()
     }
 }

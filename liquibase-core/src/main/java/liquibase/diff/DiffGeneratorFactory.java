@@ -1,5 +1,6 @@
 package liquibase.diff;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
@@ -17,11 +18,8 @@ public class DiffGeneratorFactory {
 
     protected DiffGeneratorFactory() {
         try {
-            Class[] classes = ServiceLocator.getInstance().findClasses(DiffGenerator.class);
-
-            //noinspection unchecked
-            for (Class<? extends DiffGenerator> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+            for (DiffGenerator diffGenerator : Scope.getCurrentScope().getServiceLocator().findInstances(DiffGenerator.class)) {
+                register(diffGenerator);
             }
 
         } catch (Exception e) {
@@ -56,11 +54,11 @@ public class DiffGeneratorFactory {
         }
 
         if (foundGenerators.isEmpty()) {
-            throw new UnexpectedLiquibaseException("Cannot find DiffGenerator for "+referenceDatabase.getShortName()+", "+comparisonDatabase.getShortName());
+            throw new UnexpectedLiquibaseException("Cannot find DiffGenerator for " + referenceDatabase.getShortName() + ", " + comparisonDatabase.getShortName());
         }
 
         try {
-            return foundGenerators.iterator().next().getClass().newInstance();
+            return foundGenerators.iterator().next().getClass().getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -86,6 +84,15 @@ public class DiffGeneratorFactory {
 
     public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, CompareControl compareControl) throws DatabaseException {
         Database referenceDatabase = referenceSnapshot.getDatabase();
+        if (comparisonSnapshot !=null && referenceDatabase!=null) {
+            if (referenceDatabase.getDefaultCatalogName() == null || referenceDatabase.getDefaultCatalogName().isEmpty()) {
+                referenceDatabase.setDefaultCatalogName(comparisonSnapshot.getDatabase().getDefaultCatalogName());
+            }
+            if (referenceDatabase.getDefaultSchemaName() == null || referenceDatabase.getDefaultSchemaName().isEmpty()) {
+                referenceDatabase.setDefaultSchemaName(comparisonSnapshot.getDatabase().getDefaultSchemaName());
+            }
+
+        }
         Database comparisonDatabase;
         if (comparisonSnapshot == null) {
             comparisonDatabase = referenceSnapshot.getDatabase();

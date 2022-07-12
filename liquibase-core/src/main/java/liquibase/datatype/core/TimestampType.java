@@ -1,27 +1,25 @@
 package liquibase.datatype.core;
 
+import liquibase.Scope;
 import liquibase.change.core.LoadDataChange;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import java.util.Locale;
+
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseIncapableOfOperation;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.grammar.ParseException;
-
-import java.util.Locale;
 
 /**
  * Data type support for TIMESTAMP data types in various DBMS. All DBMS are at least expected to support the
  * year, month, day, hour, minute and second parts. Optionally, fractional seconds and time zone information can be
  * specified as well.
  */
-@DataTypeInfo(name = "timestamp", aliases = {"java.sql.Types.TIMESTAMP", "java.sql.Timestamp", "timestamptz"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "timestamp", aliases = {"java.sql.Types.TIMESTAMP", "java.sql.Types.TIMESTAMP_WITH_TIMEZONE", "java.sql.Timestamp", "timestamptz"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class TimestampType extends DateTimeType {
 
     /**
@@ -31,7 +29,7 @@ public class TimestampType extends DateTimeType {
      */
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
+        String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
         // If a fractional precision is given, check is the DBMS supports the length
         if (getParameters().length > 0) {
             Integer desiredLength = null;
@@ -68,13 +66,22 @@ public class TimestampType extends DateTimeType {
             return super.toDatabaseDataType(database);
         }
         if (database instanceof MSSQLDatabase) {
-            if (!LiquibaseConfiguration.getInstance()
-                    .getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES)
-                    .getValue(Boolean.class)
+            if (!GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue()
                     && originalDefinition.toLowerCase(Locale.US).startsWith("timestamp")) {
                 return new DatabaseDataType(database.escapeDataTypeName("timestamp"));
             }
-            return new DatabaseDataType(database.escapeDataTypeName("datetime"));
+            Object[] parameters = getParameters();
+            if (parameters.length >= 1) {
+                final int paramValue = Integer.parseInt(parameters[0].toString());
+                // If the scale for datetime2 is the database default anyway, omit it.
+                // If the scale is 8, omit it since it's not a valid value for datetime2
+                if (paramValue > 7 || paramValue == (database.getDefaultScaleForNativeDataType("datetime2"))) {
+                    parameters = new Object[0];
+
+                }
+
+            }
+            return new DatabaseDataType(database.escapeDataTypeName("datetime2"), parameters);
         }
         if (database instanceof SybaseDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("datetime"));
@@ -107,7 +114,7 @@ public class TimestampType extends DateTimeType {
             }
             int maxFractionalDigits = database.getMaxFractionalDigitsForTimestamp();
             if (maxFractionalDigits < fractionalDigits) {
-                LogService.getLog(getClass()).warning(LogType.LOG, String.format(
+                Scope.getCurrentScope().getLog(getClass()).warning(String.format(
                         "A timestamp datatype with %d fractional digits was requested, but the DBMS %s only supports " +
                                 "%d digits. Because of this, the number of digits was reduced to %d.",
                         fractionalDigits, database.getDatabaseProductName(), maxFractionalDigits, maxFractionalDigits)
@@ -119,13 +126,42 @@ public class TimestampType extends DateTimeType {
             type = new DatabaseDataType("TIMESTAMP");
         }
 
-        if (((getAdditionalInformation() != null) && ((database instanceof PostgresDatabase) || (database instanceof
-            OracleDatabase))) || (database instanceof HsqlDatabase) || (database instanceof H2Database)){
+        if (originalDefinition.startsWith("java.sql.Types.TIMESTAMP_WITH_TIMEZONE")
+            && (database instanceof PostgresDatabase
+            || database instanceof OracleDatabase
+            || database instanceof H2Database
+            || database instanceof HsqlDatabase)) {
+
+            if (database instanceof PostgresDatabase || database instanceof H2Database) {
+                type.addAdditionalInformation("WITH TIME ZONE");
+            } else {
+                type.addAdditionalInformation("WITH TIMEZONE");
+            }
+
+            return type;
+        }
+
+        if (getAdditionalInformation() != null
+                && (database instanceof PostgresDatabase
+                || database instanceof OracleDatabase)
+                || database instanceof H2Database
+                || database instanceof HsqlDatabase){
             String additionalInformation = this.getAdditionalInformation();
 
-            if ((additionalInformation != null) && (database instanceof PostgresDatabase)) {
-                if (additionalInformation.toUpperCase(Locale.US).contains("TIMEZONE")) {
-                    additionalInformation = additionalInformation.toUpperCase(Locale.US).replace("TIMEZONE", "TIME ZONE");
+            if (additionalInformation != null) {
+                String additionInformation = additionalInformation.toUpperCase(Locale.US);
+                if ((database instanceof PostgresDatabase || database instanceof H2Database) && additionInformation.toUpperCase(Locale.US).contains("TIMEZONE")) {
+                    additionalInformation = additionInformation.toUpperCase(Locale.US).replace("TIMEZONE", "TIME ZONE");
+                }
+                // CORE-3229 Oracle 11g doesn't support WITHOUT clause in TIMESTAMP data type
+                if ((database instanceof OracleDatabase) && additionInformation.startsWith("WITHOUT")) {
+                    // https://docs.oracle.com/cd/B19306_01/server.102/b14225/ch4datetime.htm#sthref389
+                    additionalInformation = null;
+                }
+
+                if ((database instanceof H2Database) && additionInformation.startsWith("WITHOUT")) {
+                    // http://www.h2database.com/html/datatypes.html
+                    additionalInformation = null;
                 }
             }
 

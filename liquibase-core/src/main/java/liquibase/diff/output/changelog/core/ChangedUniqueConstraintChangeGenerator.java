@@ -46,12 +46,12 @@ public class ChangedUniqueConstraintChangeGenerator extends AbstractChangeGenera
         UniqueConstraint uniqueConstraint = (UniqueConstraint) changedObject;
 
         DropUniqueConstraintChange dropUniqueConstraintChange = createDropUniqueConstraintChange();
-        dropUniqueConstraintChange.setTableName(uniqueConstraint.getTable().getName());
+        dropUniqueConstraintChange.setTableName(uniqueConstraint.getRelation().getName());
         dropUniqueConstraintChange.setConstraintName(uniqueConstraint.getName());
 
         AddUniqueConstraintChange addUniqueConstraintChange = createAddUniqueConstraintChange();
         addUniqueConstraintChange.setConstraintName(uniqueConstraint.getName());
-        addUniqueConstraintChange.setTableName(uniqueConstraint.getTable().getName());
+        addUniqueConstraintChange.setTableName(uniqueConstraint.getRelation().getName());
         addUniqueConstraintChange.setColumnNames(uniqueConstraint.getColumnNames());
 
         returnList.add(dropUniqueConstraintChange);

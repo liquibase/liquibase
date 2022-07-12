@@ -1,15 +1,13 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
-import liquibase.logging.Logger;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 
@@ -24,7 +22,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     protected int driverVersionMajor;
     protected int driverVersionMinor;
-    private Logger log = LogService.getLog(getClass());
+    private boolean shutdownEmbeddedDerby = true;
 
     public DerbyDatabase() {
         super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
@@ -42,10 +40,29 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultDriver(String url) {
-        // CORE-1230 - don't shutdown derby network server
-        if (url.startsWith("jdbc:derby://")) {
-            return "org.apache.derby.jdbc.ClientDriver";
+        if (url == null) {
+            return null;
+        } else if (url.toLowerCase().startsWith("jdbc:derby://")) {
+            //Derby client driver class name for versions 10.15.X.X and above.
+            String derbyNewDriverClassName = "org.apache.derby.client.ClientAutoloadedDriver";
+            //Derby client driver class name for versions below 10.15.X.X.
+            String derbyOldDriverClassName = "org.apache.derby.jdbc.ClientDriver";
+            try {
+                // Check if we have a driver for versions 10.15.X.X and above. Load and return it if we do.
+                Class.forName(derbyNewDriverClassName);
+                return derbyNewDriverClassName;
+            } catch (ClassNotFoundException exception) {
+                // Check if we have a driver for versions below 10.15.X.X. Load and return it if we do.
+                try {
+                    Class.forName(derbyOldDriverClassName);
+                    return derbyOldDriverClassName;
+                } catch (ClassNotFoundException classNotFoundException) {
+                    // Return class for newer versions anyway
+                    return derbyNewDriverClassName;
+                }
+            }
         } else if (url.startsWith("jdbc:derby") || url.startsWith("java:derby")) {
+            //Use EmbeddedDriver if using a derby URL but without the `://` in it
             return "org.apache.derby.jdbc.EmbeddedDriver";
         }
         return null;
@@ -89,6 +106,14 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         return "derby";
     }
 
+    public boolean getShutdownEmbeddedDerby() {
+        return shutdownEmbeddedDerby;
+    }
+
+    public void setShutdownEmbeddedDerby(boolean shutdown) {
+        this.shutdownEmbeddedDerby = shutdown;
+    }
+
     @Override
     public boolean supportsSequences() {
         return ((driverVersionMajor == 10) && (driverVersionMinor >= 6)) || (driverVersionMajor >= 11);
@@ -109,10 +134,10 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             String dateString = super.getDateLiteral(isoDate);
             int decimalDigits = dateString.length() - dateString.indexOf('.') - 2;
             String padding = "";
-            for (int i=6; i> decimalDigits; i--) {
+            for (int i = 6; i > decimalDigits; i--) {
                 padding += "0";
             }
-            return "TIMESTAMP(" + dateString.replaceFirst("'$", padding+"'") + ")";
+            return "TIMESTAMP(" + dateString.replaceFirst("'$", padding + "'") + ")";
         }
     }
 
@@ -131,41 +156,45 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         String url = getConnection().getURL();
         String driverName = getDefaultDriver(url);
         super.close();
-        if ((driverName != null) && driverName.toLowerCase().contains("embedded")) {
-            try {
-                if (url.contains(";")) {
-                    url = url.substring(0, url.indexOf(";")) + ";shutdown=true";
-                } else {
-                    url += ";shutdown=true";
-                }
-                LogService.getLog(getClass()).info(LogType.LOG, "Shutting down derby connection: " + url);
-                // this cleans up the lock files in the embedded derby database folder
-                JdbcConnection connection = (JdbcConnection) getConnection();
-                ClassLoader classLoader = connection.getWrappedConnection().getClass().getClassLoader();
-                Driver driver = (Driver) classLoader.loadClass(driverName).newInstance();
-                // this cleans up the lock files in the embedded derby database folder
-                driver.connect(url, null);
-            } catch (Exception e) {
-                if (e instanceof SQLException) {
-                    String state = ((SQLException) e).getSQLState();
-                    if ("XJ015".equals(state) || "08006".equals(state)) {
-                        // "The XJ015 error (successful shutdown of the Derby engine) and the 08006 
-                        // error (successful shutdown of a single database) are the only exceptions 
-                        // thrown by Derby that might indicate that an operation succeeded. All other 
-                        // exceptions indicate that an operation failed."
-                        // See http://db.apache.org/derby/docs/dev/getstart/rwwdactivity3.html
-                        return;
-                    }
-                }
-                throw new DatabaseException("Error closing derby cleanly", e);
+        if (getShutdownEmbeddedDerby() && (driverName != null) && driverName.toLowerCase().contains("embedded")) {
+            shutdownDerby(url, driverName);
+        }
+    }
+
+    protected void shutdownDerby(String url, String driverName) throws DatabaseException {
+        try {
+            if (url.contains(";")) {
+                url = url.substring(0, url.indexOf(";")) + ";shutdown=true";
+            } else {
+                url += ";shutdown=true";
             }
+            Scope.getCurrentScope().getLog(getClass()).info("Shutting down derby connection: " + url);
+            // this cleans up the lock files in the embedded derby database folder
+            JdbcConnection connection = (JdbcConnection) getConnection();
+            ClassLoader classLoader = connection.getWrappedConnection().getClass().getClassLoader();
+            Driver driver = (Driver) classLoader.loadClass(driverName).getConstructor().newInstance();
+            // this cleans up the lock files in the embedded derby database folder
+            driver.connect(url, null);
+        } catch (Exception e) {
+            if (e instanceof SQLException) {
+                String state = ((SQLException) e).getSQLState();
+                if ("XJ015".equals(state) || "08006".equals(state)) {
+                    // "The XJ015 error (successful shutdown of the Derby engine) and the 08006
+                    // error (successful shutdown of a single database) are the only exceptions
+                    // thrown by Derby that might indicate that an operation succeeded. All other
+                    // exceptions indicate that an operation failed."
+                    // See http://db.apache.org/derby/docs/dev/getstart/rwwdactivity3.html
+                    return;
+                }
+            }
+            throw new DatabaseException("Error closing derby cleanly", e);
         }
     }
 
     /**
      * Determine Apache Derby driver major/minor version.
      */
-    @SuppressWarnings({ "static-access", "unchecked" })
+    @SuppressWarnings({"static-access", "unchecked"})
     protected void determineDriverVersion() {
         try {
 // Locate the Derby sysinfo class and query its version info
@@ -194,9 +223,9 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
+            return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
         } catch (Exception e) {
-            LogService.getLog(getClass()).info(LogType.LOG, "Error getting default schema", e);
+            Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
         }
         return null;
     }
@@ -213,7 +242,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         }
         try {
             return (this.getDatabaseMajorVersion() > 10) || ((this.getDatabaseMajorVersion() == 10) && (this
-                .getDatabaseMinorVersion() > 7));
+                    .getDatabaseMinorVersion() > 7));
         } catch (DatabaseException e) {
             return false; //assume not
         }

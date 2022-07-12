@@ -9,9 +9,8 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +33,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
             hashes.add(databaseObject.getName().toLowerCase());
         }
 
-        Relation table = ((UniqueConstraint) databaseObject).getTable();
+        Relation table = ((UniqueConstraint) databaseObject).getRelation();
         if (table != null) {
             hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, chain.getSchemaComparisons(), accordingTo)));
         }
@@ -55,8 +54,8 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
         int thisConstraintSize = thisConstraint.getColumns().size();
         int otherConstraintSize = otherConstraint.getColumns().size();
 
-        if ((thisConstraint.getTable() != null) && (otherConstraint.getTable() != null)) {
-            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getTable(), otherConstraint.getTable(), chain.getSchemaComparisons(), accordingTo)) {
+        if ((thisConstraint.getRelation() != null) && (otherConstraint.getRelation() != null)) {
+            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getRelation(), otherConstraint.getRelation(), chain.getSchemaComparisons(), accordingTo)) {
                 return false;
             }
             if ((databaseObject1.getSchema() != null) && (databaseObject2.getSchema() != null) &&
@@ -78,7 +77,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
                 }
 
                 for (int i = 0; i < otherConstraintSize; i++) {
-                    if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getColumns().get(i).setRelation(thisConstraint.getTable()), otherConstraint.getColumns().get(i).setRelation(otherConstraint.getTable()), chain.getSchemaComparisons(), accordingTo)) {
+                    if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getColumns().get(i).setRelation(thisConstraint.getRelation()), otherConstraint.getColumns().get(i).setRelation(otherConstraint.getRelation()), chain.getSchemaComparisons(), accordingTo)) {
                         return false;
                     }
                 }
@@ -120,7 +119,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
                     return false;
                 }
                 for (int i=0; i<referenceList.size(); i++) {
-                    if (!StringUtils.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtils.trimToEmpty(compareList.get(i).getName()))) {
+                    if (!StringUtil.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtil.trimToEmpty(compareList.get(i).getName()))) {
                         return false;
                     }
                 }

@@ -1,64 +1,177 @@
 package liquibase.resource
 
+
+import liquibase.util.StreamUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.nio.file.FileSystem
+
 class ClassLoaderResourceAccessorTest extends Specification {
 
-    def "rootUrls populated"() {
-        when:
-        def accessor = new ClassLoaderResourceAccessor(new URLClassLoader([
-                new File(System.getProperty("java.io.tmpdir")).toURL()].toArray() as URL[]
-        ))
+    def testResourceAccessor = new ClassLoaderResourceAccessor(new URLClassLoader(
+            [
+                    Thread.currentThread().getContextClassLoader().getResource("simple-files.jar"),
+                    Thread.currentThread().getContextClassLoader().getResource("simple-files.zip"),
+            ] as URL[],
+            Thread.currentThread().getContextClassLoader()))
 
-        then:
-        accessor.getRootPaths().size() >= 3
-        accessor.getRootPaths().findAll({ it.endsWith("/test-classes/") }).size() == 1
-        accessor.getRootPaths().findAll({ it.endsWith("/classes/") }).size() == 1
-    }
-
-    @Unroll("#featureName: #relativeTo / #path -> #expected")
-    def "convertToPath using relative paths"() {
-        when:
-        def accessor = new ClassLoaderResourceAccessor(new URLClassLoader([].toArray() as URL[]))
-
-        then:
-        accessor.convertToPath(relativeTo, path) == expected
+    @Unroll("#featureName: #relativeTo #streamPath")
+    def "getFinalPath"() {
+        expect:
+        new ClassLoaderResourceAccessor().getFinalPath(relativeTo, streamPath) == expected
 
         where:
-        relativeTo                         | path                             | expected
-        null                               | "liquibase/Liquibase.class"      | "liquibase/Liquibase.class"
-        ""                                 | "liquibase/Liquibase.class"      | "liquibase/Liquibase.class"
-        "liquibase"                        | "Liquibase.class"                | "liquibase/Liquibase.class"
-        "liquibase"                        | "Contexts.class"                 | "liquibase/Contexts.class"
-        "liquibase/Liquibase.class"        | "Contexts.class"                 | "liquibase/Contexts.class"
-        "liquibase/"                       | "sql/Sql.class"                  | "liquibase/sql/Sql.class"
-        "liquibase"                        | "sql/Sql.class"                  | "liquibase/sql/Sql.class"
-        "liquibase/Liquibase.class"        | "sql/Sql.class"                  | "liquibase/sql/Sql.class"
-        "liquibase/sql"                    | "../Liquibase.class"             | "liquibase/Liquibase.class"
+        relativeTo                         | streamPath                       | expected
+        null                               | "com/example/test.sql"           | "com/example/test.sql"
+        null                               | "/com/example/test.sql"          | "com/example/test.sql"
+        null                               | "\\com\\example\\test.sql"       | "com/example/test.sql"
+        null                               | "/com////example//test.sql"      | "com/example/test.sql"
+        null                               | "classpath:com/example/test.sql" | "com/example/test.sql"
+        "com/example"                      | "test.sql"                       | "com/example/test.sql"
+        "/com/example/"                    | "test.sql"                       | "com/example/test.sql"
+        "com/example"                      | "/my/test.sql"                   | "com/example/my/test.sql"
+        "com/example"                      | "/my/test.sql"                   | "com/example/my/test.sql"
+        "com/example/other.file"           | "/my/test.sql"                   | "com/example/my/test.sql"
+        "classpath:com/example/other.file" | "my/test.sql"                    | "com/example/my/test.sql"
+        "changelog.xml"                    | "sql/function.sql"               | "sql/function.sql"
+        "db-change.log/changelog.xml"      | "data/file.csv"                  | "db-change.log/data/file.csv"
     }
 
-    def "can recursively enumerate files inside JARs on the classpath"() {
+    @Unroll("#featureName: #relativeTo #streamPath")
+    def "openStreams, checking content"() {
         given:
-        def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
+        def streams = testResourceAccessor.openStreams(relativeTo, streamPath)
 
-        when:
-        def listedResources = accessor.list(null, "org/springframework/core/io", true, false, true)
+        expect:
+        streams.size() == 1
+        StreamUtil.readStreamAsString(streams.iterator().next()).split(/\r?\n/)[0] == expectedContent
 
-        then:
-        listedResources.contains("org/springframework/core/io/Resource.class")
-        listedResources.contains("org/springframework/core/io/support/ResourcePatternUtils.class")
+        where:
+        relativeTo                    | streamPath                        | expectedContent
+        null                          | "liquibase.properties"            | "# This is a sample liquibase.properties file for use by core unit tests. Its main purpose if to test the"
+        null                          | "liquibase/empty.changelog.xml"   | "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\">"
+        null                          | "file-in-zip-root.txt"            | "File in root"
+        null                          | "com/example/zip/file-in-zip.txt" | "File in zip"
+        null                          | "file-in-jar-root.txt"            | "File in root"
+        "com/example"                 | "jar/file-in-jar.txt"             | "File in jar"
+        "com/example/file-in-jar.txt" | "jar/file-in-jar.txt"             | "File in jar"
     }
 
-    def "can non-recursively enumerate files inside JARs on the classpath"() {
-        given:
-        def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
+    @Unroll("#featureName: #relativeTo #streamPath")
+    def "openStreams, can't check content"() {
+        expect:
+        testResourceAccessor.openStreams(relativeTo, streamPath).size() == expectedSize
+
+        where:
+        relativeTo | streamPath                                   | expectedSize
+        null       | "invalid_file"                               | 0
+        "/path/to" | "/another/invalid_file"                      | 0
+        null       | "com/example/everywhere/file-everywhere.txt" | 3
+
+    }
+
+    @Unroll
+    def "list"() {
+        expect:
+        testResourceAccessor.list(relativeTo, path, recursive, includeFiles, includeDirectories).toString() == expectedValue.toString()
+
+        where:
+        [relativeTo, path, recursive, includeFiles, includeDirectories, expectedValue] << [
+                [
+                        null, "com/example/jar", true, true, true,
+                        [
+                                "com/example/jar/file-in-jar.txt",
+                        ]
+                ],
+                [
+                        null, "com/example", true, true, true,
+                        [
+                                "com/example/directory",
+                                "com/example/directory/file-in-directory.txt",
+                                "com/example/everywhere",
+                                "com/example/everywhere/file-everywhere.txt",
+                                "com/example/everywhere/other-file-everywhere.txt",
+                                "com/example/file with space.txt",
+                                "com/example/file-in-jar.txt",
+                                "com/example/file-in-zip.txt",
+                                "com/example/jar",
+                                "com/example/jar/file-in-jar.txt",
+                                "com/example/liquibase",
+                                "com/example/liquibase/change",
+                                "com/example/liquibase/change/ColumnConfig.class",
+                                "com/example/liquibase/change/ComputedConfig.class",
+                                "com/example/liquibase/change/CreateTableExampleChange.class",
+                                "com/example/liquibase/change/DefaultConstraintConfig.class",
+                                "com/example/liquibase/change/IdentityConfig.class",
+                                "com/example/liquibase/change/KeyColumnConfig.class",
+                                "com/example/liquibase/change/PrimaryKeyConfig.class",
+                                "com/example/liquibase/change/UniqueConstraintConfig.class",
+                                "com/example/my-logic.sql",
+                                "com/example/shared",
+                                "com/example/shared/file-in-jar.txt",
+                                "com/example/shared/file-in-zip.txt",
+                                "com/example/users.csv",
+                                "com/example/zip",
+                                "com/example/zip/file-in-zip.txt",
+                        ]
+                ],
+                [
+                        null, "com/example", false, true, true,
+                        [
+                                "com/example/directory",
+                                "com/example/everywhere",
+                                "com/example/file with space.txt",
+                                "com/example/file-in-jar.txt",
+                                "com/example/file-in-zip.txt",
+                                "com/example/jar",
+                                "com/example/liquibase",
+                                "com/example/my-logic.sql",
+                                "com/example/shared",
+                                "com/example/users.csv",
+                                "com/example/zip",
+                        ]
+                ],
+                [
+                        null, "com/example", false, true, false,
+                        [
+                                "com/example/file with space.txt",
+                                "com/example/file-in-jar.txt",
+                                "com/example/file-in-zip.txt",
+                                "com/example/my-logic.sql",
+                                "com/example/users.csv",
+                        ]
+                ],
+                [
+                        null, "com/example", false, false, true,
+                        [
+                                "com/example/directory",
+                                "com/example/everywhere",
+                                "com/example/jar",
+                                "com/example/liquibase",
+                                "com/example/shared",
+                                "com/example/zip",
+                        ]
+                ],
+        ]
+    }
+
+    def close() {
+        setup:
+        FileSystem path1 = Mock()
+        FileSystem path2 = Mock()
 
         when:
-        def listedResources = accessor.list(null, "org/springframework/core/io", true, false, false)
+        def testAccessor = new ClassLoaderResourceAccessor(this.getClass().getClassLoader())
+
+        testAccessor.rootPaths = null;
+        testAccessor.close() //no errors thrown from close() when rootPaths is null
+
+        testAccessor.rootPaths = [path1, path2]
+        testAccessor.close()
 
         then:
-        listedResources.contains("org/springframework/core/io/Resource.class")
-        !listedResources.contains("org/springframework/core/io/support/ResourcePatternUtils.class")
+        1 * path1.close()
+        1 * path2.close()
     }
 }

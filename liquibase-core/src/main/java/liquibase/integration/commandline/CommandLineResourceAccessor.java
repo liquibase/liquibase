@@ -1,13 +1,10 @@
 package liquibase.integration.commandline;
 
 import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.InputStreamList;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Extension of {@link liquibase.resource.ClassLoaderResourceAccessor} that adds extra fuzzy searching logic based on
@@ -19,23 +16,26 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
         super(loader);
     }
 
+    @java.lang.SuppressWarnings("squid:S2095")
     @Override
-    public Set<InputStream> getResourcesAsStream(String path) throws IOException {
-        Set<InputStream> resourcesAsStream = super.getResourcesAsStream(path);
-        if (resourcesAsStream == null) {
-            for (String altPath : getAlternatePaths(path)) {
-                resourcesAsStream = super.getResourcesAsStream(altPath);
-                if (resourcesAsStream != null) {
-                    return resourcesAsStream;
-                }
+    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
+        InputStreamList resourcesAsStream = super.openStreams(relativeTo, streamPath);
+        if (resourcesAsStream != null) {
+            return resourcesAsStream;
+        }
+        for (String altPath : getAlternatePaths(streamPath)) {
+            InputStreamList altResourcesAsStream = super.openStreams(relativeTo, altPath);
+            if (altResourcesAsStream != null) {
+                return altResourcesAsStream;
             }
         }
-        return resourcesAsStream;
+        return null;
     }
 
+
     @Override
-    public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        Set<String> contents = new HashSet<>();
+    public SortedSet<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+        SortedSet<String> contents = new TreeSet<>();
         Set<String> superList = super.list(relativeTo, path, includeFiles, includeDirectories, recursive);
         if (superList != null) {
             contents.addAll(superList);
@@ -44,7 +44,7 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
             contents.addAll(super.list(relativeTo, altPath, includeFiles, includeDirectories, recursive));
         }
         if (contents.isEmpty()) {
-            return null;
+            return new TreeSet<>();
         }
         return contents;
     }

@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <preConditions onSqlOutput="IGNORE" >
             <dbms type="h2"/>
@@ -323,10 +323,16 @@
         </customChange>
     </changeSet>
     <changeSet id="57" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>
+        <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="tableName" value="person"/>
+            <param name="columnName" value="employer_id"/>
+            <param name="newValue" value="4"/>
+        </customChange>
     </changeSet>
     <changeSet id="58" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
+        <customChange class="liquibase.change.custom.ExampleCustomTaskChange">
+            <param name="helloTo" value="world"/>
+        </customChange>
     </changeSet>
 
     <!--<changeSet id="60" author="nvoxland">-->
@@ -340,6 +346,33 @@
          <dbms type="oracle"/>
       </preConditions>
       <createSequence sequenceName="liquidbase_applicationuserSQ" startValue="1" />
+    </changeSet>
+
+    <changeSet id="failingColumnNameSince197" author="tholu">
+        <createTable tableName="columnTest">
+            <column name="table" type="varchar(50)"/>
+        </createTable>
+        <update tableName="columnTest">
+            <column name="table" value="test"/>
+            <where>1</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="addcolumn before after" author="nvoxland">
+        <createTable tableName="before_after">
+            <column name="id" type="int"/>
+            <column name="name" type="int"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="addcolumn before after 2" author="nvoxland">
+        <addColumn tableName="before_after">
+            <column name="before_name" type="int" beforeColumn="name"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="addcolumn before after 3" author="nvoxland">
+        <addColumn tableName="before_after">
+            <column name="after_name" type="int" afterColumn="name"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

@@ -81,7 +81,7 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
                 try {
                     if (!control.getIncludeCatalog() && !control.getIncludeSchema()) {
                         CatalogAndSchema schema = comparisonDatabase.getDefaultSchema().customize(comparisonDatabase);
-                        backingIndex.getTable().setSchema(schema.getCatalogName(), schema.getSchemaName()); //set table schema so it is found in the correct schema
+                        backingIndex.getRelation().setSchema(schema.getCatalogName(), schema.getSchemaName()); //set table schema so it is found in the correct schema
                     }
                     if (referenceDatabase.equals(comparisonDatabase) || !SnapshotGeneratorFactory.getInstance().has(backingIndex, comparisonDatabase)) {
                         Change[] fixes = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);

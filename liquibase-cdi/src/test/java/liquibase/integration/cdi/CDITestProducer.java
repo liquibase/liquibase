@@ -21,6 +21,8 @@ public class CDITestProducer {
     public CDILiquibaseConfig createConfig() {
         CDILiquibaseConfig config = new CDILiquibaseConfig();
         config.setChangeLog("liquibase/parser/core/xml/simpleChangeLog.xml");
+        boolean configShouldRun = Boolean.valueOf(System.getProperty("liquibase.config.shouldRun", "true"));
+        config.setShouldRun(configShouldRun);
         return config;
     }
 

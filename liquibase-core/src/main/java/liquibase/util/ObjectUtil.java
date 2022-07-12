@@ -5,13 +5,17 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.beans.PropertyVetoException;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * Various methods that make it easier to read and write object properties using the propertyName, instead of having
@@ -19,6 +23,8 @@ import java.util.Map;
  */
 public class ObjectUtil {
 
+    private static final List<BeanIntrospector> introspectors = new ArrayList<>(Arrays.asList(new DefaultBeanIntrospector(), new FluentPropertyBeanIntrospector()));
+    
     /**
      * Cache for the methods of classes that we have been queried about so far.
      */
@@ -58,6 +64,9 @@ public class ObjectUtil {
      * @return the class name of the return type if the reading method is found, null if it is not found.
      */
     public static Class getPropertyType(Object object, String propertyName) {
+        if (object == null) {
+            return null;
+        }
         Method readMethod = getReadMethod(object, propertyName);
         if (readMethod == null) {
             return null;
@@ -140,8 +149,12 @@ public class ObjectUtil {
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedLiquibaseException("Cannot call " + method.toString()
-                + " with value of type " + finalValue.getClass().getName());
+            if (finalValue != null) {
+                throw new UnexpectedLiquibaseException("Cannot call " + method.toString()
+                        + " with value of type " + finalValue.getClass().getName());
+            } else {
+                throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with a null argument");
+            }
         }
     }
 
@@ -236,6 +249,250 @@ public class ObjectUtil {
             methodCache.put(object.getClass(), methods);
         }
         return methods;
+    }
+
+      /**
+     * Converts the given object to the targetClass
+     */
+    public static <T> T convert(Object object, Class<T> targetClass) throws IllegalArgumentException {
+        if (object == null) {
+            return null;
+        }
+        if (targetClass.isAssignableFrom(object.getClass())) {
+            return (T) object;
+        }
+
+        try {
+            if (Enum.class.isAssignableFrom(targetClass)) {
+                try {
+                    return (T) Enum.valueOf((Class<Enum>) targetClass, object.toString().toUpperCase());
+                } catch (Exception e) {
+                    SortedSet<String> values = new TreeSet<>();
+                    for (Enum value : ((Class<Enum>) targetClass).getEnumConstants()) {
+                        values.add(value.name());
+                    }
+                    throw new IllegalArgumentException("Invalid value "+object+". Acceptable values are "+StringUtil.join(values, ", "));
+                }
+            } else if (Number.class.isAssignableFrom(targetClass)) {
+                if (object instanceof Number) {
+                    Number number = (Number) object;
+                    String numberAsString = number.toString();
+                    numberAsString = numberAsString.replaceFirst("\\.0+$", ""); //remove zero decimal so int/long/etc. can parse it correctly.
+
+                    if (targetClass.equals(Byte.class)) {
+                        long value = Long.valueOf(numberAsString);
+                        if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
+                            raiseOverflowException(number, targetClass);
+                        }
+                        return (T) (Byte) number.byteValue();
+                    } else if (targetClass.equals(Short.class)) {
+                        long value = Long.valueOf(numberAsString);
+                        if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
+                            raiseOverflowException(number, targetClass);
+                        }
+                        return (T) (Short) number.shortValue();
+                    } else if (targetClass.equals(Integer.class)) {
+                        long value = Long.valueOf(numberAsString);
+                        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+                            raiseOverflowException(number, targetClass);
+                        }
+                        return (T) (Integer) number.intValue();
+                    } else if (targetClass.equals(Long.class)) {
+                        return (T) Long.valueOf(numberAsString);
+                    } else if (targetClass.equals(Float.class)) {
+                        return (T) (Float) number.floatValue();
+                    } else if (targetClass.equals(Double.class)) {
+                        return (T) (Double) number.doubleValue();
+                    } else if (targetClass.equals(BigInteger.class)) {
+                        return (T) new BigInteger(numberAsString);
+                    } else if (targetClass.equals(BigDecimal.class)) {
+                        // using BigDecimal(String) here, to avoid unpredictability of BigDecimal(double)
+                        // (see BigDecimal javadoc for details)
+                        return (T) new BigDecimal(numberAsString);
+                    } else {
+                        return raiseUnknownConversionException(object, targetClass);
+                    }
+                } else if (object instanceof String) {
+                    String string = (String) object;
+                    if (string.contains(".")) {
+                        string = string.replaceFirst("\\.0+$", "");
+                    }
+                    if (string.equals("")) {
+                        string = "0";
+                    }
+                    if (targetClass.equals(Byte.class)) {
+                        return (T) Byte.decode(string);
+                    } else if (targetClass.equals(Short.class)) {
+                        return (T) Short.decode(string);
+                    } else if (targetClass.equals(Integer.class)) {
+                        return (T) Integer.decode(string);
+                    } else if (targetClass.equals(Long.class)) {
+                        return (T) Long.decode(string);
+                    } else if (targetClass.equals(Float.class)) {
+                        return (T) Float.valueOf(string);
+                    } else if (targetClass.equals(Double.class)) {
+                        return (T) Double.valueOf(string);
+                    } else if (targetClass.equals(BigInteger.class)) {
+                        return (T) new BigInteger(string);
+                    } else if (targetClass.equals(BigDecimal.class)) {
+                        return (T) new BigDecimal(string);
+                    } else {
+                        return raiseUnknownConversionException(object, targetClass);
+                    }
+                } else {
+                    return raiseUnknownConversionException(object, targetClass);
+                }
+            } else if (targetClass.isAssignableFrom(Boolean.class)) {
+                String lowerCase = object.toString().toLowerCase();
+                return (T) (Boolean) (lowerCase.equals("true") || lowerCase.equals("t") || lowerCase.equals("1") || lowerCase.equals("1.0") || lowerCase.equals("yes"));
+            } else if (targetClass.isAssignableFrom(String.class)) {
+                return (T) object.toString();
+            } else if (targetClass.isAssignableFrom(List.class)) {
+                if (object instanceof List) {
+                    return (T) object;
+                } else if (object instanceof Collection) {
+                    return (T) new ArrayList((Collection) object);
+                } else if (object instanceof Object[]) {
+                    return (T) new ArrayList(Arrays.asList((Object[]) object));
+                } else {
+                    return (T) object;
+                }
+            } else if (targetClass.isAssignableFrom(StringClauses.class)) {
+                return (T) new StringClauses().append(object.toString());
+            } else if (targetClass.isAssignableFrom(Class.class)) {
+                try {
+                    return (T) Class.forName(object.toString());
+                } catch (ClassNotFoundException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            } else if (targetClass.isAssignableFrom(File.class)) {
+                return (T) new File(object.toString());
+            } else if (targetClass.equals(UUID.class)) {
+                return (T) UUID.fromString(object.toString());
+            } else if (Date.class.isAssignableFrom(targetClass)) {
+                return (T) new ISODateFormat().parse(object.toString());
+            }
+
+            return (T) object;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(e);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    private static <T> T raiseUnknownConversionException(Object object, Class<T> targetClass) {
+        throw new IllegalArgumentException("Could not convert '" + object + "' of type " + object.getClass().getName() + " to unknown target class " + targetClass.getName());
+    }
+
+    private static void raiseOverflowException(Number number, Class targetClass) {
+        throw new IllegalArgumentException("Could not convert '" + number + "' of type " + number.getClass().getName() + " to target class " + targetClass.getName() + ": overflow");
+    }
+
+    /**
+     * Return the defaultValue if the passed value is null. Otherwise, return the original value.
+     */
+    public static <T> T defaultIfNull(T value, T defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return value;
+        }
+    }
+
+    public static PropertyDescriptor[] getDescriptors(Class<?> targetClass) throws IntrospectionException {
+        IntrospectionContext context = new IntrospectionContext(targetClass);
+        for (BeanIntrospector introspector : introspectors) {
+            introspector.introspect(context);
+        }
+        return context.getDescriptors();
+    }
+
+
+    private interface BeanIntrospector {
+        void introspect(IntrospectionContext context) throws IntrospectionException;
+    }
+
+    private static class DefaultBeanIntrospector implements BeanIntrospector {
+        @Override
+        public void introspect(IntrospectionContext context) throws IntrospectionException {
+            PropertyDescriptor[] descriptors = Introspector.getBeanInfo(context.getTargetClass()).getPropertyDescriptors();
+            if (descriptors != null) {
+                context.addDescriptors(descriptors);
+            }
+        }
+    }
+
+    private static class FluentPropertyBeanIntrospector implements BeanIntrospector {
+        @Override
+        public void introspect(IntrospectionContext context) throws IntrospectionException {
+            for (Method method : context.getTargetClass().getMethods()) {
+                try {
+                    Class<?>[] argTypes = method.getParameterTypes();
+                    int argCount = argTypes.length;
+                    if ((argCount == 1) && method.getName().startsWith("set")) {
+                        String propertyName = Introspector.decapitalize(method.getName().substring(3));
+                        if (!"class".equals(propertyName)) {
+                            PropertyDescriptor pd = context.getDescriptor(propertyName);
+                            boolean setWriteMethod = false;
+                            if (pd == null) {
+                                pd = new PropertyDescriptor(propertyName, null, method);
+                                context.addDescriptor(pd);
+                                setWriteMethod = true;
+                            } else if ((pd.getWriteMethod() == null) && (pd.getReadMethod() != null) && (pd.getReadMethod
+                                    ().getReturnType() == argTypes[0])) {
+
+                                pd.setWriteMethod(method);
+                                setWriteMethod = true;
+                            }
+                            if (setWriteMethod) {
+                                for (Class<?> type : method.getExceptionTypes()) {
+                                    if (type == PropertyVetoException.class) {
+                                        pd.setConstrained(true);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (IntrospectionException ignored) {
+                }
+            }
+        }
+    }
+
+    private static class IntrospectionContext {
+        private final Class<?> targetClass;
+        private final Map<String, PropertyDescriptor> descriptors = new HashMap<>();
+
+        public IntrospectionContext(Class<?> targetClass) {
+            if (targetClass == null) {
+                throw new NullPointerException();
+            }
+            this.targetClass = targetClass;
+        }
+
+        public void addDescriptor(PropertyDescriptor descriptor) {
+            descriptors.put(descriptor.getName(), descriptor);
+        }
+
+        public void addDescriptors(PropertyDescriptor[] descriptors) {
+            for (PropertyDescriptor descriptor : descriptors) {
+                addDescriptor(descriptor);
+            }
+        }
+
+        public PropertyDescriptor getDescriptor(String name) {
+            return descriptors.get(name);
+        }
+
+        public PropertyDescriptor[] getDescriptors() {
+            return descriptors.values().toArray(new PropertyDescriptor[descriptors.values().size()]);
+        }
+
+        public Class<?> getTargetClass() {
+            return targetClass;
+        }
     }
 
 }

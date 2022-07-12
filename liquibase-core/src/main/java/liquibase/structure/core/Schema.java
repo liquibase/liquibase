@@ -3,7 +3,7 @@ package liquibase.structure.core;
 import liquibase.CatalogAndSchema;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -18,7 +18,7 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     public Schema(Catalog catalog, String schemaName) {
-        schemaName = StringUtils.trimToNull(schemaName);
+        schemaName = StringUtil.trimToNull(schemaName);
 
         setAttribute("name", schemaName);
         setAttribute("catalog", catalog);
@@ -62,27 +62,24 @@ public class Schema extends AbstractDatabaseObject {
 
     @Override
     public boolean equals(Object o) {
-        // object identity
-        if (this == o) {
-            return true;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        // other object null or of different class
-        if ((o == null) || (getClass() != o.getClass())) {
-            return false;
-        }
-        Schema otherSchema = (Schema) o;
+        Schema schema = (Schema) o;
 
-        // catalog or name different?
-        return (
-            (Objects.equals(getCatalog(), otherSchema.getCatalog())) &&
-                (StringUtils.equalsIgnoreCaseAndEmpty(getName(), otherSchema.getName())));
+        if (shouldIncludeCatalogInSpecification()) {
+            if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null)
+                return false;
+        }
+        if (getName() != null ? !getName().equalsIgnoreCase(schema.getName()) : schema.getName() != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = (getCatalog() != null) ? getCatalog().hashCode() : 0;
-        result = (31 * result) + ((getName() != null) ? getName().hashCode() : 0);
+        int result = (shouldIncludeCatalogInSpecification() && getCatalog() != null) ? getCatalog().hashCode() : 0;
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
         return result;
     }
 

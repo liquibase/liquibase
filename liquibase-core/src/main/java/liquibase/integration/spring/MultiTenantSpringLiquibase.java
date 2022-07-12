@@ -3,9 +3,8 @@
  */
 package liquibase.integration.spring;
 
+import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -43,8 +42,8 @@ import java.util.Map;
  */
 public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoaderAware {
     private final List<DataSource> dataSources = new ArrayList<>();
-    private Logger log = LogService.getLog(MultiTenantSpringLiquibase.class);
-	/** Defines the location of data sources suitable for multi-tenant environment. */
+
+    /** Defines the location of data sources suitable for multi-tenant environment. */
 	private String jndiBase;
 		/** Defines a single data source and several schemas for a multi-tenant environment. */
 	private DataSource dataSource;
@@ -62,7 +61,17 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
     private String defaultSchema;
 
+	private String liquibaseSchema;
+
+	private String liquibaseTablespace;
+
+	private String databaseChangeLogTable;
+
+	private String databaseChangeLogLockTable;
+
     private boolean dropFirst;
+
+    private boolean clearCheckSums;
 
     private boolean shouldRun = true;
 
@@ -71,26 +80,30 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
+		Logger log = Scope.getCurrentScope().getLog(getClass());
+
 		if((dataSource != null) || (schemas != null)) {
 			if((dataSource == null) && (schemas != null)) {
 				throw new LiquibaseException("When schemas are defined you should also define a base dataSource");				
 			}else if(dataSource!=null){
-				log.info(LogType.LOG, "Schema based multitenancy enabled");
+				log.info("Schema based multitenancy enabled");
 				if((schemas == null) || schemas.isEmpty()) {
-					log.warning(LogType.LOG, "Schemas not defined, using defaultSchema only");
+					log.warning("Schemas not defined, using defaultSchema only");
 					schemas = new ArrayList<>();
 					schemas.add(defaultSchema);
 				}
 				runOnAllSchemas();
 			}
 		}else {
-			log.info(LogType.LOG, "DataSources based multitenancy enabled");
+			log.info("DataSources based multitenancy enabled");
 			resolveDataSources();
 			runOnAllDataSources();
 		}
 	}
 
 	private void resolveDataSources() throws NamingException {
+		Logger log = Scope.getCurrentScope().getLog(getClass());
+
 		Context context = new InitialContext();
 		int lastIndexOf = jndiBase.lastIndexOf("/");
 		String jndiRoot = jndiBase.substring(0, lastIndexOf);
@@ -110,32 +123,36 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 			Object lookup = context.lookup(jndiUrl);
 			if(lookup instanceof DataSource) {
 				dataSources.add((DataSource) lookup);
-				log.debug(LogType.LOG, "Added a data source at " + jndiUrl);
+				log.fine("Added a data source at " + jndiUrl);
 			} else {
-				log.info(LogType.LOG, "Skipping a resource " + jndiUrl + " not compatible with DataSource.");
+				log.info("Skipping a resource " + jndiUrl + " not compatible with DataSource.");
 			}
 		}
 	}
 
 	private void runOnAllDataSources() throws LiquibaseException {
+		Logger log = Scope.getCurrentScope().getLog(getClass());
+
 		for(DataSource aDataSource : dataSources) {
-            log.info(LogType.LOG, "Initializing Liquibase for data source " + aDataSource);
+            log.info("Initializing Liquibase for data source " + aDataSource);
             SpringLiquibase liquibase = getSpringLiquibase(aDataSource);
 			liquibase.afterPropertiesSet();
-            log.info(LogType.LOG, "Liquibase ran for data source " + aDataSource);
+            log.info("Liquibase ran for data source " + aDataSource);
         }
 	}
 	
 	private void runOnAllSchemas() throws LiquibaseException {
+		Logger log = Scope.getCurrentScope().getLog(getClass());
+
 		for(String schema : schemas) {
 			if("default".equals(schema)) {
 				schema = null;
 			}
-            log.info(LogType.LOG, "Initializing Liquibase for schema " + schema);
+            log.info("Initializing Liquibase for schema " + schema);
             SpringLiquibase liquibase = getSpringLiquibase(dataSource);
 			liquibase.setDefaultSchema(schema);
 			liquibase.afterPropertiesSet();
-            log.info(LogType.LOG, "Liquibase ran for schema " + schema);
+            log.info("Liquibase ran for schema " + schema);
         }
 	}
 
@@ -146,11 +163,16 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		liquibase.setContexts(contexts);
         liquibase.setLabels(labels);
 		liquibase.setDropFirst(dropFirst);
+		liquibase.setClearCheckSums(clearCheckSums);
 		liquibase.setShouldRun(shouldRun);
 		liquibase.setRollbackFile(rollbackFile);
 		liquibase.setResourceLoader(resourceLoader);
 		liquibase.setDataSource(dataSource);
 		liquibase.setDefaultSchema(defaultSchema);
+		liquibase.setLiquibaseSchema(liquibaseSchema);
+		liquibase.setLiquibaseTablespace(liquibaseTablespace);
+		liquibase.setDatabaseChangeLogTable(databaseChangeLogTable);
+		liquibase.setDatabaseChangeLogLockTable(databaseChangeLogLockTable);
 		return liquibase;
 	}
 
@@ -203,12 +225,52 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		this.defaultSchema = defaultSchema;
 	}
 
+	public String getLiquibaseSchema() {
+		return liquibaseSchema;
+	}
+
+	public void setLiquibaseSchema(String liquibaseSchema) {
+		this.liquibaseSchema = liquibaseSchema;
+	}
+
+	public String getLiquibaseTablespace() {
+		return liquibaseTablespace;
+	}
+
+	public void setLiquibaseTablespace(String liquibaseTablespace) {
+		this.liquibaseTablespace = liquibaseTablespace;
+	}
+
+	public String getDatabaseChangeLogTable() {
+		return databaseChangeLogTable;
+	}
+
+	public void setDatabaseChangeLogTable(String databaseChangeLogTable) {
+		this.databaseChangeLogTable = databaseChangeLogTable;
+	}
+
+	public String getDatabaseChangeLogLockTable() {
+		return databaseChangeLogLockTable;
+	}
+
+	public void setDatabaseChangeLogLockTable(String databaseChangeLogLockTable) {
+		this.databaseChangeLogLockTable = databaseChangeLogLockTable;
+	}
+
 	public boolean isDropFirst() {
 		return dropFirst;
 	}
 
 	public void setDropFirst(boolean dropFirst) {
 		this.dropFirst = dropFirst;
+	}
+
+	public boolean isClearCheckSums() {
+		return clearCheckSums;
+	}
+
+	public void setClearCheckSums(boolean clearCheckSums) {
+		this.clearCheckSums = clearCheckSums;
 	}
 
 	public boolean isShouldRun() {

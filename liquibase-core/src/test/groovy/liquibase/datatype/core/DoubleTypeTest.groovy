@@ -1,35 +1,39 @@
 package liquibase.datatype.core
 
 import liquibase.database.core.*
+import liquibase.datatype.DataTypeFactory
 import liquibase.exception.UnexpectedLiquibaseException
-import liquibase.sdk.database.MockDatabase
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class DoubleTypeTest extends Specification {
 
     @Unroll
-    def "toDatabaseType"() {
+    def "toDatabaseType '#input' on #database.shortName"() {
         when:
-        def type = new DoubleType()
-        for (param in params) {
-            type.addParameter(param)
-        }
+        def type = DataTypeFactory.getInstance().fromDescription(input, database)
 
         then:
+        type instanceof DoubleType
         type.toDatabaseDataType(database).toString() == expected
 
         where:
-        params | database               | expected
-        [22]   | new MySQLDatabase()    | "DOUBLE"
-        [7, 3] | new MySQLDatabase()    | "DOUBLE(7, 3)"
-        [22]   | new DB2Database()      | "DOUBLE"
-        [22]   | new DerbyDatabase()    | "DOUBLE"
-        [22]   | new HsqlDatabase()     | "DOUBLE"
-        [22]   | new MSSQLDatabase()    | "float(53)"
-        [22]   | new PostgresDatabase() | "DOUBLE PRECISION"
-        [22]   | new InformixDatabase() | "DOUBLE PRECISION"
-        []     | new OracleDatabase()   | "FLOAT(24)"
+        input                            | database               | expected
+        "double(22)"                     | new MySQLDatabase()    | "DOUBLE"
+        "double(7,3)"                    | new MySQLDatabase()    | "DOUBLE(7, 3)"
+        "double precision(7,3)"          | new MySQLDatabase()    | "DOUBLE PRECISION(7, 3)"
+        "double(7,3) unsigned"           | new MySQLDatabase()    | "DOUBLE(7, 3) UNSIGNED"
+        "double precision(7,3) unsigned" | new MySQLDatabase()    | "DOUBLE PRECISION(7, 3) UNSIGNED"
+        "double"                         | new DB2Database()      | "DOUBLE"
+        "double"                         | new DerbyDatabase()    | "DOUBLE"
+        "double"                         | new HsqlDatabase()     | "DOUBLE"
+        "double"                         | new H2Database()       | "DOUBLE"
+        "double precision"               | new H2Database()       | "DOUBLE PRECISION"
+        "double"                         | new MSSQLDatabase()    | "float(53)"
+        "double"                         | new PostgresDatabase() | "DOUBLE PRECISION"
+        "double"                         | new InformixDatabase() | "DOUBLE PRECISION"
+        "double"                         | new FirebirdDatabase() | "DOUBLE PRECISION"
+        "double"                         | new OracleDatabase()   | "FLOAT(24)"
     }
 
     def "too many parameters"() {

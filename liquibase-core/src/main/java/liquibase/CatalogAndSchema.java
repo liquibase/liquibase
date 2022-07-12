@@ -3,7 +3,7 @@ package liquibase;
 import liquibase.database.Database;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Locale;
 
@@ -76,8 +76,8 @@ public class CatalogAndSchema {
      * @see CatalogAndSchema#customize(liquibase.database.Database)
      * */
     public CatalogAndSchema standardize(Database accordingTo) {
-        String workCatalogName = StringUtils.trimToNull(getCatalogName());
-        String workSchemaName = StringUtils.trimToNull(getSchemaName());
+        String workCatalogName = StringUtil.trimToNull(getCatalogName());
+        String workSchemaName = StringUtil.trimToNull(getSchemaName());
 
         if (!accordingTo.supportsCatalogs()) {
             return new CatalogAndSchema(null, null);
@@ -105,19 +105,21 @@ public class CatalogAndSchema {
             workSchemaName = null;
         }
 
+        boolean preserveSchemaCase = Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue());
+
         if (CatalogAndSchemaCase.LOWER_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
-            if (workCatalogName != null) {
+            if (workCatalogName != null && ! preserveSchemaCase) {
                 workCatalogName = workCatalogName.toLowerCase(Locale.US);
             }
-            if (workSchemaName != null) {
+            if (workSchemaName != null && ! preserveSchemaCase) {
                 workSchemaName = workSchemaName.toLowerCase(Locale.US);
             }
         } else if (CatalogAndSchemaCase.UPPER_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
             if (!accordingTo.isCaseSensitive()) {
-                if (workCatalogName != null) {
+                if (workCatalogName != null && ! preserveSchemaCase) {
                     workCatalogName = workCatalogName.toUpperCase(Locale.US);
                 }
-                if (workSchemaName != null) {
+                if (workSchemaName != null && ! preserveSchemaCase) {
                     workSchemaName = workSchemaName.toUpperCase(Locale.US);
                 }
             }

@@ -14,7 +14,7 @@
             You can add comments to changeSets.
             They can even be multiple lines if you would like.
             They aren't used to compute the changeSet MD5Sum, so you can update them whenever you want without causing problems.
-        </comment>        
+        </comment>
         <createTable tableName="person">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
@@ -82,20 +82,20 @@
             <column name="name" value="Widgets Inc."/>
         </insert>
     </changeSet>
-    <!--<changeSet id="7a" author="nvoxland">-->
-        <!--<addColumn tableName="company">-->
-            <!--<column name="company_id" type="int">-->
-                <!--<constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>-->
-            <!--</column>-->
-        <!--</addColumn>-->
-    <!--</changeSet>-->
-    <!--<changeSet id="8" author="bjohnson">-->
-        <!--<dropNotNullConstraint tableName="employee" columnName="name" columnDataType="varchar(50)"/>-->
-    <!--</changeSet>-->
-    <!--<changeSet id="8.1" author="bjohnson">-->
-        <!--<comment>I guess name needs to be not-null</comment>-->
-        <!--<addNotNullConstraint tableName='employee' columnName="name" defaultNullValue="UNKNOWN"/>-->
-    <!--</changeSet>-->
+    <changeSet id="7a" author="nvoxland">
+        <addColumn tableName="company">
+            <column name="company_id" type="int">
+                <constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="8" author="bjohnson">
+        <dropNotNullConstraint tableName="company" columnName="name"/>
+    </changeSet>
+    <changeSet id="8.1" author="bjohnson">
+        <comment>I guess name needs to be not-null</comment>
+        <addNotNullConstraint tableName='company' columnName="name" defaultNullValue="UNKNOWN"/>
+    </changeSet>
     <!--<changeSet id="9" author="nvoxland">-->
         <!--<renameTable oldTableName="employee" newTableName="company"/>-->
     <!--</changeSet>-->

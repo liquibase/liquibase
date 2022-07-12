@@ -11,7 +11,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 @DatabaseChange(name = "stop", description = "Stops Liquibase execution with a message. Mainly useful for debugging " +
     "and " +
@@ -31,7 +31,7 @@ public class StopChange extends AbstractChange {
     }
 
     public void setMessage(String message) {
-        this.message = StringUtils.trimToNull(message);
+        this.message = StringUtil.trimToNull(message);
     }
 
     @Override

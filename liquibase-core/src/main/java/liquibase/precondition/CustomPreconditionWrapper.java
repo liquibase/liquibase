@@ -1,5 +1,6 @@
 package liquibase.precondition;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.DatabaseChangeLog;
@@ -10,18 +11,21 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ObjectUtil;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class CustomPreconditionWrapper extends AbstractPrecondition {
 
     private String className;
-    private ClassLoader classLoader;
 
     private SortedSet<String> params = new TreeSet<>();
-    private Map<String, String> paramValues = new HashMap<>();
+    private Map<String, String> paramValues = new LinkedHashMap<>();
 
     public String getClassName() {
         return className;
@@ -33,14 +37,6 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
 
     public void setClass(String className) {
         this.className = className;
-    }
-
-    public ClassLoader getClassLoader() {
-        return classLoader;
-    }
-
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
     }
 
     public String getParamValue(String key) {
@@ -69,9 +65,9 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
         try {
 //            System.out.println(classLoader.toString());
             try {
-                customPrecondition = (CustomPrecondition) Class.forName(className, true, classLoader).newInstance();
+                customPrecondition = (CustomPrecondition) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
             } catch (ClassCastException e) { //fails in Ant in particular
-                customPrecondition = (CustomPrecondition) Class.forName(className).newInstance();
+                customPrecondition = (CustomPrecondition) Class.forName(className).getConstructor().newInstance();
             }
         } catch (Exception e) {
             throw new PreconditionFailedException("Could not open custom precondition class "+className, changeLog, this);
@@ -100,13 +96,24 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     }
 
     @Override
+    public Set<String> getSerializableFields() {
+        return new LinkedHashSet<>(Arrays.asList("className", "param"));
+    }
+
+    @Override
+    public Object getSerializableFieldValue(String field) {
+        return field.equals("param") ? paramValues
+                                     : super.getSerializableFieldValue(field);
+    }
+
+    @Override
     public String getName() {
         return "customPrecondition";
     }
 
     @Override
     protected boolean shouldAutoLoad(ParsedNode node) {
-        if ("params".equals(node.getName())) {
+        if ("params".equals(node.getName()) || "param".equals(node.getName())) {
             return false;
         }
         return super.shouldAutoLoad(node);
@@ -114,7 +121,6 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        setClassLoader(resourceAccessor.toClassLoader());
         setClassName(parsedNode.getChildValue(null, "className", String.class));
 
         ParsedNode paramsNode = parsedNode.getChild(null, "params");

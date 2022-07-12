@@ -3,7 +3,7 @@ package liquibase.changelog.filter;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.exception.RollbackFailedException;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.HashSet;
 import java.util.List;
@@ -24,7 +24,7 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
 
             if (!seenTag && tag.equalsIgnoreCase(ranChangeSet.getTag())) {
                 seenTag = true;
-                if ("tagDatabase".equals(StringUtils.trimToEmpty(ranChangeSet.getDescription()))) { //changeSet is just tagging the database. Also remove it.
+                if ("tagDatabase".equals(StringUtil.trimToEmpty(ranChangeSet.getDescription()))) { //changeSet is just tagging the database. Also remove it.
                     changeLogsAfterTag.add(changeLogToString(ranChangeSet.getId(), ranChangeSet.getAuthor(), ranChangeSet.getChangeLog()));
                 }
             }
@@ -42,9 +42,9 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         if (changeLogsAfterTag.contains(changeLogToString(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath()))) {
-            return new ChangeSetFilterResult(true, "Change set is before tag '"+tag+"'", this.getClass());
+            return new ChangeSetFilterResult(true, "Changeset is before tag '"+tag+"'", this.getClass());
         } else {
-            return new ChangeSetFilterResult(false, "Change set after tag '"+tag+"'", this.getClass());
+            return new ChangeSetFilterResult(false, "Changeset after tag '"+tag+"'", this.getClass());
         }
     }
 }

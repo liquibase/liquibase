@@ -1,13 +1,10 @@
 package liquibase.database.core;
 
-import liquibase.database.AbstractJdbcDatabaseTest;
-import liquibase.database.Database;
+import liquibase.database.*;
+import liquibase.test.JUnitResourceAccessor;
 import org.junit.Test;
-import org.powermock.api.mockito.PowerMockito;
 
 import static org.junit.Assert.*;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.support.membermodification.MemberMatcher.method;
 
 /**
  * Tests for {@link MSSQLDatabase}
@@ -62,41 +59,61 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals("[catalogName€].[schemaName€].[tableName€]", database.escapeTableName("catalogName€",
             "schemaName€", "tableName€"));
     }
-
-    @Test
-    public void changeDefaultSchemaToAllowedValue() throws Exception {
-        Database database = new MSSQLDatabase();
-        Database dbSpy = PowerMockito.spy(database);
-        when(dbSpy, method(MSSQLDatabase.class, "getConnectionSchemaName", null)).withNoArguments().thenReturn
-            ("myschema");
-        assertNull(dbSpy.getDefaultSchemaName());
-
-        dbSpy.setDefaultSchemaName("myschema");
-        assertEquals("myschema", dbSpy.getDefaultSchemaName());
+    private Database createOfflineDatabase(String url) throws Exception {
+        return DatabaseFactory.getInstance().openDatabase(url, null, null, null, null);
     }
 
     @Test
-    public void changeDefaultSchemaToNull() throws Exception {
-        Database database = new MSSQLDatabase();
-        Database dbSpy = PowerMockito.spy(database);
-        when(dbSpy, method(MSSQLDatabase.class, "getConnectionSchemaName", null)).withNoArguments().thenReturn
-            ("myschema");
-        assertNull(dbSpy.getDefaultSchemaName());
-
-        dbSpy.setDefaultSchemaName(null);
-        assertNull("Changing the default schema to null should be successful.", dbSpy.getDefaultSchemaName());
+    public void setDefaultSchemaName() throws Exception {
+        //
+        // No exception should be thrown by call to setDefaultSchemaName
+        //
+        Database database = createOfflineDatabase("offline:mssql");
+        database.setDefaultSchemaName("MySchema");
     }
 
-    @Test(expected = RuntimeException.class)
-    public void changeDefaultSchemaToForbiddenValue() throws Exception {
-        Database database = new MSSQLDatabase();
-        Database dbSpy = PowerMockito.spy(database);
-        when(dbSpy, method(MSSQLDatabase.class, "getConnectionSchemaName", null)).withNoArguments().thenReturn
-            ("myschema");
-        assertNull(dbSpy.getDefaultSchemaName());
-
-        dbSpy.setDefaultSchemaName("some_other_schema");
+    @Test
+    public void isUnmodifiable() throws Exception {
+        Database database = createOfflineDatabase("offline:mssql");
+        assertTrue(database instanceof MSSQLDatabase);
+        MSSQLDatabase mssqlDatabase = (MSSQLDatabase)database;
+        assertTrue(mssqlDatabase.dataTypeIsNotModifiable("datetime"));
     }
+
+//    @Test
+//    public void changeDefaultSchemaToAllowedValue() throws Exception {
+//        Database database = new MSSQLDatabase();
+//        Database dbSpy = PowerMockito.spy(database);
+//        when(dbSpy, method(MSSQLDatabase.class, "getConnectionSchemaName", null)).withNoArguments().thenReturn
+//            ("myschema");
+//        assertNull(dbSpy.getDefaultSchemaName());
+//
+//        dbSpy.setDefaultSchemaName("myschema");
+//        assertEquals("myschema", dbSpy.getDefaultSchemaName());
+//    }
+//
+//    @Test
+//    public void changeDefaultSchemaToNull() throws Exception {
+//        Database database = new MSSQLDatabase();
+//        Database dbSpy = PowerMockito.spy(database);
+//        when(dbSpy, method(MSSQLDatabase.class, "getConnectionSchemaName", null)).withNoArguments().thenReturn
+//            ("myschema");
+//        assertNull(dbSpy.getDefaultSchemaName());
+//
+//        dbSpy.setDefaultSchemaName(null);
+//        assertNull("Changing the default schema to null should be successful.", dbSpy.getDefaultSchemaName());
+//    }
+//
+//    @Test(expected = RuntimeException.class)
+//    public void changeDefaultSchemaToForbiddenValue() throws Exception {
+//        Database database = new MSSQLDatabase();
+//        Database dbSpy = PowerMockito.spy(database);
+//        when(dbSpy, method(MSSQLDatabase.class, "getConnectionSchemaName", null)).withNoArguments().thenReturn
+//            ("myschema");
+//        assertNull(dbSpy.getDefaultSchemaName());
+//
+//        dbSpy.setDefaultSchemaName("some_other_schema");
+//    }
 
     @Test
     public void testEscapeDataTypeName() {

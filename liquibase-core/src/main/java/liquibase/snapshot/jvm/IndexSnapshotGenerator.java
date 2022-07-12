@@ -11,7 +11,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             return;
         }
 
-        if (foundObject instanceof Table  || foundObject instanceof View) {
+        if (foundObject instanceof Table || foundObject instanceof View) {
             if (foundObject instanceof View && !addToViews(snapshot.getDatabase())) {
                 return;
             }
@@ -65,7 +65,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     if (index == null) {
                         index = new Index();
                         index.setName(indexName);
-                        index.setTable(relation);
+                        index.setRelation(relation);
 
                         short type = row.getShort("TYPE");
                         if (type == DatabaseMetaData.tableIndexClustered) {
@@ -84,8 +84,8 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         ascOrDesc = row.getString("ASC_OR_DESC");
                     }
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ? Boolean
-                        .FALSE : null);
-                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
+                            .FALSE : null);
+                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getRelation()));
                 }
 
                 //add clustered indexes first, than all others in case there is a clustered and non-clustered version of the same index. Prefer the clustered version
@@ -114,13 +114,13 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
         if ((foundObject instanceof UniqueConstraint) && (((UniqueConstraint) foundObject).getBackingIndex() == null)
-            && !(snapshot.getDatabase() instanceof DB2Database) && !(snapshot.getDatabase() instanceof DerbyDatabase)) {
-            Index exampleIndex = new Index().setTable(((UniqueConstraint) foundObject).getTable());
+                && !(snapshot.getDatabase() instanceof DB2Database) && !(snapshot.getDatabase() instanceof DerbyDatabase)) {
+            Index exampleIndex = new Index().setRelation(((UniqueConstraint) foundObject).getRelation());
             exampleIndex.getColumns().addAll(((UniqueConstraint) foundObject).getColumns());
             ((UniqueConstraint) foundObject).setBackingIndex(exampleIndex);
         }
         if ((foundObject instanceof ForeignKey) && (((ForeignKey) foundObject).getBackingIndex() == null)) {
-            Index exampleIndex = new Index().setTable(((ForeignKey) foundObject).getForeignKeyTable());
+            Index exampleIndex = new Index().setRelation(((ForeignKey) foundObject).getForeignKeyTable());
             exampleIndex.getColumns().addAll(((ForeignKey) foundObject).getForeignKeyColumns());
             ((ForeignKey) foundObject).setBackingIndex(exampleIndex);
         }
@@ -129,7 +129,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
-        Relation exampleIndex = ((Index) example).getTable();
+        Relation exampleIndex = ((Index) example).getRelation();
 
         String tableName = null;
         Schema schema = null;
@@ -172,10 +172,10 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     continue;
                 }
                 /*
-                * TODO Informix generates indexnames with a leading blank if no name given.
-                * An identifier with a leading blank is not allowed.
-                * So here is it replaced.
-                */
+                 * TODO Informix generates indexnames with a leading blank if no name given.
+                 * An identifier with a leading blank is not allowed.
+                 * So here is it replaced.
+                 */
                 if ((database instanceof InformixDatabase) && indexName.startsWith(" ")) {
                     continue; // suppress creation of generated_index records
                 }
@@ -188,7 +188,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
                 short position = row.getShort("ORDINAL_POSITION");
 
-                String definition = StringUtils.trimToNull(row.getString("FILTER_CONDITION"));
+                String definition = StringUtil.trimToNull(row.getString("FILTER_CONDITION"));
                 if (definition != null) {
                     if (!(database instanceof OracleDatabase)) { //TODO: this replaceAll code has been there for a long time but we don't know why. Investigate when it is ever needed and modify it to be smarter
                         definition = definition.replaceAll("\"", "");
@@ -200,7 +200,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     continue;
                 }
 
-                if (type == DatabaseMetaData.tableIndexStatistic) {
+                if (!(database instanceof H2Database) && type == DatabaseMetaData.tableIndexStatistic) {
                     continue;
                 }
 
@@ -215,12 +215,11 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                  * Our strategy here is: If the expression would be a valid Oracle identifier, but not a valid Oracle
                  * function name, then we assume it is the name of a regular column.
                  */
-                if ((database instanceof OracleDatabase) && (definition != null) && (columnName != null))
-                {
+                if ((database instanceof OracleDatabase) && (definition != null) && (columnName != null)) {
                     String potentialColumnExpression = definition.replaceFirst("^\"?(.*?)\"?$", "$1");
-                    OracleDatabase oracle = (OracleDatabase)database;
+                    OracleDatabase oracle = (OracleDatabase) database;
                     if (oracle.isValidOracleIdentifier(potentialColumnExpression, Index.class)
-                        && (!oracle.isFunction(potentialColumnExpression))) {
+                            && (!oracle.isFunction(potentialColumnExpression))) {
                         columnName = potentialColumnExpression;
                         definition = null;
                     }
@@ -234,7 +233,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     if ("V".equals(row.getString("INTERNAL_OBJECT_TYPE"))) {
                         relation = new View();
                     }
-                    returnIndex.setTable(relation.setName(row.getString("TABLE_NAME")).setSchema(schema));
+                    returnIndex.setRelation(relation.setName(row.getString("TABLE_NAME")).setSchema(schema));
                     returnIndex.setName(indexName);
                     returnIndex.setUnique(!nonUnique);
 
@@ -276,16 +275,6 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     includedColumns.add(columnName);
                 } else {
                     if (position != 0) { //if really a column, position is 1-based.
-
-                        /*
-                         * TODO: It seems the original author was not completely sure that the columns/expressions
-                         * that make up this index would arrive in order, i.e. they thought it could happen that we
-                         * get the (example) 4 columns in the order 3,4,1,2. So, instead of doing a simple add to the
-                         * collection, they chose this: First, make sure that an (empty) element of "position-1" exists
-                         * in the getColumns() array (add nulls until this is the case). After that, we can safely
-                         * replace the "position-1"th element. I am not sure if this really necessary, but it might
-                         * improve stability, so I leave it in place for the moment.
-                         */
                         for (int i = returnIndex.getColumns().size(); i < position; i++) {
                             returnIndex.getColumns().add(null);
                         }
@@ -293,23 +282,24 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         // Is this column a simple column (definition == null)
                         // or is it a computed expression (definition != null)
                         if (definition == null) {
-                            String ascOrDesc;
-                            if (database instanceof Db2zDatabase) {
-                                ascOrDesc =  row.getString("ORDER");
-                            } else {
-                                ascOrDesc = row.getString("ASC_OR_DESC");
-                            }
+                        String ascOrDesc;
+                        if (database instanceof Db2zDatabase) {
+                            ascOrDesc = row.getString("ORDER");
+                        } else {
+                            ascOrDesc = row.getString("ASC_OR_DESC");
+                        }
                             Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ?
                                 Boolean.FALSE : null);
                             returnIndex.getColumns().set(position - 1, new Column(columnName)
-                                    .setDescending(descending).setRelation(returnIndex.getTable()));
+                                    .setDescending(descending).setRelation(returnIndex.getRelation()));
                         } else {
                             returnIndex.getColumns().set(position - 1, new Column()
-                                    .setRelation(returnIndex.getTable()).setName(definition, true));
+                                    .setRelation(returnIndex.getRelation()).setName(definition, true));
                         }
                     }
                 }
             }
+
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -321,7 +311,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             //prefer clustered version of the index
             List<Index> nonClusteredIndexes = new ArrayList<>();
             for (Index index : foundIndexes.values()) {
-                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleIndex, snapshot.getSchemaComparisons(), database)) {
+                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getRelation(), exampleIndex, snapshot.getSchemaComparisons(), database)) {
                     boolean actuallyMatches = false;
                     if (database.isCaseSensitive()) {
                         if (index.getColumnNames().equals(((Index) example).getColumnNames())) {

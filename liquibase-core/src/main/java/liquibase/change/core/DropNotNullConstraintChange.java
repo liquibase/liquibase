@@ -23,6 +23,8 @@ public class DropNotNullConstraintChange extends AbstractChange {
     private String tableName;
     private String columnName;
     private String columnDataType;
+    private String constraintName;
+    private Boolean shouldValidate;
 
     @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="notNullConstraint.table.catalog")
     public String getCatalogName() {
@@ -75,12 +77,21 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
+    @DatabaseChangeProperty(description = "Name of not null constraint")
+    public String getConstraintName() {
+        return constraintName;
+    }
+
+    public void setConstraintName(String constraintName) {
+        this.constraintName = constraintName;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] { new SetNullableStatement(
                 getCatalogName(),
                 getSchemaName(),
-                getTableName(), getColumnName(), getColumnDataType(), true)
+                getTableName(), getColumnName(), getColumnDataType(), true, getConstraintName())
         };
     }
 
@@ -108,6 +119,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
         inverse.setColumnDataType(getColumnDataType());
+        inverse.setConstraintName(getConstraintName());
 
         return new Change[]{
                 inverse

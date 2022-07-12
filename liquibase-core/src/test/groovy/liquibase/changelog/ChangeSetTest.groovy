@@ -136,6 +136,12 @@ public class ChangeSetTest extends Specification {
                 continue
             } else if (param == "objectQuotingStrategy") {
                 testValue[param] = "QUOTE_ONLY_RESERVED_WORDS"
+            } else if (param == "runInTransaction") {
+                testValue[param] = "false"
+            } else if (param == "runOrder") {
+                testValue[param] = "last"
+            } else if (param == "ignore") {
+                testValue[param] = "true"
             } else {
                 testValue[param] = "value for ${param}"
             }
@@ -532,4 +538,54 @@ public class ChangeSetTest extends Specification {
         "validCheckSums" | []
 
     }
+
+    @Unroll("#featureName: #dbmsList=#expectedValues")
+    def "check serialization for field dbms"() {
+        when:
+        def changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, dbmsList, null);
+
+        then:
+        that(((String) changeSet.getSerializableFieldValue("dbms")).split(","), Matchers.arrayContainingInAnyOrder(*expectedValues))
+
+        where:
+        dbmsList            | expectedValues
+        "all"               | ["all"]
+        "dbms1, !dbms2"     | ["dbms1", "!dbms2"]
+        "dbms1,dbms2,dbms3" | ["dbms1", "dbms2", "dbms3"]
+    }
+
+    def "check serialization for field dbms with empty and null value"() {
+        when:
+        def changeSet = new ChangeSet("id2", "author2", false, false, "/test.xml", null, dbmsList, null);
+
+        then:
+        changeSet.getSerializableFieldValue("dbms") == expectedValue
+
+        where:
+        dbmsList | expectedValue
+        ""       | null
+        null     | null
+    }
+
+    def isInheritableIgnore() {
+        when:
+        def changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, null);
+
+        then:
+        !changeSet.isInheritableIgnore()
+
+        when:
+        def parent = new DatabaseChangeLog("com/example/test.xml")
+        changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, parent);
+
+        then:
+        !changeSet.isInheritableIgnore()
+
+        when:
+        parent.setIncludeIgnore(true)
+
+        then:
+        changeSet.isInheritableIgnore()
+    }
+
 }

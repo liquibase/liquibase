@@ -1,13 +1,13 @@
 package liquibase.diff.compare;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -21,12 +21,9 @@ public class DatabaseObjectComparatorFactory {
     private Map<String, DatabaseObjectComparatorChain> comparatorChainsByClassAndDatabase = new HashMap<>();
 
     private DatabaseObjectComparatorFactory() {
-        Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(DatabaseObjectComparator.class);
-
-            for (Class clazz : classes) {
-                register((DatabaseObjectComparator) clazz.getConstructor().newInstance());
+            for (DatabaseObjectComparator comparator : Scope.getCurrentScope().getServiceLocator().findInstances(DatabaseObjectComparator.class)) {
+                register(comparator);
             }
 
         } catch (Exception e) {
@@ -141,13 +138,20 @@ public class DatabaseObjectComparatorFactory {
         }
 
 
-        return createComparatorChain(object1.getClass(), schemaComparisons, accordingTo).isSameObject(object1, object2, accordingTo);
+        final DatabaseObjectComparatorChain comparatorChain = createComparatorChain(object1.getClass(), schemaComparisons, accordingTo);
+        if (comparatorChain != null) {
+            return comparatorChain.isSameObject(object1, object2, accordingTo);
+        }
+        return false;
     }
 
     public String[] hash(DatabaseObject databaseObject, CompareControl.SchemaComparison[] schemaComparisons, Database accordingTo) {
         String[] hash = null;
         if (databaseObject != null) {
-            hash = createComparatorChain(databaseObject.getClass(), schemaComparisons, accordingTo).hash(databaseObject, accordingTo);
+            final DatabaseObjectComparatorChain comparatorChain = createComparatorChain(databaseObject.getClass(), schemaComparisons, accordingTo);
+            if (comparatorChain != null) {
+                hash = comparatorChain.hash(databaseObject, accordingTo);
+            }
         }
 
         if (hash == null) {
@@ -157,7 +161,7 @@ public class DatabaseObjectComparatorFactory {
         }
 
         for (int i=0; i<hash.length; i++) {
-            if (StringUtils.trimToNull(hash[i]) == null) {
+            if (StringUtil.trimToNull(hash[i]) == null) {
                 hash[i] = "null";
             }
         }
@@ -165,9 +169,12 @@ public class DatabaseObjectComparatorFactory {
     }
 
     public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl) {
-        return createComparatorChain(object1.getClass(), compareControl.getSchemaComparisons(), accordingTo)
-            .findDifferences(object1, object2, accordingTo, compareControl, new HashSet<String>());
-
+        final DatabaseObjectComparatorChain comparatorChain =
+            createComparatorChain(object1.getClass(), compareControl.getSchemaComparisons(), accordingTo);
+        if (comparatorChain != null) {
+            return comparatorChain.findDifferences(object1, object2, accordingTo, compareControl, new HashSet<String>());
+        }
+        return null;
     }
 
     private DatabaseObjectComparatorChain createComparatorChain(Class<? extends DatabaseObject> databaseObjectType, CompareControl.SchemaComparison[] schemaComparisons, Database database) {

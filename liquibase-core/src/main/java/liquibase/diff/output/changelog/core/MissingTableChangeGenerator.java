@@ -22,13 +22,11 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
+import liquibase.util.StringUtil;
 import liquibase.structure.core.UniqueConstraint;
 
 import java.math.BigInteger;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MissingTableChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
 
@@ -135,7 +133,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
         if (missingTable.getRemarks() != null) {
             change.setRemarks(missingTable.getRemarks());
         }
-        if ((missingTable.getTablespace() != null) && comparisonDatabase.supportsTablespaces()) {
+        if (control.getIncludeTablespace() && (missingTable.getTablespace() != null) && comparisonDatabase.supportsTablespaces()) {
             change.setTablespace(missingTable.getTablespace());
         }
 
@@ -154,9 +152,11 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                 columnConfig.setAutoIncrement(true);
             }
 
+            boolean primaryKeyOrderMatchesTableOrder = checkPrimaryKeyOrderMatchesTableOrder(missingTable, pkColumnList);
+
             ConstraintsConfig constraintsConfig = null;
             // In MySQL, the primary key must be specified at creation for an autoincrement column
-            if ((pkColumnList != null) && pkColumnList.contains(column.getName())) {
+            if ((pkColumnList != null) && primaryKeyOrderMatchesTableOrder &&  pkColumnList.contains(column.getName())) {
                 if ((referenceDatabase instanceof MSSQLDatabase) && (primaryKey.getBackingIndex() != null) &&
                         (primaryKey.getBackingIndex().getClustered() != null) && !primaryKey.getBackingIndex()
                         .getClustered()) {
@@ -183,9 +183,17 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                         constraintsConfig.setNullable(false);
                     }
                 }
-            } else if ((column.isNullable() != null) && !column.isNullable()) {
-                constraintsConfig = new ConstraintsConfig();
+            }
+
+            if ((column.isNullable() != null) && !column.isNullable()) {
+                if (constraintsConfig == null) {
+                    constraintsConfig = new ConstraintsConfig();
+                }
                 constraintsConfig.setNullable(false);
+                if (!column.getValidateNullable()) {
+                    constraintsConfig.setValidateNullable(false);
+                }
+                constraintsConfig.setNotNullConstraintName(column.getAttribute("notNullConstraintName", String.class));
             }
 
             if (referenceDatabase instanceof MySQLDatabase) {
@@ -212,17 +220,32 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                 columnConfig.setRemarks(column.getRemarks());
             }
 
-            if (column.getAutoIncrementInformation() != null) {
-                BigInteger startWith = column.getAutoIncrementInformation().getStartWith();
-                BigInteger incrementBy = column.getAutoIncrementInformation().getIncrementBy();
+            Column.AutoIncrementInformation autoIncrementInfo = column.getAutoIncrementInformation();
+            if (autoIncrementInfo != null) {
+                BigInteger startWith = autoIncrementInfo.getStartWith();
+                BigInteger incrementBy = autoIncrementInfo.getIncrementBy();
+                String generationType = autoIncrementInfo.getGenerationType();
+                Boolean defaultOnNull = autoIncrementInfo.getDefaultOnNull();
                 if ((startWith != null) && !startWith.equals(BigInteger.ONE)) {
                     columnConfig.setStartWith(startWith);
                 }
                 if ((incrementBy != null) && !incrementBy.equals(BigInteger.ONE)) {
                     columnConfig.setIncrementBy(incrementBy);
                 }
+                if (StringUtil.isNotEmpty(generationType)) {
+                    columnConfig.setGenerationType(generationType);
+                    if (defaultOnNull != null) {
+                        columnConfig.setDefaultOnNull(defaultOnNull);
+                    }
+                }
             }
 
+            //
+            // If there is a computed setting then use it
+            //
+            if (column.getComputed() != null) {
+                columnConfig.setComputed(column.getComputed());
+            }
             change.addColumn(columnConfig);
             control.setAlreadyHandledMissing(column);
         }
@@ -233,6 +256,29 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
         return new Change[]{
                 change
         };
+    }
+
+    private boolean checkPrimaryKeyOrderMatchesTableOrder(Table missingTable, List<String> pkColumnList) {
+        if (pkColumnList == null) {
+            return false;
+        }
+
+        int lastTableOrder = -1;
+        final List<Column> tableColumnList = missingTable.getColumns();
+
+        for (String pkColumnName : pkColumnList) {
+            for (int i = 0; i < tableColumnList.size(); i++) {
+                final Column tableColumn = tableColumnList.get(i);
+                if (Objects.equals(tableColumn.getName(), pkColumnName)) {
+                    if (i < lastTableOrder) {
+                        return false;
+                    }
+                    lastTableOrder = i;
+                }
+            }
+        }
+
+        return true;
     }
 
     private Map<Column, UniqueConstraint> getSingleColumnUniqueConstraints(Table missingTable) {

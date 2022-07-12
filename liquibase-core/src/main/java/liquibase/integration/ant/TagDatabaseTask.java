@@ -2,7 +2,7 @@ package liquibase.integration.ant;
 
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import org.apache.tools.ant.BuildException;
 
 public class TagDatabaseTask extends BaseLiquibaseTask {
@@ -14,7 +14,7 @@ public class TagDatabaseTask extends BaseLiquibaseTask {
         try {
             liquibase.tag(tag);
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to tag database. " + e.toString(), e);
+            throw new BuildException("Unable to tag database: " + e.getMessage(), e);
         }
     }
 
@@ -22,7 +22,7 @@ public class TagDatabaseTask extends BaseLiquibaseTask {
     protected void validateParameters() {
         super.validateParameters();
 
-        if(StringUtils.trimToNull(tag) == null) {
+        if(StringUtil.trimToNull(tag) == null) {
             throw new BuildException("Unable to tag database. The tag attribute is required.");
         }
     }

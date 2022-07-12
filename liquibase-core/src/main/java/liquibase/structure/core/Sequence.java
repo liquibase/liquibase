@@ -2,7 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 
@@ -59,9 +59,11 @@ public class Sequence extends AbstractDatabaseObject {
         Sequence sequence = (Sequence) o;
 
         if ((this.getSchema() != null) && (sequence.getSchema() != null)) {
-            return StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(sequence.getSchema().getName()));
+            boolean schemasEqual = this.getSchema().equals(sequence.getSchema());
+            if (!schemasEqual) {
+                return false;
+            }
         }
-
 
         return !((getName() != null) ? !getName().equalsIgnoreCase(sequence.getName()) : (sequence.getName() != null));
 
@@ -152,7 +154,14 @@ public class Sequence extends AbstractDatabaseObject {
 
     public Sequence setCacheSize(BigInteger cacheSize) {
         this.setAttribute("cacheSize", cacheSize);
+        return this;
+    }
 
+    public String getDataType() {
+        return getAttribute("dataType", String.class);
+    }
+    public Sequence setDataType(String dataType) {
+        this.setAttribute("dataType", dataType);
         return this;
     }
 }

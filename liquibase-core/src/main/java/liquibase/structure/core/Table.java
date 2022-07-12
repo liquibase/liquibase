@@ -1,7 +1,8 @@
 package liquibase.structure.core;
 
 import liquibase.statement.NotNullConstraint;
-import liquibase.util.StringUtils;
+import liquibase.util.BooleanUtil;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,7 @@ public class Table extends Relation {
         Table that = (Table) o;
 
         if ((this.getSchema() != null) && (that.getSchema() != null)) {
-            boolean schemasTheSame = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            boolean schemasTheSame = this.getSchema().equals(that.getSchema());
             if (!schemasTheSame) {
                 return false;
             }
@@ -68,7 +69,7 @@ public class Table extends Relation {
 
     @Override
     public int hashCode() {
-        return StringUtils.trimToEmpty(getName()).toUpperCase().hashCode();
+        return StringUtil.trimToEmpty(getName()).toUpperCase().hashCode();
     }
 
     @Override
@@ -90,4 +91,17 @@ public class Table extends Relation {
         return this;
     }
 
+    public Boolean getDefaultTablespace() {
+        return getAttribute("default_tablespace", Boolean.class);
+    }
+
+    public Table setDefaultTablespace(Boolean tablespace) {
+        setAttribute("default_tablespace", tablespace);
+        return this;
+    }
+
+    public boolean isDefaultTablespace() {
+        Boolean b = getAttribute("default_tablespace",Boolean.class);
+        return BooleanUtil.isTrue(b);
+    }
 }

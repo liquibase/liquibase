@@ -1,5 +1,6 @@
 package liquibase.snapshot;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -7,8 +8,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
-import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.JdbcUtil;
+import liquibase.util.StringUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,6 +19,7 @@ import java.util.*;
 class ResultSetCache {
     private Map<String, Integer> timesSingleQueried = new HashMap<>();
     private Map<String, Boolean> didBulkQuery = new HashMap<>();
+    private boolean bulkTracking = true;
 
     private Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<>();
 
@@ -57,7 +59,7 @@ class ResultSetCache {
                 }
 
                 results = resultSetExtractor.bulkFetch();
-                didBulkQuery.put(schemaKey, true);
+                didBulkQuery.put(schemaKey, bulkTracking);
                 bulkQueried = true;
             } else {
                 // Don't store results in real cache to prevent confusion if later fetching all items.
@@ -73,7 +75,9 @@ class ResultSetCache {
             for (CachedRow row : results) {
                 for (String rowKey : resultSetExtractor.rowKeyParameters(row).getKeyPermutations()) {
                     if (bulkQueried && resultSetExtractor.bulkContainsSchema(schemaKey)) {
-                        String rowSchema = resultSetExtractor.getSchemaKey(row).toLowerCase();
+                        String rowSchema = CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
+                                equals(resultSetExtractor.database.getSchemaAndCatalogCase())?resultSetExtractor.getSchemaKey(row):
+                                resultSetExtractor.getSchemaKey(row).toLowerCase();
                         cache = cacheBySchema.get(rowSchema);
                         if (cache == null) {
                             cache = new HashMap<String, List<CachedRow>>();
@@ -168,13 +172,25 @@ class ResultSetCache {
             if (!database.supportsCatalogs() && !database.supportsSchemas()) {
                 return "all";
             } else if (database.supportsCatalogs() && database.supportsSchemas()) {
+                if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
+                        equals(database.getSchemaAndCatalogCase())) {
+                    return (catalog + "." + schema);
+                }
                 return (catalog + "." + schema).toLowerCase();
             } else {
                 if ((catalog == null) && (schema != null)) {
+                    if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
+                            equals(database.getSchemaAndCatalogCase())) {
+                        return schema;
+                    }
                     return schema.toLowerCase();
                 } else {
                     if (catalog == null) {
                         return "all";
+                    }
+                    if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
+                            equals(database.getSchemaAndCatalogCase())) {
+                        return catalog;
                     }
                     return catalog.toLowerCase();
                 }
@@ -182,7 +198,11 @@ class ResultSetCache {
         }
 
         public String createKey(Database database, String... params) {
-            String key = StringUtils.join(params, ":");
+            String key = StringUtil.join(params, ":");
+            if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
+                    equals(database.getSchemaAndCatalogCase())) {
+                return key;
+            }
             if (!database.isCaseSensitive()) {
                 return key.toLowerCase();
             }
@@ -256,7 +276,7 @@ class ResultSetCache {
                 resultSet.setFetchSize(database.getFetchSize());
                 return extract(resultSet, informixTrimHint);
             } finally {
-                JdbcUtils.close(resultSet, statement);
+                JdbcUtil.close(resultSet, statement);
             }
         }
 
@@ -326,7 +346,7 @@ class ResultSetCache {
                     returnList.add(new CachedRow(row));
                 }
             } finally {
-                JdbcUtils.closeResultSet(resultSet);
+                JdbcUtil.closeResultSet(resultSet);
             }
             return returnList;
         }
@@ -358,5 +378,14 @@ class ResultSetCache {
         protected UnionResultSetExtractor(Database database) {
             super(database);
         }
+    }
+
+    /**
+     * Method to control bulk fetching. By default it is true. Mostly this
+     * flag is used when the database supports multi catalog/schema
+     * @param bulkTracking - boolean flag to control bulk operation
+     */
+    public void setBulkTracking(boolean bulkTracking) {
+        this.bulkTracking = bulkTracking;
     }
 }

@@ -9,7 +9,7 @@ import liquibase.changelog.visitor.ValidatingVisitor
 import liquibase.database.Database
 import liquibase.precondition.core.NotPrecondition
 import liquibase.precondition.core.PreconditionContainer
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import spock.lang.Specification
 
 /**
@@ -90,7 +90,7 @@ class ValidationFailedExceptionTest extends Specification {
         exception = new ValidationFailedException(handler)
     }
 
-    def "change set with invalid MD5 sum present in validation error message" () {
+    def "changeset with invalid MD5 sum present in validation error message" () {
         when:
         def message = exception.getMessage()
 
@@ -98,7 +98,7 @@ class ValidationFailedExceptionTest extends Specification {
         message.contains("invalidMd5SumChangeSet")
     }
 
-    def "duplicate change set present in validation error message" () {
+    def "duplicate changeset present in validation error message" () {
         when:
         def message = exception.getMessage()
 

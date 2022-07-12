@@ -1,5 +1,6 @@
 package liquibase.structure;
 
+import liquibase.GlobalConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -9,7 +10,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -32,7 +33,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public String getObjectTypeName() {
-        return StringUtils.lowerCaseFirst(getClass().getSimpleName());
+        return StringUtil.lowerCaseFirst(getClass().getSimpleName());
     }
 
     @Override
@@ -57,13 +58,38 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     public int compareTo(Object o) {
         AbstractDatabaseObject that = (AbstractDatabaseObject) o;
         if ((this.getSchema() != null) && (that.getSchema() != null)) {
-            int compare = StringUtils.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            if (shouldIncludeCatalogInSpecification()) {
+                String thisCatalogName = this.getSchema().getCatalogName();
+                String thatCatalogName = that.getSchema().getCatalogName();
+
+                if (thisCatalogName != null && thatCatalogName != null) {
+                    int compare = thisCatalogName.compareToIgnoreCase(thatCatalogName);
+                    if (compare != 0) {
+                        return compare;
+                    }
+                } else if (thisCatalogName != null) {
+                    return 1;
+                } else if (thatCatalogName != null) {
+                    return -1;
+                } // if they are both null, it will continue with rest
+            }
+            // now compare schema name
+            int compare = StringUtil.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtil.trimToEmpty(that.getSchema().getName()));
             if (compare != 0) {
                 return compare;
             }
         }
 
-        return this.getName().compareTo(that.getName());
+        String thisName = this.getName();
+        String thatName = that.getName();
+        if (thisName != null && thatName != null) {
+            return thisName.compareTo(thatName);
+        } else if (thisName != null) {
+            return 1;
+        } else if (thatName != null) {
+            return -1;
+        }
+        return 0;
     }
 
     @Override
@@ -134,7 +160,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
                 clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
                 return clone;
             } else if (value instanceof DatabaseObject) {
-                DatabaseObject clone = (DatabaseObject) value.getClass().newInstance();
+                DatabaseObject clone = (DatabaseObject) value.getClass().getConstructor().newInstance();
                 clone.setName(((DatabaseObject) value).getName());
                 clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
                 return clone;
@@ -148,11 +174,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public LiquibaseSerializable.SerializationType getSerializableFieldType(String field) {
-        if (getSerializableFieldValue(field) instanceof DatabaseObject) {
-            return LiquibaseSerializable.SerializationType.NAMED_FIELD;
-        } else {
-            return LiquibaseSerializable.SerializationType.NAMED_FIELD;
-        }
+        return LiquibaseSerializable.SerializationType.NAMED_FIELD;
     }
 
     @Override
@@ -206,5 +228,15 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     @Override
     public String toString() {
         return getName();
+    }
+
+    /**
+     * Convenience method to check if the object types should consider catalog name
+     * also during comparision (equals(), hashcode() and compareTo())
+     *
+     * @return
+     */
+    public boolean shouldIncludeCatalogInSpecification() {
+        return GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION.getCurrentValue();
     }
 }

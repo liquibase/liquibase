@@ -1,0 +1,450 @@
+{ "databaseChangeLog": [
+  {
+    "changeSet": {
+      "id": "1604958377003-1",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createTable": {
+            "columns": [
+              {
+                "column": {
+                  "name": "ACCT_NUM",
+                  "type": "NUMBER(*, 0)"
+                }
+              },
+              {
+                "column": {
+                  "name": "AMOUNT",
+                  "type": "NUMBER(10, 2)"
+                }
+              }]
+            ,
+            "tableName": "ACCOUNT",
+            "tablespace": "USERS"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-2",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createProcedure": {
+            "path": "objects/storedprocedure/PROC_HELLO_WORLD.sql",
+            "procedureName": "PROC_HELLO_WORLD",
+            "relativeToChangelogFile": true
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-3",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createTrigger": {
+            "disabled": false,
+            "path": "objects/trigger/TRIGGER1.sql",
+            "relativeToChangelogFile": true,
+            "tableName": "ACCOUNT",
+            "triggerName": "TRIGGER1"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-4",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createView": {
+            "fullDefinition": true,
+            "selectQuery": "CREATE OR REPLACE FORCE VIEW \"VIEW1\" (\"AMOUNT\") AS SELECT AMOUNT FROM \"PROSCHEMA\".\"ACCOUNT\"",
+            "viewName": "VIEW1"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-5",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createTable": {
+            "columns": [
+              {
+                "column": {
+                  "name": "ACCT_NUM",
+                  "type": "NUMBER(*, 0)"
+                }
+              },
+              {
+                "column": {
+                  "name": "AMOUNT",
+                  "type": "NUMBER(10, 2)"
+                }
+              }]
+            ,
+            "tableName": "ACCOUNT2A",
+            "tablespace": "USERS"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-6",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createTable": {
+            "columns": [
+              {
+                "column": {
+                  "name": "ACCT_NUM",
+                  "type": "NUMBER(*, 0)"
+                }
+              },
+              {
+                "column": {
+                  "name": "AMOUNT",
+                  "type": "NUMBER(10, 2)"
+                }
+              }]
+            ,
+            "tableName": "ACCOUNT2AA",
+            "tablespace": "USERS"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-7",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createTable": {
+            "columns": [
+              {
+                "column": {
+                  "name": "ACCT_NUM",
+                  "type": "NUMBER(*, 0)"
+                }
+              },
+              {
+                "column": {
+                  "name": "AMOUNT",
+                  "type": "NUMBER(10, 2)"
+                }
+              }]
+            ,
+            "tableName": "ACCOUNT2AAA",
+            "tablespace": "USERS"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-8",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createTable": {
+            "columns": [
+              {
+                "column": {
+                  "name": "ACCT_NUM",
+                  "type": "NUMBER(*, 0)"
+                }
+              },
+              {
+                "column": {
+                  "name": "AMOUNT",
+                  "type": "NUMBER(10, 2)"
+                }
+              }]
+            ,
+            "tableName": "ACCOUNT2AAAA",
+            "tablespace": "USERS"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-9",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createTable": {
+            "columns": [
+              {
+                "column": {
+                  "name": "ACCT_NUM",
+                  "type": "NUMBER(*, 0)"
+                }
+              },
+              {
+                "column": {
+                  "name": "AMOUNT",
+                  "type": "NUMBER(10, 2)"
+                }
+              }]
+            ,
+            "tableName": "ACCOUNT2AAAAA",
+            "tablespace": "USERS"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-10",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createTable": {
+            "columns": [
+              {
+                "column": {
+                  "constraints": {
+                    "nullable": false
+                  },
+                  "name": "ID",
+                  "type": "NUMBER(20, 0)"
+                }
+              },
+              {
+                "column": {
+                  "name": "FIRST",
+                  "type": "VARCHAR2(64 BYTE)"
+                }
+              },
+              {
+                "column": {
+                  "name": "LAST",
+                  "type": "VARCHAR2(64 BYTE)"
+                }
+              }]
+            ,
+            "tableName": "POPULATED",
+            "tablespace": "USERS"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-11",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createTable": {
+            "columns": [
+              {
+                "column": {
+                  "name": "NULLABLECOL",
+                  "type": "VARCHAR2(20 BYTE)"
+                }
+              },
+              {
+                "column": {
+                  "name": "NOTNULLCOL",
+                  "type": "VARCHAR2(20 BYTE)"
+                }
+              },
+              {
+                "column": {
+                  "name": "PKCOL",
+                  "type": "VARCHAR2(20 BYTE)"
+                }
+              },
+              {
+                "column": {
+                  "name": "UQCOL",
+                  "type": "NUMBER(*, 0)"
+                }
+              },
+              {
+                "column": {
+                  "name": "INCCOL",
+                  "type": "NUMBER(*, 0)"
+                }
+              },
+              {
+                "column": {
+                  "defaultValue": "defaultVal",
+                  "name": "DEFVALCOL",
+                  "type": "VARCHAR2(20 BYTE)"
+                }
+              },
+              {
+                "column": {
+                  "defaultValueNumeric": 22,
+                  "name": "NUMVALCOL",
+                  "type": "NUMBER(*, 0)"
+                }
+              },
+              {
+                "column": {
+                  "defaultValueComputed": "TO_DATE('2014-08-11', 'YYYY-MM-DD')",
+                  "name": "DATEVALCOL",
+                  "type": "date"
+                }
+              },
+              {
+                "column": {
+                  "defaultValueComputed": "1*22",
+                  "name": "COMPVALCOL",
+                  "type": "NUMBER"
+                }
+              },
+              {
+                "column": {
+                  "name": "IDXUNCLUSTEREDCOL",
+                  "type": "NUMBER"
+                }
+              },
+              {
+                "column": {
+                  "name": "COMMENTCOL",
+                  "remarks": "This is a remark.",
+                  "type": "VARCHAR2(20 BYTE)"
+                }
+              },
+              {
+                "column": {
+                  "name": "COLUMNTOMARKUNUSED",
+                  "remarks": "This column is not used by any other refactorings in this changelog.",
+                  "type": "VARCHAR2(20 BYTE)"
+                }
+              }]
+            ,
+            "tableName": "PRIMARY_TABLE",
+            "tablespace": "USERS"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-12",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createTable": {
+            "columns": [
+              {
+                "column": {
+                  "name": "SUPPLIER_ID",
+                  "type": "NUMBER(4, 0)"
+                }
+              },
+              {
+                "column": {
+                  "name": "SUPPLIER_NAME",
+                  "type": "VARCHAR2(50 BYTE)"
+                }
+              }]
+            ,
+            "tableName": "SUPPLIERS",
+            "tablespace": "USERS"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-13",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createTable": {
+            "columns": [
+              {
+                "column": {
+                  "name": "SUPPLIER_ID",
+                  "type": "NUMBER(4, 0)"
+                }
+              },
+              {
+                "column": {
+                  "name": "SUPPLIER_NAME",
+                  "type": "VARCHAR2(50 BYTE)"
+                }
+              }]
+            ,
+            "tableName": "SUPPLIERS1",
+            "tablespace": "USERS"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-14",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "addCheckConstraint": {
+            "constraintBody": "supplier_id BETWEEN 100 and 9999",
+            "constraintName": "CHECK_SUPPLIER_ID",
+            "disabled": false,
+            "tableName": "SUPPLIERS"
+          }
+        }]
+      
+    }
+  },
+  
+  {
+    "changeSet": {
+      "id": "1604958377003-15",
+      "author": "wesley (generated)",
+      "changes": [
+        {
+          "createFunction": {
+            "functionName": "FUNC_COMPUTE_TAX",
+            "path": "objects/function/FUNC_COMPUTE_TAX.sql",
+            "relativeToChangelogFile": true
+          }
+        }]
+      
+    }
+  }
+  
+]}

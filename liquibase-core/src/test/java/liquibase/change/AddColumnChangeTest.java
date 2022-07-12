@@ -2,7 +2,7 @@ package liquibase.change;
 
 import liquibase.change.core.AddColumnChange;
 import liquibase.database.core.DB2Database;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
@@ -51,5 +51,46 @@ public class AddColumnChangeTest {
         Assert.assertEquals(2, stmt.getColumns().size());
         Assert.assertTrue(statements[1] instanceof ReorganizeTableStatement);
 
+    }
+
+    @Test
+    public void generateStatements_singleColumn_uniqueConstraintName() {
+        String myUniqueConstraintName  = "my_unique_constraint";
+
+        AddColumnChange change = new AddColumnChange();
+        change.setTableName("my_table");
+        AddColumnConfig column = new AddColumnConfig();
+        column.setName("column1");
+        column.setType("integer");
+        ConstraintsConfig constraintsConfig = new ConstraintsConfig();
+        constraintsConfig.setUnique(true);
+        constraintsConfig.setUniqueConstraintName(myUniqueConstraintName);
+        column.setConstraints(constraintsConfig);
+        change.addColumn(column);
+
+        SqlStatement[] statements = change.generateStatements(new MockDatabase());
+        Assert.assertEquals(1, statements.length);
+        Assert.assertTrue(statements[0] instanceof AddColumnStatement);
+        AddColumnStatement stmt = (AddColumnStatement)statements[0];
+        Assert.assertEquals(myUniqueConstraintName, stmt.getUniqueStatementName());
+    }
+
+    @Test
+    public void generateStatements_singleColumn_null_uniqueConstraintName() {
+        AddColumnChange change = new AddColumnChange();
+        change.setTableName("my_table");
+        AddColumnConfig column = new AddColumnConfig();
+        column.setName("column1");
+        column.setType("integer");
+        ConstraintsConfig constraintsConfig = new ConstraintsConfig();
+        constraintsConfig.setUnique(true);
+        column.setConstraints(constraintsConfig);
+        change.addColumn(column);
+
+        SqlStatement[] statements = change.generateStatements(new MockDatabase());
+        Assert.assertEquals(1, statements.length);
+        Assert.assertTrue(statements[0] instanceof AddColumnStatement);
+        AddColumnStatement stmt = (AddColumnStatement)statements[0];
+        Assert.assertNull(stmt.getUniqueStatementName());
     }
 }

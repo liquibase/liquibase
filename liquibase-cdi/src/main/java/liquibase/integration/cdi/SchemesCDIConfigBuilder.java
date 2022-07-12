@@ -1,9 +1,8 @@
 package liquibase.integration.cdi;
 
+import liquibase.Scope;
 import liquibase.integration.cdi.annotations.Liquibase;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
@@ -33,7 +32,7 @@ import java.util.concurrent.Callable;
 @Singleton
 public class SchemesCDIConfigBuilder {
 
-    private static final Logger log = LogService.getLog(SchemesCDIConfigBuilder.class);
+    private static final Logger log = Scope.getCurrentScope().getLog(SchemesCDIConfigBuilder.class);
 
     private static final String ROOT_PATH = System.getProperty("java.io.tmpdir");
 
@@ -56,7 +55,7 @@ public class SchemesCDIConfigBuilder {
      * API method.
      */
     public ResourceAccessor createResourceAccessor() {
-        return new FileSystemResourceAccessor(ROOT_PATH);
+        return new FileSystemResourceAccessor(new File(ROOT_PATH));
     }
 
     /**
@@ -64,7 +63,7 @@ public class SchemesCDIConfigBuilder {
      */
     public CDILiquibaseConfig createCDILiquibaseConfig() {
         final String id = UUID.randomUUID().toString();
-        log.debug(LogType.LOG, String.format("[id = %s] createConfig(). Date: '%s'", id, new Date()));
+        log.fine(String.format("[id = %s] createConfig(). Date: '%s'", id, new Date()));
 
         final InputStream is = SchemesCDIConfigBuilder.class.getResourceAsStream(SCHEMA_NAME);
         try {
@@ -74,43 +73,43 @@ public class SchemesCDIConfigBuilder {
                 }
             });
         } catch (Exception ex) {
-            log.warning(LogType.LOG, String.format("[id = %s] Unable to initialize liquibase where '%s'.", id, ex.getMessage()), ex);
+            log.warning(String.format("[id = %s] Unable to initialize liquibase where '%s'.", id, ex.getMessage()), ex);
             return null;
         } finally {
             try {
                 is.close();
             } catch (IOException ioe) {
-                log.warning(LogType.LOG, String.format("[id = %s] IOException during closing an input stream '%s'.", id, ioe.getMessage()), ioe);
+                log.warning(String.format("[id = %s] IOException during closing an input stream '%s'.", id, ioe.getMessage()), ioe);
             }
         }
     }
-    
+
     private CDILiquibaseConfig createCDILiquibaseConfig(final String id, final InputStream is) throws IOException {
         File liquibaseDir = new File(String.format("%s/liquibase/schemes", ROOT_PATH));
         if (!liquibaseDir.exists() && (!liquibaseDir.mkdirs())) {
             throw new RuntimeException(String.format("[id = %s] Cannot create [%s] dirs.", id, liquibaseDir));
         }
-        log.debug(LogType.LOG, String.format("[id = %s] Includes directory: [path='%s']", id, liquibaseDir.getAbsolutePath()));
+        log.fine(String.format("[id = %s] Includes directory: [path='%s']", id, liquibaseDir.getAbsolutePath()));
 
         String path = String.format("%s/%s", ROOT_PATH, TEMPLATE_NAME);
         File output = new File(path);
 
         if (output.exists()) {
-            log.debug(LogType.LOG, String.format("[id = %s] File [path='%s'] already exists, deleting", id, path));
+            log.fine(String.format("[id = %s] File [path='%s'] already exists, deleting", id, path));
             if (output.delete()) {
-                log.debug(LogType.LOG, String.format("[id = %s] File [path='%s'] already exists, deleted successfully.", id, path));
+                log.fine(String.format("[id = %s] File [path='%s'] already exists, deleted successfully.", id, path));
             } else {
-                log.debug(LogType.LOG, String.format("[id = %s] File [path='%s'] already exists, failed to delete.", id, path));
+                log.fine(String.format("[id = %s] File [path='%s'] already exists, failed to delete.", id, path));
             }
         }
         if (!output.createNewFile()) {
             throw new RuntimeException(String.format("[id = %s] Cannot create [%s] file.", id, output));
         }
-        log.info(LogType.LOG, String.format("[id = %s] File %s was created.", id, output));
-        log.debug(LogType.LOG, String.format("[id = %s] Root liquibase file [path='%s'] ready.", id, path));
+        log.info(String.format("[id = %s] File %s was created.", id, output));
+        log.fine(String.format("[id = %s] Root liquibase file [path='%s'] ready.", id, path));
 
         long start = System.currentTimeMillis();
-        log.info(LogType.LOG, String.format("[id = %s] Scanning application for liquibase schemes.", id));
+        log.info(String.format("[id = %s] Scanning application for liquibase schemes.", id));
 
         Set<Bean<?>> beans = bm.getBeans(Object.class, new AnnotationLiteralDefault());
 
@@ -146,19 +145,19 @@ public class SchemesCDIConfigBuilder {
             schemes.append(String.format(INCLUDE_TPL, schema)).append("\n");
         }
 
-        log.info(LogType.LOG, String.format("[id = %s] Scan complete [took=%s milliseconds].", id, System.currentTimeMillis() - start));
-        log.debug(LogType.LOG, String.format("[id = %s] Resolved schemes: %n%s%n", id, schemes));
-        log.debug(LogType.LOG, String.format("[id = %s] Generating root liquibase file...", id));
+        log.info(String.format("[id = %s] Scan complete [took=%s milliseconds].", id, System.currentTimeMillis() - start));
+        log.fine(String.format("[id = %s] Resolved schemes: %n%s%n", id, schemes));
+        log.fine(String.format("[id = %s] Generating root liquibase file...", id));
 
-        String template = StreamUtil.getStreamContents(is); // schema.template.xml
+        String template = StreamUtil.readStreamAsString(is); // schema.template.xml
 
         String xml = String.format(template, schemes);
 
         FileUtil.write(xml, output);
 
-        log.info(LogType.LOG, String.format("[id = %s] File %s was written.", id, output));
-        log.debug(LogType.LOG, String.format("[id = %s] Generation complete.", id));
-        log.debug(LogType.LOG, String.format("[id = %s] Root liquibase xml: %n %s %n", id, xml));
+        log.info(String.format("[id = %s] File %s was written.", id, output));
+        log.fine(String.format("[id = %s] Generation complete.", id));
+        log.fine(String.format("[id = %s] Root liquibase xml: %n %s %n", id, xml));
 
         CDILiquibaseConfig config = new CDILiquibaseConfig();
         config.setChangeLog(TEMPLATE_NAME);
@@ -173,81 +172,86 @@ public class SchemesCDIConfigBuilder {
      * Synchronization among multiple JVM's.
      */
     CDILiquibaseConfig fileLocked(final String id, Callable<CDILiquibaseConfig> action) throws Exception {
-        log.info(LogType.LOG, String.format("[id = %s] JVM lock acquired, acquiring file lock", id));
+        log.info(String.format("[id = %s] JVM lock acquired, acquiring file lock", id));
         String lockPath = String.format("%s/schema.liquibase.lock", ROOT_PATH);
 
         File lockFile = new File(lockPath);
         if (!lockFile.exists() && lockFile.createNewFile()) {
-            log.info(LogType.LOG, String.format("[id = %s] Created lock file [path='%s'].", id, lockPath));
+            log.info(String.format("[id = %s] Created lock file [path='%s'].", id, lockPath));
         }
 
-        log.info(LogType.LOG, String.format("[id = %s] Trying to acquire the file lock [file='%s']...", id, lockPath));
+        log.info(String.format("[id = %s] Trying to acquire the file lock [file='%s']...", id, lockPath));
 
         CDILiquibaseConfig actionResult = null;
         FileLock lock = null;
         try (
-            FileOutputStream fileStream = new FileOutputStream(lockPath);
-            FileChannel fileChannel = fileStream.getChannel();
+                FileOutputStream fileStream = new FileOutputStream(lockPath);
+                FileChannel fileChannel = fileStream.getChannel();
         )
         {
             while (null == lock) {
                 try {
                     lock = fileChannel.tryLock();
                 } catch (OverlappingFileLockException e) {
-                    log.debug(LogType.LOG, String.format("[id = %s] Lock already acquired, waiting for the lock...", id));
+                    log.fine(String.format("[id = %s] Lock already acquired, waiting for the lock...", id));
                 }
                 if (null == lock) {
-                    log.debug(LogType.LOG, String.format("[id = %s] Waiting for the lock...", id));
-                    Thread.sleep(FILE_LOCK_TIMEOUT);
+                    log.fine(String.format("[id = %s] Waiting for the lock...", id));
+                    try {
+                        Thread.sleep(FILE_LOCK_TIMEOUT);
+                    } catch (InterruptedException interruptedException) {
+                        log.severe(interruptedException.getMessage(), interruptedException);
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
-            log.info(LogType.LOG, String.format("[id = %s] File lock acquired, running liquibase...", id));
+            log.info(String.format("[id = %s] File lock acquired, running liquibase...", id));
             actionResult = action.call();
             lock.release();
         } catch (Exception e) {
-            log.warning(LogType.LOG, e.getMessage(), e);
+            log.warning(e.getMessage(), e);
         }
         return actionResult;
     }
 
     private String copyToFile(final String id, final String liquibase, final String schema) {
-        log.info(LogType.LOG, String.format("[id = %s] copyToFile(%s, %s)", id, liquibase, schema));
+        log.info(String.format("[id = %s] copyToFile(%s, %s)", id, liquibase, schema));
 
         InputStream is = null;
         try {
             is = this.getClass().getClassLoader().getResourceAsStream(schema);
 
-            log.info(LogType.LOG, String.format("[id = %s] Transferring schema [resource=%s] to directory [path=%s]...", id, schema, liquibase));
+            log.info(String.format("[id = %s] Transferring schema [resource=%s] to directory [path=%s]...", id, schema, liquibase));
             String path = schema.startsWith("/") ? schema.substring(1) : schema;
-            log.debug(LogType.LOG, String.format("[id = %s] LiquibaseSchema path is [path='%s'].", id, path));
+            log.fine(String.format("[id = %s] LiquibaseSchema path is [path='%s'].", id, path));
 
             if (path.contains("/")) {
 
                 String dirPath = String.format("%s/%s", liquibase, path.substring(0, path.lastIndexOf('/')));
-                log.debug(LogType.LOG, String.format("[id = %s] LiquibaseSchema path contains intermediate directories [path='%s'], preparing its...", id, dirPath));
+                log.fine(String.format("[id = %s] LiquibaseSchema path contains intermediate directories [path='%s'], preparing its...", id, dirPath));
 
                 File file = new File(dirPath);
                 if (!file.exists() && file.mkdirs()) {
-                    log.info(LogType.LOG, String.format("[id = %s] Directories for [path='%s'] file created.", id, file.getAbsolutePath()));
+                    log.info(String.format("[id = %s] Directories for [path='%s'] file created.", id, file.getAbsolutePath()));
                 }
             }
 
             File file = new File(String.format("%s/%s", liquibase, path));
             if (file.exists()) {
-                log.info(LogType.LOG, String.format("[id = %s] LiquibaseSchema file [path='%s'] already exists, deleting...", id, file.getAbsolutePath()));
+                log.info(String.format("[id = %s] LiquibaseSchema file [path='%s'] already exists, deleting...", id, file.getAbsolutePath()));
                 if (file.delete()) {
-                    log.info(LogType.LOG, String.format("[id = %s] File [path='%s'] deleted.", id, file.getAbsolutePath()));
+                    log.info(String.format("[id = %s] File [path='%s'] deleted.", id, file.getAbsolutePath()));
                 }
             }
             if (file.createNewFile()) {
-                log.info(LogType.LOG, String.format("[id = %s] File [path='%s'] created.", id, file.getAbsolutePath()));
+                log.info(String.format("[id = %s] File [path='%s'] created.", id, file.getAbsolutePath()));
             }
-            log.debug(LogType.LOG, String.format("[id = %s] LiquibaseSchema file [path='%s'] is ready, copying data...", id, file.getAbsolutePath()));
+            log.fine(String.format("[id = %s] LiquibaseSchema file [path='%s'] is ready, copying data...", id, file.getAbsolutePath()));
 
-            FileUtil.write(StreamUtil.getStreamContents(is), file);
+            FileUtil.write(StreamUtil.readStreamAsString(is), file);
 
             String schemaPath = file.getAbsolutePath().replace(ROOT_PATH, "");
-            log.info(LogType.LOG, String.format("[id = %s] Data copied, schema path is [path='%s'].", id, schemaPath));
+            log.info(String.format("[id = %s] Data copied, schema path is [path='%s'].", id, schemaPath));
             return schemaPath;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -257,7 +261,7 @@ public class SchemesCDIConfigBuilder {
                     is.close();
                 }
             } catch (IOException ioe) {
-                log.warning(LogType.LOG, String.format("IOException during closing an input stream '%s'.", ioe.getMessage()), ioe);
+                log.warning(String.format("IOException during closing an input stream '%s'.", ioe.getMessage()), ioe);
             }
         }
     }

@@ -31,7 +31,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
             //cannot check
         }
 
-        return !((database instanceof FirebirdDatabase) || (database instanceof SQLiteDatabase));
+        return !(database instanceof SQLiteDatabase);
     }
 
     @Override
@@ -39,10 +39,20 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("tableName", setNullableStatement.getTableName());
-        validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
 
-        if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof
-            InformixDatabase) || (database instanceof H2Database)) {
+        if (setNullableStatement.isNullable()) {
+            if (database instanceof OracleDatabase) {
+                if (setNullableStatement.getConstraintName() == null && setNullableStatement.getColumnName() == null) {
+                    validationErrors.addError("Oracle requires either constraintName or columnName to be set");
+                }
+            } else {
+                validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
+            }
+        } else {
+            validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
+        }
+
+        if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof InformixDatabase)) {
             validationErrors.checkRequiredField("columnDataType", setNullableStatement.getColumnDataType());
         }
         return validationErrors;
@@ -52,17 +62,18 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
     public Sql[] generateSql(SetNullableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
 
-        String nullableString;
-        if (statement.isNullable()) {
-            nullableString = " NULL";
-        } else {
-            nullableString = " NOT NULL";
-        }
+        String nullableString = statement.isNullable()?" NULL":" NOT NULL";
 
         if ((database instanceof OracleDatabase) && (statement.getConstraintName() != null)) {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " CONSTRAINT " + statement.getConstraintName() + nullableString;
+            if (!statement.isNullable()) {
+                nullableString += !statement.isValidate() ? " ENABLE NOVALIDATE " : "";
+                sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " CONSTRAINT " + statement.getConstraintName() + nullableString;
+            } else {
+                sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + statement.getConstraintName();
+            }
         } else if ((database instanceof OracleDatabase) || (database instanceof SybaseDatabase) || (database
             instanceof SybaseASADatabase)) {
+            nullableString += (database instanceof OracleDatabase)&&(!statement.isValidate()) ? " ENABLE NOVALIDATE " : "";
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + nullableString;
         } else if (database instanceof MSSQLDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + nullableString;
@@ -79,7 +90,25 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
             }
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + nullableString + ")";
         } else {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
+            final String standardSqlStatement = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
+
+            if (database instanceof FirebirdDatabase) {
+                try {
+                    if (database.getDatabaseMajorVersion() <= 2) {
+                        // For Firebird database prior to Firebird 3 the ALTER TABLE syntax is not working
+                        // As a workaround we can modify the system table entry directly (see http://www.firebirdfaq.org/faq103/)
+                        sql = "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = " + (statement.isNullable() ? "NULL" : "1") + " WHERE RDB$RELATION_NAME = '" + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "' AND RDB$FIELD_NAME = '" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + "'";
+                    } else {
+                        sql = standardSqlStatement;
+                    }
+                } catch (DatabaseException ignored) {
+                    //assume it's firebird 3+
+                    sql = standardSqlStatement;
+                }
+
+            } else {
+                sql = standardSqlStatement;
+            }
         }
 
         List<Sql> returnList = new ArrayList<>();

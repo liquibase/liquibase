@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -30,18 +31,13 @@ public class SqlGeneratorFactory {
     private Map<String, SortedSet<SqlGenerator>> generatorsByKey = new HashMap<>();
 
     private SqlGeneratorFactory() {
-        Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(SqlGenerator.class);
-
-            for (Class clazz : classes) {
-                register((SqlGenerator) clazz.getConstructor().newInstance());
+            for (SqlGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(SqlGenerator.class)) {
+                register(generator);
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     /**
@@ -60,6 +56,10 @@ public class SqlGeneratorFactory {
 
 
     public void register(SqlGenerator generator) {
+        if (this.generators.size() == 0) {
+            //handle case in tests wher we clear out the generators
+            this.generatorsByKey.clear();
+        }
         generators.add(generator);
     }
 
@@ -74,7 +74,6 @@ public class SqlGeneratorFactory {
                 toRemove = existingGenerator;
             }
         }
-
         unregister(toRemove);
     }
 
@@ -104,8 +103,11 @@ public class SqlGeneratorFactory {
 
         String key = statement.getClass().getName()+":"+ databaseName+":"+ version;
 
-        if (generatorsByKey.containsKey(key)) {
-            return generatorsByKey.get(key);
+        if (generatorsByKey.containsKey(key) && !generatorsByKey.get(key).isEmpty()) {
+            SortedSet<SqlGenerator> result = new TreeSet<>(new SqlGeneratorComparator());
+            result.addAll(generatorsByKey.get(key));
+            result.retainAll(getGenerators());
+            return result;
         }
 
         SortedSet<SqlGenerator> validGenerators = new TreeSet<>(new SqlGeneratorComparator());
@@ -132,7 +134,6 @@ public class SqlGeneratorFactory {
                 clazz = clazz.getSuperclass();
             }
         }
-
         generatorsByKey.put(key, validGenerators);
         return validGenerators;
     }
@@ -141,7 +142,6 @@ public class SqlGeneratorFactory {
         if(genericInterfacesCache.containsKey(clazz)) {
             return genericInterfacesCache.get(clazz);
         }
-
         Type[] genericInterfaces = clazz.getGenericInterfaces();
         genericInterfacesCache.put(clazz, genericInterfaces);
         return genericInterfaces;
@@ -151,7 +151,6 @@ public class SqlGeneratorFactory {
         if(genericSuperClassCache.containsKey(clazz)) {
             return genericSuperClassCache.get(clazz);
         }
-
         Type genericSuperclass = clazz.getGenericSuperclass();
         genericSuperClassCache.put(clazz, genericSuperclass);
         return genericSuperclass;
@@ -159,7 +158,7 @@ public class SqlGeneratorFactory {
 
     private boolean isTypeEqual(Type aType, Class aClass) {
         if (aType instanceof Class) {
-            return ((Class) aType).getName().equals(aClass.getName());
+            return ((Class<?>) aType).isAssignableFrom(aClass);
         }
         return aType.equals(aClass);
     }
@@ -180,7 +179,6 @@ public class SqlGeneratorFactory {
                 }
             }
         }
-
     }
 
     private SqlGeneratorChain createGeneratorChain(SqlStatement statement, Database database) {
@@ -211,7 +209,6 @@ public class SqlGeneratorFactory {
               returnList.addAll(sqlList);
             }
         }
-
         return returnList.toArray(new Sql[returnList.size()]);
     }
 
@@ -260,7 +257,12 @@ public class SqlGeneratorFactory {
 
     public Warnings warn(SqlStatement statement, Database database) {
         //noinspection unchecked
-        return createGeneratorChain(statement, database).warn(statement, database);
+        final SqlGeneratorChain generatorChain = createGeneratorChain(statement, database);
+        if (generatorChain != null) {
+            return generatorChain.warn(statement, database);
+        }
+        return
+           new Warnings().addWarning("No generator chain created for SQL Statement associated with database " + database.getShortName());
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(SqlStatement statement, Database database) {
@@ -276,9 +278,6 @@ public class SqlGeneratorFactory {
                 }
             }
         }
-
         return affectedObjects;
-
     }
-
 }

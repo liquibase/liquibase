@@ -9,7 +9,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -99,7 +99,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
         for (ParsedNode childNode : parsedNode.getChildren()) {
             try {
                if ("dbms".equals(childNode.getName())) {
-                    this.setApplicableDbms(new HashSet<>(StringUtils.splitAndTrim((String) childNode.getValue(), ",")));
+                    this.setApplicableDbms(new HashSet<>(StringUtil.splitAndTrim((String) childNode.getValue(), ",")));
                 } else if ("applyToRollback".equals(childNode.getName())) {
                    Boolean value = childNode.getValue(Boolean.class);
                    if (value != null) {

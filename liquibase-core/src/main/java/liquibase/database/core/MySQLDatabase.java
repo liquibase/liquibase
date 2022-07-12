@@ -1,29 +1,25 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Encapsulates MySQL database support.
@@ -31,11 +27,12 @@ import java.util.Set;
 public class MySQLDatabase extends AbstractJdbcDatabase {
     private static final String PRODUCT_NAME = "MySQL";
     private static final Set<String> RESERVED_WORDS = createReservedWords();
-    private Boolean hasJdbcConstraintDeferrableBug;
+
+    /** Pattern used to extract function precision like 3 in CURRENT_TIMESTAMP(3) */
+    public static final Pattern PRECISION_PATTERN = Pattern.compile("\\(\\d+\\)");
 
     public MySQLDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
-        setHasJdbcConstraintDeferrableBug(null);
     }
 
     @Override
@@ -80,14 +77,33 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         // it may still not be a MySQL, but a MariaDB.
         return (
                 (PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName()))
-                        && (!conn.getDatabaseProductVersion().toLowerCase().contains("mariadb"))
+                        && (!conn.getDatabaseProductVersion().toLowerCase().contains("mariadb") &&
+                            !conn.getDatabaseProductVersion().toLowerCase().contains("clustrix"))
         );
     }
 
     @Override
     public String getDefaultDriver(String url) {
-        if (url.startsWith("jdbc:mysql")) {
-            return "com.mysql.cj.jdbc.Driver";
+        if (url != null && url.toLowerCase().startsWith("jdbc:mysql")) {
+            String cjDriverClassName = "com.mysql.cj.jdbc.Driver";
+            try {
+
+                //make sure we don't have an old jdbc driver that doesn't have this class
+                Class.forName(cjDriverClassName);
+                return cjDriverClassName;
+            } catch (ClassNotFoundException e) {
+                //
+                // Try to load the class again with the current thread classloader
+                //
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                try {
+                    Class.forName(cjDriverClassName, true, cl);
+                    return cjDriverClassName;
+                } catch (ClassNotFoundException cnfe) {
+                    return "com.mysql.jdbc.Driver";
+                }
+            }
+
         }
         return null;
     }
@@ -188,14 +204,14 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean disableForeignKeyChecks() throws DatabaseException {
-        boolean enabled = ExecutorService.getInstance().getExecutor(this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
-        ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
+        boolean enabled = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
         return enabled;
     }
 
     @Override
     public void enableForeignKeyChecks() throws DatabaseException {
-        ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
     }
 
     @Override
@@ -240,77 +256,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     }
 
-    /**
-     * Tests if this MySQL / MariaDB database has a bug where the JDBC driver returns constraints as
-     * DEFERRABLE INITIAL IMMEDIATE even though neither MySQL nor MariaDB support DEFERRABLE CONSTRAINTs at all.
-     * We need to know about this because this could lead to errors in database snapshots.
-     * @return true if this database is affected, false if not, null if we cannot tell (e.g. OfflineConnection)
-     */
-    @SuppressWarnings("squid:S2447") // null is explicitly documented as a possible return value.
-    // TODO: MariaDB connector 2.0.2 appearantly fixes this problem, and MySQL-ConnectorJ 6.0.6 did not have it in
-    // the first place.. Replace this crude workaround with a proper JDBC driver version check
-    public Boolean hasBugJdbcConstraintsDeferrable() throws DatabaseException {
-        if (getConnection() instanceof OfflineConnection)
-            return null;
-        if (getHasJdbcConstraintDeferrableBug() != null)  // cached value
-            return getHasJdbcConstraintDeferrableBug();
-
-        String randomIdentifier = "TMP_" + StringUtils.randomIdentifer(16);
-        try
-        {
-            // Get the real connection and metadata reference
-            java.sql.Connection conn = ((JdbcConnection) getConnection()).getUnderlyingConnection();
-            java.sql.DatabaseMetaData metaData = conn.getMetaData();
-            String sql = "CREATE TABLE " + randomIdentifier + " (\n" +
-                    "  id INT PRIMARY KEY,\n" +
-                    "  self_ref INT NOT NULL,\n" +
-                    "  CONSTRAINT c_self_ref FOREIGN KEY(self_ref) REFERENCES " + randomIdentifier + "(id)\n" +
-                    ")";
-            ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement(sql));
-
-            try (
-                ResultSet rs = metaData.getImportedKeys(getDefaultCatalogName(), getDefaultSchemaName(), randomIdentifier)
-            ) {
-                if (!rs.next()) {
-                    throw new UnexpectedLiquibaseException("Error during testing for MySQL/MariaDB JDBC driver bug: " +
-                            "could not retrieve JDBC metadata information for temporary table '" +
-                            randomIdentifier + "'");
-                }
-                if (rs.getShort("DEFERRABILITY") != DatabaseMetaData.importedKeyNotDeferrable) {
-                    setHasJdbcConstraintDeferrableBug(true);
-                    LogService.getLog(getClass()).warning(LogType.LOG, "Your MySQL/MariaDB database JDBC driver might have " +
-                            "a bug where constraints are reported as DEFERRABLE, even though MySQL/MariaDB do not " +
-                            "support this feature. A workaround for this problem will be used. Please check with " +
-                            "MySQL/MariaDB for availability of fixed JDBC drivers to avoid this warning.");
-                } else {
-                    setHasJdbcConstraintDeferrableBug(false);
-                }
-            }
-
-        } catch (DatabaseException|SQLException e) {
-            throw new UnexpectedLiquibaseException("Error during testing for MySQL/MariaDB JDBC driver bug.", e);
-        } finally {
-                ExecutorService.getInstance().reset();
-                ExecutorService.getInstance().getExecutor(this).execute(
-                        new RawSqlStatement("DROP TABLE " + randomIdentifier));
-        }
-
-        return getHasJdbcConstraintDeferrableBug();
-    }
-
-    /**
-     * returns true if the JDBC drivers suffers from a bug where constraints are reported as DEFERRABLE, even though
-     * MySQL/MariaDB do not support this feature.
-     * @return true if the JDBC is probably affected, false if not.
-     */
-    protected Boolean getHasJdbcConstraintDeferrableBug() {
-        return hasJdbcConstraintDeferrableBug;
-    }
-
-    protected void setHasJdbcConstraintDeferrableBug(Boolean hasJdbcConstraintDeferrableBug) {
-        this.hasJdbcConstraintDeferrableBug = hasJdbcConstraintDeferrableBug;
-    }
-
     @Override
     public int getMaxFractionalDigitsForTimestamp() {
 
@@ -323,21 +268,50 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             minor = getDatabaseMinorVersion();
             patch = getDatabasePatchVersion();
         } catch (DatabaseException x) {
-            LogService.getLog(getClass()).warning(
-                    LogType.LOG, "Unable to determine exact database server version"
+            Scope.getCurrentScope().getLog(getClass()).warning(
+                    "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);
             return 0;
         }
 
-        // MySQL 5.6.4 introduced fractional support...
-        // https://dev.mysql.com/doc/refman/5.7/en/data-types.html
-        String minimumVersion = "5.6.4";
+        String minimumVersion = getMinimumVersionForFractionalDigitsForTimestamp();
 
-        if (StringUtils.isMinimumVersion(minimumVersion, major, minor, patch))
+        if (StringUtil.isMinimumVersion(minimumVersion, major, minor, patch))
             return 6;
         else
             return 0;
+    }
+
+    /**
+     *
+     * Check to see if this instance of a MySQL database is equal to or greater
+     * than the specified version
+     *
+     * @param   minimumVersion
+     * @return  boolean
+     *
+     */
+    public boolean isMinimumMySQLVersion(String minimumVersion) {
+        int major = 0;
+        int minor = 0;
+        int patch = 0;
+        try {
+            major = getDatabaseMajorVersion();
+            minor = getDatabaseMinorVersion();
+            patch = getDatabasePatchVersion();
+        } catch (DatabaseException x) {
+            Scope.getCurrentScope().getLog(getClass()).warning(
+                    "Unable to determine exact database server version");
+            return false;
+        }
+        return StringUtil.isMinimumVersion(minimumVersion, major, minor, patch);
+    }
+
+    protected String getMinimumVersionForFractionalDigitsForTimestamp() {
+        // MySQL 5.6.4 introduced fractional support...
+        // https://dev.mysql.com/doc/refman/5.7/en/data-types.html
+        return "5.6.4";
     }
 
     @Override
@@ -371,6 +345,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     private static Set<String> createReservedWords() {
         return new HashSet<String>(Arrays.asList("ACCESSIBLE",
             "ADD",
+            "ADMIN",
             "ALL",
             "ALTER",
             "ANALYZE",
@@ -384,6 +359,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "BINARY",
             "BLOB",
             "BOTH",
+            "BUCKETS",
             "BY",
             "CALL",
             "CASCADE",
@@ -400,6 +376,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "CONVERT",
             "CREATE",
             "CROSS",
+            "CLONE",
+            "COMPONENT",
+            "CUBE",
+            "CUME_DIST",
             "CURRENT_DATE",
             "CURRENT_TIME",
             "CURRENT_TIMESTAMP",
@@ -415,10 +395,13 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "DECIMAL",
             "DECLARE",
             "DEFAULT",
+            "DEFINITION",
             "DELAYED",
             "DELETE",
+            "DENSE_RANK",
             "DESC",
             "DESCRIBE",
+            "DESCRIPTION",
             "DETERMINISTIC",
             "DISTINCT",
             "DISTINCTROW",
@@ -429,27 +412,38 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "EACH",
             "ELSE",
             "ELSEIF",
+            "EMPTY",
             "ENCLOSED",
             "ESCAPED",
+            "EXCEPT",
+            "EXCLUDE",
             "EXISTS",
             "EXIT",
             "EXPLAIN",
             "FALSE",
             "FETCH",
+            "FIRST_VALUE",
             "FLOAT",
             "FLOAT4",
             "FLOAT8",
+            "FOLLOWING",
             "FOR",
             "FORCE",
             "FOREIGN",
             "FROM",
             "FULLTEXT",
+            "GEOMCOLLECTION",
             "GENERATED",
             "GET",
+            "GET_MASTER_PUBLIC_KEY",
             "GRANT",
             "GROUP",
+            "GROUPING",
+            "GROUPS",
             "HAVING",
             "HIGH_PRIORITY",
+            "HISTOGRAM",
+            "HISTORY",
             "HOUR_MICROSECOND",
             "HOUR_MINUTE",
             "HOUR_SECOND",
@@ -473,10 +467,15 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "INTO",
             "IS",
             "ITERATE",
+            "INVISIBLE",
             "JOIN",
+            "JSON_TABLE",
             "KEY",
             "KEYS",
             "KILL",
+            "LAG",
+            "LAST_VALUE",
+            "LEAD",
             "LEADING",
             "LEAVE",
             "LEFT",
@@ -488,11 +487,13 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "LOCALTIME",
             "LOCALTIMESTAMP",
             "LOCK",
+            "LOCKED",
             "LONG",
             "LONGBLOB",
             "LONGTEXT",
             "LOOP",
             "LOW_PRIORITY",
+            "MASTER_PUBLIC_KEY_PATH",
             "MASTER_SSL_VERIFY_SERVER_CERT",
             "MATCH",
             "MAXVALUE",
@@ -505,10 +506,16 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "MOD",
             "MODIFIES",
             "NATURAL",
+            "NESTED",
             "NOT",
+            "NOWAIT",
             "NO_WRITE_TO_BINLOG",
+            "NTH_VALUE",
+            "NTILE",
             "NULL",
+            "NULLS",
             "NUMERIC",
+            "OF",
             "ON",
             "OPTIMIZE",
             "OPTIMIZER_COSTS",
@@ -516,32 +523,52 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "OPTIONALLY",
             "OR",
             "ORDER",
+            "ORDINALITY",
+            "ORGANIZATION",
             "OUT",
             "OUTER",
             "OUTFILE",
+            "OTHERS",
+            "OVER",
             "PARTITION",
+            "PATH",
+            "PERCENT_RANK",
+            "PERSIST",
+            "PERSIST_ONLY",
+            "PRECEDING",
             "PRECISION",
             "PRIMARY",
             "PROCEDURE",
+            "PROCESS",
             "PURGE",
             "RANGE",
+            "RANK",
             "READ",
             "READS",
             "READ_WRITE",
             "REAL",
+            "RECURSIVE",
+            "REFERENCE",
             "REFERENCES",
             "REGEXP",
             "RELEASE",
+            "REMOTE",
             "RENAME",
             "REPEAT",
             "REPLACE",
             "REQUIRE",
             "RESIGNAL",
+            "RESOURCE",
+            "RESPECT",
+            "RESTART",
             "RESTRICT",
             "RETURN",
+            "REUSE",
             "REVOKE",
             "RIGHT",
             "RLIKE",
+            "ROLE",
+            "ROW_NUMBER",
             "SCHEMA",
             "SCHEMAS",
             "SECOND_MICROSECOND",
@@ -551,6 +578,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "SET",
             "SHOW",
             "SIGNAL",
+            "SKIP",
             "SMALLINT",
             "SPATIAL",
             "SPECIFIC",
@@ -561,13 +589,17 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "SQL_BIG_RESULT",
             "SQL_CALC_FOUND_ROWS",
             "SQL_SMALL_RESULT",
+            "SRID",
             "SSL",
             "STARTING",
             "STORED",
             "STRAIGHT_JOIN",
+            "SYSTEM",
             "TABLE",
             "TERMINATED",
             "THEN",
+            "THREAD_PRIORITY",
+            "TIES",
             "TINYBLOB",
             "TINYINT",
             "TINYTEXT",
@@ -575,6 +607,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "TRAILING",
             "TRIGGER",
             "TRUE",
+            "UNBOUNDED",
             "UNDO",
             "UNION",
             "UNIQUE",
@@ -592,10 +625,13 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "VARCHAR",
             "VARCHARACTER",
             "VARYING",
+            "VCPU",
+            "VISIBLE",
             "VIRTUAL",
             "WHEN",
             "WHERE",
             "WHILE",
+            "WINDOW",
             "WITH",
             "WRITE",
             "XOR",
@@ -604,4 +640,25 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         ));
     }
 
+    protected String getCurrentDateTimeFunction(int precision) {
+        return currentDateTimeFunction.replace("()", "("+precision+")");
+    }
+
+    @Override
+    public String generateDatabaseFunctionValue(DatabaseFunction databaseFunction) {
+        if (databaseFunction.getValue() != null && isCurrentTimeFunction(databaseFunction.getValue().toLowerCase())) {
+            int precision = extractPrecision(databaseFunction);
+            return precision != 0 ? getCurrentDateTimeFunction(precision) : getCurrentDateTimeFunction();
+        }
+        return super.generateDatabaseFunctionValue(databaseFunction);
+    }
+
+    private int extractPrecision(DatabaseFunction databaseFunction) {
+        int precision = 0;
+        Matcher precisionMatcher = PRECISION_PATTERN.matcher(databaseFunction.getValue());
+        if (precisionMatcher.find()) {
+            precision = Integer.parseInt(precisionMatcher.group().replaceAll("[(,)]", ""));
+        }
+        return precision;
+    }
 }

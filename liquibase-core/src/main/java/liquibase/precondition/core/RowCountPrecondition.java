@@ -1,5 +1,6 @@
 package liquibase.precondition.core;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
@@ -11,7 +12,7 @@ import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.statement.core.TableRowCountStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class RowCountPrecondition extends AbstractPrecondition {
 
@@ -33,7 +34,7 @@ public class RowCountPrecondition extends AbstractPrecondition {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = StringUtil.trimToNull(schemaName);
     }
 
     public String getTableName() {
@@ -72,7 +73,7 @@ public class RowCountPrecondition extends AbstractPrecondition {
         try {
             TableRowCountStatement statement = new TableRowCountStatement(catalogName, schemaName, tableName);
 
-            int result = ExecutorService.getInstance().getExecutor(database).queryForInt(statement);
+            int result = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForInt(statement);
             if (result != expectedRows) {
                 throw new PreconditionFailedException(getFailureMessage(result), changeLog, this);
             }

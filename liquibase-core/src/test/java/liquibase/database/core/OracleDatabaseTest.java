@@ -1,9 +1,12 @@
 package liquibase.database.core;
 
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
+import liquibase.datatype.DatabaseDataType;
+import liquibase.datatype.core.TimestampType;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.resource.ResourceAccessor;
@@ -13,6 +16,7 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.test.JUnitResourceAccessor;
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,6 +25,9 @@ import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
 import static org.junit.Assert.*;
+
+import org.hamcrest.CoreMatchers;
+import org.junit.Test;
 
 /**
  * Tests for {@link liquibase.database.core.OracleDatabase}.
@@ -78,6 +85,13 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
     @Test
+    public void verifyTimestampDataTypeWhenWithoutClauseIsPresent() {
+        TimestampType ts = new TimestampType();
+        ts.setAdditionalInformation("WITHOUT TIME ZONE");
+        DatabaseDataType oracleDataType = ts.toDatabaseDataType(getDatabase());
+        assertThat(oracleDataType.getType(), CoreMatchers.is("TIMESTAMP"));
+    }
+
     public void testGetDefaultDriver() {
         Database database = new OracleDatabase();
 
@@ -97,7 +111,7 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         MockExecutor mockExecutor = new MockExecutor();
         mockExecutor.setDatabase(database);
 
-        ExecutorService.getInstance().setExecutor(database, mockExecutor);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, mockExecutor);
 
         UpdateStatement updateStatement = new UpdateStatement(null, null, "test_table");
         updateStatement.addNewColumnValue("id", new SequenceNextValueFunction("test_table_id_seq"));
@@ -105,6 +119,12 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         database.execute(new SqlStatement[]{updateStatement}, new ArrayList<SqlVisitor>());
 
         assertEquals("UPDATE \"SAMPLESCHEMA\".\"test_table\" SET \"id\" = \"SAMPLESCHEMA\".\"test_table_id_seq\".nextval;", mockExecutor.getRanSql().trim());
+    }
+
+    @Test
+    public void getDateLiteral_date() {
+        // DATE in Oracle can have hours/minutes/seconds.
+        assertEquals("TO_DATE('2017-08-16 16:32:55', 'YYYY-MM-DD HH24:MI:SS')", database.getDateLiteral("2017-08-16T16:32:55"));
     }
 
     @Test

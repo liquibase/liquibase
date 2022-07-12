@@ -1,19 +1,19 @@
 package liquibase.diff.compare.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
-import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Set;
 
-public class CatalogComparator implements DatabaseObjectComparator {
+public class CatalogComparator extends CommonCatalogSchemaComparator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Catalog.class.isAssignableFrom(objectType)) {
@@ -37,15 +37,17 @@ public class CatalogComparator implements DatabaseObjectComparator {
             return true;
         }
 
+        // the flag will be set true in multi catalog environments
+        boolean shouldIncludeCatalog = GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION.getCurrentValue();
         String object1Name;
-        if (((Catalog) databaseObject1).isDefault()) {
+        if (!shouldIncludeCatalog && ((Catalog) databaseObject1).isDefault()) {
             object1Name = null;
         } else {
             object1Name = databaseObject1.getName();
         }
 
         String object2Name;
-        if (((Catalog) databaseObject2).isDefault()) {
+        if (!shouldIncludeCatalog && ((Catalog) databaseObject2).isDefault()) {
             object2Name = null;
         } else {
             object2Name = databaseObject2.getName();
@@ -58,33 +60,13 @@ public class CatalogComparator implements DatabaseObjectComparator {
             return otherSchema.getCatalogName() == null;
         }
 
-        if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
-            if (StringUtils.trimToEmpty(object1Name).equals(StringUtils.trimToEmpty(object2Name))){
-                return true;
-            }
-        } else {
-            if (StringUtils.trimToEmpty(object1Name).equalsIgnoreCase(StringUtils.trimToEmpty(object2Name))) {
-                return true;
-            }
-        }
-        if (accordingTo.supportsSchemas()) { //no need to check schema mappings
-            return false;
-        }
+        if (equalsSchemas(accordingTo,object1Name,  object2Name)) return true;
 
         //check with schemaComparisons
         if ((chain.getSchemaComparisons() != null) && (chain.getSchemaComparisons().length > 0)) {
             for (CompareControl.SchemaComparison comparison : chain.getSchemaComparisons()) {
-                String comparisonCatalog1;
-                String comparisonCatalog2;
-                if (accordingTo.supportsSchemas()) {
-                    comparisonCatalog1 = comparison.getComparisonSchema().getSchemaName();
-                    comparisonCatalog2 = comparison.getReferenceSchema().getSchemaName();
-                } else if (accordingTo.supportsCatalogs()) {
-                    comparisonCatalog1 = comparison.getComparisonSchema().getCatalogName();
-                    comparisonCatalog2 = comparison.getReferenceSchema().getCatalogName();
-                } else {
-                    break;
-                }
+                String comparisonCatalog1 = getComparisonSchemaOrCatalog(accordingTo, comparison);
+                String comparisonCatalog2 = getReferenceSchemaOrCatalog(accordingTo, comparison);
 
                 String finalCatalog1 = thisSchema.getCatalogName();
                 String finalCatalog2 = otherSchema.getCatalogName();
@@ -95,7 +77,7 @@ public class CatalogComparator implements DatabaseObjectComparator {
                     finalCatalog1 = comparisonCatalog1;
                 }
 
-                if (StringUtils.trimToEmpty(finalCatalog1).equalsIgnoreCase(StringUtils.trimToEmpty(finalCatalog2))) {
+                if (StringUtil.trimToEmpty(finalCatalog1).equalsIgnoreCase(StringUtil.trimToEmpty(finalCatalog2))) {
                     return true;
                 }
 
@@ -105,7 +87,7 @@ public class CatalogComparator implements DatabaseObjectComparator {
                     finalCatalog2 = comparisonCatalog1;
                 }
 
-                if (StringUtils.trimToEmpty(finalCatalog1).equalsIgnoreCase(StringUtils.trimToEmpty(finalCatalog2))) {
+                if (StringUtil.trimToEmpty(finalCatalog1).equalsIgnoreCase(StringUtil.trimToEmpty(finalCatalog2))) {
                     return true;
                 }
             }

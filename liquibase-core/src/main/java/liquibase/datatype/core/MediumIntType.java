@@ -15,6 +15,7 @@ public class MediumIntType extends LiquibaseDataType {
 
     private boolean autoIncrement;
 
+    @Override
     public boolean isAutoIncrement() {
         return autoIncrement;
     }
@@ -33,9 +34,8 @@ public class MediumIntType extends LiquibaseDataType {
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
         }
-        if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof
-            FirebirdDatabase)) {
-            return new DatabaseDataType("MEDIUMINT"); //always smallint regardless of parameters passed
+        if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof FirebirdDatabase) || database instanceof OracleDatabase) {
+            return new DatabaseDataType("MEDIUMINT"); //always mediumint regardless of parameters passed
         }
         return super.toDatabaseDataType(database);
     }

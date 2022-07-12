@@ -11,7 +11,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUniqueConstraintStatement> {
 
@@ -78,7 +78,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             isInUsingIndexClause = true;
         }
 
-        if ((StringUtils.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
+        if ((StringUtil.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
                 sql += " ON " + statement.getTablespace();
             } else if ((database instanceof AbstractDb2Database) || (database instanceof SybaseASADatabase) || (database
@@ -115,7 +115,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     protected UniqueConstraint getAffectedUniqueConstraint(AddUniqueConstraintStatement statement) {
         UniqueConstraint uniqueConstraint = new UniqueConstraint()
                 .setName(statement.getConstraintName())
-                .setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
+                .setRelation((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
         int i = 0;
         for (Column column : Column.listFromNames(statement.getColumnNames())) {
             uniqueConstraint.addColumn(i++, column);

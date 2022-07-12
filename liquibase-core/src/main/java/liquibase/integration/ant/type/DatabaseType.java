@@ -1,22 +1,14 @@
 package liquibase.integration.ant.type;
 
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.OfflineConnection;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.DataType;
 import org.apache.tools.ant.types.Reference;
-import org.apache.tools.ant.util.ClasspathUtils;
-import org.apache.tools.ant.util.LoaderUtils;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.SQLException;
 import java.util.Properties;
 
 public class DatabaseType extends DataType {
@@ -47,53 +39,33 @@ public class DatabaseType extends DataType {
         setProject(project);
     }
 
-    public Database createDatabase() {
-        ClassLoader contextClassLoader = LoaderUtils.getContextClassLoader();
-        return createDatabase(contextClassLoader);
-    }
-
-    public Database createDatabase(ClassLoader classLoader) {
+    public Database createDatabase(ResourceAccessor resourceAccessor) {
         logParameters();
         validateParameters();
         try {
             DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
-            if(databaseClass != null) {
-                Database databaseInstance = (Database) ClasspathUtils.newInstance(databaseClass, classLoader, Database.class);
-                databaseFactory.register(databaseInstance);
+
+            Properties connectionProps = new Properties();
+            String connectionUserName = getUser();
+            if((connectionUserName != null) && !connectionUserName.isEmpty()) {
+                connectionProps.setProperty(USER_PROPERTY_NAME, connectionUserName);
+            }
+            String connectionPassword = getPassword();
+            if((connectionPassword != null) && !connectionPassword.isEmpty()) {
+                connectionProps.setProperty(PASSWORD_PROPERTY_NAME, connectionPassword);
+            }
+            ConnectionProperties dbConnectionProperties = getConnectionProperties();
+            if(dbConnectionProperties != null) {
+                connectionProps.putAll(dbConnectionProperties.buildProperties());
             }
 
-            DatabaseConnection jdbcConnection;
-            if (getUrl().startsWith("offline:")) {
-                jdbcConnection = new OfflineConnection(getUrl(), new ClassLoaderResourceAccessor(classLoader));
-            } else {
-                Driver jdbcDriver = (Driver) ClasspathUtils.newInstance(getDriver(), classLoader, Driver.class);
-                if(jdbcDriver == null) {
-                    throw new BuildException("Unable to create Liquibase Database instance. Could not instantiate the" +
-                     " JDBC driver.");
-                }
-                Properties connectionProps = new Properties();
-                String connectionUserName = getUser();
-                if((connectionUserName != null) && !connectionUserName.isEmpty()) {
-                    connectionProps.setProperty(USER_PROPERTY_NAME, connectionUserName);
-                }
-                String connectionPassword = getPassword();
-                if((connectionPassword != null) && !connectionPassword.isEmpty()) {
-                    connectionProps.setProperty(PASSWORD_PROPERTY_NAME, connectionPassword);
-                }
-                ConnectionProperties dbConnectionProperties = getConnectionProperties();
-                if(dbConnectionProperties != null) {
-                    connectionProps.putAll(dbConnectionProperties.buildProperties());
-                }
-
-                Connection connection = jdbcDriver.connect(getUrl(), connectionProps);
-                if(connection == null) {
-                    throw new BuildException("Unable to create Liquibase database instance. Could not connect to the " +
-                     "database.");
-                }
-                jdbcConnection = new JdbcConnection(connection);
-            }
-
-            Database database = databaseFactory.findCorrectDatabaseImplementation(jdbcConnection);
+            Database database = databaseFactory.openDatabase(
+                    getUrl(),
+                    getUser(),
+                    getDriver(),
+                    getDatabaseClass(),
+                    connectionProps,
+                    resourceAccessor);
 
             String schemaName = getDefaultSchemaName();
             if (schemaName != null) {
@@ -137,9 +109,6 @@ public class DatabaseType extends DataType {
             }
 
             return database;
-        } catch (SQLException e) {
-            throw new BuildException("Unable to create Liquibase database instance. A JDBC error occurred. " + e
-            .toString(), e);
         } catch (DatabaseException e) {
             throw new BuildException("Unable to create Liquibase database instance. " + e.toString(), e);
         }

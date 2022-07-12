@@ -29,21 +29,21 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
 
     @Override
     public Sql[] generateSql(CopyRowsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer();
+        StringBuilder sql = new StringBuilder();
         
         if (statement.getCopyColumns().isEmpty()) {
             return new Sql[]{};
         }
         
         if (database instanceof SQLiteDatabase) {
-            sql.append("INSERT INTO `").append(statement.getTargetTable()).append("` (");
+            sql.append("INSERT INTO ").append(database.escapeTableName(null, null, statement.getTargetTable())).append(" (");
 
             for (int i = 0; i < statement.getCopyColumns().size(); i++) {
                 ColumnConfig column = statement.getCopyColumns().get(i);
                 if (i > 0) {
                     sql.append(",");
                 }
-                sql.append("`").append(column.getName()).append("`");
+                sql.append(database.escapeColumnName(null, null, statement.getTargetTable(), column.getName()));
             }
 
             sql.append(") SELECT ");
@@ -52,9 +52,9 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
                 if (i > 0) {
                     sql.append(",");
                 }
-                sql.append("`").append(column.getName()).append("`");
+                sql.append(database.escapeColumnName(null, null, statement.getSourceTable(), column.getName()));
             }
-            sql.append(" FROM `").append(statement.getSourceTable()).append("`");
+            sql.append(" FROM ").append(database.escapeTableName(null, null, statement.getSourceTable()));
         }
 
         return new Sql[]{
