@@ -1,5 +1,6 @@
 package liquibase.precondition;
 
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
@@ -47,6 +48,10 @@ public abstract class PreconditionLogic extends AbstractPrecondition {
     protected Precondition toPrecondition(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         Precondition precondition = PreconditionFactory.getInstance().create(node.getName());
         if (precondition == null) {
+            if (node.getChildren() != null && node.getChildren().size() > 0 && GlobalConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(GlobalConfiguration.ChangelogParseMode.STRICT)) {
+                throw new ParsedNodeException("Unknown precondition '" + node.getName() + "'. Check the spelling/capitalization and/or whether any required Liquibase extensions are missing.");
+            }
+
             return null;
         }
 
