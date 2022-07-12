@@ -43,7 +43,7 @@ mkdir -p $outdir
 (cd $scriptDir && javac ManifestReversion.java)
 
 #### Update  jars
-declare -a jars=("liquibase-0-SNAPSHOT.jar" "liquibase-0-SNAPSHOT-sources.jar" "liquibase-cdi-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar")
+declare -a jars=("liquibase-core-0-SNAPSHOT.jar" "liquibase-core-0-SNAPSHOT-sources.jar" "liquibase-commercial-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar")
 
 for jar in "${jars[@]}"
 do
@@ -58,7 +58,7 @@ do
   rm -rf $workdir/META-INF
 
   ## Fix up liquibase.build.properties
-  if [ $jar == "liquibase-0-SNAPSHOT.jar" ]; then
+  if [[ $jar == "liquibase-core-0-SNAPSHOT.jar" || $jar == "liquibase-commercial-0-SNAPSHOT.jar" ]]; then
     unzip -q $workdir/$jar liquibase.build.properties -d $workdir
     sed -i -e "s/build.version=.*/build.version=$version/" $workdir/liquibase.build.properties
     (cd $workdir && jar -uf $jar liquibase.build.properties)
@@ -133,11 +133,13 @@ done
 
 ##### update zip/tar files
 cp $outdir/liquibase-core-$version.jar $workdir/internal/lib/liquibase-core.jar ##save versioned jar as unversioned to include in zip/tar
+cp $outdir/liquibase-commercial-$version.jar $workdir/internal/lib/liquibase-commercial.jar ##save versioned jar as unversioned to include in zip/tar
 
 ## Extract tar.gz and rebuild it back into the tar.gz and zip
 mkdir $workdir/tgz-repackage
 (cd $workdir/tgz-repackage && tar -xzf $workdir/liquibase-0-SNAPSHOT.tar.gz)
 cp $workdir/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
+cp $workdir/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
 find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
 (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
 (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
