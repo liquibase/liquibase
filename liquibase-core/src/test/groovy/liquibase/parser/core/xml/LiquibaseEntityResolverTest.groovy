@@ -64,7 +64,6 @@ class LiquibaseEntityResolverTest extends Specification {
         "4.12.0" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd" | true
         "4.12.0" | "https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd" | true
         "4.12.0" | "http://www.liquibase.org/xml/ns/migrator/dbchangelog-3.1.xsd" | true
-        "4.12.0" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-next.xsd" | false
         "4.12.0" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd" | false
         "4.12.0" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd" | false
         "4.12.0" | "/liquibase/banner.txt" | false
