@@ -79,7 +79,7 @@ do
 done
 
 #### Update  javadoc jars
-declare -a javadocJars=("liquibase-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar")
+declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar")
 
 for jar in "${javadocJars[@]}"
 do
