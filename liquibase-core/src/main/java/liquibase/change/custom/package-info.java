@@ -4,7 +4,7 @@
  * <p>
  * To create your own custom refactoring, simply create a class that implements the
  * {@link liquibase.change.custom.CustomSqlChange} or {@link liquibase.change.custom.CustomTaskChange} interface and
- * use the &lt;custom&gt; tag in your change set.<p>
+ * use the &lt;custom&gt; tag in your changeset.<p>
  * <p>
  * If your change can be rolled back, implement the {@link liquibase.change.custom.CustomSqlRollback} interface as
  * well.<p>

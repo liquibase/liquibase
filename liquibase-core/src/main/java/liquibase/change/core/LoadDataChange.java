@@ -484,7 +484,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         } catch (UnexpectedLiquibaseException ule) {
             if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
                     .getFailOnError()) {
-                LOG.info("Change set " + getChangeSet().toString(false) +
+                LOG.info("Changeset " + getChangeSet().toString(false) +
                         " failed, but failOnError was false.  Error: " + ule.getMessage());
                 return new SqlStatement[0];
             } else {

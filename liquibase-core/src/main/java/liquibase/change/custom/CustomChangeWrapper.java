@@ -28,7 +28,7 @@ import liquibase.util.OsgiUtil;
         " want to create your own custom refactoring class.\n" +
                 "\n" +
                 "To create your own custom refactoring, simply create a class that implements the liquibase.change.custom.CustomSqlChange " +
-                "or liquibase.change.custom.CustomTaskChange interface and use the <custom> tag in your change set.\n" +
+                "or liquibase.change.custom.CustomTaskChange interface and use the <custom> tag in your changeset.\n" +
                 "\n" +
                 "If your change can be rolled back, implement the liquibase.change.custom.CustomSqlRollback interface as well.\n" +
                 "\n" +

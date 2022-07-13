@@ -836,7 +836,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         List<ChangeSet> list = liquibase.listUnrunChangeSets(new Contexts(this.contexts), new LabelExpression());
 
-        assertTrue("querying the changelog table on an empty target should return at least 1 un-run change set", !list.isEmpty());
+        assertTrue("querying the changelog table on an empty target should return at least 1 un-run changeset", !list.isEmpty());
 
     }
 
@@ -918,7 +918,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     /**
-     * Create an SQL script from a change set which inserts data from CSV files. The first CSV file is encoded in
+     * Create an SQL script from a changeset which inserts data from CSV files. The first CSV file is encoded in
      * UTF-8, the second is encoded in Latin-1. The test is successful if the CSV data is converted into correct
      * INSERT INTO statements in the final generated SQL file.
      * @throws Exception
@@ -1039,7 +1039,7 @@ public abstract class AbstractIntegrationTest {
         DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, new DiffOutputControl(false, false, false, null));
         List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
         assertEquals("generating two change logs without any changes in between should result in an empty generated " +
-                "differential change set.", 0, changeSets.size());
+                "differential changeset.", 0, changeSets.size());
     }
 
     @Test

@@ -368,7 +368,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         changeLog.getChangeSets().get(20).getId().equalsIgnoreCase("+the_user+")
     }
 
-    def "parse change set with colon in ID"() throws Exception {
+    def "parse changeset with colon in ID"() throws Exception {
         when:
         String changeLogWithOneGoodOneBad = "   \n\n" +
                 "--liquibase formatted sql\n\n" +
@@ -387,7 +387,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         assert changeSet.getId() == "ID:1"
     }
 
-    def "parse change set with invalid change set attributes"() throws Exception {
+    def "parse changeset with invalid changeset attributes"() throws Exception {
         when:
         String changeLogWithInvalidChangeSetAttributes =
                 "--liquibase formatted sql\n\n" +
@@ -405,7 +405,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         assert e
     }
 
-    def "parse change set with one good one bad"() throws Exception {
+    def "parse changeset with one good one bad"() throws Exception {
         when:
         String changeLogWithOneGoodOneBad = "   \n\n" +
                 "--liquibase formatted sql\n\n" +
@@ -424,7 +424,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         thrown(ChangeLogParseException)
     }
 
-    def "parse change set with only author"() throws Exception {
+    def "parse changeset with only author"() throws Exception {
         when:
         String changeLogWithOnlyAuthor= "   \n\n" +
                 "--liquibase formatted sql\n\n" +
@@ -513,6 +513,61 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         assert e.getMessage().toLowerCase().contains("-property name")
     }
 
+    def "parse strings that contain keywords not at the beginning"() throws Exception {
+        when:
+        def changeLog = new MockFormattedSqlChangeLogParser("""
+--liquibase formatted sql
+
+--changeset example:1
+not a property here
+- not a property here
+-- not a property here
+not a changeset here
+- not a changeset here
+-- not a changeset here
+not a rollback here
+- not a rollback here
+-- not a rollback here
+not a precondition here
+- not a precondition here
+-- not a precondition here
+not a comment here
+- not a comment here
+-- not a comment here
+not validCheckSum here
+- not validCheckSum here
+-- not validCheckSum here
+not ignoreLines here
+- not ignoreLines here
+-- not ignoreLines here
+""".trim()).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        StringUtil.standardizeLineEndings(((RawSQLChange) changeLog.getChangeSets()[0].getChanges()[0]).getSql().trim()) == StringUtil.standardizeLineEndings("""
+not a property here
+- not a property here
+-- not a property here
+not a changeset here
+- not a changeset here
+-- not a changeset here
+not a rollback here
+- not a rollback here
+-- not a rollback here
+not a precondition here
+- not a precondition here
+-- not a precondition here
+not a comment here
+- not a comment here
+-- not a comment here
+not validCheckSum here
+- not validCheckSum here
+-- not validCheckSum here
+not ignoreLines here
+- not ignoreLines here
+-- not ignoreLines here
+""".trim())
+    }
+
     def parse_withComment() throws Exception {
         when:
         String changeLogWithComment = "--liquibase formatted sql\n\n" +
@@ -569,7 +624,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         then:
         def e = thrown(ChangeLogParseException)
         assert e : "ChangeLogParseException should be thrown"
-        assert e.getMessage().contains("do not allow comment lines outside of change sets")
+        assert e.getMessage().contains("do not allow comment lines outside of changesets")
     }
 
     def parse_withWithIgnoreNotIgnoreLines() {

@@ -9,7 +9,7 @@ import liquibase.statement.SqlStatement;
  * implementing this interface is preferred over CustomTaskChange because the SQL can either be executed
  * directly or saved to a text file for later use depending on the migration mode used.  To allow
  * the change to be rolled back, also implement the CustomSqlRollback interface.  If your change requires sql-based
- * logic and non-sql-based logic, it is best to create a change set that contains a mix of CustomSqlChange and CustomTaskChange calls.
+ * logic and non-sql-based logic, it is best to create a changeset that contains a mix of CustomSqlChange and CustomTaskChange calls.
  *
  * @see liquibase.change.custom.CustomSqlRollback
  * @see liquibase.change.custom.CustomTaskChange
