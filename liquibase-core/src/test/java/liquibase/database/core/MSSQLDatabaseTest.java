@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
@@ -40,7 +41,7 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
     public void getDefaultDriver() throws DatabaseException {
         try (Database database = new MSSQLDatabase()) {
             assertEquals("com.microsoft.sqlserver.jdbc.SQLServerDriver", database.getDefaultDriver("jdbc:sqlserver://localhost;databaseName=liquibase"));
-    
+
             assertNull(database.getDefaultDriver("jdbc:oracle:thin://localhost;databaseName=liquibase"));
         } catch (final DatabaseException e) {
             throw e;
