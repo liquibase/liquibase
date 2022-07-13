@@ -49,7 +49,7 @@ public abstract class PreconditionLogic extends AbstractPrecondition {
         Precondition precondition = PreconditionFactory.getInstance().create(node.getName());
         if (precondition == null) {
             if (node.getChildren() != null && node.getChildren().size() > 0 && GlobalConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(GlobalConfiguration.ChangelogParseMode.STRICT)) {
-                throw new ParsedNodeException("Unknown precondition '" + node.getName() + "'. Check the spelling/capitalization and/or whether any required Liquibase extensions are missing.");
+                throw new ParsedNodeException("Unknown precondition '" + node.getName() + "'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial.");
             }
 
             return null;

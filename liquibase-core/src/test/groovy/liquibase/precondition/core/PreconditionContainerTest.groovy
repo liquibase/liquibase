@@ -142,7 +142,7 @@ class PreconditionContainerTest extends Specification {
 
         then:
         def e = thrown(ParsedNodeException)
-        e.message == "Unknown precondition 'invalid'. Check the spelling/capitalization and/or whether any required Liquibase extensions are missing."
+        e.message == "Unknown precondition 'invalid'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial."
     }
 
     def "load handles node with unknown preconditions in lax mode"() {

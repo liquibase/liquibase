@@ -201,7 +201,7 @@ public class ChangeSetTest extends Specification {
 
         then:
         def e = thrown(ParsedNodeException)
-        e.message == "Error parsing com/example/test.xml: Unknown change type 'invalid'. Check the spelling/capitalization and/or whether any required Liquibase extensions are missing."
+        e.message == "Error parsing com/example/test.xml: Unknown change type 'invalid'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial."
     }
 
     def "load node with unknown change types and lax parsing"() {

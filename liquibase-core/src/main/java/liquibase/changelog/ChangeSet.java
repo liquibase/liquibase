@@ -524,7 +524,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (this.getChangeLog() != null && this.getChangeLog().getPhysicalFilePath() != null) {
                     message = "Error parsing " + this.getChangeLog().getPhysicalFilePath() + ": ";
                 }
-                message += "Unknown change type '" + value.getName() + "'. Check the spelling/capitalization and/or whether any required Liquibase extensions are missing.";
+                message += "Unknown change type '" + value.getName() + "'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial.";
                 throw new ParsedNodeException(message);
             }
             return null;
