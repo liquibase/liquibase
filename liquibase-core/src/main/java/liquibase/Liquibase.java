@@ -509,7 +509,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(changeLog,
                             new ShouldRunChangeSetFilter(database),
@@ -626,7 +626,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(changeLog,
@@ -705,7 +705,7 @@ public class Liquibase implements AutoCloseable {
                 /* We have no other choice than to save the current Executer here. */
                 @SuppressWarnings("squid:S1941")
                 Executor oldTemplate = getAndReplaceJdbcExecutor(output);
-                outputHeader("Update " + changesToApply + " Change Sets Database Script");
+                outputHeader("Update " + changesToApply + " Changesets Database Script");
 
                 update(changesToApply, contexts, labelExpression);
 
@@ -882,7 +882,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(database.getRanChangeSetList(), changeLog,
                             new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
@@ -1154,7 +1154,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
@@ -1322,7 +1322,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
@@ -1480,7 +1480,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     ChangeLogIterator listLogIterator = buildChangeLogIterator(tag, changeLog, contexts, labelExpression);
 
@@ -2070,7 +2070,7 @@ public class Liquibase implements AutoCloseable {
                 out.append(StreamUtil.getLineSeparator());
             } else {
                 out.append(String.valueOf(unrunChangeSets.size()));
-                out.append(" change sets have not been applied to ");
+                out.append(" changesets have not been applied to ");
                 out.append(getDatabase().getConnection().getConnectionUserName());
                 out.append("@");
                 out.append(getDatabase().getConnection().getURL());

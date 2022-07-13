@@ -21,9 +21,9 @@ public class NotRanChangeSetFilter implements ChangeSetFilter {
             if (ranChangeSet.getId().equalsIgnoreCase(changeSet.getId())
                     && ranChangeSet.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
                     && DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()).equalsIgnoreCase(DatabaseChangeLog.normalizePath(changeSet.getFilePath()))) {
-                return new ChangeSetFilterResult(false, "Change set already ran", this.getClass());
+                return new ChangeSetFilterResult(false, "Changeset already ran", this.getClass());
             }
         }
-        return new ChangeSetFilterResult(true, "Change set not yet ran", this.getClass());
+        return new ChangeSetFilterResult(true, "Changeset not yet ran", this.getClass());
     }
 }

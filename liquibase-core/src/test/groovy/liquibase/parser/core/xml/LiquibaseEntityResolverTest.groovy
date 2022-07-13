@@ -21,7 +21,8 @@ class LiquibaseEntityResolverTest extends Specification {
                 "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd",
                 "https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd",
                 "http://www.liquibase.org/xml/ns/migrator/dbchangelog-3.1.xsd",
-                "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-next.xsd",
+                "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd",
+                "https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd",
                 "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd",
                 "/liquibase/banner.txt", //can find files without hostnames
                 "http://liquibase/banner.txt", //conversion of hostnames to files works for not just liquibase.org URLs
@@ -63,7 +64,6 @@ class LiquibaseEntityResolverTest extends Specification {
         "4.12.0" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd" | true
         "4.12.0" | "https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd" | true
         "4.12.0" | "http://www.liquibase.org/xml/ns/migrator/dbchangelog-3.1.xsd" | true
-        "4.12.0" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-next.xsd" | false
         "4.12.0" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd" | false
         "4.12.0" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd" | false
         "4.12.0" | "/liquibase/banner.txt" | false

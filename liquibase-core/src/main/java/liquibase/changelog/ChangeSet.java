@@ -481,7 +481,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
             }
             if (changeSet == null) {
-                throw new ParsedNodeException("Change set " + new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false) + " does not exist");
+                throw new ParsedNodeException("Changeset " + new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false) + " does not exist");
             }
             for (Change change : changeSet.getChanges()) {
                 rollback.getChanges().add(change);
@@ -543,7 +543,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * This method will actually execute each of the changes in the list against the
      * specified database.
      *
-     * @return should change set be marked as ran
+     * @return should changeset be marked as ran
      */
     public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database)
             throws MigrationFailedException {
@@ -695,7 +695,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 throw new MigrationFailedException(this, e);
             }
             if ((getFailOnError() != null) && !getFailOnError()) {
-                log.info("Change set " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
+                log.info("Changeset " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
                 log.fine("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
@@ -950,7 +950,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     /**
      *
-     * Build and return a string which contains both the change set and inherited context
+     * Build and return a string which contains both the changeset and inherited context
      *
      * @return  String
      *
@@ -971,7 +971,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     /**
      *
-     * Build and return a string which contains both the change set and inherited labels
+     * Build and return a string which contains both the changeset and inherited labels
      *
      * @return  String
      *
