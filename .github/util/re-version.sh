@@ -51,9 +51,9 @@ do
   unzip -q $workdir/$jar META-INF/* -d $workdir
 
   java -cp $scriptDir ManifestReversion $workdir/META-INF/MANIFEST.MF $version
-  find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
-  find $workdir/META-INF -name pom.properties -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
-  find $workdir/META-INF -name plugin*.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
+  find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
+  find $workdir/META-INF -name pom.properties -exec sed -i -e "s/0-SNAPSHOT/$version/g" {} \;
+  find $workdir/META-INF -name plugin*.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
   (cd $workdir && jar -uMf $jar META-INF)
   rm -rf $workdir/META-INF
 
@@ -86,8 +86,8 @@ do
   mkdir $workdir/rebuild
   unzip -q $workdir/$jar -d $workdir/rebuild
 
-  find $workdir/rebuild -name "*.html" -exec sed -i -e "s/0-SNAPSHOT/$version/" {} \;
-  find $workdir/rebuild -name "*.xml" -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/" {} \;
+  find $workdir/rebuild -name "*.html" -exec sed -i -e "s/0-SNAPSHOT/$version/g" {} \;
+  find $workdir/rebuild -name "*.xml" -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
 
   (cd $workdir/rebuild && jar -uf ../$jar *)
   rm -rf $workdir/rebuild
