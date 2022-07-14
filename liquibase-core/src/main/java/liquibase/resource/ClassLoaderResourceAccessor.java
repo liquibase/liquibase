@@ -182,12 +182,12 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
     }
 
     @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+    public List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
         init();
 
         String finalPath = getFinalPath(relativeTo, path);
 
-        final SortedSet<String> returnList = listFromClassLoader(finalPath, recursive, includeFiles, includeDirectories);
+        final List<Resource> returnList = listFromClassLoader(finalPath, recursive, includeFiles, includeDirectories);
         returnList.addAll(listFromRootPaths(finalPath, recursive, includeFiles, includeDirectories));
 
         return returnList;
@@ -196,8 +196,8 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
     /**
      * Called by {@link #list(String, String, boolean, boolean, boolean)} to find files in {@link #rootPaths}.
      */
-    protected SortedSet<String> listFromRootPaths(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) {
-        SortedSet<String> returnSet = new TreeSet<>();
+    protected List<Resource> listFromRootPaths(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) {
+        List<Resource> returnList = new ArrayList<>();
 
         SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
             @Override
@@ -221,11 +221,11 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
 
             protected void addToReturnList(Path file) {
                 if (!file.toString().equals(path)) {
-                    returnSet.add(file.toString()
+                    returnList.add(new FileResource(file.toString()
                             .replaceFirst("^/", "")
                             .replaceFirst("/$", "")
                             .replaceAll("//+", "/")
-                    );
+                    , file.toFile()));
                 }
             }
         };
@@ -241,14 +241,14 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
             }
         }
 
-        return returnSet;
+        return returnList;
     }
 
     /**
      * Called by {@link #list(String, String, boolean, boolean, boolean)} to find files in {@link #classLoader}.
      */
-    protected SortedSet<String> listFromClassLoader(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) {
-        final SortedSet<String> returnSet = new TreeSet<>();
+    protected List<Resource> listFromClassLoader(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) {
+        final List<Resource> returnSet = new ArrayList<>();
 
         final Enumeration<URL> resources;
         try {
@@ -283,12 +283,12 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
                                     }
 
                                     if (recursive || !name.substring(comparePath.length()).contains("/")) {
-                                        returnSet.add(name);
+                                        returnSet.add(new ZipEntryResource(name, entry, jar));
                                     }
                                 } else {
                                     if (includeFiles) {
                                         if (recursive || !name.substring(comparePath.length()).contains("/")) {
-                                            returnSet.add(name);
+                                            returnSet.add(new ZipEntryResource(name, entry, jar));
                                         }
                                     }
                                 }
@@ -306,14 +306,14 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
 
                             if (isDirectory(childPath)) {
                                 if (includeDirectories) {
-                                    returnSet.add(childPath);
+                                    returnSet.add(new UnknownResource(childPath));
                                 }
                                 if (recursive) {
                                     returnSet.addAll(listFromClassLoader(childPath, recursive, includeFiles, includeDirectories));
                                 }
                             } else {
                                 if (includeFiles) {
-                                    returnSet.add(childPath);
+                                    returnSet.add(new UnknownResource(childPath));
                                 }
                             }
                         }

@@ -20,9 +20,4 @@ public class MavenResourceAccessor extends ClassLoaderResourceAccessor {
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         return super.openStreams(relativeTo, streamPath);
     }
-
-    @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        return super.list(relativeTo, path, recursive, includeFiles, includeDirectories);
-    }
 }

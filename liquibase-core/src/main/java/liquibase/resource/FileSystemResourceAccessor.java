@@ -186,8 +186,8 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        final SortedSet<String> returnList = new TreeSet<>();
+    public List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        final List<Resource> returnList = new ArrayList<>();
 
         int maxDepth = recursive ? Integer.MAX_VALUE : 1;
 
@@ -221,7 +221,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                     }
 
                     pathToAdd = pathToAdd.replaceFirst("/$", "");
-                    returnList.add(pathToAdd);
+                    returnList.add(new FileResource(pathToAdd, file.toFile()));
                 }
 
             };

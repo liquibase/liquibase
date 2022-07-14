@@ -3,18 +3,18 @@ package liquibase.integration.spring;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.InputStreamList;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.ContextResource;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.*;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -33,7 +33,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+    public List<liquibase.resource.Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
         String searchPath = getCompletePath(relativeTo, path);
 
         if (recursive) {
@@ -44,18 +44,18 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         searchPath = finalizeSearchPath(searchPath);
 
         final Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(searchPath);
-        SortedSet<String> returnSet = new TreeSet<>();
+        List<liquibase.resource.Resource> returnList = new ArrayList<>();
         for (Resource resource : resources) {
             final boolean isFile = resourceIsFile(resource);
             if (isFile && includeFiles) {
-                returnSet.add(getResourcePath(resource));
+                returnList.add(new SpringResource(getResourcePath(resource), resource));
             }
             if (!isFile && includeDirectories) {
-                returnSet.add(getResourcePath(resource));
+                returnList.add(new SpringResource(getResourcePath(resource), resource));
             }
         }
 
-        return returnSet;
+        return returnList;
     }
 
     @Override
@@ -198,6 +198,29 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         searchPath = StringUtils.cleanPath(searchPath);
 
         return searchPath;
+    }
+
+    private static class SpringResource extends liquibase.resource.AbstractResource {
+
+        private final Resource resource;
+
+        public SpringResource(String path, Resource resource) {
+            super(path);
+            this.resource = resource;
+        }
+
+        @Override
+        public InputStream openInputStream() throws IOException {
+            return resource.getInputStream();
+        }
+
+        @Override
+        public OutputStream openOutputStream() throws IOException {
+            if (resource instanceof WritableResource) {
+                return ((WritableResource) resource).getOutputStream();
+            }
+            throw new IOException("Read only");
+        }
     }
 
 }

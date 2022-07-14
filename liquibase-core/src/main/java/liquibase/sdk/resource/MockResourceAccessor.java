@@ -3,6 +3,8 @@ package liquibase.sdk.resource;
 import liquibase.GlobalConfiguration;
 import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.InputStreamList;
+import liquibase.resource.Resource;
+import liquibase.resource.UnknownResource;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -39,11 +41,11 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        SortedSet<String> returnSet = new TreeSet<>();
+    public List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        List<Resource> returnSet = new ArrayList<>();
         for (String file : contentByFileName.keySet()) {
             if (file.startsWith(path)) {
-                returnSet.add(file);
+                returnSet.add(new UnknownResource(file));
             }
         }
         return returnSet;

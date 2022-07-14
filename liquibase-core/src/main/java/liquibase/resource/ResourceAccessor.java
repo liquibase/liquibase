@@ -2,6 +2,7 @@ package liquibase.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.SortedSet;
 
 /**
@@ -54,6 +55,8 @@ public interface ResourceAccessor {
      * @throws IOException if there is an error reading an existing root.
      */
     SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException;
+
+    List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException;
 
     /**
      * Returns a description of the places this classloader will look for paths. Used in error messages and other troubleshooting cases.

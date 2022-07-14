@@ -7,12 +7,14 @@ import liquibase.GlobalConfiguration;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.InputStreamList;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -54,7 +56,7 @@ public class ResourceSupplier {
         }
 
         @Override
-        public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        public List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
             return null;
         }
 

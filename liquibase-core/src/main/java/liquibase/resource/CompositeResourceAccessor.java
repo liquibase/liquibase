@@ -1,7 +1,5 @@
 package liquibase.resource;
 
-import liquibase.util.CollectionUtil;
-
 import java.io.IOException;
 import java.util.*;
 
@@ -43,16 +41,16 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        SortedSet<String> returnSet = new TreeSet<>();
+    public List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        List<Resource> returnList = new ArrayList<>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            final SortedSet<String> list = accessor.list(relativeTo, path, recursive, includeFiles, includeDirectories);
+            final List<Resource> list = accessor.find(relativeTo, path, recursive, includeFiles, includeDirectories);
             if (list != null) {
-                returnSet.addAll(list);
+                returnList.addAll(list);
             }
         }
 
-        return returnSet;
+        return returnList;
     }
 
     @Override

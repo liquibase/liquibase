@@ -1,11 +1,10 @@
 package liquibase.resource;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
@@ -34,12 +33,13 @@ public class FileSystemPathHandler extends AbstractPathHandler {
     public ResourceAccessor getResourceAccessor(String root) {
         return new FileSystemResourceAccessor(new File(root.replace("\\", "/")));
     }
+
     @Override
-    public InputStream open(String path) throws IOException {
-        try {
-            return Files.newInputStream(Paths.get(path));
-        } catch (NoSuchFileException e) {
-            throw new IOException("File '"+path+"' does not exist");
+    public Resource getResource(String path) throws IOException {
+        Path pathObj = Paths.get(path);
+        if (!pathObj.toFile().exists()) {
+            throw new IOException("File '" + path + "' does not exist");
         }
+        return new FileResource(path, pathObj);
     }
 }

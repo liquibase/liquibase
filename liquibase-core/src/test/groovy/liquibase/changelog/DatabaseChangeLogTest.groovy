@@ -10,6 +10,7 @@ import liquibase.parser.core.ParsedNode
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.RunningAsPrecondition
+import liquibase.resource.ResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import spock.lang.Shared
@@ -291,7 +292,7 @@ create view sql_view as select * from sql_table;'''
             private callingPath;
 
             @Override
-            SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+            List<ResourceAccessor> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
                 callingPath = path;
                 return super.list(relativeTo, path, recursive, includeFiles, includeDirectories)
             }

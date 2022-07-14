@@ -2,6 +2,7 @@ package liquibase.integration.commandline;
 
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.InputStreamList;
+import liquibase.resource.Resource;
 
 import java.io.IOException;
 import java.util.*;
@@ -34,17 +35,17 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
 
 
     @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        SortedSet<String> contents = new TreeSet<>();
-        Set<String> superList = super.list(relativeTo, path, includeFiles, includeDirectories, recursive);
+    public List<Resource> find(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+        List<Resource> contents = new ArrayList<>();
+        List<Resource> superList = super.find(relativeTo, path, includeFiles, includeDirectories, recursive);
         if (superList != null) {
             contents.addAll(superList);
         }
         for (String altPath : getAlternatePaths(path)) {
-            contents.addAll(super.list(relativeTo, altPath, includeFiles, includeDirectories, recursive));
+            contents.addAll(super.find(relativeTo, altPath, includeFiles, includeDirectories, recursive));
         }
         if (contents.isEmpty()) {
-            return new TreeSet<>();
+            return new ArrayList<>();
         }
         return contents;
     }
