@@ -35,7 +35,7 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
             return null;
         } else {
             InputStreamList list = new InputStreamList();
-            list.add(URI.create(streamPath), stream);
+            list.add(URI.create(streamPath).toString(), stream);
             return list;
         }
     }

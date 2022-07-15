@@ -84,7 +84,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         InputStreamList returnList = new InputStreamList();
         for (Resource foundResource : resources) {
             try {
-                returnList.add(foundResource.getURI(), foundResource.getInputStream());
+                returnList.add(foundResource.getDescription(), foundResource.getInputStream());
             } catch (FileNotFoundException ignored) {
                 //don't add it to the return list
             }

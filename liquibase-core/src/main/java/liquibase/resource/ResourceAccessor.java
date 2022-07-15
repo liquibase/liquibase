@@ -1,5 +1,9 @@
 package liquibase.resource;
 
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
+import liquibase.logging.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -56,7 +60,49 @@ public interface ResourceAccessor {
      */
     SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException;
 
+    /**
+     * Finds all files
+     */
     List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException;
+
+    /**
+     * Finds a single specific file. If multiple files match, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
+     */
+    default Resource find(String relativeTo, String path) throws IOException {
+        List<Resource> resources = find(relativeTo, path, false, true, false);
+
+        if (resources == null || resources.size() == 0) {
+            return null;
+        } else if (resources.size() == 1) {
+            return resources.get(0);
+        } else {
+            String message = "Found " + resources.size() + " files with the path '" + path + "':" + System.lineSeparator();
+            for (Resource resource : resources) {
+                message += "    - " + resource.getDescription() + System.lineSeparator();
+            }
+            message += "  Search Path: " + System.lineSeparator();
+            for (String location : Scope.getCurrentScope().getResourceAccessor().describeLocations()) {
+                message += "    - " + location + System.lineSeparator();
+            }
+            message += "  You can limit the search path to remove duplicates with the liquibase.searchPath setting.";
+
+            final GlobalConfiguration.DuplicateFileMode mode = GlobalConfiguration.DUPLICATE_FILE_MODE.getCurrentValue();
+            final Logger log = Scope.getCurrentScope().getLog(getClass());
+
+            if (mode == GlobalConfiguration.DuplicateFileMode.ERROR) {
+                throw new IOException(message + " Or, if you KNOW these are the exact same file you can set liquibase.duplicateFileMode=WARN.");
+            } else if (mode == GlobalConfiguration.DuplicateFileMode.WARN) {
+                Resource resource = resources.get(0);
+                final String warnMessage = message + System.lineSeparator() +
+                        "  To fail when duplicates are found, set liquibase.duplicateFileMode=ERROR" + System.lineSeparator() +
+                        "  Choosing: " + resource.getDescription();
+                Scope.getCurrentScope().getUI().sendMessage(warnMessage);
+                log.warning(warnMessage);
+            }
+
+            return resources.get(0);
+        }
+    }
 
     /**
      * Returns a description of the places this classloader will look for paths. Used in error messages and other troubleshooting cases.

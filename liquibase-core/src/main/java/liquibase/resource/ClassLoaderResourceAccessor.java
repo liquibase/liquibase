@@ -120,7 +120,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
 
             if (seenUrls.add(url.toExternalForm())) {
                 try {
-                    returnList.add(url.toURI(), url.openStream());
+                    returnList.add(url.toURI().toString(), url.openStream());
                 } catch (URISyntaxException e) {
                     Scope.getCurrentScope().getLog(getClass()).severe(e.getMessage(), e);
                 }

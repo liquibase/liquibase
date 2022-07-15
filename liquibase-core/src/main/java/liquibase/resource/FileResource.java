@@ -26,6 +26,6 @@ public class FileResource extends AbstractResource {
 
     @Override
     public OutputStream openOutputStream() throws IOException {
-        return Files.newOutputStream(file, openOptions);
+        return Files.newOutputStream(file);
     }
 }

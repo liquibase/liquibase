@@ -30,6 +30,7 @@ import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.InputStreamList
+import liquibase.resource.Resource
 import liquibase.resource.ResourceAccessor
 import liquibase.ui.ConsoleUIService
 import liquibase.ui.InputHandler
@@ -1151,12 +1152,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     //
     static class ClassLoaderResourceAccessorForTest extends ClassLoaderResourceAccessor {
         @Override
-        public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-            InputStreamList list = super.openStreams(relativeTo, streamPath)
+        List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+            def list = super.find(relativeTo, path, recursive, includeFiles, includeDirectories)
             if (list != null && ! list.isEmpty()) {
                 return list
             }
-            return super.openStreams(relativeTo, new File(streamPath).getName())
+
+            return super.find(relativeTo, new File(path).getName(), recursive, includeFiles, includeDirectories)
         }
     }
 

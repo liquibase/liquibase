@@ -176,7 +176,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                     stream = new GZIPInputStream(stream);
                 }
 
-                streams.add(streamURI, stream);
+                streams.add(streamURI.toString(), stream);
             }
 
 

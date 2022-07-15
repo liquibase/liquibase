@@ -14,53 +14,53 @@ import java.util.function.Consumer;
  */
 public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
 
-    private LinkedHashMap<URI, InputStream> streams = new LinkedHashMap<>();
+    private LinkedHashMap<String, InputStream> streams = new LinkedHashMap<>();
 
     public InputStreamList() {
     }
 
-    public InputStreamList(URI uri, InputStream stream) {
-        this.streams.put(uri, stream);
+    public InputStreamList(String description, InputStream stream) {
+        this.streams.put(description, stream);
     }
 
-    public boolean add(URI uri, InputStream inputStream) {
+    public boolean add(String description, InputStream inputStream) {
         Logger log = Scope.getCurrentScope().getLog(getClass());
 
-        boolean duplicate = alreadySaw(uri);
+        boolean duplicate = alreadySaw(description);
         if (duplicate) {
-            log.fine("Closing duplicate stream for " + uri);
+            log.fine("Closing duplicate stream for " + description);
             try {
                 inputStream.close();
             } catch (IOException e) {
-                log.warning("Cannot close stream for " + uri, e);
+                log.warning("Cannot close stream for " + description, e);
             }
         } else {
-            streams.put(uri, inputStream);
+            streams.put(description, inputStream);
         }
         return duplicate;
     }
 
-    protected boolean alreadySaw(URI uri) {
+    protected boolean alreadySaw(String description) {
         if (streams.isEmpty()) {
             return false;
         }
-        if (streams.containsKey(uri)) {
+        if (streams.containsKey(description)) {
             return true;
         }
 
 
         //standardize url strings between file:// and jar:file:
-        String thisUriStringBase = uri.toString()
+        String thisDescriptionBase = description.toString()
                 .replaceFirst("^file://", "")
                 .replaceFirst("^jar:file:", "")
                 .replaceFirst("!/", "!");
 
-        for (URI seenURI : streams.keySet()) {
-            if (seenURI.toString()
+        for (String seenDescription : streams.keySet()) {
+            if (seenDescription.toString()
                     .replaceFirst("^file://", "")
                     .replaceFirst("^jar:file:", "")
                     .replaceFirst("!/", "!")
-                    .equals(thisUriStringBase)) {
+                    .equals(thisDescriptionBase)) {
                 return true;
             }
         }
@@ -72,7 +72,7 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
             return;
         }
 
-        for (Map.Entry<URI, InputStream> entry : streams.streams.entrySet()) {
+        for (Map.Entry<String, InputStream> entry : streams.streams.entrySet()) {
             add(entry.getKey(), entry.getValue());
         }
     }
@@ -114,7 +114,7 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
         return streams.isEmpty();
     }
 
-    public List<URI> getURIs() {
+    public List<String> getDescriptions() {
         return new ArrayList<>(streams.keySet());
     }
 }

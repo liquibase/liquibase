@@ -68,9 +68,9 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         }
 
         if (streams.size() == 1) {
-            log.fine("Found XML entity at " + streams.getURIs().get(0));
+            log.fine("Found XML entity at " + streams.getDescriptions().get(0));
         } else if (streams.size() > 1) {
-            log.warning("Found " + streams.size() + " copies of " + systemId + ". Using " + streams.getURIs().get(0));
+            log.warning("Found " + streams.size() + " copies of " + systemId + ". Using " + streams.getDescriptions().get(0));
         }
         InputStream stream = streams.iterator().next();
 
