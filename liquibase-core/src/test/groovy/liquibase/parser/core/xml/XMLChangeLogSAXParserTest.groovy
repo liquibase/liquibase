@@ -80,7 +80,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        e.message.contains("Unable to resolve xml entity file:///invalid.txt locally: liquibase.secureParsing is set to 'true' which does not allow remote lookups. Set it to 'false' to allow remote lookups of xsd files")
+        e.message == "Unable to resolve xml entity file:///invalid.txt. liquibase.secureParsing is set to 'true' which does not allow remote lookups. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial in your XSD definition. Or, set it to 'false' to allow remote lookups of xsd files."
     }
 
     def "allows liquibase.secureParsing=false to disable secure parsing"() {
