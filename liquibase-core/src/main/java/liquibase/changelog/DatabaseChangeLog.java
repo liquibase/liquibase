@@ -37,25 +37,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseChangeLog.class);
 
     public static final Pattern CLASSPATH_PATTERN = Pattern.compile("classpath:");
-    public static final Matcher CLASSPATH_MATCHER = CLASSPATH_PATTERN.matcher("");
     public static final Pattern SLASH_PATTERN = Pattern.compile("^/");
-    public static final Matcher SLASH_MATCHER = SLASH_PATTERN.matcher("");
-
-
-
     public static final Pattern NON_CLASSPATH_PATTERN = Pattern.compile("^classpath:");
     public static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
     public static final Pattern DOUBLE_SLASH_PATTERN = Pattern.compile("//+");
     public static final Pattern SLASH_DOT_SLASH_PATTERN = Pattern.compile("/\\./");
     public static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
     public static final Pattern DOT_SLASH_PATTERN = Pattern.compile("^\\.?/");
-
-    public static final Matcher NO_CLASSPATH_MATCHER = NON_CLASSPATH_PATTERN.matcher("");
-    public static final Matcher DOUBLE_BACK_SLASH_MATCHER = DOUBLE_BACK_SLASH_PATTERN.matcher("");
-    public static final Matcher DOUBLE_SLASH_MATCHER = DOUBLE_SLASH_PATTERN.matcher("");
-    public static final Matcher SLASH_DOT_SLASH_MATCHER = SLASH_DOT_SLASH_PATTERN.matcher("");
-    public static final Matcher NO_LETTER_MATCHER = NO_LETTER_PATTERN.matcher("");
-    public static final Matcher DOT_SLASH_MATCHER = DOT_SLASH_PATTERN.matcher("");
 
     private PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
     private String physicalFilePath;
@@ -153,8 +141,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (returnPath == null) {
             return null;
         }
-        String path = DOUBLE_BACK_SLASH_MATCHER.reset(returnPath).replaceAll("/");
-        return SLASH_MATCHER.reset(path).replaceFirst("");
+        String path = DOUBLE_BACK_SLASH_PATTERN.matcher(returnPath).replaceAll("/");
+        return SLASH_PATTERN.matcher(path).replaceFirst("");
     }
 
     public void setLogicalFilePath(String logicalFilePath) {
@@ -668,10 +656,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         String relativeBaseFileName = this.getPhysicalFilePath();
         if (isRelativePath) {
-            relativeBaseFileName = CLASSPATH_MATCHER.reset(relativeBaseFileName).replaceFirst("");
+            relativeBaseFileName = CLASSPATH_PATTERN.matcher(relativeBaseFileName).replaceFirst("");
             fileName = FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
         }
-        fileName = CLASSPATH_MATCHER.reset(fileName).replaceFirst("");
+        fileName = CLASSPATH_PATTERN.matcher(fileName).replaceFirst("");
         DatabaseChangeLog changeLog;
         try {
             DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
@@ -745,12 +733,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (filePath == null) {
             return null;
         }
-        String noClassPathReplaced = NO_CLASSPATH_MATCHER.reset(filePath).replaceFirst("");
-        String doubleBackSlashReplaced = DOUBLE_BACK_SLASH_MATCHER.reset(noClassPathReplaced).replaceAll("/");
-        String doubleSlashReplaced = DOUBLE_SLASH_MATCHER.reset(doubleBackSlashReplaced).replaceAll("/");
-        String slashDotSlashReplaced =SLASH_DOT_SLASH_MATCHER.reset(doubleSlashReplaced).replaceAll("/");
-        String noLetterReplaced = NO_LETTER_MATCHER.reset(slashDotSlashReplaced).replaceFirst("");
-        return DOT_SLASH_MATCHER.reset(noLetterReplaced).replaceFirst("");
+        String noClassPathReplaced = NON_CLASSPATH_PATTERN.matcher(filePath).replaceFirst("");
+        String doubleBackSlashReplaced = DOUBLE_BACK_SLASH_PATTERN.matcher(noClassPathReplaced).replaceAll("/");
+        String doubleSlashReplaced = DOUBLE_SLASH_PATTERN.matcher(doubleBackSlashReplaced).replaceAll("/");
+        String slashDotSlashReplaced =SLASH_DOT_SLASH_PATTERN.matcher(doubleSlashReplaced).replaceAll("/");
+        String noLetterReplaced = NO_LETTER_PATTERN.matcher(slashDotSlashReplaced).replaceFirst("");
+        return DOT_SLASH_PATTERN.matcher(noLetterReplaced).replaceFirst("");
     }
 
     public void clearCheckSums() {
