@@ -56,7 +56,7 @@ public class ResourceSupplier {
         }
 
         @Override
-        public List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        public SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
             return null;
         }
 

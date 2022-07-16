@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 public class MockResourceAccessor extends AbstractResourceAccessor {
@@ -35,18 +36,22 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
             return null;
         } else {
             InputStreamList list = new InputStreamList();
-            list.add(URI.create(streamPath).toString(), stream);
+            list.add(URI.create(streamPath), stream);
             return list;
         }
     }
 
     @Override
-    public List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        List<Resource> returnSet = new ArrayList<>();
-        for (String file : contentByFileName.keySet()) {
-            if (file.startsWith(path)) {
-                returnSet.add(new UnknownResource(file));
+    public SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        SortedSet<Resource> returnSet = new TreeSet<>();
+        try {
+            for (String file : contentByFileName.keySet()) {
+                if (file.startsWith(path)) {
+                    returnSet.add(new UnknownResource(file, new URI("mock:" + path)));
+                }
             }
+        } catch (URISyntaxException e) {
+            throw new IOException(e.getMessage(), e);
         }
         return returnSet;
     }

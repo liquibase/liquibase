@@ -1152,7 +1152,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     //
     static class ClassLoaderResourceAccessorForTest extends ClassLoaderResourceAccessor {
         @Override
-        List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
             def list = super.find(relativeTo, path, recursive, includeFiles, includeDirectories)
             if (list != null && ! list.isEmpty()) {
                 return list

@@ -292,7 +292,7 @@ create view sql_view as select * from sql_table;'''
             private callingPath;
 
             @Override
-            List<ResourceAccessor> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+            SortedSet<ResourceAccessor> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
                 callingPath = path;
                 return super.list(relativeTo, path, recursive, includeFiles, includeDirectories)
             }

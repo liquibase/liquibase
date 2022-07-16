@@ -120,7 +120,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
 
             if (seenUrls.add(url.toExternalForm())) {
                 try {
-                    returnList.add(url.toURI().toString(), url.openStream());
+                    returnList.add(url.toURI(), url.openStream());
                 } catch (URISyntaxException e) {
                     Scope.getCurrentScope().getLog(getClass()).severe(e.getMessage(), e);
                 }
@@ -182,12 +182,12 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
     }
 
     @Override
-    public List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+    public SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
         init();
 
         String finalPath = getFinalPath(relativeTo, path);
 
-        final List<Resource> returnList = listFromClassLoader(finalPath, recursive, includeFiles, includeDirectories);
+        final SortedSet<Resource> returnList = listFromClassLoader(finalPath, recursive, includeFiles, includeDirectories);
         returnList.addAll(listFromRootPaths(finalPath, recursive, includeFiles, includeDirectories));
 
         return returnList;
@@ -247,8 +247,8 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
     /**
      * Called by {@link #list(String, String, boolean, boolean, boolean)} to find files in {@link #classLoader}.
      */
-    protected List<Resource> listFromClassLoader(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) {
-        final List<Resource> returnSet = new ArrayList<>();
+    protected SortedSet<Resource> listFromClassLoader(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) {
+        final SortedSet<Resource> returnSet = new TreeSet<>();
 
         final Enumeration<URL> resources;
         try {
@@ -283,12 +283,12 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
                                     }
 
                                     if (recursive || !name.substring(comparePath.length()).contains("/")) {
-                                        returnSet.add(new ZipEntryResource(name, entry, jar));
+                                        returnSet.add(new ZipEntryResource(name, url.toURI(), entry, jar));
                                     }
                                 } else {
                                     if (includeFiles) {
                                         if (recursive || !name.substring(comparePath.length()).contains("/")) {
-                                            returnSet.add(new ZipEntryResource(name, entry, jar));
+                                            returnSet.add(new ZipEntryResource(name, url.toURI(), entry, jar));
                                         }
                                     }
                                 }
@@ -306,20 +306,20 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
 
                             if (isDirectory(childPath)) {
                                 if (includeDirectories) {
-                                    returnSet.add(new UnknownResource(childPath));
+                                    returnSet.add(new UnknownResource(childPath, url.toURI()));
                                 }
                                 if (recursive) {
                                     returnSet.addAll(listFromClassLoader(childPath, recursive, includeFiles, includeDirectories));
                                 }
                             } else {
                                 if (includeFiles) {
-                                    returnSet.add(new UnknownResource(childPath));
+                                    returnSet.add(new UnknownResource(childPath, url.toURI()));
                                 }
                             }
                         }
                     }
                 }
-            } catch (IOException e) {
+            } catch (Throwable e) {
                 Scope.getCurrentScope().getLog(getClass()).severe("Cannot list resources in " + urlExternalForm + ": " + e.getMessage(), e);
             }
         }

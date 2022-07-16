@@ -63,22 +63,22 @@ public interface ResourceAccessor {
     /**
      * Finds all files
      */
-    List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException;
+    SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException;
 
     /**
      * Finds a single specific file. If multiple files match, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
      */
     default Resource find(String relativeTo, String path) throws IOException {
-        List<Resource> resources = find(relativeTo, path, false, true, false);
+        SortedSet<Resource> resources = find(relativeTo, path, false, true, false);
 
         if (resources == null || resources.size() == 0) {
             return null;
         } else if (resources.size() == 1) {
-            return resources.get(0);
+            return resources.iterator().next();
         } else {
             String message = "Found " + resources.size() + " files with the path '" + path + "':" + System.lineSeparator();
             for (Resource resource : resources) {
-                message += "    - " + resource.getDescription() + System.lineSeparator();
+                message += "    - " + resource.getUri() + System.lineSeparator();
             }
             message += "  Search Path: " + System.lineSeparator();
             for (String location : Scope.getCurrentScope().getResourceAccessor().describeLocations()) {
@@ -92,15 +92,15 @@ public interface ResourceAccessor {
             if (mode == GlobalConfiguration.DuplicateFileMode.ERROR) {
                 throw new IOException(message + " Or, if you KNOW these are the exact same file you can set liquibase.duplicateFileMode=WARN.");
             } else if (mode == GlobalConfiguration.DuplicateFileMode.WARN) {
-                Resource resource = resources.get(0);
+                Resource resource = resources.iterator().next();
                 final String warnMessage = message + System.lineSeparator() +
                         "  To fail when duplicates are found, set liquibase.duplicateFileMode=ERROR" + System.lineSeparator() +
-                        "  Choosing: " + resource.getDescription();
+                        "  Choosing: " + resource.getUri();
                 Scope.getCurrentScope().getUI().sendMessage(warnMessage);
                 log.warning(warnMessage);
             }
 
-            return resources.get(0);
+            return resources.iterator().next();
         }
     }
 

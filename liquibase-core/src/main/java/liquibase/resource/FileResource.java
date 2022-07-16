@@ -15,7 +15,7 @@ public class FileResource extends AbstractResource {
     }
 
     public FileResource(String path, Path file) {
-        super(path);
+        super(path, file.toUri());
         this.file = file;
     }
 

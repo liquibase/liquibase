@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public List<liquibase.resource.Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+    public SortedSet<liquibase.resource.Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
         String searchPath = getCompletePath(relativeTo, path);
 
         if (recursive) {
@@ -44,18 +45,18 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         searchPath = finalizeSearchPath(searchPath);
 
         final Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(searchPath);
-        List<liquibase.resource.Resource> returnList = new ArrayList<>();
+        SortedSet<liquibase.resource.Resource> returnSet = new TreeSet<>();
         for (Resource resource : resources) {
             final boolean isFile = resourceIsFile(resource);
             if (isFile && includeFiles) {
-                returnList.add(new SpringResource(getResourcePath(resource), resource));
+                returnSet.add(new SpringResource(getResourcePath(resource), resource.getURI(), resource));
             }
             if (!isFile && includeDirectories) {
-                returnList.add(new SpringResource(getResourcePath(resource), resource));
+                returnSet.add(new SpringResource(getResourcePath(resource), resource.getURI(), resource));
             }
         }
 
-        return returnList;
+        return returnSet;
     }
 
     @Override
@@ -84,7 +85,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         InputStreamList returnList = new InputStreamList();
         for (Resource foundResource : resources) {
             try {
-                returnList.add(foundResource.getDescription(), foundResource.getInputStream());
+                returnList.add(foundResource.getURI(), foundResource.getInputStream());
             } catch (FileNotFoundException ignored) {
                 //don't add it to the return list
             }
@@ -204,8 +205,8 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
 
         private final Resource resource;
 
-        public SpringResource(String path, Resource resource) {
-            super(path);
+        public SpringResource(String path, URI uri, Resource resource) {
+            super(path, uri);
             this.resource = resource;
         }
 

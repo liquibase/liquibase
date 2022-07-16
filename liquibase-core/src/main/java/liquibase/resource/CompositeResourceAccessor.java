@@ -41,10 +41,10 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        List<Resource> returnList = new ArrayList<>();
+    public SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        SortedSet<Resource> returnList = new TreeSet<>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            final List<Resource> list = accessor.find(relativeTo, path, recursive, includeFiles, includeDirectories);
+            final SortedSet<Resource> list = accessor.find(relativeTo, path, recursive, includeFiles, includeDirectories);
             if (list != null) {
                 returnList.addAll(list);
             }

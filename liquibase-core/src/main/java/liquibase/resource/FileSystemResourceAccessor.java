@@ -176,7 +176,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                     stream = new GZIPInputStream(stream);
                 }
 
-                streams.add(streamURI.toString(), stream);
+                streams.add(streamURI, stream);
             }
 
 
@@ -186,8 +186,8 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        final List<Resource> returnList = new ArrayList<>();
+    public SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        final SortedSet<Resource> returnSet = new TreeSet<>();
 
         int maxDepth = recursive ? Integer.MAX_VALUE : 1;
 
@@ -221,7 +221,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                     }
 
                     pathToAdd = pathToAdd.replaceFirst("/$", "");
-                    returnList.add(new FileResource(pathToAdd, file.toFile()));
+                    returnSet.add(new FileResource(pathToAdd, file.toFile()));
                 }
 
             };
@@ -278,8 +278,8 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
             }
         }
 
-        returnList.remove(path);
-        return returnList;
+        returnSet.remove(path);
+        return returnSet;
     }
 
     /**

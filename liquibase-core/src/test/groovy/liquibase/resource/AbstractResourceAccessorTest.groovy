@@ -9,7 +9,7 @@ class AbstractResourceAccessorTest extends Specification {
 //        def rootUrlsSet = new ArrayList(rootUrls)
         new AbstractResourceAccessor() {
             @Override
-            List<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+            SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
                 return null
             }
 

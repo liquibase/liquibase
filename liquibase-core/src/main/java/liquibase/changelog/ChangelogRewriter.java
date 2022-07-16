@@ -11,6 +11,7 @@ import liquibase.util.StreamUtil;
 import java.io.*;
 import java.net.URI;
 import java.util.List;
+import java.util.SortedSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +31,7 @@ public class ChangelogRewriter {
         // Make changes to the changelog file
         //
         final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        List<Resource> list = null;
+        SortedSet<Resource> list = null;
         try {
             list = resourceAccessor.find("", changeLogFile, false, true, false);
             Resource resource = list.iterator().next();
@@ -112,7 +113,7 @@ public class ChangelogRewriter {
         // Make changes to the changelog file
         //
         final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        List<Resource> list = null;
+        SortedSet<Resource> list = null;
         try {
             list = resourceAccessor.find("", changeLogFile, false, true, false);
             Resource resource = list.iterator().next();

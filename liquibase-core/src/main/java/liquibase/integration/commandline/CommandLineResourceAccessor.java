@@ -35,9 +35,9 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
 
 
     @Override
-    public List<Resource> find(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        List<Resource> contents = new ArrayList<>();
-        List<Resource> superList = super.find(relativeTo, path, includeFiles, includeDirectories, recursive);
+    public SortedSet<Resource> find(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+        SortedSet<Resource> contents = new TreeSet<>();
+        SortedSet<Resource> superList = super.find(relativeTo, path, includeFiles, includeDirectories, recursive);
         if (superList != null) {
             contents.addAll(superList);
         }
@@ -45,7 +45,7 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
             contents.addAll(super.find(relativeTo, altPath, includeFiles, includeDirectories, recursive));
         }
         if (contents.isEmpty()) {
-            return new ArrayList<>();
+            return new TreeSet<>();
         }
         return contents;
     }

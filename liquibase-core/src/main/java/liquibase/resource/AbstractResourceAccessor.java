@@ -1,15 +1,9 @@
 package liquibase.resource;
 
 import liquibase.AbstractExtensibleObject;
-import liquibase.GlobalConfiguration;
-import liquibase.Scope;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -31,7 +25,7 @@ public abstract class AbstractResourceAccessor extends AbstractExtensibleObject 
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         InputStreamList returnList = new InputStreamList();
         for (Resource resource : find(relativeTo, streamPath, false, true, false)) {
-            returnList.add(resource.getDescription(), resource.openInputStream());
+            returnList.add(resource.getUri(), resource.openInputStream());
         }
 
         return returnList;
