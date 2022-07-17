@@ -14,8 +14,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -201,13 +199,23 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         return searchPath;
     }
 
-    private static class SpringResource extends liquibase.resource.AbstractResource {
+    private static class SpringResource extends liquibase.resource.AbstractResource implements liquibase.resource.Resource {
 
         private final Resource resource;
 
         public SpringResource(String path, URI uri, Resource resource) {
             super(path, uri);
             this.resource = resource;
+        }
+
+        @Override
+        public boolean exists() {
+            return resource.exists();
+        }
+
+        @Override
+        public boolean isWritable() {
+            return resource instanceof WritableResource && ((WritableResource) resource).isWritable();
         }
 
         @Override

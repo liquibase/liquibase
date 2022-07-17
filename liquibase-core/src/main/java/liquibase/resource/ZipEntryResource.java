@@ -18,12 +18,12 @@ public class ZipEntryResource extends AbstractResource {
     }
 
     @Override
-    public InputStream openInputStream() throws IOException {
-        return jar.getInputStream(entry);
+    public boolean exists() {
+        return jar.getEntry(entry.getName()) != null;
     }
 
     @Override
-    public OutputStream openOutputStream() throws IOException {
-        throw new IOException("Cannot write");
+    public InputStream openInputStream() throws IOException {
+        return jar.getInputStream(entry);
     }
 }

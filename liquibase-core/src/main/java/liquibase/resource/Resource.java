@@ -8,7 +8,11 @@ import java.net.URI;
 public interface Resource extends Comparable<Resource> {
     String getPath();
 
+    boolean exists();
+
     InputStream openInputStream() throws IOException;
+
+    boolean isWritable();
 
     OutputStream openOutputStream() throws IOException;
 

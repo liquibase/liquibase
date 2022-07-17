@@ -3,14 +3,11 @@ package liquibase.changelog;
 import liquibase.Scope;
 import liquibase.GlobalConfiguration;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.resource.InputStreamList;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 
 import java.io.*;
-import java.net.URI;
-import java.util.List;
 import java.util.SortedSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

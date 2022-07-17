@@ -4,13 +4,11 @@ import liquibase.GlobalConfiguration;
 import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.Resource;
-import liquibase.resource.UnknownResource;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 public class MockResourceAccessor extends AbstractResourceAccessor {
@@ -44,14 +42,10 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     @Override
     public SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
         SortedSet<Resource> returnSet = new TreeSet<>();
-        try {
-            for (String file : contentByFileName.keySet()) {
-                if (file.startsWith(path)) {
-                    returnSet.add(new UnknownResource(file, new URI("mock:" + path)));
-                }
+        for (String file : contentByFileName.keySet()) {
+            if (file.startsWith(path)) {
+                returnSet.add(new MockResource(file, contentByFileName.get(file)));
             }
-        } catch (URISyntaxException e) {
-            throw new IOException(e.getMessage(), e);
         }
         return returnSet;
     }

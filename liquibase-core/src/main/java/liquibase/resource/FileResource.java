@@ -20,6 +20,16 @@ public class FileResource extends AbstractResource {
     }
 
     @Override
+    public boolean exists() {
+        return file.toFile().exists();
+    }
+
+    @Override
+    public boolean isWritable() {
+        return file.toFile().canWrite();
+    }
+
+    @Override
     public InputStream openInputStream() throws IOException {
         return Files.newInputStream(file);
     }

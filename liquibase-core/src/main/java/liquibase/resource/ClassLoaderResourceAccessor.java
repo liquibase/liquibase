@@ -306,14 +306,14 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
 
                             if (isDirectory(childPath)) {
                                 if (includeDirectories) {
-                                    returnSet.add(new UnknownResource(childPath, url.toURI()));
+                                    returnSet.add(new URIResource(childPath, url.toURI()));
                                 }
                                 if (recursive) {
                                     returnSet.addAll(listFromClassLoader(childPath, recursive, includeFiles, includeDirectories));
                                 }
                             } else {
                                 if (includeFiles) {
-                                    returnSet.add(new UnknownResource(childPath, url.toURI()));
+                                    returnSet.add(new URIResource(childPath, url.toURI()));
                                 }
                             }
                         }
