@@ -74,7 +74,7 @@ public class Operation implements HubModel {
     public static class OperationStatus {
         private UUID id;
         private String statusMessage;
-        private String operationStatusTYpe;
+        private String operationStatusType;
 
 
         public UUID getId() {
@@ -91,6 +91,14 @@ public class Operation implements HubModel {
 
         public void setStatusMessage(String statusMessage) {
             this.statusMessage = statusMessage;
+        }
+
+        public String getOperationStatusType() {
+            return operationStatusType;
+        }
+
+        public void setOperationStatusType(String operationStatusType) {
+            this.operationStatusType = operationStatusType;
         }
     }
 }

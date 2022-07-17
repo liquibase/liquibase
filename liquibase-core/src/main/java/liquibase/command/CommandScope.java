@@ -58,6 +58,13 @@ public class CommandScope {
         return commandDefinition;
     }
 
+    /**
+     * Returns the complete config prefix (without a trailing period) for the command in this scope.
+     * @return
+     */
+    public String getCompleteConfigPrefix() {
+        return completeConfigPrefix;
+    }
 
     /**
      * Adds the given key/value pair to the stored argument data.
@@ -90,11 +97,14 @@ public class CommandScope {
         ConfigurationDefinition<T> configDef = createConfigurationDefinition(argument, true);
         ConfiguredValue<T> providedValue = configDef.getCurrentConfiguredValue();
 
-        if (!providedValue.found()) {
-            configDef = createConfigurationDefinition(argument, false);
-            providedValue = configDef.getCurrentConfiguredValue();
+        if (!providedValue.found() || providedValue.wasDefaultValueUsed()) {
+            ConfigurationDefinition<T> noCommandConfigDef = createConfigurationDefinition(argument, false);
+            ConfiguredValue<T> noCommandNameProvidedValue = noCommandConfigDef.getCurrentConfiguredValue();
+            if (noCommandNameProvidedValue.found() && !noCommandNameProvidedValue.wasDefaultValueUsed()) {
+                configDef = noCommandConfigDef;
+                providedValue = noCommandNameProvidedValue;
+            }
         }
-
 
         providedValue.override(commandScopeValueProvider.getProvidedValue(configDef.getKey(), argument.getName()));
 
@@ -126,7 +136,6 @@ public class CommandScope {
      */
     public CommandResults execute() throws CommandExecutionException {
         CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
-
         for (ConfigurationValueProvider provider : Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getProviders()) {
             provider.validate(this);
         }
@@ -154,7 +163,9 @@ public class CommandScope {
             }
         } finally {
             try {
-                this.outputStream.flush();
+                if (this.outputStream != null) {
+                    this.outputStream.flush();
+                }
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
             }

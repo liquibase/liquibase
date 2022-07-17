@@ -34,7 +34,7 @@ public class CommandLineArgumentValueProvider extends AbstractMapConfigurationVa
 
     @Override
     protected boolean keyMatches(String wantedKey, String storedKey) {
-        storedKey = storedKey.replaceFirst("^--", "");
+        storedKey = String.valueOf(storedKey).replaceFirst("^--", "");
 
         if (super.keyMatches(wantedKey, storedKey)) {
             return true;

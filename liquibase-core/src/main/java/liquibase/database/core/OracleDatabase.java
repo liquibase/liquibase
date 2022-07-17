@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -20,7 +21,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.lang.reflect.Method;
@@ -167,10 +168,24 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     //noinspection HardCodedStringLiteral
                     Scope.getCurrentScope().getLog(getClass()).info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
                 } finally {
-                    JdbcUtils.closeStatement(statement);
+                    JdbcUtil.closeStatement(statement);
                 }
 
-
+                if (GlobalConfiguration.DDL_LOCK_TIMEOUT.getCurrentValue() != null) {
+                    int timeoutValue = GlobalConfiguration.DDL_LOCK_TIMEOUT.getCurrentValue();
+                    Scope.getCurrentScope().getLog(getClass()).fine("Setting DDL_LOCK_TIMEOUT value to " + timeoutValue);
+                    String sql = "ALTER SESSION SET DDL_LOCK_TIMEOUT=" + timeoutValue;
+                    PreparedStatement ddlLockTimeoutStatement = null;
+                    try {
+                        ddlLockTimeoutStatement = sqlConn.prepareStatement(sql);
+                        ddlLockTimeoutStatement.execute();
+                    } catch (SQLException sqle) {
+                        Scope.getCurrentScope().getUI().sendErrorMessage("Unable to set the DDL_LOCK_TIMEOUT_VALUE: " + sqle.getMessage(), sqle);
+                        Scope.getCurrentScope().getLog(getClass()).warning("Unable to set the DDL_LOCK_TIMEOUT_VALUE: " + sqle.getMessage(), sqle);
+                    } finally {
+                        JdbcUtil.closeStatement(ddlLockTimeoutStatement);
+                    }
+                }
             }
         }
         super.setConnection(conn);
@@ -307,7 +322,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultCatalogName() {//NOPMD
-        return (super.getDefaultCatalogName() == null) ? null : super.getDefaultCatalogName().toUpperCase(Locale.US);
+        String defaultCatalogName = super.getDefaultCatalogName();
+        if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
+            return defaultCatalogName;
+        }
+        return (defaultCatalogName == null) ? null : defaultCatalogName.toUpperCase(Locale.US);
     }
 
     /**
@@ -544,11 +563,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         if ((databaseFunction != null) && "current_timestamp".equalsIgnoreCase(databaseFunction.toString())) {
             return databaseFunction.toString();
         }
-        if ((databaseFunction instanceof SequenceNextValueFunction) || (databaseFunction instanceof
-                SequenceCurrentValueFunction)) {
+        if ((databaseFunction instanceof SequenceNextValueFunction)
+                || (databaseFunction instanceof SequenceCurrentValueFunction)) {
             String quotedSeq = super.generateDatabaseFunctionValue(databaseFunction);
+
             // replace "myschema.my_seq".nextval with "myschema"."my_seq".nextval
-            return quotedSeq.replaceFirst("\"([^\\.\"]+)\\.([^\\.\"]+)\"", "\"$1\".\"$2\"");
+            return quotedSeq.replaceFirst("\"([^.\"]+)\\.([^.\"]+)\"", "\"$1\".\"$2\"");
 
         }
 
@@ -612,7 +632,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     this.canAccessDbaRecycleBin = false;
                 }
             } finally {
-                JdbcUtils.close(null, statement);
+                JdbcUtil.close(null, statement);
             }
         }
 

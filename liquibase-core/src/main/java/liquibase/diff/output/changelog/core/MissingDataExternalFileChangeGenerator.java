@@ -14,7 +14,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Data;
 import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.csv.CSVWriter;
 
 import java.io.*;
@@ -104,7 +104,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                         line = new String[columnNames.size()];
 
                         for (int i = 0; i < columnNames.size(); i++) {
-                            Object value = JdbcUtils.getResultSetValue(rs, i + 1);
+                            Object value = JdbcUtil.getResultSetValue(rs, i + 1);
                             if ((dataTypes[i] == null) && (value != null)) {
                                 if (value instanceof Number) {
                                     dataTypes[i] = "NUMERIC";

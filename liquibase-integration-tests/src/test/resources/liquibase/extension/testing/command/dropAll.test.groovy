@@ -12,6 +12,7 @@ Short Description: Drop all database objects owned by the user
 Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changelogFile (String) The root changelog
     Default: null
@@ -24,6 +25,8 @@ Optional Args:
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
   hubConnectionId (UUID) Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.
+    Default: null
+  hubProjectId (UUID) Used to identify the specific Project in which to record at Liquibase Hub. Available in your Liquibase Hub account at https://hub.liquibase.com.
     Default: null
   password (String) Password to use to connect to the database
     Default: null

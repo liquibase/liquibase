@@ -3,7 +3,6 @@ package liquibase.hub.core;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
-import liquibase.hub.HubConfiguration;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.*;
 import liquibase.hub.model.*;
@@ -14,11 +13,15 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.ConnectException;
 import java.net.InetAddress;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class StandardHubService implements HubService {
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
@@ -144,10 +147,31 @@ public class StandardHubService implements HubService {
     }
 
     @Override
-    public List<Project> getProjects() throws LiquibaseHubException {
-        final UUID organizationId = getOrganization().getId();
+    public Project findProjectByConnectionIdOrJdbcUrl(UUID connectionId, String jdbcUrl) throws LiquibaseHubException {
+        final AtomicReference<UUID> organizationId = new AtomicReference<>(getOrganization().getId());
+        String searchParam = null;
+        if (connectionId != null) {
+            searchParam = "connections.id:\"" + connectionId.toString() + "\"";
+        } else if (jdbcUrl != null) {
+            searchParam = "connections.jdbcUrl:\"" + jdbcUrl + "\"";
+        } else {
+            throw new LiquibaseHubException("connectionId or jdbcUrl should be specified");
+        }
+        Map<String, String> parameters = new LinkedHashMap<>();
+        parameters.put("search", searchParam);
+        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", parameters, Map.class);
+        List<Project> returnList = transformProjectResponseToList(response);
+        if (returnList.size() > 1) {
+            Scope.getCurrentScope().getLog(getClass()).warning(String.format("JDBC URL: %s was associated with multiple projects.", jdbcUrl));
+            return null;
+        }
+        if (returnList.isEmpty()) {
+            return null;
+        }
+        return returnList.get(0);
+    }
 
-        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", Map.class);
+    private List<Project> transformProjectResponseToList(Map<String, List<Map>> response) {
         List<Map> contentList = response.get("content");
         List<Project> returnList = new ArrayList<>();
         for (int i = 0; i < contentList.size(); i++) {
@@ -166,8 +190,24 @@ public class StandardHubService implements HubService {
             project.setCreateDate(date);
             returnList.add(project);
         }
-
         return returnList;
+    }
+
+    private String encodeValue(String value) throws LiquibaseHubException {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw new LiquibaseHubException(e);
+        }
+    }
+
+    @Override
+    public List<Project> getProjects() throws LiquibaseHubException {
+        final AtomicReference<UUID> organizationId = new AtomicReference<>(getOrganization().getId());
+
+        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", Map.class);
+
+        return transformProjectResponseToList(response);
     }
 
     @Override
@@ -202,8 +242,8 @@ public class StandardHubService implements HubService {
     @Override
     public HubChangeLog deactivateChangeLog(HubChangeLog hubChangeLog) throws LiquibaseHubException {
         return http.doPut("/api/v1/organizations/" + getOrganization().getId() +
-                             "/projects/" + hubChangeLog.getProject().getId().toString() +
-                             "/changelogs/" +  hubChangeLog.getId().toString(), hubChangeLog, HubChangeLog.class);
+                "/projects/" + hubChangeLog.getProject().getId().toString() +
+                "/changelogs/" + hubChangeLog.getId().toString(), hubChangeLog, HubChangeLog.class);
     }
 
     @Override
@@ -313,18 +353,16 @@ public class StandardHubService implements HubService {
         HubLinkRequest reportHubLink = new HubLinkRequest();
         reportHubLink.url = url;
 
-        return http.getHubUrl()+ http.doPut("/api/v1/links", reportHubLink, HubLink.class).getShortUrl();
+        return http.getHubUrl() + http.doPut("/api/v1/links", reportHubLink, HubLink.class).getShortUrl();
     }
 
     /**
-     *
      * Query for a changelog ID.  If no result we return null
      * We cache this result and a map
      *
-     * @param   changeLogId                Changelog ID for query
-     * @return  HubChangeLog               Object container for result
-     * @throws  LiquibaseHubException
-     *
+     * @param changeLogId Changelog ID for query
+     * @return HubChangeLog               Object container for result
+     * @throws LiquibaseHubException
      */
     @Override
     public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
@@ -332,15 +370,13 @@ public class StandardHubService implements HubService {
     }
 
     /**
-     *
      * Query for a changelog ID.  If no result we return null
      * We cache this result and a map
      *
-     * @param   changeLogId                Changelog ID for query
-     * @param   includeStatus              Allowable status for returned changelog
-     * @return  HubChangeLog               Object container for result
-     * @throws  LiquibaseHubException
-     *
+     * @param changeLogId   Changelog ID for query
+     * @param includeStatus Allowable status for returned changelog
+     * @return HubChangeLog               Object container for result
+     * @throws LiquibaseHubException
      */
     @Override
     public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus)  {
@@ -366,7 +402,28 @@ public class StandardHubService implements HubService {
 
     @Override
     public Operation createOperation(String operationType, String operationCommand, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
+        final IntegrationDetails integrationDetails = Scope.getCurrentScope().get("integrationDetails", IntegrationDetails.class);
 
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("connectionId", connection.getId());
+        requestBody.put("connectionJdbcUrl", connection.getJdbcUrl());
+        requestBody.put("projectId", connection.getProject() == null ? null : connection.getProject().getId());
+        requestBody.put("changelogId", changeLog == null ? null : changeLog.getId());
+        requestBody.put("operationType", operationType);
+        requestBody.put("operationCommand", operationCommand);
+        requestBody.put("operationStatusType", "PASS");
+        requestBody.put("statusMessage", operationType);
+        requestBody.put("clientMetadata", getClientMetadata(integrationDetails));
+        if (integrationDetails!=null) {
+            requestBody.put("operationParameters", getCleanOperationParameters(integrationDetails.getParameters()));
+        }
+
+        final Operation operation = http.doPost("/api/v1/operations", requestBody, Operation.class);
+        operation.setConnection(connection);
+        return operation;
+    }
+
+    private Map<String, Object> getClientMetadata(IntegrationDetails integrationDetails) {
         String hostName;
         try {
             hostName = InetAddress.getLocalHost().getHostName();
@@ -375,27 +432,31 @@ public class StandardHubService implements HubService {
             hostName = null;
         }
 
-        final IntegrationDetails integrationDetails = Scope.getCurrentScope().get("integrationDetails", IntegrationDetails.class);
-
         Map<String, Object> clientMetadata = new HashMap<>();
         clientMetadata.put("liquibaseVersion", LiquibaseUtil.getBuildVersion());
         clientMetadata.put("hostName", hostName);
         clientMetadata.put("systemUser", System.getProperty("user.name"));
-        clientMetadata.put("clientInterface", integrationDetails.getName());
+        if (integrationDetails != null) {
+            clientMetadata.put("clientInterface", integrationDetails.getName());
+        }
+        return clientMetadata;
+    }
+
+    @Override
+    public Operation createOperationInOrganization(String operationType, String operationCommand, UUID organizationId) throws LiquibaseHubException {
+        final IntegrationDetails integrationDetails = Scope.getCurrentScope().get("integrationDetails", IntegrationDetails.class);
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("connectionId", connection.getId());
-        requestBody.put("changelogId", changeLog.getId());
         requestBody.put("operationType", operationType);
         requestBody.put("operationCommand", operationCommand);
         requestBody.put("operationStatusType", "PASS");
         requestBody.put("statusMessage", operationType);
-        requestBody.put("clientMetadata", clientMetadata);
-        requestBody.put("operationParameters", getCleanOperationParameters(integrationDetails.getParameters()));
+        requestBody.put("clientMetadata", getClientMetadata(integrationDetails));
+        if (integrationDetails!=null) {
+            requestBody.put("operationParameters", getCleanOperationParameters(integrationDetails.getParameters()));
+        }
 
-        final Operation operation = http.doPost("/api/v1/operations", requestBody, Operation.class);
-        operation.setConnection(connection);
-        return operation;
+        return http.doPost("/api/v1/organizations/" + organizationId.toString() + "/operations", requestBody, Operation.class);
     }
 
     protected Map<String, String> getCleanOperationParameters(Map<String, String> originalParams) {
@@ -424,12 +485,12 @@ public class StandardHubService implements HubService {
 
             if (allowed) {
                 String value = param.getValue();
-                if (param.getKey().toLowerCase().contains("liquibaseProLicenseKey".toLowerCase())) {
+                if (param.getKey().toLowerCase().contains("liquibaseProLicenseKey".toLowerCase()) ||
+                    param.getKey().toLowerCase().contains("liquibaseLicenseKey".toLowerCase())) {
                     if (value != null && value.length() > 8) {
                         value = value.substring(0, 8) + "************";
                     }
                 }
-
                 returnMap.put(param.getKey(), value);
             }
         }
@@ -441,6 +502,11 @@ public class StandardHubService implements HubService {
     public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException {
         final Organization organization = getOrganization();
 
+        return sendOperationEvent(operation, operationEvent, organization.getId());
+    }
+
+    @Override
+    public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent, UUID organizationId) throws LiquibaseException {
         Map<String, Object> requestParams = new HashMap<>();
         requestParams.put("eventType", operationEvent.getEventType());
         requestParams.put("startDate", operationEvent.getStartDate());
@@ -459,8 +525,7 @@ public class StandardHubService implements HubService {
             }
         }
 
-        return http.doPost("/api/v1/organizations/" + organization.getId() + "/projects/" + operation.getConnection().getProject().getId() + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
-
+        return http.doPost("/api/v1/organizations/" + organizationId + ((operation.getConnection() == null || operation.getConnection().getProject() == null) ? "" : "/projects/" + operation.getConnection().getProject().getId()) + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
     }
 
     private Date convertDateToUTC(Date dateInString) {
@@ -518,6 +583,18 @@ public class StandardHubService implements HubService {
                         "/operations/" + operationChange.getOperation().getId().toString() +
                         "/changes",
                 hubChangeList, ArrayList.class);
+    }
+
+    @Override
+    public CoreInitOnboardingResponse validateOnboardingToken(String token) throws LiquibaseHubException {
+        // This call does not use authentication, so we purposefully override any existing hub API key with empty string.
+        Map<String, Object> hubApiKeyScopeValues = Collections.singletonMap(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "");
+        try {
+            return Scope.child(hubApiKeyScopeValues, () -> http.doPost("/api/v1/init", Collections.singletonMap("onboardingToken", token), CoreInitOnboardingResponse.class));
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).severe("Failed to call Hub to validate onboarding token", e);
+            throw new LiquibaseHubException(e);
+        }
     }
 
     /**

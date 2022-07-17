@@ -42,8 +42,12 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             validationErrors.checkDisallowedField("AS", statement.getDataType(), database, PostgresDatabase.class);
         }
 
-        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, HsqlDatabase.class, PostgresDatabase.class);
-        validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class);
+        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, HsqlDatabase.class, PostgresDatabase.class, MSSQLDatabase.class);
+        validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class, CockroachDatabase.class);
+
+        if (database instanceof H2Database && statement.getDataType() != null && !statement.getDataType().equalsIgnoreCase("bigint")) {
+            validationErrors.addWarning("H2 only creates BIGINT sequences. Ignoring requested type "+statement.getDataType());
+        }
 
         return validationErrors;
     }
@@ -67,7 +71,9 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
             queryStringBuilder.append(" AS BIGINT ");
         } else if (statement.getDataType() != null) {
-            queryStringBuilder.append(" AS " + statement.getDataType());
+            if (!(database instanceof H2Database || database instanceof CockroachDatabase)) {
+                queryStringBuilder.append(" AS " + statement.getDataType());
+            }
         }
         if (!(database instanceof MariaDBDatabase) && statement.getStartValue() != null) {
             queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
@@ -86,10 +92,12 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         }
 
         if (statement.getCacheSize() != null) {
-            if (database instanceof OracleDatabase || database instanceof Db2zDatabase || database instanceof PostgresDatabase) {
+            if (database instanceof OracleDatabase || database instanceof Db2zDatabase || database instanceof PostgresDatabase || database instanceof MariaDBDatabase) {
                 if (BigInteger.ZERO.equals(statement.getCacheSize())) {
                     if (database instanceof OracleDatabase) {
                         queryStringBuilder.append(" NOCACHE ");
+                    } else if (database instanceof MariaDBDatabase) {
+                        queryStringBuilder.append(" CACHE 0");
                     }
                 } else {
                     queryStringBuilder.append(" CACHE ").append(statement.getCacheSize());
@@ -108,7 +116,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
                 }
             }
         }
-        if (!(database instanceof MariaDBDatabase) && statement.getCycle() != null) {
+        if (statement.getCycle() != null) {
             if (statement.getCycle()) {
                 queryStringBuilder.append(" CYCLE");
             }

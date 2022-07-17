@@ -2,7 +2,9 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.core.CockroachDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.statement.core.AlterSequenceStatement;
@@ -40,10 +42,10 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
 //    }
 
     @Test
-    public void testAlterSequenceDatabase() throws Exception {
+    public void testAlterSequenceDatabase(){
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (database instanceof OracleDatabase) {
-                AlterSequenceStatement statement =  createSampleSqlStatement();
+                AlterSequenceStatement statement = createSampleSqlStatement();
                 statement.setCacheSize(BigInteger.valueOf(3000L));
 
                 Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
@@ -101,10 +103,23 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
 //        assertTrue(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
 //    }
 
-	@Override
+    @Test
+    public void testAlterSequenceCycleDatabase() {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            AlterSequenceStatement statement = createSampleSqlStatement();
+            statement.setCycle(false);
+            Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+            if (database instanceof OracleDatabase) {
+                assertEquals("ALTER SEQUENCE CATALOG_NAME.SEQUENCE_NAME NOCYCLE", generatedSql[0].toSql());
+            } else if (database instanceof PostgresDatabase || database instanceof CockroachDatabase) {
+                assertEquals("ALTER SEQUENCE SCHEMA_NAME.SEQUENCE_NAME NO CYCLE", generatedSql[0].toSql());
+            }
+        }
+    }
+
+    @Override
     protected AlterSequenceStatement createSampleSqlStatement() {
-        AlterSequenceStatement statement = new AlterSequenceStatement(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
-        return statement;
+        return new AlterSequenceStatement(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
     }
 
     @Override

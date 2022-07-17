@@ -38,21 +38,17 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     @Override
     public String serialize(LiquibaseSerializable object, boolean pretty) {
         if (object instanceof ChangeSet) {
-            StringBuilder builder = new StringBuilder();
-            ChangeSet changeSet = (ChangeSet) object;
-
             //
             // If there is a Database object in the current scope, then use it for serialization
             //
+            ChangeSet changeSet = (ChangeSet) object;
             Database database = Scope.getCurrentScope().get(DiffToChangeLog.DIFF_SNAPSHOT_DATABASE, Database.class);
             if (database == null) {
                 database = getTargetDatabase(changeSet);
             }
 
-            String author = (changeSet.getAuthor()).replaceAll("\\s+", "_");
-            author = author.replace("_(generated)","");
-
-            builder.append("-- changeset ").append(author).append(":").append(changeSet.getId()).append("\n");
+            StringBuilder builder = new StringBuilder();
+            createChangeSetInfo(changeSet, builder);
             for (Change change : changeSet.getChanges()) {
                 Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change.generateStatements(database), database);
                 if (sqls != null) {
@@ -66,6 +62,20 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
         } else {
             throw new UnexpectedLiquibaseException("Cannot serialize object type: "+object.getClass().getName());
         }
+    }
+
+    /**
+     *
+     * Create the changeSet header information and add it to the StringBuilder
+     *
+     * @param  changeSet    The ChangeSet we are emitting
+     * @param  builder      The current StringBuilder we will add to
+     *
+     */
+    public void createChangeSetInfo(ChangeSet changeSet, StringBuilder builder) {
+        String author = (changeSet.getAuthor()).replaceAll("\\s+", "_");
+        author = author.replace("_(generated)", "");
+        builder.append("-- changeset ").append(author).append(":").append(changeSet.getId()).append("\n");
     }
 
     protected Database getTargetDatabase(ChangeSet changeSet) {

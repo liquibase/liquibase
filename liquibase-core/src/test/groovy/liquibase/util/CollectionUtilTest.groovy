@@ -1,12 +1,11 @@
 package liquibase.util
 
-import org.hamcrest.MatcherAssert
+
 import org.hamcrest.Matchers
 import spock.lang.Specification
 import spock.lang.Unroll
-import spock.util.matcher.HamcrestMatchers
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat
 
 class CollectionUtilTest extends Specification {
 
@@ -38,7 +37,7 @@ class CollectionUtilTest extends Specification {
         }
 
         where:
-        original | expected
+        original        | expected
         []              | [[]]
         ['a']           | [[], ['a']]
         ['a', 'b']      | [[], ['a'], ['b'], ['a', 'b']]
@@ -54,9 +53,9 @@ class CollectionUtilTest extends Specification {
         permutations Matchers.containsInAnyOrder(expected.toArray())
 
         where:
-        original | expected
-        new HashMap() | []
-        null | []
+        original                                   | expected
+        new HashMap()                              | []
+        null                                       | []
         ["a": [1, 2, 3]]                           | [["a": 1], ["a": 2], ["a": 3]]
         ["a": [1, 2, 3], "b": [5, 6]]              | [["a": 1, "b": 5], ["a": 2, "b": 5], ["a": 3, "b": 5],
                                                       ["a": 1, "b": 6], ["a": 2, "b": 6], ["a": 3, "b": 6]]
@@ -66,4 +65,17 @@ class CollectionUtilTest extends Specification {
                                                       ["a": 1, "b": 6, "c": 9], ["a": 2, "b": 6, "c": 9], ["a": 3, "b": 6, "c": 9]]
     }
 
+    @Unroll
+    def "flatten"() {
+        expect:
+        CollectionUtil.flatten(input as Map) == expected
+
+        where:
+        input                                                           | expected
+        null                                                            | null
+        [:]                                                             | [:]
+        [a: "a1", b: "b1"]                                              | [a: "a1", b: "b1"]
+        [a: [a1: "a1a", "a2": "a2a"], b: "b1"]                          | ["a.a1": "a1a", "a.a2": "a2a", b: "b1"]
+        [a: [a1: "a1a", "a2": ["a2a": "a2a1", "a2b": "a2b1"]], b: "b1"] | ["a.a1": "a1a", "a.a2.a2a": "a2a1", "a.a2.a2b": "a2b1", b: "b1"]
+    }
 }

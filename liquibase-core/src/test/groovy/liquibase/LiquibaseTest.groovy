@@ -272,7 +272,7 @@ class LiquibaseTest extends Specification {
         then:
         connection == null
         message ==
-                "WARNING: The API key 'API_KEY' was found, but no changelog ID exists.\n" +
+                "WARNING: An API key was configured, but no changelog ID exists.\n" +
                 "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
                 "Learn more at https://hub.liquibase.com."
     }

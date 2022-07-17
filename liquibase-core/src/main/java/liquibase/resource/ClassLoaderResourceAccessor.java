@@ -24,7 +24,7 @@ import java.util.jar.JarFile;
  *
  * @see OSGiResourceAccessor for OSGi-based classloaders
  */
-public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
+public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implements AutoCloseable {
 
     private ClassLoader classLoader;
     protected List<FileSystem> rootPaths;
@@ -65,6 +65,8 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     try {
                         addDescription(url);
                         this.rootPaths.add(FileSystems.newFileSystem(Paths.get(url.toURI()), this.getClass().getClassLoader()));
+                    } catch (FileSystemAlreadyExistsException e) {
+                        //has been defined already, that is OK
                     } catch (ProviderNotFoundException e) {
                         if (url.toExternalForm().startsWith("file:/")) {
                             //that is expected, the classloader itself will handle it
@@ -128,6 +130,21 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
         return returnList;
     }
 
+    /**
+     * Generates a final path to <code>streamPath</code> relative to <code>relatoveTo</code>.
+     * If the last part of relativeTo contains a dot character (`.`)
+     * this part is considered to be a file name, if it does not, it is
+     * considered to be a directory.
+     * i.e.<br>
+     * <pre>
+     * changelog/some.sql   -> some.sql is considered to be a file
+     * changelog/some_sql   -> some_sql is considered to be a directory
+     * </pre>
+     *
+     * @param relativeTo starting point of the path resolution (may be null)
+     * @param streamPath a path to a resource relative to relativeTo must not be null
+     * @return a canonicalized absolute path to a resource
+     */
     protected String getFinalPath(String relativeTo, String streamPath) {
         streamPath = streamPath.replace("\\", "/");
         streamPath = streamPath.replaceFirst("^classpath\\*?:", "");
@@ -136,14 +153,6 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             relativeTo = relativeTo.replace("\\", "/");
             relativeTo = relativeTo.replaceFirst("^classpath\\*?:", "");
             relativeTo = relativeTo.replaceAll("//+", "/");
-
-            if (!relativeTo.endsWith("/")) {
-                String lastPortion = relativeTo.replaceFirst(".+/", "");
-                if (lastPortion.contains(".")) {
-                    relativeTo = relativeTo.replaceFirst("/[^/]+?$", "");
-                }
-            }
-
             //
             // If this is a simple file name then set the
             // relativeTo value as if it is a root path
@@ -151,6 +160,18 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             if (!relativeTo.contains("/") && relativeTo.contains(".")) {
                 relativeTo = "/";
             }
+
+            //
+            // If this is not a simple file name and the last component
+            // of the path contains a '.' remove the last component
+            //
+            if (!relativeTo.endsWith("/")) {
+                String lastPortion = relativeTo.replaceFirst(".+/", "");
+                if (lastPortion.contains(".")) {
+                    relativeTo = relativeTo.replaceFirst("/[^/]+?$", "");
+                }
+            }
+
             streamPath = relativeTo + "/" + streamPath;
         }
 
@@ -249,7 +270,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     try (JarFile jar = new JarFile(URLDecoder.decode(jarPath, StandardCharsets.UTF_8.name()))) {
                         String comparePath = path;
                         if (comparePath.startsWith("/")) {
-                            comparePath = "/"+comparePath;
+                            comparePath = "/" + comparePath;
                         }
                         Enumeration<JarEntry> entries = jar.entries();
                         while (entries.hasMoreElements()) {
@@ -333,5 +354,18 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
         init();
 
         return description;
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (rootPaths != null) {
+            for (final FileSystem rootPath : rootPaths) {
+                try {
+                    rootPath.close();
+                } catch (final Exception e) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Cannot close path " + e.getMessage(), e);
+                }
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabase;
@@ -8,14 +9,13 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
 import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
@@ -29,10 +29,14 @@ import java.util.*;
  * Encapsulates PostgreSQL database support.
  */
 public class PostgresDatabase extends AbstractJdbcDatabase {
-    private String dbFullVersion=null;
+    private String dbFullVersion = null;
     public static final String PRODUCT_NAME = "PostgreSQL";
     public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
     public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
+    /**
+     * The data type names which are valid for auto-increment columns.
+     */
+    public static final List<String> VALID_AUTO_INCREMENT_COLUMN_TYPE_NAMES = Collections.unmodifiableList(Arrays.asList("int2", "int4", "int8", "smallint", "int", "bigint", "smallserial", "serial", "bigserial"));
 
     /**
      * Maximum length of PostgresSQL identifier.
@@ -40,19 +44,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
      */
     static final int PGSQL_PK_BYTES_LIMIT = 63;
     static final String PGSQL_PK_SUFFIX = "_pkey";
-    static final Charset CHARSET = Scope.getCurrentScope().getFileEncoding();
 
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
     private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
-
-    /**
-     * Represents Postgres DB types.
-     * Note: As we know COMMUNITY, RDS and AWS AURORA have the same Postgres engine. We use just COMMUNITY for those 3
-     *       If we need we can extend this ENUM in future
-     */
-    public enum DbTypes {
-        EDB, COMMUNITY, RDS, AURORA
-    }
 
     private Set<String> systemTablesAndViews = new HashSet<>();
 
@@ -75,8 +69,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 "UNIQUE", "USER", "USING", "VARIADIC", "VERBOSE", "WHEN", "WHERE", "WINDOW", "WITH"));
         super.sequenceNextValueFunction = "nextval('%s')";
         super.sequenceCurrentValueFunction = "currval('%s')";
-        super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text", "int2[]", "int4[]", "int8[]", "float4[]", "float8[]", "bool[]", "varchar[]", "text[]"));
-        super.unquotedObjectsAreUppercased=false;
+        super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text", "int2[]", "int4[]", "int8[]", "float4[]", "float8[]", "bool[]", "varchar[]", "text[]", "numeric[]"));
+        super.unquotedObjectsAreUppercased = false;
     }
 
     @Override
@@ -131,13 +125,12 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         int minorVersion = conn.getDatabaseMinorVersion();
 
         if ((majorVersion < MINIMUM_DBMS_MAJOR_VERSION) || ((majorVersion == MINIMUM_DBMS_MAJOR_VERSION) &&
-            (minorVersion < MINIMUM_DBMS_MINOR_VERSION))) {
+                (minorVersion < MINIMUM_DBMS_MINOR_VERSION))) {
             LOG.warning(
-                String.format(
-                    "Your PostgreSQL software version (%d.%d) seems to indicate that your software is " +
-                        "older than %d.%d. This means that you might encounter strange behaviour and " +
-                        "incorrect error messages.",
-                    majorVersion, minorVersion, majorVersion, minorVersion));
+                    String.format(
+                            "Your PostgreSQL software version (%d.%d) seems to indicate that your software is " +
+                                    "older than %d.%d. This means that you might encounter strange behaviour and " +
+                                    "incorrect error messages.", majorVersion, minorVersion, MINIMUM_DBMS_MAJOR_VERSION, MINIMUM_DBMS_MINOR_VERSION));
             return true;
         }
 
@@ -177,7 +170,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         super.setConnection(conn);
 
 
-
         if (conn instanceof JdbcConnection) {
             Statement statement = null;
             ResultSet resultSet = null;
@@ -195,7 +187,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             } catch (SQLException | DatabaseException e) {
                 LOG.info("Cannot check pg_settings", e);
             } finally {
-                JdbcUtils.close(resultSet, statement);
+                JdbcUtil.close(resultSet, statement);
             }
         }
 
@@ -210,14 +202,14 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public boolean isSystemObject(DatabaseObject example) {
         // All tables in the schemas pg_catalog and pg_toast are definitely system tables.
         if
-                (
+        (
                 (example instanceof Table)
                         && (example.getSchema() != null)
                         && (
                         ("pg_catalog".equals(example.getSchema().getName()))
                                 || ("pg_toast".equals(example.getSchema().getName()))
                 )
-                ) {
+        ) {
             return true;
         }
 
@@ -231,23 +223,27 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getAutoIncrementClause() {
-        try {
-            if (getDatabaseMajorVersion() < 10) {
-                return "";
-            }
-        } catch (DatabaseException e) {
+        if (useSerialDatatypes()) {
             return "";
         }
+
         return super.getAutoIncrementClause();
+    }
+
+    /**
+     * Should the database use "serial" datatypes vs. "generated by default as identity"
+     */
+    public boolean useSerialDatatypes() {
+        try {
+            return getDatabaseMajorVersion() < 10;
+        } catch (DatabaseException e) {
+            return true;
+        }
     }
 
     @Override
     protected String getAutoIncrementClause(final String generationType, final Boolean defaultOnNull) {
-        try {
-            if (getDatabaseMajorVersion() < 10) {
-                return "";
-            }
-        } catch (DatabaseException e) {
+        if (useSerialDatatypes()) {
             return "";
         }
 
@@ -261,11 +257,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean generateAutoIncrementStartWith(BigInteger startWith) {
-        try {
-            if (getDatabaseMajorVersion() < 10) {
-                return false;
-            }
-        } catch (DatabaseException e) {
+        if (useSerialDatatypes()) {
             return false;
         }
         return super.generateAutoIncrementStartWith(startWith);
@@ -273,13 +265,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean generateAutoIncrementBy(BigInteger incrementBy) {
-        try {
-            if (getDatabaseMajorVersion() < 10) {
-                return false;
-            }
-        } catch (DatabaseException e) {
+        if (useSerialDatatypes()) {
             return false;
         }
+
         return super.generateAutoIncrementBy(incrementBy);
     }
 
@@ -304,6 +293,13 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         if ((objectName == null) || (quotingStrategy != ObjectQuotingStrategy.LEGACY)) {
             return super.correctObjectName(objectName, objectType);
         }
+        //
+        // Check preserve case flag for schema
+        //
+        if (objectType.equals(Schema.class) && Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
+            return objectName;
+        }
+
         if (objectName.contains("-")
                 || hasMixedCase(objectName)
                 || startsWithNumeric(objectName)
@@ -315,14 +311,14 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     /*
-    * Check if given string has case problems according to postgresql documentation.
-    * If there are at least one characters with upper case while all other are in lower case (or vice versa) this
-    * string should be escaped.
-    *
-    * Note: This may make postgres support more case sensitive than normally is, but needs to be left in for backwards
-    * compatibility.
-    * Method is public so a subclass extension can override it to always return false.
-    */
+     * Check if given string has case problems according to postgresql documentation.
+     * If there are at least one characters with upper case while all other are in lower case (or vice versa) this
+     * string should be escaped.
+     *
+     * Note: This may make postgres support more case sensitive than normally is, but needs to be left in for backwards
+     * compatibility.
+     * Method is public so a subclass extension can override it to always return false.
+     */
     protected boolean hasMixedCase(String tableName) {
         if (tableName == null) {
             return false;
@@ -350,8 +346,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
      */
     @Override
     public String generatePrimaryKeyName(final String tableName) {
-        final byte[] tableNameBytes = tableName.getBytes(CHARSET);
-        final int pkNameBaseAllowedBytesCount = PGSQL_PK_BYTES_LIMIT - PGSQL_PK_SUFFIX.getBytes(CHARSET).length;
+        final Charset charset = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
+
+        final byte[] tableNameBytes = tableName.getBytes(charset);
+        final int pkNameBaseAllowedBytesCount = PGSQL_PK_BYTES_LIMIT - PGSQL_PK_SUFFIX.getBytes(charset).length;
 
         if (tableNameBytes.length <= pkNameBaseAllowedBytesCount) {
             return tableName + PGSQL_PK_SUFFIX;
@@ -359,7 +357,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
         // As symbols could be encoded with more than 1 byte, the last symbol bytes couldn't be identified precisely.
         // To avoid the last symbol being the invalid one, just truncate it.
-        final String baseName = new String(tableNameBytes, 0, pkNameBaseAllowedBytesCount, CHARSET);
+        final String baseName = new String(tableNameBytes, 0, pkNameBaseAllowedBytesCount, charset);
         return baseName.substring(0, baseName.length() - 1) + PGSQL_PK_SUFFIX;
     }
 
@@ -397,45 +395,11 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return CatalogAndSchema.CatalogAndSchemaCase.LOWER_CASE;
     }
 
-    public String getDatabaseFullVersion() throws DatabaseException {
-        if (getConnection() == null) {
-            throw new DatabaseException("Connection not set. Can not get database version. " +
-                    "Postgres Database wasn't initialized in proper way !");
-        }
-        if (dbFullVersion != null){
-            return dbFullVersion;
-        }
-        final String sqlToGetVersion = "SELECT version()";
-        List<?> result = Scope.getCurrentScope().getSingleton(ExecutorService.class).
-                getExecutor("jdbc", this).queryForList(new RawSqlStatement(sqlToGetVersion), String.class);
-        if (result != null && !result.isEmpty()){
-            return dbFullVersion = result.get(0).toString();
-        }
-
-        throw new DatabaseException("Connection set to Postgres type we don't support !");
-    }
-
     @Override
     public void rollback() throws DatabaseException {
         super.rollback();
+
+        //Rollback in postgresql resets the search path. Need to put it back to the defaults
         DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
     }
-
-    /**
-     * Method to get Postgres DB type
-     * @return Db types
-     * */
-    public DbTypes getDbType() {
-        boolean enterpriseDb = false;
-        try {
-            enterpriseDb = getDatabaseFullVersion().toLowerCase().contains("enterprisedb");
-        } catch (DatabaseException e) {
-            if (getConnection() != null) {
-                Scope.getCurrentScope().getLog(getClass()).severe("Can't get full version of Postgres DB. Used EDB as default", e);
-                return DbTypes.EDB;
-            }
-        }
-        return enterpriseDb ? DbTypes.EDB : DbTypes.COMMUNITY;
-    }
-
 }

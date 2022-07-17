@@ -40,10 +40,29 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultDriver(String url) {
-        // CORE-1230 - don't shutdown derby network server
-        if (url.startsWith("jdbc:derby://")) {
-            return "org.apache.derby.jdbc.ClientDriver";
+        if (url == null) {
+            return null;
+        } else if (url.toLowerCase().startsWith("jdbc:derby://")) {
+            //Derby client driver class name for versions 10.15.X.X and above.
+            String derbyNewDriverClassName = "org.apache.derby.client.ClientAutoloadedDriver";
+            //Derby client driver class name for versions below 10.15.X.X.
+            String derbyOldDriverClassName = "org.apache.derby.jdbc.ClientDriver";
+            try {
+                // Check if we have a driver for versions 10.15.X.X and above. Load and return it if we do.
+                Class.forName(derbyNewDriverClassName);
+                return derbyNewDriverClassName;
+            } catch (ClassNotFoundException exception) {
+                // Check if we have a driver for versions below 10.15.X.X. Load and return it if we do.
+                try {
+                    Class.forName(derbyOldDriverClassName);
+                    return derbyOldDriverClassName;
+                } catch (ClassNotFoundException classNotFoundException) {
+                    // Return class for newer versions anyway
+                    return derbyNewDriverClassName;
+                }
+            }
         } else if (url.startsWith("jdbc:derby") || url.startsWith("java:derby")) {
+            //Use EmbeddedDriver if using a derby URL but without the `://` in it
             return "org.apache.derby.jdbc.EmbeddedDriver";
         }
         return null;
@@ -115,10 +134,10 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             String dateString = super.getDateLiteral(isoDate);
             int decimalDigits = dateString.length() - dateString.indexOf('.') - 2;
             String padding = "";
-            for (int i=6; i> decimalDigits; i--) {
+            for (int i = 6; i > decimalDigits; i--) {
                 padding += "0";
             }
-            return "TIMESTAMP(" + dateString.replaceFirst("'$", padding+"'") + ")";
+            return "TIMESTAMP(" + dateString.replaceFirst("'$", padding + "'") + ")";
         }
     }
 
@@ -149,7 +168,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             } else {
                 url += ";shutdown=true";
             }
-                Scope.getCurrentScope().getLog(getClass()).info("Shutting down derby connection: " + url);
+            Scope.getCurrentScope().getLog(getClass()).info("Shutting down derby connection: " + url);
             // this cleans up the lock files in the embedded derby database folder
             JdbcConnection connection = (JdbcConnection) getConnection();
             ClassLoader classLoader = connection.getWrappedConnection().getClass().getClassLoader();
@@ -175,7 +194,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     /**
      * Determine Apache Derby driver major/minor version.
      */
-    @SuppressWarnings({ "static-access", "unchecked" })
+    @SuppressWarnings({"static-access", "unchecked"})
     protected void determineDriverVersion() {
         try {
 // Locate the Derby sysinfo class and query its version info
@@ -223,7 +242,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         }
         try {
             return (this.getDatabaseMajorVersion() > 10) || ((this.getDatabaseMajorVersion() == 10) && (this
-                .getDatabaseMinorVersion() > 7));
+                    .getDatabaseMinorVersion() > 7));
         } catch (DatabaseException e) {
             return false; //assume not
         }

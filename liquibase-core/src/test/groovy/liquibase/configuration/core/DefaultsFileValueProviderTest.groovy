@@ -1,10 +1,25 @@
 package liquibase.configuration.core
 
+import liquibase.Scope
 import liquibase.command.CommandScope
+import liquibase.configuration.LiquibaseConfiguration
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class DefaultsFileValueProviderTest extends Specification {
+
+    def "can load from stream"() {
+        when:
+        def stream = new ByteArrayInputStream("""
+long.key: Long Key
+long.multiWord: Long MultiWord
+""".getBytes())
+        def provider = new DefaultsFileValueProvider(stream, "Test stream")
+
+        then:
+        provider.getProvidedValue("long.key").getValue() == "Long Key"
+        provider.getProvidedValue("long.multiWord").getValue() == "Long MultiWord"
+    }
 
     @Unroll
     def "getProvidedValue"() {
@@ -43,11 +58,19 @@ class DefaultsFileValueProviderTest extends Specification {
     def "validate valid values"() {
         when:
         def provider = new DefaultsFileValueProvider([
-                (key) : "test value",
-                strict: String.valueOf(strict)
+                (key) : "test value"
         ] as Properties)
 
-        provider.validate(new CommandScope("update"))
+        //
+        // Set the strict setting in the Scope for this test
+        //
+        LiquibaseConfiguration configuration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
+        configuration.registerProvider(new ScopeValueProvider())
+
+        Map<String, String> scopeValues = ["liquibase.strict":strict] as Map<String, String>
+        Scope.getCurrentScope().child(scopeValues, (Scope.ScopedRunner) { ->
+            provider.validate(new CommandScope("update"))
+        })
 
         then:
         noExceptionThrown()
@@ -75,11 +98,19 @@ class DefaultsFileValueProviderTest extends Specification {
     def "validate invalid values"() {
         when:
         def provider = new DefaultsFileValueProvider([
-                (key) : "test value",
-                strict: "true",
+                (key) : "test value"
         ] as Properties)
 
-        provider.validate(new CommandScope("update"))
+        //
+        // Set the strict setting in the Scope for this test
+        //
+        LiquibaseConfiguration configuration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
+        configuration.registerProvider(new ScopeValueProvider())
+
+        Map<String, String> scopeValues = ["liquibase.strict":"true"]
+        Scope.getCurrentScope().child(scopeValues, (Scope.ScopedRunner) { ->
+            provider.validate(new CommandScope("update"))
+        })
 
         then:
         def e = thrown(IllegalArgumentException)

@@ -31,11 +31,7 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.ui.ConsoleUIService;
-import liquibase.util.ISODateFormat;
-import liquibase.util.LiquibaseUtil;
-import liquibase.util.StringUtil;
-import liquibase.util.xml.XMLResourceBundle;
-import liquibase.util.xml.XmlResourceBundleControl;
+import liquibase.util.*;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -64,13 +60,14 @@ public class Main {
     //set by new CLI to signify it is handling some of the configuration
     public static boolean runningFromNewCli;
 
+    //temporary work-around to pass -D changelog parameters from new CLI to here
+    public static Map<String, String> newCliChangelogParameters;
+
     private static PrintStream outputStream = System.out;
 
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
     private static final Logger LOG = Scope.getCurrentScope().getLog(Main.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    private static XMLResourceBundle commandLineHelpBundle = ((XMLResourceBundle) getBundle
-            ("liquibase/i18n/liquibase-commandline-helptext", new XmlResourceBundleControl()));
 
     protected ClassLoader classLoader;
     protected String driver;
@@ -101,7 +98,6 @@ public class Main {
     protected String changeExecListenerPropertiesFile;
     protected Boolean promptForNonLocalDatabase;
     protected Boolean includeSystemClasspath;
-    protected Boolean strict = Boolean.TRUE;
     protected String defaultsFile = "liquibase.properties";
     protected String diffTypes;
     protected String changeSetAuthor;
@@ -232,12 +228,12 @@ public class Main {
                         main.command = "";
                         main.parseDefaultPropertyFiles();
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
-                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion()));
+                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersionInfo()));
 
                         LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                         if (licenseService != null && main.liquibaseProLicenseKey != null) {
                             Location licenseKeyLocation =
-                                    new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                                    new Location("property liquibaseProLicenseKey", main.liquibaseProLicenseKey);
                             LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                             if (result.code != 0) {
                                 String allMessages = String.join("\n", result.messages);
@@ -251,7 +247,7 @@ public class Main {
 
                         Scope.getCurrentScope().getUI().sendMessage(String.format("Running Java under %s (Version %s)",
                                 System.getProperties().getProperty("java.home"),
-                                System.getProperty("java.version")
+                                SystemUtil.getJavaVersion()
                         ));
                         return Integer.valueOf(0);
                     }
@@ -333,7 +329,7 @@ public class Main {
                                 Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
                             }
                         } else {
-                            Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                            Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", main.liquibaseProLicenseKey);
                             LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                             if (result.code != 0) {
                                 String allMessages = String.join("\n", result.messages);
@@ -484,7 +480,6 @@ public class Main {
 
         for (Handler handler : rootLogger.getHandlers()) {
             handler.setLevel(level);
-            handler.setFilter(new SecureLogFilter(logService.getFilter()));
         }
         //
         // Set the Liquibase Hub log level if logging is not OFF
@@ -790,7 +785,7 @@ public class Main {
     private void parseDefaultPropertyFileFromResource(File potentialPropertyFile) throws IOException,
             CommandLineParsingException {
         try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream
-                (potentialPropertyFile.getAbsolutePath())) {
+                (potentialPropertyFile.getPath())) {
             if (resourceAsStream != null) {
                 parsePropertiesFile(resourceAsStream);
             }
@@ -1061,9 +1056,7 @@ public class Main {
             return;
         }
 
-        if (props.containsKey("strict")) {
-            strict = Boolean.valueOf(props.getProperty("strict"));
-        }
+        boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
 
         //
         // Load property values into
@@ -1165,7 +1158,7 @@ public class Main {
     protected void printHelp(PrintStream stream) {
         this.logLevel = Level.WARNING.toString();
 
-        String helpText = commandLineHelpBundle.getString("commandline-helptext");
+        String helpText = "Help not available when running liquibase.integration.commandline.Main directly. Use liquibase.integration.commandline.LiquibaseCommandLine";
         stream.println(helpText);
     }
 
@@ -1241,7 +1234,7 @@ public class Main {
         // Check the licensing keys to see if they are being set from properties
         //
         if (liquibaseProLicenseKey == null) {
-            String key = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.pro.licenseKey").getValue();
+            String key = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.licenseKey").getValue();
             liquibaseProLicenseKey = key;
         }
         if (liquibaseHubApiKey == null) {
@@ -1349,7 +1342,6 @@ public class Main {
         if (this.includeSystemClasspath == null) {
             this.includeSystemClasspath = Boolean.TRUE;
         }
-
         if (this.outputDefaultCatalog == null) {
             this.outputDefaultCatalog = "true";
         }
@@ -1472,39 +1464,6 @@ public class Main {
         }
         LOG.fine("Liquibase Hub Mode:     " + HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
 
-        //
-        // Check for a valid license to run PRO commands
-        //
-        String formatValue = getCommandParam(OPTIONS.FORMAT, null);
-        if (isLicenseableCommand(formatValue)) {
-            if (isFormattedDiff()) {
-                if (formatValue != null && !formatValue.equalsIgnoreCase("json")) {
-                    String messageString =
-                            "\nWARNING: The diff command optional Pro parameter '--format' " +
-                                    "currently supports only 'TXT' or 'JSON' as values.  (Blank defaults to 'TXT')";
-                    throw new LiquibaseException(String.format(messageString));
-                }
-            }
-            if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
-                String warningAboutCommand = command;
-                if (command.equalsIgnoreCase(COMMANDS.DIFF) && formatValue != null && !formatValue.isEmpty()) {
-                    warningAboutCommand = "diff --format=" + formatValue;
-                }
-                String messageString = String.format(coreBundle.getString("no.pro.license.found"), warningAboutCommand);
-                throw new LiquibaseException(messageString);
-            }
-        }
-
-        try {
-//            if (null != logFile) {
-//                Scope.getCurrentScope().getLog(getClass()).setLogLevel(logLevel, logFile);
-//            } else {
-//                Scope.getCurrentScope().getLog(getClass()).setLogLevel(logLevel);
-//            }
-        } catch (IllegalArgumentException e) {
-            throw new CommandLineParsingException(e.getMessage(), e);
-        }
-
         final ResourceAccessor fileOpener;
         if (Main.runningFromNewCli) {
             fileOpener = Scope.getCurrentScope().getResourceAccessor();
@@ -1523,7 +1482,11 @@ public class Main {
                     this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
                     this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
                     this.databaseChangeLogLockTableName);
-            database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+            if (this.databaseChangeLogTablespaceName != null) {
+                database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+            } else {
+                database.setLiquibaseTablespaceName(GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentConfiguredValue().getValue());
+            }
         }
 
         try {
@@ -1533,11 +1496,10 @@ public class Main {
                                 OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
             }
 
-            //
-            // Set the global configuration option based on presence of the dataOutputDirectory
-            //
-            boolean b = dataOutputDirectory != null;
-            DeprecatedConfigurationValueProvider.setData(GlobalConfiguration.SHOULD_SNAPSHOT_DATA, b);
+            if (GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getCurrentValue().equals(false) && dataOutputDirectory != null) {
+                // If we are not otherwise going to snapshot data, still snapshot data if dataOutputDirectory is set
+                DeprecatedConfigurationValueProvider.setData(GlobalConfiguration.SHOULD_SNAPSHOT_DATA, true);
+            }
 
             ObjectChangeFilter objectChangeFilter = null;
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(
@@ -1641,8 +1603,14 @@ public class Main {
                         .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
                         .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
 
+                //
+                // If we find a ResultsBuilder in the current scope then
+                // we will add the snapshot object to it
+                // otherwise, we will print the output
+                //
                 Writer outputWriter = getOutputWriter();
-                String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute());
+                CommandResults commandResults = snapshotCommand.execute();
+                String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, commandResults);
                 outputWriter.write(result);
                 outputWriter.flush();
                 return;
@@ -1674,6 +1642,11 @@ public class Main {
             }
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            if (Main.newCliChangelogParameters != null) {
+                for (Map.Entry<String, String> param : Main.newCliChangelogParameters.entrySet()) {
+                    liquibase.setChangeLogParameter(param.getKey(), param.getValue());
+                }
+            }
             try {
                 if (hubConnectionId != null) {
                     try {
@@ -1704,18 +1677,18 @@ public class Main {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.forceReleaseLock();
                 Scope.getCurrentScope().getUI().sendMessage(String.format(
-                        coreBundle.getString("successfully.released.database.change.log.locks"),
-                        liquibase.getDatabase().getConnection().getConnectionUserName() +
-                                "@" + liquibase.getDatabase().getConnection().getURL()
+                                coreBundle.getString("successfully.released.database.change.log.locks"),
+                                liquibase.getDatabase().getConnection().getConnectionUserName() +
+                                        "@" + liquibase.getDatabase().getConnection().getURL()
                         )
                 );
                 return;
             } else if (COMMANDS.TAG.equalsIgnoreCase(command)) {
                 liquibase.tag(getCommandArgument());
                 Scope.getCurrentScope().getUI().sendMessage(String.format(
-                        coreBundle.getString("successfully.tagged"), liquibase.getDatabase()
-                                .getConnection().getConnectionUserName() + "@" +
-                                liquibase.getDatabase().getConnection().getURL()
+                                coreBundle.getString("successfully.tagged"), liquibase.getDatabase()
+                                        .getConnection().getConnectionUserName() + "@" +
+                                        liquibase.getDatabase().getConnection().getURL()
                         )
                 );
                 return;
@@ -1724,14 +1697,14 @@ public class Main {
                 boolean exists = liquibase.tagExists(tag);
                 if (exists) {
                     Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("tag.exists"), tag,
-                            liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
-                                    liquibase.getDatabase().getConnection().getURL()
+                                    liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
+                                            liquibase.getDatabase().getConnection().getURL()
                             )
                     );
                 } else {
                     Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("tag.does.not.exist"), tag,
-                            liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
-                                    liquibase.getDatabase().getConnection().getURL()
+                                    liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
+                                            liquibase.getDatabase().getConnection().getURL()
                             )
                     );
                 }
@@ -1806,23 +1779,12 @@ public class Main {
                 executeSyncHub(database, liquibase);
                 return;
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
-                String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
-                HubConfiguration.HubMode hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
-                if (liquibaseHubApiKey != null && hubMode != HubConfiguration.HubMode.OFF) {
-                    if (hubConnectionId == null && changeLogFile == null) {
-                        String warningMessage =
-                                "The dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +
-                                        "can send reports to your Hub project. To enable this, please add the \n" +
-                                        "'--hubConnectionId=<hubConnectionId>' parameter to the CLI, or ensure\n" +
-                                        "a registered changelog file is passed in your defaults file or in the CLI.\n" +
-                                        "Learn more at https://hub.liquibase.com";
-                        Scope.getCurrentScope().getUI().sendMessage("\nWARNING: " + warningMessage);
-                        LOG.warning("\n" + warningMessage);
-                    }
-                }
                 CommandScope dropAllCommand = new CommandScope("internalDropAll");
                 if (hubConnectionId != null) {
                     dropAllCommand.addArgumentValue(InternalDropAllCommandStep.HUB_CONNECTION_ID_ARG, UUID.fromString(hubConnectionId));
+                }
+                if (hubProjectId != null) {
+                    dropAllCommand.addArgumentValue(InternalDropAllCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
                 }
                 dropAllCommand
                         .addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, liquibase.getDatabase())
@@ -1849,12 +1811,7 @@ public class Main {
                 liquibase.reportUnexpectedChangeSets(runVerbose, contexts, getOutputWriter());
                 return;
             } else if (COMMANDS.VALIDATE.equalsIgnoreCase(command)) {
-                try {
-                    liquibase.validate();
-                } catch (ValidationFailedException e) {
-                    e.printDescriptiveError(System.err);
-                    return;
-                }
+                liquibase.validate();
                 Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("no.validation.errors.found"));
                 return;
             } else if (COMMANDS.CLEAR_CHECKSUMS.equalsIgnoreCase(command)) {
@@ -2024,7 +1981,7 @@ public class Main {
                 }
             } catch (DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        coreBundle.getString("problem.closing.connection"), e);
+                    coreBundle.getString("problem.closing.connection"), e);
             }
         }
     }
@@ -2045,14 +2002,6 @@ public class Main {
     private boolean dbConnectionNeeded(String command) {
         return !COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command) &&
                 !COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(command);
-    }
-
-    private boolean isLicenseableCommand(String formatValue) {
-        return COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command) ||
-                COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command) ||
-                COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command) ||
-                COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command) ||
-                (COMMANDS.DIFF.equalsIgnoreCase(command) && formatValue != null && !formatValue.toLowerCase().equals("txt"));
     }
 
     private void loadChangeSetInfoToMap(Map<String, Object> argsMap) throws CommandLineParsingException {
@@ -2239,23 +2188,6 @@ public class Main {
      */
     public boolean isWindows() {
         return System.getProperty("os.name").startsWith("Windows ");
-    }
-
-    public static class SecureLogFilter implements Filter {
-
-        private LogMessageFilter filter;
-
-        public SecureLogFilter(LogMessageFilter filter) {
-            this.filter = filter;
-        }
-
-        @Override
-        public boolean isLoggable(LogRecord record) {
-            final String filteredMessage = filter.filterMessage(record.getMessage());
-
-            final boolean equals = filteredMessage.equals(record.getMessage());
-            return equals;
-        }
     }
 
     @SuppressWarnings("HardCodedStringLiteral")

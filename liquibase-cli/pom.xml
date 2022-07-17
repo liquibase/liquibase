@@ -4,9 +4,8 @@
 
     <parent>
         <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-base-module</artifactId>
-        <version>${liquibase.version}</version>
-        <relativePath>../base-module.pom.xml</relativePath>
+        <artifactId>liquibase</artifactId>
+        <version>0-SNAPSHOT</version>
     </parent>
 
     <description>Liquibase CLI interface</description>
@@ -15,10 +14,33 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-            <version>4.6.1</version>
+            <version>4.6.3</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>liquibase.integration.commandline.LiquibaseLauncher</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 
 </project>

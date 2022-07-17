@@ -4,6 +4,7 @@ import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
 import liquibase.exception.CommandValidationException
+import liquibase.extension.testing.setup.SetupCleanResources
 
 CommandTests.define {
     command = ["generateChangelog"]
@@ -13,6 +14,7 @@ Long Description: Writes Change Log XML to copy the current state of the databas
 Required Args:
   changelogFile (String) File to write changelog to
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   dataOutputDirectory (String) Directory to write table data to
     Default: null
@@ -24,7 +26,13 @@ Optional Args:
     Default: null
   excludeObjects (String) Objects to exclude from diff
     Default: null
+  includeCatalog (Boolean) If true, the catalog will be included in generated changeSets
+    Default: false
   includeObjects (String) Objects to include in diff
+    Default: null
+  includeSchema (Boolean) If true, the schema will be included in generated changeSets
+    Default: false
+  includeTablespace (String) Include the tablespace attribute in the changelog
     Default: null
   overwriteOutputFile (String) Flag to allow overwriting of output changelog file
     Default: null
@@ -45,7 +53,7 @@ Optional Args:
             changelogFile: "target/test-classes/changelog-test.xml"
         ]
         setup {
-            cleanResources("changelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "changelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",

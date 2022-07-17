@@ -35,7 +35,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     private ConfigurationValueConverter<DataType> valueConverter;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
 
-    private static final Pattern ALLOWED_KEY_PATTERN = Pattern.compile("[a-zA-Z0-9.]+");
+    private static final Pattern ALLOWED_KEY_PATTERN = Pattern.compile("[a-zA-Z0-9._]+");
 
     private boolean loggedUsingDefault = false;
 
@@ -101,7 +101,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
                 } else {
                     obfuscatedValue = valueObfuscator.obfuscate(defaultValue);
                 }
-                if (!loggedUsingDefault && !key.equals(GlobalConfiguration.FILTER_LOG_MESSAGES.getKey())) {
+                if (!loggedUsingDefault) {
                     Scope.getCurrentScope().getLog(getClass()).fine("Configuration " + key + " is using the default value of " + obfuscatedValue);
                     loggedUsingDefault = true;
                 }

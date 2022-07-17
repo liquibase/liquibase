@@ -15,7 +15,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -86,7 +86,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                     ColumnConfig column = new ColumnConfig();
                     column.setName(columnNames.get(i));
 
-                    Object value = JdbcUtils.getResultSetValue(rs, i + 1);
+                    Object value = JdbcUtil.getResultSetValue(rs, i + 1);
                     if (value == null) {
                         column.setValue(null);
                     } else if (value instanceof Number) {
@@ -101,7 +101,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                         }
                         column.setValueComputed(new DatabaseFunction("UNSUPPORTED FOR DIFF: BINARY DATA"));
                     } else { // fall back to simple string
-                        column.setValue(value.toString().replace("\\", "\\\\"));
+                        column.setValue(value.toString());
                     }
 
                     change.addColumn(column);

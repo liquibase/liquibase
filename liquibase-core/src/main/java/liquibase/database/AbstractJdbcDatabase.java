@@ -10,7 +10,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.StandardChangeLogHistoryService;
 import liquibase.GlobalConfiguration;
-import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
@@ -88,10 +87,19 @@ import static liquibase.util.StringUtil.join;
  */
 public abstract class AbstractJdbcDatabase implements Database {
 
-    private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
     private static final int FETCH_SIZE = 1000;
     private static final int DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS = 9;
-    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static final Pattern STARTS_WITH_NUMBER_PATTERN = Pattern.compile("^[0-9].*");
+    private static final Pattern NON_WORD_PATTERN = Pattern.compile(".*\\W.*");
+    private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern DATE_ONLY_PATTERN = Pattern.compile("^\\d{4}\\-\\d{2}\\-\\d{2}$");
+    private static final Pattern DATE_TIME_PATTERN = Pattern.compile("^\\d{4}\\-\\d{2}\\-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?$");
+    private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("^\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$");
+    private static final Pattern TIME_PATTERN = Pattern.compile("^\\d{2}:\\d{2}:\\d{2}$");
+    private static final Pattern NAME_WITH_DESC_PATTERN = Pattern.compile("(?i).*\\s+DESC");
+    private static final Pattern NAME_WITH_ASC_PATTERN = Pattern.compile("(?i).*\\s+ASC");
+
     private final Set<String> reservedWords = new HashSet<>();
     protected String defaultCatalogName;
     protected String defaultSchemaName;
@@ -299,7 +307,9 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        if ((quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
+        if (isCatalogOrSchemaType(objectType) && preserveCaseIfRequested() == CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE) {
+            return objectName;
+        } else if ((getObjectQuotingStrategy() == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
                 ( objectName == null) || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
             return objectName;
         } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
@@ -307,6 +317,16 @@ public abstract class AbstractJdbcDatabase implements Database {
         } else {
             return objectName.toLowerCase(Locale.US);
         }
+    }
+
+    private boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
+        return objectType.equals(Catalog.class) || objectType.equals(Schema.class);
+    }
+    private CatalogAndSchema.CatalogAndSchemaCase preserveCaseIfRequested() {
+        if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
+           return CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE;
+        }
+        return getSchemaAndCatalogCase();
     }
 
     @Override
@@ -323,7 +343,9 @@ public abstract class AbstractJdbcDatabase implements Database {
 
         if ((defaultSchemaName == null) && (connection != null)) {
             defaultSchemaName = getConnectionSchemaName();
-            Scope.getCurrentScope().getLog(getClass()).info("Set default schema name to " + defaultSchemaName);
+            if (defaultSchemaName != null) {
+                Scope.getCurrentScope().getLog(getClass()).info("Set default schema name to " + defaultSchemaName);
+            }
         }
 
         return defaultSchemaName;
@@ -495,7 +517,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @param isoDate value to check.
      */
     protected boolean isDateOnly(final String isoDate) {
-        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}$")
+        return DATE_ONLY_PATTERN.matcher(isoDate).matches()
                 || NowAndTodayUtil.isNowOrTodayFormat(isoDate);
     }
 
@@ -508,7 +530,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @param isoDate value to check.
      */
     protected boolean isDateTime(final String isoDate) {
-        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?$")
+        return DATE_TIME_PATTERN.matcher(isoDate).matches()
                 || NowAndTodayUtil.isNowOrTodayFormat(isoDate);
     }
 
@@ -521,7 +543,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @param isoDate value to check
      */
     protected boolean isTimestamp(final String isoDate) {
-        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$")
+        return TIMESTAMP_PATTERN.matcher(isoDate).matches()
                 || NowAndTodayUtil.isNowOrTodayFormat(isoDate);
     }
 
@@ -532,7 +554,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @param isoDate value to check
      */
     protected boolean isTimeOnly(final String isoDate) {
-        return isoDate.matches("^\\d{2}:\\d{2}:\\d{2}$")
+        return TIME_PATTERN.matcher(isoDate).matches()
                 || NowAndTodayUtil.isNowOrTodayFormat(isoDate);
     }
 
@@ -739,7 +761,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     * Check if given string starts with numeric values that may cause problems and should be escaped.
     */
     protected boolean startsWithNumeric(final String objectName) {
-        return startsWithNumberPattern.matcher(objectName).matches();
+        return STARTS_WITH_NUMBER_PATTERN.matcher(objectName).matches();
     }
 
     @Override
@@ -1002,7 +1024,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.matches(".*\\W.*");
+        if (isCatalogOrSchemaType(objectType) && preserveCaseIfRequested() == CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE) {
+            return true;
+        }
+        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || NON_WORD_PATTERN.matcher(objectName).matches();
     }
 
     protected String getQuotingStartCharacter() {
@@ -1068,10 +1093,10 @@ public abstract class AbstractJdbcDatabase implements Database {
                 sb.append(", ");
             }
             boolean descending = false;
-            if (columnName.matches("(?i).*\\s+DESC")) {
+            if (NAME_WITH_DESC_PATTERN.matcher(columnName).matches()) {
                 columnName = columnName.replaceFirst("(?i)\\s+DESC$", "");
                 descending = true;
-            } else if (columnName.matches("(?i).*\\s+ASC")) {
+            } else if (NAME_WITH_ASC_PATTERN.matcher(columnName).matches()) {
                 columnName = columnName.replaceFirst("(?i)\\s+ASC$", "");
             }
             sb.append(escapeObjectName(columnName, Column.class));
@@ -1440,7 +1465,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         getDefaultDatabaseProductName()));
             }
             String sequenceName = databaseFunction.getValue();
-            String sequenceSchemaName = ((SequenceNextValueFunction) databaseFunction).getSequenceSchemaName();
+            String sequenceSchemaName = databaseFunction.getSchemaName();
 
             sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
             if (sequenceNextValueFunction.contains("'")) {
@@ -1458,7 +1483,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         getDefaultDatabaseProductName()));
             }
 
-            String sequenceSchemaName = ((SequenceCurrentValueFunction) databaseFunction).getSequenceSchemaName();
+            String sequenceSchemaName = databaseFunction.getSchemaName();
             String sequenceName = databaseFunction.getValue();
             sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
 
@@ -1475,7 +1500,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    private boolean isCurrentTimeFunction(final String functionValue) {
+    protected boolean isCurrentTimeFunction(final String functionValue) {
         if (functionValue == null) {
             return false;
         }

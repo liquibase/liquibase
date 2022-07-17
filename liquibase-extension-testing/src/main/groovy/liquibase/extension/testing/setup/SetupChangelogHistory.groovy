@@ -7,7 +7,6 @@ import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
-import liquibase.extension.testing.TestDatabaseConnections
 
 class SetupChangelogHistory extends TestSetup {
 
@@ -18,8 +17,8 @@ class SetupChangelogHistory extends TestSetup {
     }
 
     @Override
-    void setup(TestDatabaseConnections.ConnectionStatus connectionStatus) throws Exception {
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connectionStatus.connection))
+    void setup(TestSetupEnvironment testSetupEnvironment) throws Exception {
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(testSetupEnvironment.connection))
 
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
         changeLogService.init()

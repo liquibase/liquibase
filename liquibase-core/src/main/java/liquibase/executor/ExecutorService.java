@@ -1,19 +1,16 @@
 package liquibase.executor;
 
-import liquibase.Scope;
-import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ExecutorService extends AbstractPluginFactory<Executor>  {
 
-    private Map<String, Executor> executors = new ConcurrentHashMap<>();
+    private final Map<String, Executor> executors = new ConcurrentHashMap<>();
 
     private ExecutorService() {
     }
@@ -26,7 +23,8 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
     @Override
     protected int getPriority(Executor executor, Object... args) {
         String name = (String) args[0];
-        if (name.equals(executor.getName())) {
+        Database database = (Database) args[1];
+        if (name.equals(executor.getName()) && executor.supports(database)) {
             return executor.getPriority();
         } else {
             return Plugin.PRIORITY_NOT_APPLICABLE;

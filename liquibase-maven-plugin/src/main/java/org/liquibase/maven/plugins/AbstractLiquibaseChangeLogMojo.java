@@ -8,13 +8,11 @@ import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubConfiguration;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
+import liquibase.resource.*;
 import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -33,6 +31,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      *
    * @parameter property="liquibase.changeLogDirectory"
      */
+    @PropertyElement
     protected String changeLogDirectory;
 
     /**
@@ -40,6 +39,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      *
      * @parameter property="liquibase.changeLogFile"
      */
+    @PropertyElement
     protected String changeLogFile;
 
 
@@ -50,6 +50,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      *
      * @parameter property="liquibase.contexts" default-value=""
      */
+    @PropertyElement
     protected String contexts;
 
     /**
@@ -59,6 +60,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      *
      * @parameter property="liquibase.labels" default-value=""
      */
+    @PropertyElement
     protected String labels;
 
     /**
@@ -68,6 +70,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      * @parameter property="liquibase.hub.apiKey"
      *
      */
+    @PropertyElement(key = "liquibase.hub.apiKey")
     protected String hubApiKey;
 
     /**
@@ -77,6 +80,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      * @parameter property="liquibase.hub.url"
      *
      */
+    @PropertyElement(key = "liquibase.hub.url")
     protected String hubUrl;
 
     /**
@@ -85,6 +89,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      * @parameter property="liquibase.hub.mode"
      *
      */
+    @PropertyElement(key = "liquibase.hub.mode")
     protected String hubMode;
 
     @Override
@@ -140,7 +145,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
             resourceAccessors.add(new FileSystemResourceAccessor(new File(changeLogDirectory)));
         }
 
-        return new CompositeResourceAccessor(resourceAccessors);
+        return new SearchPathResourceAccessor(searchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 
     @Override

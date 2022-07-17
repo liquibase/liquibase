@@ -25,7 +25,7 @@ public class DeactivateChangelogCommandStep extends AbstractCommandStep {
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).required()
+        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
             .description("The root changelog").build();
     }
 

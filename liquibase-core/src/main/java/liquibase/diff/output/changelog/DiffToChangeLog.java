@@ -621,7 +621,7 @@ public class DiffToChangeLog {
             });
 
             //get schema -> base object dependencies
-            sql += " UNION SELECT SCHEMA_NAME(SCHEMA_ID) as referencing_schema_name, name as referencing_name, PARSENAME(BASE_OBJECT_NAME,1) AS referenced_name, (CASE WHEN PARSENAME(BASE_OBJECT_NAME,2) IS NULL THEN schema_name(schema_id) else PARSENAME(BASE_OBJECT_NAME,2) END) AS referenced_schema_name FROM SYS.SYNONYMS WHERE is_ms_shipped='false' AND " + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
+            sql += " UNION SELECT SCHEMA_NAME(SCHEMA_ID) as referencing_schema_name, name as referencing_name, PARSENAME(BASE_OBJECT_NAME,1) AS referenced_name, (CASE WHEN PARSENAME(BASE_OBJECT_NAME,2) IS NULL THEN schema_name(schema_id) else PARSENAME(BASE_OBJECT_NAME,2) END) AS referenced_schema_name FROM sys.synonyms WHERE is_ms_shipped='false' AND " + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
                 @Override
                 public String toString(String obj) {
                     return "SCHEMA_NAME(SCHEMA_ID)='" + obj + "'";
@@ -664,6 +664,8 @@ public class DiffToChangeLog {
 
     private String queryForDependenciesPostgreSql(List<String> schemas) {
         //SQL adapted from https://wiki.postgresql.org/wiki/Pg_depend_display
+        //We filter out PK and FK in this query so that they are not added to the dependency graph
+        //they get added later in the flow, after the table is guaranteed to have been created
         return "WITH RECURSIVE preference AS (\n" +
                 "    SELECT 10 AS max_depth  -- The deeper the recursion goes, the slower it performs.\n" +
                 "         , 16384 AS min_oid -- user objects only\n" +
@@ -734,7 +736,7 @@ public class DiffToChangeLog {
                         return " REFERENCED_NAME like '" + obj + ".%' OR REFERENCED_NAME NOT LIKE '%.%'";
                     }
                 }) + ")\n" +
-                " AND CONTYPE::text != 'p'\n" +
+                " AND (CONTYPE::text != 'p' AND CONTYPE::text != 'f')\n" +
                 " AND referencing_schema_name is not null and referencing_name is not null";
     }
 
@@ -770,7 +772,7 @@ public class DiffToChangeLog {
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
                     ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
-                            null, false, quotingStrategy, null);
+                            null, true, quotingStrategy, null);
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
                         changeSet.setLabels(diffOutputControl.getLabels());
@@ -780,7 +782,7 @@ public class DiffToChangeLog {
                 }
             } else {
                 ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, csContext,
-                        null, false, quotingStrategy, null);
+                        null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
                     changeSet.setLabels(diffOutputControl.getLabels());

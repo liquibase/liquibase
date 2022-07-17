@@ -7,6 +7,7 @@ import liquibase.change.core.AddPrimaryKeyChange
 import liquibase.change.core.CreateTableChange
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
+import liquibase.extension.testing.setup.SetupCleanResources
 import liquibase.structure.core.Column
 
 import java.util.regex.Pattern
@@ -20,6 +21,7 @@ Required Args:
   changelogFile (String) Changelog file to write results
   referenceUrl (String) The JDBC reference database connection URL
   url (String) The JDBC target database connection URL
+    OBFUSCATED
 Optional Args:
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -33,7 +35,13 @@ Optional Args:
     Default: null
   excludeObjects (String) Objects to exclude from diff
     Default: null
+  includeCatalog (Boolean) If true, the catalog will be included in generated changeSets
+    Default: false
   includeObjects (String) Objects to include in diff
+    Default: null
+  includeSchema (Boolean) If true, the schema will be included in generated changeSets
+    Default: false
+  includeTablespace (String) Include the tablespace attribute in the changelog
     Default: null
   password (String) The target database password
     Default: null
@@ -65,7 +73,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources("diffChangelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "diffChangelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -97,7 +105,7 @@ Optional Args:
         ]
     }
 
-    run "Running diffChangelog should add change sets", {
+    run "Running diffChangelog should add changesets", {
         arguments = [
                 url              : { it.url },
                 username         : { it.username },
@@ -109,7 +117,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources("diffChangeLog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "diffChangeLog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "SharedTable",
@@ -155,7 +163,7 @@ Optional Args:
         ]
     }
 
-    run "Running diffChangelog should add change sets in the correct order", {
+    run "Running diffChangelog should add changesets in the correct order", {
         arguments = [
                 url              : { it.altUrl },
                 username         : { it.altUsername },
@@ -167,7 +175,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources("diffChangelogOrder-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "diffChangelogOrder-test.xml")
             database = [
                     new CreateTableChange(
                         tableName: "person",

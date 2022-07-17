@@ -22,9 +22,8 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
     public static final String[] COMMAND_NAME = {"internalGenerateChangelog"};
 
     private static final String INFO_MESSAGE =
-            "When generating formatted SQL changelogs, it is important to decide if batched statements\n" +
-                    "should be split (splitStatements:true is the default behavior) or not (splitStatements:false).\n" +
-                    "See http://liquibase.org for additional documentation.";
+            "BEST PRACTICE: When generating formatted SQL changelogs, always check if the 'splitStatements' attribute" + System.lineSeparator() +
+            "works for your environment. See https://docs.liquibase.com/commands/generatechangelog.html for more information. ";
 
     public static final CommandArgumentDefinition<String> AUTHOR_ARG;
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;

@@ -1,11 +1,13 @@
 package liquibase.integration.commandline;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandScope;
 import liquibase.command.core.InternalDiffCommandStep;
 import liquibase.command.core.InternalDiffChangelogCommandStep;
 import liquibase.command.core.InternalGenerateChangelogCommandStep;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
@@ -93,6 +95,17 @@ public class CommandLineUtils {
             if (!database.supportsSchemas()) {
                 if ((defaultSchemaName != null) && (defaultCatalogName == null)) {
                     defaultCatalogName = defaultSchemaName;
+                }
+                //
+                // Get values from the configuration object if they aren't already set
+                //
+                if (liquibaseCatalogName == null) {
+                    ConfiguredValue<String> configuredValue  = GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentConfiguredValue();
+                    liquibaseCatalogName = configuredValue.getValue();
+                }
+                if (liquibaseSchemaName == null) {
+                    ConfiguredValue<String> configuredValue  = GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentConfiguredValue();
+                    liquibaseSchemaName = configuredValue.getValue();
                 }
                 if ((liquibaseSchemaName != null) && (liquibaseCatalogName == null)) {
                     liquibaseCatalogName = liquibaseSchemaName;
@@ -254,18 +267,20 @@ public class CommandLineUtils {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-        myVersion = LiquibaseUtil.getBuildVersion();
+        myVersion = LiquibaseUtil.getBuildVersionInfo();
         buildTimeString = LiquibaseUtil.getBuildTime();
 
         StringBuilder banner = new StringBuilder();
+        if (GlobalConfiguration.SHOW_BANNER.getCurrentValue()) {
 
-        // Banner is stored in liquibase/banner.txt in resources.
-        Class commandLinUtilsClass = CommandLineUtils.class;
-        InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
-        try {
-            banner.append(readFromInputStream(inputStream));
-        } catch (IOException e) {
-            Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
+            // Banner is stored in liquibase/banner.txt in resources.
+            Class commandLinUtilsClass = CommandLineUtils.class;
+            InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
+            try {
+                banner.append(readFromInputStream(inputStream));
+            } catch (IOException e) {
+                Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
+            }
         }
 
         banner.append(String.format(

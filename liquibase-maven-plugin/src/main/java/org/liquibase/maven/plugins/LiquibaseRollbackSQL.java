@@ -5,8 +5,8 @@ import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,17 +30,11 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
      *            default-value=
      *            "${project.build.directory}/liquibase/migrate.sql"
      */
+    @PropertyElement
     protected File migrationSqlOutputFile;
 
     /** The writer for writing the migration SQL. */
     private Writer outputWriter;
-
-    @Override
-    protected boolean isPromptOnNonLocalDatabase() {
-        // Always run on an non-local database as we are not actually modifying
-        // the database when run on it.
-        return false;
-    }
 
     @Override
     protected Liquibase createLiquibase(Database db)

@@ -23,5 +23,7 @@ class JavaLogServiceTest extends Specification {
         StringUtil.class         | "liquibase.util"
         String.class             | "liquibase"
         CreateTableExampleChange | "liquibase.change"
+        null                     | "unknown"
+        int.class                | "int"
     }
 }

@@ -92,6 +92,12 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     }
                 }
 
+                if ("dropNotNullConstraint".equalsIgnoreCase(changeName)) {
+                    if ("oracle".equalsIgnoreCase(database.getShortName())) { //oracle must have either columnName or constraintName
+                        requiredParams.add("columnName");
+                    }
+                }
+
                 if (database instanceof Db2zDatabase && "addLookupTable".equalsIgnoreCase(changeName)) {
                     requiredParams.add("newColumnDataType");
                 }
