@@ -17,6 +17,11 @@ if exist "%LIQUIBASE_HOME%\jre" if "%JAVA_HOME%"=="" (
     set JAVA_HOME=%LIQUIBASE_HOME%\jre
 )
 
+rem use only the first JAVA_HOME in the semicolon separated list
+for /f "tokens=1 delims=;" %%a in ("%JAVA_HOME%") do (
+    set JAVA_HOME=%%a
+)
+
 rem special characters may be lost
 setlocal DISABLEDELAYEDEXPANSION
 

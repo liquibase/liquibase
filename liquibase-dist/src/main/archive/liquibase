@@ -30,6 +30,11 @@ if [ -z "${JAVA_HOME}" ]; then
   elif [ -d "${LIQUIBASE_HOME}/.install4j/jre.bundle/Contents/Home" ]; then
     JAVA_HOME="${LIQUIBASE_HOME}/.install4j/jre.bundle/Contents/Home"
   fi
+else
+  if [[ $JAVA_HOME == *";"* ]]; then
+    #JAVA_HOME is set, use only the first JAVA_HOME in the semicolon separated list
+    JAVA_HOME=$(echo "$JAVA_HOME" | cut -d ";" -f 1)
+  fi
 fi
 
 if [ -z "${JAVA_HOME}" ]; then
