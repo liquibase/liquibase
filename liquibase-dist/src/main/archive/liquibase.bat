@@ -17,9 +17,9 @@ if exist "%LIQUIBASE_HOME%\jre" if "%JAVA_HOME%"=="" (
     set JAVA_HOME=%LIQUIBASE_HOME%\jre
 )
 
-rem use only the first JAVA_HOME in the semicolon separated list
-for /f "tokens=1 delims=;" %%a in ("%JAVA_HOME%") do (
-    set JAVA_HOME=%%a
+if not exist "%JAVA_HOME%" (
+  echo ERROR: Liquibase cannot determine a valid JAVA_PATH or JAVA_HOME. Please inspect your configurations and try again. >&2
+  exit 1
 )
 
 rem special characters may be lost
