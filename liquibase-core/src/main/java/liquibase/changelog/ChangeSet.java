@@ -17,6 +17,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.logging.Logger;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
@@ -519,7 +520,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         Change change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).create(value.getName());
         if (change == null) {
-            if (value.getChildren().size() > 0 && GlobalConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(GlobalConfiguration.ChangelogParseMode.STRICT)) {
+            if (value.getChildren().size() > 0 && ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(ChangeLogParserConfiguration.ChangelogParseMode.STRICT)) {
                 String message = "";
                 if (this.getChangeLog() != null && this.getChangeLog().getPhysicalFilePath() != null) {
                     message = "Error parsing " + this.getChangeLog().getPhysicalFilePath() + ": ";
