@@ -443,11 +443,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 break;
             case "preConditions":
                 this.preconditions = new PreconditionContainer();
-                try {
-                    this.preconditions.load(child, resourceAccessor);
-                } catch (ParsedNodeException e) {
-                    e.printStackTrace();
-                }
+                this.preconditions.load(child, resourceAccessor);
                 break;
             case "changes":
                 for (ParsedNode changeNode : child.getChildren()) {
