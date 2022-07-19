@@ -289,11 +289,18 @@ public class LiquibaseCommandLine {
         return 1;
     }
 
-    private String cleanExceptionMessage(String message) {
+    protected String cleanExceptionMessage(String message) {
         if (message == null) {
             return null;
         }
-        message = message.replaceFirst("^[\\w.]*exception[\\w.]*: ", "");
+
+        String originalMessage;
+        do {
+            originalMessage = message;
+            message = message.replaceFirst("^[\\w.]*Exception: ", "");
+            message = message.replaceFirst("^[\\w.]*Error: ", "");
+        } while (!originalMessage.equals(message));
+
         message = message.replace("Unexpected error running Liquibase: ", "");
         return message;
     }
