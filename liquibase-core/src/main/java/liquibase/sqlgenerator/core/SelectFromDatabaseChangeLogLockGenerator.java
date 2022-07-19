@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -38,7 +39,12 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
                     if ((col.getComputed() != null) && col.getComputed()) {
                         return col.getName();
                     } else {
-                        return database.escapeColumnName(null, null, null, col.getName());
+                        String escapedColumnName = database.escapeColumnName(null, null, null, col.getName());
+                        if (database instanceof MariaDBDatabase && col.getName().equalsIgnoreCase("locked")) {
+                            return "CAST(" + escapedColumnName + " AS INTEGER) AS " + escapedColumnName;
+                        } else {
+                            return escapedColumnName;
+                        }
                     }
                 }
             }) + " FROM " +
