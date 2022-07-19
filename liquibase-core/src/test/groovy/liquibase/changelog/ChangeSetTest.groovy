@@ -1,10 +1,10 @@
 package liquibase.changelog
 
-import liquibase.GlobalConfiguration
+
 import liquibase.Scope
 import liquibase.change.CheckSum
 import liquibase.change.core.*
-import liquibase.exception.ChangeLogParseException
+import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.precondition.core.RunningAsPrecondition
@@ -212,7 +212,7 @@ public class ChangeSetTest extends Specification {
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
                 .addChild(new ParsedNode(null, "invalid").addChild(null, "tableName", "table_2"))
 
-        Scope.child([(GlobalConfiguration.CHANGELOG_PARSE_MODE.getKey()) : GlobalConfiguration.ChangelogParseMode.LAX], {
+        Scope.child([(ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getKey()): ChangeLogParserConfiguration.ChangelogParseMode.LAX], {
             ->
             changeSet.load(node, resourceSupplier.simpleResourceAccessor)
         } as Scope.ScopedRunner)

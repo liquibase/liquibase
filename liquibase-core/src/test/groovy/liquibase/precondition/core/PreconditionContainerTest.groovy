@@ -3,6 +3,7 @@ package liquibase.precondition.core
 import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.exception.SetupException
+import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
@@ -152,7 +153,7 @@ class PreconditionContainerTest extends Specification {
                 .addChild(new ParsedNode(null, "tableExists").addChildren([tableName: "my_table"]))
 
         def container = new PreconditionContainer()
-        Scope.currentScope.child([(GlobalConfiguration.CHANGELOG_PARSE_MODE.key): GlobalConfiguration.ChangelogParseMode.LAX], {
+        Scope.currentScope.child([(ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.key): ChangeLogParserConfiguration.ChangelogParseMode.LAX], {
             ->
             container.load(node, resourceSupplier.simpleResourceAccessor)
         } as Scope.ScopedRunner)
