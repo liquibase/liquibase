@@ -8,7 +8,7 @@ import liquibase.exception.CustomChangeException;
  * If you are updating a database through SQL, implementing CustomSqlChange is preferred because the SQL can either be executed
  * directly or saved to a text file for later use depending on the migration mode used.
  * To allow the change to be rolled back, also implement the CustomTaskRollback interface.
- * If your change requires sql-based logic and non-sql-based logic, it is best to create a change set that contains a mix of CustomSqlChange and CustomTaskChange calls.
+ * If your change requires sql-based logic and non-sql-based logic, it is best to create a changeset that contains a mix of CustomSqlChange and CustomTaskChange calls.
  *
  * @see liquibase.change.custom.CustomTaskRollback
  * @see liquibase.change.custom.CustomSqlChange

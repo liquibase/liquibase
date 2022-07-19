@@ -15,7 +15,7 @@ import java.util.Date;
 
 /**
  * <p>Invokes Liquibase to rollback the database (and mark changesets as unapplied). The
- * change sets to be rolled back are specified using attributes 'rollbackCount',
+ * changesets to be rolled back are specified using attributes 'rollbackCount',
  * 'rollbackTag' and/or 'rollbackDate'</p>
  * @author Peter Murray
  * @goal rollback
@@ -34,7 +34,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
     protected String rollbackTag;
 
     /**
-     * The number of change sets to rollback.
+     * The number of changesets to rollback.
      * @parameter property="liquibase.rollbackCount" default-value="-1"
      */
     protected int rollbackCount;
