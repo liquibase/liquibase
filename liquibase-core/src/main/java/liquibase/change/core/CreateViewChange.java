@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -243,7 +244,8 @@ public class CreateViewChange extends AbstractChange {
 			try {
 				InputStream stream = openSqlStream();
 				if (stream == null) {
-					throw new IOException(FileUtil.getFileNotFoundMessage(path));
+                    Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(path));
+                    stream = new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
 				}
 				selectQuery = StreamUtil.readStreamAsString(stream, encoding);
 			    if (getChangeSet() != null) {

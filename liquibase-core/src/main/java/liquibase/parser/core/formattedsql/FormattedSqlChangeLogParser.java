@@ -16,10 +16,8 @@ import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -528,7 +526,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         InputStream resourceAsStream = resourceAccessor.openStream(null, physicalChangeLogLocation);
         if (resourceAsStream == null) {
             final File physicalChangeLogFile = new File(physicalChangeLogLocation);
-            throw new IOException(FileUtil.getFileNotFoundMessage(physicalChangeLogFile.getAbsolutePath()));
+            Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(physicalChangeLogFile.getAbsolutePath()));
+            resourceAsStream = new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
         }
         return resourceAsStream;
     }

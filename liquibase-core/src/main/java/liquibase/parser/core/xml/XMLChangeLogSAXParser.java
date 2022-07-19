@@ -14,8 +14,10 @@ import org.xml.sax.*;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
@@ -69,7 +71,8 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     @Override
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        try (InputStream inputStream = resourceAccessor.openStream(null, physicalChangeLogLocation)) {
+        try (InputStream _inputStream = resourceAccessor.openStream(null, physicalChangeLogLocation)) {
+            InputStream inputStream = _inputStream;
             SAXParser parser = saxParserFactory.newSAXParser();
             if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
                 try {
@@ -109,7 +112,8 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                             physicalChangeLogLocation.replaceFirst("WEB-INF/classes/", ""),
                             changeLogParameters, resourceAccessor);
                 } else {
-                    throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
+                    Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
+                    inputStream = new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
                 }
             }
 

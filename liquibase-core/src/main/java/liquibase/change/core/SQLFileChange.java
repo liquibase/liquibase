@@ -15,8 +15,10 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Represents a Change for custom SQL stored in a File.
@@ -127,7 +129,8 @@ public class SQLFileChange extends AbstractSQLChange {
         if (inputStream != null) {
             return inputStream;
         }
-        throw new IOException(FileUtil.getFileNotFoundMessage(path));
+        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(path));
+        return new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
