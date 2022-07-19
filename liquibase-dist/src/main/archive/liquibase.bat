@@ -18,7 +18,7 @@ if exist "%LIQUIBASE_HOME%\jre" if "%JAVA_HOME%"=="" (
 )
 
 if NOT "%JAVA_HOME%" == "" if not exist "%JAVA_HOME%" (
-  echo ERROR: Liquibase cannot determine a valid JAVA_PATH or JAVA_HOME. Please inspect your configurations and try again. >&2
+  echo ERROR: The JAVA_HOME environment variable is not defined correctly, so Liquibase cannot be started. JAVA_HOME is set to "%JAVA_HOME%" and it does not exist. >&2
   exit 1
 )
 
