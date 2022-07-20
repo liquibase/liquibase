@@ -1148,7 +1148,7 @@ public class LiquibaseCommandLine {
                         continue;
                     }
                     final File file = new File(url.toURI());
-                    if (file.getName().equals("liquibase.jar")) {
+                    if (file.getName().equals("liquibase-core.jar")) {
                         continue;
                     }
                     if (file.exists() && file.getName().toLowerCase().endsWith(".jar")) {
@@ -1201,9 +1201,11 @@ public class LiquibaseCommandLine {
                 libraryInfo.file = pathEntryFile;
 
                 final Manifest manifest = jarFile.getManifest();
-                libraryInfo.name = getValue(manifest, "Bundle-Name", "Implementation-Title", "Specification-Title");
-                libraryInfo.version = getValue(manifest, "Bundle-Version", "Implementation-Version", "Specification-Version");
-                libraryInfo.vendor = getValue(manifest, "Bundle-Vendor", "Implementation-Vendor", "Specification-Vendor");
+                if (manifest != null) {
+                    libraryInfo.name = getValue(manifest, "Bundle-Name", "Implementation-Title", "Specification-Title");
+                    libraryInfo.version = getValue(manifest, "Bundle-Version", "Implementation-Version", "Specification-Version");
+                    libraryInfo.vendor = getValue(manifest, "Bundle-Vendor", "Implementation-Vendor", "Specification-Vendor");
+                }
 
                 if (libraryInfo.name == null) {
                     libraryInfo.name = pathEntryFile.getName().replace(".jar", "");
