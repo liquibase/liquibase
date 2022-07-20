@@ -65,6 +65,7 @@ public class CommandLineUtils {
                 databaseChangeLogTableName, databaseChangeLogLockTableName);
     }
 
+    @SuppressWarnings("java:S2095")
     public static Database createDatabaseObject(ResourceAccessor resourceAccessor,
                                                 String url,
                                                 String username,
