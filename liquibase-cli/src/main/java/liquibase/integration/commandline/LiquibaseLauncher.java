@@ -29,6 +29,7 @@ public class LiquibaseLauncher {
              parentLoaderSetting = "system";
         }
         debug("LIQUIBASE_LAUNCHER_PARENT_CLASSLOADER is set to " + parentLoaderSetting);
+
         final String liquibaseHomeEnv = System.getenv("LIQUIBASE_HOME");
         debug("LIQUIBASE_HOME: " + liquibaseHomeEnv);
         if (liquibaseHomeEnv == null || liquibaseHomeEnv.equals("")) {
