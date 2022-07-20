@@ -661,7 +661,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public boolean include(String fileName,
                            boolean isRelativePath,
                            ResourceAccessor resourceAccessor,
-                           ContextExpression includeContexts,
+                           ContextExpression includeContextFilter,
                            Labels labels,
                            Boolean ignore,
                            OnUnknownFileFormat onUnknownFileFormat)
