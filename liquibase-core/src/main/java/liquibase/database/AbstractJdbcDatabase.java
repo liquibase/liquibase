@@ -1,6 +1,24 @@
 package liquibase.database;
 
+import static liquibase.util.StringUtil.join;
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigInteger;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
@@ -9,7 +27,6 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.StandardChangeLogHistoryService;
-import liquibase.GlobalConfiguration;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
@@ -59,25 +76,6 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.NowAndTodayUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import static liquibase.util.StringUtil.join;
 
 
 /**
@@ -1224,20 +1222,15 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void close() throws DatabaseException {
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("jdbc", this);
-        DatabaseConnection connection = getConnection();
-        if (connection != null) {
-            if (previousAutoCommit != null) {
-                try {
-                    connection.setAutoCommit(previousAutoCommit);
-                } catch (DatabaseException e) {
-                    Scope.getCurrentScope().getLog(getClass()).warning("Failed to restore the auto commit to " + previousAutoCommit);
-
-                    throw e;
-                }
-            }
-            connection.close();
+      Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("jdbc", this);
+      try (final DatabaseConnection connection = getConnection();) {
+        if (connection != null && previousAutoCommit != null) {
+          connection.setAutoCommit(previousAutoCommit);
         }
+      } catch (final DatabaseException e) {
+        Scope.getCurrentScope().getLog(getClass()).warning("Failed to restore the auto commit to " + previousAutoCommit);
+        throw e;
+      }
     }
 
     @Override
