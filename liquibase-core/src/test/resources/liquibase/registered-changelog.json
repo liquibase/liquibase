@@ -48,24 +48,6 @@
   
   {
     "changeSet": {
-      "id": "1604958377003-3",
-      "author": "wesley (generated)",
-      "changes": [
-        {
-          "createTrigger": {
-            "disabled": false,
-            "path": "objects/trigger/TRIGGER1.sql",
-            "relativeToChangelogFile": true,
-            "tableName": "ACCOUNT",
-            "triggerName": "TRIGGER1"
-          }
-        }]
-      
-    }
-  },
-  
-  {
-    "changeSet": {
       "id": "1604958377003-4",
       "author": "wesley (generated)",
       "changes": [
@@ -414,39 +396,5 @@
         }]
       
     }
-  },
-  
-  {
-    "changeSet": {
-      "id": "1604958377003-14",
-      "author": "wesley (generated)",
-      "changes": [
-        {
-          "addCheckConstraint": {
-            "constraintBody": "supplier_id BETWEEN 100 and 9999",
-            "constraintName": "CHECK_SUPPLIER_ID",
-            "disabled": false,
-            "tableName": "SUPPLIERS"
-          }
-        }]
-      
-    }
-  },
-  
-  {
-    "changeSet": {
-      "id": "1604958377003-15",
-      "author": "wesley (generated)",
-      "changes": [
-        {
-          "createFunction": {
-            "functionName": "FUNC_COMPUTE_TAX",
-            "path": "objects/function/FUNC_COMPUTE_TAX.sql",
-            "relativeToChangelogFile": true
-          }
-        }]
-      
-    }
   }
-  
 ]}

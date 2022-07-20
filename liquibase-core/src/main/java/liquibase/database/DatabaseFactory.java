@@ -176,6 +176,7 @@ public class DatabaseFactory {
         return openConnection(url, username, driver, databaseClass, driverProperties, resourceAccessor);
     }
 
+    @SuppressWarnings("java:S2095")
     public DatabaseConnection openConnection(String url,
                                              String username,
                                              String driver,
