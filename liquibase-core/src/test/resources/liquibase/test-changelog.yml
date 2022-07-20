@@ -22,16 +22,6 @@ databaseChangeLog:
         procedureName: PROC_HELLO_WORLD
         relativeToChangelogFile: true
 - changeSet:
-    id: 1604960286751-3
-    author: wesley (generated)
-    changes:
-    - createTrigger:
-        disabled: false
-        path: objects/trigger/TRIGGER1.sql
-        relativeToChangelogFile: true
-        tableName: ACCOUNT
-        triggerName: TRIGGER1
-- changeSet:
     id: 1604960286751-4
     author: wesley (generated)
     changes:
@@ -207,21 +197,3 @@ databaseChangeLog:
             type: VARCHAR2(50 BYTE)
         tableName: SUPPLIERS1
         tablespace: USERS
-- changeSet:
-    id: 1604960286751-14
-    author: wesley (generated)
-    changes:
-    - addCheckConstraint:
-        constraintBody: supplier_id BETWEEN 100 and 9999
-        constraintName: CHECK_SUPPLIER_ID
-        disabled: false
-        tableName: SUPPLIERS
-- changeSet:
-    id: 1604960286751-15
-    author: wesley (generated)
-    changes:
-    - createFunction:
-        functionName: FUNC_COMPUTE_TAX
-        path: objects/function/FUNC_COMPUTE_TAX.sql
-        relativeToChangelogFile: true
-

@@ -140,7 +140,7 @@
 		<dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>2.3.6</version>
+            <version>4.0.0</version>
             <optional>true</optional>
 		</dependency>
 	</dependencies>
@@ -228,7 +228,7 @@
 
 			<plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.4.1</version>
 				<configuration>
                     <finalName>liquibase-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
