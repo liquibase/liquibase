@@ -59,7 +59,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
                 } catch (ClassNotFoundException classNotFoundException) {
                     // Return class for newer versions anyway
                     return derbyNewDriverClassName;
-                }
+                } 
             }
         } else if (url.startsWith("jdbc:derby") || url.startsWith("java:derby")) {
             //Use EmbeddedDriver if using a derby URL but without the `://` in it
@@ -153,12 +153,15 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void close() throws DatabaseException {
+      // FIXME Seems not to be a good way to handle the possibility of getting `getConnection() == null`
+      if (getConnection() != null) {
         String url = getConnection().getURL();
         String driverName = getDefaultDriver(url);
         super.close();
-        if (getShutdownEmbeddedDerby() && (driverName != null) && driverName.toLowerCase().contains("embedded")) {
+        if (shutdownEmbeddedDerby && (driverName != null) && driverName.toLowerCase().contains("embedded")) {
             shutdownDerby(url, driverName);
         }
+      }
     }
 
     protected void shutdownDerby(String url, String driverName) throws DatabaseException {
@@ -194,7 +197,6 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     /**
      * Determine Apache Derby driver major/minor version.
      */
-    @SuppressWarnings({"static-access", "unchecked"})
     protected void determineDriverVersion() {
         try {
 // Locate the Derby sysinfo class and query its version info

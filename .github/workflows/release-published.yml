@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download release assets
-        uses: robinraju/release-downloader@v1.3
+        uses: robinraju/release-downloader@v1.4
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"

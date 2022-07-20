@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-next.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <preConditions>
         <dbms type="mysql"/>
         <sqlCheck expectedResult="1">select 1</sqlCheck>
@@ -458,5 +458,17 @@
                         <!--columnName="ApproveSecurity"-->
                         <!--newDataType="ENUM('Approving_Boss','Approving_NetworkOwner','Approving_other','Approving_Owner','Approving_RVS','Inv_AccessApproving_NetworkOwner','Approving_Request_Handler') NOT NULL"/>-->
     <!--</changeSet>-->
+
+    <changeSet id="addcolumn before after" author="nvoxland">
+        <createTable tableName="before_after">
+            <column name="id" type="int"/>
+            <column name="name" type="int"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="addcolumn before after 2" author="nvoxland">
+        <addColumn tableName="before_after">
+            <column name="after_name" type="int" afterColumn="name"/>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

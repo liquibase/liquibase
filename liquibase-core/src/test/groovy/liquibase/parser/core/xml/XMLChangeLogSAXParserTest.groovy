@@ -99,7 +99,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
     def "getSchemaVersion"() {
         expect:
-        XMLChangeLogSAXParser.getSchemaVersion() == "next" //because test run in an environment with build.version == DEV
+        XMLChangeLogSAXParser.getSchemaVersion() == "latest" //because test run in an environment with build.version == DEV
     }
 
     @Unroll
@@ -109,12 +109,12 @@ class XMLChangeLogSAXParserTest extends Specification {
 
         where:
         buildVersion | expected
-        "DEV"        | "next"
+        "DEV"        | "latest"
         "4.11.0"     | "4.11"
         "4.11.1"     | "4.11"
-        "4"          | "next" //weird versions go to next
-        ""           | "next" //weird versions go to next
-        null         | "next" //weird versions go to next
+        "4"          | "latest" //weird versions go to latest
+        ""           | "latest" //weird versions go to latest
+        null         | "latest" //weird versions go to latest
     }
 
 }

@@ -93,6 +93,7 @@
                         <xsd:attribute name="value" type="xsd:string"/>
                         <xsd:attribute name="dbms" type="xsd:string"/>
                         <xsd:attribute name="context" type="xsd:string"/>
+                        <xsd:attribute name="contextFilter" type="xsd:string"/>
                         <xsd:attribute name="labels" type="xsd:string"/>
                         <xsd:attribute name="global" type="xsd:boolean"/>
                         <xsd:attribute name="target" type="xsd:string"/>
@@ -170,6 +171,7 @@
                                         </xsd:choice>
                                         <xsd:attribute name="dbms" type="xsd:string"/>
                                         <xsd:attribute name="context" type="xsd:string"/>
+                                        <xsd:attribute name="contextFilter" type="xsd:string"/>
                                         <xsd:attribute name="labels" type="xsd:string"/>
                                         <xsd:attribute name="applyToRollback" type="booleanExp"/>
                                     </xsd:complexType>
@@ -189,6 +191,7 @@
                             <xsd:attribute name="file" type="xsd:string" use="required"/>
                             <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
                             <xsd:attribute name="context" type="xsd:string"/>
+                            <xsd:attribute name="contextFilter" type="xsd:string"/>
                             <xsd:attribute name="labels" type="xsd:string"/>
                             <xsd:attribute name="ignore" type="xsd:string"/>
                             <xsd:attribute name="created" type="xsd:string"/>
@@ -203,6 +206,8 @@
                             <xsd:attribute name="resourceComparator" type="xsd:string"/>
                             <xsd:attribute name="filter" type="xsd:string"/>
                             <xsd:attribute name="context" type="xsd:string"/>
+                            <xsd:attribute name="labels" type="xsd:string"/>
+                            <xsd:attribute name="contextFilter" type="xsd:string"/>
                             <xsd:anyAttribute namespace="##other" processContents="lax"/>
                         </xsd:complexType>
                     </xsd:element>
@@ -257,6 +262,7 @@
     <xsd:attributeGroup name="changeLogAttributes">
         <xsd:attribute name="logicalFilePath" type="xsd:string"/>
         <xsd:attribute name="context" type="xsd:string"/>
+        <xsd:attribute name="contextFilter" type="xsd:string"/>
         <xsd:attribute name="changeLogId" type="xsd:string"/>
         <xsd:attribute name="objectQuotingStrategy" type="objectQuotingStrategy" default="LEGACY"/>
     </xsd:attributeGroup>
@@ -266,6 +272,7 @@
         <xsd:attribute name="id" type="xsd:string" use="required"/>
         <xsd:attribute name="author" type="xsd:string" use="required"/>
         <xsd:attribute name="context" type="xsd:string"/>
+        <xsd:attribute name="contextFilter" type="xsd:string"/>
         <xsd:attribute name="labels" type="xsd:string"/>
         <xsd:attribute name="dbms" type="xsd:string"/>
         <xsd:attribute name="runOnChange" type="booleanExp"/>
@@ -604,7 +611,7 @@
         <xsd:attribute name="separator" type="nonEmptyString" default=","/>
         <xsd:attribute name="quotchar" type="nonEmptyString" default="&quot;"/>
         <xsd:attribute name="commentLineStartsWith" type="nonEmptyString" default="#"/>
-        <xsd:attribute name="usePreparedStatements" type="booleanExp" default="false"/>
+        <xsd:attribute name="usePreparedStatements" type="booleanExp"/>
     </xsd:attributeGroup>
 
     <xsd:element name="loadData">

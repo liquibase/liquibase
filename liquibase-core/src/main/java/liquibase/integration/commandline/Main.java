@@ -31,10 +31,7 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.ui.ConsoleUIService;
-import liquibase.util.BooleanUtil;
-import liquibase.util.ISODateFormat;
-import liquibase.util.LiquibaseUtil;
-import liquibase.util.StringUtil;
+import liquibase.util.*;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -251,7 +248,7 @@ public class Main {
 
                         Scope.getCurrentScope().getUI().sendMessage(String.format("Running Java under %s (Version %s)",
                                 System.getProperties().getProperty("java.home"),
-                                System.getProperty("java.version")
+                                SystemUtil.getJavaVersion()
                         ));
                         return Integer.valueOf(0);
                     }

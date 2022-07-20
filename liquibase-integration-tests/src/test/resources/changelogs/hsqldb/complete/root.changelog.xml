@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-next.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <preConditions>
             <dbms type="hsqldb"/>
             <runningAs username="${loginUser}"/>
@@ -410,6 +410,18 @@
             <column name="month" value="12"/>
             <column name="name" value="Facebook"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="addcolumn before after" author="nvoxland">
+        <createTable tableName="before_after">
+            <column name="id" type="int"/>
+            <column name="name" type="int"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="addcolumn before after 2" author="nvoxland">
+        <addColumn tableName="before_after">
+            <column name="before_name" type="int" beforeColumn="name"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

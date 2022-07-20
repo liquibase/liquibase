@@ -471,7 +471,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         }
                         actuallyUsePreparedStatements = usePreparedStatements;
                     } else {
-                        actuallyUsePreparedStatements = needsPreparedStatement || (databaseSupportsBatchUpdates && !isLoggingExecutor(database));
+                        actuallyUsePreparedStatements = needsPreparedStatement || (!isLoggingExecutor(database) && preferPreparedStatements(database));
                     }
                 }
                 rows.add(new LoadDataRowConfig(actuallyUsePreparedStatements, columnsFromCsv));
@@ -484,7 +484,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         } catch (UnexpectedLiquibaseException ule) {
             if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
                     .getFailOnError()) {
-                LOG.info("Change set " + getChangeSet().toString(false) +
+                LOG.info("Changeset " + getChangeSet().toString(false) +
                         " failed, but failOnError was false.  Error: " + ule.getMessage());
                 return new SqlStatement[0];
             } else {
@@ -499,6 +499,17 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 }
             }
         }
+    }
+
+    /**
+     * If the loaded data does not require a prepared statement, and the user did not specify whether to use them or not,
+     * should we use prepared statements as a default?
+     */
+    private boolean preferPreparedStatements(Database database) {
+        if (database instanceof PostgresDatabase) {
+            return false; //postgresql seems surprisingly slow with prepared statements
+        }
+        return supportsBatchUpdates(database);
     }
 
     protected boolean supportsBatchUpdates(Database database) {

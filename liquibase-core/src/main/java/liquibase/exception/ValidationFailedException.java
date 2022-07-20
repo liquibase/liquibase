@@ -126,7 +126,7 @@ public class ValidationFailedException extends MigrationFailedException {
     public void printDescriptiveError(PrintStream out) {
         out.println("Validation Error: ");
         if (!invalidMD5Sums.isEmpty()) {
-            out.println(INDENT_SPACES +invalidMD5Sums.size()+" change sets have changed since they were ran against the database");
+            out.println(INDENT_SPACES +invalidMD5Sums.size()+" changesets have changed since they were ran against the database");
             for (String message : invalidMD5Sums) {
                 out.println("          " + message);
             }
@@ -146,7 +146,7 @@ public class ValidationFailedException extends MigrationFailedException {
         }
 
         if (!duplicateChangeSets.isEmpty()) {
-            out.println(INDENT_SPACES +duplicateChangeSets.size()+" change sets had duplicate identifiers");
+            out.println(INDENT_SPACES +duplicateChangeSets.size()+" changesets had duplicate identifiers");
             for (ChangeSet duplicate : duplicateChangeSets) {
                 out.println("          "+duplicate.toString(false));
             }

@@ -12,10 +12,7 @@ import liquibase.database.core.DerbyDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
+import liquibase.resource.*;
 import liquibase.util.NetUtil;
 import liquibase.util.StringUtil;
 
@@ -248,7 +245,7 @@ abstract class GenericServletListener {
 
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
             database.setDefaultSchemaName(getDefaultSchema());
-            liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO, fsFO, threadClFO), database);
+            liquibase = new Liquibase(getChangeLogFile(), new SearchPathResourceAccessor(clFO, fsFO, threadClFO), database);
 
             @SuppressWarnings("unchecked")
             Enumeration<String> initParameters = servletContext.getInitParameterNames();
