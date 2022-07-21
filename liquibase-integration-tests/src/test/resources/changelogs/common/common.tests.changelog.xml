@@ -490,7 +490,7 @@
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv"/>
     </changeSet>
     <changeSet id="sampleTSVData" author="nvoxland">
-        <loadData tableName="csvdata" file="changelogs/sample.data1.tsv" separator="&#009;"/>
+        <loadData tableName="csvdata" file="changelogs/sample.data1.tsv" separator="&#9;"/>
     </changeSet>
     <changeSet id="sampleCSVData2" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data2.csv">

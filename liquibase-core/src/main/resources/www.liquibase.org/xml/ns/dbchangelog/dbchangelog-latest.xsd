@@ -600,7 +600,7 @@
 
     <xsd:simpleType name="nonEmptyString">
         <xsd:restriction base="xsd:string">
-            <xsd:pattern value="\S.*"/>
+            <xsd:pattern value="[\S\t].*"/>
         </xsd:restriction>
     </xsd:simpleType>
 
