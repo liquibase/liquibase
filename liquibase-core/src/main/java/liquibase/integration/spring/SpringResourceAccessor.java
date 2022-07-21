@@ -144,7 +144,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
             relativeIsFile = resourceIsFile(rootResource);
 
             if (relativeIsFile) {
-                searchPath = relativeTo.replaceFirst("/[^/]+$", "") + "/" + path;
+                searchPath = relativeTo.replaceFirst("(/|^)[^/]+$", "") + "/" + path;
             } else {
                 searchPath = relativeTo + "/" + path;
             }
