@@ -426,13 +426,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
             case "preConditions": {
                 PreconditionContainer parsedContainer = new PreconditionContainer();
-                try {
-                    parsedContainer.load(node, resourceAccessor);
-                    this.preconditionContainer.addNestedPrecondition(parsedContainer);
+                parsedContainer.load(node, resourceAccessor);
+                this.preconditionContainer.addNestedPrecondition(parsedContainer);
 
-                } catch (ParsedNodeException e) {
-                    e.printStackTrace();
-                }
                 break;
             }
             case "property": {
