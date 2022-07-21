@@ -116,13 +116,13 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                         if (foundErrors.hasErrors() && (changeSet.getOnValidationFail().equals
                                 (ChangeSet.ValidationFailOption.MARK_RAN))) {
                             Scope.getCurrentScope().getLog(getClass()).info(
-                                    "Skipping change set " + changeSet + " due to validation error(s): " +
+                                    "Skipping changeset " + changeSet + " due to validation error(s): " +
                                             StringUtil.join(foundErrors.getErrorMessages(), ", "));
                             changeSet.setValidationFailed(true);
                         } else {
                             if (!foundErrors.getWarningMessages().isEmpty())
                                 Scope.getCurrentScope().getLog(getClass()).warning(
-                                        "Change set " + changeSet + ": " +
+                                        "Changeset " + changeSet + ": " +
                                                 StringUtil.join(foundErrors.getWarningMessages(), ", "));
                             validationErrors.addAll(foundErrors, changeSet);
                         }

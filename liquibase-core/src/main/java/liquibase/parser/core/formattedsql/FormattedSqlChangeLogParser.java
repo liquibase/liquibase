@@ -83,7 +83,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             RawSQLChange change = null;
             Pattern changeLogPattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
             Pattern propertyPattern = Pattern.compile("\\s*\\-\\-[\\s]*property\\s+(.*:.*)\\s+(.*:.*).*", Pattern.CASE_INSENSITIVE);
-            Pattern altPropertyOneDashPattern = Pattern.compile("\\s*?[-]+.*property\\s.*", Pattern.CASE_INSENSITIVE);
+            Pattern altPropertyOneDashPattern = Pattern.compile("\\s*?[-]+\\s*property\\s.*", Pattern.CASE_INSENSITIVE);
             Pattern changeSetPattern = Pattern.compile("\\s*\\-\\-[\\s]*changeset\\s+(\"[^\"]+\"|[^:]+):\\s*(\"[^\"]+\"|\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern altChangeSetOneDashPattern = Pattern.compile("\\-[\\s]*changeset\\s.*", Pattern.CASE_INSENSITIVE);
             Pattern altChangeSetNoOtherInfoPattern = Pattern.compile("\\s*\\-\\-[\\s]*changeset[\\s]*.*$", Pattern.CASE_INSENSITIVE);
@@ -407,7 +407,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     } else {
                         if (commentMatcher.matches()) {
                             String message =
-                               String.format("Unexpected formatting at line %d. Formatted SQL changelogs do not allow comment lines outside of change sets. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
+                               String.format("Unexpected formatting at line %d. Formatted SQL changelogs do not allow comment lines outside of changesets. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
                             throw new ChangeLogParseException("\n" + message);
                         }
                     }

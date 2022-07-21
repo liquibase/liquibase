@@ -231,61 +231,62 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
         Database db = liquibase.getDatabase();
 
-        Database referenceDatabase = CommandLineUtils.createDatabaseObject(resourceAccessor, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, propertyProviderClass, null, null, databaseChangeLogTableName, databaseChangeLogLockTableName);
+        try (Database referenceDatabase = CommandLineUtils.createDatabaseObject(resourceAccessor, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, propertyProviderClass, null, null, databaseChangeLogTableName, databaseChangeLogLockTableName)) {
 
-        getLog().info("Performing Diff on database " + db.toString());
-        if ((diffExcludeObjects != null) && (diffIncludeObjects != null)) {
-            throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
-        }
-        ObjectChangeFilter objectChangeFilter = null;
-        if (diffExcludeObjects != null) {
-            objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, diffExcludeObjects);
-        }
-        if (diffIncludeObjects != null) {
-            objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, diffIncludeObjects);
-        }
-
-        CompareControl.SchemaComparison[] schemaComparisons = createSchemaComparisons(db);
-        if (diffChangeLogFile != null) {
-            try {
-                DiffOutputControl diffOutputControl = new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace, null).addIncludedSchema(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName));
-                diffOutputControl.setObjectChangeFilter(objectChangeFilter);
-                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl,
-                                                   objectChangeFilter, StringUtil.trimToNull(diffTypes), schemaComparisons);
-                if (new File(diffChangeLogFile).exists()) {
-                    getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
-                }
-            } catch (IOException | ParserConfigurationException e) {
-                throw new LiquibaseException(e);
+            getLog().info("Performing Diff on database " + db.toString());
+            if ((diffExcludeObjects != null) && (diffIncludeObjects != null)) {
+                throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
             }
-        } else {
-            PrintStream printStream = createPrintStream();
-            if (isFormattedDiff()) {
-                CommandScope liquibaseCommand = new CommandScope("internalDiff");
-                CommandScope diffCommand =
-                        CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtil.trimToNull(diffTypes),
-                                schemaComparisons, objectChangeFilter, printStream);
-                CompareControl compareControl = new CompareControl(schemaComparisons, diffTypes);
+            ObjectChangeFilter objectChangeFilter = null;
+            if (diffExcludeObjects != null) {
+                objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, diffExcludeObjects);
+            }
+            if (diffIncludeObjects != null) {
+                objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, diffIncludeObjects);
+            }
 
-                liquibaseCommand.addArgumentValue("format", format);
-                liquibaseCommand.addArgumentValue("diffCommand", diffCommand);
-                liquibaseCommand.addArgumentValue("targetDatabase", db);
-                liquibaseCommand.addArgumentValue("referenceDatabase", referenceDatabase);
-                liquibaseCommand.addArgumentValue("compareControl", compareControl);
-                liquibaseCommand.addArgumentValue("objectChangeFilter", objectChangeFilter);
-                if (StringUtil.isEmpty(diffTypes)) {
-                    liquibaseCommand.addArgumentValue("snapshotTypes", new Class[0]);
-                } else {
-                    liquibaseCommand.addArgumentValue("snapshotTypes", diffTypes);
+            CompareControl.SchemaComparison[] schemaComparisons = createSchemaComparisons(db);
+            if (diffChangeLogFile != null) {
+                try {
+                    DiffOutputControl diffOutputControl = new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace, null).addIncludedSchema(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName));
+                    diffOutputControl.setObjectChangeFilter(objectChangeFilter);
+                    CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl,
+                            objectChangeFilter, StringUtil.trimToNull(diffTypes), schemaComparisons);
+                    if (new File(diffChangeLogFile).exists()) {
+                        getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
+                    }
+                } catch (IOException | ParserConfigurationException e) {
+                    throw new LiquibaseException(e);
                 }
-
-                CommandScope formattedDiffCommand = new CommandScope("internalFormattedDiff");
-                formattedDiffCommand.addArgumentValue("format", format);
-                formattedDiffCommand.addArgumentValue("diffCommand", liquibaseCommand);
-
-                formattedDiffCommand.execute();
             } else {
-                CommandLineUtils.doDiff(referenceDatabase, db, StringUtil.trimToNull(diffTypes), schemaComparisons, objectChangeFilter, printStream);
+                PrintStream printStream = createPrintStream();
+                if (isFormattedDiff()) {
+                    CommandScope liquibaseCommand = new CommandScope("internalDiff");
+                    CommandScope diffCommand =
+                            CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtil.trimToNull(diffTypes),
+                                    schemaComparisons, objectChangeFilter, printStream);
+                    CompareControl compareControl = new CompareControl(schemaComparisons, diffTypes);
+
+                    liquibaseCommand.addArgumentValue("format", format);
+                    liquibaseCommand.addArgumentValue("diffCommand", diffCommand);
+                    liquibaseCommand.addArgumentValue("targetDatabase", db);
+                    liquibaseCommand.addArgumentValue("referenceDatabase", referenceDatabase);
+                    liquibaseCommand.addArgumentValue("compareControl", compareControl);
+                    liquibaseCommand.addArgumentValue("objectChangeFilter", objectChangeFilter);
+                    if (StringUtil.isEmpty(diffTypes)) {
+                        liquibaseCommand.addArgumentValue("snapshotTypes", new Class[0]);
+                    } else {
+                        liquibaseCommand.addArgumentValue("snapshotTypes", diffTypes);
+                    }
+
+                    CommandScope formattedDiffCommand = new CommandScope("internalFormattedDiff");
+                    formattedDiffCommand.addArgumentValue("format", format);
+                    formattedDiffCommand.addArgumentValue("diffCommand", liquibaseCommand);
+
+                    formattedDiffCommand.execute();
+                } else {
+                    CommandLineUtils.doDiff(referenceDatabase, db, StringUtil.trimToNull(diffTypes), schemaComparisons, objectChangeFilter, printStream);
+                }
             }
         }
     }

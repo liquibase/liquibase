@@ -11,7 +11,7 @@ Short Description: Calculates and prints a checksum for the changeset
 Long Description: Calculates and prints a checksum for the changeset with the given id in the format filepath::id::author
 Required Args:
   changelogFile (String) The root changelog file
-  changesetIdentifier (String) Change set ID identifier of form filepath::id::author
+  changesetIdentifier (String) Changeset ID identifier of form filepath::id::author
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:

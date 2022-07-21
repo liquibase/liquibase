@@ -128,7 +128,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
     /**
      *
-     * Called which a change set is successfully rolled back
+     * Called which a changeset is successfully rolled back
      *
      * @param changeSet         changeSet that was rolled back
      * @param databaseChangeLog parent change log
@@ -183,7 +183,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     }
 
     //
-    // Send an update message to Hub for this change set rollback
+    // Send an update message to Hub for this changeset rollback
     //
     private void updateHubForRollback(ChangeSet changeSet,
                                       DatabaseChangeLog databaseChangeLog,
@@ -305,7 +305,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         catch (LiquibaseException lbe) {
             logger.warning(lbe.getMessage(), lbe);
             logger.warning("Unable to send Operation Change Event for operation '" + operation.getId().toString() +
-                    " change set '" + changeSet.toString(false));
+                    " changeset '" + changeSet.toString(false));
         }
     }
 
@@ -324,7 +324,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     }
 
     //
-    // Send an update message to Hub for this change set
+    // Send an update message to Hub for this changeset
     //
     private void updateHub(ChangeSet changeSet,
                            DatabaseChangeLog databaseChangeLog,
@@ -401,7 +401,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                 //
                 // Just log message
                 //
-                logger.warning("Unable to serialize change set '" + changeSet.toString(false) + "' for Hub.");
+                logger.warning("Unable to serialize changeset '" + changeSet.toString(false) + "' for Hub.");
             }
         }
 
@@ -443,7 +443,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         catch (LiquibaseException lbe) {
             logger.warning(lbe.getMessage(), lbe);
             logger.warning("Unable to send Operation Change Event for operation '" + operation.getId().toString() +
-                    " change set '" + changeSet.toString(false));
+                    " changeset '" + changeSet.toString(false));
             failedToPostCount++;
         }
     }

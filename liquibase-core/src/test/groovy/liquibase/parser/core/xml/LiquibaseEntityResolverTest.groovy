@@ -1,8 +1,11 @@
 package liquibase.parser.core.xml
 
 import liquibase.GlobalConfiguration
+import liquibase.LiquibaseTest
 import liquibase.Scope
 import liquibase.resource.FileSystemResourceAccessor
+import liquibase.util.LiquibaseUtil
+import org.xml.sax.InputSource
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -18,11 +21,53 @@ class LiquibaseEntityResolverTest extends Specification {
                 "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd",
                 "https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd",
                 "http://www.liquibase.org/xml/ns/migrator/dbchangelog-3.1.xsd",
-                "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-next.xsd",
+                "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd",
+                "https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd",
                 "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd",
                 "/liquibase/banner.txt", //can find files without hostnames
                 "http://liquibase/banner.txt", //conversion of hostnames to files works for not just liquibase.org URLs
         ]
+    }
+
+    @Unroll
+    def "warning message for mismatched xsd and build versions #systemId /// #buildVersion"() {
+        given:
+        def uiService = new LiquibaseTest.TestConsoleUIService()
+        // Save these props for later
+        def originalProperties = LiquibaseUtil.liquibaseBuildProperties
+        LiquibaseUtil.liquibaseBuildProperties = new Properties()
+        LiquibaseUtil.liquibaseBuildProperties.put("build.version", buildVersion)
+        def er = new LiquibaseEntityResolver()
+        er.setShouldWarnOnMismatchedXsdVersion(true)
+        er.hasWarnedAboutMismatchedXsdVersion = false
+
+        expect:
+        Scope.child([
+                (Scope.Attr.ui.name())        : uiService
+        ], {
+            er.resolveEntity(null, null, null, systemId)
+        } as Scope.ScopedRunnerWithReturn<InputSource>) != null
+
+        // This is an ugly assertion line, it is essentially saying, either we expect the message, so make sure it's there
+        // or we expect no message, so make sure there are no messages.
+        ((expectedWarningMessage && uiService.getMessages().contains("INFO: An older version of the XSD is specified in one or more changelog's <databaseChangeLog> header. This can lead to unexpected outcomes. If a specific XSD is not required, please replace all XSD version references with \"-latest\". Learn more at https://docs.liquibase.com"))
+        || (!expectedWarningMessage && uiService.getMessages().isEmpty()))
+
+        cleanup:
+        // Set the build properties back to what they were before the test.
+        LiquibaseUtil.liquibaseBuildProperties = originalProperties
+
+        where:
+        buildVersion | systemId | expectedWarningMessage
+        "3.1.0" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd" | false
+        "3.1.1" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd" | false
+        "4.12.0" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd" | true
+        "4.12.0" | "https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd" | true
+        "4.12.0" | "http://www.liquibase.org/xml/ns/migrator/dbchangelog-3.1.xsd" | true
+        "4.12.0" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd" | false
+        "4.12.0" | "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd" | false
+        "4.12.0" | "/liquibase/banner.txt" | false
+        "4.12.0" | "http://liquibase/banner.txt" | false
     }
 
     @Unroll

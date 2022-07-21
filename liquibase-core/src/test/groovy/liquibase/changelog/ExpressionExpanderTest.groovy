@@ -44,6 +44,7 @@ class ExpressionExpanderTest extends Specification {
         PRESERVE | ""                                                                                                | ""
         PRESERVE | "A Simple String"                                                                                 | "A Simple String"
         PRESERVE | "With { brackets } in it"                                                                         | "With { brackets } in it"
+        PRESERVE | "With \${ unmatched"                                                                              | "With \${ unmatched"
         PRESERVE | "A string with one expression \${param1} set"                                                     | "A string with one expression value1 set"
         PRESERVE | "A string with two expressions \${param1} and \${param2} set"                                     | "A string with two expressions value1 and value2 set"
         EMPTY    | "A string with two expressions \${param1} and \${param2} set"                                     | "A string with two expressions value1 and value2 set"
@@ -69,6 +70,12 @@ class ExpressionExpanderTest extends Specification {
         PRESERVE | "valid '\${double.nested.value.valid}' double nested"                                             | "valid 'double a param with param1=value1' double nested"
         PRESERVE | "invalid '\${double.nested.value.invalid}' double nested"                                         | "invalid 'double \${nested.value.invalid}' double nested"
         EMPTY    | "invalid '\${double.nested.value.invalid}' double nested"                                         | "invalid 'double ' double nested"
+        PRESERVE | "INSERT INTO script (id, script) VALUES (5, '{test} \${test} {test} \${test} {test} ');"          | "INSERT INTO script (id, script) VALUES (5, '{test} \${test} {test} \${test} {test} ');"
+        PRESERVE | "test \$\$ here"                                                                                  | "test \$\$ here"
+        PRESERVE | "test \$1.30 here"                                                                                | "test \$1.30 here"
+        PRESERVE | "test \$1.30 here \$"                                                                             | "test \$1.30 here \$"
+        PRESERVE | "ending \${"                                                                                      | "ending \${"
+        PRESERVE | "ending \$"                                                                                       | "ending \$"
     }
 
 

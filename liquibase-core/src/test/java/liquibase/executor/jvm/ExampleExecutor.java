@@ -1,8 +1,8 @@
 /*
  *
  * This is an example of a custom Executor class.
- * Specifying the change set attribute "runWith=<executor name>"
- * instructs Liquibase to execute the changes in the change set
+ * Specifying the changeset attribute "runWith=<executor name>"
+ * instructs Liquibase to execute the changes in the changeset
  * with the Executor.
  *
  */
@@ -68,9 +68,9 @@ public class ExampleExecutor extends JdbcExecutor {
 
     /**
      *
-     * Validate whether the change set can be executed by this Executor
+     * Validate whether the changeset can be executed by this Executor
      *
-     * @param   changeSet The change set to validate
+     * @param   changeSet The changeset to validate
      * @return  boolean   True if all changes can be executed by the custom Executor
      *                    False if any change cannot be executed
      *
