@@ -19,6 +19,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Base class for {@link TestSystem}s for databases.
@@ -78,6 +79,8 @@ public abstract class DatabaseTestSystem extends TestSystem {
         if (wrapper != null && wrapper.isRunning()) {
             return;
         }
+
+        TimeUnit.SECONDS.sleep(30);
 
         wrapper = createWrapper();
 
