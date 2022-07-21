@@ -11,7 +11,9 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtil;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.testcontainers.images.PullPolicy;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -23,13 +25,13 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
 
     public static final String TEST_SYSTEM_LABEL = "org.liquibase.testSystem";
 
-    private final JdbcDatabaseContainer container;
+    private final GenericContainer container;
     private final TestSystem testSystem;
 
     private static final Set<String> alreadyRunningContainerIds = new HashSet<>();
 
-    public DockerDatabaseWrapper(JdbcDatabaseContainer container, TestSystem testSystem) {
-        this.container = container;
+    public DockerDatabaseWrapper(GenericContainer container, TestSystem testSystem) {
+        this.container = container.withImagePullPolicy(PullPolicy.alwaysPull());
         this.testSystem = testSystem;
     }
 
@@ -100,7 +102,7 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
         return null;
     }
 
-    protected void mapPorts(JdbcDatabaseContainer container) {
+    protected void mapPorts(GenericContainer container) {
         int[] ports = testSystem.getConfiguredValue("ports", value -> {
             if (value == null) {
                 return null;
@@ -156,15 +158,15 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
 
     @Override
     public String getUrl() {
-        return container.getJdbcUrl();
+        return ((JdbcDatabaseContainer) container).getJdbcUrl();
     }
 
     public JdbcDatabaseContainer getContainer() {
-        return container;
+        return ((JdbcDatabaseContainer) container);
     }
 
     @Override
     public String getUsername() {
-        return container.getUsername();
+        return ((JdbcDatabaseContainer) container).getUsername();
     }
 }
