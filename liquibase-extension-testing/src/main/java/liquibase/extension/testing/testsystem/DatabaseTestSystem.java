@@ -75,7 +75,7 @@ public abstract class DatabaseTestSystem extends TestSystem {
      */
     @Override
     public void start() throws Exception {
-        if (wrapper != null) {
+        if (wrapper != null && wrapper.isRunning()) {
             return;
         }
 

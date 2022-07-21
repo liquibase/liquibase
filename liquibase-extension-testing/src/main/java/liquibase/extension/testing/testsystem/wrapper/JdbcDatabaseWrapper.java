@@ -25,6 +25,11 @@ public class JdbcDatabaseWrapper extends DatabaseWrapper {
     }
 
     @Override
+    public boolean isRunning() {
+        return true;
+    }
+
+    @Override
     public void start() throws Exception {
 
     }

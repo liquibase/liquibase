@@ -28,4 +28,6 @@ public abstract class DatabaseWrapper {
      * Describes the configuration of this wrapper. Used in outputting to user how this connection is configured.
      */
     public abstract String describe();
+
+    public abstract boolean isRunning();
 }

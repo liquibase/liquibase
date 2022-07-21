@@ -20,6 +20,7 @@ public class LiquibaseGlobalExtension implements IGlobalExtension {
         for (TestSystem startedTestSystem : LiquibaseIntegrationMethodInterceptor.startedTestSystems) {
             try {
                 startedTestSystem.stop();
+                LiquibaseIntegrationMethodInterceptor.startedTestSystems.remove(startedTestSystem);
             } catch (Exception e) {
                 e.printStackTrace();
             }

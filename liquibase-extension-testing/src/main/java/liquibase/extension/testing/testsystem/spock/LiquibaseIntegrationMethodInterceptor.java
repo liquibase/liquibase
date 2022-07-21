@@ -78,6 +78,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
 
             try {
                 testSystem.stop();
+                startedTestSystems.remove(testSystem);
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Cannot stop "+testSystem.getDefinition());
             }
@@ -96,6 +97,9 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
      */
     @Override
     public void interceptCleanupSpecMethod(IMethodInvocation invocation) throws Throwable {
+        final List<FieldInfo> containers = findAllContainers();
+        stopContainers(containers, invocation);
+
         invocation.proceed();
     }
 }

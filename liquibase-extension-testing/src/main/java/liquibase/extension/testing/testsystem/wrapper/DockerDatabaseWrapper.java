@@ -45,6 +45,11 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
     }
 
     @Override
+    public boolean isRunning() {
+        return container.isRunning();
+    }
+
+    @Override
     public void start() throws Exception {
         if (container.isRunning()) {
             return;
