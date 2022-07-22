@@ -89,11 +89,6 @@ public class CommandScope {
         return this;
     }
 
-    public SortedMap<String, Object> getArgumentValues() {
-        return argumentValues;
-    }
-
-
     /**
      * Returns the detailed information about how an argument is set.
      * <br><br>

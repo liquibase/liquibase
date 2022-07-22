@@ -1,10 +1,13 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.command.CommandScope;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.LiquibaseException;
 import org.liquibase.maven.property.PropertyElement;
+import org.liquibase.maven.provider.FlowCommandArgumentValueProvider;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -47,7 +50,8 @@ public abstract class AbstractLiquibaseFlowMojo extends AbstractLiquibaseMojo {
         liquibaseCommand.addArgumentValue("flowFile", flowFile);
         liquibaseCommand.addArgumentValue("flowIntegration", "maven");
         if (flowCommandArguments != null) {
-            liquibaseCommand.getArgumentValues().putAll(flowCommandArguments);
+            FlowCommandArgumentValueProvider flowCommandArgumentValueProvider = new FlowCommandArgumentValueProvider(flowCommandArguments);
+            Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).registerProvider(flowCommandArgumentValueProvider);
         }
         if (outputFile != null) {
             try {
