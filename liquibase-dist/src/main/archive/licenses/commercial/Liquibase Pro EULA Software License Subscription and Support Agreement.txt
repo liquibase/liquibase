@@ -24,7 +24,7 @@ Customer, under an order, a term based non-exclusive, non-transferable license
 up to the license capacity purchased to use the Software only in Customer’s
 internal business operations. Third party licenses delivered with the Software
 may be subject to additional license rights and restrictions a set forth at
-https://download.liquibase.org/lbpro-third-party-licenses/.
+https://www.liquibase.com/licenses/liquibase_pro_tpl.html.
 
 2. RESTRICTIONS. Customer may not:
 a. Transfer, assign, sublicense, rent the Software, create derivative works of

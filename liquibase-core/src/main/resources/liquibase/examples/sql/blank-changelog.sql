@@ -1,5 +1,5 @@
 --liquibase formatted sql
-/* https://www.liquibase.org/documentation/sql_format.html */
+/* https://docs.liquibase.com/concepts/changelogs/sql-format.html */
 
 --changeset authorname:1
 /* Insert SQL change objects here */
