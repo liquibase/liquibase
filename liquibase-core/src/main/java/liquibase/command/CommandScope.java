@@ -26,10 +26,6 @@ public class CommandScope {
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
     private final CommandScopeValueProvider commandScopeValueProvider = new CommandScopeValueProvider();
 
-    public SortedMap<String, Object> getArgumentValues() {
-        return argumentValues;
-    }
-
     /**
      * Config key including the command name. Example `liquibase.command.update`
      */
@@ -91,6 +87,10 @@ public class CommandScope {
         this.argumentValues.put(argument.getName(), value);
 
         return this;
+    }
+
+    public SortedMap<String, Object> getArgumentValues() {
+        return argumentValues;
     }
 
 

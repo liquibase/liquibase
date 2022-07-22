@@ -27,6 +27,15 @@ public abstract class AbstractLiquibaseFlowMojo extends AbstractLiquibaseMojo {
     @PropertyElement
     protected File outputFile;
 
+    /**
+     * Arbitrary map of parameters that the underlying liquibase command will use. These arguments will be passed
+     * verbatim to the underlying liquibase command that is being run.
+     *
+     * @parameter property="flowCommandArguments"
+     */
+    @PropertyElement
+    protected Map<String, Object> flowCommandArguments;
+
     @Override
     public boolean databaseConnectionRequired() {
         return false;
@@ -37,8 +46,8 @@ public abstract class AbstractLiquibaseFlowMojo extends AbstractLiquibaseMojo {
         CommandScope liquibaseCommand = new CommandScope(getCommandName());
         liquibaseCommand.addArgumentValue("flowFile", flowFile);
         liquibaseCommand.addArgumentValue("flowIntegration", "maven");
-        for (Map.Entry<String, Object> commandArgument : liquibaseCommandArguments.entrySet()) {
-            liquibaseCommand.addArgumentValue(commandArgument.getKey(), commandArgument.getValue());
+        if (flowCommandArguments != null) {
+            liquibaseCommand.getArgumentValues().putAll(flowCommandArguments);
         }
         if (outputFile != null) {
             try {
