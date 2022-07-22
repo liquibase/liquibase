@@ -26,4 +26,16 @@ public class FlowCommandArgumentValueProvider extends AbstractMapConfigurationVa
     protected String getSourceDescription() {
         return "Arguments provided through maven when invoking flow or flow.validate maven goals";
     }
+
+    @Override
+    protected boolean keyMatches(String wantedKey, String storedKey) {
+        if (super.keyMatches(wantedKey, storedKey)) {
+            return true;
+        }
+        if (wantedKey.startsWith("liquibase.command.")) {
+            return super.keyMatches(wantedKey.replaceFirst("^liquibase\\.command\\.", ""), storedKey);
+        }
+
+        return super.keyMatches(wantedKey.replaceFirst("^liquibase\\.", ""), storedKey);
+    }
 }
