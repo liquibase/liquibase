@@ -89,6 +89,7 @@ public class CommandScope {
         return this;
     }
 
+
     /**
      * Returns the detailed information about how an argument is set.
      * <br><br>
