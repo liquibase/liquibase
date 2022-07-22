@@ -314,7 +314,7 @@ class ResultSetCache {
             List<Map> result;
             List<CachedRow> returnList = new ArrayList<>();
             try {
-                result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper() {
+                result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
                     @Override
                     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                         Object value = super.getColumnValue(rs, index);

@@ -318,7 +318,7 @@ public class JdbcExecutor extends AbstractExecutor {
      * @see ColumnMapRowMapper
      */
     protected RowMapper getColumnMapRowMapper() {
-        return new ColumnMapRowMapper();
+        return new ColumnMapRowMapper(database.isCaseSensitive());
     }
 
     /**
