@@ -88,6 +88,8 @@ jobs:
 
           unzip -j liquibase-commercial-${version}.jar META-INF/maven/org.liquibase/liquibase-commercial/pom.xml
           mv pom.xml liquibase-commercial-${version}.pom
+          sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private</connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" liquibase-commercial-${version}.pom   ## scm info not in the pom
+          
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-commercial-${version}.pom
           
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
