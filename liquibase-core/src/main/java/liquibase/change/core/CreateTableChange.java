@@ -29,6 +29,8 @@ import java.util.List;
 public class CreateTableChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private List<ColumnConfig> columns;
+    Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
+    private String tableType;
     private String catalogName;
     private String schemaName;
     private String tableName;
@@ -163,7 +165,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     protected CreateTableStatement generateCreateTableStatement() {
-        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks());
+        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType());
     }
 
     @Override
@@ -290,4 +292,12 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    public String getTableType() {
+        return tableType;
+    }
+
+    @DatabaseChangeProperty(since = "4.13")
+    public void setTableType(String tableType) {
+        this.tableType = tableType;
+    }
 }
