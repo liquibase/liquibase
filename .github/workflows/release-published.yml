@@ -79,7 +79,6 @@ jobs:
 
           unzip -j liquibase-maven-plugin-${version}.jar META-INF/maven/org.liquibase/liquibase-maven-plugin/pom.xml
           mv pom.xml liquibase-maven-plugin-${version}.pom
-          sed -i -e "s/<description>/<name>Liquibase Maven Plugin<\/name><description>/" liquibase-maven-plugin-${version}.pom   ## name didn't end up in pom. Hack it in for now
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-maven-plugin-${version}.pom
 
           unzip -j liquibase-cdi-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi/pom.xml
