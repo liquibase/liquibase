@@ -9,7 +9,7 @@ Short Description: Generates SQL to sequentially revert <count> number of change
 Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog
-  count (Integer) Number of change sets to generate rollback SQL for
+  count (Integer) Number of changesets to generate rollback SQL for
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:

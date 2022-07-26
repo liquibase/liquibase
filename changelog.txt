@@ -1,6 +1,34 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.14.0 (2022.07.26)
+
+## Notable Changes
+* Split liquibase-core and liquibase-commercial jar files by @nvoxland in https://github.com/liquibase/liquibase/pull/3050
+* Added liquibase.changelogParseMode setting by @nvoxland in https://github.com/liquibase/liquibase/pull/3057
+
+## Enhancements
+* Warn if XSD version does not match build version in validate command (DAT-9874) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3016
+* Allow use of pro-only objects for filtering with generateChangeLog (DAT-9542) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3068
+* Improve connection exception by including underlying driver exception trace by @hessjcg in https://github.com/liquibase/liquibase/pull/3033
+* Add Closeable/AutoCloseable interface to liquibase.database.Database by @zorglube in https://github.com/liquibase/liquibase/pull/2990
+
+## Fixes
+
+* Fixed Formatted SQL "property" parsing by @nvoxland in https://github.com/liquibase/liquibase/pull/3037
+* Ensure Postgresql search_path entries are quoted correctly by @nvoxland in https://github.com/liquibase/liquibase/pull/3009
+* Updated "Change Set" wording to "Changeset" by @kataggart in https://github.com/liquibase/liquibase/pull/3042
+* Improved error when JAVA_HOME is set to invalid value (DAT-10545) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3074
+* Fixed autoIncrement incrementBy/startWith support in MySQL, H2, HSQLDB, and MariaDB by @tozogabee in https://github.com/liquibase/liquibase/pull/3026
+* Improve renameColumn generated SQL on mssql by @mide25 in https://github.com/liquibase/liquibase/pull/783
+
+### JDBC Driver and Third-Party Library Updates
+
+* Upgraded mariadb-java-client from 3.0.5 to 3.0.6 by @dependabot in https://github.com/liquibase/liquibase/pull/3021
+* Upgraded testcontainers-bom from 1.17.2 to 1.17.3 by @dependabot in https://github.com/liquibase/liquibase/pull/3020
+* Upgraded postgresql from 42.3.4 to 42.4.0 by @dependabot in https://github.com/liquibase/liquibase/pull/2935
+* Bump jaxb-runtime from 2.3.6 to 4.0.0 by @dependabot in https://github.com/liquibase/liquibase/pull/2964
+
 Changes in version 4.13.0 (2022.07.07)
 
 ## Enhancements

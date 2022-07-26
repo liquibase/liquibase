@@ -66,7 +66,7 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Will the change set run next time.
+     * Will the changeset run next time.
      */
     public boolean getWillRun() {
         return willRun;
@@ -77,7 +77,7 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Reasons the change set will or will not run next time. Returns empty set if no reasons were given
+     * Reasons the changeset will or will not run next time. Returns empty set if no reasons were given
      */
     public Set<ChangeSetFilterResult> getFilterResults() {
         return filterResults;
@@ -88,7 +88,7 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Convenience method to check wither a given ChangeSetFilter type is a reason for running the change set or not.
+     * Convenience method to check wither a given ChangeSetFilter type is a reason for running the changeset or not.
      */
     public boolean isFilteredBy(Class<? extends ChangeSetFilter> filterType) {
         if (!willRun) {
@@ -108,7 +108,7 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Return the checksum stored from the last execution of the change set. Returns null if it has not ran before
+     * Return the checksum stored from the last execution of the changeset. Returns null if it has not ran before
      */
     public CheckSum getStoredCheckSum() {
         return storedCheckSum;
@@ -119,7 +119,7 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Return the date the change set was last executed. Returns null if it has not ran before
+     * Return the date the changeset was last executed. Returns null if it has not ran before
      */
     public Date getDateLastExecuted() {
         return dateLastExecuted;
@@ -130,7 +130,7 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Returns true if the change set was ran previously.
+     * Returns true if the changeset was ran previously.
      */
     public boolean getPreviouslyRan() {
         return previouslyRan;

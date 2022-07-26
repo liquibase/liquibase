@@ -39,7 +39,7 @@ public class CalculateChecksumCommandStep extends AbstractCliWrapperCommandStep 
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
         CHANGESET_IDENTIFIER_ARG = builder.argument("changesetIdentifier", String.class).required()
-                .description("Change set ID identifier of form filepath::id::author").build();
+                .description("Changeset ID identifier of form filepath::id::author").build();
     }
 
     @Override
