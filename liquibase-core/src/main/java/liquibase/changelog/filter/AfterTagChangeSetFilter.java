@@ -42,9 +42,9 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         if (changeLogsAfterTag.contains(changeLogToString(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath()))) {
-            return new ChangeSetFilterResult(true, "Change set is before tag '"+tag+"'", this.getClass());
+            return new ChangeSetFilterResult(true, "Changeset is before tag '"+tag+"'", this.getClass());
         } else {
-            return new ChangeSetFilterResult(false, "Change set after tag '"+tag+"'", this.getClass());
+            return new ChangeSetFilterResult(false, "Changeset after tag '"+tag+"'", this.getClass());
         }
     }
 }

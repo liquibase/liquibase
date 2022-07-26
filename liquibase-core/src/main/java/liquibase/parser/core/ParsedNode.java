@@ -188,8 +188,18 @@ public class ParsedNode {
         return this;
     }
 
+    /**
+     *
+     * Match the namespace and name of this node. This is now done case-insensitively
+     *
+     * @param   node
+     * @param   namespace
+     * @param   nodename
+     * @return  boolean
+     *
+     */
     protected boolean nodeMatches(ParsedNode node, String namespace, String nodename) {
-        return namespaceMatches(node, namespace) && node.getName().equals(nodename);
+        return namespaceMatches(node, namespace) && node.getName().equalsIgnoreCase(nodename);
     }
 
     protected boolean namespaceMatches(ParsedNode node, String namespace) {

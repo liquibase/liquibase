@@ -2,7 +2,7 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -19,7 +19,7 @@ import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
@@ -377,7 +377,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return super.escapeObjectName(objectName, objectType);
         }
 
-        boolean includeCatalog = LiquibaseConfiguration.getInstance().shouldIncludeCatalogInSpecification();
+        boolean includeCatalog = GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION.getCurrentValue();
         if ((catalogName != null) && (includeCatalog || !catalogName.equalsIgnoreCase(this.getDefaultCatalogName()))) {
             return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
         } else {
@@ -554,7 +554,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                         sendsStringParametersAsUnicode =
                             (baseType == null) || baseType.startsWith("n");
                     } finally {
-                        JdbcUtils.close(rs, ps);
+                        JdbcUtil.close(rs, ps);
                     }
                 } else if (getConnection() instanceof OfflineConnection) {
                     sendsStringParametersAsUnicode =
@@ -611,6 +611,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     protected String getQuotingEndCharacter() {
         return "]";
+    }
+
+    @Override
+    public int getDefaultFractionalDigitsForTimestamp() {
+        return 7;
     }
 
     @Override

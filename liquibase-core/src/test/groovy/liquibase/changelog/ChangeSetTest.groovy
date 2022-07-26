@@ -1,7 +1,10 @@
 package liquibase.changelog
 
+
+import liquibase.Scope
 import liquibase.change.CheckSum
 import liquibase.change.core.*
+import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.precondition.core.RunningAsPrecondition
@@ -136,6 +139,12 @@ public class ChangeSetTest extends Specification {
                 continue
             } else if (param == "objectQuotingStrategy") {
                 testValue[param] = "QUOTE_ONLY_RESERVED_WORDS"
+            } else if (param == "runInTransaction") {
+                testValue[param] = "false"
+            } else if (param == "runOrder") {
+                testValue[param] = "last"
+            } else if (param == "ignore") {
+                testValue[param] = "true"
             } else {
                 testValue[param] = "value for ${param}"
             }
@@ -179,6 +188,39 @@ public class ChangeSetTest extends Specification {
         changeSet.changes[0].tableName == "table_1"
         changeSet.changes[0].changeSet == changeSet
         changeSet.changes[1].tableName == "table_2"
+    }
+
+    def "load node with unknown change types and strict parsing"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        def node = new ParsedNode(null, "changeSet")
+                .addChildren([id: "1", author: "nvoxland"])
+                .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
+                .addChild(new ParsedNode(null, "invalid").addChild(null, "tableName", "table_2"))
+        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        def e = thrown(ParsedNodeException)
+        e.message == "Error parsing com/example/test.xml: Unknown change type 'invalid'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial."
+    }
+
+    def "load node with unknown change types and lax parsing"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        def node = new ParsedNode(null, "changeSet")
+                .addChildren([id: "1", author: "nvoxland"])
+                .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
+                .addChild(new ParsedNode(null, "invalid").addChild(null, "tableName", "table_2"))
+
+        Scope.child([(ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getKey()): ChangeLogParserConfiguration.ChangelogParseMode.LAX], {
+            ->
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } as Scope.ScopedRunner)
+
+
+        then:
+        notThrown(ParsedNodeException)
+        changeSet.getChanges().size() == 1
     }
 
     def "load node with rollback containing sql as value"() {
@@ -559,6 +601,27 @@ public class ChangeSetTest extends Specification {
         dbmsList | expectedValue
         ""       | null
         null     | null
+    }
+
+    def isInheritableIgnore() {
+        when:
+        def changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, null);
+
+        then:
+        !changeSet.isInheritableIgnore()
+
+        when:
+        def parent = new DatabaseChangeLog("com/example/test.xml")
+        changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, parent);
+
+        then:
+        !changeSet.isInheritableIgnore()
+
+        when:
+        parent.setIncludeIgnore(true)
+
+        then:
+        changeSet.isInheritableIgnore()
     }
 
 }

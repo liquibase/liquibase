@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -20,7 +21,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.lang.reflect.Method;
@@ -35,7 +36,7 @@ import static java.util.ResourceBundle.getBundle;
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
-	private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
+	public static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
     public static final String PRODUCT_NAME = "oracle";
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -85,6 +86,17 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 Method method = con.getClass().getMethod("openProxySession", int.class, Properties.class);
                 method.setAccessible(true);
                 method.invoke(con, 1, props);
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
+                return;
+            }
+            try {
+                Method method = con.getClass().getMethod("isProxySession");
+                method.setAccessible(true);
+                boolean b = (boolean)method.invoke(con);
+                if (! b) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Proxy session not established on OracleDatabase: ");
+                }
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
             }
@@ -156,10 +168,24 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     //noinspection HardCodedStringLiteral
                     Scope.getCurrentScope().getLog(getClass()).info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
                 } finally {
-                    JdbcUtils.closeStatement(statement);
+                    JdbcUtil.closeStatement(statement);
                 }
 
-
+                if (GlobalConfiguration.DDL_LOCK_TIMEOUT.getCurrentValue() != null) {
+                    int timeoutValue = GlobalConfiguration.DDL_LOCK_TIMEOUT.getCurrentValue();
+                    Scope.getCurrentScope().getLog(getClass()).fine("Setting DDL_LOCK_TIMEOUT value to " + timeoutValue);
+                    String sql = "ALTER SESSION SET DDL_LOCK_TIMEOUT=" + timeoutValue;
+                    PreparedStatement ddlLockTimeoutStatement = null;
+                    try {
+                        ddlLockTimeoutStatement = sqlConn.prepareStatement(sql);
+                        ddlLockTimeoutStatement.execute();
+                    } catch (SQLException sqle) {
+                        Scope.getCurrentScope().getUI().sendErrorMessage("Unable to set the DDL_LOCK_TIMEOUT_VALUE: " + sqle.getMessage(), sqle);
+                        Scope.getCurrentScope().getLog(getClass()).warning("Unable to set the DDL_LOCK_TIMEOUT_VALUE: " + sqle.getMessage(), sqle);
+                    } finally {
+                        JdbcUtil.closeStatement(ddlLockTimeoutStatement);
+                    }
+                }
             }
         }
         super.setConnection(conn);
@@ -265,6 +291,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         if (getConnection() instanceof OfflineConnection) {
             return getConnection().getCatalog();
         }
+
+        if (!(getConnection() instanceof JdbcConnection)) {
+            return defaultCatalogName;
+        }
+
         try {
             //noinspection HardCodedStringLiteral
             return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
@@ -291,7 +322,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultCatalogName() {//NOPMD
-        return (super.getDefaultCatalogName() == null) ? null : super.getDefaultCatalogName().toUpperCase(Locale.US);
+        String defaultCatalogName = super.getDefaultCatalogName();
+        if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
+            return defaultCatalogName;
+        }
+        return (defaultCatalogName == null) ? null : defaultCatalogName.toUpperCase(Locale.US);
     }
 
     /**
@@ -528,11 +563,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         if ((databaseFunction != null) && "current_timestamp".equalsIgnoreCase(databaseFunction.toString())) {
             return databaseFunction.toString();
         }
-        if ((databaseFunction instanceof SequenceNextValueFunction) || (databaseFunction instanceof
-                SequenceCurrentValueFunction)) {
+        if ((databaseFunction instanceof SequenceNextValueFunction)
+                || (databaseFunction instanceof SequenceCurrentValueFunction)) {
             String quotedSeq = super.generateDatabaseFunctionValue(databaseFunction);
+
             // replace "myschema.my_seq".nextval with "myschema"."my_seq".nextval
-            return quotedSeq.replaceFirst("\"([^\\.\"]+)\\.([^\\.\"]+)\"", "\"$1\".\"$2\"");
+            return quotedSeq.replaceFirst("\"([^.\"]+)\\.([^.\"]+)\"", "\"$1\".\"$2\"");
 
         }
 
@@ -596,7 +632,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     this.canAccessDbaRecycleBin = false;
                 }
             } finally {
-                JdbcUtils.close(null, statement);
+                JdbcUtil.close(null, statement);
             }
         }
 

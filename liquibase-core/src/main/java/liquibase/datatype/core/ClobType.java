@@ -1,8 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.change.core.LoadDataChange;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -44,8 +43,8 @@ public class ClobType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
-            if ((!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration
-                .CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase(Locale.US).startsWith("text"))
+            if ((!GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue()
+                    && originalDefinition.toLowerCase(Locale.US).startsWith("text"))
                 || originalDefinition.toLowerCase(Locale.US).startsWith("[text]")) {
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.

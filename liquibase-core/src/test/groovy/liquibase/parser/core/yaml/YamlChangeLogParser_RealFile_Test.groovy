@@ -114,6 +114,15 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         change.columns[2].constraints == null
     }
 
+    def "throws a nice validation error when changeSet node has typo in name"() throws ChangeLogParseException {
+        def path = "liquibase/parser/core/yaml/typoChangeLog.yaml"
+        when:
+        new YamlChangeLogParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+
+        then:
+        thrown(ChangeLogParseException.class)
+    }
+
     def "able to parse a changelog with multiple changeSets multiChangeSetChangeLog.yaml"() throws Exception {
         def path = "liquibase/parser/core/yaml/multiChangeSetChangeLog.yaml"
         when:
@@ -196,16 +205,16 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         changeLog.getPhysicalFilePath() == path
 
         changeLog.getPreconditions() != null
-        changeLog.getPreconditions().getNestedPreconditions().size() == 2
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().size() == 2
 
-        changeLog.getPreconditions().getNestedPreconditions().get(0).getName() == "runningAs"
-        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(0)).getUsername() == "testUser"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(0).getName() == "runningAs"
+        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(0)).getUsername() == "testUser"
 
-        changeLog.getPreconditions().getNestedPreconditions().get(1).getName() == "or"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(0).getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(0)).getType() == "mssql"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1).getName() == "or"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(0).getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(0)).getType() == "mssql"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
 
         changeLog.getChangeSets().size() == 1
     }
@@ -289,29 +298,6 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         then:
         def e = thrown(ChangeLogParseException)
         assert e.message.startsWith("Syntax error in file liquibase/parser/core/yaml/malformedChangeLog.yaml")
-    }
-
-    def "elements that don't correspond to anything in liquibase are ignored"() throws Exception {
-        def path = "liquibase/parser/core/yaml/unusedTagsChangeLog.yaml"
-        expect:
-        DatabaseChangeLog changeLog = new YamlChangeLogParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
-
-        changeLog.getLogicalFilePath() == path
-        changeLog.getPhysicalFilePath() == path
-
-        changeLog.getPreconditions().getNestedPreconditions().size() == 0
-        changeLog.getChangeSets().size() == 1
-
-        ChangeSet changeSet = changeLog.getChangeSets().get(0);
-        changeSet.getAuthor() == "nvoxland"
-        changeSet.getId() == "1"
-        changeSet.getChanges().size() == 1
-        changeSet.getFilePath() == path
-        changeSet.getComments() == "Some comments go here"
-
-        Change change = changeSet.getChanges().get(0);
-        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName() == "createTable"
-        assert change instanceof CreateTableChange
     }
 
     def "changeLog parameters are correctly expanded"() throws Exception {
@@ -542,7 +528,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[3].defaultValueComputed.toString() == "average_size()"
 
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[4].name == "new_col_datetime"
-        new ISODateFormat().format(new java.sql.Timestamp(((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[4].defaultValueDate.time)).matches(/2014-12-\d+T\d+:15:33/) //timezones shift actual value around
+        new ISODateFormat().format(new java.sql.Timestamp(((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[4].defaultValueDate.time)).matches(/2014-12-\d+T\d+:\d+:33/) //timezones shift actual value around
 
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[5].name == "new_col_seq"
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[5].defaultValueSequenceNext.toString() == "seq_test"

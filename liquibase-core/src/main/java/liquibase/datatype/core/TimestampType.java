@@ -4,8 +4,7 @@ import liquibase.Scope;
 import liquibase.change.core.LoadDataChange;
 import java.util.Locale;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -67,13 +66,22 @@ public class TimestampType extends DateTimeType {
             return super.toDatabaseDataType(database);
         }
         if (database instanceof MSSQLDatabase) {
-            if (!LiquibaseConfiguration.getInstance()
-                    .getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES)
-                    .getValue(Boolean.class)
+            if (!GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue()
                     && originalDefinition.toLowerCase(Locale.US).startsWith("timestamp")) {
                 return new DatabaseDataType(database.escapeDataTypeName("timestamp"));
             }
-            return new DatabaseDataType(database.escapeDataTypeName("datetime"));
+            Object[] parameters = getParameters();
+            if (parameters.length >= 1) {
+                final int paramValue = Integer.parseInt(parameters[0].toString());
+                // If the scale for datetime2 is the database default anyway, omit it.
+                // If the scale is 8, omit it since it's not a valid value for datetime2
+                if (paramValue > 7 || paramValue == (database.getDefaultScaleForNativeDataType("datetime2"))) {
+                    parameters = new Object[0];
+
+                }
+
+            }
+            return new DatabaseDataType(database.escapeDataTypeName("datetime2"), parameters);
         }
         if (database instanceof SybaseDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("datetime"));

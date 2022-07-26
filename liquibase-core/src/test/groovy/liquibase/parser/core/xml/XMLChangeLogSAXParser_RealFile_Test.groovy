@@ -43,10 +43,6 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     @Shared resourceSupplier = new ResourceSupplier()
 
-    def before() {
-        LiquibaseConfiguration.getInstance().reset();
-    }
-
     def "namespace configured correctly"() {
         expect:
         assert new XMLChangeLogSAXParser().saxParserFactory.isNamespaceAware()
@@ -198,16 +194,16 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getPhysicalFilePath() == path
 
         changeLog.getPreconditions() != null
-        changeLog.getPreconditions().getNestedPreconditions().size() == 2
+        changeLog.getPreconditions().getNestedPreconditions()[0].nestedPreconditions.size() == 2
 
-        changeLog.getPreconditions().getNestedPreconditions()[0].getName() == "runningAs"
-        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0]).getUsername() == "testUser"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions()[0].getName() == "runningAs"
+        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions()[0]).getUsername() == "testUser"
 
-        changeLog.getPreconditions().getNestedPreconditions().get(1).getName() == "or"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions()[0].getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions()[0]).getType() == "mssql"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1).getName() == "or"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions()[0].getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions()[0]).getType() == "mssql"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
 
         changeLog.getChangeSets().size() == 1
     }
@@ -701,7 +697,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         Scope.getCurrentScope().getSingleton(ChangeFactory.class).unregister("createTableExample")
     }
 
-    def "change sets with matching dbms are parsed"() {
+    def "changesets with matching dbms are parsed"() {
         when:
         def path = "liquibase/parser/core/xml/rollbackWithDbmsChangeLog.xml"
         def database = new MSSQLDatabase()
@@ -711,7 +707,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getChangeSets().size() == 4
     }
 
-    def "change sets with non-matching dbms are skipped"() {
+    def "changesets with non-matching dbms are skipped"() {
         when:
         def path = "liquibase/parser/core/xml/rollbackWithDbmsChangeLog.xml"
         def database = new H2Database()
@@ -721,7 +717,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getChangeSets().size() == 2
     }
 
-    def "change sets exclude matching-excluded dbms"() {
+    def "changesets exclude matching-excluded dbms"() {
         when:
         def path = "liquibase/parser/core/xml/excludeDbmsChangeLog.xml"
         def database = new MSSQLDatabase()
@@ -734,7 +730,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         change1.getColumns().get(0).getType() == "varchar(50)"
     }
 
-    def "change sets include non-matching-excluded dbms"() {
+    def "changesets include non-matching-excluded dbms"() {
         when:
         def path = "liquibase/parser/core/xml/excludeDbmsChangeLog.xml"
         def database = new H2Database()

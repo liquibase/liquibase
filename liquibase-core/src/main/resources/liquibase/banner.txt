@@ -10,7 +10,7 @@
 ##                                                ## 
 ##  Get documentation at docs.liquibase.com       ##
 ##  Get certified courses at learn.liquibase.com  ## 
-##  Get advanced features and support at          ##
-##      liquibase.com/support                     ##
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
 ##                                                ##
 ####################################################

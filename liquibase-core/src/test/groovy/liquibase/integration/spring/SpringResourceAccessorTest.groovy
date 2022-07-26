@@ -2,6 +2,7 @@ package liquibase.integration.spring
 
 import org.springframework.core.io.DefaultResourceLoader
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class SpringResourceAccessorTest extends Specification {
 
@@ -73,6 +74,24 @@ class SpringResourceAccessorTest extends Specification {
         !list.contains("/Database.class,")
         list.contains("/OracleDatabaseTest.class,")
         list.contains("MSSQLDatabaseTest.class,")
+    }
+
+    @Unroll
+    def finalizeSearchPath() {
+        expect:
+        new SpringResourceAccessor().finalizeSearchPath(input) == expected
+
+        where:
+        input | expected
+        "/path/to/file" | "classpath*:/path/to/file"
+        "//path////to/file" | "classpath*:/path/to/file"
+        "path/to/file" | "classpath*:/path/to/file"
+        "classpath:path/to/file" | "classpath*:/path/to/file"
+        "classpath:/path/to/file" | "classpath*:/path/to/file"
+        "classpath:classpath:/path/to/file" | "classpath*:/path/to/file"
+        "classpath*:/path/to/file" | "classpath*:/path/to/file"
+        "classpath*:path/to/file" | "classpath*:/path/to/file"
+        "file:/path/to/file" | "file:/path/to/file"
     }
 
 

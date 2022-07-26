@@ -99,6 +99,12 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
             sb.append(!statement.shouldValidate() ? " ENABLE NOVALIDATE " : "");
         }
 
+        // since Postgres 9.1
+        // https://www.postgresql.org/docs/9.1/sql-altertable.html
+        if (database instanceof PostgresDatabase) {
+            sb.append(!statement.shouldValidate() ? " NOT VALID " : "");
+        }
+
         if (database instanceof InformixDatabase) {
             sb.append(" CONSTRAINT ");
             sb.append(database.escapeConstraintName(statement.getConstraintName()));

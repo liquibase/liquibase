@@ -1,10 +1,13 @@
 package liquibase.dbtest.pgsql;
 
-import liquibase.CatalogAndSchema;
+import liquibase.Contexts;
+import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.change.Change;
+import liquibase.change.core.AddPrimaryKeyChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
+import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.diff.DiffGeneratorFactory;
@@ -12,25 +15,62 @@ import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.exception.ValidationFailedException;
 import liquibase.executor.ExecutorService;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 
+import static org.junit.Assume.assumeNotNull;
+
 public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
+
+    String dependenciesChangeLog = null;
 
     public PostgreSQLIntegrationTest() throws Exception {
         super("pgsql", DatabaseFactory.getInstance().getDatabase("postgresql"));
+        dependenciesChangeLog = "changelogs/pgsql/complete/testFkPkDependencies.xml";
     }
 
+    /**
+     * Postgresql caches info including enum oid mappings in the connection. When we do a lot of dropping/re-creating in the tests it gets confused.
+     * Closing the connection
+     */
     @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        return true;
+    public void tearDown() throws Exception {
+        super.tearDown();
+        if (getDatabase() != null && getDatabase().getConnection() != null) {
+            getDatabase().getConnection().close();
+        }
+    }
+
+    @Test
+    public void testDependenciesInGenerateChangeLog() throws Exception {
+        assumeNotNull(this.getDatabase());
+
+        Liquibase liquibase = createLiquibase(this.dependenciesChangeLog);
+        clearDatabase();
+
+        try {
+            liquibase.update(new Contexts());
+            Database database = liquibase.getDatabase();
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, new CompareControl());
+            DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult,
+                new DiffOutputControl(false, false, false, null));
+            List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
+            Assert.assertTrue(changeSets.size() > 0);
+            ChangeSet addPrimaryKeyChangeSet =
+                changeSets.stream()
+                          .filter(changeSet -> changeSet.getChanges().get(0) instanceof AddPrimaryKeyChange)
+                          .findFirst()
+                          .orElse(null);
+            Assert.assertNull(addPrimaryKeyChangeSet);
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
     }
 
     @Test

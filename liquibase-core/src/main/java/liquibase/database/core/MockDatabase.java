@@ -44,6 +44,7 @@ public class MockDatabase implements Database, InternalDatabase {
     private String defaultSchemaName;
     private boolean caseSensitive;
     private DatabaseConnection connection = new MockDatabaseConnection();
+    private String currentDateTimeFunction = "DATETIME()";
 
 
     @Override
@@ -256,22 +257,27 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public String getCurrentDateTimeFunction() {
-        return "DATETIME()";
+        return currentDateTimeFunction;
     }
 
     @Override
     public void setCurrentDateTimeFunction(final String function) {
+        this.currentDateTimeFunction = function;
     }
 
     @Override
     public String getLineComment() {
-        return null;
+        return "--";
     }
 
     @Override
     public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy, final String generationType, final Boolean defaultOnNull) {
-        return (("AUTO_INCREMENT_CLAUSE" + startWith) != null) ? (" " + startWith) : ((("" + incrementBy) != null) ?
-            (" " + incrementBy) : "");
+        if (startWith != null) {
+            return " " + startWith;
+        }
+        else {
+            return " " + incrementBy;
+        }
     }
 
     public SqlStatement getCommitSQL() {

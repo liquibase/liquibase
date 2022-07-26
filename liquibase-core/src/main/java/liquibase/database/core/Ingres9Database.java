@@ -8,7 +8,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -47,18 +47,19 @@ public class Ingres9Database extends AbstractJdbcDatabase {
                 throw new DatabaseException("Cannot execute commands against an offline database");
             }
             stmt = ((JdbcConnection) getConnection()).getUnderlyingConnection().createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            while(rs.next()) {
-                definition += rs.getString("text_segment");
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    definition += rs.getString("text_segment");
+                }
             }
         }
         catch (Exception ex) {
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
             stmt = null;
             return null;
         }
         finally {
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
         }
         if (definition == null) {
             return null;

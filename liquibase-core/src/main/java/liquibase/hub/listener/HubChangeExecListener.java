@@ -7,8 +7,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.AbstractChangeExecListener;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.ChangeLogSyncListener;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.hub.HubConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.PreconditionErrorException;
@@ -47,8 +46,11 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     private int postCount;
     private int failedToPostCount;
 
-    public HubChangeExecListener(Operation operation) {
+    private ChangeExecListener changeExecListener;
+
+    public HubChangeExecListener(Operation operation, ChangeExecListener changeExecListener) {
         this.operation = operation;
+        this.changeExecListener = changeExecListener;
     }
 
     public void setRollbackScriptContents(String rollbackScriptContents) {
@@ -66,11 +68,17 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     @Override
     public void willRun(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, ChangeSet.RunStatus runStatus) {
         startDateMap.put(changeSet, new Date());
+        if (changeExecListener != null) {
+            changeExecListener.willRun(changeSet, databaseChangeLog, database, runStatus);
+        }
     }
 
     @Override
     public void willRun(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database) {
         startDateMap.put(changeSet, new Date());
+        if (changeExecListener != null) {
+            changeExecListener.willRun(change, changeSet, changeLog, database);
+        }
     }
 
     @Override
@@ -80,6 +88,9 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                     ChangeSet.ExecType execType) {
         String message = "PASSED::" + changeSet.getId() + "::" + changeSet.getAuthor();
         updateHub(changeSet, databaseChangeLog, database, "UPDATE", "PASS", message);
+        if (changeExecListener != null) {
+            changeExecListener.ran(changeSet, databaseChangeLog, database, execType);
+        }
     }
 
     /**
@@ -92,6 +103,9 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     @Override
     public void willRollback(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         startDateMap.put(changeSet, new Date());
+        if (changeExecListener != null) {
+            changeExecListener.willRollback(changeSet, databaseChangeLog, database);
+        }
     }
 
     /**
@@ -107,11 +121,14 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     @Override
     public void rollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception e) {
         updateHubForRollback(changeSet, databaseChangeLog, database, "FAIL", e.getMessage());
+        if (changeExecListener != null) {
+            changeExecListener.rollbackFailed(changeSet, databaseChangeLog, database, e);
+        }
     }
 
     /**
      *
-     * Called which a change set is successfully rolled back
+     * Called which a changeset is successfully rolled back
      *
      * @param changeSet         changeSet that was rolled back
      * @param databaseChangeLog parent change log
@@ -124,24 +141,38 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                            Database database) {
         String message = "PASSED::" + changeSet.getId() + "::" + changeSet.getAuthor();
         updateHubForRollback(changeSet, databaseChangeLog, database, "PASS", message);
+        if (changeExecListener != null) {
+            changeExecListener.rolledBack(changeSet, databaseChangeLog, database);
+        }
     }
 
     @Override
     public void preconditionFailed(PreconditionFailedException error, PreconditionContainer.FailOption onFail) {
+        if (changeExecListener != null) {
+            changeExecListener.preconditionFailed(error, onFail);
+        }
     }
 
     @Override
     public void preconditionErrored(PreconditionErrorException error, PreconditionContainer.ErrorOption onError) {
+        if (changeExecListener != null) {
+            changeExecListener.preconditionErrored(error, onError);
+        }
     }
 
     @Override
     public void ran(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database) {
-
+        if (changeExecListener != null) {
+            changeExecListener.ran(change, changeSet, changeLog, database);
+        }
     }
 
     @Override
     public void runFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception) {
         updateHub(changeSet, databaseChangeLog, database, "UPDATE", "FAIL", exception.getMessage());
+        if (changeExecListener != null) {
+            changeExecListener.runFailed(changeSet, databaseChangeLog, database, exception);
+        }
     }
 
     @Override
@@ -152,7 +183,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     }
 
     //
-    // Send an update message to Hub for this change set rollback
+    // Send an update message to Hub for this changeset rollback
     //
     private void updateHubForRollback(ChangeSet changeSet,
                                       DatabaseChangeLog databaseChangeLog,
@@ -160,10 +191,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                                       String operationStatusType,
                                       String statusMessage) {
         if (operation == null) {
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-            String apiKey = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
-            boolean hubOn =
-                    ! (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off"));
+            String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
+            boolean hubOn = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue() != HubConfiguration.HubMode.OFF;
             if (apiKey != null && hubOn) {
                 String message =
                         "Hub communication failure.\n" +
@@ -276,21 +305,26 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         catch (LiquibaseException lbe) {
             logger.warning(lbe.getMessage(), lbe);
             logger.warning("Unable to send Operation Change Event for operation '" + operation.getId().toString() +
-                    " change set '" + changeSet.toString(false));
+                    " changeset '" + changeSet.toString(false));
         }
     }
 
     private String getCurrentLog() {
+        //
+        // Capture the current log level to use for filtering
+        //
+        Level currentLevel = HubConfiguration.LIQUIBASE_HUB_LOGLEVEL.getCurrentValue();
+
         BufferedLogService bufferedLogService =
            Scope.getCurrentScope().get(BufferedLogService.class.getName(), BufferedLogService.class);
         if (bufferedLogService != null) {
-            return bufferedLogService.getLogAsString(Level.INFO);
+            return bufferedLogService.getLogAsString(currentLevel);
         }
         return null;
     }
 
     //
-    // Send an update message to Hub for this change set
+    // Send an update message to Hub for this changeset
     //
     private void updateHub(ChangeSet changeSet,
                            DatabaseChangeLog databaseChangeLog,
@@ -302,10 +336,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         // If not connected to Hub but we are supposed to be then show message
         //
         if (operation == null) {
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-            String apiKey = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
-            boolean hubOn =
-                ! (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off"));
+            String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValueObfuscated());
+            boolean hubOn = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue() != HubConfiguration.HubMode.OFF;
             if (apiKey != null && hubOn) {
                 String message;
                 if (databaseChangeLog.getChangeLogId() == null) {
@@ -369,7 +401,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                 //
                 // Just log message
                 //
-                logger.warning("Unable to serialize change set '" + changeSet.toString(false) + "' for Hub.");
+                logger.warning("Unable to serialize changeset '" + changeSet.toString(false) + "' for Hub.");
             }
         }
 
@@ -411,7 +443,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         catch (LiquibaseException lbe) {
             logger.warning(lbe.getMessage(), lbe);
             logger.warning("Unable to send Operation Change Event for operation '" + operation.getId().toString() +
-                    " change set '" + changeSet.toString(false));
+                    " changeset '" + changeSet.toString(false));
             failedToPostCount++;
         }
     }

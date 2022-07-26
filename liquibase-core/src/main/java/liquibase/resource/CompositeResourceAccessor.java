@@ -7,13 +7,15 @@ import java.util.*;
 
 /**
  * A {@link liquibase.resource.ResourceAccessor} that contains multiple sub-accessors and combines the results of all of them.
+ * For the "overall" aggregate resource accessor, integrations should generally use {@link SearchPathResourceAccessor} instead of this.
  */
 public class CompositeResourceAccessor extends AbstractResourceAccessor {
 
     private List<ResourceAccessor> resourceAccessors;
 
     public CompositeResourceAccessor(ResourceAccessor... resourceAccessors) {
-        this.resourceAccessors = Arrays.asList(CollectionUtil.createIfNull(resourceAccessors));
+        this.resourceAccessors = new ArrayList<>(); //Arrays.asList(CollectionUtil.createIfNull(resourceAccessors));
+        this.resourceAccessors.addAll(Arrays.asList(resourceAccessors));
     }
 
     public CompositeResourceAccessor(Collection<ResourceAccessor> resourceAccessors) {
@@ -26,7 +28,12 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
         return this;
     }
 
+    public void removeResourceAccessor(ResourceAccessor resourceAccessor) {
+        this.resourceAccessors.remove(resourceAccessor);
+    }
+
     @Override
+    @java.lang.SuppressWarnings("squid:S2095")
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         InputStreamList returnList = new InputStreamList();
         for (ResourceAccessor accessor : resourceAccessors) {

@@ -2,6 +2,7 @@ package liquibase.database;
 
 import liquibase.Scope;
 import liquibase.database.core.UnsupportedDatabase;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
@@ -175,6 +176,7 @@ public class DatabaseFactory {
         return openConnection(url, username, driver, databaseClass, driverProperties, resourceAccessor);
     }
 
+    @SuppressWarnings("java:S2095")
     public DatabaseConnection openConnection(String url,
                                              String username,
                                              String driver,
@@ -209,7 +211,7 @@ public class DatabaseFactory {
               driverProperties.put("useInformationSchema", "true");
             }
 
-            LOG.fine("Connecting to the URL:'" + url + "' using driver:'" + driverObject.getClass().getName() + "'");
+            LOG.fine("Connecting to the URL:'" + JdbcConnection.sanitizeUrl(url) + "' using driver:'" + driverObject.getClass().getName() + "'");
             databaseConnection = ConnectionServiceFactory.getInstance().create(url, driverObject, driverProperties);
             LOG.fine("Connection has been created");
         } catch (Exception e) {
