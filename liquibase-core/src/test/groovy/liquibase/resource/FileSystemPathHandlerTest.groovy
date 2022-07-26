@@ -31,12 +31,12 @@ class FileSystemPathHandlerTest extends Specification {
 
     def "open reads existing file"() {
         expect:
-        StreamUtil.readStreamAsString(new FileSystemPathHandler().get("../README.md")).startsWith("# Liquibase")
+        StreamUtil.readStreamAsString(new FileSystemPathHandler().getResource("../README.md").openInputStream()).startsWith("# Liquibase")
     }
 
     def "open fails on invalid file"() {
         when:
-        new FileSystemPathHandler().get("/invalid/file/path.txt")
+        new FileSystemPathHandler().getResource("/invalid/file/path.txt")
 
         then:
         def e = thrown(IOException)

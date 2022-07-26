@@ -29,7 +29,6 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
 import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.resource.InputStreamList
 import liquibase.resource.Resource
 import liquibase.resource.ResourceAccessor
 import liquibase.ui.ConsoleUIService
@@ -44,7 +43,6 @@ import org.junit.ComparisonFailure
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.regex.Pattern
 import java.util.stream.Collectors
@@ -1152,13 +1150,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     //
     static class ClassLoaderResourceAccessorForTest extends ClassLoaderResourceAccessor {
         @Override
-        SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-            def list = super.find(relativeTo, path, recursive, includeFiles, includeDirectories)
+        List<Resource> list(String path, boolean recursive) throws IOException {
+            def list = super.list(path, recursive)
             if (list != null && ! list.isEmpty()) {
                 return list
             }
 
-            return super.find(relativeTo, new File(path).getName(), recursive, includeFiles, includeDirectories)
+            return super.list(new File(path).getName(), recursive)
         }
     }
 

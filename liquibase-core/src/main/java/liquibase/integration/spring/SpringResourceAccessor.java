@@ -14,6 +14,8 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -32,9 +34,17 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public SortedSet<liquibase.resource.Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        String searchPath = getCompletePath(relativeTo, path);
+    public void close() throws Exception {
 
+    }
+
+    @Override
+    public SortedSet<liquibase.resource.Resource> getAll(String path) throws IOException {
+        return null;
+    }
+
+    @Override
+    public List<liquibase.resource.Resource> list(String searchPath, boolean recursive) throws IOException {
         if (recursive) {
             searchPath += "/**";
         } else {
@@ -43,18 +53,15 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         searchPath = finalizeSearchPath(searchPath);
 
         final Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(searchPath);
-        SortedSet<liquibase.resource.Resource> returnSet = new TreeSet<>();
+        List<liquibase.resource.Resource> returnList = new ArrayList<>();
         for (Resource resource : resources) {
             final boolean isFile = resourceIsFile(resource);
-            if (isFile && includeFiles) {
-                returnSet.add(new SpringResource(getResourcePath(resource), resource.getURI(), resource));
-            }
-            if (!isFile && includeDirectories) {
-                returnSet.add(new SpringResource(getResourcePath(resource), resource.getURI(), resource));
+            if (isFile) {
+                returnList.add(new SpringResource(getResourcePath(resource), resource.getURI(), resource));
             }
         }
 
-        return returnSet;
+        return returnList;
     }
 
     @Override

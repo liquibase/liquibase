@@ -28,13 +28,12 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.TestSystemFactory;
-import liquibase.hub.HubConfiguration;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
 import liquibase.precondition.core.TableExistsPrecondition;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -854,7 +853,7 @@ public abstract class AbstractIntegrationTest {
         } else {
             absolutePathOfChangeLog = "/" + absolutePathOfChangeLog;
         }
-        Liquibase liquibase = createLiquibase(absolutePathOfChangeLog, new FileSystemResourceAccessor(File.listRoots()));
+        Liquibase liquibase = createLiquibase(absolutePathOfChangeLog, new DirectoryResourceAccessor(File.listRoots()[0]));
         clearDatabase();
 
         liquibase.update(this.contexts);

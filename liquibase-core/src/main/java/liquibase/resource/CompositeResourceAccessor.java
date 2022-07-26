@@ -20,6 +20,13 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
         this.resourceAccessors = new ArrayList<>(resourceAccessors);
     }
 
+    @Override
+    public void close() throws Exception {
+        for (ResourceAccessor accessor : resourceAccessors) {
+            accessor.close();
+        }
+    }
+
     public CompositeResourceAccessor addResourceAccessor(ResourceAccessor resourceAccessor) {
         this.resourceAccessors.add(resourceAccessor);
 
@@ -31,20 +38,23 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    @java.lang.SuppressWarnings("squid:S2095")
-    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-        InputStreamList returnList = new InputStreamList();
+    public List<Resource> list(String path, boolean recursive) throws IOException {
+        List<Resource> returnList = new ArrayList<>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            returnList.addAll(accessor.openStreams(relativeTo, streamPath));
+            final List<Resource> list = accessor.list(path, recursive);
+            if (list != null) {
+                returnList.addAll(list);
+            }
         }
+
         return returnList;
     }
 
     @Override
-    public SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+    public SortedSet<Resource> getAll(String path) throws IOException {
         SortedSet<Resource> returnList = new TreeSet<>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            final SortedSet<Resource> list = accessor.find(relativeTo, path, recursive, includeFiles, includeDirectories);
+            final SortedSet<Resource> list = accessor.getAll(path);
             if (list != null) {
                 returnList.addAll(list);
             }

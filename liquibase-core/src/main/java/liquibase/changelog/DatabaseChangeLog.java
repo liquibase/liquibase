@@ -17,6 +17,7 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.Precondition;
 import liquibase.precondition.core.PreconditionContainer;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
@@ -24,6 +25,7 @@ import liquibase.util.FilenameUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -398,7 +400,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                 String resourceComparatorDef = node.getChildValue(null, "resourceComparator", String.class);
                 Comparator<String> resourceComparator = null;
-                if (resourceComparatorDef != null) {
+                if (resourceComparatorDef == null) {
+                    resourceComparator = getStandardChangeLogComparator();
+                } else {
                     try {
                         resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).getConstructor().newInstance();
                     } catch (ReflectiveOperationException e) {
@@ -549,26 +553,32 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (StringUtil.isNotEmpty(pathName) && !(pathName.endsWith("/"))) {
                 pathName = pathName + '/';
             }
-            LOG.fine("includeAll for " + pathName);
-            LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
-
             String relativeTo = null;
             if (isRelativeToChangelogFile) {
                 relativeTo = this.getPhysicalFilePath();
             }
 
-            Set<String> unsortedResources = null;
+            List<Resource> unsortedResources = null;
             try {
-                unsortedResources = resourceAccessor.list(relativeTo, pathName, true, true, false);
+                String path = pathName;
+                if (relativeTo != null) {
+                    path = Paths.get(relativeTo).getParent().resolve(pathName).toString();
+                }
+
+                path = path.replace("\\", "/");
+                LOG.fine("includeAll for " + pathName);
+                LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
+
+                unsortedResources = resourceAccessor.list(path, true);
             } catch (IOException e) {
                 if (errorIfMissingOrEmpty) {
                     throw e;
                 }
             }
-            SortedSet<String> resources = new TreeSet<>(resourceComparator);
+            SortedSet<Resource> resources = new TreeSet<>((o1, o2) -> resourceComparator.compare(o1.getPath(), o2.getPath()));
             if (unsortedResources != null) {
-                for (String resourcePath : unsortedResources) {
-                    if ((resourceFilter == null) || resourceFilter.include(resourcePath)) {
+                for (Resource resourcePath : unsortedResources) {
+                    if ((resourceFilter == null) || resourceFilter.include(resourcePath.getPath())) {
                         resources.add(resourcePath);
                     }
                 }
@@ -579,9 +589,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         "Could not find directory or directory was empty for includeAll '" + pathName + "'");
             }
 
-            for (String path : resources) {
-                Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + path);
-                include(path, false, resourceAccessor, includeContexts, labels, ignore, OnUnknownFileFormat.WARN);
+            for (Resource resource : resources) {
+                Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
+                include(resource.getPath(), false, resourceAccessor, includeContexts, labels, ignore, OnUnknownFileFormat.WARN);
             }
         } catch (Exception e) {
             throw new SetupException(e);

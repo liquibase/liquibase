@@ -30,8 +30,7 @@ public class ChangelogRewriter {
         final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         SortedSet<Resource> list = null;
         try {
-            list = resourceAccessor.find("", changeLogFile, false, true, false);
-            Resource resource = list.iterator().next();
+            Resource resource = resourceAccessor.get(changeLogFile);
             String changeLogString;
             String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
@@ -110,10 +109,8 @@ public class ChangelogRewriter {
         // Make changes to the changelog file
         //
         final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        SortedSet<Resource> list = null;
         try {
-            list = resourceAccessor.find("", changeLogFile, false, true, false);
-            Resource resource = list.iterator().next();
+            Resource resource = resourceAccessor.get(changeLogFile);
             InputStream is = resource.openInputStream();
             String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
             String changeLogString = StreamUtil.readStreamAsString(is, encoding);

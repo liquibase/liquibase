@@ -22,13 +22,12 @@ import liquibase.integration.IntegrationDetails;
 import liquibase.license.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogMessageFilter;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.ui.ConsoleUIService;
 import liquibase.util.*;
@@ -1469,8 +1468,8 @@ public class Main {
             fileOpener = Scope.getCurrentScope().getResourceAccessor();
         } else {
             fileOpener = new CompositeResourceAccessor(
-                    new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
-                    new CommandLineResourceAccessor(classLoader)
+                    new DirectoryResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
+                    new ClassLoaderResourceAccessor(classLoader)
             );
         }
 

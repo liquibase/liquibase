@@ -1,0 +1,106 @@
+package liquibase.resource;
+
+import liquibase.Scope;
+import liquibase.logging.Logger;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
+
+public abstract class AbstractPathResourceAccessor extends AbstractResourceAccessor {
+
+    abstract protected Path getRootPath();
+
+    @Override
+    public String toString() {
+        return getClass().getName() + " (" + getRootPath() + ")";
+    }
+
+    @Override
+    public SortedSet<String> describeLocations() {
+        SortedSet<String> returnSet = new TreeSet<>();
+
+        returnSet.add(getRootPath().toString());
+
+        return returnSet;
+    }
+
+    @Override
+    public SortedSet<Resource> getAll(String path) throws IOException {
+        if (path == null) {
+            throw new IllegalArgumentException("Path must not be null");
+        }
+        final SortedSet<Resource> returnSet = new TreeSet<>();
+
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+        path = standardizePath(path);
+
+        Path finalPath = getRootPath().resolve(path);
+        if (Files.exists(finalPath)) {
+            returnSet.add(createResource(finalPath, path));
+        } else {
+            log.fine("Path " + path + " in " + getRootPath() + " does not exist");
+        }
+
+        return returnSet;
+    }
+
+    private String standardizePath(String path) {
+        return new File(path).toPath().normalize().toString().replace("\\", "/").replaceFirst("^/", "");
+    }
+
+    @Override
+    public List<Resource> list(String startPath, boolean recursive) throws IOException {
+        if (startPath == null) {
+            throw new IllegalArgumentException("Path must not be null");
+        }
+
+        startPath = startPath
+                .replaceFirst("^file:/+", "")
+                .replaceFirst("^/", "");
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
+        Path rootPath = getRootPath();
+        Path basePath = rootPath.resolve(startPath);
+
+        final List<Resource> returnSet = new ArrayList<>();
+        if (!Files.exists(basePath)) {
+            log.fine("Path " + startPath + " in " + rootPath + " does not exist");
+            return returnSet;
+        }
+
+        SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                if (attrs.isRegularFile()) {
+                    addToReturnList(file);
+                }
+
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+
+            private void addToReturnList(Path file) {
+                String pathToAdd = rootPath.relativize(file).normalize().toString().replace("\\", "/");
+
+                pathToAdd = pathToAdd.replaceFirst("/$", "");
+                returnSet.add(createResource(file, pathToAdd));
+            }
+        };
+
+        int maxDepth = recursive ? Integer.MAX_VALUE : 1;
+
+        Files.walkFileTree(basePath, Collections.singleton(FileVisitOption.FOLLOW_LINKS), maxDepth, fileVisitor);
+
+        return returnSet;
+    }
+
+    protected abstract Resource createResource(Path file, String pathToAdd);
+
+}

@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.InputStreamList;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
 import org.xml.sax.InputSource;
@@ -50,11 +51,11 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         }
 
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        InputStreamList streams = resourceAccessor.openStreams(null, path);
-        if (streams.isEmpty()) {
-            streams = getFallbackResourceAccessor().openStreams(null, path);
+        Resource entityResource = resourceAccessor.get(path);
+        if (entityResource == null) {
+            entityResource = getFallbackResourceAccessor().get(path);
 
-            if (streams.isEmpty()) {
+            if (entityResource == null) {
                 if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
                     String errorMessage = "Unable to resolve xml entity " + systemId + ". " +
                             GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
@@ -67,12 +68,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
             }
         }
 
-        if (streams.size() == 1) {
-            log.fine("Found XML entity at " + streams.getURIs().get(0));
-        } else if (streams.size() > 1) {
-            log.warning("Found " + streams.size() + " copies of " + systemId + ". Using " + streams.getURIs().get(0));
-        }
-        InputStream stream = streams.iterator().next();
+        InputStream stream = entityResource.openInputStream();
 
         org.xml.sax.InputSource source = new org.xml.sax.InputSource(stream);
         source.setPublicId(publicId);

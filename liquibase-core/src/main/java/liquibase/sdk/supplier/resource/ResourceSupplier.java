@@ -35,6 +35,11 @@ public class ResourceSupplier {
     private static class SimpleResourceAccessor extends AbstractResourceAccessor{
 
         @Override
+        public void close() throws Exception {
+
+        }
+
+        @Override
         public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
             InputStream stream = null;
             String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
@@ -56,7 +61,12 @@ public class ResourceSupplier {
         }
 
         @Override
-        public SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        public SortedSet<Resource> getAll(String path) throws IOException {
+            return null;
+        }
+
+        @Override
+        public List<Resource> list(String path, boolean recursive) throws IOException {
             return null;
         }
 

@@ -5,12 +5,11 @@ import liquibase.Labels
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.exception.SetupException
-import liquibase.exception.UnknownChangeLogParameterException
 import liquibase.parser.core.ParsedNode
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.RunningAsPrecondition
-import liquibase.resource.ResourceAccessor
+import liquibase.resource.Resource
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import spock.lang.Shared
@@ -284,24 +283,24 @@ create view sql_view as select * from sql_table;'''
     def "includeAll empty relative path"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
-                "com/example/root/children/file2.sql": "file 2",
-                "com/example/root/children/file3.sql": "file 3",
-                "com/example/root/children/file1.sql": "file 1",
+                "com/example/children/file2.sql": "file 2",
+                "com/example/children/file3.sql": "file 3",
+                "com/example/children/file1.sql": "file 1",
                 "com/example/not/fileX.sql"          : "file X",
         ]) {
             private callingPath;
 
             @Override
-            SortedSet<ResourceAccessor> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+            List<Resource> list(String path, boolean recursive) throws IOException {
                 callingPath = path;
-                return super.list(relativeTo, path, recursive, includeFiles, includeDirectories)
+                return super.list(path, recursive)
             }
         }
         def changeLogFile = new DatabaseChangeLog("com/example/children/root.xml")
         changeLogFile.includeAll("", true, { r -> r != changeLogFile.physicalFilePath}, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
 
         then:
-        resourceAccessor.callingPath == ""
+        resourceAccessor.callingPath == "com/example/children"
     }
 
     @Unroll("#featureName: #changeSets")

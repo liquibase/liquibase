@@ -8,7 +8,7 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
@@ -52,10 +52,10 @@ public class ConvertCommandStep extends AbstractCommandStep {
         String classpath = commandScope.getArgumentValue(CLASSPATH_ARG);
 
         List<ResourceAccessor> openers = new ArrayList<>();
-        openers.add(new FileSystemResourceAccessor());
+        openers.add(new DirectoryResourceAccessor(new File(".")));
         openers.add(new ClassLoaderResourceAccessor());
         if (classpath != null) {
-            openers.add(new FileSystemResourceAccessor(new File(classpath)));
+            openers.add(new DirectoryResourceAccessor(new File(classpath)));
         }
         ResourceAccessor resourceAccessor = new CompositeResourceAccessor(openers);
 

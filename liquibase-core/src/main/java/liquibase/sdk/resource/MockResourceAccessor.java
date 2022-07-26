@@ -13,16 +13,20 @@ import java.util.*;
 
 public class MockResourceAccessor extends AbstractResourceAccessor {
 
-    private Map<String, String> contentByFileName;
+    private SortedMap<String, String> contentByFileName;
 
     public MockResourceAccessor() {
         this(new HashMap<String, String>());
     }
 
     public MockResourceAccessor(Map<String, String> contentByFileName) {
-        this.contentByFileName = contentByFileName;
+        this.contentByFileName = new TreeMap<>(contentByFileName);
     }
 
+    @Override
+    public void close() throws Exception {
+
+    }
 
     @Override
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
@@ -40,14 +44,26 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public SortedSet<Resource> find(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+    public SortedSet<Resource> getAll(String path) throws IOException {
+        path = path.replace("\\", "/");
+        String content = contentByFileName.get(path);
         SortedSet<Resource> returnSet = new TreeSet<>();
-        for (String file : contentByFileName.keySet()) {
-            if (file.startsWith(path)) {
-                returnSet.add(new MockResource(file, contentByFileName.get(file)));
-            }
+        if (content != null) {
+            returnSet.add(new MockResource(path, content));
         }
         return returnSet;
+    }
+
+    @Override
+    public List<Resource> list(String path, boolean recursive) throws IOException {
+        path = path.replace("\\", "/");
+        List<Resource> returnList = new ArrayList<>();
+        for (String file : contentByFileName.keySet()) {
+            if (file.startsWith(path)) {
+                returnList.add(new MockResource(file, contentByFileName.get(file)));
+            }
+        }
+        return returnList;
     }
 
     @Override
