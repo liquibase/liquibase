@@ -1,10 +1,6 @@
 package liquibase.parser.core.xml
 
-import liquibase.Contexts
-import liquibase.GlobalConfiguration
-import liquibase.LabelExpression
-import liquibase.RuntimeEnvironment
-import liquibase.Scope
+import liquibase.*
 import liquibase.changelog.ChangeLogIterator
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
@@ -18,6 +14,7 @@ import liquibase.exception.LiquibaseException
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.test.JUnitResourceAccessor
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class XMLChangeLogSAXParserTest extends Specification {
 
@@ -83,7 +80,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        e.message.contains("Unable to resolve xml entity file:///invalid.txt locally: liquibase.secureParsing is set to 'true' which does not allow remote lookups. Set it to 'false' to allow remote lookups of xsd files")
+        e.message.contains("Unable to resolve xml entity file:///invalid.txt. liquibase.secureParsing is set to 'true'")
     }
 
     def "allows liquibase.secureParsing=false to disable secure parsing"() {
@@ -98,6 +95,26 @@ class XMLChangeLogSAXParserTest extends Specification {
         then:
         def e = thrown(ChangeLogParseException)
         e.message.contains("Error Reading Changelog File: " + File.separator + "invalid.txt")
+    }
+
+    def "getSchemaVersion"() {
+        expect:
+        XMLChangeLogSAXParser.getSchemaVersion() == "latest" //because test run in an environment with build.version == DEV
+    }
+
+    @Unroll
+    def "computeSchemaVersion"() {
+        expect:
+        XMLChangeLogSAXParser.computeSchemaVersion(buildVersion) == expected
+
+        where:
+        buildVersion | expected
+        "DEV"        | "latest"
+        "4.11.0"     | "4.11"
+        "4.11.1"     | "4.11"
+        "4"          | "latest" //weird versions go to latest
+        ""           | "latest" //weird versions go to latest
+        null         | "latest" //weird versions go to latest
     }
 
 }

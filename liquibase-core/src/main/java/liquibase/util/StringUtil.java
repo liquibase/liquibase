@@ -283,6 +283,9 @@ public class StringUtil {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {
+        if (StringUtil.isEmpty(multiLineSQL)) {
+            return multiLineSQL;
+        }
         return SqlParser.parse(multiLineSQL, true, false).toString().trim();
     }
 

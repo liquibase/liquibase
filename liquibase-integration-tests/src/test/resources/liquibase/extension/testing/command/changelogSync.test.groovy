@@ -14,6 +14,7 @@ Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog file
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   contexts (String) Context string to use for filtering which changes to mark as executed
     Default: null

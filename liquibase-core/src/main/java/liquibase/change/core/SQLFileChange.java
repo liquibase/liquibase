@@ -10,7 +10,6 @@ import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
@@ -150,9 +149,7 @@ public class SQLFileChange extends AbstractSQLChange {
     public String getSql() {
         String sql = super.getSql();
         if (sql == null) {
-            InputStream sqlStream;
-            try {
-                sqlStream = openSqlStream();
+            try (InputStream sqlStream = openSqlStream()) {
                 if (sqlStream == null) {
                     return null;
                 }

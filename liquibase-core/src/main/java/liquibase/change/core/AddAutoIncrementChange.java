@@ -144,8 +144,12 @@ public class AddAutoIncrementChange extends AbstractChange {
 
             SequenceNextValueFunction nvf = new SequenceNextValueFunction(schemaPrefix, sequenceName);
 
+            final CreateSequenceStatement createSequenceStatement = new CreateSequenceStatement(catalogName, this.schemaName, sequenceName);
+            createSequenceStatement.setIncrementBy(this.getIncrementBy());
+            createSequenceStatement.setStartValue(this.getStartWith());
+
             return new SqlStatement[]{
-                    new CreateSequenceStatement(catalogName, this.schemaName, sequenceName),
+                    createSequenceStatement,
                     new SetNullableStatement(catalogName, this.schemaName, getTableName(), getColumnName(), null, false),
                     new AddDefaultValueStatement(catalogName, this.schemaName, getTableName(), getColumnName(), getColumnDataType(), nvf)
             };

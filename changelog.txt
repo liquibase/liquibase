@@ -1,6 +1,187 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.14.0 (2022.07.26)
+
+## Notable Changes
+* Split liquibase-core and liquibase-commercial jar files by @nvoxland in https://github.com/liquibase/liquibase/pull/3050
+* Added liquibase.changelogParseMode setting by @nvoxland in https://github.com/liquibase/liquibase/pull/3057
+
+## Enhancements
+* Warn if XSD version does not match build version in validate command (DAT-9874) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3016
+* Allow use of pro-only objects for filtering with generateChangeLog (DAT-9542) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3068
+* Improve connection exception by including underlying driver exception trace by @hessjcg in https://github.com/liquibase/liquibase/pull/3033
+* Add Closeable/AutoCloseable interface to liquibase.database.Database by @zorglube in https://github.com/liquibase/liquibase/pull/2990
+
+## Fixes
+
+* Fixed Formatted SQL "property" parsing by @nvoxland in https://github.com/liquibase/liquibase/pull/3037
+* Ensure Postgresql search_path entries are quoted correctly by @nvoxland in https://github.com/liquibase/liquibase/pull/3009
+* Updated "Change Set" wording to "Changeset" by @kataggart in https://github.com/liquibase/liquibase/pull/3042
+* Improved error when JAVA_HOME is set to invalid value (DAT-10545) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3074
+* Fixed autoIncrement incrementBy/startWith support in MySQL, H2, HSQLDB, and MariaDB by @tozogabee in https://github.com/liquibase/liquibase/pull/3026
+* Improve renameColumn generated SQL on mssql by @mide25 in https://github.com/liquibase/liquibase/pull/783
+
+### JDBC Driver and Third-Party Library Updates
+
+* Upgraded mariadb-java-client from 3.0.5 to 3.0.6 by @dependabot in https://github.com/liquibase/liquibase/pull/3021
+* Upgraded testcontainers-bom from 1.17.2 to 1.17.3 by @dependabot in https://github.com/liquibase/liquibase/pull/3020
+* Upgraded postgresql from 42.3.4 to 42.4.0 by @dependabot in https://github.com/liquibase/liquibase/pull/2935
+* Bump jaxb-runtime from 2.3.6 to 4.0.0 by @dependabot in https://github.com/liquibase/liquibase/pull/2964
+
+Changes in version 4.13.0 (2022.07.07)
+
+## Enhancements
+* Added new liquibase.duplicateFileMode setting by @nvoxland in https://github.com/liquibase/liquibase/pull/3006
+* Add additional info in CLI's --version output by @nvoxland in https://github.com/liquibase/liquibase/pull/2942
+* Added support for new "searchPath" global configuration by @nvoxland in https://github.com/liquibase/liquibase/pull/2917
+
+## Fixes
+* Hide CommandFailedException stacktrace when thrown to set exit code (DAT-9608) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2938
+* Update copyright year in txt files; also update links in txt files (DAT-10261) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2955
+* add support for default-catalog-name in SQL Server (DAT-10484) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2940
+* Make additional query for more column information for MariaDB DAT-8693 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2898
+* Include should fail if a parser cannot be found for the specified file by @nvoxland in https://github.com/liquibase/liquibase/pull/2972
+* Improved postgresql prepared statement performance by @nvoxland in https://github.com/liquibase/liquibase/pull/2914
+* Cleanup relative paths preventing sql files being found by the class loader by @marcsowen in https://github.com/liquibase/liquibase/pull/2932
+* Fix missing attributes in serialization by @tms-91 in https://github.com/liquibase/liquibase/pull/2585
+* Improved parsing of single-quoted strings by @nvoxland in https://github.com/liquibase/liquibase/pull/2949
+* DAT-10260: add outputFile argument in maven plugin for checks.run target by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2975
+* Formatted SQL files with uppercase in the liquibase attributes (DAT-10531) by @abrackx in https://github.com/liquibase/liquibase/pull/2985
+* handle empty or null input to stripComments method (DAT-10296) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2970
+* Fixed issue with parameter expression parsing by @nvoxland in https://github.com/liquibase/liquibase/pull/2984
+* Fixed before/after/at column arguments in addColumn by @nvoxland in https://github.com/liquibase/liquibase/pull/2943
+* Adds liquibase.psql.conf example (DAT-10303) by @abrackx in https://github.com/liquibase/liquibase/pull/2939
+* [DAT-10093] added schema escaping to getColumns call to jdbc metadata classes by @KushnirykOleh in https://github.com/liquibase/liquibase/pull/2895
+* Use "numeric" (without parameters) data type in PostgreSQL by @LonwoLonwo in https://github.com/liquibase/liquibase/pull/1906
+* Force "json" resultset formats in Snowflake when running Java 17+ by @nvoxland in https://github.com/liquibase/liquibase/pull/3019
+
+## JDBC Driver and Third-Party Library Updates
+* Upgraded jaxb-core from 2.3.0.1 to 4.0.0 by @dependabot in https://github.com/liquibase/liquibase/pull/2962
+* Upgraded snowflake-jdbc from 3.13.19 to 3.13.20 by @dependabot in https://github.com/liquibase/liquibase/pull/3001
+* Upgraded mariadb-java-client from 3.0.4 to 3.0.5 by @dependabot in https://github.com/liquibase/liquibase/pull/2881
+* Upgraded ojdbc8 from 21.5.0.0 to 21.6.0.0.1 by @dependabot in https://github.com/liquibase/liquibase/pull/2987
+* Upgraded h2 from 2.1.212 to 2.1.214 by @dependabot in https://github.com/liquibase/liquibase/pull/2944
+
+Changes in version 4.12.0 (2022.06.16)
+
+## Enhancements
+* Changed value modifier to make StandardLockService extendable for future extension by @Cliftonz in https://github.com/liquibase/liquibase/pull/2785
+* Added liquibase.showBanner global configuration setting by @nvoxland in https://github.com/liquibase/liquibase/pull/2871
+* Quality Checks for Databases (DAT-9298) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2715
+* Added configuration options for missing property handling by @dwieland in https://github.com/liquibase/liquibase/pull/2656
+* Add ConfiguredValueModifier extension point for plugins by @mcred in https://github.com/liquibase/liquibase/pull/2252
+* Added showBanner configuration to maven by @nvoxland in https://github.com/liquibase/liquibase/pull/2933
+* Added new argument to preserve schema case DAT-10027 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2888
+* Introduced "latest" xsd file path by @nvoxland in https://github.com/liquibase/liquibase/pull/2886
+* Moved Snowflake support into standard liquibase [DAT-10294]  by @KushnirykOleh in https://github.com/liquibase/liquibase/pull/2841
+
+## JDBC Driver and Third-Party Library Updates
+* Added connector-api.jar to internal/lib by @nvoxland in https://github.com/liquibase/liquibase/pull/2873
+* Upgraded mysql-connector-java from 8.0.28 to 8.0.29 by @dependabot in https://github.com/liquibase/liquibase/pull/2798
+* Move opencsv to be non-shaded by @nvoxland in https://github.com/liquibase/liquibase/pull/2903
+* Added snowflake driver to CLI by @nvoxland in https://github.com/liquibase/liquibase/pull/2931
+* Upgraded mssql-jdbc from 10.2.0.jre8 to 10.2.1.jre8 by @dependabot in https://github.com/liquibase/liquibase/pull/2846
+
+## Fixes
+* Fixed BLOBs in loadData for MySQL/MariaDB  by @MichaelCkr in https://github.com/liquibase/liquibase/pull/2595
+* Fixed getting ENUM column values from Mysql database having multiple schemas by @akatiyar in https://github.com/liquibase/liquibase/pull/2616
+* Added logic to Derby.getDefaultDriver() to check for availability of different driver classes by @AlexanderSashchenko in https://github.com/liquibase/liquibase/pull/2571
+* Fixed TableOutput spaces when using long words (DAT-10069) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2879
+* Fixed addAutoIncrement startValue and incrementBy support on postgresql by @nvoxland in https://github.com/liquibase/liquibase/pull/2588
+* Support non-classpath: protocols in Spring by @reallyinsane in https://github.com/liquibase/liquibase/pull/2524
+* Fixed #2780: AddColumnChange with schema and NOT NULL constraint fails by @MartinRied in https://github.com/liquibase/liquibase/pull/2781
+* Make extension matching for SQL parsers case-insensitve DAT-10265 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2884
+* Restored outputDefaultSchema and outputDefaultCatalog command arguments by @nvoxland in https://github.com/liquibase/liquibase/pull/2834
+* Quote liquibase.jar path in bash launcher by @nvoxland in https://github.com/liquibase/liquibase/pull/2885
+* Fix for working with Firebird 2 and newer versions. Fixes nullables and boolean type. by @mngsgoncalves in https://github.com/liquibase/liquibase/pull/2277
+* Fixed issue if change changelog object is null by @kamalnigam in https://github.com/liquibase/liquibase/pull/2837
+* Filter out license key strings for Hub communication DAT-10522 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2926
+* Specify which parameter is missing in the error message by @bendem in https://github.com/liquibase/liquibase/pull/2567
+* Split license information into OSS vs. Pro directories by @nvoxland in https://github.com/liquibase/liquibase/pull/2868
+* Use the method setBlob to insert blob data by @xjodoin in https://github.com/liquibase/liquibase/pull/605
+* Smooth out differences in "./" paths by @nvoxland in https://github.com/liquibase/liquibase/pull/2915
+* Include inherited labels in databasechangelog table by @nvoxland in https://github.com/liquibase/liquibase/pull/2870
+* Restored OSGi headers by @nvoxland in https://github.com/liquibase/liquibase/pull/2924
+* Working on better Git Bash console solution DAT-10230 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2882
+* close InputStream in SQLFileChange (DAT-9855) by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2920
+* Support prepared statements for query by @fbiville in https://github.com/liquibase/liquibase/pull/2913
+* Implement NOT VALID for Postgres databases by @coenvk in https://github.com/liquibase/liquibase/pull/2600
+
+Changes in version 4.11.0 (2022.05.19)
+
+## Enhancements
+* Added new liquibase.monitorPerformance setting for CLI by @nvoxland in https://github.com/liquibase/liquibase/pull/2599
+* Updated Installer JDK to 17 by @nvoxland in https://github.com/liquibase/liquibase/pull/2602
+* Create internal/lib dir by @nvoxland in https://github.com/liquibase/liquibase/pull/2850
+
+## JDBC Driver and Third-Party Library Updates
+* Upgraded picocli from 4.6.1 to 4.6.3 by @dependabot in https://github.com/liquibase/liquibase/pull/2518
+* Upgraded jaxb libraries to the newest 2.3.x versions by @nvoxland in https://github.com/liquibase/liquibase/pull/2793
+* Upgraded snakeyaml from 1.27 to 1.30 by @dependabot in https://github.com/liquibase/liquibase/pull/2498
+
+## Fixes
+* Do not throw a confusing error if a datatype specified as a changelog parameter is not expanded by @nvoxland in https://github.com/liquibase/liquibase/pull/2772
+* Fixed SQLite not correctly snapshotting tables with underscores in the name by @nvoxland in https://github.com/liquibase/liquibase/pull/2778
+* Fixed local XSD lookup by @nvoxland in https://github.com/liquibase/liquibase/pull/2830
+* Test System Framework: add support for "liquibase.sdk.testSystem.skip" property by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2838
+* stop database containers when spock execution ends by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2843
+* Refactor start-h2 logic by @nvoxland in https://github.com/liquibase/liquibase/pull/2597
+* Support default values in the format `(0)::real` by @nvoxland in https://github.com/liquibase/liquibase/pull/2836
+* Fix handling of defaultSchemaName on Postgresql by @nvoxland in https://github.com/liquibase/liquibase/pull/2812
+* Introduce generateStatementsFromRows for extensions by @fbiville in https://github.com/liquibase/liquibase/pull/2686
+* The type of attributes "ordered" and "cycle" should be boolean by @DartVerder in https://github.com/liquibase/liquibase/pull/2725
+* improve Command Test filtering logic by @StevenMassaro in https://github.com/liquibase/liquibase/pull/2853
+* Remove custom log message filtering by @nvoxland in https://github.com/liquibase/liquibase/pull/2777
+* Spring Boot: better support relativeToChangelogfile when ResourceLoaders return FilteredReactiveWebContextResources by @erik-meuwese-topicus in https://github.com/liquibase/liquibase/pull/2758
+* Fix ForeignKeyComparator when foreign key table is not known by @joserebelo in https://github.com/liquibase/liquibase/pull/2565
+
+**Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.10.0...v4.11.0
+
+
+Changes in version 4.10.0 (2022.05.04)
+
+## Breaking Change
+
+Upgraded mssql driver to 10.2.0 by @nvoxland in https://github.com/liquibase/liquibase/pull/2790
+
+End User Impact:  The driver changed the encryption default from "false" to "true" between 8.x and 10.x. If you have a self-signed certificate in your database, you must do one of the following: add `encrypt=false`; add `trustServerCertificate=true`; or add the server certificate to the java trusted certificate list. For production systems, Liquibase recommends against using self-signed certificates without adding the server certificate to the Java keystore. For more information on installing the trusted certificate, see https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/manage-certificates?view=sql-server-ver15
+
+## Security Updates
+Upgraded postgresql from 42.3.2 to 42.3.4  to address [CVE-2022-26520](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-26520) by @dependabot in https://github.com/liquibase/liquibase/pull/2769
+* Vulnerability introduced in org.postgresql:postgresql@42.3.2
+* Fixed in org.postgresql:postgresql@42.3.3
+
+## JDBC Driver and Third-Party Library Updates
+* Upgraded oracle driver to 21.5.0.0 by @nvoxland in https://github.com/liquibase/liquibase/pull/2791
+* Upgraded jcc from 11.5.6.0 to 11.5.7.0 by @dependabot in https://github.com/liquibase/liquibase/pull/2421
+* Upgraded mssql driver to 10.2.0 by @nvoxland in https://github.com/liquibase/liquibase/pull/2790
+* Upgraded  h2 from 2.1.210 to 2.1.212 by @dependabot in https://github.com/liquibase/liquibase/pull/2740
+* Upgraded sqlite-jdbc from 3.34.0 to 3.36.0.3 by @dependabot in https://github.com/liquibase/liquibase/pull/2412
+* Upgraded jaybird from 4.0.3.java8 to 4.0.6.java8 by @dependabot in https://github.com/liquibase/liquibase/pull/2802
+* Upgraded hsqldb from 2.4.0 to 2.5.2 by @nvoxland in https://github.com/liquibase/liquibase/pull/2797
+* Updated information in "licenses" directory by @nvoxland in https://github.com/liquibase/liquibase/pull/2795
+* Upgraded mariadb driver to 3.0.4 by @nvoxland in https://github.com/liquibase/liquibase/pull/2789
+
+
+## Enhancements
+* Allow CompositeResourceAccessor to have a non-fixed size list of ResourceAccessor so that the list can be added to/removed from by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2650
+* Correctly handle null class package names in the logging system by @nvoxland in https://github.com/liquibase/liquibase/pull/2763
+* Handle URLs correctly in error conditions DAT-9882 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2709
+* Validate formatted SQL changelog for invalid patterns DAT-7721 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/2761
+* Quality checks for Maven - `checks run` and `checks show` goals
+
+
+## Fixes
+* Fix EnterpriseDB database recognition by @nvoxland in https://github.com/liquibase/liquibase/pull/2767
+* Fix start failure with Nullpointed exception when Environment contains empty string Key (fix Issue 2631) by @feltonma91 in https://github.com/liquibase/liquibase/pull/2636
+* Fix createTable on Mysql not preserving primary key information when remarks also defined on the column by @nvoxland in https://github.com/liquibase/liquibase/pull/2752
+* Updated information in "licenses" directory by @nvoxland in https://github.com/liquibase/liquibase/pull/2795
+
+
+**Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.9.1...v4.10.0
+
+
 Changes in version 4.9.1 (2022.03.25)
 
 ## Liquibase 4.9.1 patch release
@@ -26,7 +207,6 @@ Changes in version 4.9.0 (2022.03.17)
 
 Liquibase  4.9.0 introduces the following functionality:
 - [PRO] Quality checks output in a JSON format
-- Quality checks for Maven - `checks run` and `checks show` goals
 - [PR#2558] [kavya-shastri] The extension of the usage of the Liquibase global configuration for the `secureParsing` parameter to prevent the entity resolver from falling back to looking on the network for missing XSDs. If you reference an XSD other than one of Liquibase, Liquibase will no longer automatically download the XSD from the internet and use it. The default value for `secureParsing`  is `true`, but you can override it in any of the Liquibase configuration locations. For more information, see the Example Changelogs: XML Format documentation.
 - [PR#2529] [Krzysztof Sierszeń] [LB-1781] The `uniqueConstraintExists` precondition to check for the existence of unique constraints before running the update. You can check the constraint by constraint name or columns:
 <preConditions>

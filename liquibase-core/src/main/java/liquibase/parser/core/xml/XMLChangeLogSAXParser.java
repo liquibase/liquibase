@@ -8,6 +8,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.BomAwareInputStream;
 import liquibase.util.FileUtil;
+import liquibase.util.LiquibaseUtil;
 import org.xml.sax.*;
 
 import javax.xml.XMLConstants;
@@ -18,8 +19,12 @@ import java.io.InputStream;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
-    public static final String LIQUIBASE_SCHEMA_VERSION = "4.6";
+    public static final String LIQUIBASE_SCHEMA_VERSION;
     private SAXParserFactory saxParserFactory;
+
+    static {
+        LIQUIBASE_SCHEMA_VERSION = computeSchemaVersion(LiquibaseUtil.getBuildVersion());
+    }
 
     private final LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
 
@@ -52,6 +57,14 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     protected SAXParserFactory getSaxParserFactory() {
         return saxParserFactory;
+    }
+
+    /**
+     * When set to true, a warning will be printed to the console if the XSD version used does not match the version
+     * of Liquibase. If "latest" is used as the XSD version, no warning is printed.
+     */
+    public void setShouldWarnOnMismatchedXsdVersion(boolean shouldWarnOnMismatchedXsdVersion) {
+        resolver.setShouldWarnOnMismatchedXsdVersion(shouldWarnOnMismatchedXsdVersion);
     }
 
     @Override
@@ -150,5 +163,18 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         } catch (SAXNotRecognizedException | SAXNotSupportedException ignored) {
             //ok, parser need not support it
         }
+    }
+
+    static String computeSchemaVersion(String version) {
+        String finalVersion = null;
+
+        if (version != null && version.contains(".")) {
+            String[] splitVersion = version.split("\\.");
+            finalVersion = splitVersion[0] + "." + splitVersion[1];
+        }
+        if (finalVersion == null) {
+            finalVersion = "latest";
+        }
+        return finalVersion;
     }
 }

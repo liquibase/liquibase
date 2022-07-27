@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
@@ -8,6 +9,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Schema;
+import liquibase.util.StringUtil;
 
 public class DatabaseUtils {
     /**
@@ -36,10 +38,25 @@ public class DatabaseUtils {
                         new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA=" +
                                 database.escapeObjectName(schema, Schema.class)));
             } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
-                final String searchPath = executor.queryForObject(new RawSqlStatement("SHOW SEARCH_PATH"), String.class);
+                String searchPath = executor.queryForObject(new RawSqlStatement("SHOW SEARCH_PATH"), String.class);
 
                 if (!searchPath.equals(defaultCatalogName) && !searchPath.startsWith(defaultSchemaName + ",") && !searchPath.startsWith("\"" + defaultSchemaName + "\",")) {
-                    executor.execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class) + ", " + searchPath));
+                    String finalSearchPath;
+                    if (GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue()) {
+                        finalSearchPath = ((PostgresDatabase) database).quoteObject(defaultSchemaName, Schema.class);
+                    } else {
+                        finalSearchPath = defaultSchemaName;
+                    }
+
+                    //If existing search path entries are not quoted, quote them. Some databases do not show them as quoted even though they need to be (like $user or case sensitive schemas)
+                    finalSearchPath += ", " + StringUtil.join(StringUtil.splitAndTrim(searchPath, ","), ",", (StringUtil.StringUtilFormatter<String>) obj -> {
+                        if (obj.startsWith("\"")) {
+                            return obj;
+                        }
+                        return ((PostgresDatabase) database).quoteObject(obj, Schema.class);
+                    });
+
+                    executor.execute(new RawSqlStatement("SET SEARCH_PATH TO " + finalSearchPath));
                 }
 
             } else if (database instanceof AbstractDb2Database) {
@@ -55,6 +72,8 @@ public class DatabaseUtils {
                     schema = defaultSchemaName;
                 }
                 executor.execute(new RawSqlStatement("USE " + schema));
+            } else if (database instanceof MSSQLDatabase) {
+                executor.execute(new RawSqlStatement("USE " + defaultCatalogName));
             }
 
         }

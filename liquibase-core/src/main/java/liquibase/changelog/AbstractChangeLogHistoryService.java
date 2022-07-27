@@ -100,7 +100,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     /**
      *
-     * Return the last deployment ID from the change sets that have been run or null
+     * Return the last deployment ID from the changesets that have been run or null
      *
      * @return   String
      * @throws   DatabaseException

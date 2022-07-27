@@ -1,12 +1,13 @@
 package liquibase.change.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
@@ -344,6 +345,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    @SuppressWarnings("java:S2095")
     @Override
     protected Map<String, Object> createExampleValueMetaData(
         String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
