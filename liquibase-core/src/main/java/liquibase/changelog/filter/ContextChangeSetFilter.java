@@ -36,7 +36,7 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
 
         Collection<ContextExpression> inheritableContexts = changeSet.getInheritableContexts();
         if (changeSet.getContexts().isEmpty() && inheritableContexts.isEmpty()) {
-            return new ChangeSetFilterResult(true, "Change set runs under all contexts", this.getClass());
+            return new ChangeSetFilterResult(true, "Changeset runs under all contexts", this.getClass());
         }
 
         if (changeSet.getContexts().matches(contexts) && ContextExpression.matchesAll(inheritableContexts, contexts)) {
