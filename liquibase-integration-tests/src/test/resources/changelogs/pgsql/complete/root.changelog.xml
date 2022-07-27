@@ -370,7 +370,7 @@
         <addAutoIncrement tableName="cp1_table" columnName="id" columnDataType="int"/>
     </changeSet>
     <!--
-      Change sets to test  https://github.com/liquibase/liquibase/issues/1212.
+      Changesets to test  https://github.com/liquibase/liquibase/issues/1212.
       To test this, we'll need 3 things:
       0. Postgresql >= 10
       1. A parent table to reference.

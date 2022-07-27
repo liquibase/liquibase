@@ -23,7 +23,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
 
     /**
      *
-     * The change set ID to rollback
+     * The changeset ID to rollback
      *
      * @parameter property="liquibase.changeSetId"
      *
@@ -80,9 +80,9 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
     @Override
     protected void printSettings(String indent) {
       super.printSettings(indent);
-        getLog().info(indent + "Change Set ID:     " + changeSetId);
-        getLog().info(indent + "Change Set Author: " + changeSetAuthor);
-        getLog().info(indent + "Change Set Path:   " + changeSetPath);
+        getLog().info(indent + "Changeset ID:     " + changeSetId);
+        getLog().info(indent + "Changeset Author: " + changeSetAuthor);
+        getLog().info(indent + "Changeset Path:   " + changeSetPath);
         getLog().info(indent + "Rollback script:   " + rollbackScript);
     }
 

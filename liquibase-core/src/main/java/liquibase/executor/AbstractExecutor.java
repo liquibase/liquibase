@@ -44,9 +44,9 @@ public abstract class AbstractExecutor implements Executor {
 
     /**
      *
-     * Validate if the change set can be executed by this Executor
+     * Validate if the changeset can be executed by this Executor
      *
-     * @param   changeSet The change set to validate
+     * @param   changeSet The changeset to validate
      * @return  boolean   Always true for abstract class
      *
      */
@@ -57,10 +57,10 @@ public abstract class AbstractExecutor implements Executor {
 
     /**
      *
-     * Allow this Executor to make any needed changes to the change set.
+     * Allow this Executor to make any needed changes to the changeset.
      * The base class sets splitStatements to 'true' if it is not set
      *
-     * @param changeSet The change set to operate on
+     * @param changeSet The changeset to operate on
      *
      */
     @Override

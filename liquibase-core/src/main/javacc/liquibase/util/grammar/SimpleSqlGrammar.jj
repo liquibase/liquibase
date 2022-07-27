@@ -72,9 +72,10 @@ TOKEN:
 |	< S_IDENTIFIER: ( <LETTER> | <UNICODE_LETTERS> )+ ( <DIGIT> | <LETTER> | <UNICODE_LETTERS> | <SPECIAL_CHARS> )* >
 | 	< #LETTER: ["a"-"z", "A"-"Z", "_", "$"] >
 |   < #SPECIAL_CHARS: "$" | "_" | "#" | "@" >
-|   < S_CHAR_LITERAL: "'" (~["'"]|"\\'")* "'" ("'" (~["'"]|"\\'")* "'")*>
+|   < S_CHAR_LITERAL: (["U","E","N","R","B"]|"RB"|"_utf8")? (("'" ( <ESC> | ~["'", "\\", "\n", "\r"] )* "'") | ("'" ("''" | ~["'"])* "'")) >
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])+ "\"" | ("`" (~["\n","\r","`"])+ "`") | ( "[" ~["0"-"9","]"] (~["\n","\r","]"])* "]" ) >
 |    <EMPTY_QUOTE: "\"" "\"">
+|   < #ESC: "\\" ["n","t","b","r","f","\\","'","\""] >
 
 /*
 Built list from http://stackoverflow.com/a/37668315/45756

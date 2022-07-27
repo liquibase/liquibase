@@ -12,10 +12,7 @@ import liquibase.database.core.DerbyDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
+import liquibase.resource.*;
 import liquibase.util.NetUtil;
 import liquibase.util.StringUtil;
 
@@ -30,7 +27,7 @@ import java.util.Enumeration;
  * Servlet listener than can be added to web.xml to allow Liquibase to run on every application server startup.
  * Using this listener allows users to know that they always have the most up to date database, although it will
  * slow down application server startup slightly.
- * See the <a href="http://www.liquibase.org/documentation/servlet_listener.html">Liquibase documentation</a> for
+ * See the <a href="https://docs.liquibase.com/tools-integrations/community-supported/servlet-listener.html">Liquibase documentation</a> for
  * more information.
  *
  * @see LiquibaseJakartaServletListener
@@ -230,7 +227,7 @@ abstract class GenericServletListener {
 
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
             database.setDefaultSchemaName(getDefaultSchema());
-            liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO, fsFO, threadClFO), database);
+            liquibase = new Liquibase(getChangeLogFile(), new SearchPathResourceAccessor(clFO, fsFO, threadClFO), database);
 
             @SuppressWarnings("unchecked")
             Enumeration<String> initParameters = servletContext.getInitParameterNames();
