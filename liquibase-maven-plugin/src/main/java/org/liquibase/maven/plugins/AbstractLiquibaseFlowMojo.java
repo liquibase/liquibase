@@ -1,14 +1,18 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.command.CommandScope;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.LiquibaseException;
 import org.liquibase.maven.property.PropertyElement;
+import org.liquibase.maven.provider.FlowCommandArgumentValueProvider;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.Map;
 
 public abstract class AbstractLiquibaseFlowMojo extends AbstractLiquibaseMojo {
     /**
@@ -26,6 +30,15 @@ public abstract class AbstractLiquibaseFlowMojo extends AbstractLiquibaseMojo {
     @PropertyElement
     protected File outputFile;
 
+    /**
+     * Arbitrary map of parameters that the underlying liquibase command will use. These arguments will be passed
+     * verbatim to the underlying liquibase command that is being run.
+     *
+     * @parameter property="flowCommandArguments"
+     */
+    @PropertyElement
+    protected Map<String, Object> flowCommandArguments;
+
     @Override
     public boolean databaseConnectionRequired() {
         return false;
@@ -36,6 +49,10 @@ public abstract class AbstractLiquibaseFlowMojo extends AbstractLiquibaseMojo {
         CommandScope liquibaseCommand = new CommandScope(getCommandName());
         liquibaseCommand.addArgumentValue("flowFile", flowFile);
         liquibaseCommand.addArgumentValue("flowIntegration", "maven");
+        if (flowCommandArguments != null) {
+            FlowCommandArgumentValueProvider flowCommandArgumentValueProvider = new FlowCommandArgumentValueProvider(flowCommandArguments);
+            Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).registerProvider(flowCommandArgumentValueProvider);
+        }
         if (outputFile != null) {
             try {
                 liquibaseCommand.setOutput(new FileOutputStream(outputFile));
