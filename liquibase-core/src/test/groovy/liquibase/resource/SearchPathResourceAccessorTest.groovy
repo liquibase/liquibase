@@ -14,7 +14,7 @@ class SearchPathResourceAccessorTest extends Specification {
         StreamUtil.readStreamAsString(accessor.openStream(null, "file-in-root.txt")) == "File in root"
         accessor.list("www.liquibase.org/xml/ns/dbchangelog", false)*.getPath().contains("www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.0.xsd")
 
-        accessor.describeLocations()[0].endsWith("classes")
-        accessor.describeLocations()[1].endsWith("test-classes")
+        accessor.describeLocations()[0].endsWith("test-classes")
+        accessor.describeLocations()[1].endsWith("classes")
     }
 }

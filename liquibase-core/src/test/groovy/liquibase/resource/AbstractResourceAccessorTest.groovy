@@ -10,7 +10,7 @@ class AbstractResourceAccessorTest extends Specification {
         new AbstractResourceAccessor() {
 
             @Override
-            SortedSet<Resource> getAll(String path) throws IOException {
+            List<Resource> getAll(String path) throws IOException {
                 return null
             }
 
@@ -20,7 +20,7 @@ class AbstractResourceAccessorTest extends Specification {
             }
 
             @Override
-            SortedSet<String> describeLocations() {
+            List<String> describeLocations() {
                 return null
             }
 

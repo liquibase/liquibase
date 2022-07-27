@@ -1,5 +1,7 @@
 package liquibase.resource;
 
+import liquibase.util.CollectionUtil;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -39,38 +41,32 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public List<Resource> list(String path, boolean recursive) throws IOException {
-        List<Resource> returnList = new ArrayList<>();
+        LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            final List<Resource> list = accessor.list(path, recursive);
-            if (list != null) {
-                returnList.addAll(list);
-            }
+            returnList.addAll(CollectionUtil.createIfNull(accessor.list(path, recursive)));
         }
 
-        return returnList;
+        return new ArrayList<>(returnList);
     }
 
     @Override
-    public SortedSet<Resource> getAll(String path) throws IOException {
-        SortedSet<Resource> returnList = new TreeSet<>();
+    public List<Resource> getAll(String path) throws IOException {
+        LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            final SortedSet<Resource> list = accessor.getAll(path);
-            if (list != null) {
-                returnList.addAll(list);
-            }
+            returnList.addAll(CollectionUtil.createIfNull(accessor.getAll(path)));
         }
 
-        return returnList;
+        return new ArrayList<>(returnList);
     }
 
     @Override
-    public SortedSet<String> describeLocations() {
-        SortedSet<String> returnSet = new TreeSet<>();
+    public List<String> describeLocations() {
+        LinkedHashSet<String> returnSet = new LinkedHashSet<>();
 
         for (ResourceAccessor accessor : resourceAccessors) {
-            returnSet.addAll(accessor.describeLocations());
+            returnSet.addAll(CollectionUtil.createIfNull(accessor.describeLocations()));
         }
 
-        return returnSet;
+        return new ArrayList<>(returnSet);
     }
 }

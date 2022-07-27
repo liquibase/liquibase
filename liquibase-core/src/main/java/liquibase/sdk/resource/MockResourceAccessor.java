@@ -44,10 +44,10 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public SortedSet<Resource> getAll(String path) throws IOException {
+    public List<Resource> getAll(String path) throws IOException {
         path = path.replace("\\", "/");
         String content = contentByFileName.get(path);
-        SortedSet<Resource> returnSet = new TreeSet<>();
+        List<Resource> returnSet = new ArrayList<>();
         if (content != null) {
             returnSet.add(new MockResource(path, content));
         }
@@ -67,7 +67,7 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public SortedSet<String> describeLocations() {
-        return new TreeSet<String>(Collections.singletonList("MockResouceAccessor.java"));
+    public List<String> describeLocations() {
+        return Collections.singletonList("MockResouceAccessor.java");
     }
 }

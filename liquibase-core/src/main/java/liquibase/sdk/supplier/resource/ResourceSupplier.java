@@ -14,8 +14,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class ResourceSupplier {
@@ -61,7 +61,7 @@ public class ResourceSupplier {
         }
 
         @Override
-        public SortedSet<Resource> getAll(String path) throws IOException {
+        public List<Resource> getAll(String path) throws IOException {
             return null;
         }
 
@@ -71,8 +71,8 @@ public class ResourceSupplier {
         }
 
         @Override
-        public SortedSet<String> describeLocations() {
-            return new TreeSet<>(Arrays.asList("Logic in ResourceSupplier.java"));
+        public List<String> describeLocations() {
+            return Collections.singletonList("Logic in ResourceSupplier.java");
         }
     }
 }

@@ -16,7 +16,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class SpringResourceAccessor extends AbstractResourceAccessor {
@@ -39,7 +38,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public SortedSet<liquibase.resource.Resource> getAll(String path) throws IOException {
+    public List<liquibase.resource.Resource> getAll(String path) throws IOException {
         return null;
     }
 
@@ -65,8 +64,8 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public SortedSet<String> describeLocations() {
-        final TreeSet<String> returnSet = new TreeSet<>();
+    public List<String> describeLocations() {
+        final List<String> returnSet = new ArrayList<>();
 
         final ClassLoader classLoader = resourceLoader.getClassLoader();
         if (classLoader instanceof URLClassLoader) {

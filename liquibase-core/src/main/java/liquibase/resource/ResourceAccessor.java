@@ -7,7 +7,6 @@ import liquibase.logging.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.SortedSet;
 
 /**
  * ResourceAccessors abstract file access so they can be read in a variety of environments.
@@ -64,13 +63,13 @@ public interface ResourceAccessor extends AutoCloseable {
      */
     List<Resource> list(String path, boolean recursive) throws IOException;
 
-    SortedSet<Resource> getAll(String path) throws IOException;
+    List<Resource> getAll(String path) throws IOException;
 
     /**
      * Finds a single specific file. If multiple files match, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
      */
     default Resource get(String path) throws IOException {
-        SortedSet<Resource> resources = getAll(path);
+        List<Resource> resources = getAll(path);
 
         if (resources == null || resources.size() == 0) {
             return null;
@@ -108,6 +107,6 @@ public interface ResourceAccessor extends AutoCloseable {
     /**
      * Returns a description of the places this classloader will look for paths. Used in error messages and other troubleshooting cases.
      */
-    SortedSet<String> describeLocations();
+    List<String> describeLocations();
 
 }

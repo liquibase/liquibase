@@ -57,7 +57,7 @@ class DirectoryResourceAccessorTest extends Specification {
     @Unroll
     def "list"() {
         expect:
-        simpleTestAccessor.list(path, recursive)*.getPath() == expected
+        simpleTestAccessor.list(path, recursive)*.getPath() as SortedSet == expected as SortedSet
 
         where:
         path          | recursive | expected

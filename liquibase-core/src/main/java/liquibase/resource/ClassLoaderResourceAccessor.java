@@ -29,7 +29,7 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
     }
 
     @Override
-    public SortedSet<String> describeLocations() {
+    public List<String> describeLocations() {
         init();
         return super.describeLocations();
     }
@@ -42,6 +42,7 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
         if (!initialized) {
             this.description = new TreeSet<>();
             loadRootPaths(classLoader);
+            initialized  = true;
         }
     }
 
@@ -92,8 +93,8 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
     }
 
     @Override
-    public SortedSet<Resource> getAll(String path) throws IOException {
-        SortedSet<Resource> returnSet = new TreeSet<>();
+    public List<Resource> getAll(String path) throws IOException {
+        LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
 
         path = path.replace("\\", "/").replaceFirst("^/", "");
 
@@ -101,12 +102,12 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
         try {
             while (all.hasMoreElements()) {
                 URL url = all.nextElement();
-                returnSet.add(new PathResource(path, Paths.get(url.toURI())));
+                returnList.add(new PathResource(path, Paths.get(url.toURI())));
             }
         } catch (URISyntaxException e) {
             throw new IOException(e.getMessage(), e);
         }
 
-        return returnSet;
+        return new ArrayList<>(returnList);
     }
 }

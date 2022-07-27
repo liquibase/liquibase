@@ -19,7 +19,6 @@ public class AntResourceAccessor extends CompositeResourceAccessor {
 
         if (changeLogDirectory == null) {
             this.addResourceAccessor(new DirectoryResourceAccessor(Paths.get(".").toAbsolutePath()));
-            this.addResourceAccessor(new DirectoryResourceAccessor(Paths.get("/").toAbsolutePath()));
         } else {
             this.addResourceAccessor(new DirectoryResourceAccessor(new File(changeLogDirectory).toPath().toAbsolutePath()));
         }

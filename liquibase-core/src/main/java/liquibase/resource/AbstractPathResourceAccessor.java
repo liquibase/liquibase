@@ -19,32 +19,28 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
     }
 
     @Override
-    public SortedSet<String> describeLocations() {
-        SortedSet<String> returnSet = new TreeSet<>();
-
-        returnSet.add(getRootPath().toString());
-
-        return returnSet;
+    public List<String> describeLocations() {
+        return Collections.singletonList(getRootPath().toString());
     }
 
     @Override
-    public SortedSet<Resource> getAll(String path) throws IOException {
+    public List<Resource> getAll(String path) throws IOException {
         if (path == null) {
             throw new IllegalArgumentException("Path must not be null");
         }
-        final SortedSet<Resource> returnSet = new TreeSet<>();
+        final List<Resource> returnList = new ArrayList<>();
 
         Logger log = Scope.getCurrentScope().getLog(getClass());
         path = standardizePath(path);
 
         Path finalPath = getRootPath().resolve(path);
         if (Files.exists(finalPath)) {
-            returnSet.add(createResource(finalPath, path));
+            returnList.add(createResource(finalPath, path));
         } else {
             log.fine("Path " + path + " in " + getRootPath() + " does not exist");
         }
 
-        return returnSet;
+        return returnList;
     }
 
     private String standardizePath(String path) {

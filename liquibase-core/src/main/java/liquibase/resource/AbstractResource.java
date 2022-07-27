@@ -25,11 +25,6 @@ public abstract class AbstractResource implements Resource {
     }
 
     @Override
-    public int compareTo(Resource o) {
-        return this.getUri().compareTo(o.getUri());
-    }
-
-    @Override
     public boolean isWritable() {
         return false;
     }
@@ -45,5 +40,18 @@ public abstract class AbstractResource implements Resource {
     @Override
     public String toString() {
         return getPath();
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getUri().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Resource)) {
+            return false;
+        }
+        return this.getUri().equals(((Resource) obj).getUri());
     }
 }
