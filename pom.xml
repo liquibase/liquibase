@@ -192,14 +192,14 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.3.4</version>
+            <version>42.4.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.0.5</version>
+            <version>3.0.6</version>
             <scope>test</scope>
         </dependency>
 
@@ -247,7 +247,7 @@
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>2.3.6</version>
+            <version>4.0.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

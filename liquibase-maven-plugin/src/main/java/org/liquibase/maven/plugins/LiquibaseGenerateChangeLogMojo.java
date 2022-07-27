@@ -43,7 +43,7 @@ public class LiquibaseGenerateChangeLogMojo extends
     protected String dataDir;
 
     /**
-     * The author to be specified for Change Sets in the generated Change Log.
+     * The author to be specified for Changesets in the generated Change Log.
      *
      * @parameter property="liquibase.changeSetAuthor"
      */
@@ -58,7 +58,7 @@ public class LiquibaseGenerateChangeLogMojo extends
     protected String contexts;
 
     /**
-     * The execution context to be used for Change Sets in the generated Change Log, which can be "," separated if multiple contexts.
+     * The execution context to be used for Changesets in the generated Change Log, which can be "," separated if multiple contexts.
      *
      * @parameter property="liquibase.changeSetContext"
      */
