@@ -507,23 +507,25 @@ public class LiquibaseCommandLine {
         }
 
         final File defaultsFile = new File(defaultsFileConfig.getValue());
-        if (defaultsFile.exists()) {
-            final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsFile);
-            liquibaseConfiguration.registerProvider(fileProvider);
-            returnList.add(fileProvider);
-        } else {
-            final InputStream defaultsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
-            if (defaultsStream == null) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
-                if (!defaultsFileConfig.wasDefaultValueUsed()) {
-                    //can't use UI since it's not configured correctly yet
-                    System.err.println("Could not find defaults file " + defaultsFileConfig.getValue());
-                }
-            } else {
-                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File in classpath " + defaultsFileConfig.getValue());
+        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+        try (InputStream defaultsStream = pathHandlerFactory.open(defaultsFileConfig.getValue())) {
+            if (defaultsStream != null) {
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File exists at path " + defaultsFileConfig.getValue());
                 liquibaseConfiguration.registerProvider(fileProvider);
                 returnList.add(fileProvider);
-
+            } else {
+                InputStream inputStreamOnClasspath = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
+                if (inputStreamOnClasspath == null) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
+                    if (!defaultsFileConfig.wasDefaultValueUsed()) {
+                        //can't use UI since it's not configured correctly yet
+                        System.err.println("Could not find defaults file " + defaultsFileConfig.getValue());
+                    }
+                } else {
+                    final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(inputStreamOnClasspath, "File in classpath " + defaultsFileConfig.getValue());
+                    liquibaseConfiguration.registerProvider(fileProvider);
+                    returnList.add(fileProvider);
+                }
             }
         }
 

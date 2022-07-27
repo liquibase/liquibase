@@ -36,10 +36,9 @@ class FileSystemPathHandlerTest extends Specification {
 
     def "open fails on invalid file"() {
         when:
-        new FileSystemPathHandler().open("/invalid/file/path.txt")
+        def inputStream = new FileSystemPathHandler().open("/invalid/file/path.txt")
 
         then:
-        def e = thrown(IOException)
-        e.message == "File '/invalid/file/path.txt' does not exist"
+        assert inputStream == null
     }
 }

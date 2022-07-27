@@ -1,5 +1,7 @@
 package liquibase.resource;
 
+import liquibase.Scope;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,7 +41,8 @@ public class FileSystemPathHandler extends AbstractPathHandler {
         try {
             return Files.newInputStream(Paths.get(path));
         } catch (NoSuchFileException e) {
-            throw new IOException("File '"+path+"' does not exist");
+            Scope.getCurrentScope().getLog(FileSystemResourceAccessor.class).fine("File '"+path+"' does not exist");
         }
+        return null;
     }
 }
