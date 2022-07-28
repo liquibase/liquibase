@@ -1,3 +1,4 @@
+liquibase.sqlgenerator.core.CreateSequenceGeneratorSnowflake
 liquibase.sqlgenerator.core.DropDefaultValueGeneratorSnowflake
 liquibase.sqlgenerator.core.DropProcedureGeneratorSnowflake
 liquibase.sqlgenerator.core.InsertOrUpdateGeneratorSnowflake
