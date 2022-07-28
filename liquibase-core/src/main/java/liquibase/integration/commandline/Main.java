@@ -436,7 +436,11 @@ public class Main {
 
                         e1.printStackTrace();
                     }
-                    throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
+                    if (runningFromNewCli) {
+                        throw e;
+                    } else {
+                        throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
+                    }
                 }
 
                 if (isHubEnabled(main.command) &&

@@ -16,4 +16,9 @@ public class DB2zDatabaseTest extends TestCase {
         }
     }
 
+    public void testMaxFractionDigits() {
+        Database database = new Db2zDatabase();
+        assertEquals(12, database.getMaxFractionalDigitsForTimestamp());
+    }
+
 }
