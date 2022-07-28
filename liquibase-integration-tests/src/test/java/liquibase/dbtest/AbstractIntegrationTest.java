@@ -74,10 +74,6 @@ import static org.junit.Assume.assumeNotNull;
  */
 public abstract class AbstractIntegrationTest {
 
-    public static final String ALT_TABLESPACE = "LIQUIBASE2";
-    public static final String ALT_SCHEMA = "LBSCHEM2";
-    public static final String ALT_CATALOG = "LBCAT2";
-
     @Rule
     public DatabaseTestSystem testSystem;
 
@@ -133,7 +129,8 @@ public abstract class AbstractIntegrationTest {
 
         if (database.supportsTablespaces()) {
             // Use the opportunity to test if the DATABASECHANGELOG table is placed in the correct tablespace
-            database.setLiquibaseTablespaceName(ALT_TABLESPACE);
+            String altTablespace = testSystem.getAltTablespace();
+            database.setLiquibaseTablespaceName(altTablespace);
         }
         if (!database.getConnection().getAutoCommit()) {
             database.rollback();
@@ -186,12 +183,15 @@ public abstract class AbstractIntegrationTest {
                     database);
             SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
 
+            String altSchema = testSystem.getAltSchema();
+            String altCatalog = testSystem.getAltCatalog();
+
             if (database.supportsSchemas()) {
-                emptyTestSchema(null, ALT_SCHEMA, database);
+                emptyTestSchema(null, altSchema, database);
             }
             if (supportsAltCatalogTests()) {
                 if (database.supportsSchemas() && database.supportsCatalogs()) {
-                    emptyTestSchema(ALT_CATALOG, ALT_SCHEMA, database);
+                    emptyTestSchema(altCatalog, altSchema, database);
                 }
             }
 
@@ -200,12 +200,12 @@ public abstract class AbstractIntegrationTest {
              * schemas AND (b) the RDBMS DOES support catalogs AND (c) someone uses "schemaName=..." in a
              * Liquibase ChangeSet. In this case, AbstractJdbcDatabase.escapeObjectName assumes the author
              * was intending to write "catalog=..." and transparently rewrites the expression.
-             * For us, this means that we have to wipe both ALT_SCHEMA and ALT_CATALOG to be sure we
+             * For us, this means that we have to wipe both altSchema and altCatalog to be sure we
              * are doing a thorough cleanup.
              */
             CatalogAndSchema[] alternativeLocations = new CatalogAndSchema[]{
-                new CatalogAndSchema(ALT_CATALOG, null),
-                new CatalogAndSchema(null, ALT_SCHEMA),
+                new CatalogAndSchema(altCatalog, null),
+                new CatalogAndSchema(null, altSchema),
                 new CatalogAndSchema("LBCAT2", database.getDefaultSchemaName()),
                 new CatalogAndSchema(null, "LBCAT2"),
                 new CatalogAndSchema("lbcat2", database.getDefaultSchemaName()),
