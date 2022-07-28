@@ -38,16 +38,21 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
         }
 
-        if (isPostgreWithoutAsDatatypeSupport(database)) {
-            validationErrors.checkDisallowedField("AS", statement.getDataType(), database, PostgresDatabase.class);
-        }
-
         validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, HsqlDatabase.class, PostgresDatabase.class, MSSQLDatabase.class);
-        validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class, CockroachDatabase.class);
 
-        if (isH2WithoutAsDatatypeSupport(database) && statement.getDataType() != null && !statement.getDataType().equalsIgnoreCase("bigint")) {
-            validationErrors.addWarning("This version of H2 only creates BIGINT sequences. Ignoring requested type " + statement.getDataType());
+        //check datatype
+        if (database instanceof PostgresDatabase) {
+            if (isPostgreWithoutAsDatatypeSupport(database)) {
+                validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, PostgresDatabase.class);
+            }
+        } else if (database instanceof H2Database) {
+            if (isH2WithoutAsDatatypeSupport(database) && statement.getDataType() != null && !statement.getDataType().equalsIgnoreCase("bigint")) {
+                validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, H2Database.class);
+            }
+        } else {
+            validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class, CockroachDatabase.class);
         }
+
 
         return validationErrors;
     }

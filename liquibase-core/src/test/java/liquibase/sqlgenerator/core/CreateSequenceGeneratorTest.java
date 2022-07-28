@@ -87,7 +87,7 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
         createSequenceStatement.setDataType("int");
 
         errors = new CreateSequenceGenerator().validate(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
-        assertThat(errors.getErrorMessages()).contains("AS is not allowed on postgresql");
+        assertThat(errors.getErrorMessages()).contains("dataType is not allowed on postgresql");
 
 
         // verify that if no version is available the validate() method passes
@@ -107,7 +107,7 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
     }
 
     @Test
-    public void oldH2IgnoresDataType() throws Exception {
+    public void oldH2FailsValidationWithDataType() throws Exception {
         DatabaseConnection dbConnection = mock(DatabaseConnection.class);
         H2Database h2Database = new H2Database();
         h2Database.setConnection(dbConnection);
@@ -125,8 +125,7 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
 
         stmt.setDataType("INT");
         errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
-        assertThat(errors.getErrorMessages()).isEmpty();
-        assertThat(errors.getWarningMessages()).containsExactly("This version of H2 only creates BIGINT sequences. Ignoring requested type INT");
+        assertThat(errors.getErrorMessages()).containsExactly("dataType is not allowed on h2");
 
         String sql = generatorUnderTest.generateSql(stmt, h2Database, new MockSqlGeneratorChain())[0].toSql();
         assertThat(sql).isEqualTo("CREATE SEQUENCE SCHEMA_NAME.SEQUENCE_NAME");
