@@ -3,6 +3,7 @@ package liquibase.resource;
 import liquibase.plugin.AbstractPluginFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Singleton for working with {@link PathHandler}s.
@@ -31,5 +32,16 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
             throw new IOException("Cannot parse resource location: '" + root + "'");
         }
         return plugin.getResourceAccessor(root);
+    }
+
+    /**
+     * Creates an {@link InputStream} for the given path.
+     */
+    public InputStream open(String root) throws IOException {
+        final PathHandler plugin = getPlugin(root);
+        if (plugin == null) {
+            throw new IOException("Cannot parse resource location: '" + root + "'");
+        }
+        return plugin.open(root);
     }
 }
