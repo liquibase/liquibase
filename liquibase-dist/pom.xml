@@ -228,7 +228,7 @@
 
 			<plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.4.2</version>
 				<configuration>
                     <finalName>liquibase-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
