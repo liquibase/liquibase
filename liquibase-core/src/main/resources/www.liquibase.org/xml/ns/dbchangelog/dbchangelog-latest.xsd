@@ -242,18 +242,6 @@
         </xsd:choice>
     </xsd:group>
 
-    <!-- Attributes for DatabaseInfo -->
-    <xsd:attributeGroup name="DatabaseInfoAttributes">
-        <xsd:attribute name="type" type="xsd:string"/>
-        <xsd:attribute name="version" type="xsd:string"/>
-        <xsd:attribute name="username" type="xsd:string"/>
-        <xsd:attribute name="password" type="xsd:string"/>
-        <xsd:attribute name="port" type="integerExp"/>
-        <xsd:attribute name="host" type="xsd:string"/>
-        <xsd:attribute name="schemaName" type="xsd:string"/>
-        <xsd:attribute name="driverName" type="xsd:string"/>
-    </xsd:attributeGroup>
-
     <!-- Attributes for changeLog -->
     <xsd:attributeGroup name="changeLogAttributes">
         <xsd:attribute name="logicalFilePath" type="xsd:string"/>
