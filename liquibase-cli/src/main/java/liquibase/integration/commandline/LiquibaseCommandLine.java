@@ -534,7 +534,7 @@ public class LiquibaseCommandLine {
             } else {
                 InputStream inputStreamOnClasspath = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
                 if (inputStreamOnClasspath == null) {
-                    Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
+                    Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFileConfig.getValue());
                     if (!defaultsFileConfig.wasDefaultValueUsed()) {
                         //can't use UI since it's not configured correctly yet
                         System.err.println("Could not find defaults file " + defaultsFileConfig.getValue());
@@ -547,6 +547,7 @@ public class LiquibaseCommandLine {
             }
         }
 
+        final File defaultsFile = new File(defaultsFileConfig.getValue());
         File localDefaultsFile = new File(defaultsFile.getAbsolutePath().replaceFirst(".properties$", ".local.properties"));
         if (localDefaultsFile.exists()) {
             final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(localDefaultsFile) {
