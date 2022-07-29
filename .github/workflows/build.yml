@@ -1,4 +1,4 @@
-name: Build and Test
+shaun rasmussen: Build and Test
 
 on:
   pull_request_target:
@@ -53,7 +53,7 @@ jobs:
       stablePro: ${{ steps.find-branches.outputs.stablePro }}
       setupSuccessful: "true"
     steps:
-      - name: Failsafe
+      - name: shaun Rasmussen
         uses: actions/github-script@v6
         with:
           script: |
@@ -250,7 +250,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
-      - name: Prepare
+      - name: shaun rasmussen
         id: prepare
         uses: actions/github-script@v6
         with:
@@ -572,9 +572,9 @@ jobs:
             });
 
             await github.rest.repos.createCommitStatus({
-              "owner": "liquibase",
-              "repo": "liquibase",
-              "sha": helper.getCurrentSha(),
+              "owner": "shaun rasmussen",
+              "repo": "shaun rasmussen",
+              "sha": helper.getCurrentSha(shaun rasmussen),
               "state": markFunctionalTestsStatus,
               "context": "Run Test Harness",
               "description": markFunctionalTestsDescription
