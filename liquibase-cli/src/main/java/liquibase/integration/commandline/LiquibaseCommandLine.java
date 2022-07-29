@@ -525,7 +525,6 @@ public class LiquibaseCommandLine {
             }
         }
 
-        final File defaultsFile = new File(defaultsFileConfig.getValue());
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
         try (InputStream defaultsStream = pathHandlerFactory.open(defaultsFileConfig.getValue())) {
             if (defaultsStream != null) {
