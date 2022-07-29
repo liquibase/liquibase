@@ -5,10 +5,12 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
@@ -56,6 +58,17 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
             validationErrors.checkRequiredField("columnDataType", setNullableStatement.getColumnDataType());
         }
         return validationErrors;
+    }
+
+    @Override
+    public Warnings warn(SetNullableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        Warnings warnings = super.warn(statement, database, sqlGeneratorChain);
+
+        if (database instanceof MySQLDatabase) {
+            ((MySQLDatabase) database).warnAboutAlterColumn("setNullable", warnings);
+        }
+
+        return warnings;
     }
 
     @Override
