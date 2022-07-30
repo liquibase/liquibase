@@ -3,8 +3,11 @@ package liquibase.command;
 import liquibase.Scope;
 import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
+import liquibase.exception.CommandValidationException;
 import liquibase.util.StringUtil;
 
+import java.io.FilterOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 
@@ -126,16 +129,21 @@ public class CommandScope {
      * Think "what would be piped out", not "what the user is told about what is happening".
      */
     public CommandScope setOutput(OutputStream outputStream) {
-        this.outputStream = outputStream;
+        /*
+        This is an UnclosableOutputStream because we do not want individual command steps to inadvertently (or
+        intentionally) close the System.out OutputStream. Closing System.out renders it unusable for other command
+        steps which expect it to still be open.  If the passed OutputStream is null then we do not create it.
+         */
+        if (outputStream != null) {
+            this.outputStream = new UnclosableOutputStream(outputStream);
+        } else {
+            this.outputStream = null;
+        }
 
         return this;
     }
 
-    /**
-     * Executes the command in this scope, and returns the results.
-     */
-    public CommandResults execute() throws CommandExecutionException {
-        CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
+    public void validate() throws CommandValidationException {
         for (ConfigurationValueProvider provider : Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getProviders()) {
             provider.validate(this);
         }
@@ -151,6 +159,15 @@ public class CommandScope {
         for (CommandStep step : pipeline) {
             step.validate(this);
         }
+    }
+
+    /**
+     * Executes the command in this scope, and returns the results.
+     */
+    public CommandResults execute() throws CommandExecutionException {
+        CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
+        final List<CommandStep> pipeline = commandDefinition.getPipeline();
+        validate();
         try {
             for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
@@ -189,6 +206,29 @@ public class CommandScope {
                 .setValueHandler(argument.getValueConverter())
                 .setValueObfuscator(argument.getValueObfuscator())
                 .buildTemporary();
+    }
+
+    /**
+     * This class is a wrapper around OutputStreams, and makes them impossible for callers to close.
+     */
+    private static class UnclosableOutputStream extends FilterOutputStream {
+        public UnclosableOutputStream(OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            out.write(b, off, len);
+        }
+
+        /**
+         * This method does not actually close the underlying stream, but rather only flushes it. Callers should not be
+         * closing the stream they are given.
+         */
+        @Override
+        public void close() throws IOException {
+            out.flush();
+        }
     }
 
     private class CommandScopeValueProvider extends AbstractMapConfigurationValueProvider {

@@ -2,6 +2,7 @@ package liquibase.extension.testing.command
 
 import liquibase.AbstractExtensibleObject
 import liquibase.CatalogAndSchema
+import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.changelog.ChangeLogHistoryService
@@ -31,6 +32,7 @@ import liquibase.logging.core.BufferedLogService
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.Resource
 import liquibase.resource.ResourceAccessor
+import liquibase.resource.SearchPathResourceAccessor
 import liquibase.ui.ConsoleUIService
 import liquibase.ui.InputHandler
 import liquibase.ui.UIService
@@ -275,11 +277,37 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
 
+        def resourceAccessor = Scope.getCurrentScope().getResourceAccessor()
+
+        if (testDef.searchPath != null) {
+            def config = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
+
+            ConfigurationValueProvider propertiesProvider = new AbstractMapConfigurationValueProvider() {
+                @Override
+                protected Map<?, ?> getMap() {
+                    return Collections.singletonMap(GlobalConfiguration.SEARCH_PATH.getKey(), testDef.searchPath)
+                }
+
+                @Override
+                protected String getSourceDescription() {
+                    return "command tests search path override"
+                }
+
+                @Override
+                int getPrecedence() {
+                    return 1
+                }
+            }
+
+            config.registerProvider(propertiesProvider)
+            resourceAccessor = new SearchPathResourceAccessor(Scope.getCurrentScope().getResourceAccessor())
+        }
+
         def scopeSettings = [
                 (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name)               : MockHubService,
                 (Scope.Attr.resourceAccessor.name())                  : testDef.resourceAccessor ?
-                                                                            testDef.resourceAccessor : Scope.getCurrentScope().getResourceAccessor(),
+                                                                            testDef.resourceAccessor : resourceAccessor,
                 (Scope.Attr.ui.name())                                : testDef.testUI ? testDef.testUI.initialize(uiOutputWriter, uiErrorWriter) :
                                                                                          new TestUI(uiOutputWriter, uiErrorWriter),
                 (Scope.Attr.logService.name())                        : logService
@@ -750,6 +778,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         private Map<String, ?> globalArguments = new HashMap<>()
 
+        private String searchPath
+
         /**
          * Arguments to command as key/value pairs
          */
@@ -817,6 +847,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         def setGlobalArguments(Map<String, Object> args) {
             this.globalArguments = args
+        }
+
+        def setSearchPath(String searchPath) {
+            this.searchPath = searchPath
         }
 
         def setExpectedFileContent(Map<String, Object> content) {
@@ -1104,6 +1138,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupModifyTextFile(textFile, originalString, newString))
         }
 
+        void modifyDbCredentials(File textFile) {
+            this.setups.add(new SetupModifyDbCredentials(textFile))
+        }
         private void validate() throws IllegalArgumentException {
 
         }
