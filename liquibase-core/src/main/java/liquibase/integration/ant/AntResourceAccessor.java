@@ -1,13 +1,13 @@
 package liquibase.integration.ant;
 
-import liquibase.resource.*;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
+import liquibase.resource.ZipResourceAccessor;
 import liquibase.util.StringUtil;
 import org.apache.tools.ant.AntClassLoader;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.SortedSet;
 
 public class AntResourceAccessor extends CompositeResourceAccessor {
 
@@ -19,6 +19,7 @@ public class AntResourceAccessor extends CompositeResourceAccessor {
 
         if (changeLogDirectory == null) {
             this.addResourceAccessor(new DirectoryResourceAccessor(Paths.get(".").toAbsolutePath()));
+            this.addResourceAccessor(new DirectoryResourceAccessor(Paths.get("/").toAbsolutePath()));
         } else {
             this.addResourceAccessor(new DirectoryResourceAccessor(new File(changeLogDirectory).toPath().toAbsolutePath()));
         }
