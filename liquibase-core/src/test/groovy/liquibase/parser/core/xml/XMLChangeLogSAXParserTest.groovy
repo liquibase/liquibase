@@ -83,18 +83,18 @@ class XMLChangeLogSAXParserTest extends Specification {
         e.message.contains("Unable to resolve xml entity file:///invalid.txt. liquibase.secureParsing is set to 'true'")
     }
 
-    def "allows liquibase.secureParsing=false to disable secure parsing"() {
-        when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/insecure.xml": INSECURE_XML])
-
-        Scope.child(GlobalConfiguration.SECURE_PARSING.key, "false", { ->
-            new XMLChangeLogSAXParser().parse("com/example/insecure.xml", new ChangeLogParameters(), resourceAccessor)
-        })
-
-
-        then:
-        def e = thrown(ChangeLogParseException)
-        e.message.contains("Error Reading Changelog File: " + File.separator + "invalid.txt")
+//    def "allows liquibase.secureParsing=false to disable secure parsing"() {
+//        when:
+//        def resourceAccessor = new MockResourceAccessor(["com/example/insecure.xml": INSECURE_XML])
+//
+//        Scope.child(GlobalConfiguration.SECURE_PARSING.key, "false", { ->
+//            new XMLChangeLogSAXParser().parse("com/example/insecure.xml", new ChangeLogParameters(), resourceAccessor)
+//        })
+//
+//
+//        then:
+//        def e = thrown(ChangeLogParseException)
+//        e.message.contains("Error Reading Changelog File: " + File.separator + "invalid.txt")
     }
 
     def "getSchemaVersion"() {
