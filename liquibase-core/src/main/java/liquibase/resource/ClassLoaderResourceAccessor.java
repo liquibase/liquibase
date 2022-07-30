@@ -1,6 +1,7 @@
 package liquibase.resource;
 
 import liquibase.Scope;
+import org.apache.tools.ant.types.resources.FileResource;
 
 import java.io.IOException;
 import java.net.*;
@@ -94,7 +95,6 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
 
     @Override
     public List<Resource> getAll(String path) throws IOException {
-        init();
         //using a hash because sometimes the same resource gets included multiple times.
         LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
 
@@ -104,7 +104,11 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
         try {
             while (all.hasMoreElements()) {
                 URI uri = all.nextElement().toURI();
-                returnList.add(new URIResource(path, uri));
+                if (uri.getScheme().equals("file")) {
+                    returnList.add(new PathResource(path, Paths.get(uri)));
+                } else {
+                    returnList.add(new URIResource(path, uri));
+                }
             }
         } catch (URISyntaxException e) {
             throw new IOException(e.getMessage(), e);
