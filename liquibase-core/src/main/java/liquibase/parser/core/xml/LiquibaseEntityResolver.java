@@ -14,6 +14,7 @@ import org.xml.sax.ext.EntityResolver2;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,7 +24,6 @@ import java.util.regex.Pattern;
  */
 public class LiquibaseEntityResolver implements EntityResolver2 {
 
-    private static ClassLoaderResourceAccessor fallbackResourceAccessor;
     private boolean shouldWarnOnMismatchedXsdVersion = false;
     /**
      * The warning message should only be printed once.
@@ -50,12 +50,13 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
             warnForMismatchedXsdVersion(systemId);
         }
 
+        InputStream stream;
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         Resource entityResource = resourceAccessor.get(path);
         if (entityResource == null) {
-            entityResource = getFallbackResourceAccessor().get(path);
+            URL resourceUri = getClass().getClassLoader().getResource(path);
 
-            if (entityResource == null) {
+            if (resourceUri == null) {
                 if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
                     String errorMessage = "Unable to resolve xml entity " + systemId + ". " +
                             GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
@@ -65,10 +66,12 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                     log.fine("Unable to resolve XML entity locally. Will load from network.");
                     return null;
                 }
+            } else {
+                stream = resourceUri.openStream();
             }
+        } else {
+            stream = entityResource.openInputStream();
         }
-
-        InputStream stream = entityResource.openInputStream();
 
         org.xml.sax.InputSource source = new org.xml.sax.InputSource(stream);
         source.setPublicId(publicId);
@@ -102,17 +105,6 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).fine("Failed to compare XSD version with build version.", e);
         }
-    }
-
-    /**
-     * ResourceAccessor to use if the standard one does not have the XSD files in it.
-     * Returns a ClassLoaderResourceAccessor that checks the system classloader which should include the liquibase-core.jar.
-     */
-    protected ResourceAccessor getFallbackResourceAccessor() {
-        if (fallbackResourceAccessor == null) {
-            fallbackResourceAccessor = new ClassLoaderResourceAccessor();
-        }
-        return fallbackResourceAccessor;
     }
 
     @Override
