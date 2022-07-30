@@ -880,13 +880,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     private static InputStream handlePropertyFileInputStream(String propertyFile) throws MojoFailureException {
-        InputStream is;
         try {
-            is = Scope.getCurrentScope().getResourceAccessor().openStream(null, propertyFile);
+            return Scope.getCurrentScope().getResourceAccessor().getExisting(propertyFile).openInputStream();
         } catch (IOException e) {
             throw new MojoFailureException("Failed to resolve the properties file.", e);
         }
-        return is;
     }
 
     protected ClassLoader getMavenArtifactClassLoader() throws MojoExecutionException {

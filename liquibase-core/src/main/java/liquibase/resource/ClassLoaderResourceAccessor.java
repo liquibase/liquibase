@@ -87,13 +87,15 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
     }
 
     @Override
-    public List<Resource> list(String path, boolean recursive) throws IOException {
+    public List<Resource> search(String path, boolean recursive) throws IOException {
         init();
-        return super.list(path, recursive);
+        return super.search(path, recursive);
     }
 
     @Override
     public List<Resource> getAll(String path) throws IOException {
+        init();
+        //using a hash because sometimes the same resource gets included multiple times.
         LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
 
         path = path.replace("\\", "/").replaceFirst("^/", "");
@@ -108,6 +110,9 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
             throw new IOException(e.getMessage(), e);
         }
 
+        if (returnList.size() == 0) {
+            return null;
+        }
         return new ArrayList<>(returnList);
     }
 }

@@ -291,9 +291,9 @@ create view sql_view as select * from sql_table;'''
             private callingPath;
 
             @Override
-            List<Resource> list(String path, boolean recursive) throws IOException {
+            List<Resource> search(String path, boolean recursive) throws IOException {
                 callingPath = path;
-                return super.list(path, recursive)
+                return super.search(path, recursive)
             }
         }
         def changeLogFile = new DatabaseChangeLog("com/example/children/root.xml")

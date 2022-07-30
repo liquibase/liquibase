@@ -6,33 +6,33 @@ import spock.lang.Unroll
 
 class SpringResourceAccessorTest extends Specification {
 
-    def loader = new DefaultResourceLoader()
+    def loader = new DefaultResourceLoader(Thread.currentThread().getContextClassLoader())
     def resourceAccessor = new SpringResourceAccessor(loader)
 
-    def "openStreams for single file"() {
-        when:
-        def list = resourceAccessor.openStreams(null, "liquibase/integration/spring/SpringResourceAccessorTest.class")
-
-        then:
-        list.size() == 1
+    def "getAll"() {
+        expect:
+        resourceAccessor.getAll("liquibase/integration/spring/SpringResourceAccessorTest.class")*.getPath().equals(["liquibase/integration/spring/SpringResourceAccessorTest.class"])
+        resourceAccessor.getAll("invalid/path") == null
     }
 
-    def "openStreams for relative file"() {
+    def "search non-recursive files"() {
         when:
-        def list = resourceAccessor.openStreams("liquibase/database/Database.class", "core/UnsupportedDatabase.class")
+        def list = resourceAccessor.search("liquibase/database", false)*.getPath()
 
         then:
-        list.size() == 1
-    }
-
-    def "list just non-recursive files"() {
-        when:
-        def list = resourceAccessor.list("liquibase/database", false).toListString()
-
-        then:
-        list.contains("AbstractJdbcDatabaseTest.class,")
-        list.contains("DatabaseFactoryTest.class,")
+        list.contains("liquibase/database/AbstractJdbcDatabaseTest.class")
+        list.contains("liquibase/database/DatabaseFactoryTest.class")
         !list.contains("core,")
+    }
+
+    def "search recursive files"() {
+        when:
+        def list = resourceAccessor.search("liquibase/database", true)*.getPath()
+
+        then:
+        list.contains("liquibase/database/AbstractJdbcDatabaseTest.class")
+        list.contains("liquibase/database/DatabaseFactoryTest.class")
+        list.contains("liquibase/database/core/H2Database.class")
     }
 
     @Unroll
@@ -41,15 +41,15 @@ class SpringResourceAccessorTest extends Specification {
         new SpringResourceAccessor().finalizeSearchPath(input) == expected
 
         where:
-        input | expected
-        "/path/to/file" | "classpath*:/path/to/file"
-        "//path////to/file" | "classpath*:/path/to/file"
-        "path/to/file" | "classpath*:/path/to/file"
-        "classpath:path/to/file" | "classpath*:/path/to/file"
-        "classpath:/path/to/file" | "classpath*:/path/to/file"
+        input                               | expected
+        "/path/to/file"                     | "classpath*:/path/to/file"
+        "//path////to/file"                 | "classpath*:/path/to/file"
+        "path/to/file"                      | "classpath*:/path/to/file"
+        "classpath:path/to/file"            | "classpath*:/path/to/file"
+        "classpath:/path/to/file"           | "classpath*:/path/to/file"
         "classpath:classpath:/path/to/file" | "classpath*:/path/to/file"
-        "classpath*:/path/to/file" | "classpath*:/path/to/file"
-        "classpath*:path/to/file" | "classpath*:/path/to/file"
-        "file:/path/to/file" | "file:/path/to/file"
+        "classpath*:/path/to/file"          | "classpath*:/path/to/file"
+        "classpath*:path/to/file"           | "classpath*:/path/to/file"
+        "file:/path/to/file"                | "file:/path/to/file"
     }
 }

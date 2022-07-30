@@ -20,7 +20,6 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.ui.UIService;
 import liquibase.util.StringUtil;
 import liquibase.util.FilenameUtil;
 
@@ -28,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -468,8 +466,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     } else {
                         // read properties from the file
                         Properties props = new Properties();
-                        try (InputStream propertiesStream = resourceAccessor.openStream(null, file)) {
-                            if (propertiesStream != null) {
+                        Resource resource = resourceAccessor.get(file);
+                        if (resource == null) {
+                            Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
+                        } else {
+                            try (InputStream propertiesStream = resource.openInputStream()) {
                                 props.load(propertiesStream);
 
                                 for (Map.Entry<Object, Object> entry : props.entrySet()) {
@@ -483,8 +484,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                                             this
                                     );
                                 }
-                            } else {
-                                Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
                             }
                         }
                     }
@@ -571,16 +570,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
             List<Resource> unsortedResources = null;
             try {
-                String path = pathName;
-                if (relativeTo != null) {
-                    path = Paths.get(relativeTo).getParent().resolve(pathName).toString();
-                }
+                String path = resourceAccessor.resolve(relativeTo, pathName);
 
                 path = path.replace("\\", "/");
                 LOG.fine("includeAll for " + pathName);
                 LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
 
-                unsortedResources = resourceAccessor.list(path, true);
+                unsortedResources = resourceAccessor.search(path, true);
             } catch (IOException e) {
                 if (errorIfMissingOrEmpty) {
                     throw e;
@@ -744,7 +740,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         String noClassPathReplaced = NON_CLASSPATH_PATTERN.matcher(filePath).replaceFirst("");
         String doubleBackSlashReplaced = DOUBLE_BACK_SLASH_PATTERN.matcher(noClassPathReplaced).replaceAll("/");
         String doubleSlashReplaced = DOUBLE_SLASH_PATTERN.matcher(doubleBackSlashReplaced).replaceAll("/");
-        String slashDotSlashReplaced =SLASH_DOT_SLASH_PATTERN.matcher(doubleSlashReplaced).replaceAll("/");
+        String slashDotSlashReplaced = SLASH_DOT_SLASH_PATTERN.matcher(doubleSlashReplaced).replaceAll("/");
         String noLetterReplaced = NO_LETTER_PATTERN.matcher(slashDotSlashReplaced).replaceFirst("");
         return DOT_SLASH_PATTERN.matcher(noLetterReplaced).replaceFirst("");
     }
@@ -780,13 +776,19 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
      */
     public enum OnUnknownFileFormat {
 
-        /** Silently skip unknown files.*/
+        /**
+         * Silently skip unknown files.
+         */
         SKIP,
 
-        /**  Log a warning about the file not being in a recognized format, but continue on */
+        /**
+         * Log a warning about the file not being in a recognized format, but continue on
+         */
         WARN,
 
-        /** Fail parsing with an error */
+        /**
+         * Fail parsing with an error
+         */
         FAIL
     }
 

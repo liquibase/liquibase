@@ -1,7 +1,6 @@
 package liquibase.resource
 
-import liquibase.GlobalConfiguration
-import liquibase.Scope
+
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -57,7 +56,7 @@ class DirectoryResourceAccessorTest extends Specification {
     @Unroll
     def "list"() {
         expect:
-        simpleTestAccessor.list(path, recursive)*.getPath() as SortedSet == expected as SortedSet
+        simpleTestAccessor.search(path, recursive)*.getPath() as SortedSet == expected as SortedSet
 
         where:
         path          | recursive | expected

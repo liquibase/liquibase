@@ -48,7 +48,7 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
     }
 
     @Override
-    public List<Resource> list(String startPath, boolean recursive) throws IOException {
+    public List<Resource> search(String startPath, boolean recursive) throws IOException {
         if (startPath == null) {
             throw new IllegalArgumentException("Path must not be null");
         }

@@ -16,8 +16,4 @@ public class MavenResourceAccessor extends ClassLoaderResourceAccessor {
         super(classLoader);
     }
 
-    @Override
-    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-        return super.openStreams(relativeTo, streamPath);
-    }
 }

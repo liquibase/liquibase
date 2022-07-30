@@ -29,21 +29,6 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-        InputStream stream = null;
-        if (contentByFileName.containsKey(streamPath)) {
-            stream = new ByteArrayInputStream(contentByFileName.get(streamPath).getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
-        }
-        if (stream == null) {
-            return null;
-        } else {
-            InputStreamList list = new InputStreamList();
-            list.add(URI.create(streamPath), stream);
-            return list;
-        }
-    }
-
-    @Override
     public List<Resource> getAll(String path) throws IOException {
         path = path.replace("\\", "/");
         String content = contentByFileName.get(path);
@@ -51,11 +36,15 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
         if (content != null) {
             returnSet.add(new MockResource(path, content));
         }
+
+        if (returnSet.isEmpty()) {
+            return null;
+        }
         return returnSet;
     }
 
     @Override
-    public List<Resource> list(String path, boolean recursive) throws IOException {
+    public List<Resource> search(String path, boolean recursive) throws IOException {
         path = path.replace("\\", "/");
         List<Resource> returnList = new ArrayList<>();
         for (String file : contentByFileName.keySet()) {

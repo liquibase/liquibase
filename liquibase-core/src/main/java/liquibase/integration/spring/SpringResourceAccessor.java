@@ -39,11 +39,23 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public List<liquibase.resource.Resource> getAll(String path) throws IOException {
-        return null;
+        path = finalizeSearchPath(path);
+        final Resource[] springResources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(path);
+        List<liquibase.resource.Resource> returnList = new ArrayList<>();
+        for (Resource resource : springResources) {
+            if (resource.exists()) {
+                returnList.add(new SpringResource(path, resource.getURI(), resource));
+            }
+        }
+
+        if (returnList.isEmpty()) {
+            return null;
+        }
+        return returnList;
     }
 
     @Override
-    public List<liquibase.resource.Resource> list(String searchPath, boolean recursive) throws IOException {
+    public List<liquibase.resource.Resource> search(String searchPath, boolean recursive) throws IOException {
         if (recursive) {
             searchPath += "/**";
         } else {
@@ -77,25 +89,6 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         }
 
         return returnSet;
-    }
-
-    @Override
-    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-        String searchPath = getCompletePath(relativeTo, streamPath);
-        searchPath = finalizeSearchPath(searchPath);
-
-        final Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(searchPath);
-
-        InputStreamList returnList = new InputStreamList();
-        for (Resource foundResource : resources) {
-            try {
-                returnList.add(foundResource.getURI(), foundResource.getInputStream());
-            } catch (FileNotFoundException ignored) {
-                //don't add it to the return list
-            }
-        }
-
-        return returnList;
     }
 
     /**

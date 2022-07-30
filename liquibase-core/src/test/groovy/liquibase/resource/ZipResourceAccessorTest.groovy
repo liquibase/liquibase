@@ -1,7 +1,6 @@
 package liquibase.resource
 
-import liquibase.GlobalConfiguration
-import liquibase.Scope
+
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -56,7 +55,7 @@ class ZipResourceAccessorTest extends Specification {
     @Unroll
     def "list"() {
         expect:
-        simpleTestAccessor.list(path, recursive)*.getPath() == expected
+        simpleTestAccessor.search(path, recursive)*.getPath() == expected
 
         where:
         path                     | recursive | expected

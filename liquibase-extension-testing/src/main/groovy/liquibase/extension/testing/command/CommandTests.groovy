@@ -1187,13 +1187,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     //
     static class ClassLoaderResourceAccessorForTest extends ClassLoaderResourceAccessor {
         @Override
-        List<Resource> list(String path, boolean recursive) throws IOException {
-            def list = super.list(path, recursive)
+        List<Resource> search(String path, boolean recursive) throws IOException {
+            def list = super.search(path, recursive)
             if (list != null && ! list.isEmpty()) {
                 return list
             }
 
-            return super.list(new File(path).getName(), recursive)
+            return super.search(new File(path).getName(), recursive)
         }
     }
 

@@ -15,7 +15,7 @@ class AbstractResourceAccessorTest extends Specification {
             }
 
             @Override
-            List<Resource> list(String path, boolean recursive) throws IOException {
+            List<Resource> search(String path, boolean recursive) throws IOException {
                 return null
             }
 

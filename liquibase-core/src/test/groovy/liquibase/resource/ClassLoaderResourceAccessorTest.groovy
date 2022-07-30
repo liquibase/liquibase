@@ -41,18 +41,17 @@ class ClassLoaderResourceAccessorTest extends Specification {
 //        "db-change.log/changelog.xml"      | "data/file.csv"                  | "db-change.log/data/file.csv"
 //    }
 
-            @ Unroll("#featureName: #relativeTo #streamPath")
-
-    def "openStreams, checking content"() {
+    @Unroll
+    def "getAll, checking content: #path"() {
         given:
-        def streams = testResourceAccessor.openStreams(null, streamPath)
+        def resources = testResourceAccessor.getAll(path)
 
         expect:
-        streams.size() == 1
-        StreamUtil.readStreamAsString(streams.iterator().next()).split(/\r?\n/)[0] == expectedContent
+        resources.size() == 1
+        StreamUtil.readStreamAsString(resources.iterator().next().openInputStream()).split(/\r?\n/)[0] == expectedContent
 
         where:
-        streamPath                        | expectedContent
+        path                        | expectedContent
         "liquibase.properties"            | "# This is a sample liquibase.properties file for use by core unit tests. Its main purpose if to test the"
         "liquibase/empty.changelog.xml"   | "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\">"
         "file-in-zip-root.txt"            | "File in root"
@@ -62,24 +61,26 @@ class ClassLoaderResourceAccessorTest extends Specification {
         "com/example/jar/file-in-jar.txt" | "File in jar"
     }
 
-    @Unroll("#featureName: #relativeTo #streamPath")
-    def "openStreams, can't check content"() {
+    @Unroll
+    def "getAll, doesn't exist: #path"() {
         expect:
-        testResourceAccessor.openStreams(relativeTo, streamPath).size() == expectedSize
+        testResourceAccessor.getAll(path) == null
 
         where:
-        relativeTo | streamPath                                   | expectedSize
-        null       | "invalid_file"                               | 0
-        "/path/to" | "/another/invalid_file"                      | 0
-        null       | "com/example/everywhere/file-everywhere.txt" | 3
-
+        path << ["invalid_file", "/invalid_file"]
     }
+
+    def "getAll, multiple locations"() {
+        expect:
+        testResourceAccessor.getAll("com/example/everywhere/file-everywhere.txt").size() == 3
+    }
+
 
     @Unroll
     def "list"() {
         expect:
         //have to resort them because different test runners may put classloader entries in different orders
-        (testResourceAccessor.list(path, recursive)*.getPath()) as SortedSet == expectedValue as SortedSet
+        (testResourceAccessor.search(path, recursive)*.getPath()) as SortedSet == expectedValue as SortedSet
 
         where:
         [path, recursive, expectedValue] << [

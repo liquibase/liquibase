@@ -7,6 +7,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
@@ -36,9 +37,9 @@ public class SqlChangeLogParser implements ChangeLogParser {
         RawSQLChange change = new RawSQLChange();
 
         try {
-            InputStream sqlStream = resourceAccessor.openStream(null, physicalChangeLogLocation);
-            if (sqlStream != null) {
-                String sql = StreamUtil.readStreamAsString(sqlStream);
+            Resource sqlResource = resourceAccessor.get(physicalChangeLogLocation);
+            if (sqlResource != null) {
+                String sql = StreamUtil.readStreamAsString(sqlResource.openInputStream());
                 change.setSql(sql);
             }
             else {

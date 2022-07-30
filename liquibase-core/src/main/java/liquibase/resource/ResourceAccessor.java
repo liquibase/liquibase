@@ -2,11 +2,17 @@ package liquibase.resource;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
+import liquibase.util.FileUtil;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * ResourceAccessors abstract file access so they can be read in a variety of environments.
@@ -23,10 +29,21 @@ public interface ResourceAccessor extends AutoCloseable {
      * Returns {@link InputStreamList} since multiple resources can map to the same path, such as "META-INF/MAINFEST.MF".
      * Remember to close streams when finished with them.
      *
+     * @param relativeTo Location that streamPath should be found relative to. If null, streamPath is an absolute path
      * @return Empty list if the resource does not exist.
      * @throws IOException if there is an error reading an existing path.
+     *
+     * @deprecated Use {@link #search(String, boolean)} or {@link #getAll(String)}
      */
-    InputStreamList openStreams(String relativeTo, String streamPath) throws IOException;
+    @Deprecated
+    default InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
+        InputStreamList returnList = new InputStreamList();
+        for (Resource resource : search(resolve(relativeTo, streamPath), false)) {
+            returnList.add(resource.getUri(), resource.openInputStream());
+        }
+
+        return returnList;
+    }
 
     /**
      * Returns a single stream matching the given path. See {@link #openStreams(String, String)} for details about path options.
@@ -36,37 +53,108 @@ public interface ResourceAccessor extends AutoCloseable {
      * @return null if the resource does not exist
      * @throws IOException if multiple paths matched the stream
      * @throws IOException if there is an error reading an existing path
+     *
+     * @deprecated Use {@link #search(String, boolean)} or {@link #getAll(String)}
      */
-    InputStream openStream(String relativeTo, String streamPath) throws IOException;
+    @Deprecated
+    default InputStream openStream(String relativeTo, String streamPath) throws IOException {
+        Resource resource = get(resolve(relativeTo, streamPath));
+        if (resource == null) {
+            return null;
+        }
+        return resource.openInputStream();
 
-//    /**
-//     * Returns the path to all resources contained in the given path.
-//     * The passed path is not included in the returned set.
-//     * Returned strings should use "/" for file path separators, regardless of the OS and should accept both / and \ chars for file paths to be platform-independent.
-//     * Returned set is sorted, normally alphabetically but subclasses can use different comparators.
-//     * The values returned should be able to be passed into {@link #openStreams(String)} and return the contents.
-//     * Returned paths should normally be root-relative and therefore not be an absolute path, unless there is a good reason to be absolute.
-//     *
-//     *
-//     * @param relativeTo Location that streamPath should be found relative to. If null, path is an absolute path
-//     * @param path The path to lookup resources in.
-//     * @param recursive Set to true and will return paths to contents in sub directories as well.
-//     * @param includeFiles Set to true and will return paths to files.
-//     * @param includeDirectories Set to true and will return paths to directories.
-//     * @return empty set if nothing was found
-//     * @throws IOException if there is an error reading an existing root.
-//     */
-//    SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException;
+    }
 
     /**
-     * Finds all files
+     * Returns the final path of a file at the given path relative to a <b>file</b> at relativeTo.
+     * Therefore, the path is within relativeTo's directory.
+     * If relativeTo is null, return path.
+     * This method should return a value even if relativeTo or path do not exist.
      */
-    List<Resource> list(String path, boolean recursive) throws IOException;
+    default String resolve(String relativeTo, String path) {
+        if (relativeTo == null) {
+            return path;
+        }
+        return Paths.get(relativeTo).getParent().resolve(Paths.get(path)).toString();
+    }
 
+    /**
+     * Returns the path to all resources contained in the given path.
+     * The passed path is not included in the returned set.
+     * Returned strings should use "/" for file path separators, regardless of the OS and should accept both / and \ chars for file paths to be platform-independent.
+     * Returned set is sorted, normally alphabetically but subclasses can use different comparators.
+     * The values returned should be able to be passed into {@link #openStreams(String, String)} and return the contents.
+     * Returned paths should normally be root-relative and therefore not be an absolute path, unless there is a good reason to be absolute.
+     * <p>
+     * Default implementation calls {@link #search(String, boolean)} and collects the paths from the resources.
+     * Because the new method no longer supports listing directories, it will silently ignore the includeDirectories argument UNLESS includeFiles is false. In that case, it will throw an exception.
+     *
+     * @param relativeTo Location that streamPath should be found relative to. If null, path is an absolute path
+     * @param path The path to lookup resources in.
+     * @param recursive Set to true and will return paths to contents in sub directories as well.
+     * @param includeFiles Set to true and will return paths to files.
+     * @param includeDirectories Set to true and will return paths to directories.
+     * @return empty set if nothing was found
+     * @throws IOException if there is an error reading an existing root.
+     *
+     * @deprecated use {@link #search(String, boolean)}
+     */
+    @Deprecated
+    default SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        SortedSet<String> returnList = new TreeSet<>();
+        if (includeFiles) {
+            for (Resource resource : search(resolve(relativeTo, path), recursive)) {
+                returnList.add(resource.getPath());
+            }
+        } else {
+            throw new UnexpectedLiquibaseException("ResourceAccessor can no longer search only for directories");
+        }
+        return returnList;
+    }
+
+    /**
+     * Returns the path to all resources contained in the given path.
+     * Multiple resources may be returned with the same path, but only if they are actually unique files.
+     * Order is important to pay attention to, they should be returned in a user-expected manner based on this resource accessor.
+     *
+     * @param path The path to lookup resources in.
+     * @param recursive Set to true and will return paths to contents in subdirectories as well.
+     * @return empty set if nothing was found
+     * @throws IOException if there is an error searching the system.
+     */
+    List<Resource> search(String path, boolean recursive) throws IOException;
+
+    /**
+     * Returns all {@link Resource}s at the given path.
+     * For many resource accessors (such as a file system), only one resource can exist at a given spot,
+     * but some accessors (such as {@link CompositeResourceAccessor} or {@link ClassLoaderResourceAccessor}) can have multiple resources for a single path.
+     * <p>
+     * If the resourceAccessor returns multiple values, the returned List should be considered sorted for that resource accessor.
+     * For example, {@link ClassLoaderResourceAccessor} returns them in order based on the configured classloader.
+     * Order is important to pay attention to, because users may set {@link GlobalConfiguration#DUPLICATE_FILE_MODE} to pick the "best" file which is defined as
+     * "the first file from this function".
+     * <p>
+     * @return null if no resources match the path
+     * @throws IOException if there is an unexpected error determining what is at the path
+     */
     List<Resource> getAll(String path) throws IOException;
 
     /**
-     * Finds a single specific file. If multiple files match, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
+     * Convenience version of {@link #get(String)} which throws an exception if the file does not exist.
+     * @throws FileNotFoundException if the file does not exist
+     */
+    default Resource getExisting(String path) throws IOException {
+        Resource resource = get(path);
+        if (resource == null || !resource.exists()) {
+            throw new FileNotFoundException(FileUtil.getFileNotFoundMessage(path));
+        }
+        return resource;
+    }
+
+    /**
+     * Finds a single specific {@link }. If multiple files match the given path, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
+     * Default implementation calls {@link #getAll(String)}
      */
     default Resource get(String path) throws IOException {
         List<Resource> resources = getAll(path);

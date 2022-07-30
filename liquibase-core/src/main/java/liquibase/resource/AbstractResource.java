@@ -1,5 +1,7 @@
 package liquibase.resource;
 
+import liquibase.util.StringUtil;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
@@ -10,7 +12,11 @@ public abstract class AbstractResource implements Resource {
     private final URI uri;
 
     public AbstractResource(String path, URI uri) {
-        this.path = path;
+        this.path = path
+                .replace("\\", "/")
+                .replaceFirst("^classpath\\*?:", "")
+                .replaceFirst("^/", "");
+
         this.uri = uri;
     }
 

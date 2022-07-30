@@ -87,10 +87,9 @@ public abstract class StreamUtil {
      * @deprecated use {@link ResourceAccessor#openStream(String, String)}
      */
     public static InputStream openStream(String path, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
-        String relativeTo = null;
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            relativeTo = changeSet.getChangeLog().getPhysicalFilePath();
+            path = resourceAccessor.resolve(changeSet.getChangeLog().getPhysicalFilePath(), path);
         }
-        return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
+        return resourceAccessor.getExisting(path).openInputStream();
     }
 }
