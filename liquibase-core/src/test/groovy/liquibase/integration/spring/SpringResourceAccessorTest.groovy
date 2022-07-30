@@ -1,12 +1,13 @@
 package liquibase.integration.spring
 
+import liquibase.test.TestContext
 import org.springframework.core.io.DefaultResourceLoader
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class SpringResourceAccessorTest extends Specification {
 
-    def loader = new DefaultResourceLoader(Thread.currentThread().getContextClassLoader())
+    def loader = new DefaultResourceLoader(new URLClassLoader([new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/target/classes").toURI().toURL()] as URL[]))
     def resourceAccessor = new SpringResourceAccessor(loader)
 
     def "getAll"() {
