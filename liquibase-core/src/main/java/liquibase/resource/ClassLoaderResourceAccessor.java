@@ -47,8 +47,8 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
     }
 
     /**
-     * The classloader search logic in {@link #list(String, String, boolean, boolean, boolean)} does not handle jar files well.
-     * This method is called by that method to populate {@link #rootPaths} with additional paths to search.
+     * The classloader search logic in {@link #search(String, boolean)} does not handle jar files well.
+     * This method is called by that method to call {@link #addResourceAccessor(ResourceAccessor)} with paths to search.
      */
     protected void loadRootPaths(ClassLoader classLoader) {
         if (classLoader instanceof URLClassLoader) {
@@ -103,8 +103,8 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
         Enumeration<URL> all = classLoader.getResources(path);
         try {
             while (all.hasMoreElements()) {
-                URL url = all.nextElement();
-                returnList.add(new PathResource(path, Paths.get(url.toURI())));
+                URI uri = all.nextElement().toURI();
+                returnList.add(new URIResource(path, uri));
             }
         } catch (URISyntaxException e) {
             throw new IOException(e.getMessage(), e);
