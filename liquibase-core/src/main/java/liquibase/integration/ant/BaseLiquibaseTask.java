@@ -58,7 +58,7 @@ public abstract class BaseLiquibaseTask extends Task {
         log(coreBundle.getString("starting.liquibase"), Project.MSG_INFO);
         classLoader = getProject().createClassLoader(classpath);
         classLoader.setParent(this.getClass().getClassLoader());
-//        classLoader.setThreadContextLoader();
+        classLoader.setThreadContextLoader();
         validateParameters();
         final Database[] database = {null};
         try {
