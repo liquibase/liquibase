@@ -35,6 +35,7 @@ public interface ResourceAccessor extends AutoCloseable {
      *
      * @deprecated Use {@link #search(String, boolean)} or {@link #getAll(String)}
      */
+    @SuppressWarnings("java:S2095")
     @Deprecated
     default InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         InputStreamList returnList = new InputStreamList();

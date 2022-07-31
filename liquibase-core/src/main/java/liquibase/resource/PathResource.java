@@ -22,6 +22,7 @@ public class PathResource extends AbstractResource {
         return Files.exists(path);
     }
 
+    @SuppressWarnings("java:S2095")
     @Override
     public InputStream openInputStream() throws IOException {
         if (!this.exists()) {

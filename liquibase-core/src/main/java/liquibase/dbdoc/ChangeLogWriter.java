@@ -21,18 +21,17 @@ public class ChangeLogWriter {
         File xmlFile = new File(outputDir, changeLogOutFile.toLowerCase() + ".html");
         xmlFile.getParentFile().mkdirs();
 
-        BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(xmlFile,
-                false), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
-        Resource stylesheet = resourceAccessor.get(physicalFilePath);
-        if (stylesheet == null) {
-            throw new IOException("Can not find " + changeLog);
-        }
-        try (InputStream stream = stylesheet.openInputStream()) {
-            changeLogStream.write("<html><body><pre>\n");
-            changeLogStream.write(StreamUtil.readStreamAsString(stream).replace("<", "&lt;").replace(">", "&gt;"));
-            changeLogStream.write("\n</pre></body></html>");
-        } finally {
-            changeLogStream.close();
+        try (BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(xmlFile,
+                false), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))) {
+            Resource stylesheet = resourceAccessor.get(physicalFilePath);
+            if (stylesheet == null) {
+                throw new IOException("Can not find " + changeLog);
+            }
+            try (InputStream stream = stylesheet.openInputStream()) {
+                changeLogStream.write("<html><body><pre>\n");
+                changeLogStream.write(StreamUtil.readStreamAsString(stream).replace("<", "&lt;").replace(">", "&gt;"));
+                changeLogStream.write("\n</pre></body></html>");
+            }
         }
     }
 }

@@ -4,7 +4,6 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.logging.Logger;
 import liquibase.resource.Resource;
-import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
