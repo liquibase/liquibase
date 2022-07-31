@@ -13,8 +13,8 @@ public class PathResource extends AbstractResource {
     private final Path path;
 
     public PathResource(String logicalPath, Path path) {
-        super(logicalPath, path.toUri());
-        this.path = path;
+        super(logicalPath, path.normalize().toUri());
+        this.path = path.normalize();
     }
 
     @Override
