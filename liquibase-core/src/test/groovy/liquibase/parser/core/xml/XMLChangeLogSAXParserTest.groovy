@@ -95,7 +95,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 //        then:
 //        def e = thrown(ChangeLogParseException)
 //        e.message.contains("Error Reading Changelog File: " + File.separator + "invalid.txt")
-    }
+//    }
 
     def "getSchemaVersion"() {
         expect:
