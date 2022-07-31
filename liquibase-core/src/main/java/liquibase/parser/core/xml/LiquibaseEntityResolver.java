@@ -48,10 +48,13 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
             warnForMismatchedXsdVersion(systemId);
         }
 
-        InputStream stream;
+        InputStream stream = null;
         URL resourceUri = getSearchClassloader().getResource(path);
         if (resourceUri == null) {
-            stream = Scope.getCurrentScope().getResourceAccessor().getExisting(path).openInputStream();
+            Resource resource = Scope.getCurrentScope().getResourceAccessor().get(path);
+            if (resource != null) {
+                stream = resource.openInputStream();
+            }
         } else {
             stream = resourceUri.openStream();
         }
