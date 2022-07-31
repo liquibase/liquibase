@@ -49,31 +49,23 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         }
 
         InputStream stream;
-        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        Resource entityResource = null;
-        try {
-            entityResource = resourceAccessor.get(path);
-        } catch (IOException e) {
-            log.fine("Error loading " + path + " from the search path: " + e.getMessage(), e);
-        }
-        if (entityResource == null) {
-            URL resourceUri = getFallbackClassloader().getResource(path);
-
-            if (resourceUri == null) {
-                if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
-                    String errorMessage = "Unable to resolve xml entity " + systemId + ". " +
-                            GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
-                            "Check for spelling or capitalization errors and missing extensions such as liquibase-commercial in your XSD definition. Or, set it to 'false' to allow remote lookups of xsd files.";
-                    throw new XSDLookUpException(errorMessage);
-                } else {
-                    log.fine("Unable to resolve XML entity locally. Will load from network.");
-                    return null;
-                }
-            } else {
-                stream = resourceUri.openStream();
-            }
+        URL resourceUri = getSearchClassloader().getResource(path);
+        if (resourceUri == null) {
+            stream = Scope.getCurrentScope().getResourceAccessor().getExisting(path).openInputStream();
         } else {
-            stream = entityResource.openInputStream();
+            stream = resourceUri.openStream();
+        }
+
+        if (stream == null) {
+            if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
+                String errorMessage = "Unable to resolve xml entity " + systemId + ". " +
+                        GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
+                        "Check for spelling or capitalization errors and missing extensions such as liquibase-commercial in your XSD definition. Or, set it to 'false' to allow remote lookups of xsd files.";
+                throw new XSDLookUpException(errorMessage);
+            } else {
+                log.fine("Unable to resolve XML entity locally. Will load from network.");
+                return null;
+            }
         }
 
         org.xml.sax.InputSource source = new org.xml.sax.InputSource(stream);
@@ -84,7 +76,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     }
 
-    protected ClassLoader getFallbackClassloader() {
+    protected ClassLoader getSearchClassloader() {
         return Thread.currentThread().getContextClassLoader();
     }
 
