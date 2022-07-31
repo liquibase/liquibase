@@ -3,8 +3,6 @@ package liquibase.parser.core.xml;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.logging.Logger;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.InputStreamList;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
@@ -54,7 +52,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         Resource entityResource = resourceAccessor.get(path);
         if (entityResource == null) {
-            URL resourceUri = getClass().getClassLoader().getResource(path);
+            URL resourceUri = getFallbackClassloader().getResource(path);
 
             if (resourceUri == null) {
                 if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
@@ -79,6 +77,10 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
         return source;
 
+    }
+
+    protected ClassLoader getFallbackClassloader() {
+        return Thread.currentThread().getContextClassLoader();
     }
 
     /**
