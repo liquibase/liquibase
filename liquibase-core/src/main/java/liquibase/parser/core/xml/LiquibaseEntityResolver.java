@@ -50,7 +50,12 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
         InputStream stream;
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        Resource entityResource = resourceAccessor.get(path);
+        Resource entityResource = null;
+        try {
+            entityResource = resourceAccessor.get(path);
+        } catch (IOException e) {
+            log.fine("Error loading " + path + " from the search path: " + e.getMessage(), e);
+        }
         if (entityResource == null) {
             URL resourceUri = getFallbackClassloader().getResource(path);
 
