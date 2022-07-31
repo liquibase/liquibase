@@ -7,13 +7,11 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.FileUtil;
 import liquibase.util.LiquibaseUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -66,7 +64,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                     throw new XSDLookUpException(errorMessage);
                 } else {
                     log.fine("Unable to resolve XML entity locally. Will load from network.");
-                    throw new FileNotFoundException(FileUtil.getFileNotFoundMessage(path));
+                    return null;
                 }
             } else {
                 stream = resourceUri.openStream();
