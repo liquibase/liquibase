@@ -276,6 +276,32 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
 
+        def resourceAccessor = Scope.getCurrentScope().getResourceAccessor()
+
+        if (testDef.searchPath != null) {
+            def config = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
+
+            ConfigurationValueProvider propertiesProvider = new AbstractMapConfigurationValueProvider() {
+                @Override
+                protected Map<?, ?> getMap() {
+                    return Collections.singletonMap(GlobalConfiguration.SEARCH_PATH.getKey(), testDef.searchPath)
+                }
+
+                @Override
+                protected String getSourceDescription() {
+                    return "command tests search path override"
+                }
+
+                @Override
+                int getPrecedence() {
+                    return 1
+                }
+            }
+
+            config.registerProvider(propertiesProvider)
+            resourceAccessor = new SearchPathResourceAccessor(testDef.searchPath, Scope.getCurrentScope().getResourceAccessor())
+        }
+
         def scopeSettings = [
                 (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name)               : MockHubService,
