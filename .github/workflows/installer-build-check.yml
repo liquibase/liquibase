@@ -1,4 +1,4 @@
-name: Build and Test
+name: Build Test Installers
 
 # Job will run nightly at 03:05 EDT / 02:05 CDT
 # Time below is UTC
@@ -6,6 +6,9 @@ on:
   schedule:
     - cron: "5 7 * * *"
   workflow_dispatch:
+  push:
+    branches:
+      - gha-scheduled-*
 
 jobs:
   build-installers:
