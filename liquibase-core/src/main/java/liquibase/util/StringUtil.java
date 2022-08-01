@@ -176,7 +176,8 @@ public class StringUtil {
         } else {
             if (endDelimiter.length() == 1) {
                 if ("/".equals(endDelimiter)) {
-                    if (previousPiece != null && previousPiece.endsWith("*")) {
+                    if (previousPiece != null && !previousPiece.endsWith("\n")) {
+                        //don't count /'s the are there for comments for division signs or any other use besides a / at the beginning of a line
                         return false;
                     }
                 }
