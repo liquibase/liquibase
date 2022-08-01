@@ -2,6 +2,7 @@ package liquibase.extension.testing.command
 
 import liquibase.AbstractExtensibleObject
 import liquibase.CatalogAndSchema
+import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.changelog.ChangeLogHistoryService
@@ -31,6 +32,7 @@ import liquibase.logging.core.BufferedLogService
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.InputStreamList
 import liquibase.resource.ResourceAccessor
+import liquibase.resource.SearchPathResourceAccessor
 import liquibase.ui.ConsoleUIService
 import liquibase.ui.InputHandler
 import liquibase.ui.UIService
@@ -306,7 +308,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name)               : MockHubService,
                 (Scope.Attr.resourceAccessor.name())                  : testDef.resourceAccessor ?
-                                                                            testDef.resourceAccessor : Scope.getCurrentScope().getResourceAccessor(),
+                                                                            testDef.resourceAccessor : resourceAccessor,
                 (Scope.Attr.ui.name())                                : testDef.testUI ? testDef.testUI.initialize(uiOutputWriter, uiErrorWriter) :
                                                                                          new TestUI(uiOutputWriter, uiErrorWriter),
                 (Scope.Attr.logService.name())                        : logService
@@ -777,6 +779,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         private Map<String, ?> globalArguments = new HashMap<>()
 
+        private String searchPath
+
         /**
          * Arguments to command as key/value pairs
          */
@@ -844,6 +848,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         def setGlobalArguments(Map<String, Object> args) {
             this.globalArguments = args
+        }
+
+        def setSearchPath(String searchPath) {
+            this.searchPath = searchPath
         }
 
         def setExpectedFileContent(Map<String, Object> content) {
