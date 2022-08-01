@@ -32,4 +32,12 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         }
         return plugin.getResourceAccessor(root);
     }
+
+    public Resource getResource(String resource) throws IOException {
+        final PathHandler plugin = getPlugin(resource);
+        if (plugin == null) {
+            throw new IOException("Cannot parse resource location: '" + resource + "'");
+        }
+        return plugin.getResource(resource);
+    }
 }

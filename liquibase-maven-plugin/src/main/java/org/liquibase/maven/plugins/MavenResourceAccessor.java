@@ -2,9 +2,11 @@ package org.liquibase.maven.plugins;
 
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.InputStreamList;
+import liquibase.resource.Resource;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.SortedSet;
 
 /**

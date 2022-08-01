@@ -1186,6 +1186,17 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     // to locate files that they write and then try to read
     //
     static class ClassLoaderResourceAccessorForTest extends ClassLoaderResourceAccessor {
+
+        @Override
+        List<Resource> getAll(String path) throws IOException {
+            def list = super.getAll(path)
+            if (list != null && !list.isEmpty()) {
+                return list;
+            }
+
+            return super.getAll(new File(path).getName())
+        }
+
         @Override
         List<Resource> search(String path, boolean recursive) throws IOException {
             def list = super.search(path, recursive)

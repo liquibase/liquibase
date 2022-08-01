@@ -37,14 +37,9 @@ public class SqlChangeLogParser implements ChangeLogParser {
         RawSQLChange change = new RawSQLChange();
 
         try {
-            Resource sqlResource = resourceAccessor.get(physicalChangeLogLocation);
-            if (sqlResource != null) {
-                String sql = StreamUtil.readStreamAsString(sqlResource.openInputStream());
-                change.setSql(sql);
-            }
-            else {
-                throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
-            }
+            Resource sqlResource = resourceAccessor.getExisting(physicalChangeLogLocation);
+            String sql = StreamUtil.readStreamAsString(sqlResource.openInputStream());
+            change.setSql(sql);
         } catch (IOException e) {
             throw new ChangeLogParseException(e);
         }

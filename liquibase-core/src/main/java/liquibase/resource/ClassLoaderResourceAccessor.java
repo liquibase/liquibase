@@ -17,10 +17,10 @@ import java.util.*;
  *
  * @see OSGiResourceAccessor for OSGi-based classloaders
  */
-public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
+public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
     private ClassLoader classLoader;
-    private boolean initialized = false;
+    private CompositeResourceAccessor searchResourceAccessor;
     protected SortedSet<String> description;
 
     public ClassLoaderResourceAccessor() {
@@ -35,7 +35,19 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
     @Override
     public List<String> describeLocations() {
         init();
-        return super.describeLocations();
+
+        List<String> returnList = new ArrayList<>();
+        returnList.add("Classpath including:");
+        returnList.addAll(searchResourceAccessor.describeLocations());
+
+        return returnList;
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (searchResourceAccessor != null) {
+            searchResourceAccessor.close();
+        }
     }
 
     /**
@@ -43,16 +55,16 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
      * Not done in the constructor for performance reasons, but can be called at the beginning of every public method.
      */
     protected void init() {
-        if (!initialized) {
+        if (searchResourceAccessor == null) {
             this.description = new TreeSet<>();
+            this.searchResourceAccessor = new CompositeResourceAccessor();
             loadRootPaths(classLoader);
-            initialized  = true;
         }
     }
 
     /**
      * The classloader search logic in {@link #search(String, boolean)} does not handle jar files well.
-     * This method is called by that method to call {@link #addResourceAccessor(ResourceAccessor)} with paths to search.
+     * This method is called by that method to configure an internal {@link ResourceAccessor} with paths to search.
      */
     protected void loadRootPaths(ClassLoader classLoader) {
         if (classLoader instanceof URLClassLoader) {
@@ -64,9 +76,9 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
                         Path path = Paths.get(url.toURI());
                         String lowerCaseName = path.getFileName().toString().toLowerCase();
                         if (lowerCaseName.endsWith(".jar") || lowerCaseName.endsWith("zip")) {
-                            addResourceAccessor(new ZipResourceAccessor(path));
+                            searchResourceAccessor.addResourceAccessor(new ZipResourceAccessor(path));
                         } else {
-                            addResourceAccessor(new DirectoryResourceAccessor(path));
+                            searchResourceAccessor.addResourceAccessor(new DirectoryResourceAccessor(path));
                         }
                     } catch (Throwable e) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Cannot create resourceAccessor for url " + url.toExternalForm() + ": " + e.getMessage(), e);
@@ -93,7 +105,7 @@ public class ClassLoaderResourceAccessor extends CompositeResourceAccessor {
     @Override
     public List<Resource> search(String path, boolean recursive) throws IOException {
         init();
-        return super.search(path, recursive);
+        return searchResourceAccessor.search(path, recursive);
     }
 
     @Override

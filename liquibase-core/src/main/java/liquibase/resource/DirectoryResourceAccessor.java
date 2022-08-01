@@ -33,7 +33,7 @@ public class DirectoryResourceAccessor extends AbstractPathResourceAccessor {
         if (directory == null) {
             throw new IllegalArgumentException("Directory must not be null");
         }
-        directory = directory.normalize();
+        directory = directory.normalize().toAbsolutePath();
         Scope.getCurrentScope().getLog(getClass()).fine("Creating resourceAccessor for directory " + directory);
         this.rootDirectory = directory;
         if (!Files.exists(directory)) {
