@@ -55,18 +55,18 @@ jobs:
           version="${{ needs.setup.outputs.version }}"
           
           ##### Rebuild installers
-          tarFile=$(pwd)/re-version/final/liquibase-$version.tar.gz
+          tarFile=$(pwd)/re-version/final/liquibase-0-SNAPSHOT.tar.gz
           scriptDir=$(pwd)/.github/util/
           
-          mkdir -p liquibase-dist/target/liquibase-$version
-          (cd liquibase-dist/target/liquibase-$version && tar xfz $tarFile)
-          (cd liquibase-dist && $scriptDir/package-install4j.sh $version)
+          mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
+          (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz $tarFile)
+          (cd liquibase-dist && $scriptDir/package-install4j.sh 0-SNAPSHOT)
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
           
           ##Sign Files
           .github/util/sign-artifacts.sh re-version/final
           
-          (cd re-version/final && zip liquibase-additional-$version.zip *.asc *.md5 *.sha1)
+          (cd re-version/final && zip liquibase-additional-0-SNAPSHOT.zip *.asc *.md5 *.sha1)
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
