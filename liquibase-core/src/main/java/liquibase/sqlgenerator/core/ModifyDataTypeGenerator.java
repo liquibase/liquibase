@@ -27,9 +27,8 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Warnings warnings = super.warn(modifyDataTypeStatement, database, sqlGeneratorChain);
 
-        if ((database instanceof MySQLDatabase) && !modifyDataTypeStatement.getNewDataType().toLowerCase().contains
-            ("varchar")) {
-            warnings.addWarning("modifyDataType will lose primary key/autoincrement/not null settings for mysql.  Use <sql> and re-specify all configuration if this is the case");
+        if (database instanceof MySQLDatabase) {
+            ((MySQLDatabase) database).warnAboutAlterColumn("modifyDataType", warnings);
         }
 
         return warnings;

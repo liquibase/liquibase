@@ -1,5 +1,6 @@
 package liquibase.parser;
 
+import liquibase.GlobalConfiguration;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 
@@ -11,6 +12,9 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> SUPPORT_PROPERTY_ESCAPING;
     public static final ConfigurationDefinition<Boolean> USE_PROCEDURE_SCHEMA;
     public static final ConfigurationDefinition<MissingPropertyMode> MISSING_PROPERTY_MODE;
+
+    public static final ConfigurationDefinition<ChangelogParseMode> CHANGELOG_PARSE_MODE;
+
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -30,11 +34,23 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
                 .setDescription("How to handle changelog property expressions where a value is not set. For example, a string '${address}' when no 'address' property was defined. Values can be: 'preserve' which leaves the string as-is, 'empty' which replaces it with an empty string, or 'error' which stops processing with an error.")
                 .setDefaultValue(MissingPropertyMode.PRESERVE)
                 .build();
+
+
+        CHANGELOG_PARSE_MODE = builder.define("changelogParseMode", ChangelogParseMode.class)
+                .setDescription("Configures how to handle unknown fields in changelog files. Possible values: STRICT which causes parsing to fail, and LAX which continues with the parsing.")
+                .setDefaultValue(ChangelogParseMode.STRICT)
+                .build();
+
     }
 
     public enum MissingPropertyMode {
         PRESERVE,
         EMPTY,
         ERROR,
+    }
+
+    public enum ChangelogParseMode {
+        STRICT,
+        LAX,
     }
 }
