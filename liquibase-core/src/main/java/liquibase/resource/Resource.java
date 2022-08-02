@@ -17,10 +17,6 @@ public interface Resource {
      */
     String getPath();
 
-    /**
-     * @return true if the given resource exists
-     */
-    boolean exists();
 
     /**
      * Opens an input stream to read from this resource.

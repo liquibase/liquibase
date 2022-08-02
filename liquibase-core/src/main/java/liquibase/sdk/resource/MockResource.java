@@ -17,11 +17,6 @@ public class MockResource extends AbstractResource {
     }
 
     @Override
-    public boolean exists() {
-        return true;
-    }
-
-    @Override
     public InputStream openInputStream() throws IOException {
         return new ByteArrayInputStream(content.getBytes());
     }

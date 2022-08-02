@@ -22,8 +22,9 @@ public interface PathHandler extends Plugin {
     ResourceAccessor getResourceAccessor(String root) throws IOException;
 
     /**
-     * Parse the given "absolute" path and return a {@link liquibase.resource.Resource} for it.
+     * Parse the given "absolute" path and return a {@link liquibase.resource.Resource} for it if it exists.
      *
+     * @return null if the resource does not exist.
      * @throws IOException if the path is invalid
      */
     Resource getResource(String path) throws IOException;

@@ -152,7 +152,7 @@ public interface ResourceAccessor extends AutoCloseable {
      */
     default Resource getExisting(String path) throws IOException {
         Resource resource = get(path);
-        if (resource == null || !resource.exists()) {
+        if (resource == null) {
             throw new FileNotFoundException(FileUtil.getFileNotFoundMessage(path));
         }
         return resource;
@@ -160,7 +160,9 @@ public interface ResourceAccessor extends AutoCloseable {
 
     /**
      * Finds a single specific {@link }. If multiple files match the given path, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
-     * Default implementation calls {@link #getAll(String)}
+     * Default implementation calls {@link #getAll(String)}.
+     *
+     * @return null if the path does not exist
      */
     default Resource get(String path) throws IOException {
         List<Resource> resources = getAll(path);

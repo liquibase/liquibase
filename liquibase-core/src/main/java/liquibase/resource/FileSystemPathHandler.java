@@ -36,7 +36,7 @@ public class FileSystemPathHandler extends AbstractPathHandler {
     public Resource getResource(String path) throws IOException {
         Path pathObj = Paths.get(path);
         if (!pathObj.toFile().exists()) {
-            throw new IOException("File '" + path + "' does not exist");
+            return null;
         }
         return new PathResource(path, pathObj);
     }
