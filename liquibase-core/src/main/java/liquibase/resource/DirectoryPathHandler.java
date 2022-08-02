@@ -30,7 +30,9 @@ public class DirectoryPathHandler extends AbstractPathHandler {
     }
 
     public ResourceAccessor getResourceAccessor(String root) {
-        root = root.replace("file:", "");
+        root = root
+                .replace("file:", "")
+                .replace("\\", "/");
         return new DirectoryResourceAccessor(new File(root));
     }
 

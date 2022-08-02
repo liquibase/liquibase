@@ -51,6 +51,7 @@ class DirectoryPathHandlerTest extends Specification {
         where:
         root << [
                 new File("").absolutePath,
+                new File("").absolutePath.replace("/", "\\"),
                 "file:/" + new File("").absolutePath,
 
         ]
