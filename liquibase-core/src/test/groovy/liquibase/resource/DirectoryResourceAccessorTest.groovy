@@ -1,6 +1,6 @@
 package liquibase.resource
 
-
+import liquibase.util.StreamUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -16,6 +16,77 @@ class DirectoryResourceAccessorTest extends Specification {
         simpleTestAccessor = new DirectoryResourceAccessor(testClasspathRoot);
 
     }
+
+    @Unroll
+    def "resolve #relativeTo #path"() {
+        expect:
+        new DirectoryResourceAccessor(new File(".")).resolve(relativeTo, path) == expected
+
+        where:
+        relativeTo      | path            | expected
+        null            | null            | null
+        null            | "x.sql"         | "x.sql"
+        null            | "path/to/x.sql" | "path/to/x.sql"
+        null            | "path/to/x"     | "path/to/x"
+        null            | "path/to/x"     | "path/to/x"
+        "base.sql"      | "path/to/x"     | "path/to/x"
+        "base/path.sql" | "x"             | "base/x"
+        "base/path.sql" | "to/x.sql"      | "base/to/x.sql"
+    }
+
+    def "openStreams and openStream"() {
+        when:
+        def accessor = new DirectoryResourceAccessor("src/main" as File)
+
+        def streams = accessor.openStreams(relativeTo, path)
+        def stream = accessor.openStream(relativeTo, path)
+
+        then:
+        streams.size() == 1
+        StreamUtil.readStreamAsString(streams.iterator().next()).contains(expected)
+        StreamUtil.readStreamAsString(stream).contains(expected)
+
+        where:
+        relativeTo                      | path                            | expected
+        null                            | "java/liquibase/Liquibase.java" | "class Liquibase"
+        "java/liquibase/Liquibase.java" | "Scope.java"                    | "class Scope"
+        "java/liquibase/Liquibase.java" | "util/StringUtil.java"          | "class StringUtil"
+    }
+
+    @Unroll
+    def "list non-recursive"() {
+        when:
+        def accessor = new DirectoryResourceAccessor("src/main" as File)
+
+        def results = accessor.list(relativeTo, path, false, true, false)
+
+        then:
+        results.contains("java/liquibase/AbstractExtensibleObject.java")
+        !results.contains("java/liquibase/util/StringUtil.java")
+
+        where:
+        relativeTo      | path
+        null            | "java/liquibase"
+        "java/file.txt" | "liquibase"
+    }
+
+    @Unroll
+    def "list recursive"() {
+        when:
+        def accessor = new DirectoryResourceAccessor("src/main" as File)
+
+        def results = accessor.list(relativeTo, path, true, true, false)
+
+        then:
+        results.contains("java/liquibase/AbstractExtensibleObject.java")
+        results.contains("java/liquibase/util/StringUtil.java")
+
+        where:
+        relativeTo      | path
+        null            | "java/liquibase"
+        "java/file.txt" | "liquibase"
+    }
+
 
     @Unroll
     def "Cannot construct invalid values"() {

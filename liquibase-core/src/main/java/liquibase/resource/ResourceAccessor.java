@@ -9,6 +9,7 @@ import liquibase.util.FileUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.SortedSet;
@@ -32,7 +33,6 @@ public interface ResourceAccessor extends AutoCloseable {
      * @param relativeTo Location that streamPath should be found relative to. If null, streamPath is an absolute path
      * @return Empty list if the resource does not exist.
      * @throws IOException if there is an error reading an existing path.
-     *
      * @deprecated Use {@link #search(String, boolean)} or {@link #getAll(String)}
      */
     @SuppressWarnings("java:S2095")
@@ -54,7 +54,6 @@ public interface ResourceAccessor extends AutoCloseable {
      * @return null if the resource does not exist
      * @throws IOException if multiple paths matched the stream
      * @throws IOException if there is an error reading an existing path
-     *
      * @deprecated Use {@link #search(String, boolean)} or {@link #getAll(String)}
      */
     @Deprecated
@@ -77,7 +76,12 @@ public interface ResourceAccessor extends AutoCloseable {
         if (relativeTo == null) {
             return path;
         }
-        return Paths.get(relativeTo).getParent().resolve(Paths.get(path)).toString();
+        Path basePath = Paths.get(relativeTo).getParent();
+        if (basePath == null) {
+            return path;
+        }
+
+        return basePath.resolve(path).normalize().toString().replace("\\", "/");
     }
 
     /**
@@ -91,14 +95,13 @@ public interface ResourceAccessor extends AutoCloseable {
      * Default implementation calls {@link #search(String, boolean)} and collects the paths from the resources.
      * Because the new method no longer supports listing directories, it will silently ignore the includeDirectories argument UNLESS includeFiles is false. In that case, it will throw an exception.
      *
-     * @param relativeTo Location that streamPath should be found relative to. If null, path is an absolute path
-     * @param path The path to lookup resources in.
-     * @param recursive Set to true and will return paths to contents in sub directories as well.
-     * @param includeFiles Set to true and will return paths to files.
+     * @param relativeTo         Location that streamPath should be found relative to. If null, path is an absolute path
+     * @param path               The path to lookup resources in.
+     * @param recursive          Set to true and will return paths to contents in sub directories as well.
+     * @param includeFiles       Set to true and will return paths to files.
      * @param includeDirectories Set to true and will return paths to directories.
      * @return empty set if nothing was found
      * @throws IOException if there is an error reading an existing root.
-     *
      * @deprecated use {@link #search(String, boolean)}
      */
     @Deprecated
@@ -119,7 +122,7 @@ public interface ResourceAccessor extends AutoCloseable {
      * Multiple resources may be returned with the same path, but only if they are actually unique files.
      * Order is important to pay attention to, they should be returned in a user-expected manner based on this resource accessor.
      *
-     * @param path The path to lookup resources in.
+     * @param path      The path to lookup resources in.
      * @param recursive Set to true and will return paths to contents in subdirectories as well.
      * @return empty set if nothing was found
      * @throws IOException if there is an error searching the system.
@@ -136,6 +139,7 @@ public interface ResourceAccessor extends AutoCloseable {
      * Order is important to pay attention to, because users may set {@link GlobalConfiguration#DUPLICATE_FILE_MODE} to pick the "best" file which is defined as
      * "the first file from this function".
      * <p>
+     *
      * @return null if no resources match the path
      * @throws IOException if there is an unexpected error determining what is at the path
      */
@@ -143,6 +147,7 @@ public interface ResourceAccessor extends AutoCloseable {
 
     /**
      * Convenience version of {@link #get(String)} which throws an exception if the file does not exist.
+     *
      * @throws FileNotFoundException if the file does not exist
      */
     default Resource getExisting(String path) throws IOException {

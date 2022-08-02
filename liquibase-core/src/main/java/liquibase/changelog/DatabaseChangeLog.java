@@ -36,15 +36,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final ThreadLocal<DatabaseChangeLog> ROOT_CHANGE_LOG = new ThreadLocal<>();
     private static final ThreadLocal<DatabaseChangeLog> PARENT_CHANGE_LOG = new ThreadLocal<>();
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseChangeLog.class);
-
-    public static final Pattern CLASSPATH_PATTERN = Pattern.compile("classpath:");
-    public static final Pattern SLASH_PATTERN = Pattern.compile("^/");
-    public static final Pattern NON_CLASSPATH_PATTERN = Pattern.compile("^classpath:");
-    public static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
-    public static final Pattern DOUBLE_SLASH_PATTERN = Pattern.compile("//+");
-    public static final Pattern SLASH_DOT_SLASH_PATTERN = Pattern.compile("/\\./");
-    public static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
-    public static final Pattern DOT_SLASH_PATTERN = Pattern.compile("^\\.?/");
+    private static final Pattern SLASH_PATTERN = Pattern.compile("^/");
+    private static final Pattern NON_CLASSPATH_PATTERN = Pattern.compile("^classpath:");
+    private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
+    private static final Pattern DOUBLE_SLASH_PATTERN = Pattern.compile("//+");
+    private static final Pattern SLASH_DOT_SLASH_PATTERN = Pattern.compile("/\\./");
+    private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
+    private static final Pattern DOT_SLASH_PATTERN = Pattern.compile("^\\.?/");
 
     private PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
     private String physicalFilePath;
@@ -658,12 +656,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             return false;
         }
 
-        String relativeBaseFileName = this.getPhysicalFilePath();
         if (isRelativePath) {
-            relativeBaseFileName = CLASSPATH_PATTERN.matcher(relativeBaseFileName).replaceFirst("");
-            fileName = FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
+            fileName = resourceAccessor.resolve(this.getPhysicalFilePath(), fileName);
         }
-        fileName = CLASSPATH_PATTERN.matcher(fileName).replaceFirst("");
         DatabaseChangeLog changeLog;
         try {
             DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
@@ -696,7 +691,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             boolean matchesFileExtension = StringUtil.trimToEmpty(fileName).matches("\\.\\w+$");
             if (matchesFileExtension || onUnknownFileFormat == OnUnknownFileFormat.WARN) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        "included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type"
+                        "included file " + fileName + "/" + fileName + " is not a recognized file type"
                 );
             }
             return false;
