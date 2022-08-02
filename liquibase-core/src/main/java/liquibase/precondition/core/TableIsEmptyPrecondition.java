@@ -7,7 +7,7 @@ public class TableIsEmptyPrecondition extends RowCountPrecondition {
     }
 
     @Override
-    protected String getFailureMessage(int result) {
+    protected String getFailureMessage(int result, int expectedRows) {
         return "Table "+getTableName()+" is not empty. Contains "+result+" rows";
     }
 
