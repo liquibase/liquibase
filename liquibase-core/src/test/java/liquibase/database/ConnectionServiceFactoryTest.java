@@ -1,13 +1,9 @@
 package liquibase.database;
 
-import liquibase.database.jvm.JdbcConnection;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.sql.Driver;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import liquibase.database.jvm.JdbcConnection;
 
 public class ConnectionServiceFactoryTest {
 

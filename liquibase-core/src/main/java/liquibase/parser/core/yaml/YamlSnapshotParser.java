@@ -19,6 +19,7 @@ import java.util.Map;
 
 public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
 
+    @SuppressWarnings("java:S2095")
     @Override
     public DatabaseSnapshot parse(String path, ResourceAccessor resourceAccessor) throws LiquibaseParseException {
         Yaml yaml = new Yaml(new SafeConstructor());

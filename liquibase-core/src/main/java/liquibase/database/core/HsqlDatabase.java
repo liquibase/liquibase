@@ -17,6 +17,7 @@ import java.util.*;
 import static liquibase.statement.DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER;
 
 public class HsqlDatabase extends AbstractJdbcDatabase {
+
     private static final Map<String, HashSet<String>> SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP;
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
@@ -511,5 +512,11 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
         // HyperSQL does not seem to specify the exact number of possible fractional digits in its documentation,
         // this value is derived from tests.
         return 9;
+    }
+
+    @Override
+    public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy, String generationType, Boolean defaultOnNull) {
+        final String clause = super.getAutoIncrementClause(startWith, incrementBy, generationType, defaultOnNull);
+        return clause.replace(",", ""); //sql doesn't use commas between the values
     }
 }
