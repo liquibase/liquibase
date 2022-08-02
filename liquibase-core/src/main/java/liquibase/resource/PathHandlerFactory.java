@@ -3,6 +3,7 @@ package liquibase.resource;
 import liquibase.plugin.AbstractPluginFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Singleton for working with {@link PathHandler}s.
@@ -32,6 +33,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         }
         return plugin.getResourceAccessor(root);
     }
+
 
     public Resource getResource(String resource) throws IOException {
         final PathHandler plugin = getPlugin(resource);

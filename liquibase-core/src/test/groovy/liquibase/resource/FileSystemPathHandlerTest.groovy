@@ -39,7 +39,6 @@ class FileSystemPathHandlerTest extends Specification {
         new FileSystemPathHandler().getResource("/invalid/file/path.txt")
 
         then:
-        def e = thrown(IOException)
-        e.message == "File '/invalid/file/path.txt' does not exist"
+        assert inputStream == null
     }
 }
