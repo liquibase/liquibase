@@ -526,8 +526,7 @@ public class LiquibaseCommandLine {
         }
 
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-        ResourceAccessor resourceAccessor = pathHandlerFactory.getResourceAccessor(defaultsFileConfig.getValue());
-        Resource resource = resourceAccessor.get(defaultsFileConfig.getValue());
+        Resource resource = pathHandlerFactory.getResource(defaultsFileConfig.getValue());
         if (resource != null) {
             try (InputStream defaultsStream = resource.openInputStream()) {
                 if (defaultsStream != null) {

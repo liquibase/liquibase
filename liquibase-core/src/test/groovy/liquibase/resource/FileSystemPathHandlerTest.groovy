@@ -36,9 +36,9 @@ class FileSystemPathHandlerTest extends Specification {
 
     def "open fails on invalid file"() {
         when:
-        new FileSystemPathHandler().getResource("/invalid/file/path.txt")
+        def resource= new FileSystemPathHandler().getResource("/invalid/file/path.txt")
 
         then:
-        assert inputStream == null
+        assert resource == null
     }
 }
