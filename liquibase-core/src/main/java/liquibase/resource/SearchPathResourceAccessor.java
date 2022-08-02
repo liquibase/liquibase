@@ -25,7 +25,7 @@ public class SearchPathResourceAccessor extends CompositeResourceAccessor {
      * Creates itself with the given searchPath value.
      * If any of the paths in {@link GlobalConfiguration#SEARCH_PATH} are invalid, an error is logged but no exception is thrown from this method.
      *
-     * @param defaultAccessors Only uses these successors if searchPath is null.
+     * @param defaultAccessors Only uses these accessors if searchPath is null.
      */
     public SearchPathResourceAccessor(String searchPath, ResourceAccessor... defaultAccessors) {
 

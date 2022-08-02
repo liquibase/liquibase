@@ -2,21 +2,16 @@ package liquibase.integration.spring;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.AbstractResourceAccessor;
-import liquibase.resource.InputStreamList;
 import org.springframework.core.io.*;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.TreeSet;
 
 public class SpringResourceAccessor extends AbstractResourceAccessor {
 
@@ -77,18 +72,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public List<String> describeLocations() {
-        final List<String> returnSet = new ArrayList<>();
-
-        final ClassLoader classLoader = resourceLoader.getClassLoader();
-        if (classLoader instanceof URLClassLoader) {
-            for (URL url : ((URLClassLoader) classLoader).getURLs()) {
-                returnSet.add(url.toExternalForm());
-            }
-        } else {
-            returnSet.add("Spring resources");
-        }
-
-        return returnSet;
+        return Collections.singletonList("Spring classpath");
     }
 
     /**
@@ -125,32 +109,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         }
     }
 
-    /**
-     * Returns the complete path to the resource, taking the relative path into account
-     */
-    protected String getCompletePath(String relativeTo, String path) throws IOException {
-        path = path.replace("\\", "/");
-
-        String searchPath;
-        if (relativeTo == null) {
-            searchPath = path;
-        } else {
-            relativeTo = relativeTo.replace("\\", "/");
-
-            boolean relativeIsFile;
-            Resource rootResource = getResource(relativeTo);
-            relativeIsFile = resourceIsFile(rootResource);
-
-            if (relativeIsFile) {
-                searchPath = relativeTo.replaceFirst("/[^/]+$", "") + "/" + path;
-            } else {
-                searchPath = relativeTo + "/" + path;
-            }
-        }
-        return searchPath;
-    }
-
-    /**
+     /**
      * Looks up the given resource.
      */
     protected Resource getResource(String resourcePath) {
@@ -196,34 +155,6 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         searchPath = StringUtils.cleanPath(searchPath);
 
         return searchPath;
-    }
-
-    private static class SpringResource extends liquibase.resource.AbstractResource implements liquibase.resource.Resource {
-
-        private final Resource resource;
-
-        public SpringResource(String path, URI uri, Resource resource) {
-            super(path, uri);
-            this.resource = resource;
-        }
-
-        @Override
-        public boolean isWritable() {
-            return resource instanceof WritableResource && ((WritableResource) resource).isWritable();
-        }
-
-        @Override
-        public InputStream openInputStream() throws IOException {
-            return resource.getInputStream();
-        }
-
-        @Override
-        public OutputStream openOutputStream() throws IOException {
-            if (resource instanceof WritableResource) {
-                return ((WritableResource) resource).getOutputStream();
-            }
-            throw new IOException("Read only");
-        }
     }
 
 }

@@ -12,14 +12,16 @@ class CompositeResourceAccessorTest extends Specification {
     @Shared
     InputStream validStream = this.getClass().getClassLoader().getResourceAsStream("liquibase/resource/CompositeResourceAccessorTest.class")
     InputStreamList empty = new InputStreamList()
+
     @Shared
-    SortedSet<String> validResources;
+    List<Resource> validResources;
 
     def setupSpec() {
-        validResources = new TreeSet<>()
+        validResources = new ArrayList<>()
         def resources = this.getClass().getClassLoader().getResources("liquibase")
         while (resources.hasMoreElements()) {
-            validResources.add(resources.nextElement().toExternalForm())
+            URL element = resources.nextElement()
+            validResources.add(new URIResource(element.toExternalForm().replaceFirst(".*/liquibase/", "liquibase/"), element.toURI()))
         }
 
     }
@@ -36,22 +38,22 @@ class CompositeResourceAccessorTest extends Specification {
         }
 
     }
-//
-//    @Unroll
-//    def "list"() {
-//        when:
-//        1 * first.list("file", true) >> firstAccessorMock
-//        1 * second.list("file", true) >> secondAccessorMock
-//        def list = composite.list("file", true);
-//
-//        then:
-//        list == expected
-//
-//        where:
-//        firstAccessorMock | secondAccessorMock | expected
-//        validResources    | [] as List         | validResources
-//        [] as List        | validResources     | validResources
-//        [] as List        | [] as List         | [] as List
-//        validResources    | validResources     | validResources
-//    }
+
+    @Unroll
+    def "search"() {
+        when:
+        1 * first.search("file", true) >> firstAccessorMock
+        1 * second.search("file", true) >> secondAccessorMock
+        def list = composite.search("file", true);
+
+        then:
+        list == expected
+
+        where:
+        firstAccessorMock | secondAccessorMock | expected
+        validResources    | [] as List         | validResources
+        [] as List        | validResources     | validResources
+        [] as List        | [] as List         | [] as List
+        validResources    | validResources     | validResources
+    }
 }

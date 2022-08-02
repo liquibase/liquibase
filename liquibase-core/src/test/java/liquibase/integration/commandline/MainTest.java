@@ -373,23 +373,23 @@ public class MainTest {
         cli.configureClassLoader();
     }
 
-//    @Test
-//    public void windowsConfigureClassLoaderLocation() throws Exception {
-//        Main cli = new Main();
-//
-//        if (cli.isWindows())
-//        {
-//          System.setProperty("os.name", "Windows XP");
-//          cli.classpath = "c:\\;c:\\windows\\";
-//          cli.applyDefaults();
-//          cli.configureClassLoader();
-//
-//          URL[] classloaderURLs = ((URLClassLoader) cli.classLoader).getURLs();
-//            assertEquals("Parsing example Windows classpath returns 2 entries", 2, classloaderURLs.length);
-//            assertEquals("Windows path C:\\ is correctly parsed", "file:/c:/", classloaderURLs[0].toExternalForm());
-//            assertEquals("Windows path C:\\windows\\ is correctly parsed", "file:/c:/windows/", classloaderURLs[1].toExternalForm());
-//        }
-//    }
+    @Test
+    public void windowsConfigureClassLoaderLocation() throws Exception {
+        Main cli = new Main();
+
+        if (cli.isWindows())
+        {
+          System.setProperty("os.name", "Windows XP");
+          cli.classpath = "c:\\;c:\\windows\\";
+          cli.applyDefaults();
+          cli.configureClassLoader();
+
+          URL[] classloaderURLs = ((URLClassLoader) cli.classLoader).getURLs();
+            assertEquals("Parsing example Windows classpath returns 2 entries", 2, classloaderURLs.length);
+            assertEquals("Windows path C:\\ is correctly parsed", "file:/c:/", classloaderURLs[0].toExternalForm());
+            assertEquals("Windows path C:\\windows\\ is correctly parsed", "file:/c:/windows/", classloaderURLs[1].toExternalForm());
+        }
+    }
 
     @Test
     public void unixConfigureClassLoaderLocation() throws Exception {

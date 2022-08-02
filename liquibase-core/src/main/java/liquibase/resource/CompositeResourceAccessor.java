@@ -1,5 +1,6 @@
 package liquibase.resource;
 
+import liquibase.Scope;
 import liquibase.util.CollectionUtil;
 
 import java.io.IOException;
@@ -25,7 +26,11 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
     @Override
     public void close() throws Exception {
         for (ResourceAccessor accessor : resourceAccessors) {
-            accessor.close();
+            try {
+                accessor.close();
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Error closing " + accessor.getClass().getName() + ": " + e.getMessage(), e);
+            }
         }
     }
 
