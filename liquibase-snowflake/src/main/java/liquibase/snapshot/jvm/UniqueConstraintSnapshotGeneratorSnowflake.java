@@ -2,7 +2,6 @@ package liquibase.snapshot.jvm;
 
 import liquibase.Scope;
 import liquibase.database.Database;
-import liquibase.database.core.H2Database;
 import liquibase.database.core.SnowflakeDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
@@ -12,7 +11,6 @@ import liquibase.snapshot.SnapshotGenerator;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtil;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -28,32 +26,6 @@ public class UniqueConstraintSnapshotGeneratorSnowflake extends UniqueConstraint
         } else {
             return PRIORITY_NONE;
         }
-    }
-
-    @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
-        Database database = snapshot.getDatabase();
-        UniqueConstraint exampleConstraint = (UniqueConstraint) example;
-        Relation table = exampleConstraint.getRelation();
-
-        List<Map<String, ?>> metadata = listColumns(exampleConstraint, database, snapshot);
-
-        if (metadata.isEmpty()) {
-            return null;
-        }
-        UniqueConstraint constraint = new UniqueConstraint();
-        constraint.setRelation(table);
-        constraint.setName(example.getName());
-        constraint.setBackingIndex(exampleConstraint.getBackingIndex());
-        constraint.setInitiallyDeferred(((UniqueConstraint) example).isInitiallyDeferred());
-        constraint.setDeferrable(((UniqueConstraint) example).isDeferrable());
-        constraint.setClustered(((UniqueConstraint) example).isClustered());
-
-        for (Map<String, ?> col : metadata) {
-            constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setRelation(table));
-        }
-
-        return constraint;
     }
 
     @Override
