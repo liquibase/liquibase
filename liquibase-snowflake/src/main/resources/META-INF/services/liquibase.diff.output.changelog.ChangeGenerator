@@ -1,0 +1,2 @@
+liquibase.diff.output.changelog.core.ChangedSequenceChangeGeneratorSnowflake
+liquibase.diff.output.changelog.core.MissingSequenceChangeGeneratorSnowflake
