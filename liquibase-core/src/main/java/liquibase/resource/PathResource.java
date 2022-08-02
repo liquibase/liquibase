@@ -17,15 +17,10 @@ public class PathResource extends AbstractResource {
         this.path = path.normalize();
     }
 
-    @Override
-    public boolean exists() {
-        return Files.exists(path);
-    }
-
     @SuppressWarnings("java:S2095")
     @Override
     public InputStream openInputStream() throws IOException {
-        if (!this.exists()) {
+        if (!Files.exists(this.path)) {
             throw new FileNotFoundException(this.path + " does not exist");
         } else if (Files.isDirectory(this.path)) {
             throw new FileNotFoundException(this.path + " is a directory");

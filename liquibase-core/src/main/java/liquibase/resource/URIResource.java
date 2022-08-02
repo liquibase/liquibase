@@ -11,11 +11,6 @@ public class URIResource extends AbstractResource {
     }
 
     @Override
-    public boolean exists() {
-        return true;
-    }
-
-    @Override
     public InputStream openInputStream() throws IOException {
         return getUri().toURL().openStream();
     }

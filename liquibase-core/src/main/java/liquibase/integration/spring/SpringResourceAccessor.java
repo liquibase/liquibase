@@ -208,11 +208,6 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         }
 
         @Override
-        public boolean exists() {
-            return resource.exists();
-        }
-
-        @Override
         public boolean isWritable() {
             return resource instanceof WritableResource && ((WritableResource) resource).isWritable();
         }

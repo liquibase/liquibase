@@ -1,5 +1,6 @@
 package liquibase.resource;
 
+import liquibase.Scope;
 import liquibase.plugin.AbstractPluginFactory;
 
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
     }
 
     /**
-     * Creates the {@link ResourceAccessor} for the given path.
+     * Creates a {@link ResourceAccessor} for the given path.
      */
     public ResourceAccessor getResourceAccessor(String root) throws IOException {
         final PathHandler plugin = getPlugin(root);
@@ -34,12 +35,31 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         return plugin.getResourceAccessor(root);
     }
 
+    /**
+     * Convenience method for {@link #getResource(String, boolean)} with false for fallbackToResourceAccessor
+     */
+    public Resource getResource(String resourcePath) throws IOException {
+       return getResource(resourcePath, false);
+    }
 
-    public Resource getResource(String resource) throws IOException {
-        final PathHandler plugin = getPlugin(resource);
+    /**
+     * Return the resource for the given path.
+     * @param fallbackToResourceAccessor if true, check {@link Scope#getResourceAccessor()} before returning null
+     * @return null if the resource does not exist
+     *
+     * @throws IOException if the path cannot be understood or if there is a problem parsing the path
+     */
+    public Resource getResource(String resourcePath, boolean fallbackToResourceAccessor) throws IOException {
+        final PathHandler plugin = getPlugin(resourcePath);
         if (plugin == null) {
-            throw new IOException("Cannot parse resource location: '" + resource + "'");
+            throw new IOException("Cannot parse resource location: '" + resourcePath + "'");
         }
-        return plugin.getResource(resource);
+        Resource foundResource = plugin.getResource(resourcePath);
+        if (foundResource == null && fallbackToResourceAccessor) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Did not find "+resourcePath+" directly. Checking search path");
+            foundResource = Scope.getCurrentScope().getResourceAccessor().get(resourcePath);
+        }
+
+        return foundResource;
     }
 }
