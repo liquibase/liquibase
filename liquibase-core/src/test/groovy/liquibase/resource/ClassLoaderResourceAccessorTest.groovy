@@ -77,7 +77,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
 
 
     @Unroll
-    def "list"() {
+    def "search"() {
         expect:
         //have to resort them because different test runners may put classloader entries in different orders
         (testResourceAccessor.search(path, recursive)*.getPath()) as SortedSet == expectedValue as SortedSet

@@ -1,15 +1,18 @@
 package liquibase.resource;
 
 import liquibase.Scope;
+import liquibase.util.StreamUtil;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.io.InputStream;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 
 /**
  * An implementation of {@link DirectoryResourceAccessor} that builds up the file roots based on the passed {@link ClassLoader}.
@@ -20,7 +23,7 @@ import java.util.*;
 public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
     private ClassLoader classLoader;
-    private CompositeResourceAccessor searchResourceAccessor;
+    private CompositeResourceAccessor additionalResourceAccessors;
     protected SortedSet<String> description;
 
     public ClassLoaderResourceAccessor() {
@@ -34,19 +37,13 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public List<String> describeLocations() {
-        init();
-
-        List<String> returnList = new ArrayList<>();
-        returnList.add("Classpath including:");
-        returnList.addAll(searchResourceAccessor.describeLocations());
-
-        return returnList;
+        return Collections.singletonList("Configured classpath");
     }
 
     @Override
     public void close() throws Exception {
-        if (searchResourceAccessor != null) {
-            searchResourceAccessor.close();
+        if (additionalResourceAccessors != null) {
+            additionalResourceAccessors.close();
         }
     }
 
@@ -54,11 +51,12 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
      * Performs the configuration of this resourceAccessor.
      * Not done in the constructor for performance reasons, but can be called at the beginning of every public method.
      */
-    protected void init() {
-        if (searchResourceAccessor == null) {
+    protected synchronized void init() {
+        if (additionalResourceAccessors == null) {
             this.description = new TreeSet<>();
-            this.searchResourceAccessor = new CompositeResourceAccessor();
-            loadRootPaths(classLoader);
+            this.additionalResourceAccessors = new CompositeResourceAccessor();
+
+            configureAdditionalResourceAccessors(classLoader);
         }
     }
 
@@ -66,19 +64,18 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
      * The classloader search logic in {@link #search(String, boolean)} does not handle jar files well.
      * This method is called by that method to configure an internal {@link ResourceAccessor} with paths to search.
      */
-    protected void loadRootPaths(ClassLoader classLoader) {
+    protected void configureAdditionalResourceAccessors(ClassLoader classLoader) {
         if (classLoader instanceof URLClassLoader) {
             final URL[] urls = ((URLClassLoader) classLoader).getURLs();
             if (urls != null) {
                 for (URL url : urls) {
                     try {
-                        addDescription(url);
-                        Path path = Paths.get(url.toURI());
-                        String lowerCaseName = path.getFileName().toString().toLowerCase();
-                        if (lowerCaseName.endsWith(".jar") || lowerCaseName.endsWith("zip")) {
-                            searchResourceAccessor.addResourceAccessor(new ZipResourceAccessor(path));
-                        } else {
-                            searchResourceAccessor.addResourceAccessor(new DirectoryResourceAccessor(path));
+                        if (url.getProtocol().equals("file")) {
+                            String filename = url.getFile().toLowerCase(Locale.ROOT);
+                            if (filename.endsWith(".zip") || filename.endsWith(".jar")) {
+                                Path path = Paths.get(url.toURI());
+                                additionalResourceAccessors.addResourceAccessor(new ZipResourceAccessor(path));
+                            }
                         }
                     } catch (Throwable e) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Cannot create resourceAccessor for url " + url.toExternalForm() + ": " + e.getMessage(), e);
@@ -89,23 +86,49 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         final ClassLoader parent = classLoader.getParent();
         if (parent != null) {
-            loadRootPaths(parent);
-        }
-
-    }
-
-    private void addDescription(URL url) {
-        try {
-            this.description.add(Paths.get(url.toURI()).toString());
-        } catch (Throwable e) {
-            this.description.add(url.toExternalForm());
+            configureAdditionalResourceAccessors(parent);
         }
     }
+//
+//    private void addDescription(URL url) {
+//        try {
+//            this.description.add(Paths.get(url.toURI()).toString());
+//        } catch (Throwable e) {
+//            this.description.add(url.toExternalForm());
+//        }
+//    }
 
     @Override
     public List<Resource> search(String path, boolean recursive) throws IOException {
         init();
-        return searchResourceAccessor.search(path, recursive);
+
+        final LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
+        PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+
+        final Enumeration<URL> resources;
+        try {
+            resources = classLoader.getResources(path);
+        } catch (IOException e) {
+            throw new IOException("Cannot list resources in path " + path + ": " + e.getMessage(), e);
+        }
+
+        while (resources.hasMoreElements()) {
+            final URL url = resources.nextElement();
+
+            String urlExternalForm = url.toExternalForm();
+            urlExternalForm = urlExternalForm.replaceFirst(Pattern.quote(path) + "/?$", "");
+
+            try (ResourceAccessor resourceAccessor = pathHandlerFactory.getResourceAccessor(urlExternalForm)) {
+                returnList.addAll(resourceAccessor.search(path, recursive));
+            } catch (Exception e) {
+                throw new IOException(e.getMessage(), e);
+            }
+        }
+
+        returnList.addAll(additionalResourceAccessors.search(path, recursive));
+
+
+        return new ArrayList<>(returnList);
     }
 
     @Override
