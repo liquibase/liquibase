@@ -8,7 +8,7 @@ import java.net.URI;
 public interface Resource {
 
     /**
-     * Returns the canonical searchPath relative path for this resource.
+     * Returns the normalized, ResourceAccessor-relative path for this resource.
      * To get the unique location of this resource, use {@link #getUri()}
      * This should always use `/` for separators
      * This should not include any sort of protocol or prefixes

@@ -19,28 +19,6 @@ class ClassLoaderResourceAccessorTest extends Specification {
             )
     ))
 
-//    @Unroll("#featureName: #relativeTo #streamPath")
-//    def "getFinalPath"() {
-//        expect:
-//        new ClassLoaderResourceAccessor().getFinalPath(relativeTo, streamPath) == expected
-//
-//        where:
-//        relativeTo                         | streamPath                       | expected
-//        null                               | "com/example/test.sql"           | "com/example/test.sql"
-//        null                               | "/com/example/test.sql"          | "com/example/test.sql"
-//        null                               | "\\com\\example\\test.sql"       | "com/example/test.sql"
-//        null                               | "/com////example//test.sql"      | "com/example/test.sql"
-//        null                               | "classpath:com/example/test.sql" | "com/example/test.sql"
-//        "com/example"                      | "test.sql"                       | "com/example/test.sql"
-//        "/com/example/"                    | "test.sql"                       | "com/example/test.sql"
-//        "com/example"                      | "/my/test.sql"                   | "com/example/my/test.sql"
-//        "com/example"                      | "/my/test.sql"                   | "com/example/my/test.sql"
-//        "com/example/other.file"           | "/my/test.sql"                   | "com/example/my/test.sql"
-//        "classpath:com/example/other.file" | "my/test.sql"                    | "com/example/my/test.sql"
-//        "changelog.xml"                    | "sql/function.sql"               | "sql/function.sql"
-//        "db-change.log/changelog.xml"      | "data/file.csv"                  | "db-change.log/data/file.csv"
-//    }
-
     @Unroll
     def "getAll, checking content: #path"() {
         given:
@@ -77,7 +55,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
 
 
     @Unroll
-    def "list"() {
+    def "search"() {
         expect:
         //have to resort them because different test runners may put classloader entries in different orders
         (testResourceAccessor.search(path, recursive)*.getPath()) as SortedSet == expectedValue as SortedSet
