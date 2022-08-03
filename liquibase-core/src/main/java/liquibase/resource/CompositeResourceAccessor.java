@@ -1,5 +1,6 @@
 package liquibase.resource;
 
+import liquibase.Scope;
 import liquibase.util.CollectionUtil;
 
 import java.io.IOException;
@@ -22,6 +23,17 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
         this.resourceAccessors = new ArrayList<>(resourceAccessors);
     }
 
+    @Override
+    public void close() throws Exception {
+        for (ResourceAccessor accessor : resourceAccessors) {
+            try {
+                accessor.close();
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Error closing " + accessor.getClass().getName() + ": " + e.getMessage(), e);
+            }
+        }
+    }
+
     public CompositeResourceAccessor addResourceAccessor(ResourceAccessor resourceAccessor) {
         this.resourceAccessors.add(resourceAccessor);
 
@@ -33,36 +45,33 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    @java.lang.SuppressWarnings("squid:S2095")
-    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-        InputStreamList returnList = new InputStreamList();
+    public List<Resource> search(String path, boolean recursive) throws IOException {
+        LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            returnList.addAll(accessor.openStreams(relativeTo, streamPath));
+            returnList.addAll(CollectionUtil.createIfNull(accessor.search(path, recursive)));
         }
-        return returnList;
+
+        return new ArrayList<>(returnList);
     }
 
     @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        SortedSet<String> returnSet = new TreeSet<>();
+    public List<Resource> getAll(String path) throws IOException {
+        LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            final SortedSet<String> list = accessor.list(relativeTo, path, recursive, includeFiles, includeDirectories);
-            if (list != null) {
-                returnSet.addAll(list);
-            }
+            returnList.addAll(CollectionUtil.createIfNull(accessor.getAll(path)));
         }
 
-        return returnSet;
+        return new ArrayList<>(returnList);
     }
 
     @Override
-    public SortedSet<String> describeLocations() {
-        SortedSet<String> returnSet = new TreeSet<>();
+    public List<String> describeLocations() {
+        LinkedHashSet<String> returnSet = new LinkedHashSet<>();
 
         for (ResourceAccessor accessor : resourceAccessors) {
-            returnSet.addAll(accessor.describeLocations());
+            returnSet.addAll(CollectionUtil.createIfNull(accessor.describeLocations()));
         }
 
-        return returnSet;
+        return new ArrayList<>(returnSet);
     }
 }

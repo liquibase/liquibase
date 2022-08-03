@@ -10,6 +10,8 @@ import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.resource.Resource;
+import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.util.FileUtil;
@@ -209,13 +211,15 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
 
         try {
+            ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+
             String path = getPath();
-            String relativeTo = null;
             final Boolean isRelative = isRelativeToChangelogFile();
             if (isRelative != null && isRelative) {
-                relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
+                path = resourceAccessor.resolve(getChangeSet().getChangeLog().getPhysicalFilePath(), path);
             }
-            return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
+
+            return resourceAccessor.getExisting(path).openInputStream();
         } catch (IOException e) {
             throw new IOException(
                 "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +

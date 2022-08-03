@@ -5,8 +5,7 @@ import liquibase.command.CommandScope;
 import liquibase.command.core.RegisterChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.SearchPathResourceAccessor;
 import org.apache.maven.plugin.MojoFailureException;
@@ -85,7 +84,8 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
         File baseDir = project.getBasedir();
         File sourceDir = new File(baseDir, "src/main/resources");
-        resourceAccessors.add(new FileSystemResourceAccessor(baseDir, sourceDir));
+        resourceAccessors.add(new DirectoryResourceAccessor(baseDir));
+        resourceAccessors.add(new DirectoryResourceAccessor(sourceDir));
         return new SearchPathResourceAccessor(resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 }
