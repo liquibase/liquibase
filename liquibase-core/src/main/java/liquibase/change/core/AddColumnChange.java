@@ -301,7 +301,10 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             } else {
                 //try to set them all, only one will be non-null
                 change.setDefaultValue(column.getDefaultValue());
-                change.setDefaultValueNumeric(column.getDefaultValue());
+                Number defaultValueNumeric = column.getDefaultValueNumeric();
+                if (defaultValueNumeric != null) {
+                    change.setDefaultValueNumeric(String.valueOf(defaultValueNumeric));
+                }
                 change.setDefaultValueBoolean(column.getDefaultValueBoolean());
                 change.setDefaultValueComputed(column.getDefaultValueComputed());
                 change.setDefaultValueSequenceNext(column.getDefaultValueSequenceNext());
