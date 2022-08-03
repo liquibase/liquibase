@@ -12,6 +12,7 @@ import liquibase.util.StringUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Driver;
 import java.util.*;
@@ -169,7 +170,7 @@ public class DatabaseFactory {
                                              ResourceAccessor resourceAccessor) throws DatabaseException {
         Properties driverProperties;
         try {
-            driverProperties = buildDriverProperties(username, password, driverPropertiesFile, propertyProviderClass);
+            driverProperties = buildDriverProperties(username, password, driverPropertiesFile, propertyProviderClass, resourceAccessor);
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -275,7 +276,7 @@ public class DatabaseFactory {
         return driverObject;
     }
 
-    private Properties buildDriverProperties(String username, String password, String driverPropertiesFile, String propertyProviderClass) {
+    private Properties buildDriverProperties(String username, String password, String driverPropertiesFile, String propertyProviderClass, ResourceAccessor resourceAccessor) {
         Properties driverProperties;
         try {
             if (propertyProviderClass == null) {
@@ -291,23 +292,24 @@ public class DatabaseFactory {
                 driverProperties.put("password", password);
             }
             if (null != driverPropertiesFile) {
-                File propertiesFile = new File(driverPropertiesFile);
-                if (propertiesFile.exists()) {
-                    LOG.fine(
-                            "Loading properties from the file:'" + driverPropertiesFile + "'"
-                    );
-                    FileInputStream inputStream = new FileInputStream(propertiesFile);
-                    try {
-                        driverProperties.load(inputStream);
-                    } finally {
-                        inputStream.close();
+                try {
+                    InputStream stream = resourceAccessor.openStream(null, driverPropertiesFile);
+                    if (stream != null) {
+                        LOG.fine(
+                                "Loading properties from the file:'" + driverPropertiesFile + "'"
+                        );
+                        driverProperties.load(stream);
+                        stream.close();
+                    } else {
+                        throw new RuntimeException("Cannot find JDBC Driver properties file: '"
+                                + driverPropertiesFile + "'");
                     }
-                } else {
+                } catch (IOException e) {
                     throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
                             + driverPropertiesFile + "'");
                 }
             }
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException | IOException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
             throw new RuntimeException("Exception opening JDBC Driver specific properties from the file: '"
                     + driverPropertiesFile + "'", e);
         }
