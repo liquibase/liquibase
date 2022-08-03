@@ -2,6 +2,7 @@ package liquibase.database;
 
 import liquibase.exception.DatabaseException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.sdk.resource.MockResourceAccessor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -11,6 +12,8 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import static org.hamcrest.Matchers.containsString;
@@ -93,7 +96,11 @@ public class DatabaseFactoryTest {
         }
         String propsFilePath = propsFile.getAbsolutePath();
 
-        DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, null, propsFilePath, null, resourceAccessor);
+        Map<String, String> resources = new HashMap<>();
+        resources.put(propsFilePath, propsFile.toString());
+        ResourceAccessor mockAccessor = new MockResourceAccessor(resources);
+
+        DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, null, propsFilePath, null, mockAccessor);
         assertThat(dbConnection, notNullValue());
         assertThat(dbConnection.getDatabaseProductName(), equalTo("H2"));
         // TODO: Figure out how to assert the properties are loaded
@@ -110,7 +117,7 @@ public class DatabaseFactoryTest {
     public void openConnectionThrowsRuntimeExceptionWhenDriverPropertiesFileNotFound() throws Exception {
         expectedException.expect(instanceOf(DatabaseException.class));
         expectedException.expectCause(instanceOf(RuntimeException.class));
-        expectedException.expectMessage(containsString("Cannot find JDBC Driver properties file: 'unknown file'"));
+        expectedException.expectMessage(containsString("Can't open JDBC Driver specific properties from the file: 'unknown file'"));
 
         databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, null, "unknown file", null, resourceAccessor);
     }

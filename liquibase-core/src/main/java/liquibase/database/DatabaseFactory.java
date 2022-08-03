@@ -6,6 +6,8 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
@@ -293,19 +295,21 @@ public class DatabaseFactory {
             }
             if (null != driverPropertiesFile) {
                 try {
-                    InputStream stream = resourceAccessor.openStream(null, driverPropertiesFile);
-                    if (stream != null) {
+                    String driverPropertiesFilePath = resourceAccessor.resolve(null, driverPropertiesFile);
+                    Resource driverProperty = resourceAccessor.get(driverPropertiesFilePath);
+                    if (driverProperty != null) {
+                        InputStream stream = driverProperty.openInputStream();
                         LOG.fine(
                                 "Loading properties from the file:'" + driverPropertiesFile + "'"
                         );
                         driverProperties.load(stream);
                         stream.close();
                     } else {
-                        throw new RuntimeException("Cannot find JDBC Driver properties file: '"
+                        throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
                                 + driverPropertiesFile + "'");
                     }
                 } catch (IOException e) {
-                    throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
+                    throw new RuntimeException("Cannot find JDBC Driver properties file: '"
                             + driverPropertiesFile + "'");
                 }
             }
