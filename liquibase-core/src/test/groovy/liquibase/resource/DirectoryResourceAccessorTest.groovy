@@ -125,6 +125,21 @@ class DirectoryResourceAccessorTest extends Specification {
     }
 
     @Unroll
+    def "search fails with invalid values: #path"() {
+        when:
+        simpleTestAccessor.search(path, true)
+
+        then:
+        def e = thrown(Exception)
+        e.message == expected
+
+        where:
+        path                                                     | expected
+        null                                                     | "Path must not be null"
+        "liquibase/resource/DirectoryResourceAccessorTest.class" | "'liquibase/resource/DirectoryResourceAccessorTest.class' is a file, not a directory"
+    }
+
+    @Unroll
     def "list"() {
         expect:
         simpleTestAccessor.search(path, recursive)*.getPath() as SortedSet == expected as SortedSet
