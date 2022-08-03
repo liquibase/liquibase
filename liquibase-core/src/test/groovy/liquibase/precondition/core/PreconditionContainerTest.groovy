@@ -1,6 +1,9 @@
 package liquibase.precondition.core
 
+import liquibase.GlobalConfiguration
+import liquibase.Scope
 import liquibase.exception.SetupException
+import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
@@ -9,7 +12,8 @@ import spock.lang.Specification
 
 class PreconditionContainerTest extends Specification {
 
-    @Shared resourceSupplier = new ResourceSupplier()
+    @Shared
+            resourceSupplier = new ResourceSupplier()
 
     def "load handles empty node with params"() {
         when:
@@ -101,8 +105,8 @@ class PreconditionContainerTest extends Specification {
         def node = new ParsedNode(null, "preConditions").addChildren([onFail: "MARK_RAN"])
                 .addChild(new ParsedNode(null, "runningAs").addChildren([username: "my_user"]))
                 .addChild(new ParsedNode(null, "or")
-                    .addChildren([runningAs: [username: "other_user"]])
-                    .addChildren([runningAs: [username: "yet_other_user"]])
+                        .addChildren([runningAs: [username: "other_user"]])
+                        .addChildren([runningAs: [username: "yet_other_user"]])
                 )
                 .addChild(new ParsedNode(null, "tableExists").addChildren([tableName: "my_table"]))
 
@@ -128,4 +132,35 @@ class PreconditionContainerTest extends Specification {
 
     }
 
+    def "load handles node with unknown preconditions in strict mode"() {
+        when:
+        def node = new ParsedNode(null, "preConditions").addChildren([onFail: "MARK_RAN"])
+                .addChild(new ParsedNode(null, "invalid").addChildren([tableName: "my_table"]))
+                .addChild(new ParsedNode(null, "tableExists").addChildren([tableName: "my_table"]))
+
+        def container = new PreconditionContainer()
+        container.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        def e = thrown(ParsedNodeException)
+        e.message == "Unknown precondition 'invalid'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial."
+    }
+
+    def "load handles node with unknown preconditions in lax mode"() {
+        when:
+        def node = new ParsedNode(null, "preConditions").addChildren([onFail: "MARK_RAN"])
+                .addChild(new ParsedNode(null, "invalid").addChildren([tableName: "my_table"]))
+                .addChild(new ParsedNode(null, "tableExists").addChildren([tableName: "my_table"]))
+
+        def container = new PreconditionContainer()
+        Scope.currentScope.child([(ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.key): ChangeLogParserConfiguration.ChangelogParseMode.LAX], {
+            ->
+            container.load(node, resourceSupplier.simpleResourceAccessor)
+        } as Scope.ScopedRunner)
+
+
+        then:
+        notThrown(ParsedNodeException)
+        container.getNestedPreconditions().size() == 1
+    }
 }

@@ -26,6 +26,7 @@ import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -359,8 +360,13 @@ public class JdbcExecutor extends AbstractExecutor {
                 } else {
                     Statement stmt = null;
                     try {
-                        stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
-                        stmt.execute(sql.toSql());
+                        if (sqlStatement instanceof CompoundStatement) {
+                            stmt = ((JdbcConnection) con).getUnderlyingConnection().prepareStatement(sql.toSql());
+                            ((PreparedStatement)stmt).execute();
+                        } else {
+                            stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
+                            stmt.execute(sql.toSql());
+                        }
                         con.commit();
                     } finally {
                         JdbcUtil.closeStatement(stmt);
