@@ -1,6 +1,38 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.15.0 (2022.08.04)
+
+## Notable Changes
+* liquibase flow and new flow-file (DAT-10419) by in #2946
+ This is currently a Liquibase Labs restricted capability, so please contact mario@liquibase.com to request a license key.
+  Learn more at http://docs.liquibase.com/flow
+
+## Enhancements
+* searchPath - explain concisely
+* duplicateFileMode - explain concisely
+
+## Fixes
+* Fix maven plugin pro commands for local developer install by @StevenMassaro in #3101
+* Update Derby reserved words by @andrewhj in #1971
+* Output "may lose settings" warning on mysql/mariadb for more impacted change types by @nvoxland in #3045
+* Improved "include" fix performance: optimized normalizePath method by @lzxgyh in #3063
+* Removed DatabaseInfoAttributes in XSD by @kazz62 in #2239
+* Do not split SQL on delimiters within BEGIN/END blocks by @nvoxland in #1589
+* Set max fractional timestamp digits to 12 for all DB2 editions (fix #2880) by @ctgnz in #2892
+* Fix query for snapshotting views on DB2/Z by @michaelmatthiaskern in #2712
+* Fix for bug 2711: Error when calling a procedure with parameters on DB2Z by @michaelmatthiaskern in #2765
+* Improve CLI error messages by @nvoxland in #3078
+* Liquibase flow command (DAT-10419) by @StevenMassaro in #2946
+* support setting searchPath in CommandTests (DAT-11055) by @StevenMassaro in #3129
+* Improved handling of endDelimiter="/" by @nvoxland in #3118
+* Upgrade installer to ship with jdk 17.0.4+8 by @nvoxland in #3104
+* Improve failure message of RowCountPrecondition to preserve expected row count by @martinspielmann in #3093
+* Changed what sequence attributes are included in diff/generate changelog for Snowflake by @yodzhubeiskyi in #3121
+* Fix columnNames snapshot attribute of uniqueConstraints for Snowflake by @yodzhubeiskyi in #3123
+* Added duplicateFileMode setting for maven plugin by @nvoxland in #3119
+
+
 Changes in version 4.14.0 (2022.07.26)
 
 ## Notable Changes
