@@ -28,6 +28,7 @@ class DiffChangelogTest extends Specification {
 
     def "auto increment on varchar column" () {
         when:
+        postgres.getConnection().setAutoCommit(false)
         def changelogfile = StringUtil.randomIdentifer(10) + ".sql"
         def sequenceName = StringUtil.randomIdentifer(10)
         def tableName = StringUtil.randomIdentifer(10)
