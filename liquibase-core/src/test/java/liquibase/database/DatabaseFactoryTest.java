@@ -110,7 +110,7 @@ public class DatabaseFactoryTest {
     public void openConnectionThrowsRuntimeExceptionWhenDriverPropertiesFileNotFound() throws Exception {
         expectedException.expect(instanceOf(DatabaseException.class));
         expectedException.expectCause(instanceOf(RuntimeException.class));
-        expectedException.expectMessage(containsString("Can't open JDBC Driver specific properties from the file"));
+        expectedException.expectMessage(containsString("Cannot find JDBC Driver properties file: 'unknown file'"));
 
         databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, null, "unknown file", null, resourceAccessor);
     }
