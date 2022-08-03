@@ -30,7 +30,7 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
 import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.resource.InputStreamList
+import liquibase.resource.Resource
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.ui.ConsoleUIService
@@ -45,7 +45,6 @@ import org.junit.ComparisonFailure
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.regex.Pattern
 import java.util.stream.Collectors
@@ -1187,13 +1186,25 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     // to locate files that they write and then try to read
     //
     static class ClassLoaderResourceAccessorForTest extends ClassLoaderResourceAccessor {
+
         @Override
-        public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-            InputStreamList list = super.openStreams(relativeTo, streamPath)
+        List<Resource> getAll(String path) throws IOException {
+            def list = super.getAll(path)
+            if (list != null && !list.isEmpty()) {
+                return list;
+            }
+
+            return super.getAll(new File(path).getName())
+        }
+
+        @Override
+        List<Resource> search(String path, boolean recursive) throws IOException {
+            def list = super.search(path, recursive)
             if (list != null && ! list.isEmpty()) {
                 return list
             }
-            return super.openStreams(relativeTo, new File(streamPath).getName())
+
+            return super.search(new File(path).getName(), recursive)
         }
     }
 
