@@ -1035,7 +1035,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 List<Map> result;
 
                 try {
-                    result = (List<Map>) new RowMapperNotNullConstraintsResultSetExtractor(new ColumnMapRowMapper() {
+                    result = (List<Map>) new RowMapperNotNullConstraintsResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
                         @Override
                         protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                             Object value = super.getColumnValue(rs, index);
