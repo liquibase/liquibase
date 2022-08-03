@@ -3,7 +3,6 @@ package liquibase.resource;
 import liquibase.plugin.Plugin;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Interface for extensions that can translate path strings into {@link ResourceAccessor}s and {@link java.io.InputStream}s.
@@ -23,9 +22,10 @@ public interface PathHandler extends Plugin {
     ResourceAccessor getResourceAccessor(String root) throws IOException;
 
     /**
-     * Parse the given path and return an {@link java.io.InputStream} for it.
+     * Parse the given "absolute" path and return a {@link liquibase.resource.Resource} for it if it exists.
      *
+     * @return null if the resource does not exist.
      * @throws IOException if the path is invalid
      */
-    InputStream open(String path) throws IOException;
+    Resource getResource(String path) throws IOException;
 }

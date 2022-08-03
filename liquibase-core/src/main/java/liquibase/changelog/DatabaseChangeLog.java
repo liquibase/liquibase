@@ -17,16 +17,16 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.Precondition;
 import liquibase.precondition.core.PreconditionContainer;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.ui.UIService;
 import liquibase.util.StringUtil;
 import liquibase.util.FilenameUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -36,15 +36,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final ThreadLocal<DatabaseChangeLog> ROOT_CHANGE_LOG = new ThreadLocal<>();
     private static final ThreadLocal<DatabaseChangeLog> PARENT_CHANGE_LOG = new ThreadLocal<>();
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseChangeLog.class);
-
-    public static final Pattern CLASSPATH_PATTERN = Pattern.compile("classpath:");
-    public static final Pattern SLASH_PATTERN = Pattern.compile("^/");
-    public static final Pattern NON_CLASSPATH_PATTERN = Pattern.compile("^classpath:");
-    public static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
-    public static final Pattern DOUBLE_SLASH_PATTERN = Pattern.compile("//+");
-    public static final Pattern SLASH_DOT_SLASH_PATTERN = Pattern.compile("/\\./");
-    public static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
-    public static final Pattern DOT_SLASH_PATTERN = Pattern.compile("^\\.?/");
+    private static final Pattern SLASH_PATTERN = Pattern.compile("^/");
+    private static final Pattern NON_CLASSPATH_PATTERN = Pattern.compile("^classpath:");
+    private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
+    private static final Pattern DOUBLE_SLASH_PATTERN = Pattern.compile("//+");
+    private static final Pattern SLASH_DOT_SLASH_PATTERN = Pattern.compile("/\\./");
+    private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
+    private static final Pattern DOT_SLASH_PATTERN = Pattern.compile("^\\.?/");
 
     private PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
     private String physicalFilePath;
@@ -409,7 +407,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                 String resourceComparatorDef = node.getChildValue(null, "resourceComparator", String.class);
                 Comparator<String> resourceComparator = null;
-                if (resourceComparatorDef != null) {
+                if (resourceComparatorDef == null) {
+                    resourceComparator = getStandardChangeLogComparator();
+                } else {
                     try {
                         resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).getConstructor().newInstance();
                     } catch (ReflectiveOperationException e) {
@@ -464,8 +464,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     } else {
                         // read properties from the file
                         Properties props = new Properties();
-                        try (InputStream propertiesStream = resourceAccessor.openStream(null, file)) {
-                            if (propertiesStream != null) {
+                        Resource resource = resourceAccessor.get(file);
+                        if (resource == null) {
+                            Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
+                        } else {
+                            try (InputStream propertiesStream = resource.openInputStream()) {
                                 props.load(propertiesStream);
 
                                 for (Map.Entry<Object, Object> entry : props.entrySet()) {
@@ -479,8 +482,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                                             this
                                     );
                                 }
-                            } else {
-                                Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
                             }
                         }
                     }
@@ -560,26 +561,29 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (StringUtil.isNotEmpty(pathName) && !(pathName.endsWith("/"))) {
                 pathName = pathName + '/';
             }
-            LOG.fine("includeAll for " + pathName);
-            LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
-
             String relativeTo = null;
             if (isRelativeToChangelogFile) {
                 relativeTo = this.getPhysicalFilePath();
             }
 
-            Set<String> unsortedResources = null;
+            List<Resource> unsortedResources = null;
             try {
-                unsortedResources = resourceAccessor.list(relativeTo, pathName, true, true, false);
+                String path = resourceAccessor.resolve(relativeTo, pathName);
+
+                path = path.replace("\\", "/");
+                LOG.fine("includeAll for " + pathName);
+                LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
+
+                unsortedResources = resourceAccessor.search(path, true);
             } catch (IOException e) {
                 if (errorIfMissingOrEmpty) {
                     throw e;
                 }
             }
-            SortedSet<String> resources = new TreeSet<>(resourceComparator);
+            SortedSet<Resource> resources = new TreeSet<>((o1, o2) -> resourceComparator.compare(o1.getPath(), o2.getPath()));
             if (unsortedResources != null) {
-                for (String resourcePath : unsortedResources) {
-                    if ((resourceFilter == null) || resourceFilter.include(resourcePath)) {
+                for (Resource resourcePath : unsortedResources) {
+                    if ((resourceFilter == null) || resourceFilter.include(resourcePath.getPath())) {
                         resources.add(resourcePath);
                     }
                 }
@@ -590,9 +594,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         "Could not find directory or directory was empty for includeAll '" + pathName + "'");
             }
 
-            for (String path : resources) {
-                Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + path);
-                include(path, false, resourceAccessor, includeContexts, labels, ignore, OnUnknownFileFormat.WARN);
+            for (Resource resource : resources) {
+                Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
+                include(resource.getPath(), false, resourceAccessor, includeContexts, labels, ignore, OnUnknownFileFormat.WARN);
             }
         } catch (Exception e) {
             throw new SetupException(e);
@@ -652,12 +656,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             return false;
         }
 
-        String relativeBaseFileName = this.getPhysicalFilePath();
         if (isRelativePath) {
-            relativeBaseFileName = CLASSPATH_PATTERN.matcher(relativeBaseFileName).replaceFirst("");
-            fileName = FilenameUtil.concat(FilenameUtil.getDirectory(relativeBaseFileName), fileName);
+            fileName = resourceAccessor.resolve(this.getPhysicalFilePath(), fileName);
         }
-        fileName = CLASSPATH_PATTERN.matcher(fileName).replaceFirst("");
         DatabaseChangeLog changeLog;
         try {
             DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
@@ -690,7 +691,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             boolean matchesFileExtension = StringUtil.trimToEmpty(fileName).matches("\\.\\w+$");
             if (matchesFileExtension || onUnknownFileFormat == OnUnknownFileFormat.WARN) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        "included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type"
+                        "included file " + fileName + "/" + fileName + " is not a recognized file type"
                 );
             }
             return false;
@@ -734,7 +735,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         String noClassPathReplaced = NON_CLASSPATH_PATTERN.matcher(filePath).replaceFirst("");
         String doubleBackSlashReplaced = DOUBLE_BACK_SLASH_PATTERN.matcher(noClassPathReplaced).replaceAll("/");
         String doubleSlashReplaced = DOUBLE_SLASH_PATTERN.matcher(doubleBackSlashReplaced).replaceAll("/");
-        String slashDotSlashReplaced =SLASH_DOT_SLASH_PATTERN.matcher(doubleSlashReplaced).replaceAll("/");
+        String slashDotSlashReplaced = SLASH_DOT_SLASH_PATTERN.matcher(doubleSlashReplaced).replaceAll("/");
         String noLetterReplaced = NO_LETTER_PATTERN.matcher(slashDotSlashReplaced).replaceFirst("");
         return DOT_SLASH_PATTERN.matcher(noLetterReplaced).replaceFirst("");
     }
@@ -770,13 +771,19 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
      */
     public enum OnUnknownFileFormat {
 
-        /** Silently skip unknown files.*/
+        /**
+         * Silently skip unknown files.
+         */
         SKIP,
 
-        /**  Log a warning about the file not being in a recognized format, but continue on */
+        /**
+         * Log a warning about the file not being in a recognized format, but continue on
+         */
         WARN,
 
-        /** Fail parsing with an error */
+        /**
+         * Fail parsing with an error
+         */
         FAIL
     }
 
