@@ -8,10 +8,6 @@ Changes in version 4.15.0 (2022.08.04)
  This is currently a Liquibase Labs restricted capability, so please contact mario@liquibase.com to request a license key.
   Learn more at http://docs.liquibase.com/flow
 
-## Enhancements
-* searchPath - Adds new searchPath configuration to the CLI, maven, and Ant integrations. While we will still search the classpath for files, searchPath is the new, better place to configure additional locations to look for changelog files.
-* duplicateFileMode - Adds a new liquibase.duplicateFileMode global setting which defaults to "ERROR" but can also be set to "WARN"
-
 ## Fixes
 * Fix maven plugin pro commands for local developer install by @StevenMassaro in #3101
 * Update Derby reserved words by @andrewhj in #1971
@@ -24,7 +20,6 @@ Changes in version 4.15.0 (2022.08.04)
 * Fix for bug 2711: Error when calling a procedure with parameters on DB2Z by @michaelmatthiaskern in #2765
 * Improve CLI error messages by @nvoxland in #3078
 * Liquibase flow command (DAT-10419) by @StevenMassaro in #2946
-* support setting searchPath in CommandTests (DAT-11055) by @StevenMassaro in #3129
 * Improved handling of endDelimiter="/" by @nvoxland in #3118
 * Upgrade installer to ship with jdk 17.0.4+8 by @nvoxland in #3104
 * Improve failure message of RowCountPrecondition to preserve expected row count by @martinspielmann in #3093
