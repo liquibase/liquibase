@@ -1,6 +1,7 @@
 package liquibase.resource
 
 import liquibase.Scope
+import liquibase.util.StreamUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -22,5 +23,39 @@ class PathHandlerFactoryTest extends Specification {
 
         where:
         input << [null, "proto:unsupported"]
+    }
+
+    def openResourceOutputStream() {
+        when:
+        def tempFile = File.createTempFile("DirectoryPathHandlerTest", ".tmp")
+        tempFile.deleteOnExit()
+        tempFile.delete()
+        def path = tempFile.getAbsolutePath()
+
+        def pathHandlerFactory = Scope.currentScope.getSingleton(PathHandlerFactory)
+
+        then:
+        pathHandlerFactory.openResourceOutputStream(path, false, false) == null //when createIfNotExists is false
+
+        when:
+        def stream = pathHandlerFactory.openResourceOutputStream(path, false, true) //createIfNotExists is true
+        stream.withWriter {
+            it.write("test")
+        }
+        stream.close()
+
+        then:
+        StreamUtil.readStreamAsString(pathHandlerFactory.getResource(path).openInputStream()) == "test"
+
+        when:
+        //can update file
+        stream = pathHandlerFactory.openResourceOutputStream(path, false, true)
+        stream.withWriter {
+            it.write("test 2")
+        }
+        stream.close()
+
+        then:
+        StreamUtil.readStreamAsString(pathHandlerFactory.getResource(path).openInputStream()) == "test 2"
     }
 }

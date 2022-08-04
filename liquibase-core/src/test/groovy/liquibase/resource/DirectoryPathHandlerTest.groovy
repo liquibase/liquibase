@@ -1,8 +1,12 @@
 package liquibase.resource
 
 import liquibase.util.StreamUtil
+import liquibase.util.StringUtil
+import org.hsqldb.types.Charset
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import java.nio.file.FileAlreadyExistsException
 
 import static liquibase.plugin.Plugin.PRIORITY_DEFAULT
 import static liquibase.plugin.Plugin.PRIORITY_NOT_APPLICABLE
@@ -55,5 +59,33 @@ class DirectoryPathHandlerTest extends Specification {
                 "file:/" + new File("").absolutePath,
 
         ]
+    }
+
+    def "createResource"() {
+        given:
+        def handler = new DirectoryPathHandler()
+
+        when:
+        //can create initially
+        def tempFile = File.createTempFile("DirectoryPathHandlerTest", ".tmp")
+        tempFile.deleteOnExit()
+        tempFile.delete()
+        def path = tempFile.getAbsolutePath()
+
+        def stream = handler.createResource(path)
+        stream.withWriter {
+            it.write("test")
+        }
+        stream.close()
+
+        then:
+        StreamUtil.readStreamAsString(handler.getResource(path).openInputStream()) == "test"
+
+        when:
+        //check that we can't re-create an existing file
+        handler.createResource(path)
+
+        then:
+        def e = thrown(FileAlreadyExistsException)
     }
 }
