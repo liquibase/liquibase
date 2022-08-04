@@ -11,8 +11,6 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -172,7 +170,7 @@ public class DatabaseFactory {
                                              ResourceAccessor resourceAccessor) throws DatabaseException {
         Properties driverProperties;
         try {
-            driverProperties = buildDriverProperties(username, password, driverPropertiesFile, propertyProviderClass, resourceAccessor);
+            driverProperties = buildDriverProperties(username, password, driverPropertiesFile, propertyProviderClass);
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -278,7 +276,7 @@ public class DatabaseFactory {
         return driverObject;
     }
 
-    private Properties buildDriverProperties(String username, String password, String driverPropertiesFile, String propertyProviderClass, ResourceAccessor resourceAccessor) {
+    private Properties buildDriverProperties(String username, String password, String driverPropertiesFile, String propertyProviderClass) {
         Properties driverProperties;
         try {
             if (propertyProviderClass == null) {
@@ -295,8 +293,8 @@ public class DatabaseFactory {
             }
             if (null != driverPropertiesFile) {
                 try {
-                    String driverPropertiesFilePath = resourceAccessor.resolve(null, driverPropertiesFile);
-                    Resource driverProperty = resourceAccessor.get(driverPropertiesFilePath);
+                    PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+                    Resource driverProperty = pathHandlerFactory.getResource(driverPropertiesFile, true);
                     if (driverProperty != null) {
                         InputStream stream = driverProperty.openInputStream();
                         LOG.fine(
