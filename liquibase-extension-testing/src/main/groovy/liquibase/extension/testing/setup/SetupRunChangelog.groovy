@@ -13,7 +13,8 @@ import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
-import liquibase.integration.commandline.CommandLineResourceAccessor
+
+import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.CompositeResourceAccessor
 import liquibase.resource.FileSystemResourceAccessor
 import liquibase.resource.ResourceAccessor
@@ -78,8 +79,8 @@ class SetupRunChangelog extends TestSetup {
             resourceAccessor = new SearchPathResourceAccessor(Scope.getCurrentScope().getResourceAccessor())
         } else {
             resourceAccessor = new CompositeResourceAccessor(
-                    new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
-                    new CommandLineResourceAccessor(getClass().getClassLoader())
+                    new DirectoryResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
+                    new ClassLoaderResourceAccessor(getClass().getClassLoader())
             )
         }
 

@@ -2,9 +2,11 @@ package org.liquibase.maven.plugins;
 
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.InputStreamList;
+import liquibase.resource.Resource;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.SortedSet;
 
 /**
@@ -16,13 +18,4 @@ public class MavenResourceAccessor extends ClassLoaderResourceAccessor {
         super(classLoader);
     }
 
-    @Override
-    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-        return super.openStreams(relativeTo, streamPath);
-    }
-
-    @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        return super.list(relativeTo, path, recursive, includeFiles, includeDirectories);
-    }
 }
