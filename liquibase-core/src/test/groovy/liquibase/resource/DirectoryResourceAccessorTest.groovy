@@ -34,6 +34,7 @@ class DirectoryResourceAccessorTest extends Specification {
         "base/path.sql" | "to/x.sql"      | "base/to/x.sql"
     }
 
+    @Unroll
     def "openStreams and openStream"() {
         when:
         def accessor = new DirectoryResourceAccessor("src/main" as File)

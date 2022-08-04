@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
+import liquibase.util.CollectionUtil;
 import liquibase.util.FileUtil;
 
 import java.io.FileNotFoundException;
@@ -39,7 +40,8 @@ public interface ResourceAccessor extends AutoCloseable {
     @Deprecated
     default InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         InputStreamList returnList = new InputStreamList();
-        for (Resource resource : search(resolve(relativeTo, streamPath), false)) {
+
+        for (Resource resource : CollectionUtil.createIfNull(getAll(resolve(relativeTo, streamPath)))) {
             returnList.add(resource.getUri(), resource.openInputStream());
         }
 
