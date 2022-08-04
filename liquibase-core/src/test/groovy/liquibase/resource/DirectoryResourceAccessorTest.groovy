@@ -34,6 +34,7 @@ class DirectoryResourceAccessorTest extends Specification {
         "base/path.sql" | "to/x.sql"      | "base/to/x.sql"
     }
 
+    @Unroll
     def "openStreams and openStream"() {
         when:
         def accessor = new DirectoryResourceAccessor("src/main" as File)
@@ -122,6 +123,21 @@ class DirectoryResourceAccessorTest extends Specification {
     def "getAll returns empty if nothing matches"() {
         expect:
         simpleTestAccessor.getAll("com/example/invalid.txt").size() == 0
+    }
+
+    @Unroll
+    def "search fails with invalid values: #path"() {
+        when:
+        simpleTestAccessor.search(path, true)
+
+        then:
+        def e = thrown(Exception)
+        e.message == expected
+
+        where:
+        path                                                     | expected
+        null                                                     | "Path must not be null"
+        "liquibase/resource/DirectoryResourceAccessorTest.class" | "'liquibase/resource/DirectoryResourceAccessorTest.class' is a file, not a directory"
     }
 
     @Unroll

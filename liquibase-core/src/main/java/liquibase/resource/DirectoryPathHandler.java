@@ -1,9 +1,10 @@
 package liquibase.resource;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.OutputStream;
+import java.nio.file.*;
 
 /**
  * {@link PathHandler} that converts the path into a {@link DirectoryResourceAccessor}.
@@ -43,5 +44,10 @@ public class DirectoryPathHandler extends AbstractPathHandler {
             return null;
         }
         return new PathResource(path, pathObj);
+    }
+
+    @Override
+    public OutputStream createResource(String path) throws IOException {
+        return Files.newOutputStream(Paths.get(path), StandardOpenOption.CREATE_NEW);
     }
 }
