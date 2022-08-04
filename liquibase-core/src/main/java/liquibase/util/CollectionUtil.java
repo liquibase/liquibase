@@ -78,11 +78,22 @@ public class CollectionUtil {
     }
 
     /**
-     * Returns a new empty set if the passed array is null.
+     * Returns a new empty set if the passed set is null.
      */
     public static <T> Set<T> createIfNull(Set<T> currentValue) {
         if (currentValue == null) {
             return new HashSet<>();
+        } else {
+            return currentValue;
+        }
+    }
+
+    /**
+     * Returns a new empty map if the passed map is null.
+     */
+    public static <T, E> Map<T, E> createIfNull(Map<T, E> currentValue) {
+        if (currentValue == null) {
+            return new HashMap<>();
         } else {
             return currentValue;
         }
