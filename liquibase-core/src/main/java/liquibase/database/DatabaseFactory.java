@@ -292,26 +292,21 @@ public class DatabaseFactory {
                 driverProperties.put("password", password);
             }
             if (null != driverPropertiesFile) {
-                try {
                     PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                     Resource driverProperty = pathHandlerFactory.getResource(driverPropertiesFile, true);
                     if (driverProperty != null) {
-                        InputStream stream = driverProperty.openInputStream();
-                        LOG.fine(
-                                "Loading properties from the file:'" + driverPropertiesFile + "'"
-                        );
-                        driverProperties.load(stream);
-                        stream.close();
+                        try (InputStream stream = driverProperty.openInputStream()) {
+                            LOG.fine(
+                                    "Loading properties from the file:'" + driverPropertiesFile + "'"
+                            );
+                            driverProperties.load(stream);
+                        }
                     } else {
                         throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
                                 + driverPropertiesFile + "'");
                     }
-                } catch (IOException e) {
-                    throw new RuntimeException("Cannot find JDBC Driver properties file: '"
-                            + driverPropertiesFile + "'");
                 }
-            }
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException | IOException e) {
             throw new RuntimeException("Exception opening JDBC Driver specific properties from the file: '"
                     + driverPropertiesFile + "'", e);
         }
