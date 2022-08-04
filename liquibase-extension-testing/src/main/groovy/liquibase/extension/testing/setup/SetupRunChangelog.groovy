@@ -16,7 +16,7 @@ import liquibase.database.jvm.JdbcConnection
 
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.CompositeResourceAccessor
-import liquibase.resource.FileSystemResourceAccessor
+import liquibase.resource.DirectoryResourceAccessor
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 
