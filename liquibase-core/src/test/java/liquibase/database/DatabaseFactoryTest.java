@@ -2,7 +2,6 @@ package liquibase.database;
 
 import liquibase.exception.DatabaseException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sdk.resource.MockResourceAccessor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -12,8 +11,6 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import static org.hamcrest.Matchers.containsString;
@@ -95,6 +92,7 @@ public class DatabaseFactoryTest {
             expectedProps.store(writer, "connection properties");
         }
         String propsFilePath = propsFile.getAbsolutePath();
+
         DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, null, propsFilePath, null, resourceAccessor);
         assertThat(dbConnection, notNullValue());
         assertThat(dbConnection.getDatabaseProductName(), equalTo("H2"));
