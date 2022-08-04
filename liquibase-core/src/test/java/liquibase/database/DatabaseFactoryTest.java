@@ -95,12 +95,7 @@ public class DatabaseFactoryTest {
             expectedProps.store(writer, "connection properties");
         }
         String propsFilePath = propsFile.getAbsolutePath();
-
-        Map<String, String> resources = new HashMap<>();
-        resources.put(propsFilePath, propsFile.toString());
-        ResourceAccessor mockAccessor = new MockResourceAccessor(resources);
-
-        DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, null, propsFilePath, null, mockAccessor);
+        DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, null, propsFilePath, null, resourceAccessor);
         assertThat(dbConnection, notNullValue());
         assertThat(dbConnection.getDatabaseProductName(), equalTo("H2"));
         // TODO: Figure out how to assert the properties are loaded
