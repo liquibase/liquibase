@@ -4,11 +4,7 @@ import liquibase.Scope;
 import liquibase.plugin.AbstractPluginFactory;
 
 import java.io.IOException;
-<<<<<<< HEAD
 import java.io.OutputStream;
-=======
-import java.io.InputStream;
->>>>>>> origin/DAT-10444
 
 /**
  * Singleton for working with {@link PathHandler}s.
