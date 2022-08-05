@@ -521,7 +521,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                                         "UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
                                         "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "' \n" +
                                         "AND TABLE_NAME = '" + column.getRelation().getName() + "' \n" +
-                                        "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
+                                        "AND COLUMN_NAME = '" + column.getName() + "'\n" +
+                                        "ORDER BY tens.i, units.i"), String.class);
                 String enumClause = "";
                 for (String enumValue : enumValues) {
                     enumClause += "'" + enumValue + "', ";
