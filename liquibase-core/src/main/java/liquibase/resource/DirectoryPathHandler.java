@@ -1,5 +1,7 @@
 package liquibase.resource;
 
+import liquibase.Scope;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
