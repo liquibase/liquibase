@@ -67,6 +67,10 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
             return returnSet;
         }
 
+        if (!Files.isDirectory(basePath)) {
+            throw new IOException("'" + startPath + "' is a file, not a directory");
+        }
+
         SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
