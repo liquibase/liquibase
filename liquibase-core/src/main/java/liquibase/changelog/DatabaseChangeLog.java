@@ -340,7 +340,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         setChangeLogId(parsedNode.getChildValue(null, "changeLogId", String.class));
         setLogicalFilePath(parsedNode.getChildValue(null, "logicalFilePath", String.class));
-        setContextFilter(new ContextExpression(parsedNode.getChildValue(null, "context", String.class)));
+
+        String context = parsedNode.getChildValue(null, "contextFilter", String.class);
+        if (context == null) {
+            context = parsedNode.getChildValue(null, "context", String.class);
+        }
+
+        setContextFilter(new ContextExpression(context));
         String objectQuotingStrategy = parsedNode.getChildValue(null, "objectQuotingStrategy", String.class);
         if (objectQuotingStrategy != null) {
             setObjectQuotingStrategy(ObjectQuotingStrategy.valueOf(objectQuotingStrategy));
