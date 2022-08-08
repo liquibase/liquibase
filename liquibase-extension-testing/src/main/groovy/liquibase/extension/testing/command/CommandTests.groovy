@@ -1038,6 +1038,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupRunChangelog(changeLogPath, labels))
         }
 
+        /**
+         * Run a changelog with labels
+         */
+        void runChangelog(String changeLogPath, String labels, String searchPath) {
+            this.setups.add(new SetupRunChangelog(changeLogPath, labels, searchPath))
+        }
+
         /*
          * Create files and directories
          */
