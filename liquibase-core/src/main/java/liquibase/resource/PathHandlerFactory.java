@@ -4,7 +4,7 @@ import liquibase.Scope;
 import liquibase.plugin.AbstractPluginFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Singleton for working with {@link PathHandler}s.
@@ -43,6 +43,21 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
     }
 
     /**
+     * Creates a new resource at the specified path and returns an OutputStream for writing to it.
+     *
+     * @throws java.nio.file.FileAlreadyExistsException if the file already exists
+     * @throws IOException if the path cannot be written to
+     */
+    public OutputStream createResource(String resourcePath) throws IOException {
+        final PathHandler plugin = getPlugin(resourcePath);
+        if (plugin == null) {
+            throw new IOException("Cannot parse resource location: '" + resourcePath + "'");
+        }
+
+        return plugin.createResource(resourcePath);
+    }
+
+    /**
      * Return the resource for the given path.
      * @param fallbackToResourceAccessor if true, check {@link Scope#getResourceAccessor()} before returning null
      * @return null if the resource does not exist
@@ -61,5 +76,22 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         }
 
         return foundResource;
+    }
+
+    /**
+     * Returns the outputStream from {@link #getResource(String, boolean)} if it exists, and the outputStream from {@link #createResource(String)} if it does not.
+     * @return null if resoucePath does not exist and createIfNotExists is false
+     * @throws IOException if there is an error opening the stream
+     */
+    public OutputStream openResourceOutputStream(String resourcePath, boolean fallbackToResourceAccessor, boolean createIfNotExists) throws IOException {
+        Resource resource = getResource(resourcePath, fallbackToResourceAccessor);
+        if (resource == null) {
+            if (createIfNotExists) {
+                return createResource(resourcePath);
+            } else {
+                return null;
+            }
+        }
+        return resource.openOutputStream();
     }
 }
