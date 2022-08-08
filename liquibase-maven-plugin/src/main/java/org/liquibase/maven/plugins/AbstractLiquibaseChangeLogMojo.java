@@ -2,6 +2,7 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
@@ -17,6 +18,7 @@ import org.liquibase.maven.property.PropertyElement;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A Liquibase MOJO that requires the user to provide a DatabaseChangeLogFile to be able
@@ -101,6 +103,16 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     @PropertyElement(key = "liquibase.hub.mode")
     protected String hubMode;
 
+
+    /**
+     * How to handle multiple files being found in the search path that have duplicate paths.
+     * Options are WARN (log warning and choose one at random) or ERROR (fail current operation)
+     *
+     * @parameter property="liquibase.duplicateFileMode" default-value="ERROR"
+     */
+    @PropertyElement
+    protected String duplicateFileMode;
+
     @Override
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
@@ -130,6 +142,9 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         }
         if (StringUtil.isNotEmpty(hubMode)) {
             DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_MODE.getKey(), hubMode);
+        }
+        if (StringUtil.isNotEmpty(duplicateFileMode)) {
+            DeprecatedConfigurationValueProvider.setData(GlobalConfiguration.DUPLICATE_FILE_MODE.getKey(), GlobalConfiguration.DuplicateFileMode.valueOf(duplicateFileMode.toUpperCase(Locale.ROOT)));
         }
     }
 

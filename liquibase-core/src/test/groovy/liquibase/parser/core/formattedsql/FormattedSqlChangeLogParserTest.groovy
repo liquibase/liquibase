@@ -170,9 +170,12 @@ END reany_procedure_name;
 
 
 grant /*Beware, this comment should not be seen as a delimiter! */
-    execute on any_procedure_name to ANY_USER1/
-grant execute on any_procedure_name to ANY_USER2/
-grant execute on any_procedure_name to ANY_USER3/
+    execute on any_procedure_name to ANY_USER1
+/
+grant execute on any_procedure_name to ANY_USER2
+/
+grant execute on any_procedure_name to ANY_USER3
+/
 -- rollback drop PROCEDURE refresh_all_fos_permission_views/
 """
 
@@ -702,13 +705,14 @@ not ignoreLines here
         changeLog.getChangeSets().size() == 1
         changeLog.getChangeSets().get(0).getChanges().size() == 1
         def statements = changeLog.getChangeSets().get(0).getChanges().get(0).generateStatements(new MockDatabase())
-        statements.size() == 4
-        statements[0].toString() == "CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n" +
+        statements*.toString() == [
+                "CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n" +
                 "    DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);\n" +
-                "END reany_procedure_name;"
-        statements[1].toString() == "grant \n    execute on any_procedure_name to ANY_USER1"
-        statements[2].toString() == "grant execute on any_procedure_name to ANY_USER2"
-        statements[3].toString() == "grant execute on any_procedure_name to ANY_USER3"
+                "END reany_procedure_name;",
+                "grant \n    execute on any_procedure_name to ANY_USER1",
+                "grant execute on any_procedure_name to ANY_USER2",
+                "grant execute on any_procedure_name to ANY_USER3",
+        ]
     }
 
     @Unroll("#featureName: #example")

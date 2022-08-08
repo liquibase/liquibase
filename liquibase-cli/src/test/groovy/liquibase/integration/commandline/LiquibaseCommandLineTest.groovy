@@ -43,8 +43,8 @@ class LiquibaseCommandLineTest extends Specification {
         LiquibaseCommandLine.toArgNames(new ConfigurationDefinition.Builder(prefix).define(argName, String).addAliasKey(alias).buildTemporary()).join(", ") == expected
 
         where:
-        prefix          | argName          | alias                 | expected
-        "liquibase"     | "test"           | "testAlias"           | "--test, --liquibase-test, --liquibasetest, --test-alias, --testAlias"
+        prefix      | argName | alias       | expected
+        "liquibase" | "test"  | "testAlias" | "--test, --liquibase-test, --liquibasetest, --test-alias, --testAlias"
     }
 
     @Unroll
@@ -63,19 +63,19 @@ class LiquibaseCommandLineTest extends Specification {
         new LiquibaseCommandLine().adjustLegacyArgs(input as String[]).toArrayString() == (expected as String[]).toArrayString()
 
         where:
-        input                                  | expected
-        ["--arg", "update", "--help"]          | ["--arg", "update", "--help"]
-        ["tag", "--help"]                      | ["tag", "--help"]
-        ["tag", "my-tag"]                      | ["tag", "--tag", "my-tag"]
-        ["rollback", "my-tag"]                 | ["rollback", "--tag", "my-tag"]
-        ["rollbackToDate", "1/2/3"]              | ["rollbackToDate", "--date", "1/2/3"]
-        ["rollback-to-date", "1/2/3"]             | ["rollback-to-date", "--date", "1/2/3"]
-        ["rollback-to-date", "1/2/3", "3:15:21"]             | ["rollback-to-date", "--date", "1/2/3 3:15:21"]
-        ["rollback-count", "5"]                | ["rollback-count", "--count", "5"]
-        ["future-rollback-count-sql", "5"]         | ["future-rollback-count-sql", "--count", "5"]
-        ["future-rollback-from-tag-sql", "my-tag"] | ["future-rollback-from-tag-sql", "--tag", "my-tag"]
+        input                                                                                                                                                                                       | expected
+        ["--arg", "update", "--help"]                                                                                                                                                               | ["--arg", "update", "--help"]
+        ["tag", "--help"]                                                                                                                                                                           | ["tag", "--help"]
+        ["tag", "my-tag"]                                                                                                                                                                           | ["tag", "--tag", "my-tag"]
+        ["rollback", "my-tag"]                                                                                                                                                                      | ["rollback", "--tag", "my-tag"]
+        ["rollbackToDate", "1/2/3"]                                                                                                                                                                 | ["rollbackToDate", "--date", "1/2/3"]
+        ["rollback-to-date", "1/2/3"]                                                                                                                                                               | ["rollback-to-date", "--date", "1/2/3"]
+        ["rollback-to-date", "1/2/3", "3:15:21"]                                                                                                                                                    | ["rollback-to-date", "--date", "1/2/3 3:15:21"]
+        ["rollback-count", "5"]                                                                                                                                                                     | ["rollback-count", "--count", "5"]
+        ["future-rollback-count-sql", "5"]                                                                                                                                                          | ["future-rollback-count-sql", "--count", "5"]
+        ["future-rollback-from-tag-sql", "my-tag"]                                                                                                                                                  | ["future-rollback-from-tag-sql", "--tag", "my-tag"]
 
-        ["--log-level","DEBUG","--log-file","06V21.txt","--defaultsFile=liquibase.h2-mem.properties","update","--changelog-file","postgres_lbpro_master_changelog.xml","--labels","setup"] | ["--log-level","DEBUG","--log-file","06V21.txt","--defaultsFile=liquibase.h2-mem.properties","update","--changelog-file","postgres_lbpro_master_changelog.xml","--labels","setup"]
+        ["--log-level", "DEBUG", "--log-file", "06V21.txt", "--defaultsFile=liquibase.h2-mem.properties", "update", "--changelog-file", "postgres_lbpro_master_changelog.xml", "--labels", "setup"] | ["--log-level", "DEBUG", "--log-file", "06V21.txt", "--defaultsFile=liquibase.h2-mem.properties", "update", "--changelog-file", "postgres_lbpro_master_changelog.xml", "--labels", "setup"]
     }
 
     def "accepts -D subcommand arguments for changelog parameters"() {
@@ -85,5 +85,21 @@ class LiquibaseCommandLineTest extends Specification {
         then:
         subcommands["update"].commandSpec.findOption("-D") != null
         subcommands["snapshot"].commandSpec.findOption("-D") == null
+    }
+
+    @Unroll
+    def "cleanExceptionMessage"() {
+        expect:
+        new LiquibaseCommandLine().cleanExceptionMessage(input) == expected
+
+        where:
+        input                                                                | expected
+        null                                                                 | null
+        ""                                                                   | ""
+        "random string"                                                      | "random string"
+        "Unexpected error running Liquibase: message here"                   | "message here"
+        "java.lang.RuntimeException: message here"                           | "message here"
+        "java.lang.ParseError: message here"                                 | "message here"
+        "java.io.RuntimeException: java.lang.RuntimeException: message here" | "message here"
     }
 }

@@ -178,7 +178,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.29</version>
+            <version>8.0.30</version>
             <scope>test</scope>
         </dependency>
 
@@ -192,7 +192,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.4.0</version>
+            <version>42.4.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -227,7 +227,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.13.20</version>
+            <version>3.13.21</version>
         </dependency>
 
 
@@ -262,7 +262,7 @@
 
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.0</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -325,7 +325,7 @@
 
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
+                <version>3.0.0</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -442,7 +442,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>2.5.2</version>
+                    <version>3.0.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
