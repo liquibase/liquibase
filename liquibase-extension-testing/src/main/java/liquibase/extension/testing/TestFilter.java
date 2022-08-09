@@ -77,7 +77,7 @@ public class TestFilter {
         }
         // This is the start of a string that comes from Intellij Idea if you copy the test definition from the run window.
         if (input.startsWith("java:test://")) {
-            Pattern p = Pattern.compile("(db:)(?<db>[a-z]*),(command:)(?<command>[a-z]*)} (?<def>.*)");
+            Pattern p = Pattern.compile("(db:)(?<db>[a-z]*),(command:)(?<command>[a-zA-Z]*)} (?<def>.*)");
             Matcher matcher = p.matcher(input);
             if (!matcher.find()) {
                 Assert.fail("Cannot parse " + desc);
