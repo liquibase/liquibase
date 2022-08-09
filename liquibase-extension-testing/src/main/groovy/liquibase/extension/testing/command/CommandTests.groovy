@@ -300,7 +300,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
 
             config.registerProvider(propertiesProvider)
-            resourceAccessor = new SearchPathResourceAccessor(Scope.getCurrentScope().getResourceAccessor())
+            resourceAccessor = new SearchPathResourceAccessor(testDef.searchPath, Scope.getCurrentScope().getResourceAccessor())
         }
 
         def scopeSettings = [
@@ -1036,6 +1036,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          */
         void runChangelog(String changeLogPath, String labels) {
             this.setups.add(new SetupRunChangelog(changeLogPath, labels))
+        }
+
+        /**
+         * Run a changelog with labels
+         */
+        void runChangelog(String changeLogPath, String labels, String searchPath) {
+            this.setups.add(new SetupRunChangelog(changeLogPath, labels, searchPath))
         }
 
         /*

@@ -6,12 +6,13 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Driver;
 import java.util.*;
@@ -291,22 +292,20 @@ public class DatabaseFactory {
                 driverProperties.put("password", password);
             }
             if (null != driverPropertiesFile) {
-                File propertiesFile = new File(driverPropertiesFile);
-                if (propertiesFile.exists()) {
-                    LOG.fine(
-                            "Loading properties from the file:'" + driverPropertiesFile + "'"
-                    );
-                    FileInputStream inputStream = new FileInputStream(propertiesFile);
-                    try {
-                        driverProperties.load(inputStream);
-                    } finally {
-                        inputStream.close();
+                    PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+                    Resource driverProperty = pathHandlerFactory.getResource(driverPropertiesFile, true);
+                    if (driverProperty != null) {
+                        try (InputStream stream = driverProperty.openInputStream()) {
+                            LOG.fine(
+                                    "Loading properties from the file:'" + driverPropertiesFile + "'"
+                            );
+                            driverProperties.load(stream);
+                        }
+                    } else {
+                        throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
+                                + driverPropertiesFile + "'");
                     }
-                } else {
-                    throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
-                            + driverPropertiesFile + "'");
                 }
-            }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException | IOException e) {
             throw new RuntimeException("Exception opening JDBC Driver specific properties from the file: '"
                     + driverPropertiesFile + "'", e);

@@ -6,8 +6,11 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.FileUtil;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.io.File;
@@ -57,11 +60,12 @@ public class InternalExecuteSqlCommandStep extends AbstractCommandStep {
         if (sqlFile == null) {
             sqlText = sql;
         } else {
-            File file = new File(sqlFile);
-            if (! file.exists()){
-              throw new LiquibaseException(String.format("The file '%s' does not exist", file.getCanonicalPath()));
+            final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+            Resource resource = pathHandlerFactory.getResource(sqlFile, true);
+            if (resource == null){
+              throw new LiquibaseException(String.format("The file '%s' does not exist", sqlFile));
             }
-            sqlText = FileUtil.getContents(file);
+            sqlText = StreamUtil.readStreamAsString(resource.openInputStream());
         }
 
         String out = "";

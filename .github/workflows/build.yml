@@ -364,8 +364,8 @@ jobs:
           ##create zip file from tar content
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && zip -r ../liquibase-0-SNAPSHOT.zip *)
 
-          ##create installers
-          (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
+          ##create installer - disabled here but run as nightly job and as part of release workflow
+          # (cd liquibase-dist && ${{ github.workspace }}/.github/util/package-install4j.sh 0-SNAPSHOT)
 
           find . -name original-*.jar -exec rm {} \;
 
@@ -377,7 +377,8 @@ jobs:
           cp liquibase-dist/target/liquibase-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
           cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
           
-          cp liquibase-dist/target/liquibase-*-installer-* artifacts
+          ##create installer - disabled here but run as nightly job and as part of release workflow
+          #cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts
           cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-sources.jar artifacts
