@@ -267,6 +267,17 @@ Optional Args:
             ]
 
         }
+        expectedFileContent = [
+                "target/test-classes/diffChangeLog-test.xml" :
+                        [
+                                CommandTests.assertContains("<changeSet ", 10),
+                                CommandTests.assertContains("<createTable ", 2),
+                                CommandTests.assertContains("<addColumn ", 2),
+                                CommandTests.assertContains("<dropTable ", 2),
+                                CommandTests.assertContains("<dropColumn ", 2),
+                                CommandTests.assertContains("<modifyDataType ", 2),
+                        ]
+        ]
     }
 
     run "Running without changelogFile gives an error", {
