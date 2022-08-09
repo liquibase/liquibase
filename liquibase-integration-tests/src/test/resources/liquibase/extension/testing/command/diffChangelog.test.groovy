@@ -280,6 +280,73 @@ Optional Args:
         ]
     }
 
+    run "Running diff against differently structured databases finds changed objects, with existing changelog file", {
+        arguments = [
+                url              : { it.url },
+                username         : { it.username },
+                password         : { it.password },
+                referenceUrl     : { it.altUrl },
+                referenceUsername: { it.altUsername },
+                referencePassword: { it.altPassword },
+                changelogFile: "target/test-classes/diffChangeLog-test-21938109283.xml",
+        ]
+
+        setup {
+            cleanResources("diffChangeLog-test-21938109283.xml")
+            copyResource("changelogs/diffChangeLog-test-21938109283.xml", "diffChangeLog-test-21938109283.xml")
+            database = [
+                    new CreateTableChange(
+                            tableName: "SharedTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)"),
+                                    ColumnConfig.fromName("Shared")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "PrimaryTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+            ]
+
+            altDatabase = [
+                    new CreateTableChange(
+                            tableName: "SharedTable",
+                            columns: [
+                                    ColumnConfig.fromName("Name")
+                                            .setType("VARCHAR(255)"),
+                                    ColumnConfig.fromName("Shared")
+                                            .setType("VARCHAR(3)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondaryTable",
+                            columns: [
+                                    ColumnConfig.fromName("Id")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+            ]
+
+        }
+        expectedFileContent = [
+                "target/test-classes/diffChangeLog-test-21938109283.xml" :
+                        [
+                                CommandTests.assertContains("<changeSet ", 10),
+                                CommandTests.assertContains("<createTable ", 2),
+                                CommandTests.assertContains("<addColumn ", 2),
+                                CommandTests.assertContains("<dropTable ", 2),
+                                CommandTests.assertContains("<dropColumn ", 2),
+                                CommandTests.assertContains("<modifyDataType ", 2),
+                                CommandTests.assertContains("</databaseChangeLog>", 1),
+                        ]
+        ]
+    }
+
     run "Running without changelogFile gives an error", {
         arguments = [
                 url              : { it.url },
