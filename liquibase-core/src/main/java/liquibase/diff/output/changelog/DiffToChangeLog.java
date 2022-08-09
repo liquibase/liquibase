@@ -16,6 +16,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -26,6 +28,8 @@ import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
 import liquibase.util.DependencyUtil;
+import liquibase.util.FilenameUtil;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -91,23 +95,38 @@ public class DiffToChangeLog {
 
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         this.changeSetPath = changeLogFile;
-        File file = new File(changeLogFile);
+        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+        Resource resource = pathHandlerFactory.getResource(changeLogFile, true);
+        boolean fileExists;
+        // todo, an exists method would be useful here, instead of this hack
+        try (InputStream is = resource.openInputStream()) {
+            fileExists = is != null;
+        } catch (IOException | NullPointerException e) {
+            fileExists = false;
+            Scope.getCurrentScope().getLog(getClass()).warning("Unable to open input stream to file " + changeLogFile, e);
+        }
 
         final Map<String, Object> newScopeObjects = new HashMap<>();
 
-        File objectsDir = null;
+        String objectsDir = null;
+        String parent;
+        if (resource != null) {
+            parent = FilenameUtil.getPath(resource.getPath());
+        } else {
+            parent = FilenameUtil.getPath(changeLogFile);
+        }
         if (changeLogFile.toLowerCase().endsWith("sql")) {
             DeprecatedConfigurationValueProvider.setData("liquibase.pro.sql.inline", "true");
         } else if (this.diffResult.getComparisonSnapshot() instanceof EmptyDatabaseSnapshot) {
-            objectsDir = new File(file.getParentFile(), "objects");
+            objectsDir = FilenameUtil.concat(parent, "objects");
         } else {
-            objectsDir = new File(file.getParentFile(), "objects-" + new Date().getTime());
+            objectsDir = FilenameUtil.concat(parent, "objects-" + new Date().getTime());
         }
 
         if (objectsDir != null) {
-            if (objectsDir.exists()) {
-                throw new UnexpectedLiquibaseException("The generatechangelog command would overwrite your existing stored logic files. To run this command please remove or rename the '"+objectsDir.getCanonicalPath()+"' dir in your local project directory");
-            }
+//            if (objectsDir.exists()) {
+//                throw new UnexpectedLiquibaseException("The generatechangelog command would overwrite your existing stored logic files. To run this command please remove or rename the '"+objectsDir.getCanonicalPath()+"' dir in your local project directory");
+//            }
             newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, objectsDir);
         }
 
@@ -124,15 +143,17 @@ public class DiffToChangeLog {
                 database = determineDatabase(diffResult.getComparisonSnapshot());
             }
             newScopeObjects.put(DIFF_SNAPSHOT_DATABASE, database);
+            boolean finalFileExists = fileExists;
             Scope.child(newScopeObjects, new Scope.ScopedRunner() {
                 @Override
                 public void run() {
                     try {
-                        if (!file.exists()) {
+                        if (!finalFileExists) {
                             //print changeLog only if there are available changeSets to print instead of printing it always
-                            printNew(changeLogSerializer, file);
+                            printNew(changeLogSerializer, changeLogFile);
                         } else {
-                            Scope.getCurrentScope().getLog(getClass()).info(file + " exists, appending");
+                            Scope.getCurrentScope().getLog(getClass()).info(changeLogFile + " exists, appending");
+                            StringBuilder fileContents = new StringBuilder(StreamUtil.readStreamAsString(resource.openInputStream()));
                             ByteArrayOutputStream out = new ByteArrayOutputStream();
                             print(new PrintStream(out, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()), changeLogSerializer);
 
@@ -146,37 +167,17 @@ public class DiffToChangeLog {
                                 return;
                             }
 
-                            try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw")) {
-
-                                String line;
-                                long offset = 0;
-                                boolean foundEndTag = false;
-                                while ((line = randomAccessFile.readLine()) != null) {
-                                    int index = line.indexOf(DATABASE_CHANGE_LOG_CLOSING_XML_TAG);
-                                    if (index >= 0) {
-                                        foundEndTag = true;
-                                        break;
-                                    } else {
-                                        offset = randomAccessFile.getFilePointer();
-                                    }
-                                }
-
+                            int endTagIndex = fileContents.indexOf(DATABASE_CHANGE_LOG_CLOSING_XML_TAG);
+                            if (endTagIndex == -1) {
+                                fileContents.append(xml);
+                            } else {
                                 String lineSeparator = GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getCurrentValue();
-
-                                if (foundEndTag) {
-                                    randomAccessFile.seek(offset);
-                                    randomAccessFile.writeBytes("    ");
-                                    randomAccessFile.write(innerXml.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
-                                    randomAccessFile.writeBytes(lineSeparator);
-                                    randomAccessFile.writeBytes(DATABASE_CHANGE_LOG_CLOSING_XML_TAG + lineSeparator);
-                                } else {
-                                    randomAccessFile.seek(0);
-                                    long length = randomAccessFile.length();
-                                    randomAccessFile.seek(length);
-                                    randomAccessFile.write(xml.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
-                                }
+                                String toInsert = "    " + innerXml + lineSeparator;
+                                fileContents.insert(endTagIndex, toInsert);
                             }
-
+                            try (OutputStream outputStream = resource.openOutputStream()) {
+                                outputStream.write(fileContents.toString().getBytes());
+                            }
                         }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -217,7 +218,7 @@ public class DiffToChangeLog {
      * Prints changeLog that would bring the target database to be the same as
      * the reference database
      */
-    public void printNew(ChangeLogSerializer changeLogSerializer, File file) throws ParserConfigurationException, IOException, DatabaseException {
+    public void printNew(ChangeLogSerializer changeLogSerializer, String file) throws ParserConfigurationException, IOException, DatabaseException {
 
         List<ChangeSet> changeSets = generateChangeSets();
 
@@ -227,8 +228,8 @@ public class DiffToChangeLog {
         } else {
             Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
         }
-
-        try (FileOutputStream stream = new FileOutputStream(file);
+        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+        try (OutputStream stream = pathHandlerFactory.createResource(file);
              PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
             changeLogSerializer.write(changeSets, out);
         }
