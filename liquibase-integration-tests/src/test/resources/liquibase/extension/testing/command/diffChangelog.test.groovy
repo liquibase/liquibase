@@ -223,11 +223,11 @@ Optional Args:
                 referenceUrl     : { it.altUrl },
                 referenceUsername: { it.altUsername },
                 referencePassword: { it.altPassword },
-                changelogFile: "target/test-classes/diffChangeLog-test.xml",
+                changelogFile: "target/test-classes/diffChangeLog-test-1212093821.xml",
         ]
 
         setup {
-            cleanResources("diffChangeLog-test.xml")
+            cleanResources("diffChangeLog-test-1212093821.xml")
             database = [
                     new CreateTableChange(
                             tableName: "SharedTable",
@@ -268,14 +268,14 @@ Optional Args:
 
         }
         expectedFileContent = [
-                "target/test-classes/diffChangeLog-test.xml" :
+                "target/test-classes/diffChangeLog-test-1212093821.xml" :
                         [
-                                CommandTests.assertContains("<changeSet ", 10),
-                                CommandTests.assertContains("<createTable ", 2),
-                                CommandTests.assertContains("<addColumn ", 2),
-                                CommandTests.assertContains("<dropTable ", 2),
-                                CommandTests.assertContains("<dropColumn ", 2),
-                                CommandTests.assertContains("<modifyDataType ", 2),
+                                CommandTests.assertContains("<changeSet ", 5),
+                                CommandTests.assertContains("<createTable ", 1),
+                                CommandTests.assertContains("<addColumn ", 1),
+                                CommandTests.assertContains("<dropTable ", 1),
+                                CommandTests.assertContains("<dropColumn ", 1),
+                                CommandTests.assertContains("<modifyDataType ", 1),
                         ]
         ]
     }
