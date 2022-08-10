@@ -27,10 +27,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
-import liquibase.util.DependencyUtil;
-import liquibase.util.FilenameUtil;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
+import liquibase.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
@@ -111,16 +108,16 @@ public class DiffToChangeLog {
         String objectsDir = null;
         String parent;
         if (resource != null) {
-            parent = FilenameUtil.getPath(resource.getPath());
+            parent = CommonsFilenameUtils.getPath(resource.getPath());
         } else {
-            parent = FilenameUtil.getPath(changeLogFile);
+            parent = CommonsFilenameUtils.getPath(changeLogFile);
         }
         if (changeLogFile.toLowerCase().endsWith("sql")) {
             DeprecatedConfigurationValueProvider.setData("liquibase.pro.sql.inline", "true");
         } else if (this.diffResult.getComparisonSnapshot() instanceof EmptyDatabaseSnapshot) {
-            objectsDir = FilenameUtil.concat(parent, "objects");
+            objectsDir = CommonsFilenameUtils.concat(parent, "objects");
         } else {
-            objectsDir = FilenameUtil.concat(parent, "objects-" + new Date().getTime());
+            objectsDir = CommonsFilenameUtils.concat(parent, "objects-" + new Date().getTime());
         }
 
         if (objectsDir != null) {
