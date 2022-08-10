@@ -43,7 +43,7 @@
     <repositories>
         <repository>
             <id>local-lib-repo</id>
-            <url>file:///${project.basedir}/lib</url>
+            <url>file:///${pom.basedir}/src/lib</url>
         </repository>
     </repositories>
 
@@ -118,6 +118,25 @@
             <version>${dependency.spock.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-bigquery -->
+
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-bigquery</artifactId>
+            <version>2.14.2</version>
+        </dependency>
+
+          <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client-jackson2</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client</artifactId>
+            <version>1.42.2</version>
+        </dependency>
 
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
@@ -135,7 +154,30 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
+
+                <plugin>
+                    <groupId>org.liquibase</groupId>
+                    <artifactId>liquibase-maven-plugin</artifactId>
+                    <version>4.15.0</version>
+                    <configuration>
+                        <propertyFileWillOverride>true</propertyFileWillOverride>
+                        <propertyFile>target/classes/liquibase.properties</propertyFile>
+                        <logging>DEBUG</logging>
+                        <changeLogFile>target/classes/changelog.sql</changeLogFile>
+                        <outputChangeLogFile>target/classes/generatedChangelog.bigquery.sql</outputChangeLogFile>
+                        <diffTypes>tables,views</diffTypes>
+                        <diffIncludeCatalog>true</diffIncludeCatalog>
+                        <diffIncludeSchema>true</diffIncludeSchema>
+                    </configuration>
+                </plugin>
+
 
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>

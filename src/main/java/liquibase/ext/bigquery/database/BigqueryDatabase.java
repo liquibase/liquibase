@@ -136,6 +136,8 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getJdbcCatalogName(final CatalogAndSchema schema) {
+        /*return "INFORMATION_SCHEMA";*/
+
         DatabaseConnection connection = getConnection();
         try {
             return connection.getCatalog();
@@ -143,6 +145,8 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
             e.printStackTrace();
             return null;
         }
+
+
     }
 
     @Override

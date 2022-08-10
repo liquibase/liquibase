@@ -117,8 +117,11 @@ public class BigqueryConnection extends JdbcConnection {
 
     public void openConn(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
         try {
+            System.out.println(url);
             this.con = (S42Connection) driverObject.connect(url, driverProperties);
+            System.out.println("connected");
             if (this.con == null) {
+                System.out.println("connection issues");
                 throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
             }
         } catch (SQLException sqle) {

@@ -123,6 +123,7 @@ public class BigQueryTableSnapshotGenerator extends TableSnapshotGenerator {
 
         CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase)database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
+
         if ("Y".equals(tableMetadataResultSet.getString("TEMPORARY"))) {
             table.setAttribute("temporary", "GLOBAL");
             String duration = tableMetadataResultSet.getString("DURATION");

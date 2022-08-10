@@ -4,3 +4,4 @@
 derby.log
 liquibase-bigquery.iml
 src/test/java/BigqueryIT.java
+/src/main/resources/lolejniczakdatabricksdemo-5d5e0af44293.p12

@@ -1,0 +1,3 @@
+liquibase.ext.bigquery.snapshot.jvm.BigQueryDatasetSnapshotGenerator
+liquibase.ext.bigquery.snapshot.jvm.BigQueryTableSnapshotGenerator
+liquibase.ext.bigquery.snapshot.jvm.BigQueryColumnSnapshotGenerator

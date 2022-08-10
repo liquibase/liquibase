@@ -1,4 +1,4 @@
-package liquibase.ext.bigquery.diff.output.changelog;
+package liquibase.ext.bigquery.diff.output.changelog.core;
 
 import liquibase.Scope;
 import liquibase.change.Change;
@@ -15,6 +15,8 @@ import liquibase.structure.core.Table;
 
 public class BigQueryChangedTableChangeGenerator extends ChangedTableChangeGenerator {
 
+    public BigQueryChangedTableChangeGenerator(){}
+
         @Override
         public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
             int priority = super.getPriority(objectType, database);
@@ -23,6 +25,7 @@ public class BigQueryChangedTableChangeGenerator extends ChangedTableChangeGener
             }
             return priority;
         }
+
         @Override
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Table table = (Table)changedObject;

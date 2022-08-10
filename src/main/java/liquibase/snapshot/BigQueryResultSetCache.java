@@ -1,4 +1,4 @@
-package liquibase.ext.bigquery.snapshot
+package liquibase.snapshot;
 
 import java.sql.SQLException;
 import java.util.List;
