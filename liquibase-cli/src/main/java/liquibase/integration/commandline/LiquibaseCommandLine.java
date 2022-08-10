@@ -358,9 +358,9 @@ public class LiquibaseCommandLine {
                             Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue().getAbsolutePath());
                         }
 
-                        final ConfiguredValue<File> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
+                        final ConfiguredValue<String> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
                         if (outputFile.found()) {
-                            Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue().getAbsolutePath());
+                            Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue());
                         }
 
                         if (response == 0) {
