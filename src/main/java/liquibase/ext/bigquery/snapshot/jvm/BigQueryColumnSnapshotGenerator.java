@@ -32,12 +32,8 @@ public class BigQueryColumnSnapshotGenerator extends ColumnSnapshotGenerator {
     }
 
     @Override
-    public Class<? extends SnapshotGenerator>[] replaces() {
-        return new Class[]{ColumnSnapshotGenerator.class};
-    }
-
-    @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException {
+        System.out.println("Wlazlem ssssssss");
         if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
             return;
         }
