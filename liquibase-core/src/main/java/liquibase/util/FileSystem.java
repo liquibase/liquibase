@@ -332,7 +332,7 @@ public enum FileSystem {
         this.casePreserving = casePreserving;
         this.supportsDriveLetter = supportsDriveLetter;
         this.nameSeparator = nameSeparator;
-        this.nameSeparatorOther = FilenameUtils.flipSeparator(nameSeparator);
+        this.nameSeparatorOther = CommonsFilenameUtils.flipSeparator(nameSeparator);
     }
 
     /**

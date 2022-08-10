@@ -17,8 +17,6 @@
 
 package liquibase.util;
 
-import liquibase.util.file.FilenameUtils;
-
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -66,7 +64,7 @@ public enum IOCase {
      * versa, then the value of the case-sensitivity flag will change.
      * </p>
      */
-    SYSTEM("System", !FilenameUtils.isSystemWindows());
+    SYSTEM("System", !CommonsFilenameUtils.isSystemWindows());
 
     /** Serialization version. */
     private static final long serialVersionUID = -6343169151696340687L;
