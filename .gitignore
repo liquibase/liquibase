@@ -4,3 +4,7 @@
 derby.log
 liquibase-bigquery.iml
 src/test/java/BigqueryIT.java
+src/test/resources/*.json
+src/main/resources/*.json
+src/main/resources/liquibase.properties
+ewojtach*.json
