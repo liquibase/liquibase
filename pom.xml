@@ -5,7 +5,7 @@
 
     <groupId>org.liquibase.ext</groupId>
     <artifactId>liquibase-bigquery</artifactId>
-    <version>4.13.1-SNAPSHOT</version>
+    <version>4.15.1-SNAPSHOT</version>
 
     <name>Liquibase Extension: BigQuery</name>
     <description>Adds support for BigQuery database</description>
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>4.13.0</version>
+            <version>4.15.0</version>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
@@ -110,6 +110,24 @@
             <version>4.2</version>
             <scope>system</scope>
             <systemPath>${basedir}/lib/GoogleBigQueryJDBC42.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-bigquery</artifactId>
+            <version>2.14.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client-jackson2</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client</artifactId>
+            <version>1.42.2</version>
         </dependency>
 
         <dependency>
@@ -239,6 +257,15 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>4.15.0</version>
+                <configuration>
+                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
+                </configuration>
+
             </plugin>
         </plugins>
 
