@@ -1,7 +1,9 @@
 package liquibase.resource;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.plugin.AbstractPluginFactory;
+import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -65,7 +67,8 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
      * @throws IOException if the path cannot be understood or if there is a problem parsing the path
      */
     public Resource getResource(String resourcePath, boolean fallbackToResourceAccessor) throws IOException {
-        final PathHandler plugin = getPlugin(resourcePath);
+        String searchPath = GlobalConfiguration.SEARCH_PATH.getCurrentValue();
+        PathHandler plugin = determinePlugin(searchPath, resourcePath);
         if (plugin == null) {
             throw new IOException("Cannot parse resource location: '" + resourcePath + "'");
         }
@@ -76,6 +79,21 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         }
 
         return foundResource;
+    }
+
+    /**
+     * Determine which PathHandler to use. If a search path is provided, the path handler associated with that
+     * search path is always used. If no search path is provided, look for a path handler that is compatible
+     * with the path provided.
+     */
+    private PathHandler determinePlugin(String searchPath, String resourcePath) {
+        PathHandler plugin;
+        if (StringUtil.isEmpty(searchPath)) {
+            plugin = getPlugin(resourcePath);
+        } else {
+            plugin = getPlugin(GlobalConfiguration.SEARCH_PATH.getCurrentValue());
+        }
+        return plugin;
     }
 
     /**
