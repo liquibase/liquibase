@@ -52,4 +52,9 @@ public class DirectoryPathHandler extends AbstractPathHandler {
     public OutputStream createResource(String path) throws IOException {
         return Files.newOutputStream(Paths.get(path), StandardOpenOption.CREATE_NEW);
     }
+
+    @Override
+    public boolean exists(String path) {
+        return Files.exists(Paths.get(path));
+    }
 }

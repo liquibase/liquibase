@@ -94,14 +94,7 @@ public class DiffToChangeLog {
         this.changeSetPath = changeLogFile;
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
         Resource resource = pathHandlerFactory.getResource(changeLogFile, true);
-        boolean fileExists;
-        // todo, an exists method would be useful here, instead of this hack
-        try (InputStream is = resource.openInputStream()) {
-            fileExists = is != null;
-        } catch (IOException | NullPointerException e) {
-            fileExists = false;
-            Scope.getCurrentScope().getLog(getClass()).warning("Unable to open input stream to file " + changeLogFile, e);
-        }
+        final boolean fileExists = pathHandlerFactory.exists(changeLogFile);
 
         final Map<String, Object> newScopeObjects = new HashMap<>();
 

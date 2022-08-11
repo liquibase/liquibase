@@ -37,4 +37,10 @@ public interface PathHandler extends Plugin {
      * @throws IOException if the path cannot be written to
      */
     OutputStream createResource(String path) throws IOException;
+
+    /**
+     * Check if a resource exists at the specified path.
+     * @return true if the file exists, false otherwise
+     */
+    boolean exists(String path);
 }

@@ -94,4 +94,9 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         }
         return resource.openOutputStream();
     }
+
+    public boolean exists(String resourcePath) {
+        final PathHandler plugin = getPlugin(resourcePath);
+        return plugin.exists(resourcePath);
+    }
 }
