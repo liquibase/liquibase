@@ -24,6 +24,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * This class was copied from the Apache Commons IO project, and unused methods removed. If additional methods are
+ * required, they can be added to this class.
+ *
  * General file name and file path manipulation utilities.
  * <p>
  * When dealing with file names you can hit problems when moving from a Windows

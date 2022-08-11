@@ -21,6 +21,9 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
+ * This class was copied from the Apache Commons IO project, and unused methods removed. If additional methods are
+ * required, they can be added to this class.
+ *
  * Enumeration of IO case sensitivity.
  * <p>
  * Different filing systems have different rules for case-sensitivity.

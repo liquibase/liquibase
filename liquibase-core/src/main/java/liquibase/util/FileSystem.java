@@ -21,6 +21,9 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
+ * This class was copied from the Apache Commons IO project, and unused methods removed. If additional methods are
+ * required, they can be added to this class.
+ *
  * Abstracts an OS' file system details, currently supporting the single use case of converting a file name String to a
  * legal file name with {@link #toLegalFileName(String, char)}.
  * <p>
