@@ -14,4 +14,9 @@ public class URIResource extends AbstractResource {
     public InputStream openInputStream() throws IOException {
         return getUri().toURL().openStream();
     }
+
+    @Override
+    public String getAbsolutePath() {
+        return getUri().getPath();
+    }
 }

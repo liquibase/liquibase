@@ -20,4 +20,9 @@ public class MockResource extends AbstractResource {
     public InputStream openInputStream() throws IOException {
         return new ByteArrayInputStream(content.getBytes());
     }
+
+    @Override
+    public String getAbsolutePath() {
+        return null;
+    }
 }

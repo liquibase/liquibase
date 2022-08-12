@@ -101,22 +101,22 @@ public class DiffToChangeLog {
         String objectsDir = null;
         String parent;
         if (resource != null) {
-            parent = CommonsFilenameUtils.getPath(resource.getPath());
+            parent = CommonsFilenameUtils.getPath(resource.getAbsolutePath());
         } else {
             parent = CommonsFilenameUtils.getPath(changeLogFile);
         }
         if (changeLogFile.toLowerCase().endsWith("sql")) {
             DeprecatedConfigurationValueProvider.setData("liquibase.pro.sql.inline", "true");
         } else if (this.diffResult.getComparisonSnapshot() instanceof EmptyDatabaseSnapshot) {
-            objectsDir = CommonsFilenameUtils.concat(parent, "objects");
+            objectsDir = pathHandlerFactory.concat(parent, "objects");
         } else {
-            objectsDir = CommonsFilenameUtils.concat(parent, "objects-" + new Date().getTime());
+            objectsDir = pathHandlerFactory.concat(parent, "objects-" + new Date().getTime());
         }
 
         if (objectsDir != null) {
-//            if (objectsDir.exists()) {
-//                throw new UnexpectedLiquibaseException("The generatechangelog command would overwrite your existing stored logic files. To run this command please remove or rename the '"+objectsDir.getCanonicalPath()+"' dir in your local project directory");
-//            }
+            if (pathHandlerFactory.exists(objectsDir)) {
+                throw new UnexpectedLiquibaseException("The generatechangelog command would overwrite your existing stored logic files. To run this command please remove or rename the '"+objectsDir+"' dir");
+            }
             newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, objectsDir);
         }
 

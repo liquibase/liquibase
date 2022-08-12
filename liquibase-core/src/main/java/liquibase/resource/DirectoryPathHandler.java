@@ -1,6 +1,7 @@
 package liquibase.resource;
 
 import liquibase.Scope;
+import liquibase.util.FilenameUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -50,11 +51,22 @@ public class DirectoryPathHandler extends AbstractPathHandler {
 
     @Override
     public OutputStream createResource(String path) throws IOException {
-        return Files.newOutputStream(Paths.get(path), StandardOpenOption.CREATE_NEW);
+        Path path1 = Paths.get(path);
+        // Need to create parent directories, because Files.newOutputStream won't create them.
+        Path parent = path1.getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
+        return Files.newOutputStream(path1);
     }
 
     @Override
     public boolean exists(String path) {
         return Files.exists(Paths.get(path));
+    }
+
+    @Override
+    public String concat(String parent, String objects) {
+        return FilenameUtil.concat(parent, objects);
     }
 }

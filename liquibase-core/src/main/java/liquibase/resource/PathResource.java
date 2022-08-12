@@ -48,4 +48,9 @@ public class PathResource extends AbstractResource {
             return Files.newOutputStream(this.path);
         }
     }
+
+    @Override
+    public String getAbsolutePath() {
+        return this.path.toAbsolutePath().toString();
+    }
 }

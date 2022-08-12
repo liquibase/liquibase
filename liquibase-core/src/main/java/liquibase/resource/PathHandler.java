@@ -43,4 +43,6 @@ public interface PathHandler extends Plugin {
      * @return true if the file exists, false otherwise
      */
     boolean exists(String path);
+
+    String concat(String parent, String objects);
 }

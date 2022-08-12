@@ -1,5 +1,6 @@
 package liquibase.integration.spring;
 
+import liquibase.Scope;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.WritableResource;
 
@@ -36,5 +37,15 @@ class SpringResource extends liquibase.resource.AbstractResource {
             return ((WritableResource) resource).getOutputStream();
         }
         throw new IOException("Read only");
+    }
+
+    @Override
+    public String getAbsolutePath() {
+        try {
+            return resource.getFile().getAbsolutePath();
+        } catch (IOException | NullPointerException e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to determine absolute path", e);
+            return resource.getFilename();
+        }
     }
 }

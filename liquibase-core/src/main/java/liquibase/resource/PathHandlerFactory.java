@@ -117,4 +117,9 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         final PathHandler plugin = getPlugin(resourcePath);
         return plugin.exists(resourcePath);
     }
+
+    public String concat(String parent, String objects) {
+        final PathHandler plugin = getPlugin(parent);
+        return plugin.concat(parent, objects);
+    }
 }
