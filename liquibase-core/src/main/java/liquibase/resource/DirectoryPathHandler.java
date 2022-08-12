@@ -54,10 +54,10 @@ public class DirectoryPathHandler extends AbstractPathHandler {
         Path path1 = Paths.get(path);
         // Need to create parent directories, because Files.newOutputStream won't create them.
         Path parent = path1.getParent();
-        if (parent != null) {
+        if (parent != null && !Files.exists(parent)) {
             Files.createDirectories(parent);
         }
-        return Files.newOutputStream(path1);
+        return Files.newOutputStream(path1, StandardOpenOption.CREATE_NEW);
     }
 
     @Override
