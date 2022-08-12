@@ -6,7 +6,5 @@ context: testContext
 databasesUnderTest:
   - name: bigquery
     version:
-    url: jdbc:bigquery://[Host]:[Port];ProjectId=[Project];OAuthType=[AuthValue];[DefaultDataset]=[Value1];[Property2]=[Value2];
-    username: myuser
-    password: mypass
-    dbSchema: liquibase
+    url: jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=lolejniczakdatabricksdemo;DefaultDataset=lharness;OAuthType=0;OAuthServiceAcctEmail=sa-liquibase@lolejniczakdatabricksdemo.iam.gserviceaccount.com;OAuthPvtKeyPath=/Users/lolejniczak/Downloads/lolejniczakdatabricksdemo-51f56a38cd69.p12;
+    dbSchema: lharness

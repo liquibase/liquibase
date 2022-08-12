@@ -1,19 +1,18 @@
 --liquibase formatted sql
 
---changeset myuser:create-a-table
-
-create table liquibase.dim_channels
+--changeset lolejniczak:create-a-table
+create table authors
 (
-dim_channel_key smallint NOT NULL,
-channel_name character varying(40) NOT NULL,
-channel_type character varying(20) NOT NULL,
-channel_sub_type character varying(20) NOT NULL,
-storing_order integer NOT NULL,
-channel_display_name character varying(40) NOT NULL,
-channel_code character varying(20) NOT NULL,
-created_date timestamp without time zone NOT NULL,
-last_modified_date timestamp without time zone NOT NULL,
-oem_owner character varying(50) NOT NULL,
-publisher character varying(100) NOT NULL
+    dim_channel_key INT64,
+    channel_name STRING,
+    channel_type STRING,
+    channel_sub_type STRING,
+    storing_order INT64,
+    channel_display_name STRING,
+    channel_code  STRING,
+    created_date timestamp,
+    last_modified_date timestamp,
+    oem_owner  STRING,
+    publisher  STRING
 )
 ;

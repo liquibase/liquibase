@@ -101,7 +101,7 @@ public class BigQueryTableSnapshotGenerator extends TableSnapshotGenerator {
     }
 */
 
-
+/* TOOOOOO DZIALA ALE NA POTRZEBY TESTU
     @Override
     protected Table readTable(CachedRow tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
 
@@ -140,7 +140,7 @@ public class BigQueryTableSnapshotGenerator extends TableSnapshotGenerator {
 
         return table;
     }
-
+*/
 
 
 }
