@@ -58,6 +58,7 @@ class CommandTests extends Specification {
     public static String NOT_NULL = "not_null"
 
     private ConfigurationValueProvider propertiesProvider
+    private ConfigurationValueProvider searchPathPropertiesProvider
 
     def setup() {
         def properties = new Properties()
@@ -96,6 +97,9 @@ class CommandTests extends Specification {
 
     def cleanup() {
         Scope.currentScope.getSingleton(LiquibaseConfiguration).unregisterProvider(propertiesProvider)
+        if (searchPathPropertiesProvider != null) {
+            Scope.currentScope.getSingleton(LiquibaseConfiguration).unregisterProvider(searchPathPropertiesProvider)
+        }
     }
 
     @Unroll("#featureName: #commandTestDefinition.testFile.name")
@@ -282,7 +286,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         if (testDef.searchPath != null) {
             def config = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
 
-            ConfigurationValueProvider propertiesProvider = new AbstractMapConfigurationValueProvider() {
+            searchPathPropertiesProvider = new AbstractMapConfigurationValueProvider() {
                 @Override
                 protected Map<?, ?> getMap() {
                     return Collections.singletonMap(GlobalConfiguration.SEARCH_PATH.getKey(), testDef.searchPath)
@@ -299,7 +303,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 }
             }
 
-            config.registerProvider(propertiesProvider)
+            config.registerProvider(searchPathPropertiesProvider)
             resourceAccessor = new SearchPathResourceAccessor(testDef.searchPath, Scope.getCurrentScope().getResourceAccessor())
         }
 

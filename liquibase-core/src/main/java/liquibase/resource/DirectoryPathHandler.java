@@ -1,6 +1,7 @@
 package liquibase.resource;
 
 import liquibase.Scope;
+import liquibase.util.FilenameUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -51,5 +52,18 @@ public class DirectoryPathHandler extends AbstractPathHandler {
     @Override
     public OutputStream createResource(String path) throws IOException {
         return Files.newOutputStream(Paths.get(path), StandardOpenOption.CREATE_NEW);
+    }
+
+    @Override
+    public boolean isAbsolute(String path) throws IOException {
+        if (path == null) {
+            return false;
+        }
+        return new File(path).isAbsolute();
+    }
+
+    @Override
+    public String concat(String parent, String objects) {
+        return FilenameUtil.concat(parent, objects);
     }
 }

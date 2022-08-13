@@ -30,6 +30,8 @@ public interface PathHandler extends Plugin {
      */
     Resource getResource(String path) throws IOException;
 
+    String concat(String parent, String objects);
+
     /**
      * Creates a new resource at the specified path and returns an OutputStream for writing to it.
      *
@@ -37,4 +39,14 @@ public interface PathHandler extends Plugin {
      * @throws IOException if the path cannot be written to
      */
     OutputStream createResource(String path) throws IOException;
+
+    /**
+     *
+     * Given a path to a resource, return true if this is an absolute path or false if not
+     *
+     * @param  path       The path to consider
+     * @return boolean    True if this is an absolute path and false if not
+     *
+     */
+    boolean isAbsolute(String path) throws IOException;
 }

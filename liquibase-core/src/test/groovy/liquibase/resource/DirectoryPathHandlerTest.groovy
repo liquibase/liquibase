@@ -3,6 +3,8 @@ package liquibase.resource
 import liquibase.util.StreamUtil
 import liquibase.util.StringUtil
 import org.hsqldb.types.Charset
+import spock.lang.IgnoreIf
+import spock.lang.Requires
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -87,5 +89,39 @@ class DirectoryPathHandlerTest extends Specification {
 
         then:
         def e = thrown(FileAlreadyExistsException)
+    }
+
+    @Requires({ System.getProperty("os.name").contains("windows") })
+    @Unroll
+    def "isAbsolute (Windows): #input"() {
+        expect:
+        new DirectoryPathHandler().isAbsolute(input) == expected
+
+        where:
+        input                       | expected
+        null                        | false
+        "simple"                    | false
+        "with/path"                 | false
+        "with\\path"                | false
+        "c:\\windows\\path"         | true
+        "c:/windows/path"           | true
+        "/c:/windows/path"          | true
+        "D:\\windows\\path"         | true
+        "file:/tmp/liquibase.xml"   | true
+        "file:///tmp/liquibase.xml" | true
+    }
+
+    @IgnoreIf({ System.getProperty("os.name").contains("windows") })
+    @Unroll
+    def "isAbsolute (Linux): #input"() {
+        expect:
+        new DirectoryPathHandler().isAbsolute(input) == expected
+
+        where:
+        input                       | expected
+        null                        | false
+        "simple"                    | false
+        "with/path"                 | false
+        "/etc/config"               | true
     }
 }
