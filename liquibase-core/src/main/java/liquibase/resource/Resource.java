@@ -43,5 +43,9 @@ public interface Resource {
      */
     URI getUri();
 
+    /**
+     * Return the absolute path for this resource. Some resources may not be capable of providing an absolute path,
+     * and those resources should provide a partial path, as close to an absolute path as possible.
+     */
     String getAbsolutePath();
 }

@@ -44,5 +44,9 @@ public interface PathHandler extends Plugin {
      */
     boolean exists(String path);
 
+    /**
+     * Concatenates two parts of a path using the rules defined by the particular path handler. Some path handlers will
+     * use specific rules for path concatenation.
+     */
     String concat(String parent, String objects);
 }
