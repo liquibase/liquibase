@@ -11,9 +11,16 @@ import liquibase.util.JdbcUtil;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 public class EnterpriseDBDatabase extends PostgresDatabase {
 
+    public EnterpriseDBDatabase() {
+        super();
+        
+        reservedWords.addAll(Arrays.asList("Locked"));
+    }
+    
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         final String url = conn.getURL();
