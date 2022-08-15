@@ -18,7 +18,7 @@ public class EnterpriseDBDatabase extends PostgresDatabase {
     public EnterpriseDBDatabase() {
         super();
         
-        reservedWords.addAll(Arrays.asList("Locked"));
+        reservedWords.addAll(Arrays.asList("LOCKED"));
     }
     
     @Override
