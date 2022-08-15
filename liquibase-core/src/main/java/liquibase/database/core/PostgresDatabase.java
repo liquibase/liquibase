@@ -50,7 +50,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     private Set<String> systemTablesAndViews = new HashSet<>();
 
-    private Set<String> reservedWords = new HashSet<>();
+    protected Set<String> reservedWords = new HashSet<>();
 
     public PostgresDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
