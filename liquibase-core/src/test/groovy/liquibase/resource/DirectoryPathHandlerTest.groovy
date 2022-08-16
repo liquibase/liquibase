@@ -107,8 +107,8 @@ class DirectoryPathHandlerTest extends Specification {
         "c:/windows/path"           | true
         "/c:/windows/path"          | true
         "D:\\windows\\path"         | true
-        "file:/tmp/liquibase.xml"   | true
-        "file:///tmp/liquibase.xml" | true
+        "file:/tmp/liquibase.xml"   | false
+        "file:///tmp/liquibase.xml" | false
     }
 
     @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("win") })
