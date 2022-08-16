@@ -12,6 +12,7 @@ import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtil;
 import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -82,7 +83,7 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
 
         }
         try {
-
+            container.setWaitStrategy(Wait.forListeningPort());
             container.start();
         } catch(Throwable e ) {
             Scope.getCurrentScope().getLog(getClass()).severe("Exception occurred in Docker:"+container.getLogs());
