@@ -30,8 +30,6 @@ public interface PathHandler extends Plugin {
      */
     Resource getResource(String path) throws IOException;
 
-    String concat(String parent, String objects);
-
     /**
      * Creates a new resource at the specified path and returns an OutputStream for writing to it.
      *

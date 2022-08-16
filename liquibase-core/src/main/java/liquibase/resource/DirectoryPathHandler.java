@@ -61,9 +61,4 @@ public class DirectoryPathHandler extends AbstractPathHandler {
         }
         return new File(path).isAbsolute();
     }
-
-    @Override
-    public String concat(String parent, String objects) {
-        return FilenameUtil.concat(parent, objects);
-    }
 }

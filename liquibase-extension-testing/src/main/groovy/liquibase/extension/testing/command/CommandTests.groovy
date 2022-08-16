@@ -30,6 +30,7 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
 import liquibase.resource.ClassLoaderResourceAccessor
+import liquibase.resource.PathHandlerFactory
 import liquibase.resource.Resource
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
@@ -37,6 +38,7 @@ import liquibase.ui.ConsoleUIService
 import liquibase.ui.InputHandler
 import liquibase.ui.UIService
 import liquibase.util.FileUtil
+import liquibase.util.StreamUtil
 import liquibase.util.StringUtil
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.Assert
@@ -573,10 +575,23 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     static void checkFileContent(Map<String, ?> expectedFileContent, String outputDescription) {
-        for (def check : expectedFileContent) {
+        expectedFileContent.each { def check ->
             String path = check.key
             List<Object> checks = check.value
-            String contents = FileUtil.getContents(new File(path))
+            String contents
+            File f = new File(path)
+            if (f.exists()) {
+                contents = FileUtil.getContents(f)
+            } else {
+                final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class)
+                def resource = pathHandlerFactory.getResource(path)
+                if (resource != null) {
+                    contents = StreamUtil.readStreamAsString(resource.openInputStream())
+                } else {
+                    contents = null
+                }
+            }
+
             contents = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(contents))
             contents = contents.replaceAll(/\s+/, " ")
             checkOutput(outputDescription, contents, checks)
