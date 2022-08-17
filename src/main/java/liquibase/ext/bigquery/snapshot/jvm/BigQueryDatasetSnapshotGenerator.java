@@ -55,7 +55,6 @@ public class BigQueryDatasetSnapshotGenerator extends SchemaSnapshotGenerator {
                 // Do stuff with name
             }
 
-
             int j = 0;
             while (schemas.next()) {
                 System.out.println(j+" "+schemas.getString("TABLE_CATALOG")+" "+schemas.getString("TABLE_SCHEM"));

@@ -4,12 +4,14 @@ import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.ext.bigquery.database.BigqueryDatabase;
 import liquibase.snapshot.*;
 import liquibase.snapshot.jvm.TableSnapshotGenerator;
+import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
@@ -33,6 +35,7 @@ public class BigQueryTableSnapshotGenerator extends TableSnapshotGenerator {
         }
         return priority;
     }
+
 
     /*
     @Override
