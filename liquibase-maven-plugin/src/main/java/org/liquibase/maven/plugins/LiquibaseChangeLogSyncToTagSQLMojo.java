@@ -56,7 +56,7 @@ public class LiquibaseChangeLogSyncToTagSQLMojo extends
 	@Override
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
-		liquibase.changeLogSync(toTag, new Contexts(contexts), new LabelExpression(labels), outputWriter);
+		liquibase.changeLogSync(toTag, new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
 	}
 
 	@Override
