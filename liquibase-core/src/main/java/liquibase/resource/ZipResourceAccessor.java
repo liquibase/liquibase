@@ -3,6 +3,7 @@ package liquibase.resource;
 import liquibase.Scope;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.*;
@@ -15,17 +16,17 @@ public class ZipResourceAccessor extends AbstractPathResourceAccessor {
     /**
      * Creates a FileSystemResourceAccessor with the given directories/files as the roots.
      */
-    public ZipResourceAccessor(File file) {
+    public ZipResourceAccessor(File file) throws FileNotFoundException {
         this(file.toPath());
     }
 
-    public ZipResourceAccessor(Path file) {
+    public ZipResourceAccessor(Path file) throws FileNotFoundException {
         if (file == null) {
             throw new IllegalArgumentException("File must not be null");
         }
         Scope.getCurrentScope().getLog(getClass()).fine("Creating resourceAccessor for file " + file);
         if (!Files.exists(file)) {
-            throw new IllegalArgumentException("Non-existent file: " + file.toAbsolutePath());
+            throw new FileNotFoundException("Non-existent file: " + file.toAbsolutePath());
         }
         if (!Files.isRegularFile(file)) {
             throw new IllegalArgumentException("Not a regular file: " + file.toAbsolutePath());

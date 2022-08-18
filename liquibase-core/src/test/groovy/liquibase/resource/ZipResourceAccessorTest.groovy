@@ -1,6 +1,5 @@
 package liquibase.resource
 
-
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -9,14 +8,14 @@ class ZipResourceAccessorTest extends Specification {
     ZipResourceAccessor simpleTestAccessor
 
     def setup() {
-        simpleTestAccessor = new ZipResourceAccessor(new File(this.getClass().getClassLoader().getResource("simple-files.jar").toURI()));
+        simpleTestAccessor = new ZipResourceAccessor(new File(this.getClass().getClassLoader().getResource("simple-files.jar").toURI()))
 
     }
 
     @Unroll
     def "Cannot construct invalid values"() {
         when:
-        new ZipResourceAccessor(testFile);
+        new ZipResourceAccessor(testFile)
 
         then:
         def e = thrown(IllegalArgumentException)
