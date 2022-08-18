@@ -54,7 +54,7 @@ public class SchemesCDIConfigBuilder {
     /**
      * API method.
      */
-    public ResourceAccessor createResourceAccessor() {
+    public ResourceAccessor createResourceAccessor() throws IOException {
         return new DirectoryResourceAccessor(new File(ROOT_PATH));
     }
 

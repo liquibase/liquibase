@@ -3,6 +3,7 @@ package liquibase.resource;
 import liquibase.Scope;
 import liquibase.util.StreamUtil;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
@@ -32,7 +33,6 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
     public ClassLoaderResourceAccessor(ClassLoader classLoader) {
         this.classLoader = classLoader;
-
     }
 
     @Override
@@ -68,17 +68,18 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
         if (classLoader instanceof URLClassLoader) {
             final URL[] urls = ((URLClassLoader) classLoader).getURLs();
             if (urls != null) {
+                PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+
                 for (URL url : urls) {
                     try {
                         if (url.getProtocol().equals("file")) {
-                            String filename = url.getFile().toLowerCase(Locale.ROOT);
-                            if (filename.endsWith(".zip") || filename.endsWith(".jar")) {
-                                Path path = Paths.get(url.toURI());
-                                additionalResourceAccessors.addResourceAccessor(new ZipResourceAccessor(path));
-                            }
+                            additionalResourceAccessors.addResourceAccessor(pathHandlerFactory.getResourceAccessor(url.toExternalForm()));
                         }
+                    } catch (FileNotFoundException e) {
+                        //classloaders often have invalid paths specified on purpose. Just log them as fine level.
+                        Scope.getCurrentScope().getLog(getClass()).fine("Classloader URL " + url.toExternalForm() + " does not exist", e);
                     } catch (Throwable e) {
-                        Scope.getCurrentScope().getLog(getClass()).warning("Cannot create resourceAccessor for url " + url.toExternalForm() + ": " + e.getMessage(), e);
+                        Scope.getCurrentScope().getLog(getClass()).warning("Cannot handle classloader url " + url.toExternalForm() + ": " + e.getMessage()+". Operations that need to list files from this location may not work as expected", e);
                     }
                 }
             }
