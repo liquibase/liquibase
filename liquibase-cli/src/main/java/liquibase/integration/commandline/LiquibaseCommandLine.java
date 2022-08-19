@@ -690,7 +690,7 @@ public class LiquibaseCommandLine {
         return commandLine;
     }
 
-    private Map<String, Object> configureResourceAccessor(ClassLoader classLoader) {
+    private Map<String, Object> configureResourceAccessor(ClassLoader classLoader) throws IOException {
         Map<String, Object> returnMap = new HashMap<>();
 
         returnMap.put(Scope.Attr.resourceAccessor.name(), new SearchPathResourceAccessor(

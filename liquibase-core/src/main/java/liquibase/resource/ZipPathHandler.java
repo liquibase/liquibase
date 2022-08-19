@@ -1,40 +1,42 @@
 package liquibase.resource;
 
-import liquibase.Scope;
-import liquibase.util.FilenameUtil;
-
-import java.io.*;
-import java.nio.file.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 /**
  * {@link PathHandler} that converts the path into a {@link DirectoryResourceAccessor}.
  */
-public class DirectoryPathHandler extends AbstractPathHandler {
+public class ZipPathHandler extends AbstractPathHandler {
 
     /**
-     * Returns {@link #PRIORITY_DEFAULT} for all paths except for ones that are for a non-"file:" protocol.
+     * Returns {@link #PRIORITY_SPECIALIZED} for all "jar:file:" or files that end in ".jar" or ".zip"
      */
     public int getPriority(String root) {
         if (root == null) {
             return PRIORITY_NOT_APPLICABLE;
         }
 
-        if (root.startsWith("/") || !root.contains(":")) {
-            return PRIORITY_DEFAULT;
+        if (root.toLowerCase().endsWith(".zip") || root.toLowerCase().endsWith(".jar")) {
+            return PRIORITY_SPECIALIZED;
         }
 
-        if (root.startsWith("file:") || root.matches("^[A-Za-z]:.*")) {
-            return PRIORITY_DEFAULT;
-        } else {
-            return PRIORITY_NOT_APPLICABLE;
-        }
+        return PRIORITY_NOT_APPLICABLE;
     }
 
     public ResourceAccessor getResourceAccessor(String root) throws FileNotFoundException {
-        root = root
-                .replace("file:", "")
-                .replace("\\", "/");
-        return new DirectoryResourceAccessor(new File(root));
+        root = root.replace("jar:", "");
+
+        if (root.matches("^\\w\\w+:.*")) {
+            return new ZipResourceAccessor(Paths.get(URI.create(root)));
+        }
+        return new ZipResourceAccessor(new File(root));
     }
 
     @Override
@@ -53,9 +55,6 @@ public class DirectoryPathHandler extends AbstractPathHandler {
 
     @Override
     public boolean isAbsolute(String path) throws IOException {
-        if (path == null) {
-            return false;
-        }
-        return new File(path).isAbsolute();
+        return false;
     }
 }
