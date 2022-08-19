@@ -2,6 +2,7 @@ package liquibase.resource;
 
 import liquibase.plugin.Plugin;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -19,8 +20,9 @@ public interface PathHandler extends Plugin {
      * Parse the given path and return a {@link ResourceAccessor} for it.
      *
      * @throws IOException if the path is invalid
+     * @throws FileNotFoundException if hte path is valid but does not exist
      */
-    ResourceAccessor getResourceAccessor(String root) throws IOException;
+    ResourceAccessor getResourceAccessor(String root) throws IOException, FileNotFoundException;
 
     /**
      * Parse the given "absolute" path and return a {@link liquibase.resource.Resource} for it if it exists.

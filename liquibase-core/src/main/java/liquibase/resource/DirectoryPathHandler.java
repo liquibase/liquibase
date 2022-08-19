@@ -3,10 +3,7 @@ package liquibase.resource;
 import liquibase.Scope;
 import liquibase.util.FilenameUtil;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.*;
 
 /**
@@ -33,7 +30,7 @@ public class DirectoryPathHandler extends AbstractPathHandler {
         }
     }
 
-    public ResourceAccessor getResourceAccessor(String root) {
+    public ResourceAccessor getResourceAccessor(String root) throws FileNotFoundException {
         root = root
                 .replace("file:", "")
                 .replace("\\", "/");

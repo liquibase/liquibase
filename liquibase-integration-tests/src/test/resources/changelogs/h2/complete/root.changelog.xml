@@ -158,7 +158,7 @@
     </changeSet>
 
     <changeSet id="16a" author="nvoxland">
-        <createSequence sequenceName="seq_test" startValue="1000" incrementBy="2" />
+        <createSequence sequenceName="seq_test" startValue="1000" incrementBy="2" dataType="int" />
     </changeSet>
 
     <changeSet id="17" author="nvoxland">

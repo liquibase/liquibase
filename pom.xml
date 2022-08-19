@@ -158,7 +158,7 @@
         <dependency> <!-- enables mocking of classes without default constructor (together with CGLIB) -->
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
-            <version>3.2</version>
+            <version>3.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -199,7 +199,7 @@
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.0.6</version>
+            <version>3.0.7</version>
             <scope>test</scope>
         </dependency>
 
@@ -220,7 +220,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.36.0.3</version>
+            <version>3.39.2.0</version>
             <scope>test</scope>
         </dependency>
 
