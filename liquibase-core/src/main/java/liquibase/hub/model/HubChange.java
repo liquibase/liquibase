@@ -55,7 +55,7 @@ public class HubChange implements HubModel {
         this.comments = changeSet.getComments();
         this.labels = Objects.toString(changeSet.getLabels(), null);
         // Contexts can't be null because of ChangeSet constructor logic
-        this.contexts = changeSet.getContexts().toString();
+        this.contexts = changeSet.getContextFilter().toString();
         this.orderExecuted = 0;
         // CheckSum can't be null because of ChangeSet generateCheckSum logic
         this.md5sum = changeSet.generateCheckSum().toString();

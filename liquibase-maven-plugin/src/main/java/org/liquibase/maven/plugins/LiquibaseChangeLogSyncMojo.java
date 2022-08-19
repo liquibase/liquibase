@@ -17,6 +17,6 @@ public class LiquibaseChangeLogSyncMojo extends AbstractLiquibaseChangeLogMojo {
     protected void performLiquibaseTask(Liquibase liquibase)
   			throws LiquibaseException {
         super.performLiquibaseTask(liquibase);
-	    	liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels));
+	    	liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()));
     }
 }
