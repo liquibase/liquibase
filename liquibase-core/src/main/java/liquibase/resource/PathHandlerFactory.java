@@ -63,9 +63,10 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
     /**
      * Return the resource for the given path.
      *
-     * @param includeResourceAccessor if true, check {@link Scope#getResourceAccessor()} before returning null
+     * @param includeResourceAccessor if true, check {@link Scope#getResourceAccessor()} as well.
      * @return null if the resource does not exist
      * @throws IOException if the path cannot be understood or if there is a problem parsing the path
+     * @throws IOException if the path exists as both a direct resourcePath and also in the resourceAccessor (if included). Unless {@link liquibase.GlobalConfiguration#DUPLICATE_FILE_MODE} overrides that behavior.
      */
     public Resource getResource(String resourcePath, boolean includeResourceAccessor) throws IOException {
         final PathHandler plugin = getPlugin(resourcePath);
