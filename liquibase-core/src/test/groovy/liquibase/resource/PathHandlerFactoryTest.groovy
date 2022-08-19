@@ -1,6 +1,7 @@
 package liquibase.resource
 
 import liquibase.Scope
+import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -9,7 +10,7 @@ class PathHandlerFactoryTest extends Specification {
 
     def "parse file path"() {
         expect:
-        Scope.getCurrentScope().getSingleton(PathHandlerFactory).getResourceAccessor("a/path/here") instanceof DirectoryResourceAccessor
+        Scope.getCurrentScope().getSingleton(PathHandlerFactory).getResourceAccessor("src/test/groovy") instanceof DirectoryResourceAccessor
     }
 
     @Unroll
@@ -23,6 +24,45 @@ class PathHandlerFactoryTest extends Specification {
 
         where:
         input << [null, "proto:unsupported"]
+    }
+
+    @Unroll
+    def "getResource: #path"() {
+        when:
+        def pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory)
+
+        then:
+        (pathHandlerFactory.getResource(path) != null) == existsWithoutResourceAccessor
+        Scope.child(Scope.Attr.resourceAccessor, new JUnitResourceAccessor(), { ->
+            assert (pathHandlerFactory.getResource(path, true) != null) == existsWithResourceAccessor
+        })
+
+
+        where:
+        path                                                               | existsWithoutResourceAccessor | existsWithResourceAccessor
+        "src/test/groovy/liquibase/resource/PathHandlerFactoryTest.groovy" | true                          | true
+        "invalid/path.txt"                                                 | false                         | false
+        "liquibase/resource/PathHandlerFactoryTest.class"                  | false                         | true
+        "/liquibase/resource/PathHandlerFactoryTest.class"                 | false                         | true
+    }
+
+    def "getResource with duplicate files"() {
+        when:
+        def pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory)
+        def path = "target/test-classes/duplicate.txt"
+
+        (path as File).createNewFile()
+        ("target/test-classes/" + path as File).getParentFile().mkdirs()
+        ("target/test-classes/" + path as File).createNewFile()
+
+
+        Scope.child(Scope.Attr.resourceAccessor, new JUnitResourceAccessor(), { ->
+            pathHandlerFactory.getResource(path, true)
+        })
+
+        then:
+        def e = thrown(IOException)
+        e.message.startsWith("Found 2 files with the path 'target/test-classes/duplicate.txt':")
     }
 
     def openResourceOutputStream() {
