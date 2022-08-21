@@ -16,7 +16,7 @@ class ZipPathHandlerTest extends Specification {
 
         then:
         //exception message shows how the file is converted
-        def e = thrown(IllegalArgumentException)
+        def e = thrown(FileNotFoundException)
         e.message == "Non-existent file: $expected"
 
         where:

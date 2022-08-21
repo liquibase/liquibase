@@ -581,7 +581,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             } else {
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class)
                 def resource = pathHandlerFactory.getResource(path)
-                if (resource != null) {
+                if (resource.exists()) {
                     contents = StreamUtil.readStreamAsString(resource.openInputStream())
                 } else {
                     contents = null

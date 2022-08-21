@@ -1,10 +1,13 @@
 package liquibase.resource;
 
-import liquibase.Scope;
-import liquibase.util.FilenameUtil;
-
-import java.io.*;
-import java.nio.file.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 /**
  * {@link PathHandler} that converts the path into a {@link DirectoryResourceAccessor}.
@@ -39,11 +42,7 @@ public class DirectoryPathHandler extends AbstractPathHandler {
 
     @Override
     public Resource getResource(String path) throws IOException {
-        Path pathObj = Paths.get(path);
-        if (!pathObj.toFile().exists()) {
-            return null;
-        }
-        return new PathResource(path, pathObj);
+        return new PathResource(path, Paths.get(path));
     }
 
     @Override
@@ -55,15 +54,5 @@ public class DirectoryPathHandler extends AbstractPathHandler {
             Files.createDirectories(parent);
         }
         return Files.newOutputStream(path1, StandardOpenOption.CREATE_NEW);
-    }
-
-    @Override
-    public boolean exists(String path) {
-        return Files.exists(Paths.get(path));
-    }
-
-    @Override
-    public String concat(String parent, String objects) {
-        return FilenameUtil.concat(parent, objects);
     }
 }

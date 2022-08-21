@@ -51,7 +51,7 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
             return new File(path).toPath().normalize().toString().replace("\\", "/").replaceFirst("^/", "");
         } catch (InvalidPathException e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Failed to standardize path " + path, e);
-            return null;
+            return path;
         }
     }
 

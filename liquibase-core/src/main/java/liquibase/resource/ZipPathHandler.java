@@ -41,11 +41,7 @@ public class ZipPathHandler extends AbstractPathHandler {
 
     @Override
     public Resource getResource(String path) throws IOException {
-        Path pathObj = Paths.get(path);
-        if (!pathObj.toFile().exists()) {
-            return null;
-        }
-        return new PathResource(path, pathObj);
+        return new PathResource(path, Paths.get(path));
     }
 
     @Override

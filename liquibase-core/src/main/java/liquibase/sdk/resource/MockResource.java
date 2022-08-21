@@ -1,6 +1,7 @@
 package liquibase.sdk.resource;
 
 import liquibase.resource.AbstractResource;
+import liquibase.resource.Resource;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -17,12 +18,21 @@ public class MockResource extends AbstractResource {
     }
 
     @Override
-    public InputStream openInputStream() throws IOException {
-        return new ByteArrayInputStream(content.getBytes());
+    public boolean exists() {
+        return true;
     }
 
     @Override
-    public String getAbsolutePath() {
-        return null;
+    public Resource resolve(String other) {
+        return new MockResource(resolvePath(other), "Resource relative to " + getPath());
+    }
+
+    public Resource resolveSibling(String other) {
+        return new MockResource(resolveSiblingPath(other), "Sibling resource to " + getPath());
+    }
+
+    @Override
+    public InputStream openInputStream() throws IOException {
+        return new ByteArrayInputStream(content.getBytes());
     }
 }

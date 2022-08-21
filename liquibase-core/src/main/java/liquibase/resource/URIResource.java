@@ -10,13 +10,26 @@ public class URIResource extends AbstractResource {
         super(path, uri);
     }
 
+    /**
+     * Cannot determine if the URI exists, return true
+     */
     @Override
-    public InputStream openInputStream() throws IOException {
-        return getUri().toURL().openStream();
+    public boolean exists() {
+        return true;
     }
 
     @Override
-    public String getAbsolutePath() {
-        return getUri().getPath();
+    public Resource resolve(String other) {
+        return new URIResource(resolvePath(other), URI.create(getUri().toString() + "/" + other));
+    }
+
+    @Override
+    public Resource resolveSibling(String other) {
+        return new URIResource(resolveSiblingPath(other), URI.create(getUri().toString().replaceFirst("/.*?$", "") + "/" + other));
+    }
+
+    @Override
+    public InputStream openInputStream() throws IOException {
+        return getUri().toURL().openStream();
     }
 }

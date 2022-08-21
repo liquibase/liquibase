@@ -93,28 +93,21 @@ public class DiffToChangeLog {
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         this.changeSetPath = changeLogFile;
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-        Resource resource = pathHandlerFactory.getResource(changeLogFile, true);
-        final boolean fileExists = pathHandlerFactory.exists(changeLogFile);
+        Resource file = pathHandlerFactory.getResource(changeLogFile, true);
 
         final Map<String, Object> newScopeObjects = new HashMap<>();
 
-        String objectsDir = null;
-        String parent;
-        if (resource != null) {
-            parent = CommonsFilenameUtils.getPath(resource.getAbsolutePath());
-        } else {
-            parent = CommonsFilenameUtils.getPath(changeLogFile);
-        }
+        Resource objectsDir = null;
         if (changeLogFile.toLowerCase().endsWith("sql")) {
             DeprecatedConfigurationValueProvider.setData("liquibase.pro.sql.inline", "true");
         } else if (this.diffResult.getComparisonSnapshot() instanceof EmptyDatabaseSnapshot) {
-            objectsDir = pathHandlerFactory.concat(parent, "objects");
+            objectsDir = file.resolveSibling("objects");
         } else {
-            objectsDir = pathHandlerFactory.concat(parent, "objects-" + new Date().getTime());
+            objectsDir = file.resolveSibling("objects-" + new Date().getTime());
         }
 
         if (objectsDir != null) {
-            if (pathHandlerFactory.exists(objectsDir)) {
+            if (objectsDir.exists()) {
                 throw new UnexpectedLiquibaseException("The generatechangelog command would overwrite your existing stored logic files. To run this command please remove or rename the '"+objectsDir+"' dir");
             }
             newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, objectsDir);
@@ -133,17 +126,16 @@ public class DiffToChangeLog {
                 database = determineDatabase(diffResult.getComparisonSnapshot());
             }
             newScopeObjects.put(DIFF_SNAPSHOT_DATABASE, database);
-            boolean finalFileExists = fileExists;
             Scope.child(newScopeObjects, new Scope.ScopedRunner() {
                 @Override
                 public void run() {
                     try {
-                        if (!finalFileExists) {
+                        if (!file.exists()) {
                             //print changeLog only if there are available changeSets to print instead of printing it always
-                            printNew(changeLogSerializer, changeLogFile);
+                            printNew(changeLogSerializer, file);
                         } else {
-                            Scope.getCurrentScope().getLog(getClass()).info(changeLogFile + " exists, appending");
-                            StringBuilder fileContents = new StringBuilder(StreamUtil.readStreamAsString(resource.openInputStream()));
+                            Scope.getCurrentScope().getLog(getClass()).info(file.getUri() + " exists, appending");
+                            StringBuilder fileContents = new StringBuilder(StreamUtil.readStreamAsString(file.openInputStream()));
                             ByteArrayOutputStream out = new ByteArrayOutputStream();
                             print(new PrintStream(out, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()), changeLogSerializer);
 
@@ -165,7 +157,7 @@ public class DiffToChangeLog {
                                 String toInsert = "    " + innerXml + lineSeparator;
                                 fileContents.insert(endTagIndex, toInsert);
                             }
-                            try (OutputStream outputStream = resource.openOutputStream()) {
+                            try (OutputStream outputStream = file.openOutputStream(true)) {
                                 outputStream.write(fileContents.toString().getBytes());
                             }
                         }
@@ -208,7 +200,7 @@ public class DiffToChangeLog {
      * Prints changeLog that would bring the target database to be the same as
      * the reference database
      */
-    public void printNew(ChangeLogSerializer changeLogSerializer, String file) throws ParserConfigurationException, IOException, DatabaseException {
+    public void printNew(ChangeLogSerializer changeLogSerializer, Resource file) throws ParserConfigurationException, IOException, DatabaseException {
 
         List<ChangeSet> changeSets = generateChangeSets();
 
@@ -218,8 +210,8 @@ public class DiffToChangeLog {
         } else {
             Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
         }
-        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-        try (OutputStream stream = pathHandlerFactory.createResource(file);
+
+        try (OutputStream stream = file.openOutputStream(true);
              PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
             changeLogSerializer.write(changeSets, out);
         }

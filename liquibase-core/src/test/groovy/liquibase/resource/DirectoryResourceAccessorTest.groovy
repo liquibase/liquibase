@@ -18,23 +18,6 @@ class DirectoryResourceAccessorTest extends Specification {
     }
 
     @Unroll
-    def "resolve #relativeTo #path"() {
-        expect:
-        new DirectoryResourceAccessor(new File(".")).resolve(relativeTo, path) == expected
-
-        where:
-        relativeTo      | path            | expected
-        null            | null            | null
-        null            | "x.sql"         | "x.sql"
-        null            | "path/to/x.sql" | "path/to/x.sql"
-        null            | "path/to/x"     | "path/to/x"
-        null            | "path/to/x"     | "path/to/x"
-        "base.sql"      | "path/to/x"     | "path/to/x"
-        "base/path.sql" | "x"             | "base/x"
-        "base/path.sql" | "to/x.sql"      | "base/to/x.sql"
-    }
-
-    @Unroll
     def "openStreams and openStream"() {
         when:
         def accessor = new DirectoryResourceAccessor("src/main" as File)

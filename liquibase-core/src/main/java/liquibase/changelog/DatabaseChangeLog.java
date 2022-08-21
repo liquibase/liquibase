@@ -568,7 +568,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
             List<Resource> unsortedResources = null;
             try {
-                String path = resourceAccessor.resolve(relativeTo, pathName);
+                String path;
+                if (relativeTo == null) {
+                    path = pathName;
+                } else {
+                    path = resourceAccessor.get(relativeTo).resolveSibling(pathName).getPath();
+                }
 
                 path = path.replace("\\", "/");
                 LOG.fine("includeAll for " + pathName);
@@ -657,7 +662,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
 
         if (isRelativePath) {
-            fileName = resourceAccessor.resolve(this.getPhysicalFilePath(), fileName);
+            try {
+                fileName = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(fileName).getPath();
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
         DatabaseChangeLog changeLog;
         try {

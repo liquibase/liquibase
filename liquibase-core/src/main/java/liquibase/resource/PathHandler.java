@@ -27,7 +27,7 @@ public interface PathHandler extends Plugin {
     /**
      * Parse the given "absolute" path and return a {@link liquibase.resource.Resource} for it if it exists.
      *
-     * @return null if the resource does not exist.
+     * @return a Resource even if the resource does not exist. Callers can check {@link Resource#exists()} to determine if it exists or not
      * @throws IOException if the path is invalid
      */
     Resource getResource(String path) throws IOException;
@@ -39,16 +39,4 @@ public interface PathHandler extends Plugin {
      * @throws IOException if the path cannot be written to
      */
     OutputStream createResource(String path) throws IOException;
-
-    /**
-     * Check if a resource exists at the specified path.
-     * @return true if the file exists, false otherwise
-     */
-    boolean exists(String path);
-
-    /**
-     * Concatenates two parts of a path using the rules defined by the particular path handler. Some path handlers will
-     * use specific rules for path concatenation.
-     */
-    String concat(String parent, String objects);
 }

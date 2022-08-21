@@ -294,7 +294,7 @@ public class DatabaseFactory {
             if (null != driverPropertiesFile) {
                     PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                     Resource driverProperty = pathHandlerFactory.getResource(driverPropertiesFile, true);
-                    if (driverProperty != null) {
+                    if (driverProperty.exists()) {
                         try (InputStream stream = driverProperty.openInputStream()) {
                             LOG.fine(
                                     "Loading properties from the file:'" + driverPropertiesFile + "'"

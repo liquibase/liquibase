@@ -37,7 +37,9 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public List<String> describeLocations() {
-        return Collections.singletonList("Configured classpath");
+        init();
+
+        return additionalResourceAccessors.describeLocations();
     }
 
     @Override

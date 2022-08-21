@@ -36,21 +36,39 @@ public class PathResource extends AbstractResource {
     }
 
     @Override
+    public boolean exists() {
+        return Files.exists(path);
+    }
+
+    @Override
+    public Resource resolve(String other) {
+        return new PathResource(resolvePath(other), path.resolve(other));
+    }
+
+    @Override
+    public Resource resolveSibling(String other) {
+        return new PathResource(resolveSiblingPath(other), path.resolveSibling(other));
+    }
+
+    @Override
     public boolean isWritable() {
         return !Files.isDirectory(this.path) && Files.isWritable(path);
     }
 
     @Override
-    public OutputStream openOutputStream() throws IOException {
+    public OutputStream openOutputStream(boolean createIfNeeded) throws IOException {
+        if (!exists()) {
+            if (createIfNeeded) {
+                path.getParent().toFile().mkdirs();
+            } else {
+                throw new IOException("File " + this.getUri() + " does not exist");
+            }
+        }
+
         if (Files.isDirectory(this.path)) {
             throw new FileNotFoundException(this.getPath() + " is a directory");
         } else {
             return Files.newOutputStream(this.path);
         }
-    }
-
-    @Override
-    public String getAbsolutePath() {
-        return this.path.toAbsolutePath().toString();
     }
 }

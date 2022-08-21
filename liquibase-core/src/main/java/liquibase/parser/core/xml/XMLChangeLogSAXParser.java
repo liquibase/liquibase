@@ -104,7 +104,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                 }
             });
 
-            if (resource == null) {
+            if (!resource.exists()) {
                 if (physicalChangeLogLocation.startsWith("WEB-INF/classes/")) {
                     // Correct physicalChangeLogLocation and try again.
                     return parseToNode(
