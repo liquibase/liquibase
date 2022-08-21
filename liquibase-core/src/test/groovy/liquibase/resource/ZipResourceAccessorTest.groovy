@@ -13,7 +13,7 @@ class ZipResourceAccessorTest extends Specification {
     }
 
     @Unroll
-    def "Cannot construct invalid values"() {
+    def "Cannot construct invalid values IllegalArgumentException"() {
         when:
         new ZipResourceAccessor(testFile)
 
@@ -24,9 +24,22 @@ class ZipResourceAccessorTest extends Specification {
         where:
         testFile                                                                                                             | expected
         null                                                                                                                 | "File must not be null"
+        new File(this.getClass().getClassLoader().getResource("liquibase/resource/DirectoryResourceAccessor.class").toURI()) | "Not a jar or zip file: "
+    }
+
+    @Unroll
+    def "Cannot construct invalid values FileNotFoundException"() {
+        when:
+        new ZipResourceAccessor(testFile)
+
+        then:
+        def e = thrown(FileNotFoundException)
+        assert e.message.startsWith(expected)
+
+        where:
+        testFile                                                                                                             | expected
         new File("/invalid/file.zip")                                                                                        | "Non-existent file: "
         new File("/invalid/file.jar")                                                                                        | "Non-existent file: "
-        new File(this.getClass().getClassLoader().getResource("liquibase/resource/DirectoryResourceAccessor.class").toURI()) | "Not a jar or zip file: "
     }
 
 
