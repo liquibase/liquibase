@@ -80,7 +80,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
             ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), new FoundResourceAccessor(resourcePath, foundResource));
 
             Resource resource = resourceAccessor.get(resourcePath);
-            if (resource == null) {
+            if (!resource.exists()) {
                 return foundResource;
             }
             return resource;
