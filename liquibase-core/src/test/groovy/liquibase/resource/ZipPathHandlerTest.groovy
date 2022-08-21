@@ -17,14 +17,16 @@ class ZipPathHandlerTest extends Specification {
         then:
         //exception message shows how the file is converted
         def e = thrown(FileNotFoundException)
-        e.message == "Non-existent file: $expected"
+        e.message.startsWith("Non-existent file: ")
+        e.message.contains(expected)
+
 
         where:
         input                                  | expected
         "c:/path/here.jar"                     | "c:\\path\\here.jar"
         "c:\\path\\here.jar"                   | "c:\\path\\here.jar"
-        "/path/here.jar"                       | "C:\\path\\here.jar"
-        "\\path\\here.jar"                     | "C:\\path\\here.jar"
+        "/path/here.jar"                       | ":\\path\\here.jar"
+        "\\path\\here.jar"                     | ":\\path\\here.jar"
         "file:/C:/path/here.jar"               | "C:\\path\\here.jar"
         "jar:file:/C:/path/here.jar"           | "C:\\path\\here.jar"
         "file:/C:/path/with%20spaces/here.jar" | "C:\\path\\with spaces\\here.jar"
