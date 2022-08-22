@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset lolejniczak:create-a-table
+--changeset lolejniczak:001
 create table authors
 (
     dim_channel_key INT64,
@@ -14,5 +14,13 @@ create table authors
     last_modified_date timestamp,
     oem_owner  STRING,
     publisher  STRING
+)
+;
+
+
+--changeset lolejniczak:002
+create table posts
+(
+    title STRING
 )
 ;

@@ -4,12 +4,14 @@ import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.ext.bigquery.database.BigqueryDatabase;
 import liquibase.snapshot.*;
 import liquibase.snapshot.jvm.TableSnapshotGenerator;
+import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
@@ -33,6 +35,7 @@ public class BigQueryTableSnapshotGenerator extends TableSnapshotGenerator {
         }
         return priority;
     }
+
 
     /*
     @Override
@@ -101,7 +104,7 @@ public class BigQueryTableSnapshotGenerator extends TableSnapshotGenerator {
     }
 */
 
-
+/* TOOOOOO DZIALA ALE NA POTRZEBY TESTU
     @Override
     protected Table readTable(CachedRow tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
 
@@ -123,6 +126,7 @@ public class BigQueryTableSnapshotGenerator extends TableSnapshotGenerator {
 
         CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase)database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
+
         if ("Y".equals(tableMetadataResultSet.getString("TEMPORARY"))) {
             table.setAttribute("temporary", "GLOBAL");
             String duration = tableMetadataResultSet.getString("DURATION");
@@ -139,7 +143,7 @@ public class BigQueryTableSnapshotGenerator extends TableSnapshotGenerator {
 
         return table;
     }
-
+*/
 
 
 }
