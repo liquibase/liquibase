@@ -118,9 +118,6 @@ public class DatabaseType extends DataType {
         if(getUrl() == null) {
             throw new BuildException("JDBC URL is required.");
         }
-        if((getDriver() == null) && !getUrl().startsWith("offline:")) {
-            throw new BuildException("JDBC driver is required.");
-        }
     }
 
     private void logParameters() {
