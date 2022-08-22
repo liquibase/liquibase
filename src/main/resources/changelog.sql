@@ -16,3 +16,11 @@ create table authors
     publisher  STRING
 )
 ;
+
+
+--changeset lolejniczak:002
+create table posts
+(
+    title STRING
+)
+;
