@@ -77,13 +77,16 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         Resource foundResource = plugin.getResource(resourcePath);
 
         if (includeResourceAccessor) {
-            ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), new FoundResourceAccessor(resourcePath, foundResource));
+            try(ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), new FoundResourceAccessor(resourcePath, foundResource))) {
 
-            Resource resource = resourceAccessor.get(resourcePath);
-            if (!resource.exists()) {
-                return foundResource;
+                Resource resource = resourceAccessor.get(resourcePath);
+                if (!resource.exists()) {
+                    return foundResource;
+                }
+                return resource;
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Error closing resourceAccessor: "+e.getMessage(), e);
             }
-            return resource;
         } else {
             return foundResource;
         }
