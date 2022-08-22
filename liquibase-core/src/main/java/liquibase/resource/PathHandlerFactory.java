@@ -68,6 +68,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
      * @throws IOException if the path cannot be understood or if there is a problem parsing the path
      * @throws IOException if the path exists as both a direct resourcePath and also in the resourceAccessor (if included). Unless {@link liquibase.GlobalConfiguration#DUPLICATE_FILE_MODE} overrides that behavior.
      */
+    @SuppressWarnings("java:S2095")
     public Resource getResource(String resourcePath, boolean includeResourceAccessor) throws IOException {
         final PathHandler plugin = getPlugin(resourcePath);
         if (plugin == null) {
@@ -77,16 +78,13 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         Resource foundResource = plugin.getResource(resourcePath);
 
         if (includeResourceAccessor) {
-            try(ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), new FoundResourceAccessor(resourcePath, foundResource))) {
+            ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), new FoundResourceAccessor(resourcePath, foundResource));
 
-                Resource resource = resourceAccessor.get(resourcePath);
-                if (!resource.exists()) {
-                    return foundResource;
-                }
-                return resource;
-            } catch (Exception e) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Error closing resourceAccessor: "+e.getMessage(), e);
+            Resource resource = resourceAccessor.get(resourcePath);
+            if (!resource.exists()) {
+                return foundResource;
             }
+            return resource;
         } else {
             return foundResource;
         }
