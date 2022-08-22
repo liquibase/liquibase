@@ -4,9 +4,9 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.ext.bigquery.database.BigqueryDatabase;
+import liquibase.snapshot.SnapshotGenerator;
 import liquibase.snapshot.jvm.SequenceSnapshotGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 
 public class BigQuerySequenceSnapshotGenerator extends SequenceSnapshotGenerator {
@@ -20,12 +20,12 @@ public class BigQuerySequenceSnapshotGenerator extends SequenceSnapshotGenerator
             return priority;
         }
 
-        /*
+
         @Override
         public Class<? extends SnapshotGenerator>[] replaces() {
             return new Class[]{SequenceSnapshotGenerator.class};
         }
-        */
+
 
         @Override
         protected String getSelectSequenceSql(Schema schema, Database database) {
