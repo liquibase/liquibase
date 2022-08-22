@@ -1092,8 +1092,14 @@ public class LiquibaseCommandLine {
 
     protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
         LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        returnList.add("--" + StringUtil.toKabobCase(def.getName()).replace(".", "-"));
-        returnList.add("--" + def.getName().replaceAll("\\.", ""));
+        Set<String> baseNames = new HashSet<>();
+        baseNames.add(def.getName());
+        baseNames.addAll(def.getAliases());
+
+        for (String baseName : baseNames) {
+            returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
+            returnList.add("--" + baseName.replaceAll("\\.", ""));
+        }
 
         return returnList.toArray(new String[0]);
     }

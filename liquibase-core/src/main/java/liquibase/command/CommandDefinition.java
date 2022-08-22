@@ -88,6 +88,12 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
             if (argumentDefinition.getName().equalsIgnoreCase(argName)) {
                 return argumentDefinition;
             }
+
+            for (String alias : argumentDefinition.getAliases()) {
+                if (alias.equalsIgnoreCase(argName)) {
+                    return argumentDefinition;
+                }
+            }
         }
 
         return null;
