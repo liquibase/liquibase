@@ -2,4 +2,5 @@ liquibase.ext.bigquery.snapshot.jvm.BigQueryDatasetSnapshotGenerator
 liquibase.ext.bigquery.snapshot.jvm.BigQueryTableSnapshotGenerator
 liquibase.ext.bigquery.snapshot.jvm.BigQueryColumnSnapshotGenerator
 liquibase.ext.bigquery.snapshot.jvm.BigQueryUniqueConstraintSnapshotGenerator
+liquibase.ext.bigquery.snapshot.jvm.BigQuerySequenceSnapshotGenerator
 
