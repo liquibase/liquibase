@@ -1036,6 +1036,9 @@ public class StringUtil {
      * @return string without any whitespaces formatted to lowercase.
      */
     public static String toLowerWithoutWhitespaces(String value) {
+        if (value == null) {
+            return null;
+        }
         return value.toLowerCase().replaceAll("\\s+", "");
     }
 

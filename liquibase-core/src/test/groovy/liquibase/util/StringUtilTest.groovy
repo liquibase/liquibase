@@ -128,6 +128,7 @@ class StringUtilTest extends Specification {
         "First Value"         | "firstvalue"
         "secondValue"         | "secondvalue"
         "   Third Value   \n" | "thirdvalue"
+        null                  | null
     }
 
     @Unroll
