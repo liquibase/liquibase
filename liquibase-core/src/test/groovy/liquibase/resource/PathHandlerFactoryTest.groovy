@@ -40,8 +40,8 @@ class PathHandlerFactoryTest extends Specification {
 
         where:
         path                                                               | existsWithoutResourceAccessor | existsWithResourceAccessor
-//        "src/test/groovy/liquibase/resource/PathHandlerFactoryTest.groovy" | true                          | true
-//        "invalid/path.txt"                                                 | false                         | false
+        "src/test/groovy/liquibase/resource/PathHandlerFactoryTest.groovy" | true                          | true
+        "invalid/path.txt"                                                 | false                         | false
         "liquibase/resource/PathHandlerFactoryTest.class"                  | false                         | true
         "/liquibase/resource/PathHandlerFactoryTest.class"                 | false                         | true
     }
