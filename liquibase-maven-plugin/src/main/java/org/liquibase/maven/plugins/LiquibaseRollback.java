@@ -106,12 +106,12 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
         super.performLiquibaseTask(liquibase);
         switch (type) {
             case COUNT: {
-                liquibase.rollback(rollbackCount, rollbackScript, new Contexts(contexts), new LabelExpression(labels));
+                liquibase.rollback(rollbackCount, rollbackScript, new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 break;
             }
             case DATE: {
                 try {
-                    liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels));
+                    liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 }
                 catch (ParseException e) {
                     String message = "Error parsing rollbackDate: " + e.getMessage();
@@ -120,7 +120,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
                 break;
             }
             case TAG: {
-                liquibase.rollback(rollbackTag, rollbackScript,new Contexts(contexts), new LabelExpression(labels));
+                liquibase.rollback(rollbackTag, rollbackScript,new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 break;
             }
             default: {

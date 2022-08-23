@@ -38,16 +38,21 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
         }
 
-        if (isPostgreWithoutAsDatatypeSupport(database)) {
-            validationErrors.checkDisallowedField("AS", statement.getDataType(), database, PostgresDatabase.class);
-        }
-
         validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, HsqlDatabase.class, PostgresDatabase.class, MSSQLDatabase.class);
-        validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class, CockroachDatabase.class);
 
-        if (database instanceof H2Database && statement.getDataType() != null && !statement.getDataType().equalsIgnoreCase("bigint")) {
-            validationErrors.addWarning("H2 only creates BIGINT sequences. Ignoring requested type "+statement.getDataType());
+        //check datatype
+        if (database instanceof PostgresDatabase) {
+            if (isPostgreWithoutAsDatatypeSupport(database)) {
+                validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, PostgresDatabase.class);
+            }
+        } else if (database instanceof H2Database) {
+            if (isH2WithoutAsDatatypeSupport(database) && statement.getDataType() != null && !statement.getDataType().equalsIgnoreCase("bigint")) {
+                validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, H2Database.class);
+            }
+        } else {
+            validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class, CockroachDatabase.class);
         }
+
 
         return validationErrors;
     }
@@ -71,8 +76,8 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
             queryStringBuilder.append(" AS BIGINT ");
         } else if (statement.getDataType() != null) {
-            if (!(database instanceof H2Database || database instanceof CockroachDatabase)) {
-                queryStringBuilder.append(" AS " + statement.getDataType());
+            if (!(isH2WithoutAsDatatypeSupport(database) || database instanceof CockroachDatabase)) {
+                queryStringBuilder.append(" AS ").append(statement.getDataType());
             }
         }
         if (!(database instanceof MariaDBDatabase) && statement.getStartValue() != null) {
@@ -139,6 +144,16 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             return database instanceof PostgresDatabase && database.getDatabaseMajorVersion() < 10;
         } catch (DatabaseException e) {
             // we can't determinate the PostgreSQL version so we shouldn't throw validation error as it might work for this DB
+            return false;
+        }
+    }
+
+    private boolean isH2WithoutAsDatatypeSupport(Database database) {
+        try {
+            // H2 supports the `AS <dataType>` clause since version 2.0
+            return database instanceof H2Database && database.getDatabaseMajorVersion() < 2;
+        } catch (DatabaseException e) {
+            // we can't determinate the H2 version so we shouldn't throw validation error as it might work for this DB
             return false;
         }
     }

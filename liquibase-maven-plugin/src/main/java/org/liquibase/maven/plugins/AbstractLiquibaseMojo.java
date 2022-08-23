@@ -921,7 +921,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     @SuppressWarnings("java:S2095")
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
         ResourceAccessor mFO = new MavenResourceAccessor(cl);
         ResourceAccessor fsFO = new DirectoryResourceAccessor(project.getBasedir());
         return new SearchPathResourceAccessor(searchPath, mFO, fsFO);

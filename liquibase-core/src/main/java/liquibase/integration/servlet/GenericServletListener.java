@@ -20,6 +20,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Enumeration;
@@ -39,6 +40,7 @@ abstract class GenericServletListener {
     private static final String LIQUIBASE_CHANGELOG = "liquibase.changelog";
     private static final String LIQUIBASE_CONTEXTS = "liquibase.contexts";
     private static final String LIQUIBASE_LABELS = "liquibase.labels";
+    private static final String LIQUIBASE_LABEL_FILTER = "liquibase.labelFilter";
     private static final String LIQUIBASE_DATASOURCE = "liquibase.datasource";
     private static final String LIQUIBASE_HOST_EXCLUDES = "liquibase.host.excludes";
     private static final String LIQUIBASE_HOST_INCLUDES = "liquibase.host.includes";
@@ -49,7 +51,7 @@ abstract class GenericServletListener {
     private String changeLogFile;
     private String dataSourceName;
     private String contexts;
-    private String labels;
+    private String labelFilter;
     private String defaultSchema;
     private String hostName;
 
@@ -69,12 +71,26 @@ abstract class GenericServletListener {
         contexts = ctxt;
     }
 
+    /**
+     * @deprecated use {@link #getLabelFilter()}
+     */
     public String getLabels() {
-        return labels;
+        return getLabelFilter();
     }
 
+    /**
+     * @deprecated use {@link #setLabelFilter(String)}
+     */
     public void setLabels(String labels) {
-        this.labels = labels;
+        setLabelFilter(labels);
+    }
+
+    public String getLabelFilter() {
+        return labelFilter;
+    }
+
+    public void setLabelFilter(String labelFilter) {
+        this.labelFilter = labelFilter;
     }
 
     public String getDataSource() {
@@ -207,7 +223,10 @@ abstract class GenericServletListener {
         }
 
         setContexts((String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_CONTEXTS).getValue());
-        setLabels((String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_LABELS).getValue());
+        setLabelFilter((String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_LABEL_FILTER).getValue());
+        if (getLabelFilter() == null) {
+            setLabelFilter((String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_LABELS).getValue());
+        }
         this.defaultSchema = StringUtil.trimToNull((String) liquibaseConfiguration.getCurrentConfiguredValue(null, null, LIQUIBASE_SCHEMA_DEFAULT).getValue());
 
         Connection connection = null;
@@ -239,10 +258,12 @@ abstract class GenericServletListener {
                 }
             }
 
-            liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
+            liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabelFilter()));
             if (database instanceof DerbyDatabase) {
                 ((DerbyDatabase) database).setShutdownEmbeddedDerby(false);
             }
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
         } finally {
             if (liquibase != null) {
                 liquibase.close();

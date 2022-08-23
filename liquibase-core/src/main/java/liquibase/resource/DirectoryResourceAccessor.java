@@ -22,14 +22,14 @@ public class DirectoryResourceAccessor extends AbstractPathResourceAccessor {
     /**
      * Creates a FileSystemResourceAccessor with the given directory as the root.
      */
-    public DirectoryResourceAccessor(File directory) {
+    public DirectoryResourceAccessor(File directory) throws FileNotFoundException {
         this(directory.toPath());
     }
 
     /**
      * Creates a FileSystemResourceAccessor with the given directory as the root.
      */
-    public DirectoryResourceAccessor(Path directory) {
+    public DirectoryResourceAccessor(Path directory) throws FileNotFoundException {
         if (directory == null) {
             throw new IllegalArgumentException("Directory must not be null");
         }
@@ -37,8 +37,7 @@ public class DirectoryResourceAccessor extends AbstractPathResourceAccessor {
         Scope.getCurrentScope().getLog(getClass()).fine("Creating resourceAccessor for directory " + directory);
         this.rootDirectory = directory;
         if (!Files.exists(directory)) {
-            Scope.getCurrentScope().getLog(getClass()).info("Non-existent directory: " + directory.toAbsolutePath());
-            return;
+            throw new FileNotFoundException("Non-existent directory: " + directory.toAbsolutePath());
         }
         if (!Files.isDirectory(directory)) {
             throw new IllegalArgumentException("Not a directory: " + directory.toAbsolutePath());

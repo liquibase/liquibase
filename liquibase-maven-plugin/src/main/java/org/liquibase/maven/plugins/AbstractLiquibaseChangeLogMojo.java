@@ -16,6 +16,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -56,14 +57,23 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     protected String contexts;
 
     /**
-     * Specifies which Liquibase labels Liquibase will execute, which can be separated by a commaif multiple labels
-      are required or you need to designate a more complex expression.
-   * If a label is not specified, then ALL labels will be executed.
+     * Deprecated version of labelFilter
      *
      * @parameter property="liquibase.labels" default-value=""
+     * @deprecated
      */
     @PropertyElement
     protected String labels;
+
+    /**
+     * Specifies which Liquibase labels Liquibase will execute, which can be separated by a comma if multiple labels
+     are required or you need to designate a more complex expression.
+     * If a label is not specified, then ALL labels will be executed.
+     *
+     * @parameter property="liquibase.labelFilter" default-value=""
+     */
+    @PropertyElement
+    protected String labelFilter;
 
     /**
      *
@@ -145,11 +155,11 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         getLog().info(indent + "changeLogDirectory: " + changeLogDirectory);
         getLog().info(indent + "changeLogFile: " + changeLogFile);
         getLog().info(indent + "context(s): " + contexts);
-        getLog().info(indent + "label(s): " + labels);
+        getLog().info(indent + "label(s): " + getLabelFilter());
     }
 
     @Override
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
         List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
         resourceAccessors.add(new MavenResourceAccessor(cl));
         resourceAccessors.add(new DirectoryResourceAccessor(project.getBasedir()));
@@ -182,5 +192,12 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
                 changeLogDirectory = project.getBasedir().getAbsolutePath().replace('\\', '/') + "/" + changeLogDirectory;
             }
         }
+    }
+
+    public String getLabelFilter() {
+        if (labelFilter == null) {
+            return labels;
+        }
+        return labelFilter;
     }
 }
