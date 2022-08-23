@@ -1032,7 +1032,7 @@ public class StringUtil {
     }
 
     /**
-     * @param value - string to process
+     * @param value string to process
      * @return string without any whitespaces formatted to lowercase.
      */
     public static String toLowerWithoutWhitespaces(String value) {
