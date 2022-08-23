@@ -848,7 +848,7 @@ public abstract class AbstractIntegrationTest {
         assertTrue(fileUrlToChangeLog.startsWith("file:/"));
 
         String absolutePathOfChangeLog = fileUrlToChangeLog.replaceFirst("file:\\/", "");
-        if (System.getProperty("os.name").startsWith("Windows ")) {
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
             absolutePathOfChangeLog = absolutePathOfChangeLog.replace('/', '\\');
         } else {
             absolutePathOfChangeLog = "/" + absolutePathOfChangeLog;

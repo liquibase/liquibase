@@ -37,7 +37,7 @@ public class DirectoryResourceAccessor extends AbstractPathResourceAccessor {
         Scope.getCurrentScope().getLog(getClass()).fine("Creating resourceAccessor for directory " + directory);
         this.rootDirectory = directory;
         if (!Files.exists(directory)) {
-            throw new FileNotFoundException("Non-existent directory: " + directory.toAbsolutePath());
+            throw new FileNotFoundException("Non-existent directory: " + directory.toAbsolutePath() + " for " + System.getProperty("os.name"));
         }
         if (!Files.isDirectory(directory)) {
             throw new IllegalArgumentException("Not a directory: " + directory.toAbsolutePath());
