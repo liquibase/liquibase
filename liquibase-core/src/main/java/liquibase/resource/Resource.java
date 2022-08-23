@@ -52,7 +52,7 @@ public interface Resource {
 
 
     /**
-     * Opens an input stream to write to this resource.
+     * Opens an output stream to write to this resource. Note that calling this method will truncate (erase) the existing file.
      *
      * @param createIfNeeded if true, create the resource if it does not exist. If false, throw an exception if it does not exist
      * @throws IOException if there is an error writing to the resource, including if the resource does not exist or permission don't allow writing.
