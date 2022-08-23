@@ -10,7 +10,7 @@ class ZipPathHandlerTest extends Specification {
 
     @Requires({ os.windows })
     @Unroll
-    def "getResourceAccessor with different root patterns"() {
+    def "getResourceAccessor with different root patterns #input"() {
         when:
         new ZipPathHandler().getResourceAccessor(input)
 
@@ -22,13 +22,13 @@ class ZipPathHandlerTest extends Specification {
 
         where:
         input                                  | expected
-        "c:/path/here.jar"                     | "c:\\path\\here.jar"
-        "c:\\path\\here.jar"                   | "c:\\path\\here.jar"
-        "/path/here.jar"                       | "C:\\path\\here.jar"
-        "\\path\\here.jar"                     | "C:\\path\\here.jar"
-        "file:/C:/path/here.jar"               | "C:\\path\\here.jar"
-        "jar:file:/C:/path/here.jar"           | "C:\\path\\here.jar"
-        "file:/C:/path/with%20spaces/here.jar" | "C:\\path\\with spaces\\here.jar"
+        "c:/path/here.jar"                     | ":\\path\\here.jar"
+        "c:\\path\\here.jar"                   | ":\\path\\here.jar"
+        "/path/here.jar"                       | ":\\path\\here.jar"
+        "\\path\\here.jar"                     | ":\\path\\here.jar"
+        "file:/C:/path/here.jar"               | ":\\path\\here.jar"
+        "jar:file:/C:/path/here.jar"           | ":\\path\\here.jar"
+        "file:/C:/path/with%20spaces/here.jar" | ":\\path\\with spaces\\here.jar"
     }
 
     @Unroll
