@@ -114,15 +114,11 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
      *
      */
     public boolean isAbsolute(String path) throws IOException {
-        /*
-        String searchPath = GlobalConfiguration.SEARCH_PATH.getCurrentValue();
-        PathHandler plugin = determinePlugin(searchPath, path);
+        PathHandler plugin = getPlugin(path);
         if (plugin == null) {
             throw new IOException("Cannot parse resource location: '" + path + "'");
         }
         return plugin.isAbsolute(path);
-         */
-        return false;
     }
 
     private static class FoundResourceAccessor implements ResourceAccessor {
