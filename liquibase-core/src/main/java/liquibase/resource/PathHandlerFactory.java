@@ -69,6 +69,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
      * @throws IOException if the path cannot be understood or if there is a problem parsing the path
      * @throws IOException if the path exists as both a direct resourcePath and also in the resourceAccessor (if included). Unless {@link liquibase.GlobalConfiguration#DUPLICATE_FILE_MODE} overrides that behavior.
      */
+    @SuppressWarnings("java:S2095")
     public Resource getResource(String resourcePath, boolean includeResourceAccessor) throws IOException {
         final PathHandler plugin = getPlugin(resourcePath);
         if (plugin == null) {
