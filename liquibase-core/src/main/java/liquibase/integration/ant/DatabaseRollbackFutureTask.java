@@ -13,7 +13,7 @@ public class DatabaseRollbackFutureTask extends AbstractChangeLogBasedTask {
     public void executeWithLiquibaseClassloader() throws BuildException {
         Liquibase liquibase = getLiquibase();
         try (Writer outputFileWriter = getOutputFileWriter()) {
-            liquibase.futureRollbackSQL(new Contexts(getContexts()), getLabels(), outputFileWriter);
+            liquibase.futureRollbackSQL(new Contexts(getContexts()), getLabelFilter(), outputFileWriter);
         } catch (LiquibaseException e) {
             throw new BuildException("Unable to generate future rollback SQL: " + e.getMessage(), e);
         } catch (IOException e) {
