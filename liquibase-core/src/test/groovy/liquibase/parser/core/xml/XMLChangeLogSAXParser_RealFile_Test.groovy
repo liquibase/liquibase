@@ -31,6 +31,7 @@ import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sql.visitor.AppendSqlVisitor
 import liquibase.sql.visitor.ReplaceSqlVisitor
 import liquibase.test.JUnitResourceAccessor
+import org.junit.BeforeClass
 import spock.lang.FailsWith
 import spock.lang.Shared
 import spock.lang.Specification
@@ -42,6 +43,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     @Shared resourceSupplier = new ResourceSupplier()
 
+    @BeforeClass
     def before() {
         LiquibaseConfiguration.getInstance().reset();
     }

@@ -93,7 +93,7 @@ class XMLChangeLogSAXParserTest extends Specification {
         Scope.child(null, null, {
             LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setSecureParsing(false)
             new XMLChangeLogSAXParser().parse("com/example/insecure.xml", new ChangeLogParameters(), resourceAccessor)
-            LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setSecureParsing(true)
+            LiquibaseConfiguration.getInstance().reset()
         } as Scope.ScopedRunner)
 
 
