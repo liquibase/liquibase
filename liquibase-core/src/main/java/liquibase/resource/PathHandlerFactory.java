@@ -69,6 +69,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
      * @throws IOException if the path cannot be understood or if there is a problem parsing the path
      * @throws IOException if the path exists as both a direct resourcePath and also in the resourceAccessor (if included). Unless {@link liquibase.GlobalConfiguration#DUPLICATE_FILE_MODE} overrides that behavior.
      */
+    @SuppressWarnings("java:S2095")
     public Resource getResource(String resourcePath, boolean includeResourceAccessor) throws IOException {
         final PathHandler plugin = getPlugin(resourcePath);
         if (plugin == null) {
@@ -113,15 +114,11 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
      *
      */
     public boolean isAbsolute(String path) throws IOException {
-        /*
-        String searchPath = GlobalConfiguration.SEARCH_PATH.getCurrentValue();
-        PathHandler plugin = determinePlugin(searchPath, path);
+        PathHandler plugin = getPlugin(path);
         if (plugin == null) {
             throw new IOException("Cannot parse resource location: '" + path + "'");
         }
         return plugin.isAbsolute(path);
-         */
-        return false;
     }
 
     private static class FoundResourceAccessor implements ResourceAccessor {
