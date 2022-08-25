@@ -52,4 +52,9 @@ public class ZipPathHandler extends AbstractPathHandler {
     public OutputStream createResource(String path) throws IOException {
         return Files.newOutputStream(Paths.get(path), StandardOpenOption.CREATE_NEW);
     }
+
+    @Override
+    public boolean isAbsolute(String path) throws IOException {
+        return false;
+    }
 }

@@ -13,7 +13,7 @@ class ZipResourceAccessorTest extends Specification {
     }
 
     @Unroll
-    def "Cannot construct invalid values"() {
+    def "Cannot construct invalid values IllegalArgumentException"() {
         when:
         new ZipResourceAccessor(testFile)
 

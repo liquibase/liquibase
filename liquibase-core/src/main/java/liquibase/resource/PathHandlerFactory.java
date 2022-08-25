@@ -147,4 +147,55 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
 
         }
     }
+
+    /**
+     *
+     * Given a path to a resource, return true if this is an absolute path or false if not
+     *
+     * @param  path       The path to consider
+     * @return boolean    True if this is an absolute path and false if not
+     *
+     */
+    public boolean isAbsolute(String path) throws IOException {
+        PathHandler plugin = getPlugin(path);
+        if (plugin == null) {
+            throw new IOException("Cannot parse resource location: '" + path + "'");
+        }
+        return plugin.isAbsolute(path);
+    }
+
+    private static class FoundResourceAccessor implements ResourceAccessor {
+
+        private final Resource foundResource;
+        private final String location;
+
+        public FoundResourceAccessor(String location, Resource foundResource) {
+            this.location = location;
+            this.foundResource = foundResource;
+        }
+
+        @Override
+        public List<Resource> search(String path, boolean recursive) throws IOException {
+            throw new UnexpectedLiquibaseException("Method not implemented");
+        }
+
+        @Override
+        public List<Resource> getAll(String path) throws IOException {
+            if (foundResource == null) {
+                return null;
+            }
+
+            return Collections.singletonList(foundResource);
+        }
+
+        @Override
+        public List<String> describeLocations() {
+            return Collections.singletonList(location);
+        }
+
+        @Override
+        public void close() throws Exception {
+
+        }
+    }
 }
