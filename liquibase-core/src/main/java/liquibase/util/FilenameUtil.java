@@ -66,28 +66,6 @@ public class FilenameUtil {
     }
 
     /**
-     * Joins the specified path elements with a single forward slash.
-     * Existing forward slashes are not duplicated. The operating system is not consulted for path separator, a forward
-     * slash is always used.
-     *
-     * @param  path            Elements of the path
-     */
-    public static String concatWithForwardSlash(String... path) {
-        StringBuilder finalPath = new StringBuilder();
-
-        for (int i = 0; i < path.length; i++) {
-            String s = path[i];
-            boolean isFirstElement = i == 0;
-            if (!isFirstElement && !finalPath.toString().endsWith("/") && !s.startsWith("/")) {
-                finalPath.append("/");
-            }
-            finalPath.append(s);
-        }
-
-        return finalPath.toString();
-    }
-
-    /**
      * If the path is a file, return everything up to the file. If the path is a directory, return the directory.
      * <p>
      * The returned path will be {@link #normalize(String)}'ed
