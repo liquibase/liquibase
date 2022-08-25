@@ -23,6 +23,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = "generatedChangeSetIdsContainsDescription";
     public static final String INCLUDE_CATALOG_IN_SPECIFICATION = "includeCatalogInSpecification";
     public static final String SHOULD_SNAPSHOT_DATA = "shouldSnapshotData";
+    public static final String SECURE_PARSING = "secureParsing";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -100,6 +101,10 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(SHOULD_SNAPSHOT_DATA, Boolean.class)
                 .setDescription("Should Liquibase snapshot data by default?")
                 .setDefaultValue(false);
+
+        getContainer().addProperty(SECURE_PARSING, Boolean.class)
+                .setDescription("If true, remove functionality from file parsers which could be used insecurely. Examples include (but not limited to) disabling remote XML entity support.")
+                .setDefaultValue(true);
     }
 
     /**
@@ -262,6 +267,15 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
     public GlobalConfiguration setGeneratedChangeSetIdsContainDescription(boolean containDescription) {
         getContainer().setValue(GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION, containDescription);
+        return this;
+    }
+
+    public boolean getSecureParsing() {
+        return getContainer().getValue(SECURE_PARSING, Boolean.class);
+    }
+
+    public GlobalConfiguration setSecureParsing(boolean secureParsing) {
+        getContainer().setValue(SECURE_PARSING, secureParsing);
         return this;
     }
 }

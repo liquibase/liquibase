@@ -1,6 +1,8 @@
 package liquibase.parser.core.xml;
 
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
@@ -31,6 +33,13 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         saxParserFactory = SAXParserFactory.newInstance();
         saxParserFactory.setValidating(true);
         saxParserFactory.setNamespaceAware(true);
+        if (LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getSecureParsing()) {
+            try {
+                saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            } catch (Throwable e) {
+                LogService.getLog(XMLChangeLogSAXParser.class).warning("Cannot enable FEATURE_SECURE_PROCESSING: " + e.getMessage(), e);
+            }
+        }
         
         if (PREFER_INTERNAL_XSD) {
             InputStream xsdInputStream = XMLChangeLogSAXParser.class.getResourceAsStream(XSD_FILE);
@@ -70,6 +79,13 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         try (
             InputStream inputStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor)) {
             SAXParser parser = saxParserFactory.newSAXParser();
+            if (LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getSecureParsing()) {
+                try {
+                    parser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "http,https"); //need to allow external schemas on http/https to support the liquibase.org xsd files
+                } catch (SAXException e) {
+                    LogService.getLog(XMLChangeLogSAXParser.class).warning("Cannot enable ACCESS_EXTERNAL_SCHEMA: " + e.getMessage(), e);
+                }
+            }
             trySetSchemaLanguageProperty(parser);
     
             XMLReader xmlReader = parser.getXMLReader();
