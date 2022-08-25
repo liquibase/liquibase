@@ -17,7 +17,11 @@ public abstract class AbstractResource implements Resource {
                 .replaceFirst("^classpath\\*?:", "")
                 .replaceFirst("^/", "");
 
-        this.uri = uri.normalize();
+        if (uri != null) {
+            this.uri = uri.normalize();
+        } else {
+            this.uri = null;
+        }
     }
 
     @Override
