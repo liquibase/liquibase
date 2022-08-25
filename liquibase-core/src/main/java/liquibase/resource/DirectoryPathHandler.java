@@ -1,11 +1,9 @@
 package liquibase.resource;
 
 import liquibase.Scope;
+import liquibase.util.FilenameUtil;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.*;
 
 /**
@@ -32,7 +30,7 @@ public class DirectoryPathHandler extends AbstractPathHandler {
         }
     }
 
-    public ResourceAccessor getResourceAccessor(String root) {
+    public ResourceAccessor getResourceAccessor(String root) throws FileNotFoundException {
         root = root
                 .replace("file:", "")
                 .replace("\\", "/");
@@ -51,5 +49,13 @@ public class DirectoryPathHandler extends AbstractPathHandler {
     @Override
     public OutputStream createResource(String path) throws IOException {
         return Files.newOutputStream(Paths.get(path), StandardOpenOption.CREATE_NEW);
+    }
+
+    @Override
+    public boolean isAbsolute(String path) throws IOException {
+        if (path == null) {
+            return false;
+        }
+        return new File(path).isAbsolute();
     }
 }
