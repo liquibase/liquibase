@@ -30,10 +30,34 @@ public interface Resource {
     boolean isWritable();
 
     /**
-     * Opens an input stream to write to this resource.
+     * @return true if the resource defined by this object currently exists.
+     */
+    boolean exists();
+
+    /**
+     * Resolve the given path against this resource.
+     * If other is an empty path then this method trivially returns this path.
+     * Otherwise this method considers this resource to be a directory and resolves the given path against this resource.
+     * <b>Even if "other" begins with a `/`, the returned resource should be relative to this resource.</b>
+     */
+    Resource resolve(String other);
+
+    /**
+     * Resolves the given path against this resource's parent path.
+     * This is useful where a file name needs to be replaced with another file name. For example, suppose that the name separator is "/" and a path represents "dir1/dir2/foo", then invoking this method with the Path "bar" will result in the Path "dir1/dir2/bar".
+     * If other is an empty path then this method returns this path's parent.
+     * <b>Even if "other" begins with a `/`, the returned resource should be relative to this resource.</b>
+     */
+    Resource resolveSibling(String other);
+
+
+    /**
+     * Opens an output stream to write to this resource. Note that calling this method will truncate (erase) the existing file.
+     *
+     * @param createIfNeeded if true, create the resource if it does not exist. If false, throw an exception if it does not exist
      * @throws IOException if there is an error writing to the resource, including if the resource does not exist or permission don't allow writing.
      */
-    OutputStream openOutputStream() throws IOException;
+    OutputStream openOutputStream(boolean createIfNeeded) throws IOException;
 
     /**
      * Returns a unique and complete identifier for this resource.

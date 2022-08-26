@@ -32,9 +32,9 @@ class PathHandlerFactoryTest extends Specification {
         def pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory)
 
         then:
-        (pathHandlerFactory.getResource(path) != null) == existsWithoutResourceAccessor
+        (pathHandlerFactory.getResource(path).exists()) == existsWithoutResourceAccessor
         Scope.child(Scope.Attr.resourceAccessor, new JUnitResourceAccessor(), { ->
-            assert (pathHandlerFactory.getResource(path, true) != null) == existsWithResourceAccessor
+            assert (pathHandlerFactory.getResource(path, true).exists()) == existsWithResourceAccessor
         })
 
 

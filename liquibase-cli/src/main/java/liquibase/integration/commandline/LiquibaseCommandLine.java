@@ -527,7 +527,7 @@ public class LiquibaseCommandLine {
 
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
         Resource resource = pathHandlerFactory.getResource(defaultsFileConfig.getValue());
-        if (resource != null) {
+        if (resource.exists()) {
             try (InputStream defaultsStream = resource.openInputStream()) {
                 if (defaultsStream != null) {
                     final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File exists at path " + defaultsFileConfig.getValue());

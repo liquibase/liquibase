@@ -1,6 +1,5 @@
 package liquibase.resource;
 
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
@@ -81,7 +80,11 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         if (includeResourceAccessor) {
             ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), new FoundResourceAccessor(resourcePath, foundResource));
 
-            return resourceAccessor.get(resourcePath);
+            Resource resource = resourceAccessor.get(resourcePath);
+            if (!resource.exists()) {
+                return foundResource;
+            }
+            return resource;
         } else {
             return foundResource;
         }
@@ -95,32 +98,21 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
      */
     public OutputStream openResourceOutputStream(String resourcePath, boolean includeResourceAccessor, boolean createIfNotExists) throws IOException {
         Resource resource = getResource(resourcePath, includeResourceAccessor);
-        if (resource == null) {
+        if (!resource.exists()) {
             if (createIfNotExists) {
                 return createResource(resourcePath);
             } else {
                 return null;
             }
         }
-        return resource.openOutputStream();
+        return resource.openOutputStream(createIfNotExists);
     }
 
     /**
-     *
-     * Given a path to a resource, return true if this is an absolute path or false if not
-     *
-     * @param  path       The path to consider
-     * @return boolean    True if this is an absolute path and false if not
+     * Adapts a resource found by the PathHandlerFactory to the ResourceAccessor interface so it can be used
+     * with the standard "duplicate file logic" in the ResourceAccessors
      *
      */
-    public boolean isAbsolute(String path) throws IOException {
-        PathHandler plugin = getPlugin(path);
-        if (plugin == null) {
-            throw new IOException("Cannot parse resource location: '" + path + "'");
-        }
-        return plugin.isAbsolute(path);
-    }
-
     private static class FoundResourceAccessor implements ResourceAccessor {
 
         private final Resource foundResource;
@@ -138,7 +130,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
 
         @Override
         public List<Resource> getAll(String path) throws IOException {
-            if (foundResource == null) {
+            if (foundResource == null || !foundResource.exists()) {
                 return null;
             }
 
@@ -154,5 +146,21 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         public void close() throws Exception {
 
         }
+    }
+
+    /**
+     *
+     * Given a path to a resource, return true if this is an absolute path or false if not
+     *
+     * @param  path       The path to consider
+     * @return boolean    True if this is an absolute path and false if not
+     *
+     */
+    public boolean isAbsolute(String path) throws IOException {
+        PathHandler plugin = getPlugin(path);
+        if (plugin == null) {
+            throw new IOException("Cannot parse resource location: '" + path + "'");
+        }
+        return plugin.isAbsolute(path);
     }
 }

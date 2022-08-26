@@ -33,6 +33,9 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
         Logger log = Scope.getCurrentScope().getLog(getClass());
         path = standardizePath(path);
 
+        if (path == null) {
+            return returnList;
+        }
         Path finalPath = getRootPath().resolve(path);
         if (Files.exists(finalPath)) {
             returnList.add(createResource(finalPath, path));
@@ -44,7 +47,12 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
     }
 
     private String standardizePath(String path) {
-        return new File(path).toPath().normalize().toString().replace("\\", "/").replaceFirst("^/", "");
+        try {
+            return new File(path).toPath().normalize().toString().replace("\\", "/").replaceFirst("^/", "");
+        } catch (InvalidPathException e) {
+            Scope.getCurrentScope().getLog(getClass()).warning("Failed to standardize path " + path, e);
+            return path;
+        }
     }
 
     @Override

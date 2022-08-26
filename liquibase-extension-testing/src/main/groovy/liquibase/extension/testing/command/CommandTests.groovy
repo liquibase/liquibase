@@ -579,14 +579,14 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         expectedFileContent.each { def check ->
             String path = check.key
             List<Object> checks = check.value
-            String contents
             File f = new File(path)
+            String contents
             if (f.exists()) {
                 contents = FileUtil.getContents(f)
             } else {
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class)
                 def resource = pathHandlerFactory.getResource(path)
-                if (resource != null) {
+                if (resource.exists()) {
                     contents = StreamUtil.readStreamAsString(resource.openInputStream())
                 } else {
                     contents = null

@@ -72,7 +72,7 @@ public class ChangelogRewriter {
                 }
             }
 
-            try (OutputStream outputStream = resource.openOutputStream()) {
+            try (OutputStream outputStream = resource.openOutputStream(true)) {
                 outputStream.write(changeLogString.getBytes(encoding));
             }
 
@@ -169,7 +169,7 @@ public class ChangelogRewriter {
             //
             // Write out the file again
             //
-            try (OutputStream outputStream = resource.openOutputStream()) {
+            try (OutputStream outputStream = resource.openOutputStream(true)) {
                 outputStream.write(changeLogString.getBytes(encoding));
             }
 

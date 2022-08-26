@@ -42,7 +42,7 @@ class DirectoryPathHandlerTest extends Specification {
 
     def "getResource when does not exist"() {
         expect:
-        new DirectoryPathHandler().getResource("/invalid/file/path.txt") == null
+        !new DirectoryPathHandler().getResource("/invalid/file/path.txt").exists()
     }
 
     @Unroll
