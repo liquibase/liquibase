@@ -16,11 +16,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.liquibase.maven.property.PropertyElement;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
 /**
  * <p>Generates a changelog based on the current database schema. Typically used when
  * beginning to use Liquibase on an existing project and database schema.</p>
