@@ -88,9 +88,9 @@ public class LiquibaseLauncher {
 
         ClassLoader parentLoader;
         if (parentLoaderSetting.equalsIgnoreCase("system")) {
-            //loading with the regular system classloader includes liquibase.jar in the parent.
+        //loading with the regular system classloader includes liquibase.jar in the parent.
             //That causes the parent classloader to load LiquibaseCommandLine which makes it not able to access files in the child classloader
-            //The system classloader's parent is the boot classloader, which keeps the only classloader with liquibase-core.jar the same as the rest of the classes it needs to access.
+        //The system classloader's parent is the boot classloader, which keeps the only classloader with liquibase-core.jar the same as the rest of the classes it needs to access.
             parentLoader = ClassLoader.getSystemClassLoader().getParent();
 
         } else if (parentLoaderSetting.equalsIgnoreCase("thread")) {

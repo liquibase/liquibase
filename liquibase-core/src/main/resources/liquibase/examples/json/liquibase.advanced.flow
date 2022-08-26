@@ -1,0 +1,105 @@
+##########           LIQUIBASE FLOW FILE               ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+## NOTE: This is an advanced example flowfile, compared to the other sample at examples/liquibase.flowfile.yaml
+#### HOW TO USE THIS FILE:
+#### example for CLI: liquibase flow --flow-file=liquibase.advanced.flow
+#### example for ENV Var: LIQUIBASE_FLOW_FLOW_FILE=liquibase.advanced.flow
+
+## Advanced options show in this file include:
+#### non-default name of 'liquibase.advanced.flow' (use by setting flowfile property to this name)
+#### use of 'include' to inject namespaced yaml files of key: val variables
+#### use of globalVariables and stageVariables
+#### use of globalArgs and cmdArgs
+#### use of property substitution
+#### use of a nested flowfile (in this case in the endStage, but could be elsewhere)
+
+
+## Bring in and namespace an external file with yaml 'key: val' pairs for use in this file
+## The variables will be used as ${namespace.variablename}, seen in this example as ${DATES.THISDATE}
+include:
+  DATES: liquibase.flowvariables.yaml
+
+
+
+
+## Set up some global variables for property substitution in ANY stage
+globalVariables:
+  PROJNAME: "MyFlowProject"
+
+
+## Start of the stages.
+stages:  
+  
+  ## The first stage. There can be more than one if desired.
+  stage1:
+
+    ## set up vars for property substitution in THIS stage only
+    stageVariables:
+      VERBOSESTATE: TRUE
+
+
+    actions:
+    
+   #
+   # Do a validate command 
+   #
+    - type: liquibase
+      command: validate
+
+   #
+   # Tell me what is pending a deployment
+   #
+    - type: liquibase
+      command: status
+      cmdArgs: {verbose: "${VERBOSESTATE}"}
+
+   #
+   # And then save a version in detail
+   #
+    - type: liquibase
+      command: updatesql
+      globalArgs: {outputfile: "${PROJNAME}-${DATES.THISDATE}-updatesql.log"}
+        
+
+
+   #
+   # Quality Checks for changelog 
+   #
+    - type: liquibase
+      command: checks run
+      cmdArgs: {checks-scope: changelog}
+   #
+   # Run update
+   #
+    - type: liquibase
+      command: update 
+
+
+      
+   #
+   # Quality Checks for database 
+   #
+    - type: liquibase
+      command: checks run
+      cmdArgs: {checks-scope: database}
+      
+    
+   #
+   # Create a history file 
+   #
+    - type: liquibase
+      command: history
+      globalArgs: {outputfile: "${PROJNAME}-${DATES.THISDATE}-history.log"}
+
+
+
+## The endStage ALWAYS RUNS. 
+## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
+## If you do not want any actions to ALWAYS RUN, simply delete the endStage from your flow file.
+
+endStage:
+  actions:
+    - type: liquibase
+      command: flow
+      cmdArgs: {flowfile: liquibase.endstage.flow}

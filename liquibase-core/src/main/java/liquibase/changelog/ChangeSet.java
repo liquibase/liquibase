@@ -1,7 +1,6 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
-import liquibase.GlobalConfiguration;
 import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.*;
@@ -138,7 +137,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * Runtime contexts in which the changeSet will be executed.  If null or empty, will execute regardless of contexts set
      */
-    private ContextExpression contexts;
+    private ContextExpression contextFilter;
 
     /**
      * "Labels" associated with this changeSet.  If null or empty, will execute regardless of contexts set
@@ -233,24 +232,24 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.changeLog = databaseChangeLog;
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, null, true, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList, DatabaseChangeLog databaseChangeLog) {
+        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, true, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, boolean runInTransaction, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, null, runInTransaction, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList, boolean runInTransaction, DatabaseChangeLog databaseChangeLog) {
+        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, runInTransaction, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, null, true, quotingStrategy, databaseChangeLog);
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
+        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, true, quotingStrategy, databaseChangeLog);
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList,
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList,
                      boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, null, runInTransaction, quotingStrategy, databaseChangeLog);
+        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, runInTransaction, quotingStrategy, databaseChangeLog);
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList,
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList,
                      String runWith, boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
         this(databaseChangeLog);
         this.id = id;
@@ -260,7 +259,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.runOnChange = runOnChange;
         this.runInTransaction = runInTransaction;
         this.objectQuotingStrategy = quotingStrategy;
-        this.contexts = new ContextExpression(contextList);
+        this.contextFilter = new ContextExpression(contextFilter);
         setDbms(dbmsList);
         this.runWith = runWith;
     }
@@ -333,7 +332,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.alwaysRun = node.getChildValue(null, "runAlways", node.getChildValue(null, "alwaysRun", false));
         this.runOnChange = node.getChildValue(null, "runOnChange", false);
         this.runWith = node.getChildValue(null, "runWith", String.class);
-        this.contexts = new ContextExpression(node.getChildValue(null, "context", String.class));
+        this.contextFilter = new ContextExpression(node.getChildValue(null, "contextFilter", String.class));
+        if (this.contextFilter.isEmpty()) {
+            contextFilter = new ContextExpression(node.getChildValue(null, "context", String.class));
+        }
         this.labels = new Labels(StringUtil.trimToNull(node.getChildValue(null, "labels", String.class)));
         setDbms(node.getChildValue(null, "dbms", String.class));
         this.runInTransaction = node.getChildValue(null, "runInTransaction", true);
@@ -404,7 +406,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 break;
             case "modifySql":
                 String dbmsString = StringUtil.trimToNull(child.getChildValue(null, "dbms", String.class));
-                String contextString = StringUtil.trimToNull(child.getChildValue(null, "context", String.class));
+                String contextFilterString = StringUtil.trimToNull(child.getChildValue(null, "contextFilter", String.class));
+                if (contextFilterString == null) {
+                    contextFilterString = StringUtil.trimToNull(child.getChildValue(null, "context", String.class));
+                }
+
                 String labelsString = StringUtil.trimToNull(child.getChildValue(null, "labels", String.class));
                 boolean applyToRollback = child.getChildValue(null, "applyToRollback", false);
 
@@ -412,9 +418,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (dbmsString != null) {
                     dbms.addAll(StringUtil.splitAndTrim(dbmsString, ","));
                 }
-                ContextExpression context = null;
-                if (contextString != null) {
-                    context = new ContextExpression(contextString);
+                ContextExpression contextFilter = null;
+                if (contextFilterString != null) {
+                    contextFilter = new ContextExpression(contextFilterString);
                 }
 
                 Labels labels = null;
@@ -431,7 +437,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         if (!dbms.isEmpty()) {
                             sqlVisitor.setApplicableDbms(dbms);
                         }
-                        sqlVisitor.setContexts(context);
+                        sqlVisitor.setContextFilter(contextFilter);
                         sqlVisitor.setLabels(labels);
                         sqlVisitor.load(node, resourceAccessor);
 
@@ -881,12 +887,26 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return author;
     }
 
+    /**
+     * @deprecated use {@link #getContextFilter()}
+     */
     public ContextExpression getContexts() {
-        return contexts;
+        return getContextFilter();
     }
 
+    /**
+     * @deprecated use {@link #setContextFilter(ContextExpression)}
+     */
     public ChangeSet setContexts(ContextExpression contexts) {
-        this.contexts = contexts;
+        return setContextFilter(contexts);
+    }
+
+    public ContextExpression getContextFilter() {
+        return contextFilter;
+    }
+
+    public ChangeSet setContextFilter(ContextExpression contextFilter) {
+        this.contextFilter = contextFilter;
         return this;
     }
 
@@ -919,15 +939,15 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return changeLog.isIncludeIgnore();
     }
 
-    public Collection<ContextExpression> getInheritableContexts() {
+    public Collection<ContextExpression> getInheritableContextFilter() {
         Collection<ContextExpression> expressions = new ArrayList<>();
         DatabaseChangeLog changeLog = getChangeLog();
         while (changeLog != null) {
-            ContextExpression expression = changeLog.getContexts();
+            ContextExpression expression = changeLog.getContextFilter();
             if ((expression != null) && !expression.isEmpty()) {
                 expressions.add(expression);
             }
-            ContextExpression includeExpression = changeLog.getIncludeContexts();
+            ContextExpression includeExpression = changeLog.getIncludeContextFilter();
             if ((includeExpression != null) && !includeExpression.isEmpty()) {
                 expressions.add(includeExpression);
             }
@@ -957,7 +977,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public String buildFullContext() {
         StringBuilder contextExpression = new StringBuilder();
         boolean notFirstContext = false;
-        for (ContextExpression inheritableContext : getInheritableContexts()) {
+        for (ContextExpression inheritableContext : getInheritableContextFilter()) {
             appendContext(contextExpression, inheritableContext.toString(), notFirstContext);
             notFirstContext = true;
         }
@@ -1221,7 +1241,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public Set<String> getSerializableFields() {
         return new LinkedHashSet<>(
                 Arrays.asList(
-                        "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
+                        "id", "author", "runAlways", "runOnChange", "failOnError", "contextFilter", "labels", "dbms",
                         "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
                         "logicalFilePath", "created", "runInTransaction", "runOrder", "ignore"
                 )
@@ -1257,9 +1277,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return this.getFailOnError();
         }
 
-        if ("context".equals(field)) {
-            if (!this.getContexts().isEmpty()) {
-                return this.getContexts().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
+        if ("contextFilter".equals(field) || "context".equals(field)) {
+            if (!this.getContextFilter().isEmpty()) {
+                return this.getContextFilter().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
             } else {
                 return null;
             }
