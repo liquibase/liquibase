@@ -1,1 +1,3 @@
-CREATE TABLE createTableDataTypeText (textCol STRING)
+CREATE TABLE createTableDataTypeText (
+    textCol STRING
+)
