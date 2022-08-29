@@ -97,7 +97,7 @@ public class BigqueryConnection extends JdbcConnection {
             String url = con.getMetaData().getURL();
             Scope.getCurrentScope().getLog(this.getClass()).fine(String.format("Returning connection, url %s BQConnection Location=%s", url, getUnderlyingBQConnectionLocation()));
         } catch (SQLException e) {
-            //
+            e.printStackTrace();
         }
         return con;
     }
