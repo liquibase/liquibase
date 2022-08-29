@@ -188,7 +188,7 @@ jobs:
         role-to-assume: ${{ secrets.AWS_ROLE_JAVADOCS_S3 }}
         aws-region: us-east-1
 
-    - name: Copy files to the test website with the AWS CLI
+    - name: Unpack javadoc files and upload to s3
       run: |
         unzip -j '*.zip' '*javadoc*.jar'
         unzip '*liquibase-cdi*.jar' -d liquibase-cdi/
