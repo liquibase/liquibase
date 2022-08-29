@@ -10,6 +10,12 @@ Fill in `harness-config.yml` in `src/test/resources` directory.
 
 ### Executing with maven
 
+Build project without tests
+
+```
+mvn clean install -DskipTests
+```
+
 To run all harness tests for the extension run
 
 ```
