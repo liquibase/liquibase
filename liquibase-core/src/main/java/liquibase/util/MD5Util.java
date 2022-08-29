@@ -1,8 +1,7 @@
 package liquibase.util;
 
 import liquibase.Scope;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.io.InputStream;
@@ -29,7 +28,7 @@ public class MD5Util {
         MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");
-            digest.update(input.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+            digest.update(input.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -47,6 +46,10 @@ public class MD5Util {
     }
 
     public static String computeMD5(InputStream stream) {
+        if (stream == null) {
+            return null;
+        }
+
         MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");

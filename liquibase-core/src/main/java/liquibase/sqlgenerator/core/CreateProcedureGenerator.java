@@ -1,25 +1,34 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.parser.ChangeLogParserCofiguration;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.jvm.JdbcExecutor;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateProcedureStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
 import liquibase.util.SqlParser;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedureStatement> {
+
+    @Override
+    public boolean supports(CreateProcedureStatement statement, Database database) {
+        return !(database instanceof SQLiteDatabase);
+    }
+
     @Override
     public ValidationErrors validate(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -42,8 +51,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         List<Sql> sql = new ArrayList<>();
 
         String schemaName = statement.getSchemaName();
-        if ((schemaName == null) && LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-            .getAlwaysOverrideStoredLogicSchema()) {
+        if ((schemaName == null) && GlobalConfiguration.ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA.getCurrentValue()) {
             schemaName = database.getDefaultSchemaName();
         }
 
@@ -129,15 +137,37 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
      */
     public static void surroundWithSchemaSets(List<Sql> sql, String schemaName, Database database) {
         if ((StringUtil.trimToNull(schemaName) != null) &&
-                !LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
+                !ChangeLogParserConfiguration.USE_PROCEDURE_SCHEMA.getCurrentValue()) {
             String defaultSchema = database.getDefaultSchemaName();
             if (database instanceof OracleDatabase) {
                 sql.add(0, new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(schemaName, Schema.class)));
                 sql.add(new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(defaultSchema, Schema.class)));
-            }
-            else if (database instanceof AbstractDb2Database) {
+            } else if (database instanceof AbstractDb2Database) {
                 sql.add(0, new UnparsedSql("SET CURRENT SCHEMA " + schemaName));
                 sql.add(new UnparsedSql("SET CURRENT SCHEMA " + defaultSchema));
+            } else if (database instanceof PostgresDatabase) {
+                final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+                String originalSearchPath = null;
+                if (executor instanceof JdbcExecutor) {
+                    try {
+                        originalSearchPath = executor.queryForObject(new RawSqlStatement("SHOW SEARCH_PATH"), String.class);
+                    } catch (Throwable e) {
+                        Scope.getCurrentScope().getLog(CreateProcedureGenerator.class).warning("Cannot get search_path", e);
+                    }
+                }
+                if (originalSearchPath == null) {
+                    originalSearchPath = defaultSchema;
+                }
+
+                if (!originalSearchPath.equals(schemaName) && !originalSearchPath.startsWith(schemaName + ",") && !originalSearchPath.startsWith("\"" + schemaName + "\",")) {
+                    if (database instanceof EnterpriseDBDatabase){
+                        sql.add(0, new UnparsedSql("ALTER SESSION SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchema, Schema.class) + ", " + originalSearchPath));
+                        sql.add(new UnparsedSql("ALTER SESSION SET CURRENT SCHEMA " + originalSearchPath));
+                    } else {
+                        sql.add(0, new UnparsedSql("SET SEARCH_PATH TO " + database.escapeObjectName(schemaName, Schema.class) + ", " + originalSearchPath));
+                        sql.add(new UnparsedSql("SET CURRENT SCHEMA " + originalSearchPath));
+                    }
+                }
             }
         }
     }
@@ -149,7 +179,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         if (schemaName == null) {
             return procedureText;
         }
-        if ((StringUtil.trimToNull(schemaName) != null) && LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
+        if ((StringUtil.trimToNull(schemaName) != null) && ChangeLogParserConfiguration.USE_PROCEDURE_SCHEMA.getCurrentValue()) {
             StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
             StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
             Object next = "START";

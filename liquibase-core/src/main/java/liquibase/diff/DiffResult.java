@@ -9,7 +9,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
-import liquibase.util.BooleanUtils;
+import liquibase.util.BooleanUtil;
 
 import java.io.IOException;
 import java.util.*;
@@ -96,7 +96,7 @@ public class DiffResult {
     }
 
     public void addMissingObject(DatabaseObject obj) {
-        if ((obj instanceof Column) && (BooleanUtils.isTrue(((Column) obj).getComputed()) || BooleanUtils.isTrue(((Column) obj).getDescending()))) {
+        if ((obj instanceof Column) && (BooleanUtil.isTrue(((Column) obj).getComputed()) || BooleanUtil.isTrue(((Column) obj).getDescending()))) {
             return; //not really missing, it's a virtual column
         }
         missingObjects.add(obj);

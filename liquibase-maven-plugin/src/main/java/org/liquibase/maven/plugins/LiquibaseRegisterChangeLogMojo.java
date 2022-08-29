@@ -1,72 +1,91 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
-import liquibase.Scope;
-import liquibase.command.CommandExecutionException;
-import liquibase.command.CommandFactory;
-import liquibase.command.CommandResult;
-import liquibase.command.core.RegisterChangeLogCommand;
+import liquibase.command.CommandScope;
+import liquibase.command.core.RegisterChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.resource.SearchPathResourceAccessor;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.io.File;
+import java.util.*;
+
 
 /**
+ * <p>Registers a change log with Hub.</p>
  *
- * <p>Syncs all changes in change log with Hub.</p>
- * 
  * @author Wesley Willard
- * @goal   registerChangeLog
- *
+ * @goal registerChangeLog
  */
 public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMojo {
 
     /**
-     *
-     * Specifies the <i>Liquibase Hub API key</i> for Liquibase to use.
+     * Specifies the <i>Liquibase Hub Project ID</i> for Liquibase to use.
      *
      * @parameter property="liquibase.hubProjectId"
-     *
      */
+    @PropertyElement
     protected String hubProjectId;
 
-	  @Override
-  	protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
+    /**
+     *
+     * Specifies the <i>Liquibase Hub Project</i> for Liquibase to create and use.
+     *
+     * @parameter property="liquibase.hubProjectName"
+     *
+     */
+    @PropertyElement
+    protected String hubProjectName;
+
+    @Override
+    protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
-        if (hubProjectId == null) {
-            throw new MojoFailureException("\nThe Hub project ID must be specified.");
+        if (hubProjectId == null && hubProjectName == null) {
+            throw new MojoFailureException("\nEither the Hub project ID or project name must be specified.");
+        }
+        if (hubProjectId != null && hubProjectName != null) {
+            throw new MojoFailureException("\nThe 'registerchangelog' command failed because too many parameters were provided. Command expects project ID or new projectname, but not both.\n");
         }
     }
 
     @Override
-    protected void performLiquibaseTask(Liquibase liquibase)
-        throws LiquibaseException {
+    protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         super.performLiquibaseTask(liquibase);
         Database database = liquibase.getDatabase();
-        RegisterChangeLogCommand registerChangeLog =
-            (RegisterChangeLogCommand) CommandFactory.getInstance().getCommand("registerChangeLog");
-        registerChangeLog.setChangeLogFile(changeLogFile);
-        registerChangeLog.setHubProjectId(UUID.fromString(hubProjectId));
-        Map<String, Object> argsMap = new HashMap<>();
-        argsMap.put("changeLogFile", changeLogFile);
-        argsMap.put("database", database);
-        argsMap.put("liquibase", liquibase);
-        argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
-        registerChangeLog.configure(argsMap);
-        try {
-            CommandResult result = registerChangeLog.execute();
-            if (result.succeeded) {
-                Scope.getCurrentScope().getUI().sendMessage(result.print());
-            } else {
-                throw new LiquibaseException(result.message);
-            }
+        CommandScope registerChangeLog = new CommandScope("registerChangeLog");
+        registerChangeLog
+                .addArgumentValue(RegisterChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_ID_ARG, (hubProjectId != null ? UUID.fromString(hubProjectId) : null))
+                .addArgumentValue(RegisterChangelogCommandStep.HUB_PROJECT_NAME_ARG, hubProjectName);
 
-        }
-        catch (CommandExecutionException cee) {
-            throw new LiquibaseException("Error executing registerChangeLog", cee);
-        }
+        registerChangeLog.addArgumentValue("changeLogFile", changeLogFile);
+        registerChangeLog.addArgumentValue("database", database);
+        registerChangeLog.addArgumentValue("liquibase", liquibase);
+        registerChangeLog.addArgumentValue("changeLog", liquibase.getDatabaseChangeLog());
+
+        registerChangeLog.execute();
+    }
+
+    /**
+     *
+     * Override this method in order to create a ResourceAccessor which only
+     * looks for files in root and src/main/resources paths
+     *
+     * @param   cl
+     * @return  ResourceAccessor
+     *
+     */
+    @Override
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
+        List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
+        File baseDir = project.getBasedir();
+        File sourceDir = new File(baseDir, "src/main/resources");
+        resourceAccessors.add(new FileSystemResourceAccessor(baseDir, sourceDir));
+        return new SearchPathResourceAccessor(resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 }

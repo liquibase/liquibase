@@ -6,6 +6,7 @@ import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
+import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.MySQLDatabase;
@@ -17,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static liquibase.util.Validate.fail;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class ChangeLogIteratorTest {
     private DatabaseChangeLog changeLog;
@@ -106,10 +107,9 @@ public class ChangeLogIteratorTest {
         assertEquals("1", testChangeLogVisitor.visitedChangeSets.get(2).getId());
     }
 
-    private static class TestChangeSetVisitor implements ChangeSetVisitor {
+    private static class TestChangeSetVisitor extends ValidatingVisitor {
 
         public List<ChangeSet> visitedChangeSets = new ArrayList<ChangeSet>();
-
 
         @Override
         public Direction getDirection() {

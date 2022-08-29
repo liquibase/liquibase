@@ -5,8 +5,8 @@ import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +18,7 @@ import java.io.Writer;
  * @author JAmes Atwill
  * @goal changelogSyncSQL
  */
+@SuppressWarnings("java:S2095")
 public class LiquibaseChangeLogSyncSQLMojo extends
 		AbstractLiquibaseChangeLogMojo {
 
@@ -29,7 +30,15 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 	 *            default-value=
 	 *            "${project.build.directory}/liquibase/migrate.sql"
 	 */
+	@PropertyElement
 	protected File migrationSqlOutputFile;
+
+	/**
+	 * Update to the changeSet with the given tag command.
+	 * @parameter property="liquibase.toTag"
+	 */
+	@PropertyElement
+	protected String toTag;
 
 	/** The writer for writing the migration SQL. */
 	private Writer outputWriter;
@@ -37,7 +46,7 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 	@Override
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
-		liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels), outputWriter);
+		liquibase.changeLogSync(toTag, new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
 	}
 
 	@Override
@@ -46,14 +55,6 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 		getLog().info(
 				indent + "migrationSQLOutputFile: " + migrationSqlOutputFile);
 
-	}
-
-	@Override
-	protected boolean isPromptOnNonLocalDatabase() {
-		// Always run on an non-local database as we are not actually modifying
-		// the database
-		// when run on it.
-		return false;
 	}
 
 	@Override
@@ -73,7 +74,7 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 									+ migrationSqlOutputFile.getAbsolutePath());
 				}
 			}
-			outputWriter = getOutputWriter(migrationSqlOutputFile);;
+			outputWriter = getOutputWriter(migrationSqlOutputFile);
 		} catch (IOException e) {
 			getLog().error(e);
 			throw new MojoExecutionException(

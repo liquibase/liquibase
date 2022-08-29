@@ -2,20 +2,20 @@ package liquibase.util;
 
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.resource.ResourceAccessor;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Utilities for working with streams.
  */
-public class StreamUtil {
+public abstract class StreamUtil {
 
     public static String getLineSeparator() {
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
+        return GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getCurrentValue();
     }
 
     public static void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
@@ -38,7 +38,7 @@ public class StreamUtil {
     }
 
     /**
-     * Calls {@link #readStreamAsString(InputStream, String)} with {@link Scope#getFileEncoding()} as the encoding
+     * Calls {@link #readStreamAsString(InputStream, String)} with {@link GlobalConfiguration#FILE_ENCODING} as the encoding
      */
     public static String readStreamAsString(InputStream stream) throws IOException {
         return readStreamAsString(stream, null);
@@ -46,7 +46,7 @@ public class StreamUtil {
 
     /**
      * Returns the given stream as a string using the given encoding.
-     * If encoding is null, use {@link Scope#getFileEncoding()}
+     * If encoding is null, use {@link GlobalConfiguration#FILE_ENCODING}
      */
     public static String readStreamAsString(InputStream stream, String encoding) throws IOException {
         StringBuilder result = new StringBuilder();
@@ -80,7 +80,7 @@ public class StreamUtil {
             }
         }
 
-        return new InputStreamReader(encodingAwareStream, ObjectUtil.defaultIfNull(encoding, Scope.getCurrentScope().getFileEncoding().toString()));
+        return new InputStreamReader(encodingAwareStream, ObjectUtil.defaultIfNull(encoding == null ? null : Charset.forName(encoding), GlobalConfiguration.FILE_ENCODING.getCurrentValue()));
     }
 
     /**

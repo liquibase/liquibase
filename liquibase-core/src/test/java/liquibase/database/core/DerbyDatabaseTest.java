@@ -1,7 +1,7 @@
 package liquibase.database.core;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -19,12 +19,15 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 
 public class DerbyDatabaseTest extends TestCase {
-    public void testGetDefaultDriver() {
-        Database database = new DerbyDatabase();
 
-        assertEquals("org.apache.derby.jdbc.EmbeddedDriver", database.getDefaultDriver("java:derby:liquibase;create=true"));
+    public void testGetDefaultDriver() throws DatabaseException {
+        try (Database database = new DerbyDatabase()) {
+            assertEquals("org.apache.derby.jdbc.EmbeddedDriver", database.getDefaultDriver("java:derby:liquibase;create=true"));
 
-        assertNull(database.getDefaultDriver("jdbc:oracle://localhost;databaseName=liquibase"));
+            assertNull(database.getDefaultDriver("jdbc:oracle://localhost;databaseName=liquibase"));
+        } catch (final DatabaseException e) {
+            throw e;
+        }
     }
 
     public void testGetDateLiteral() {

@@ -14,13 +14,24 @@ public final class AntTaskLogger extends AbstractLogger {
 
     private final Task task;
 
-    public AntTaskLogger(Task task, LogMessageFilter filter) {
-        super(filter);
+    /**
+     * @deprecated use {@link AntTaskLogger(Task)} instead
+     */
+    @Deprecated
+    public AntTaskLogger(Task task, LogMessageFilter ignored) {
+        this(task);
+    }
+
+    public AntTaskLogger(Task task) {
         this.task = task;
     }
 
     @Override
     public void log(Level level, String message, Throwable e) {
+        if (level == Level.OFF) {
+            return;
+        }
+
         int antLevel;
         if (level.intValue() == Level.SEVERE.intValue()) {
             antLevel = Project.MSG_ERR;

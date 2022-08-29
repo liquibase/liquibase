@@ -1,77 +1,39 @@
 package liquibase.configuration;
 
+import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
- * Contains the definition and current value of a given configuration property.
+ * @deprecated
  */
 public class ConfigurationProperty {
 
+    private final ConfigurationDefinition.Building definitionBuilder;
+    private ConfigurationDefinition definition;
     private final String namespace;
-    private final String name;
-    private final Class type;
-    private List<String> aliases = new ArrayList<>();
 
-    private Object value;
-    private String description;
-    private Object defaultValue;
-    private boolean wasOverridden;
-
-    private ConfigurationValueHandler valueHandler;
-
-    public ConfigurationProperty(String namespace, String propertyName, Class type) {
+    public ConfigurationProperty(String namespace, ConfigurationDefinition.Building definitionBuilder) {
         this.namespace = namespace;
-        this.name = propertyName;
-        this.type = type;
+        this.definitionBuilder = definitionBuilder;
+        this.definition = definitionBuilder.buildTemporary();
     }
-
-    /**
-     * Initialize this property with values in the given ConfigurationProvers. If the configurationValueProviders do not contain
-     * a default value, the property is initialized with the value set by {@link #setDefaultValue(Object)}.
-     * If multiple configurationValueProviders contain values, the first in the list wins.
-     */
-    protected void init(ConfigurationValueProvider[] configurationValueProviders) {
-        Object containerValue = null;
-
-        for (ConfigurationValueProvider container : configurationValueProviders) {
-            containerValue = container.getValue(namespace, name);
-            for (String alias : aliases) {
-                if (containerValue != null) {
-                    break;
-                }
-                containerValue = container.getValue(namespace, alias);
-            }
-        }
-
-        if (containerValue == null) {
-            value = defaultValue;
-        } else {
-            try {
-                value = valueOf(containerValue);
-                wasOverridden = true;
-            } catch (NumberFormatException e) {
-                throw new UnexpectedLiquibaseException("Error parsing "+containerValue+" as a "+type.getSimpleName());
-            }
-        }
-    }
-
 
     /**
      * Returns the property name.
+     *
+     * @deprecated
      */
     public String getName() {
-        return name;
+        return definition.getKey().replace(namespace+".", "");
     }
 
     /**
      * Returns the namespace used by this property's {@link ConfigurationContainer}
+     * @deprecated
      */
     public String getNamespace() {
         return namespace;
@@ -79,15 +41,18 @@ public class ConfigurationProperty {
 
     /**
      * Returns the type of value stored in this property
+     * @deprecated
      */
     public Class getType() {
-        return type;
+        return definition.getDataType();
     }
 
     /**
      * Converts an object of a different type to the type used by this property. If types are not convertible, an exception is thrown.
+     * @deprecated
      */
     protected Object valueOf(Object value) {
+        Class type = definition.getDataType();
         if (value == null) {
             return value;
         } else if (type.isAssignableFrom(value.getClass())) {
@@ -100,7 +65,7 @@ public class ConfigurationProperty {
             } else if (type.equals(BigDecimal.class)) {
                 return new BigDecimal((String) value);
             } else if (type.equals(Long.class)) {
-            	return Long.valueOf((String) value);
+                return Long.valueOf((String) value);
             } else if (type.equals(List.class)) {
                 return StringUtil.splitAndTrim((String) value, ",");
             } else {
@@ -113,45 +78,43 @@ public class ConfigurationProperty {
 
     /**
      * Returns the value currently stored in this property without any casting.
+     * @deprecated
      */
     public Object getValue() {
-        return value;
+        return definition.getCurrentValue();
     }
 
     /**
      * Returns the value currently stored in this property cast to the given type.
+     * @deprecated
      */
     public <T> T getValue(Class<T> type) {
-        if (!this.type.isAssignableFrom(type)) {
-            throw new UnexpectedLiquibaseException("Property "+name+" on is of type "+this.type.getSimpleName()+", not "+type.getSimpleName());
+        if (!this.definition.getDataType().isAssignableFrom(type)) {
+            throw new UnexpectedLiquibaseException("Property "+definition.getDataType()+" on is of type "+this.definition.getDataType().getSimpleName()+", not "+type.getSimpleName());
         }
 
-        return (T) value;
+        return (T) definition.getCurrentValue();
     }
 
     /**
      * Overwrites the value currently stored in this property. It he passed type is not compatible with the defined type, an exception is thrown.
+     * @deprecated
      */
     public void setValue(Object value) {
-        if (valueHandler == null) {
-            value = ObjectUtil.convert(value, type);
-        } else {
-            value = valueHandler.convert(value);
-        }
-        if ((value != null) && !type.isAssignableFrom(value.getClass())) {
-            throw new UnexpectedLiquibaseException("Property "+name+" is of type "+type.getSimpleName()+", not "+value.getClass().getSimpleName());
-        }
-
-        this.value = value;
-        wasOverridden = true;
+        DeprecatedConfigurationValueProvider.setData(definition, value);
     }
 
     /**
      * Adds an alias for this property. An alias is an alternate to the "name" field that can be used by the ConfigurationProvers to look up starting values.
+     * @deprecated
      */
     public ConfigurationProperty addAlias(String... aliases) {
         if (aliases != null) {
-            this.aliases.addAll(Arrays.asList(aliases));
+            for (String alias : aliases) {
+                definitionBuilder.addAliasKey(alias);
+            }
+
+            definition = definitionBuilder.buildTemporary();
         }
 
         return this;
@@ -159,48 +122,55 @@ public class ConfigurationProperty {
 
     /**
      * Returns a human-readable definition of this property
+     * @deprecated
      */
     public String getDescription() {
-        return description;
+        return definition.getDescription();
     }
 
+    /**
+     * @deprecated
+     */
     public ConfigurationProperty setDescription(String description) {
-        this.description = description;
+        this.definitionBuilder.setDescription(description);
+        this.definition = definitionBuilder.buildTemporary();
+
         return this;
     }
 
     /**
      * Returns the default value to use if no ConfigurationProviders override it.
+     * @deprecated
      */
     public Object getDefaultValue() {
-        return defaultValue;
+        return definition.getDefaultValue();
     }
 
     /**
      * Sets the default value to use if no ConfigurationProviders override it. Throws an exception if the given object is not compatible with the defined type.
+     * @deprecated
      */
     public ConfigurationProperty setDefaultValue(Object defaultValue) {
-        if ((defaultValue != null) && !type.isAssignableFrom(defaultValue.getClass())) {
-            if ((type == Long.class) && (defaultValue instanceof Integer)) {
-                return setDefaultValue(((Integer) defaultValue).longValue());
-            }
-            throw new UnexpectedLiquibaseException("Property "+name+" on is of type "+type.getSimpleName()+", not "+defaultValue.getClass().getSimpleName());
-        }
-
-        this.defaultValue = defaultValue;
+        this.definitionBuilder.setDefaultValue(defaultValue);
+        this.definition = definitionBuilder.buildTemporary();
 
         return this;
     }
 
     /**
      * Returns true if the value has been set by a ConfigurationValueProvider or by {@link #setValue(Object)}
+     * @deprecated
      */
     public boolean getWasOverridden() {
-        return wasOverridden;
+        return !this.definition.getCurrentConfiguredValue().wasDefaultValueUsed();
     }
 
+    /**
+     * @deprecated
+     */
     public ConfigurationProperty setValueHandler(ConfigurationValueHandler handler) {
-        this.valueHandler = handler;
+        this.definitionBuilder.setValueHandler(value -> handler.convert(value));
+        this.definition = definitionBuilder.buildTemporary();
 
         return this;
     }

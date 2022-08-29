@@ -1,20 +1,23 @@
 package liquibase.integration.commandline;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.Scope;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.util.StringUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Properties;
-import java.util.Arrays;
-import java.util.List;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -85,7 +88,7 @@ public class MainTest {
 //        snapshotCommandResult = PowerMockito.mock(SnapshotCommand.SnapshotCommandResult.class);
 //
 //        // Do not do actual database snapshots.
-//        when(CommandFactory.getInstance()).thenReturn(commandFactory);
+//        when(Scope.getCurrentScope().getSingleton(CommandFactory.class)).thenReturn(commandFactory);
 //        when(commandFactory.getCommand("snapshot")).thenReturn(snapshotCommand);
 //        when(snapshotCommand.execute()).thenReturn(snapshotCommandResult);
 //        when(snapshotCommandResult.print()).thenReturn("<?xml version=\"1.0\" encoding=\"UTF-8\"?>...");
@@ -116,8 +119,8 @@ public class MainTest {
         Main cli = new Main();
         cli.parseOptions(args);
 
-        assertTrue("Read context from liquibase.local.properties", ((cli.contexts != null) && cli.contexts.contains
-            ("local-context-for-liquibase-unit-tests")));
+//        assertTrue("Read context from liquibase.local.properties", ((cli.contexts != null) && cli.contexts.contains
+//            ("local-context-for-liquibase-unit-tests")));
         assertTrue("Read context from liquibase.properties", ((cli.logFile != null) && ("target" +
             "/logfile_set_from_liquibase_properties.log").equals(cli.logFile)));
     }
@@ -131,12 +134,11 @@ public class MainTest {
 
     @Test
     public void globalConfigurationSaysDoNotRun() throws Exception {
-        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .setValue("shouldRun", false);
-        int errorLevel = Main.run(new String[0]);
-        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .setValue("shouldRun", true);
-        assertEquals(errorLevel, 0); // If it SHOULD run, and we would call without parameters, we would get -1
+        Scope.child(Collections.singletonMap(LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey(), false), () -> {
+
+            int errorLevel = Main.run(new String[0]);
+            assertEquals(errorLevel, 0); // If it SHOULD run, and we would call without parameters, we would get -1
+        });
     }
 
 //    @Test
@@ -472,24 +474,6 @@ public class MainTest {
     }
 
     @Test
-    public void propertiesFileParsingShouldIgnoreUnknownArgumentsIfStrictFalseIsInFile() throws Exception {
-        Main cli = new Main();
-
-        Properties props = new Properties();
-        props.setProperty("driver", "DRIVER");
-        props.setProperty("unknown.property", "UnknownValue");
-        props.setProperty("strict", "false");
-
-        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
-        props.store(propFile, "");
-
-        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
-
-        assertEquals("DRIVER", cli.driver);
-
-    }
-
-    @Test
     public void propertiesFileChangeLogParameters() throws Exception {
         Main cli = new Main();
 
@@ -504,41 +488,6 @@ public class MainTest {
 
         assertEquals("Changelog parameter in properties file is recognized", "parameterValue",
             cli.changeLogParameters.get("some_changelog_parameter"));
-
-    }
-
-    @Test
-    public void propertiesFileParsingShouldIgnoreUnknownArgumentsIfStrictModeIsFalse() throws Exception {
-        Main cli = new Main();
-        String[] args = new String[]{"--strict=false"};
-
-        cli.parseOptions(args);
-        Properties props = new Properties();
-        props.setProperty("driver", "DRIVER");
-        props.setProperty("unknown.property", "UnknownValue");
-
-        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
-        props.store(propFile, "");
-
-        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
-
-        assertEquals("DRIVER", cli.driver);
-
-    }
-
-    @Test(expected = CommandLineParsingException.class)
-    public void propertiesFileParsingShouldFailOnUnknownArgumentsIfStrictMode() throws Exception {
-        Main cli = new Main();
-
-        Properties props = new Properties();
-        props.setProperty("driver", "DRIVER");
-        props.setProperty("unknown.property", "UnknownValue");
-        props.setProperty("strict", "true");
-
-        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
-        props.store(propFile, "");
-
-        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
 
     }
 
@@ -558,21 +507,6 @@ public class MainTest {
         cli.applyDefaults();
         assertEquals("Correct default value for --promptForNonLocalDatabase", Boolean.FALSE, cli.promptForNonLocalDatabase);
 
-    }
-
-    @Test(expected = CommandLineParsingException.class)
-    public void propertiesFileWithBadArgs() throws Exception {
-        Main cli = new Main();
-
-        Properties props = new Properties();
-        props.setProperty("driver", "DRIVER");
-        props.setProperty("username", "USERNAME");
-        props.setProperty("badArg", "ARG");
-
-        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
-        props.store(propFile, "");
-
-        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
     }
 
     @Test
@@ -595,18 +529,17 @@ public class MainTest {
         cli.command = "migrate";
         assertEquals(0, cli.checkSetup().size());
 
-        String[] noArgCommand = { "migrate", "migrateSQL", "update", "updateSQL",
-                "futureRollbackSQL", "updateTestingRollback", "listLocks",
+        String[] noArgCommand = {"migrate", "migrateSQL", "update", "updateSQL",
+                "updateTestingRollback", "listLocks",
                 "releaseLocks", "validate", "help",
-                "clearCheckSums", "changelogSync", "changelogSyncSQL",
-                "markNextChangeSetRan", "markNextChangeSetRanSQL"
+                "clearCheckSums", "changelogSync", "changelogSyncSQL"
         };
 
         cli.commandParams.clear();
         cli.commandParams.add("--logLevel=debug");
 
         // verify unexpected parameter
-        for(int i=0; i<noArgCommand.length; i++) {
+        for (int i = 0; i < noArgCommand.length; i++) {
             cli.command = noArgCommand[i];
             assertEquals("Command " + cli.command, 1, cli.checkSetup().size());
         }
@@ -620,18 +553,18 @@ public class MainTest {
 
         // verify normal case - comand w/o command parameters
         cli.commandParams.clear();
-        for(int i=0; i<noArgCommand.length; i++) {
+        for (int i = 0; i < noArgCommand.length; i++) {
             cli.command = noArgCommand[i];
             assertEquals(0, cli.checkSetup().size());
         }
 
-        String[] singleArgCommand = { "updateCount", "updateCountSQL",
+        String[] singleArgCommand = {"updateCount", "updateCountSQL",
                 "tag", "dbDoc"
         };
 
         // verify unexpected parameter for single arg commands
         cli.commandParams.add("--logLevel=debug");
-        for(int i=0; i<singleArgCommand.length; i++) {
+        for (int i = 0; i < singleArgCommand.length; i++) {
             cli.command = singleArgCommand[i];
             assertEquals(1, cli.checkSetup().size());
         }
@@ -639,7 +572,7 @@ public class MainTest {
         // verify normal case - comand with string command parameter
         cli.commandParams.clear();
         cli.commandParams.add("someCommandValue");
-        for(int i=0; i<singleArgCommand.length; i++) {
+        for (int i = 0; i < singleArgCommand.length; i++) {
             cli.command = singleArgCommand[i];
             assertEquals(0, cli.checkSetup().size());
         }
@@ -657,17 +590,17 @@ public class MainTest {
         cli.commandParams.add("--logLevel=debug");
         assertEquals(1, cli.checkSetup().size());
 
-        String[] multiArgCommand = { "diff", "diffChangeLog" };
+        String[] multiArgCommand = {"diff", "diffChangeLog"};
 
         //first verify diff cmds w/o args
         cli.commandParams.clear();
-        for(int i=0; i<multiArgCommand.length; i++) {
+        for (int i = 0; i < multiArgCommand.length; i++) {
             cli.command = multiArgCommand[i];
             assertEquals(0, cli.checkSetup().size());
         }
 
         // next verify with all parms
-        String[] cmdParms = { "--referenceUsername=USERNAME", "--referencePassword=PASSWORD",
+        String[] cmdParms = {"--referenceUsername=USERNAME", "--referencePassword=PASSWORD",
                 "--referenceUrl=URL", "--referenceDriver=DRIVER"};
         // load all parms
         for (String param : cmdParms) {
@@ -678,23 +611,6 @@ public class MainTest {
         // now add an unexpected parm
         cli.commandParams.add("--logLevel=debug");
         assertEquals(1, cli.checkSetup().size());
-    }
-
-    @Test
-    public void printHelp() throws Exception {
-        final int MAXIMUM_LENGTH = 80;
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Main cli = new Main();
-        cli.printHelp(new PrintStream(stream));
-
-        BufferedReader reader = new BufferedReader(new StringReader(new String(stream.toByteArray())));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.length() > MAXIMUM_LENGTH) {
-                fail("'" + line + String.format("' is longer than %d chars", MAXIMUM_LENGTH));
-            }
-        }
     }
 
     @Test

@@ -7,9 +7,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.sql.*;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -18,8 +17,50 @@ import java.util.regex.Pattern;
  */
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
+    private static final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC_BLANK = new HashSet<>();
+    private static final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC_BLANK_TO_OBFUSCATE = new HashSet<>();
+    private static final Set<Map.Entry<Pattern, Pattern>> PATTERN_JDBC_OBFUSCATE = new HashSet<>();
+    private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
-    public static final Pattern PATTERN_JDBC_URL_PASSWORD_PROPERTY = Pattern.compile("(?i);password=[^;]*");
+    @SuppressWarnings("squid:S2068")
+    private static final String FILTER_CREDS_PW_TO_BLANK = "(?i)[?&:;]password=[^;&]*";
+    private static final String FILTER_CREDS_USER_TO_BLANK = "(?i)[?&:;]user(.*?)=(.+)[^;&]";
+    @SuppressWarnings("squid:S2068")
+    public static final String FILTER_CREDS_PRIVATE_KEY_TO_BLANK = "(?i)[?&:;]private_key_file(.*?)=[^;&]*";
+
+    @SuppressWarnings("squid:S2068")
+    public static final String FILTER_CREDS_PASSWORD = "(?i)(.+?)password=([^;&?]+)[;&]*?(.*?)$";
+
+    public static final String FILTER_CREDS_USER = "(?i)(.+?)user[name]*?=([^;&?]+)[;&]*?(.*?)$";
+
+    @SuppressWarnings("squid:S2068")
+    public static final String FILTER_CREDS_PRIVATE_KEY_FILE = "(?i)(.+?)private_key_file=([^;&?]+)[;&]*?(.*?)$";
+
+    @SuppressWarnings("squid:S2068")
+    public static final String FILTER_CREDS_PRIVATE_KEY_FILE_PWD = "(?i)(.+?)private_key_file_pwd=([^;&?]+)[;&]*?(.*?)$";
+
+    public static final String FILTER_CREDS = "(?i)/(.*)((?=@))";
+
+    public static final String FILTER_CREDS_MYSQL_TO_OBFUSCATE = "(?i).+://(.*?)([:])(.*?)((?=@))";
+    public static final String FILTER_CREDS_ORACLE_TO_OBFUSCATE = "(?i)jdbc:oracle:thin:(.*?)([/])(.*?)((?=@))";
+
+    static {
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PW_TO_BLANK)));
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_USER_TO_BLANK)));
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PRIVATE_KEY_TO_BLANK)));
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile(FILTER_CREDS)));
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile(FILTER_CREDS)));
+        PATTERN_JDBC_BLANK.add(PatternPair.of(Pattern.compile("(?i)jdbc:mariadb(.*)"), Pattern.compile(FILTER_CREDS)));
+
+        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:oracle:thin(.*)"), Pattern.compile(FILTER_CREDS_ORACLE_TO_OBFUSCATE)));
+        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:mysql(.*)"), Pattern.compile(FILTER_CREDS_MYSQL_TO_OBFUSCATE)));
+        PATTERN_JDBC_BLANK_TO_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)jdbc:mariadb(.*)"), Pattern.compile(FILTER_CREDS_MYSQL_TO_OBFUSCATE)));
+
+        PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PASSWORD)));
+        PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_USER)));
+        PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PRIVATE_KEY_FILE)));
+        PATTERN_JDBC_OBFUSCATE.add(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PRIVATE_KEY_FILE_PWD)));
+    }
 
     public JdbcConnection() {
 
@@ -36,14 +77,18 @@ public class JdbcConnection implements DatabaseConnection {
 
     @Override
     public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
+        String driverClassName = driverObject.getClass().getName();
+        String errorMessage = "Connection could not be created to " + sanitizeUrl(url) + " with driver " + driverClassName;
         try {
             this.con = driverObject.connect(url, driverProperties);
             if (this.con == null) {
-                throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+                throw new DatabaseException(errorMessage + ".  Possibly the wrong driver for the given database URL");
             }
-        }
-        catch (SQLException sqle) {
-            throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  " + sqle.getMessage());
+        } catch (SQLException sqle) {
+            if (driverClassName.equals("org.h2.Driver")) {
+                errorMessage += ". Make sure your H2 database is active and accessible by opening a new terminal window, run \"liquibase init start-h2\", and then return to this terminal window to run commands";
+            }
+            throw new DatabaseException(errorMessage + ".  " + sqle.getMessage(), sqle);
         }
     }
 
@@ -98,7 +143,7 @@ public class JdbcConnection implements DatabaseConnection {
     public String getURL() {
         try {
             String url = getConnectionUrl();
-            url = sanitizeUrl(url);
+            url = stripPasswordPropFromJdbcUrl(url);
             return url;
         } catch (SQLException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -107,12 +152,77 @@ public class JdbcConnection implements DatabaseConnection {
 
     /**
      * Remove any secure information from the URL. Used for logging purposes
+     * Strips off the <code>;password=</code> property from string.
+     * Note: it does not remove the password from the
+     * <code>user:password@host</code> section
+     *
+     * @param  url string to remove password=xxx from
+     * @return modified string
      */
     public static String sanitizeUrl(String url) {
-        if (url != null) {
-            url = PATTERN_JDBC_URL_PASSWORD_PROPERTY.matcher(url).replaceAll("");
+        return obfuscateCredentialsPropFromJdbcUrl(url);
+    }
+
+    private static String obfuscateCredentialsPropFromJdbcUrl(String jdbcUrl) {
+        if (jdbcUrl == null || (jdbcUrl != null && jdbcUrl.equals(""))) {
+            return jdbcUrl;
         }
-        return url;
+
+        //
+        // Do not try to strip passwords from a proxy URL
+        //
+        Matcher m = PROXY_USER.matcher(jdbcUrl);
+        if (m.matches()) {
+            return jdbcUrl;
+        }
+
+        for (Map.Entry<Pattern, Pattern> entry : PATTERN_JDBC_BLANK_TO_OBFUSCATE) {
+            Pattern jdbcUrlPattern = entry.getKey();
+            Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
+            if (matcher.matches()) {
+                Pattern pattern = entry.getValue();
+                Matcher actualMatcher = pattern.matcher(jdbcUrl);
+                if (actualMatcher.find()) {
+                    jdbcUrl = jdbcUrl.replace(actualMatcher.group(1) + actualMatcher.group(2) + actualMatcher.group(3), "*****" + actualMatcher.group(2) + "*****");
+                }
+            }
+        }
+
+        for (Map.Entry<Pattern, Pattern> entry : PATTERN_JDBC_OBFUSCATE) {
+            Pattern jdbcUrlPattern = entry.getKey();
+            Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
+            if (matcher.matches()) {
+                Pattern pattern = entry.getValue();
+                Matcher actualMatcher = pattern.matcher(jdbcUrl);
+                if (actualMatcher.find()) {
+                    jdbcUrl = jdbcUrl.replace("=" + actualMatcher.group(2), "=*****");
+                }
+            }
+        }
+        return jdbcUrl;
+    }
+
+    private static String stripPasswordPropFromJdbcUrl(String jdbcUrl) {
+        if (jdbcUrl == null || (jdbcUrl != null && jdbcUrl.equals(""))) {
+            return jdbcUrl;
+        }
+
+        //
+        // Do not try to strip passwords from a proxy URL
+        //
+        Matcher m = PROXY_USER.matcher(jdbcUrl);
+        if (m.matches()) {
+            return jdbcUrl;
+        }
+        for (Map.Entry<Pattern, Pattern> entry : PATTERN_JDBC_BLANK) {
+            Pattern jdbcUrlPattern = entry.getKey();
+            Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
+            if (matcher.matches()) {
+                Pattern pattern = entry.getValue();
+                jdbcUrl = pattern.matcher(jdbcUrl).replaceAll("");
+            }
+        }
+        return jdbcUrl;
     }
 
     protected String getConnectionUrl() throws SQLException {
@@ -496,6 +606,13 @@ public class JdbcConnection implements DatabaseConnection {
             return getUnderlyingConnection().getMetaData().supportsBatchUpdates();
         } catch (SQLException e) {
             throw new DatabaseException("Asking the JDBC driver if it supports batched updates has failed.", e);
+        }
+    }
+
+    private static class PatternPair {
+        // Return a map entry (key-value pair) from the specified values
+        public static <T, U> Map.Entry<T, U> of(T first, U second) {
+            return new AbstractMap.SimpleEntry<>(first, second);
         }
     }
 }

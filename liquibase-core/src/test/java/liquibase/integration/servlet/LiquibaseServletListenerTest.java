@@ -10,8 +10,6 @@ import java.util.Collections;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
 import javax.sql.DataSource;
 
 import org.apache.derby.jdbc.BasicEmbeddedDataSource40;
@@ -29,7 +27,7 @@ public class LiquibaseServletListenerTest extends TestCase {
     static DataSource dataSource;
 
     private LiquibaseServletListener servletListener;
-    private ServletContext servletContext;
+    private GenericServletWrapper.ServletContext servletContext;
     private Context namingContext;
 
     public static Test suite() {
@@ -52,7 +50,7 @@ public class LiquibaseServletListenerTest extends TestCase {
     public void setUp() throws Exception {
         servletListener = new LiquibaseServletListener();
 
-        servletContext = mock(ServletContext.class);
+        servletContext = mock(GenericServletWrapper.ServletContext.class);
         when(servletContext.getInitParameter(LIQUIBASE_DATASOURCE)).thenReturn("myDS");
         when(servletContext.getInitParameter(LIQUIBASE_CHANGELOG))
                 .thenReturn("liquibase/integration/servlet/simple-changelog.xml");
@@ -69,8 +67,11 @@ public class LiquibaseServletListenerTest extends TestCase {
     }
 
     public void testShouldNotShutEmbeddedDerbyDown() throws Exception {
+        if (dataSource == null) {
+            return;
+        }
         try (Connection pooled = dataSource.getConnection()) {
-            servletListener.contextInitialized(new ServletContextEvent(servletContext));
+            servletListener.contextInitialized(servletContext);
             assertEquals("connection.closed", false, pooled.isClosed());
         }
     }

@@ -8,6 +8,7 @@ public class HubChangeLog implements HubModel {
     private String fileName;
     private String name;
     private Project project;
+    private String status;
 
     @Override
     public UUID getId() {
@@ -37,6 +38,14 @@ public class HubChangeLog implements HubModel {
         return this;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "ID " + getId() + " (" + fileName + "::" + name + ")";
@@ -49,5 +58,17 @@ public class HubChangeLog implements HubModel {
     public HubChangeLog setProject(Project project) {
         this.project = project;
         return this;
+    }
+
+    public boolean isActive() {
+        return status != null && status.toLowerCase().equals("active");
+    }
+
+    public boolean isInactive() {
+        return status != null && status.toLowerCase().equals("inactive");
+    }
+
+    public boolean isDeleted() {
+        return status != null && status.toLowerCase().equals("deleted");
     }
 }

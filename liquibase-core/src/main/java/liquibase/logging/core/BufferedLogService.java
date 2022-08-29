@@ -12,7 +12,10 @@ import java.util.List;
 import java.util.logging.Level;
 
 public class BufferedLogService extends AbstractLogService {
-
+    //
+    // Truncate the return value at 10MB = 10,000,000 bytes
+    //
+    public static final int MAX_LOG_LENGTH = 10000000;
     private List<BufferedLogMessage> log = new ArrayList<>();
 
 
@@ -23,7 +26,7 @@ public class BufferedLogService extends AbstractLogService {
 
     @Override
     public Logger getLog(Class clazz) {
-        return new BufferedLogger(clazz, this, this.filter);
+        return new BufferedLogger(clazz, this);
     }
 
 
@@ -55,6 +58,9 @@ public class BufferedLogService extends AbstractLogService {
             }
         }
 
+        if (returnLog.length() > MAX_LOG_LENGTH) {
+            returnLog.setLength(MAX_LOG_LENGTH);
+        }
         return returnLog.toString();
     }
 

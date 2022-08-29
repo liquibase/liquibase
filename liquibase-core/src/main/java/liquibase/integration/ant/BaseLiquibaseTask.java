@@ -1,17 +1,17 @@
 package liquibase.integration.ant;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.ui.UIFactory;
+import liquibase.resource.SearchPathResourceAccessor;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -41,7 +41,6 @@ public abstract class BaseLiquibaseTask extends Task {
     private Path classpath;
     private DatabaseType databaseType;
     private ChangeLogParametersType changeLogParameters;
-    private boolean promptOnNonLocalDatabase;
 
     public BaseLiquibaseTask() {
         super();
@@ -68,17 +67,12 @@ public abstract class BaseLiquibaseTask extends Task {
             scopeValues.put(Scope.Attr.classLoader.name(), classLoader);
 
             Scope.child(scopeValues, () -> {
-                Scope.getCurrentScope().getUI().setAllowPrompt(false);
                 database[0] = createDatabaseFromType(databaseType, resourceAccessor);
                 liquibase = new Liquibase(getChangeLogFile(), resourceAccessor, database[0]);
                 if (changeLogParameters != null) {
                     changeLogParameters.applyParameters(liquibase);
                 }
-                if (isPromptOnNonLocalDatabase() && !liquibase.isSafeToRunUpdate() &&
-                        UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                    log("User chose not to run task against a non-local database.", Project.MSG_INFO);
-                    return;
-                }
+
                 if (shouldRun()) {
                     executeWithLiquibaseClassloader();
                 }
@@ -129,6 +123,15 @@ public abstract class BaseLiquibaseTask extends Task {
      * This method is designed to be overridden by subclasses when a change log is needed. By default it returns null.
      *
      * @return Returns null in this implementation. Subclasses that need a change log should implement.
+     */
+    public String getSearchPath() {
+        return null;
+    }
+
+    /**
+     * This method is designed to be overridden by subclasses when a change log is needed. By default it returns null.
+     *
+     * @return Returns null in this implementation. Subclasses that need a change log should implement.
      * @see AbstractChangeLogBasedTask#getChangeLogFile()
      */
     protected String getChangeLogFile() {
@@ -136,20 +139,15 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     protected boolean shouldRun() {
-        LiquibaseConfiguration configuration = LiquibaseConfiguration.getInstance();
-        GlobalConfiguration globalConfiguration = configuration.getConfiguration(GlobalConfiguration.class);
-        if (!globalConfiguration.getShouldRun()) {
-            log("Liquibase did not run because " + configuration.describeValueLookupLogic(globalConfiguration
-                    .getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false", Project.MSG_INFO);
+        if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
+            log("Liquibase did not run because " + LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey() + " was set to false", Project.MSG_INFO);
             return false;
         }
         return true;
     }
 
     protected String getDefaultOutputEncoding() {
-        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
-        GlobalConfiguration globalConfiguration = liquibaseConfiguration.getConfiguration(GlobalConfiguration.class);
-        return globalConfiguration.getOutputEncoding();
+        return GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
     }
 
     /**
@@ -168,7 +166,7 @@ public abstract class BaseLiquibaseTask extends Task {
      * @return A ResourceAccessor.
      */
     private ResourceAccessor createResourceAccessor(AntClassLoader classLoader) {
-        return new CompositeResourceAccessor(
+        return new SearchPathResourceAccessor(getSearchPath(),
                 new AntResourceAccessor(classLoader, getChangeLogDirectory()),
                 new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader())
         );
@@ -228,11 +226,17 @@ public abstract class BaseLiquibaseTask extends Task {
         changeLogParameters.setRefid(changeLogParametersRef);
     }
 
+    /**
+     * @deprecated no longer prompts
+     */
     public boolean isPromptOnNonLocalDatabase() {
-        return promptOnNonLocalDatabase;
+        return false;
     }
 
+    /**
+     * @deprecated no longer prompts
+     */
     public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
-        this.promptOnNonLocalDatabase = promptOnNonLocalDatabase;
+        log("NOTE: The promptOnLocalDatabase functionality has been removed", Project.MSG_INFO);
     }
 }

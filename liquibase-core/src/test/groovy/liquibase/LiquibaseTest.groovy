@@ -1,27 +1,35 @@
 package liquibase
 
-
 import liquibase.changelog.ChangeLogIterator
 import liquibase.changelog.DatabaseChangeLog
-import liquibase.configuration.HubConfiguration
-import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.Database
 import liquibase.database.core.MockDatabase
+import liquibase.database.jvm.JdbcConnection
+import liquibase.exception.DatabaseException
 import liquibase.exception.LiquibaseException
+import liquibase.hub.HubConfiguration
 import liquibase.hub.HubService
 import liquibase.hub.HubServiceFactory
 import liquibase.hub.core.MockHubService
-import liquibase.hub.model.Connection
 import liquibase.lockservice.LockService
 import liquibase.lockservice.LockServiceFactory
 import liquibase.parser.ChangeLogParser
 import liquibase.parser.ChangeLogParserFactory
 import liquibase.parser.MockChangeLogParser
+import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
+import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.ui.ConsoleUIService
-import liquibase.ui.ConsoleUIServiceTest
 import spock.lang.Specification
 
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.PreparedStatement
+import java.sql.SQLException
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
+import static java.lang.String.format
 import static org.junit.Assert.*
 
 class LiquibaseTest extends Specification {
@@ -38,7 +46,10 @@ class LiquibaseTest extends Specification {
     private DatabaseChangeLog mockChangeLog
     private ChangeLogIterator mockChangeLogIterator
 
+    JdbcConnection h2Connection
+
     def setup() {
+        h2Connection = null;
         mockResourceAccessor = new MockResourceAccessor()
 //        mockDatabase = mock(Database.class);
 //        mockLockService = mock(LockService.class);
@@ -95,6 +106,10 @@ class LiquibaseTest extends Specification {
         ChangeLogParserFactory.reset()
         Scope.exit(setupScopeId)
         ChangeLogParserFactory.reset()
+
+        if (h2Connection != null) {
+            h2Connection.close()
+        }
     }
 
 
@@ -109,20 +124,20 @@ class LiquibaseTest extends Specification {
         assertNotNull("change log object may not be null", liquibase.getLog())
 
         assertEquals("correct name of the change log file is returned",
-        "com/example/test.xml", liquibase.getChangeLogFile())
+                "com/example/test.xml", liquibase.getChangeLogFile())
 
         assertSame("ressourceAccessor property is set as requested",
-            resourceAccessor, liquibase.getResourceAccessor())
+                resourceAccessor, liquibase.getResourceAccessor())
 
         assertNotNull("parameters list for the change log is not null",
-            liquibase.getChangeLogParameters())
+                liquibase.getChangeLogParameters())
         assertEquals("Standard database changelog parameters were not set",
-            "DATABASECHANGELOGLOCK",
-            liquibase.getChangeLogParameters().getValue("database.databaseChangeLogLockTableName", null)
+                "DATABASECHANGELOGLOCK",
+                liquibase.getChangeLogParameters().getValue("database.databaseChangeLogLockTableName", null)
         )
 
         assertSame("database object for the change log is set as requested",
-            mockDatabase, liquibase.getDatabase())
+                mockDatabase, liquibase.getDatabase())
     }
 
     def testConstructorChangelogPathsStandardize() throws Exception {
@@ -131,19 +146,19 @@ class LiquibaseTest extends Specification {
 
         then:
         assertEquals("Windows path separators are translated correctly",
-            "path/with/windows/separators.xml", liquibase.getChangeLogFile())
+                "path/with/windows/separators.xml", liquibase.getChangeLogFile())
 
         when:
         liquibase = new Liquibase("path/with/unix/separators.xml", mockResourceAccessor, mockDatabase)
         then:
         assertEquals("Unix path separators are left intact",
-            "path/with/unix/separators.xml", liquibase.getChangeLogFile())
+                "path/with/unix/separators.xml", liquibase.getChangeLogFile())
 
         when:
         liquibase = new Liquibase("/absolute/path/remains.xml", mockResourceAccessor, mockDatabase)
         then:
         assertEquals("An absolute path is left intact",
-            "/absolute/path/remains.xml", liquibase.getChangeLogFile())
+                "/absolute/path/remains.xml", liquibase.getChangeLogFile())
     }
 
 //    @Test
@@ -170,7 +185,7 @@ class LiquibaseTest extends Specification {
 
         then:
         assertSame("ressourceAccessor is set as requested",
-            liquibase.getResourceAccessor(), liquibase.getResourceAccessor())
+                liquibase.getResourceAccessor(), liquibase.getResourceAccessor())
     }
 
 //    @Test
@@ -186,15 +201,21 @@ class LiquibaseTest extends Specification {
 
     def "update communicates with hub"() {
         given:
-        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
-        LiquibaseConfiguration.instance.getConfiguration(HubConfiguration.class).setLiquibaseHubApiKey("API_KEY")
+        Map<String, Object> scopedObjects = new HashMap<>()
+        TestConsoleUIService uiService = new TestConsoleUIService()
+        scopedObjects.put(Scope.Attr.ui.name(), uiService)
+        def scopeId = Scope.enter(null, scopedObjects)
 
         when:
-        liquibase.update("")
+        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
+        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "API_KEY", {
+          liquibase.update("")
+        })
+        Scope.exit(scopeId)
 
         then:
         mockHubService.sentObjects.toString() ==
-            "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author], startOperation/$MockHubService.randomUUID:[$MockHubService.operationCreateDate]]"
+          "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author], startOperation/$MockHubService.randomUUID:[$MockHubService.operationCreateDate]]"
 
     }
 
@@ -207,13 +228,17 @@ class LiquibaseTest extends Specification {
 
         when:
         Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
-        LiquibaseConfiguration.instance.getConfiguration(HubConfiguration.class).setLiquibaseHubApiKey(null)
-        DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
+        Connection connection = null;
+        String message = null;
         def changeLogId = UUID.randomUUID().toString()
-        changeLog.setChangeLogId(changeLogId)
-        Connection connection = liquibase.getConnection(changeLog)
-        List<String> messages = uiService.getMessages()
-        String message = messages.get(0)
+
+        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), null, {
+            DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
+            changeLog.setChangeLogId(changeLogId)
+            connection = liquibase.getConnection(changeLog)
+            List<String> messages = uiService.getMessages()
+            message = messages.get(0)
+        })
         Scope.exit(scopeId)
 
         then:
@@ -233,20 +258,23 @@ class LiquibaseTest extends Specification {
 
         when:
         Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
-        LiquibaseConfiguration.instance.getConfiguration(HubConfiguration.class).setLiquibaseHubApiKey("API_KEY")
-        DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
-        changeLog.setChangeLogId(null)
-        Connection connection = liquibase.getConnection(changeLog)
-        List<String> messages = uiService.getMessages()
-        String message = messages.get(0)
+        Connection connection = null
+        String message = null
+        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "API_KEY", {
+            DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
+            changeLog.setChangeLogId(null)
+            connection = liquibase.getConnection(changeLog)
+            List<String> messages = uiService.getMessages()
+            message = messages.get(0)
+        })
         Scope.exit(scopeId)
 
         then:
         connection == null
         message ==
-          "WARNING: The API key 'API_KEY' was found, but no changelog ID exists.\n" +
-          "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
-          "Learn more at https://hub.liquibase.com."
+                "WARNING: An API key was configured, but no changelog ID exists.\n" +
+                "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
+                "Learn more at https://hub.liquibase.com."
     }
 
 //    @Test(expected = LockException.class)
@@ -309,8 +337,209 @@ class LiquibaseTest extends Specification {
 //        });
 //    }
 
+
+    def syncChangeLogForUnmanagedDatabase() throws Exception {
+        when:
+        h2Connection = getInMemoryH2DatabaseConnection();
+
+        Liquibase liquibase = createUnmanagedDatabase(h2Connection);
+        assertFalse(hasDatabaseChangeLogTable(liquibase));
+
+        liquibase.changeLogSync("");
+
+        then:
+        assert hasDatabaseChangeLogTable(liquibase);
+        assertTags(liquibase, "1.0", "1.1", "2.0");
+    }
+
+    def syncChangeLogToTagForUnmanagedDatabase() throws Exception {
+        when:
+        h2Connection = getInMemoryH2DatabaseConnection();
+
+        Liquibase liquibase = createUnmanagedDatabase(h2Connection);
+
+        then:
+        assert !hasDatabaseChangeLogTable(liquibase)
+
+        when:
+        liquibase.changeLogSync("1.1", "");
+
+        then:
+        assert hasDatabaseChangeLogTable(liquibase);
+        assertTags(liquibase, "1.0", "1.1");
+    }
+
+    def syncChangeLogForManagedDatabase() throws Exception {
+        when:
+        h2Connection = getInMemoryH2DatabaseConnection();
+
+        Liquibase liquibase = createDatabaseAtTag(h2Connection, "1.0");
+
+        then:
+        assert hasDatabaseChangeLogTable(liquibase)
+
+        when:
+        liquibase.changeLogSync("");
+
+        then:
+        assertTags(liquibase, "1.0", "1.1", "2.0");
+    }
+
+    def syncChangeLogToTagForManagedDatabase() throws Exception {
+        when:
+        h2Connection = getInMemoryH2DatabaseConnection();
+
+        Liquibase liquibase = createDatabaseAtTag(h2Connection, "1.0");
+        then:
+        assert hasDatabaseChangeLogTable(liquibase);
+
+        when:
+        liquibase.changeLogSync("1.1", "");
+
+        then:
+        assertTags(liquibase, "1.0", "1.1");
+    }
+
+    def syncChangeLogSqlForUnmanagedDatabase() throws Exception {
+        when:
+        h2Connection = getInMemoryH2DatabaseConnection();
+        StringWriter writer = new StringWriter();
+
+        Liquibase liquibase = createUnmanagedDatabase(h2Connection);
+
+        then:
+        assert !hasDatabaseChangeLogTable(liquibase);
+
+        when:
+        liquibase.changeLogSync("", writer);
+
+        then:
+        assert !hasDatabaseChangeLogTable(liquibase);
+        assertSqlOutputAppliesTags(writer.toString(), "1.0", "1.1", "2.0");
+    }
+
+    def syncChangeLogToTagSqlForUnmanagedDatabase() throws Exception {
+        when:
+        h2Connection = getInMemoryH2DatabaseConnection();
+        StringWriter writer = new StringWriter();
+
+        Liquibase liquibase = createUnmanagedDatabase(h2Connection);
+
+        then:
+        assert !hasDatabaseChangeLogTable(liquibase);
+
+        when:
+        liquibase.changeLogSync("1.1", "", writer);
+
+        then:
+        !hasDatabaseChangeLogTable(liquibase);
+        assertSqlOutputAppliesTags(writer.toString(), "1.0", "1.1");
+    }
+
+    def syncChangeLogSqlForManagedDatabase() throws Exception {
+        when:
+        h2Connection = getInMemoryH2DatabaseConnection();
+        StringWriter writer = new StringWriter();
+
+        Liquibase liquibase = createDatabaseAtTag(h2Connection, "1.0");
+
+        then:
+        assert hasDatabaseChangeLogTable(liquibase);
+
+        when:
+        liquibase.changeLogSync("", writer);
+
+        then:
+        assertSqlOutputAppliesTags(writer.toString(), "1.1", "2.0");
+    }
+
+    def syncChangeLogToTagSqlForManagedDatabase() throws Exception {
+        when:
+        h2Connection = getInMemoryH2DatabaseConnection();
+        StringWriter writer = new StringWriter();
+
+        Liquibase liquibase = createDatabaseAtTag(h2Connection, "1.0");
+
+        then:
+        assertTrue(hasDatabaseChangeLogTable(liquibase));
+
+        when:
+        liquibase.changeLogSync("1.1", "", writer);
+
+        then:
+        assertSqlOutputAppliesTags(writer.toString(), "1.1");
+    }
+
+    private JdbcConnection getInMemoryH2DatabaseConnection() throws SQLException {
+        String urlFormat = "jdbc:h2:mem:%s";
+        return new JdbcConnection(DriverManager.getConnection(format(urlFormat, UUID.randomUUID().toString())));
+    }
+
+    private Liquibase createUnmanagedDatabase(JdbcConnection connection) throws SQLException, LiquibaseException {
+        String createTableSql = "CREATE TABLE PUBLIC.TABLE_A (ID INTEGER);";
+
+        PreparedStatement stmt = connection.getUnderlyingConnection().prepareStatement(createTableSql)
+        try {
+            stmt.execute();
+        } finally {
+            stmt.close()
+        }
+
+        return new Liquibase("liquibase/tagged-changelog.xml", new ClassLoaderResourceAccessor(), connection);
+    }
+
+    private Liquibase createDatabaseAtTag(JdbcConnection connection, String tag) throws LiquibaseException {
+        Liquibase liquibase = new Liquibase("liquibase/tagged-changelog.xml", new ClassLoaderResourceAccessor(),
+                connection);
+        liquibase.update(tag, "");
+        return liquibase;
+    }
+
+    private boolean hasDatabaseChangeLogTable(Liquibase liquibase) throws DatabaseException {
+        return SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(liquibase.database);
+    }
+
+    private void assertTags(Liquibase liquibase, String... expectedTags) throws DatabaseException {
+        def actualTags = []
+        for (def ranChangeset : liquibase.database.getRanChangeSetList()) {
+            if (ranChangeset.getTag() != null) {
+                actualTags.add(ranChangeset.getTag())
+            }
+        }
+
+        assertEquals(Arrays.asList(expectedTags), actualTags);
+    }
+
+    private void assertSqlOutputAppliesTags(String output, String... expectedTags) throws IOException {
+        String insertTagH2SqlTemplate =
+                "INSERT INTO PUBLIC\\.DATABASECHANGELOG \\(.*, DESCRIPTION,.*, TAG\\) VALUES \\(.*, 'tagDatabase',.*, '%s'\\);";
+
+        List<Pattern> patterns = []
+
+        for (def tag : expectedTags) {
+            patterns.add(Pattern.compile(String.format(insertTagH2SqlTemplate, tag)))
+        }
+
+        BufferedReader reader = new BufferedReader(new StringReader(output))
+        try {
+            String line;
+            int index = 0;
+
+            while ((line = reader.readLine()) != null && index < patterns.size()) {
+                Matcher matcher = patterns.get(index).matcher(line);
+                if (matcher.matches()) {
+                    index++;
+                }
+            }
+            assertTrue(index > 0 && index == patterns.size());
+        } finally {
+            reader.close()
+        }
+    }
+
     public static class TestConsoleUIService extends ConsoleUIService {
         private List<String> messages = new ArrayList<>()
+
         @Override
         void sendMessage(String message) {
             messages.add(message)
