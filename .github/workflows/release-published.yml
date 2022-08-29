@@ -166,7 +166,7 @@ jobs:
   #           -DstagingProgressTimeoutMinutes=10
   
   deploy_javadocs:
-    name: Upload javadocs to javadocs.liquibase.com (AWS S3)
+    name: Upload Javadocs
     needs: [ setup ]
     runs-on: ubuntu-latest
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
