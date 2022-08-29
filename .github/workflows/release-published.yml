@@ -164,3 +164,35 @@ jobs:
             -DserverId=sonatype-nexus-staging \
             -DstagingRepositoryId=$stagingRepositoryId \
             -DstagingProgressTimeoutMinutes=10
+  
+  deploy_javadocs:
+    name: Upload javadocs to javadocs.liquibase.com (AWS S3)
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Download release javadocs
+      uses: robinraju/release-downloader@v1.4
+      with:
+        repository: "liquibase/liquibase"
+        tag: "${{ needs.setup.outputs.tag }}"
+        filename: "liquibase-additional*.zip"
+        out-file-path: "."
+    - name: Configure AWS credentials from Test account
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_JAVADOCS_S3 }}
+        aws-region: us-east-1
+
+    - name: Copy files to the test website with the AWS CLI
+      run: |
+        unzip -j '*.zip' '*javadoc*.jar'
+        unzip '*liquibase-cdi*.jar' -d liquibase-cdi/
+        unzip '*liquibase-commercial*.jar' -d liquibase-commercial/
+        unzip '*liquibase-core*.jar' -d liquibase-core/
+        unzip '*liquibase-maven-plugin*.jar' -d liquibase-maven-plugin/
+        rm -rf *.jar *.zip
+        aws s3 sync . s3://javadocsliquibasecom-origin
