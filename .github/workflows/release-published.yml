@@ -181,6 +181,7 @@ jobs:
         tag: "${{ needs.setup.outputs.tag }}"
         filename: "liquibase-additional*.zip"
         out-file-path: "."
+        
     - name: Configure AWS credentials from Test account
       uses: aws-actions/configure-aws-credentials@v1
       with:
