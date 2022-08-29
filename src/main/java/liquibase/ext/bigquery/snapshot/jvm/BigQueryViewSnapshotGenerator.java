@@ -21,6 +21,7 @@ import liquibase.structure.core.View;
 import liquibase.util.StringUtil;
 
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,25 +56,28 @@ public class BigQueryViewSnapshotGenerator extends ViewSnapshotGenerator {
             List<Map<String, ?>> viewsMetadataRs = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                         .getExecutor("jdbc", database).queryForList(new RawSqlStatement(query));
 
+            String viewDefinition = "";
                 if (viewsMetadataRs.isEmpty()) {
                     return null;
                 } else {
-                    CachedRow row = (CachedRow) viewsMetadataRs.get(0);
-                    String rawViewName = row.getString("TABLE_NAME");
-                    String rawSchemaName = StringUtil.trimToNull(row.getString("TABLE_SCHEM"));
-                    String rawCatalogName = StringUtil.trimToNull(row.getString("TABLE_CAT"));
-                    String remarks = row.getString("REMARKS");
+                    Map<String, ?> row = viewsMetadataRs.get(0);
+                    String rawViewName = example.getName(); //(String) row.get("VIEW_DEFINITION");
+                    String rawSchemaName = schema.getName(); //StringUtil.trimToNull((String) row.get("TABLE_SCHEM"));
+                    String rawCatalogName = schema.getCatalogName(); //StringUtil.trimToNull((String) row.get("TABLE_CAT"));
+                    String remarks = null;// (String) row.get("REMARKS");
                     if (remarks != null) {
                         remarks = remarks.replace("''", "'");
                     }
+
+                    viewDefinition = (String) row.get("VIEW_DEFINITION");
 
                     View view = (new View()).setName(this.cleanNameFromDatabase(rawViewName, database));
                     view.setRemarks(remarks);
                     CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase)database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
                     view.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
-                    try {
-                        String definition = database.getViewDefinition(schemaFromJdbcInfo, view.getName());
+                    //try {
+                        String definition = viewDefinition; //database.getViewDefinition(schemaFromJdbcInfo, view.getName());
                         if (definition.startsWith("FULL_DEFINITION: ")) {
                             definition = definition.replaceFirst("^FULL_DEFINITION: ", "");
                             view.setContainsFullDefinition(true);
@@ -108,9 +112,9 @@ public class BigQueryViewSnapshotGenerator extends ViewSnapshotGenerator {
                         }
 
                         view.setDefinition(definition);
-                    } catch (DatabaseException var16) {
-                        throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getSchema().getCatalogName(), view.getSchema().getName(), rawViewName), var16);
-                    }
+                    //} catch (DatabaseException var16) {
+                    //    throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getSchema().getCatalogName(), view.getSchema().getName(), rawViewName), var16);
+                    //}
 
                     return view;
                 }

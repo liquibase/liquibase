@@ -160,6 +160,7 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
         String definition = (String)((ExecutorService) Scope.getCurrentScope().getSingleton(ExecutorService.class))
                 .getExecutor("jdbc", this)
                 .queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+        System.out.println("getViewDefinition "+definition);
         return definition == null ? null : CREATE_VIEW_AS_PATTERN
                 .matcher(definition)
                 .replaceFirst("");
