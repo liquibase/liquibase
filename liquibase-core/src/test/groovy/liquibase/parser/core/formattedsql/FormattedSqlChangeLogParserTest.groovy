@@ -1,5 +1,6 @@
 package liquibase.parser.core.formattedsql
 
+import liquibase.change.core.CreateTableChange
 import liquibase.change.core.EmptyChange
 import liquibase.change.core.RawSQLChange
 import liquibase.changelog.ChangeLogParameters
@@ -156,6 +157,24 @@ create table table99 (
 create table old_style_context (
     id int primary key
 );
+
+-- changeset the_user:create
+create table test_table (
+    id int primary key
+);
+
+-- rollback drop table test_table;
+
+-- changeset the_user:create_rollback
+alter table test_table add column name varchar(20);
+
+-- rollback changesetId:create changeSetAuthor:the_user
+
+-- changeset the_user:create_rollback2
+alter table test_table add column name2 varchar(20);
+
+-- rollback changesetId:create changeSetAuthor:the_user
+
 """.trim()
 
     private static final String END_DELIMITER_CHANGELOG = """
@@ -249,7 +268,7 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
 
         changeLog.getLogicalFilePath() == "asdf.sql"
 
-        changeLog.getChangeSets().size() == 22
+        changeLog.getChangeSets().size() == 25
 
         changeLog.getChangeSets().get(0).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(0).getId() == "1"
@@ -376,6 +395,14 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         changeLog.getChangeSets().get(20).getId().equalsIgnoreCase("+the_user+")
 
         changeLog.getChangeSets().get(21).getContextFilter().toString() == "oldstyle"
+
+        changeLog.getChangeSets().get(22).getChanges().size() == 1
+
+        changeLog.getChangeSets().get(23).getRollback().getChanges().size() == 1
+        ((RawSQLChange) changeLog.getChangeSets().get(23).getRollback().getChanges().get(0)).getSql().startsWith("create table test_table (")
+
+        changeLog.getChangeSets().get(24).getRollback().getChanges().size() == 1
+        ((RawSQLChange) changeLog.getChangeSets().get(24).getRollback().getChanges().get(0)).getSql().startsWith("create table test_table (")
     }
 
     def "parse changeset with colon in ID"() throws Exception {

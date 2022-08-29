@@ -125,8 +125,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern onUpdateSqlPattern = Pattern.compile(".*onUpdateSQL:(\\w+).*", Pattern.CASE_INSENSITIVE);
 
             Pattern rollbackChangeSetIdPattern = Pattern.compile(".*changeSetId:(\\S+).*", Pattern.CASE_INSENSITIVE);
-            Pattern rollbackChangeSetAuthorPattern = Pattern.compile(".*changeSetAuthor:(\\S+).*", Pattern.CASE_INSENSITIVE);
-            Pattern rollbackChangeSetPathPattern = Pattern.compile(".*changeSetPath:(\\S+).*", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackChangeSetAuthorPattern = Pattern.compile(".*changesetAuthor:(\\S+).*", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackChangeSetPathPattern = Pattern.compile(".*changesetPath:(\\S+).*", Pattern.CASE_INSENSITIVE);
 
             Matcher rollbackSplitStatementsPatternMatcher=null;
             boolean rollbackSplitStatements = true;
@@ -215,10 +215,18 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 Matcher authorMatcher = rollbackChangeSetAuthorPattern.matcher(rollbackString);
                                 Matcher idMatcher = rollbackChangeSetIdPattern.matcher(rollbackString);
                                 Matcher pathMatcher = rollbackChangeSetPathPattern.matcher(rollbackString);
-                                
-                                String changeSetAuthor = parseString(authorMatcher);
-                                String changeSetId = parseString(idMatcher);
-                                String changeSetPath = parseString(pathMatcher);
+
+                                String changeSetAuthor = StringUtil.trimToNull(parseString(authorMatcher));
+                                String changeSetId = StringUtil.trimToNull(parseString(idMatcher));
+                                String changeSetPath = StringUtil.trimToNull(parseString(pathMatcher));
+
+                                if (changeSetId == null) {
+                                    throw new ChangeLogParseException("'changesetId' not set in rollback block '"+rollbackString+"'");
+                                }
+
+                                if (changeSetAuthor == null) {
+                                    throw new ChangeLogParseException("'changesetAuthor' not set in rollback block '"+rollbackString+"'");
+                                }
 
                                 if (changeSetPath == null) {
                                     changeSetPath = physicalChangeLogLocation;
@@ -472,9 +480,17 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         Matcher idMatcher = rollbackChangeSetIdPattern.matcher(rollbackString);
                         Matcher pathMatcher = rollbackChangeSetPathPattern.matcher(rollbackString);
                         
-                        String changeSetAuthor = parseString(authorMatcher);
-                        String changeSetId = parseString(idMatcher);
-                        String changeSetPath = parseString(pathMatcher);
+                        String changeSetAuthor = StringUtil.trimToNull(parseString(authorMatcher));
+                        String changeSetId = StringUtil.trimToNull(parseString(idMatcher));
+                        String changeSetPath = StringUtil.trimToNull(parseString(pathMatcher));
+
+                        if (changeSetId == null) {
+                            throw new ChangeLogParseException("'changesetId' not set in rollback block '"+rollbackString+"'");
+                        }
+
+                        if (changeSetAuthor == null) {
+                            throw new ChangeLogParseException("'changesetAuthor' not set in rollback block '"+rollbackString+"'");
+                        }
 
                         if (changeSetPath == null) {
                             changeSetPath = physicalChangeLogLocation;
