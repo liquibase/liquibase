@@ -1,13 +1,19 @@
 package liquibase.change.core
 
+import liquibase.Scope
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
-import liquibase.sdk.database.MockDatabase
+import liquibase.changelog.ChangeSet
+import liquibase.changelog.DatabaseChangeLog
+import liquibase.database.core.MockDatabase
 import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNodeException
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.View
+import liquibase.test.JUnitResourceAccessor
+import liquibase.util.StreamUtil
+import spock.lang.Unroll
 
 public class CreateViewChangeTest extends StandardChangeTest {
 
@@ -55,5 +61,33 @@ public class CreateViewChangeTest extends StandardChangeTest {
         then:
         change.viewName == "my_view"
         change.selectQuery == "select * from test"
+    }
+
+    @Unroll
+    def "openSqlStream correctly opens files"() {
+        when:
+        def changelog = new DatabaseChangeLog("com/example/changelog.xml")
+
+        def changeset = new ChangeSet("1", "auth", false, false, logicalFilePath, null, null, changelog)
+
+        def change = new CreateViewChange()
+        change.path = sqlPath
+        change.relativeToChangelogFile = relativeToChangelogFile
+        change.setChangeSet(changeset)
+
+        String fileContents = Scope.child([(Scope.Attr.resourceAccessor.name()): new JUnitResourceAccessor()], {
+            return StreamUtil.readStreamAsString(change.openSqlStream())
+        } as Scope.ScopedRunnerWithReturn<String>)
+
+        then:
+        fileContents.trim() == "My Logic Here"
+
+        where:
+        sqlPath | logicalFilePath | relativeToChangelogFile
+        "com/example/my-logic.sql" | null                 | false
+        "com/example/my-logic.sql" | "a/logical/path.xml" | false
+        "my-logic.sql"             | null                 | true
+        "my-logic.sql"             | "a/logical/path.xml" | true
+
     }
 }

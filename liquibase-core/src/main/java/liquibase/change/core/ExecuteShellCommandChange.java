@@ -1,11 +1,11 @@
 package liquibase.change.core;
 
+import liquibase.Scope;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -13,8 +13,6 @@ import liquibase.exception.Warnings;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -22,11 +20,10 @@ import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -45,7 +42,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     protected List<String> finalCommandArray;
     private String executable;
     private List<String> os;
-    private List<String> args = new ArrayList<String>();
+    private final List<String> args = new ArrayList<>();
     private String timeout;
     private static final Pattern TIMEOUT_PATTERN = Pattern.compile("^\\s*(\\d+)\\s*([sSmMhH]?)\\s*$");
     private static final Long SECS_IN_MILLIS = 1000L;
@@ -97,13 +94,13 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     public void setOs(String os) {
-        this.os = StringUtils.splitAndTrim(os, ",");
+        this.os = StringUtil.splitAndTrim(os, ",");
     }
 
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
-        if (!StringUtils.isEmpty(timeout)) {
+        if (!StringUtil.isEmpty(timeout)) {
             // check for the timeout values, accept only positive value with one letter unit (s/m/h)
             Matcher matcher = TIMEOUT_PATTERN.matcher(timeout);
             if (!matcher.matches()) {
@@ -127,14 +124,14 @@ public class ExecuteShellCommandChange extends AbstractChange {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
                 shouldRun = false;
-                LogService.getLog(getClass()).info(LogType.LOG, "Not executing on os " + currentOS + " when " + os + " was " +
+                Scope.getCurrentScope().getLog(getClass()).info("Not executing on os " + currentOS + " when " + os + " was " +
                         "specified");
             }
         }
 
         // check if running under not-executed mode (logging output)
         boolean nonExecutedMode = false;
-        Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         if (executor instanceof LoggingExecutor) {
             nonExecutedMode = true;
         }
@@ -193,8 +190,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         int returnCode = 0;
         try {
             //output both stdout and stderr data from proc to stdout of this process
-            StreamGobbler errorGobbler = new StreamGobbler(p.getErrorStream(), errorStream);
-            StreamGobbler outputGobbler = new StreamGobbler(p.getInputStream(), inputStream);
+            StreamGobbler errorGobbler = createErrorGobbler(p.getErrorStream(), errorStream);
+            StreamGobbler outputGobbler = createErrorGobbler(p.getInputStream(), inputStream);
 
             errorGobbler.start();
             outputGobbler.start();
@@ -217,17 +214,19 @@ public class ExecuteShellCommandChange extends AbstractChange {
             Thread.currentThread().interrupt();
         }
 
-        String errorStreamOut = errorStream.toString(LiquibaseConfiguration.getInstance().getConfiguration
-                (GlobalConfiguration.class).getOutputEncoding());
-        String infoStreamOut = inputStream.toString(LiquibaseConfiguration.getInstance().getConfiguration
-                (GlobalConfiguration.class).getOutputEncoding());
+        String errorStreamOut = errorStream.toString(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+        String infoStreamOut = inputStream.toString(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
 
         if (errorStreamOut != null && !errorStreamOut.isEmpty()) {
-            LogService.getLog(getClass()).severe(LogType.LOG, errorStreamOut);
+            Scope.getCurrentScope().getLog(getClass()).severe(errorStreamOut);
         }
-        LogService.getLog(getClass()).info(LogType.LOG, infoStreamOut);
+        Scope.getCurrentScope().getLog(getClass()).info(infoStreamOut);
 
         processResult(returnCode, errorStreamOut, infoStreamOut, database);
+    }
+
+    protected StreamGobbler createErrorGobbler(InputStream processStream, OutputStream outputStream) {
+        return new StreamGobbler(processStream, outputStream, Thread.currentThread());
     }
 
     /**
@@ -243,12 +242,11 @@ public class ExecuteShellCommandChange extends AbstractChange {
      * <p>
      * Creates a scheduled task to destroy the process in given timeout milliseconds.
      * This killer task will be cancelled if the process returns before the timeout value.
-     *
-     * @param process
+     *  @param process
      * @param timeoutInMillis waits for specified timeoutInMillis before destroying the process.
-     *                        It will wait indefinitely if timeoutInMillis is 0.
      */
-    private int waitForOrKill(final Process process, final long timeoutInMillis) throws ExecutionException, TimeoutException {
+    @java.lang.SuppressWarnings("squid:S2142")
+    private int waitForOrKill(final Process process, final long timeoutInMillis) throws TimeoutException {
         int ret = -1;
         final AtomicBoolean timedOut = new AtomicBoolean(false);
         Timer timer = new Timer();
@@ -277,6 +275,11 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 }
             } catch (InterruptedException ignore) {
                 // check again
+                if (timedOut.get()) {
+                    timer.cancel();
+                    String timeoutStr = timeout != null ? timeout : timeoutInMillis + " ms";
+                    throw new TimeoutException("Process timed out (" + timeoutStr + ")");
+                }
             }
         }
 
@@ -295,7 +298,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 try {
                     long valLong = Long.parseLong(val);
                     String unit = matcher.group(2);
-                    if (StringUtils.isEmpty(unit)) {
+                    if (StringUtil.isEmpty(unit)) {
                         return valLong * SECS_IN_MILLIS;
                     }
                     char u = unit.toLowerCase().charAt(0);
@@ -340,7 +343,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     protected String getCommandString() {
-        return getExecutable() + " " + StringUtils.join(args, " ");
+        return getExecutable() + " " + StringUtil.join(args, " ");
     }
 
     @Override
@@ -359,11 +362,11 @@ public class ExecuteShellCommandChange extends AbstractChange {
         for (ParsedNode arg : argsNode.getChildren(null, "arg")) {
             addArg(arg.getChildValue(null, "value", String.class));
         }
-        String passedValue = StringUtils.trimToNull(parsedNode.getChildValue(null, "os", String.class));
+        String passedValue = StringUtil.trimToNull(parsedNode.getChildValue(null, "os", String.class));
         if (passedValue == null) {
             this.os = new ArrayList<>();
         } else {
-            List<String> os = StringUtils.splitAndTrim(StringUtils.trimToEmpty(parsedNode.getChildValue(null, "os",
+            List<String> os = StringUtil.splitAndTrim(StringUtil.trimToEmpty(parsedNode.getChildValue(null, "os",
                     String.class)), ",");
             if ((os.size() == 1) && ("".equals(os.get(0)))) {
                 this.os = null;
@@ -372,22 +375,24 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }
         }
     }
-    private class StreamGobbler extends Thread {
+
+    public class StreamGobbler extends Thread {
         private static final int THREAD_SLEEP_MILLIS = 100;
         private final OutputStream outputStream;
         private InputStream processStream;
         boolean loggedTruncated = false;
         long copiedSize = 0;
+        private final Thread parentThread;
 
-        private StreamGobbler(InputStream processStream, ByteArrayOutputStream outputStream) {
+        public StreamGobbler(InputStream processStream, OutputStream outputStream, Thread parentThread) {
             this.processStream = processStream;
             this.outputStream = outputStream;
+            this.parentThread = parentThread;
         }
 
         @Override
         public void run() {
-            try {
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(processStream);
+            try (BufferedInputStream bufferedInputStream = new BufferedInputStream(processStream)) {
                 while (processStream != null) {
                     if (bufferedInputStream.available() > 0) {
                         copy(bufferedInputStream, outputStream);
@@ -400,7 +405,10 @@ public class ExecuteShellCommandChange extends AbstractChange {
                     }
                 }
             } catch (IOException ioe) {
-                ioe.printStackTrace();
+                Scope.getCurrentScope().getLog(ExecuteShellCommandChange.class).warning(ioe.getMessage());
+                if (parentThread != null) {
+                    parentThread.interrupt();
+                }
             }
         }
 

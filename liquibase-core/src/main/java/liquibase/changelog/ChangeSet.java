@@ -1,12 +1,13 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
-import liquibase.LabelExpression;
 import liquibase.Labels;
+import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
@@ -14,9 +15,8 @@ import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
@@ -28,7 +28,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -44,6 +44,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * is calculated at run time when ValidatorVisitor is being called
      */
     private CheckSum storedCheckSum;
+
+    private static final String AND = " AND ";
+    private static final String COMMA = ",";
+    private static final String WHITESPACE = " ";
+    private static final String OPEN_BRACKET = "(";
+    private static final String CLOSE_BRACKET = ")";
 
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN, MARK_RAN, INVALID_MD5SUM
@@ -107,7 +113,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private String filePath = "UNKNOWN CHANGE LOG";
 
-    private Logger log;
+
+    /**
+     * A logicalFilePath if defined
+     */
+    private String logicalFilePath;
+
+    /**
+     * File path stored in the databasechangelog table. It should be the same as filePath, but not always.
+     */
+    private String storedFilePath;
 
     /**
      * If set to true, the changeSet will be executed on every update. Defaults to false
@@ -122,7 +137,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * Runtime contexts in which the changeSet will be executed.  If null or empty, will execute regardless of contexts set
      */
-    private ContextExpression contexts;
+    private ContextExpression contextFilter;
 
     /**
      * "Labels" associated with this changeSet.  If null or empty, will execute regardless of contexts set
@@ -130,9 +145,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private Labels labels;
 
     /**
-     *
      * If set to true, the changeSet will be ignored (skipped)
-     *
      */
     private boolean ignore;
 
@@ -182,7 +195,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private PreconditionContainer preconditions;
 
-   /**
+    /**
      * ChangeSet level attribute to specify an Executor
      */
     private String runWith;
@@ -216,28 +229,27 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public ChangeSet(DatabaseChangeLog databaseChangeLog) {
         this.changes = new ArrayList<>();
-        log = LogService.getLog(getClass());
         this.changeLog = databaseChangeLog;
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, null, true, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList, DatabaseChangeLog databaseChangeLog) {
+        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, true, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, boolean runInTransaction, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, null, runInTransaction, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList, boolean runInTransaction, DatabaseChangeLog databaseChangeLog) {
+        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, runInTransaction, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, null, true, quotingStrategy, databaseChangeLog);
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
+        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, true, quotingStrategy, databaseChangeLog);
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList,
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList,
                      boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, null, runInTransaction, quotingStrategy, databaseChangeLog);
+        this(id, author, alwaysRun, runOnChange, filePath, contextFilter, dbmsList, null, runInTransaction, quotingStrategy, databaseChangeLog);
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList,
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextFilter, String dbmsList,
                      String runWith, boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
         this(databaseChangeLog);
         this.id = id;
@@ -247,7 +259,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.runOnChange = runOnChange;
         this.runInTransaction = runInTransaction;
         this.objectQuotingStrategy = quotingStrategy;
-        this.contexts = new ContextExpression(contextList);
+        this.contextFilter = new ContextExpression(contextFilter);
         setDbms(dbmsList);
         this.runWith = runWith;
     }
@@ -256,10 +268,37 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.dbmsSet = DatabaseList.toDbmsSet(dbmsList);
     }
 
+    /**
+     * @return either this object's logicalFilePath or the changelog's filepath (logical or physical) if not.
+     */
     public String getFilePath() {
         return filePath;
     }
-    
+
+    /**
+     * The logical file path defined directly on this node. Return null if not set.
+     *
+     * @return
+     */
+    public String getLogicalFilePath() {
+        return logicalFilePath;
+    }
+
+    public void setLogicalFilePath(String logicalFilePath) {
+        this.logicalFilePath = logicalFilePath;
+    }
+
+    public String getStoredFilePath() {
+        if (storedFilePath == null) {
+            return getFilePath();
+        }
+        return storedFilePath;
+    }
+
+    public void setStoredFilePath(String storedFilePath) {
+        this.storedFilePath = storedFilePath;
+    }
+
     public String getRunWith() {
         return runWith;
     }
@@ -270,7 +309,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public CheckSum generateCheckSum() {
         if (checkSum == null) {
-            StringBuffer stringToMD5 = new StringBuffer();
+            StringBuilder stringToMD5 = new StringBuilder();
             for (Change change : getChanges()) {
                 stringToMD5.append(change.generateCheckSum()).append(":");
             }
@@ -290,29 +329,29 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public void load(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         this.id = node.getChildValue(null, "id", String.class);
         this.author = node.getChildValue(null, "author", String.class);
-        this.alwaysRun  = node.getChildValue(null, "runAlways", node.getChildValue(null, "alwaysRun", false));
-        this.runOnChange  = node.getChildValue(null, "runOnChange", false);
+        this.alwaysRun = node.getChildValue(null, "runAlways", node.getChildValue(null, "alwaysRun", false));
+        this.runOnChange = node.getChildValue(null, "runOnChange", false);
         this.runWith = node.getChildValue(null, "runWith", String.class);
-        this.contexts = new ContextExpression(node.getChildValue(null, "context", String.class));
-        this.labels = new Labels(StringUtils.trimToNull(node.getChildValue(null, "labels", String.class)));
+        this.contextFilter = new ContextExpression(node.getChildValue(null, "contextFilter", String.class));
+        if (this.contextFilter.isEmpty()) {
+            contextFilter = new ContextExpression(node.getChildValue(null, "context", String.class));
+        }
+        this.labels = new Labels(StringUtil.trimToNull(node.getChildValue(null, "labels", String.class)));
         setDbms(node.getChildValue(null, "dbms", String.class));
-        this.runInTransaction  = node.getChildValue(null, "runInTransaction", true);
+        this.runInTransaction = node.getChildValue(null, "runInTransaction", true);
         this.created = node.getChildValue(null, "created", String.class);
         this.runOrder = node.getChildValue(null, "runOrder", String.class);
         this.ignore = node.getChildValue(null, "ignore", false);
-        this.comments = StringUtils.join(node.getChildren(null, "comment"), "\n", new StringUtils.StringUtilsFormatter() {
-            @Override
-            public String toString(Object obj) {
-                if (((ParsedNode) obj).getValue() == null) {
-                    return "";
-                } else {
-                    return ((ParsedNode) obj).getValue().toString();
-                }
+        this.comments = StringUtil.join(node.getChildren(null, "comment"), "\n", obj -> {
+            if (((ParsedNode) obj).getValue() == null) {
+                return "";
+            } else {
+                return ((ParsedNode) obj).getValue().toString();
             }
         });
-        this.comments = StringUtils.trimToNull(this.comments);
+        this.comments = StringUtil.trimToNull(this.comments);
 
-        String objectQuotingStrategyString = StringUtils.trimToNull(node.getChildValue(null, "objectQuotingStrategy", String.class));
+        String objectQuotingStrategyString = StringUtil.trimToNull(node.getChildValue(null, "objectQuotingStrategy", String.class));
         if (changeLog != null) {
             this.objectQuotingStrategy = changeLog.getObjectQuotingStrategy();
         }
@@ -324,9 +363,17 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             this.objectQuotingStrategy = ObjectQuotingStrategy.LEGACY;
         }
 
-        this.filePath = StringUtils.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
+        this.logicalFilePath = StringUtil.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
+
+        this.filePath = logicalFilePath;
         if (filePath == null) {
-            filePath = changeLog.getFilePath();
+            if (changeLog != null) {
+                filePath = changeLog.getFilePath();
+            }
+        } else {
+            filePath = filePath.replaceAll("\\\\", "/")
+                    .replaceFirst("^/", "");
+
         }
 
         this.setFailOnError(node.getChildValue(null, "failOnError", Boolean.class));
@@ -358,18 +405,22 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
                 break;
             case "modifySql":
-                String dbmsString = StringUtils.trimToNull(child.getChildValue(null, "dbms", String.class));
-                String contextString = StringUtils.trimToNull(child.getChildValue(null, "context", String.class));
-                String labelsString = StringUtils.trimToNull(child.getChildValue(null, "labels", String.class));
+                String dbmsString = StringUtil.trimToNull(child.getChildValue(null, "dbms", String.class));
+                String contextFilterString = StringUtil.trimToNull(child.getChildValue(null, "contextFilter", String.class));
+                if (contextFilterString == null) {
+                    contextFilterString = StringUtil.trimToNull(child.getChildValue(null, "context", String.class));
+                }
+
+                String labelsString = StringUtil.trimToNull(child.getChildValue(null, "labels", String.class));
                 boolean applyToRollback = child.getChildValue(null, "applyToRollback", false);
 
                 Set<String> dbms = new HashSet<>();
                 if (dbmsString != null) {
-                    dbms.addAll(StringUtils.splitAndTrim(dbmsString, ","));
+                    dbms.addAll(StringUtil.splitAndTrim(dbmsString, ","));
                 }
-                ContextExpression context = null;
-                if (contextString != null) {
-                    context = new ContextExpression(contextString);
+                ContextExpression contextFilter = null;
+                if (contextFilterString != null) {
+                    contextFilter = new ContextExpression(contextFilterString);
                 }
 
                 Labels labels = null;
@@ -386,7 +437,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         if (!dbms.isEmpty()) {
                             sqlVisitor.setApplicableDbms(dbms);
                         }
-                        sqlVisitor.setContexts(context);
+                        sqlVisitor.setContextFilter(contextFilter);
                         sqlVisitor.setLabels(labels);
                         sqlVisitor.load(node, resourceAccessor);
 
@@ -398,11 +449,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 break;
             case "preConditions":
                 this.preconditions = new PreconditionContainer();
-                try {
-                    this.preconditions.load(child, resourceAccessor);
-                } catch (ParsedNodeException e) {
-                    e.printStackTrace();
-                }
+                this.preconditions.load(child, resourceAccessor);
                 break;
             case "changes":
                 for (ParsedNode changeNode : child.getChildren()) {
@@ -435,7 +482,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
             }
             if (changeSet == null) {
-                throw new ParsedNodeException("Change set " + new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false) + " does not exist");
+                throw new ParsedNodeException("Changeset " + new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false) + " does not exist");
             }
             for (Change change : changeSet.getChanges()) {
                 rollback.getChanges().add(change);
@@ -448,23 +495,23 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             Change rollbackChange = toChange(childNode, resourceAccessor);
             if (rollbackChange != null) {
                 addRollbackChange(rollbackChange);
-                foundValue =  true;
+                foundValue = true;
             }
         }
 
         Object value = rollbackNode.getValue();
         if (value != null) {
             if (value instanceof String) {
-                String finalValue = StringUtils.trimToNull((String) value);
+                String finalValue = StringUtil.trimToNull((String) value);
                 if (finalValue != null) {
-                    String[] strings = StringUtils.processMutliLineSQL(finalValue, true, true, ";");
+                    String[] strings = StringUtil.processMultiLineSQL(finalValue, true, true, ";");
                     for (String string : strings) {
                         addRollbackChange(new RawSQLChange(string));
                         foundValue = true;
                     }
                 }
             } else {
-                throw new ParsedNodeException("Unexpected object: "+value.getClass().getName()+" '"+value.toString()+"'");
+                throw new ParsedNodeException("Unexpected object: " + value.getClass().getName() + " '" + value.toString() + "'");
             }
         }
         if (!foundValue) {
@@ -473,8 +520,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        Change change = ChangeFactory.getInstance().create(value.getName());
+        Change change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).create(value.getName());
         if (change == null) {
+            if (value.getChildren().size() > 0 && ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(ChangeLogParserConfiguration.ChangelogParseMode.STRICT)) {
+                String message = "";
+                if (this.getChangeLog() != null && this.getChangeLog().getPhysicalFilePath() != null) {
+                    message = "Error parsing " + this.getChangeLog().getPhysicalFilePath() + ": ";
+                }
+                message += "Unknown change type '" + value.getName() + "'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial.";
+                throw new ParsedNodeException(message);
+            }
             return null;
         } else {
             change.load(value, resourceAccessor);
@@ -497,10 +552,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * This method will actually execute each of the changes in the list against the
      * specified database.
      *
-     * @return should change set be marked as ran
+     * @return should changeset be marked as ran
      */
     public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database)
             throws MigrationFailedException {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
@@ -513,7 +570,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         Executor originalExecutor = setupCustomExecutorIfNecessary(database);
         try {
-            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+            Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
             // set object quoting strategy
             database.setObjectQuotingStrategy(objectQuotingStrategy);
 
@@ -522,7 +579,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
 
             executor.comment("Changeset " + toString(false));
-            if (StringUtils.trimToNull(getComments()) != null) {
+            if (StringUtil.trimToNull(getComments()) != null) {
                 String comments = getComments();
                 String[] lines = comments.split("\\n");
                 for (int i = 0; i < lines.length; i++) {
@@ -530,7 +587,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         lines[i] = database.getLineComment() + " " + lines[i];
                     }
                 }
-                executor.comment(StringUtils.join(Arrays.asList(lines), "\n"));
+                executor.comment(StringUtil.join(Arrays.asList(lines), "\n"));
             }
 
             try {
@@ -541,7 +598,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (listener != null) {
                     listener.preconditionFailed(e, preconditions.getOnFail());
                 }
-                StringBuffer message = new StringBuffer();
+                StringBuilder message = new StringBuilder();
                 message.append(StreamUtil.getLineSeparator());
                 for (FailedPrecondition invalid : e.getFailedPreconditions()) {
                     message.append("          ").append(invalid.toString());
@@ -554,12 +611,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     skipChange = true;
                     execType = ExecType.SKIPPED;
 
-                    LogService.getLog(getClass()).info(LogType.LOG, "Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
+                    Scope.getCurrentScope().getLog(getClass()).info("Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
 
-                    log.info(LogType.LOG, "Marking ChangeSet: " + toString() + " ran despite precondition failure due to onFail='MARK_RAN': " + message);
+                    log.info("Marking ChangeSet: " + toString() + " ran despite precondition failure due to onFail='MARK_RAN': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
                     execType = null; //already warned
                 } else {
@@ -570,7 +627,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     listener.preconditionErrored(e, preconditions.getOnError());
                 }
 
-                StringBuffer message = new StringBuffer();
+                StringBuilder message = new StringBuilder();
                 message.append(StreamUtil.getLineSeparator());
                 for (ErrorPrecondition invalid : e.getErrorPreconditions()) {
                     message.append("          ").append(invalid.toString());
@@ -587,7 +644,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
 
-                    log.info(LogType.LOG, "Marking ChangeSet: " + toString() + " ran despite precondition error: " + message);
+                    log.info("Marking ChangeSet: " + toString() + " ran despite precondition error: " + message);
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
                     execType = null; //already logged
                 } else {
@@ -608,7 +665,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                 }
 
-                log.debug(LogType.LOG, "Reading ChangeSet: " + toString());
+                log.fine("Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
                     if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         if (listener != null) {
@@ -620,24 +677,24 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
 
                         database.executeStatements(change, databaseChangeLog, sqlVisitors);
-                        log.info(LogType.LOG, change.getConfirmationMessage());
+                        log.info(change.getConfirmationMessage());
                         if (listener != null) {
                             listener.ran(change, this, changeLog, database);
                         }
                     } else {
-                        log.debug(LogType.LOG, "Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
+                        log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
                     }
                 }
 
                 if (runInTransaction) {
                     database.commit();
                 }
-                log.info(LogType.LOG, "ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime + "ms"));
+                log.info("ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime + "ms"));
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
             } else {
-                log.debug(LogType.LOG, "Skipping ChangeSet: " + toString());
+                log.fine("Skipping ChangeSet: " + toString());
             }
 
         } catch (Exception e) {
@@ -647,12 +704,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 throw new MigrationFailedException(this, e);
             }
             if ((getFailOnError() != null) && !getFailOnError()) {
-                log.info(LogType.LOG, "Change set " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
-                log.debug(LogType.LOG, "Failure Stacktrace", e);
+                log.info("Changeset " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
+                log.fine("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
-                // just log the message, dont log the stacktrace by appending exception. Its logged anyway to stdout
-                log.severe(LogType.LOG, "Change Set " + toString(false) + " failed.  Error: " + e.getMessage());
                 if (e instanceof MigrationFailedException) {
                     throw ((MigrationFailedException) e);
                 } else {
@@ -660,14 +715,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
             }
         } finally {
-            ExecutorService.getInstance().setExecutor("jdbc", database, originalExecutor);
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, originalExecutor);
             // restore auto-commit to false if this ChangeSet was not run in a transaction,
             // but only if the database supports DDL in transactions
             if (!runInTransaction && database.supportsDDLInTransaction()) {
                 try {
                     database.setAutoCommit(false);
                 } catch (DatabaseException e) {
-                    throw new MigrationFailedException(this, "Could not resetInternalState autocommit", e);
+                    Scope.getCurrentScope().getLog(getClass()).warning("Could not resetInternalState autocommit", e);
                 }
             }
         }
@@ -679,15 +734,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     // We do not do anything if we have a LoggingExecutor.
     //
     private Executor setupCustomExecutorIfNecessary(Database database) {
-        Executor originalExecutor = ExecutorService.getInstance().getExecutor("jdbc", database);
+        Executor originalExecutor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         if (getRunWith() == null || originalExecutor instanceof LoggingExecutor) {
             return originalExecutor;
         }
-        Executor customExecutor = ExecutorService.getInstance().getExecutor(getRunWith(), database);
-        ExecutorService.getInstance().setExecutor("jdbc", database, customExecutor);
+        String executorName = ChangeSet.lookupExecutor(getRunWith());
+        Executor customExecutor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(executorName, database);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, customExecutor);
         List<Change> changes = getChanges();
         for (Change change : changes) {
-            if (! (change instanceof AbstractChange)) {
+            if (!(change instanceof AbstractChange)) {
                 continue;
             }
             final ResourceAccessor resourceAccessor = ((AbstractChange) change).getResourceAccessor();
@@ -699,14 +755,39 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return originalExecutor;
     }
 
+    /**
+     * Look for a configuration property that matches liquibase.<executor name>.executor
+     * and if found, return its value as the executor name
+     *
+     * @param executorName The value from the input changeset runWith attribute
+     * @return String                           The mapped value
+     */
+    public static String lookupExecutor(String executorName) {
+        if (StringUtil.isEmpty(executorName)) {
+            return null;
+        }
+        String key = "liquibase." + executorName.toLowerCase() + ".executor";
+        String replacementExecutorName =
+                (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, key).getValue();
+        if (replacementExecutorName != null) {
+            Scope.getCurrentScope().getLog(ChangeSet.class).info("Mapped '" + executorName + "' to executor '" + replacementExecutorName + "'");
+            return replacementExecutorName;
+        } else if (executorName.equalsIgnoreCase("native")) {
+            String message = "Unable to locate an executor for 'runWith=" + executorName + "'.  You must specify a valid executor name.";
+            Scope.getCurrentScope().getLog(ChangeSet.class).warning(message);
+            Scope.getCurrentScope().getUI().sendErrorMessage("WARNING: " + message);
+        }
+        return executorName;
+    }
+
     public void rollback(Database database) throws RollbackFailedException {
-      rollback(database, null);
+        rollback(database, null);
     }
 
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
         Executor originalExecutor = setupCustomExecutorIfNecessary(database);
         try {
-            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+            Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
             executor.comment("Rolling Back ChangeSet: " + toString());
 
             database.setObjectQuotingStrategy(objectQuotingStrategy);
@@ -727,7 +808,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                     ValidationErrors errors = change.validate(database);
                     if (errors.hasErrors()) {
-                        throw new RollbackFailedException("Rollback statement failed validation: "+errors.toString());
+                        throw new RollbackFailedException("Rollback statement failed validation: " + errors.toString());
                     }
                     //
                     SqlStatement[] changeStatements = change.generateStatements(database);
@@ -753,7 +834,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (runInTransaction) {
                 database.commit();
             }
-            log.debug(LogType.LOG, "ChangeSet " + toString() + " has been successfully rolled back.");
+            Scope.getCurrentScope().getLog(getClass()).fine("ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
             try {
                 database.rollback();
@@ -764,12 +845,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         } finally {
             // restore auto-commit to false if this ChangeSet was not run in a transaction,
             // but only if the database supports DDL in transactions
-            ExecutorService.getInstance().setExecutor("jdbc", database, originalExecutor);
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, originalExecutor);
             if (!runInTransaction && database.supportsDDLInTransaction()) {
                 try {
                     database.setAutoCommit(false);
                 } catch (DatabaseException e) {
-                    throw new RollbackFailedException("Could not resetInternalState autocommit", e);
+                    Scope.getCurrentScope().getLog(getClass()).warning("Could not resetInternalState autocommit", e);
                 }
             }
         }
@@ -779,7 +860,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * Returns whether custom rollback steps are specified for this changeSet, or whether auto-generated ones should be used
      */
-    protected boolean hasCustomRollbackChanges() {
+    public boolean hasCustomRollbackChanges() {
         return (rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty();
     }
 
@@ -806,8 +887,27 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return author;
     }
 
+    /**
+     * @deprecated use {@link #getContextFilter()}
+     */
     public ContextExpression getContexts() {
-        return contexts;
+        return getContextFilter();
+    }
+
+    /**
+     * @deprecated use {@link #setContextFilter(ContextExpression)}
+     */
+    public ChangeSet setContexts(ContextExpression contexts) {
+        return setContextFilter(contexts);
+    }
+
+    public ContextExpression getContextFilter() {
+        return contextFilter;
+    }
+
+    public ChangeSet setContextFilter(ContextExpression contextFilter) {
+        this.contextFilter = contextFilter;
+        return this;
     }
 
     public Labels getLabels() {
@@ -832,17 +932,22 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public boolean isInheritableIgnore() {
         DatabaseChangeLog changeLog = getChangeLog();
+        if (changeLog == null) {
+            return false;
+        }
+
         return changeLog.isIncludeIgnore();
     }
-    public Collection<ContextExpression> getInheritableContexts() {
+
+    public Collection<ContextExpression> getInheritableContextFilter() {
         Collection<ContextExpression> expressions = new ArrayList<>();
         DatabaseChangeLog changeLog = getChangeLog();
         while (changeLog != null) {
-            ContextExpression expression = changeLog.getContexts();
+            ContextExpression expression = changeLog.getContextFilter();
             if ((expression != null) && !expression.isEmpty()) {
                 expressions.add(expression);
             }
-            ContextExpression includeExpression = changeLog.getIncludeContexts();
+            ContextExpression includeExpression = changeLog.getIncludeContextFilter();
             if ((includeExpression != null) && !includeExpression.isEmpty()) {
                 expressions.add(includeExpression);
             }
@@ -851,17 +956,76 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return Collections.unmodifiableCollection(expressions);
     }
 
-    public Collection<LabelExpression> getInheritableLabels() {
-        Collection<LabelExpression> expressions = new ArrayList<LabelExpression>();
+    public Collection<Labels> getInheritableLabels() {
+        Collection<Labels> labels = new ArrayList<>();
         DatabaseChangeLog changeLog = getChangeLog();
         while (changeLog != null) {
-            LabelExpression expression = changeLog.getIncludeLabels();
-            if (expression != null && !expression.isEmpty()) {
-                expressions.add(expression);
+            Labels includeLabels = changeLog.getIncludeLabels();
+            if (includeLabels != null && !includeLabels.isEmpty()) {
+                labels.add(includeLabels);
             }
             changeLog = changeLog.getParentChangeLog();
         }
-        return Collections.unmodifiableCollection(expressions);
+        return Collections.unmodifiableCollection(labels);
+    }
+
+    /**
+     * Build and return a string which contains both the changeset and inherited context
+     *
+     * @return String
+     */
+    public String buildFullContext() {
+        StringBuilder contextExpression = new StringBuilder();
+        boolean notFirstContext = false;
+        for (ContextExpression inheritableContext : getInheritableContextFilter()) {
+            appendContext(contextExpression, inheritableContext.toString(), notFirstContext);
+            notFirstContext = true;
+        }
+        ContextExpression changeSetContext = getContexts();
+        if ((changeSetContext != null) && !changeSetContext.isEmpty()) {
+            appendContext(contextExpression, changeSetContext.toString(), notFirstContext);
+        }
+        return StringUtil.trimToNull(contextExpression.toString());
+    }
+
+    /**
+     * Build and return a string which contains both the changeset and inherited labels
+     *
+     * @return String
+     */
+    public String buildFullLabels() {
+        StringBuilder labels = new StringBuilder();
+        boolean notFirstLabel = false;
+        for (Labels inheritableLabel : getInheritableLabels()) {
+            appendLabels(labels, inheritableLabel.toString(), notFirstLabel);
+            notFirstLabel = true;
+        }
+        Labels changeSetLabels = getLabels();
+        if ((changeSetLabels != null) && !changeSetLabels.isEmpty()) {
+            appendLabels(labels, changeSetLabels.toString(), notFirstLabel);
+        }
+        return StringUtil.trimToNull(labels.toString());
+    }
+
+    private void appendLabels(StringBuilder existingLabels, String labelToAppend, boolean notFirstContext) {
+        if (notFirstContext) {
+            existingLabels.append(COMMA);
+        }
+        existingLabels.append(labelToAppend);
+    }
+
+    private void appendContext(StringBuilder contextExpression, String contextToAppend, boolean notFirstContext) {
+        boolean complexExpression = contextToAppend.contains(COMMA) || contextToAppend.contains(WHITESPACE);
+        if (notFirstContext) {
+            contextExpression.append(AND);
+        }
+        if (complexExpression) {
+            contextExpression.append(OPEN_BRACKET);
+        }
+        contextExpression.append(contextToAppend);
+        if (complexExpression) {
+            contextExpression.append(CLOSE_BRACKET);
+        }
     }
 
     public DatabaseChangeLog getChangeLog() {
@@ -902,14 +1066,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public void addRollBackSQL(String sql) {
-        if (StringUtils.trimToNull(sql) == null) {
+        if (StringUtil.trimToNull(sql) == null) {
             if (rollback.getChanges().isEmpty()) {
                 rollback.getChanges().add(new EmptyChange());
             }
             return;
         }
 
-        for (String statment : StringUtils.splitSQL(sql, null)) {
+        for (String statment : StringUtil.splitSQL(sql, null)) {
             rollback.getChanges().add(new RawSQLChange(statment.trim()));
         }
     }
@@ -947,7 +1111,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             messages.add(change.getDescription());
         }
 
-        return StringUtils.limitSize(StringUtils.join(messages, "; "), 255);
+        return StringUtil.limitSize(StringUtil.join(messages, "; "), 255);
     }
 
     public Boolean getFailOnError() {
@@ -982,8 +1146,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         // no need to generate the checksum if any has been set as the valid checksum
         for (CheckSum validCheckSum : validCheckSums) {
             if ("1:any".equalsIgnoreCase(validCheckSum.toString())
-                || "1:all".equalsIgnoreCase(validCheckSum.toString())
-                || "1:*".equalsIgnoreCase(validCheckSum.toString())) {
+                    || "1:all".equalsIgnoreCase(validCheckSum.toString())
+                    || "1:*".equalsIgnoreCase(validCheckSum.toString())) {
                 return true;
             }
         }
@@ -1076,11 +1240,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     @Override
     public Set<String> getSerializableFields() {
         return new LinkedHashSet<>(
-            Arrays.asList(
-                "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
-                "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
-                "objectQuotingStrategy", "created"
-            )
+                Arrays.asList(
+                        "id", "author", "runAlways", "runOnChange", "failOnError", "contextFilter", "labels", "dbms",
+                        "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
+                        "logicalFilePath", "created", "runInTransaction", "runOrder", "ignore"
+                )
         );
     }
 
@@ -1113,9 +1277,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return this.getFailOnError();
         }
 
-        if ("context".equals(field)) {
-            if (!this.getContexts().isEmpty()) {
-                return this.getContexts().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
+        if ("contextFilter".equals(field) || "context".equals(field)) {
+            if (!this.getContextFilter().isEmpty()) {
+                return this.getContextFilter().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
             } else {
                 return null;
             }
@@ -1123,7 +1287,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         if ("labels".equals(field)) {
             if ((this.getLabels() != null) && !this.getLabels().isEmpty()) {
-                return StringUtils.join(this.getLabels().getLabels(), ", ");
+                return StringUtil.join(this.getLabels().getLabels(), ", ");
             } else {
                 return null;
             }
@@ -1131,18 +1295,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         if ("dbms".equals(field)) {
             if ((this.getDbmsSet() != null) && !this.getDbmsSet().isEmpty()) {
-                StringBuffer dbmsString = new StringBuffer();
-                for (String dbms : this.getDbmsSet()) {
-                    dbmsString.append(dbms).append(",");
-                }
-                return dbmsString.toString().replaceFirst(",$", "");
+                return StringUtil.join(getDbmsSet(), ",");
             } else {
                 return null;
             }
         }
 
         if ("comment".equals(field)) {
-            return StringUtils.trimToNull(this.getComments());
+            return StringUtil.trimToNull(this.getComments());
         }
 
         if ("objectQuotingStrategy".equals(field)) {
@@ -1168,6 +1328,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return getCreated();
         }
 
+        if ("logicalFilePath".equals(field)) {
+            return getLogicalFilePath();
+        }
+
         if ("rollback".equals(field)) {
             if ((rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty()) {
                 return rollback;
@@ -1176,13 +1340,33 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
 
-        throw new UnexpectedLiquibaseException("Unexpected field request on changeSet: "+field);
+        if ("runInTransaction".equals(field)) {
+            if (!this.isRunInTransaction()) {
+                return false;
+            } else {
+                return null;
+            }
+        }
+
+        if ("runOrder".equals(field)) {
+            return getRunOrder();
+        }
+
+        if ("ignore".equals(field)) {
+            if (this.isIgnore()) {
+                return true;
+            } else {
+                return null;
+            }
+        }
+
+        throw new UnexpectedLiquibaseException("Unexpected field request on changeSet: " + field);
     }
 
     @Override
     public SerializationType getSerializableFieldType(String field) {
         if ("comment".equals(field) || "preconditions".equals(field) || "changes".equals(field) || "rollback".equals
-            (field)) {
+                (field)) {
             return SerializationType.NESTED_OBJECT;
         } else {
             return SerializationType.NAMED_FIELD;
@@ -1225,6 +1409,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     /**
      * Gets storedCheckSum
+     *
      * @return storedCheckSum if it was executed otherwise null
      */
     public CheckSum getStoredCheckSum() {
@@ -1233,6 +1418,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     /**
      * Sets storedCheckSum in ValidatingVisitor in case when changeset was executed
+     *
      * @param storedCheckSum
      */
     public void setStoredCheckSum(CheckSum storedCheckSum) {

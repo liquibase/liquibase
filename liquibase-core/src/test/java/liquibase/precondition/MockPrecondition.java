@@ -11,9 +11,11 @@ import liquibase.exception.Warnings;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.LiquibaseService;
 
 import java.util.Set;
 
+@LiquibaseService(skip = true)
 public class MockPrecondition implements Precondition {
     @Override
     public String getName() {

@@ -5,8 +5,7 @@ import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
@@ -16,16 +15,32 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializable.SerializationType;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
@@ -33,6 +48,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     private Document currentChangeLogFileDOM;
 
     private static final String XML_VERSION = "1.1";
+    private final LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
 
     public XMLChangeLogSerializer() {
         try {
@@ -63,12 +79,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     @Override
     public String serialize(LiquibaseSerializable object, boolean pretty) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         int indent = -1;
         if (pretty) {
             indent = 0;
         }
-        nodeToStringBuffer(createNode(object), buffer, indent);
+        nodeToStringBuilder(createNode(object), buffer, indent);
         return buffer.toString();
     }
 
@@ -82,7 +98,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-        documentBuilder.setEntityResolver(new LiquibaseEntityResolver(this));
+        documentBuilder.setEntityResolver(resolver);
 
         Document doc = documentBuilder.newDocument();
         doc.setXmlVersion(XML_VERSION);
@@ -116,14 +132,18 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
 
 
-        String schemaLocationAttribute = "";
+        StringBuilder schemaLocationAttribute = new StringBuilder();
         for (Map.Entry<String, String> entry : urlByNamespace.entrySet()) {
             if (!"".equals(entry.getValue())) {
-                schemaLocationAttribute += entry.getKey() + " " + entry.getValue() + " ";
+                schemaLocationAttribute
+                    .append(entry.getKey())
+                    .append(" ")
+                    .append(entry.getValue())
+                    .append(" ");
             }
         }
 
-        changeLogElement.setAttribute("xsi:schemaLocation", schemaLocationAttribute.trim());
+        changeLogElement.setAttribute("xsi:schemaLocation", schemaLocationAttribute.toString().trim());
 
         doc.appendChild(changeLogElement);
         setCurrentChangeLogFileDOM(doc);
@@ -137,27 +157,20 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
-        FileInputStream in = new FileInputStream(changeLogFile);
         String existingChangeLog;
-        try {
-            existingChangeLog = StreamUtil.getStreamContents(in);
-        } finally {
-            in.close();
+        try (FileInputStream in = new FileInputStream(changeLogFile)) {
+            existingChangeLog = StreamUtil.readStreamAsString(in);
         }
 
-        FileOutputStream out = new FileOutputStream(changeLogFile);
-
-        try {
+        try (FileOutputStream out = new FileOutputStream(changeLogFile)) {
             if (!existingChangeLog.contains("</databaseChangeLog>")) {
                 write(Arrays.asList(changeSet), out);
             } else {
                 existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
 
-                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())), out);
+                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())), out);
             }
             out.flush();
-        } finally {
-            out.close();
         }
     }
 
@@ -352,7 +365,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         if (columnConfig.getValueSequenceCurrent() != null) {
             element.setAttribute("valueSequenceNext", columnConfig.getValueSequenceCurrent().toString());
         }
-        if (StringUtils.trimToNull(columnConfig.getRemarks()) != null) {
+        if (StringUtil.trimToNull(columnConfig.getRemarks()) != null) {
             element.setAttribute("remarks", columnConfig.getRemarks());
         }
 
@@ -376,7 +389,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 constraintsElement.setAttribute("referencedTableName", constraints.getReferencedTableName());
             }
             if (constraints.getReferencedColumnNames() != null) {
-                constraintsElement.setAttribute("referencedTableName", constraints.getReferencedColumnNames());
+                constraintsElement.setAttribute("referencedColumnNames", constraints.getReferencedColumnNames());
             }
             if (constraints.isDeferrable() != null) {
                 constraintsElement.setAttribute("deferrable", constraints.isDeferrable().toString());
@@ -408,17 +421,23 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             if (constraints.isUnique() != null) {
                 constraintsElement.setAttribute("unique", constraints.isUnique().toString());
             }
-
             if (constraints.getUniqueConstraintName() != null) {
                 constraintsElement.setAttribute("uniqueConstraintName", constraints.getUniqueConstraintName());
             }
-
             if (constraints.getPrimaryKeyName() != null) {
                 constraintsElement.setAttribute("primaryKeyName", constraints.getPrimaryKeyName());
             }
-
             if (constraints.getPrimaryKeyTablespace() != null) {
                 constraintsElement.setAttribute("primaryKeyTablespace", constraints.getPrimaryKeyTablespace());
+            }
+            if (constraints.getNotNullConstraintName() != null) {
+                constraintsElement.setAttribute("notNullConstraintName", constraints.getNotNullConstraintName());
+            }
+            if (constraints.getReferencedTableCatalogName() != null) {
+                constraintsElement.setAttribute("referencedTableCatalogName", constraints.getReferencedTableCatalogName());
+            }
+            if (constraints.getReferencedTableSchemaName() != null) {
+                constraintsElement.setAttribute("referencedTableSchemaName", constraints.getReferencedTableSchemaName());
             }
             element.appendChild(constraintsElement);
         }
@@ -431,15 +450,15 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
      * change
      *
      * @param node the {@link Element} associated to this change
-     * @param buffer a {@link StringBuffer} object used to hold the {@link String}
+     * @param buffer a {@link StringBuilder} object used to hold the {@link String}
      *               representation of the change
      */
-    private void nodeToStringBuffer(Node node, StringBuffer buffer, int indent) {
+    private void nodeToStringBuilder(Node node, StringBuilder buffer, int indent) {
         if (indent >= 0) {
             if (indent > 0) {
                 buffer.append("\n");
             }
-            buffer.append(StringUtils.repeat(" ", indent));
+            buffer.append(StringUtil.repeat(" ", indent));
         }
         buffer.append("<").append(node.getNodeName());
         SortedMap<String, String> attributeMap = new TreeMap<>();
@@ -453,7 +472,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             String value = (String) entry.getValue();
             if (value != null) {
                 if ((indent >= 0) && !firstAttribute && (attributeMap.size() > 2)) {
-                    buffer.append("\n").append(StringUtils.repeat(" ", indent)).append("        ");
+                    buffer.append("\n").append(StringUtil.repeat(" ", indent)).append("        ");
                 } else {
                     buffer.append(" ");
                 }
@@ -461,7 +480,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 firstAttribute = false;
             }
         }
-        String textContent = StringUtils.trimToEmpty(XMLUtil.getTextContent(node));
+        String textContent = StringUtil.trimToEmpty(XMLUtil.getTextContent(node));
         textContent = escapeXml(textContent);
         buffer.append(">").append(textContent);
 
@@ -474,13 +493,13 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 if (newIndent >= 0) {
                     newIndent += 4;
                 }
-                nodeToStringBuffer(childNode, buffer, newIndent);
+                nodeToStringBuilder(childNode, buffer, newIndent);
                 sawChildren = true;
             }
         }
         if (indent >= 0) {
             if (sawChildren) {
-                buffer.append("\n").append(StringUtils.repeat(" ", indent));
+                buffer.append("\n").append(StringUtil.repeat(" ", indent));
             }
         }
 

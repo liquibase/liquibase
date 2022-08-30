@@ -1,19 +1,28 @@
 package liquibase;
 
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
+import liquibase.logging.core.JavaLogService;
+import liquibase.logging.core.LogServiceFactory;
+import liquibase.osgi.Activator;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.ServiceLocator;
+import liquibase.servicelocator.StandardServiceLocator;
+import liquibase.ui.ConsoleUIService;
+import liquibase.ui.UIService;
 import liquibase.util.SmartMap;
+import liquibase.util.StringUtil;
 
 import java.lang.reflect.Constructor;
+import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -29,6 +38,8 @@ public class Scope {
      * Enumeration containing standard attributes. Normally use methods like convenience {@link #getResourceAccessor()} or {@link #getDatabase()}
      */
     public enum Attr {
+        logService,
+        ui,
         resourceAccessor,
         classLoader,
         database,
@@ -37,29 +48,94 @@ public class Scope {
         lockService,
         executeMode,
         lineSeparator,
+        serviceLocator,
+
+        /**
+         * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
+         */
+        fileEncoding,
+        databaseChangeLog,
+        changeSet,
+        osgiPlatform
     }
 
-    private static ScopeManager scopeManager = new SingletonScopeFactory();
+    private static ScopeManager scopeManager;
 
     private Scope parent;
     private SmartMap values = new SmartMap();
+    private String scopeId;
 
     private LiquibaseListener listener;
 
     public static Scope getCurrentScope() {
+        if (scopeManager == null) {
+            scopeManager = new SingletonScopeManager();
+        }
+        if (scopeManager.getCurrentScope() == null) {
+            Scope rootScope = new Scope();
+            scopeManager.setCurrentScope(rootScope);
+
+            rootScope.values.put(Attr.logService.name(), new JavaLogService());
+            rootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
+            rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
+
+            rootScope.values.put(Attr.ui.name(), new ConsoleUIService());
+            rootScope.getSingleton(LiquibaseConfiguration.class).init(rootScope);
+
+            LogService overrideLogService = rootScope.getSingleton(LogServiceFactory.class).getDefaultLogService();
+            if (overrideLogService == null) {
+                throw new UnexpectedLiquibaseException("Cannot find default log service");
+            }
+            rootScope.values.put(Attr.logService.name(), overrideLogService);
+
+            //check for higher-priority serviceLocator
+            ServiceLocator serviceLocator = rootScope.getServiceLocator();
+            for (ServiceLocator possibleLocator : serviceLocator.findInstances(ServiceLocator.class)) {
+                if (possibleLocator.getPriority() > serviceLocator.getPriority()) {
+                    serviceLocator = possibleLocator;
+                }
+            }
+
+            rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
+            rootScope.values.put(Attr.osgiPlatform.name(), Activator.OSGIContainerChecker.isOsgiPlatform());
+        }
         return scopeManager.getCurrentScope();
     }
 
+    public static void setScopeManager(ScopeManager scopeManager) {
+        Scope currentScope = getCurrentScope();
+        if (currentScope == null) {
+            currentScope = new Scope();
+        }
+
+        try {
+            currentScope = scopeManager.init(currentScope);
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(Scope.class).warning(e.getMessage(), e);
+        }
+        scopeManager.setCurrentScope(currentScope);
+
+        Scope.scopeManager = scopeManager;
+
+
+    }
 
     /**
      * Creates a new "root" scope.
-     * Defaults resourceAccessor to {@link ClassLoaderResourceAccessor}
+     * Defaults resourceAccessor to {@link ClassLoaderResourceAccessor}.
+     * Defaults serviceLocator to {@link StandardServiceLocator}
      */
-    Scope() {
-        values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
+    private Scope() {
     }
 
+    /**
+     * @param parent      The new Scopes parent in the hierarchy of Scopes, not null.
+     * @param scopeValues The values for the new Scope.
+     */
     protected Scope(Scope parent, Map<String, Object> scopeValues) {
+        if (parent == null) {
+            throw new UnexpectedLiquibaseException("Cannot pass a null parent to a new Scope. Use Scope.child to correctly create a nested scope");
+        }
         this.parent = parent;
         if (scopeValues != null) {
             for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
@@ -78,8 +154,15 @@ public class Scope {
     /**
      * Creates a new scope that is a child of this scope.
      */
-    public static void child(Map<String, Object> scopeValues, ScopedRunner runner) {
+    public static void child(Map<String, Object> scopeValues, ScopedRunner runner) throws Exception {
         child((LiquibaseListener) null, scopeValues, runner);
+    }
+
+    /**
+     * Creates a new scope that is a child of this scope.
+     */
+    public static <ReturnType> ReturnType child(Map<String, Object> scopeValues, ScopedRunnerWithReturn<ReturnType> runner) throws Exception {
+        return child(null, scopeValues, runner);
     }
 
     /**
@@ -88,33 +171,79 @@ public class Scope {
      *
      * @see #getListeners(Class)
      */
-    public static void child(LiquibaseListener listener, ScopedRunner runner) {
+    public static void child(LiquibaseListener listener, ScopedRunner runner) throws Exception {
         child(listener, null, runner);
     }
 
-    public static void child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunner runner) {
+    public static void child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunner runner) throws Exception {
+        child(listener, scopeValues, () -> {
+            runner.run();
+            return null;
+        });
+    }
+
+    public static <T> T child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunnerWithReturn<T> runner) throws Exception {
+        String scopeId = enter(listener, scopeValues);
+
+        try {
+            return runner.run();
+        } finally {
+            exit(scopeId);
+        }
+    }
+
+    /**
+     * Convenience version of {@link #enter(LiquibaseListener, Map)} with no {@link LiquibaseListener}
+     */
+    public static String enter(Map<String, Object> scopeValues) throws Exception {
+        return enter(null, scopeValues);
+    }
+
+    /**
+     * Creates a new scope without passing a ScopedRunner.
+     * This mainly exists for tests where you have a setup/cleanup method pattern.
+     * The recommended way to create Scopes is the "child" methods.
+     * When done with the scope, call {@link #exit(String)}
+     *
+     * @return Returns the scopeId to pass to to {@link #exit(String)}
+     */
+    public static String enter(LiquibaseListener listener, Map<String, Object> scopeValues) throws Exception {
+        String scopeId = StringUtil.randomIdentifer(10).toLowerCase();
+
         Scope originalScope = getCurrentScope();
         Scope child = new Scope(originalScope, scopeValues);
         child.listener = listener;
-        try {
-            scopeManager.setCurrentScope(child);
-            runner.run();
-        } finally {
-            scopeManager.setCurrentScope(originalScope);
+        child.scopeId = scopeId;
+        scopeManager.setCurrentScope(child);
+
+        return scopeId;
+    }
+
+    /**
+     * Exits the scope started with {@link #enter(LiquibaseListener, Map)}
+     *
+     * @param scopeId The id of the scope to exit. Throws an exception if the name does not match the current scope.
+     */
+    public static void exit(String scopeId) throws Exception {
+        Scope currentScope = getCurrentScope();
+        if (!currentScope.scopeId.equals(scopeId)) {
+            throw new RuntimeException("Cannot end scope " + scopeId + " when currently at scope " + currentScope.scopeId);
         }
+
+        scopeManager.setCurrentScope(currentScope.getParent());
     }
 
     /**
      * Creates a new scope that is a child of this scope.
      */
-    public void child(String newValueKey, Object newValue, ScopedRunner runner) {
+    public static void child(String newValueKey, Object newValue, ScopedRunner runner) throws Exception {
         Map<String, Object> scopeValues = new HashMap<String, Object>();
         scopeValues.put(newValueKey, newValue);
 
         child(scopeValues, runner);
     }
 
-    public void child(Enum newValueKey, Object newValue, ScopedRunner runner) {
+    public static void child(Enum newValueKey, Object newValue, ScopedRunner runner) throws Exception {
         child(newValueKey.name(), newValue, runner);
     }
 
@@ -205,12 +334,20 @@ public class Scope {
         return singleton;
     }
 
+    public Logger getLog(Class clazz) {
+        return get(Attr.logService, LogService.class).getLog(clazz);
+    }
+
+    public UIService getUI() {
+        return get(Attr.ui, UIService.class);
+    }
+
     public Database getDatabase() {
         return get(Attr.database, Database.class);
     }
 
     public ClassLoader getClassLoader() {
-        return get(Attr.classLoader, ClassLoader.class);
+        return get(Attr.classLoader, Thread.currentThread().getContextClassLoader());
     }
 
     public ClassLoader getClassLoader(boolean fallbackToContextClassLoader) {
@@ -221,6 +358,10 @@ public class Scope {
         return classLoader;
     }
 
+    public ServiceLocator getServiceLocator() {
+        return get(Attr.serviceLocator, ServiceLocator.class);
+    }
+
     public ResourceAccessor getResourceAccessor() {
         return get(Attr.resourceAccessor, ResourceAccessor.class);
     }
@@ -229,6 +370,12 @@ public class Scope {
         return get(Attr.lineSeparator, System.lineSeparator());
     }
 
+    /**
+     * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
+     */
+    public Charset getFileEncoding() {
+        return get(Attr.fileEncoding, Charset.defaultCharset());
+    }
 
     /**
      * Returns {@link LiquibaseListener}s defined in this scope and/or all its parents that are of the given type.
@@ -270,11 +417,11 @@ public class Scope {
         return "scope(database=" + databaseName + ")";
     }
 
-    public interface ScopedRunner {
-        void run();
+    public interface ScopedRunner<T> {
+        void run() throws Exception;
     }
 
-    public Logger getLog(Class clazz) {
-        return LogService.getLog(clazz);
+    public interface ScopedRunnerWithReturn<T> {
+        T run() throws Exception;
     }
 }

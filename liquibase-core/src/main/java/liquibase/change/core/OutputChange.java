@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.Scope;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
@@ -7,13 +8,11 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 @DatabaseChange(name="output", description = "Logs a message and continues execution.", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "3.3")
 public class OutputChange extends AbstractChange {
@@ -34,7 +33,7 @@ public class OutputChange extends AbstractChange {
     }
 
     public void setMessage(String message) {
-        this.message = StringUtils.trimToNull(message);
+        this.message = StringUtil.trimToNull(message);
     }
 
     @DatabaseChangeProperty(description = "Target for message. Possible values: STDOUT, STDERR, FATAL, WARN, INFO, DEBUG. Default value: STDERR", exampleValue = "STDERR")
@@ -46,7 +45,7 @@ public class OutputChange extends AbstractChange {
     }
 
     public void setTarget(String target) {
-        this.target = StringUtils.trimToNull(target);
+        this.target = StringUtil.trimToNull(target);
     }
 
 
@@ -61,14 +60,14 @@ public class OutputChange extends AbstractChange {
                 } else if ("STDERR".equalsIgnoreCase(target)) {
                     System.err.println(getMessage());
                 } else if ("DEBUG".equalsIgnoreCase(target)) {
-                    LogService.getLog(getClass()).debug(LogType.LOG, getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).fine(getMessage());
                 } else if ("INFO".equalsIgnoreCase(target)) {
-                    LogService.getLog(getClass()).info(LogType.LOG, getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).info(getMessage());
                 } else if ("WARN".equalsIgnoreCase(target) || "WARNING".equalsIgnoreCase(target)) {
-                    LogService.getLog(getClass()).warning(LogType.LOG, getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).warning(getMessage());
                 } else if ("SEVERE".equalsIgnoreCase(target) || "FATAL".equalsIgnoreCase(target) || "ERROR"
                     .equalsIgnoreCase(target)) {
-                    LogService.getLog(getClass()).severe(LogType.LOG, getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).severe(getMessage());
                 } else {
                     throw new UnexpectedLiquibaseException("Unknown target: "+target);
                 }

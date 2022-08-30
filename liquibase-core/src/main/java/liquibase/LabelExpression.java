@@ -1,7 +1,7 @@
 package liquibase;
 
 import liquibase.util.ExpressionMatcher;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -40,12 +40,12 @@ public class LabelExpression {
     }
 
     private void parseLabelString(String labels) {
-        labels = StringUtils.trimToNull(labels);
+        labels = StringUtil.trimToNull(labels);
 
         if (labels == null) {
             return;
         }
-        for (String label : StringUtils.splitAndTrim(labels, ",")) {
+        for (String label : StringUtil.splitAndTrim(labels, ",")) {
             this.labels.add(label.toLowerCase());
         }
 
@@ -64,7 +64,7 @@ public class LabelExpression {
         if (originalString != null) {
             return originalString;
         }
-        return "(" + StringUtils.join(new TreeSet<>(this.labels), "), (") + ")";
+        return "(" + StringUtil.join(new TreeSet<>(this.labels), "), (") + ")";
     }
 
     /**
@@ -90,22 +90,20 @@ public class LabelExpression {
      *
      * Return true if any of the LabelExpression objects match the runtime
      *
-     * @param   expressions    Expressions to match against
-     * @param   labels         Runtime labels
+     * @param   changesetLabels    Expressions to match against
+     * @param   labelExpression         Runtime labels
      * @return  boolean        True if match
      *
      */
-    public static boolean matchesAll(Collection<LabelExpression> expressions, LabelExpression labels) {
-        if (expressions == null || expressions.isEmpty()) {
+    public static boolean matchesAll(Collection<Labels> changesetLabels, LabelExpression labelExpression) {
+        if (changesetLabels == null || changesetLabels.isEmpty()) {
             return true;
         }
-        if (labels == null || labels.isEmpty()) {
+        if (labelExpression == null || labelExpression.isEmpty()) {
             return true;
         }
-        Set<String> labelStrings = labels.getLabels();
-        Labels runtimeLabels = new Labels(labelStrings);
-        for (LabelExpression expression : expressions) {
-            if (!expression.matches(runtimeLabels)) {
+        for (Labels changesetLabel : changesetLabels) {
+            if (!labelExpression.matches(changesetLabel)) {
                 return false;
             }
         }

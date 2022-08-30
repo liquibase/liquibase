@@ -11,8 +11,8 @@ import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.BooleanUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.BooleanUtil;
+import liquibase.util.StringUtil;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -76,11 +76,11 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected Table readTable(CachedRow tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
         String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
-        String rawSchemaName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
-        String rawCatalogName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
-        String remarks = StringUtils.trimToNull(tableMetadataResultSet.getString("REMARKS"));
-        String tablespace = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLESPACE_NAME"));
-        String defaultTablespaceString = StringUtils.trimToNull(tableMetadataResultSet.getString("DEFAULT_TABLESPACE"));
+        String rawSchemaName = StringUtil.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
+        String rawCatalogName = StringUtil.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
+        String remarks = StringUtil.trimToNull(tableMetadataResultSet.getString("REMARKS"));
+        String tablespace = StringUtil.trimToNull(tableMetadataResultSet.getString("TABLESPACE_NAME"));
+        String defaultTablespaceString = StringUtil.trimToNull(tableMetadataResultSet.getString("DEFAULT_TABLESPACE"));
 
         if (remarks != null) {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
@@ -89,7 +89,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         Table table = new Table().setName(cleanNameFromDatabase(rawTableName, database));
         table.setRemarks(remarks);
         table.setTablespace(tablespace);
-        table.setDefaultTablespace(BooleanUtils.isTrue(Boolean.parseBoolean(defaultTablespaceString)));
+        table.setDefaultTablespace(BooleanUtil.isTrue(Boolean.parseBoolean(defaultTablespaceString)));
 
         CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));

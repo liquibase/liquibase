@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <preConditions>
             <dbms type="derby"/>
             <runningAs username="${loginUser}"/>
@@ -31,7 +31,7 @@
             <column name="username" type="varchar(8)"/>
         </addColumn>
     </changeSet>
-    <changeSet id="5" author="nvoxland" context="test">
+    <changeSet id="5" author="nvoxland" contextFilter="test">
         <insert tableName="person">
             <column name="firstname" value="John"/>
             <column name="lastname" value="Doe"/>
@@ -58,7 +58,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="7" author="bjohnson" context="test">
+    <changeSet id="7" author="bjohnson" contextFilter="test">
         <insert tableName="employee">
             <column name="name" value="ACME Corp"/>
         </insert>
@@ -266,10 +266,18 @@
         </customChange>
     </changeSet>
     <changeSet id="57" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>
+                <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="tableName" value="person"/>
+            <param name="columnName" value="employer_id"/>
+            <param name="newValue" value="3"/>
+        </customChange>
+
     </changeSet>
     <changeSet id="58" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
+                <customChange class="liquibase.change.custom.ExampleCustomTaskChange">
+            <param name="helloTo" value="world"/>
+        </customChange>
+
     </changeSet>
 
     <changeSet id="60" author="nvoxland">

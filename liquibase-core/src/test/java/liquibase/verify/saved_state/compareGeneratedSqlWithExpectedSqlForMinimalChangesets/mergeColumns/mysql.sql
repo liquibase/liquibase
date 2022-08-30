@@ -5,6 +5,6 @@
 -- Change Parameter: finalColumnType=varchar(255)
 -- Change Parameter: tableName=person
 ALTER TABLE person ADD full_name VARCHAR(255) NULL;
-UPDATE person SET full_name = CONCAT_WS(first_name, 'null', last_name);
+UPDATE person SET full_name = CONCAT_WS('null', first_name, last_name);
 ALTER TABLE person DROP COLUMN first_name;
 ALTER TABLE person DROP COLUMN last_name;

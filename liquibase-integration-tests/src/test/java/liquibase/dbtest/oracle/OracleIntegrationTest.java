@@ -1,28 +1,20 @@
 package liquibase.dbtest.oracle;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.Logger;
 import liquibase.sql.visitor.AbstractSqlVisitor;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.core.DropTableStatement;
 import org.junit.Test;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -35,29 +27,18 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     String indexOnSchemaChangeLog;
     String viewOnSchemaChangeLog;
     String customExecutorChangeLog;
-    Logger logger = LogService.getLog(OracleIntegrationTest.class);
+    String hubTestChangelog;
 
     public OracleIntegrationTest() throws Exception {
         super("oracle", DatabaseFactory.getInstance().getDatabase("oracle"));
          indexOnSchemaChangeLog = "changelogs/oracle/complete/indexOnSchema.xml";
          viewOnSchemaChangeLog = "changelogs/oracle/complete/viewOnSchema.xml";
          customExecutorChangeLog = "changelogs/oracle/complete/sqlplusExecutor.xml";
+         hubTestChangelog = "changelogs/oracle/complete/HubTestChangelog.xml";
         // Respect a user-defined location for sqlnet.ora, tnsnames.ora etc. stored in the environment
         // variable TNS_ADMIN. This allowes the use of TNSNAMES.
         if (System.getenv("TNS_ADMIN") != null)
             System.setProperty("oracle.net.tns_admin",System.getenv("TNS_ADMIN"));
-    }
-
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        // Seems unlikely to ever be provided by Travis, as it's not free
-        return false;
-    }
-
-    @Override
-    @Test
-    public void testRunChangeLog() throws Exception {
-        super.testRunChangeLog();    //To change body of overridden methods use File | Settings | File Templates.
     }
 
     @Test
@@ -87,8 +68,8 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     private class TestSqlVisitor extends AbstractSqlVisitor {
         @Override
         public String modifySql(String sql, Database database) {
-            logger.info("In the TestSqlVisitor.modifySql method");
-            logger.info(sql);
+            Scope.getCurrentScope().getLog(getClass()).info("In the TestSqlVisitor.modifySql method");
+            Scope.getCurrentScope().getLog(getClass()).info(sql);
             assertTrue(sql.startsWith("CREATE TABLE primary_table_numero_uno (name CHAR(20));"));
             assertTrue(sql.endsWith("CREATE TABLE primary_table_numero_cinco(name CHAR(20));"));
             return null;
@@ -135,6 +116,20 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
 
 
+    }
+    @Test
+    public void testHubChangelog() throws Exception {
+        assumeNotNull(this.getDatabase());
+
+        Liquibase liquibase = createLiquibase(this.hubTestChangelog);
+        clearDatabase();
+
+        try {
+            liquibase.update(this.contexts);
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
     }
 
     @Test

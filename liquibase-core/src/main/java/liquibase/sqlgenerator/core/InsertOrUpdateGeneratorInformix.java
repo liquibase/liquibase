@@ -90,7 +90,7 @@ public class InsertOrUpdateGeneratorInformix extends InsertOrUpdateGenerator {
 
       for (String columnKey : columnValues.keySet()) {
         // Do not include Primary Key fields within the update
-        if (!hashPkFields.contains(columnKey)) {
+        if (!hashPkFields.contains(columnKey) && insertOrUpdateStatement.getAllowColumnUpdate(columnKey)) {
           sql.append(DEST_ALIAS).append(".").append(columnKey).append(" = ");
           sql.append(SOURCE_ALIAS).append(".").append(columnKey);
           sql.append(", ");

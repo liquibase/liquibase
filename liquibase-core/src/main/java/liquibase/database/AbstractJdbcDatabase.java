@@ -1,6 +1,25 @@
 package liquibase.database;
 
+import static liquibase.util.StringUtil.join;
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigInteger;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -8,9 +27,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.StandardChangeLogHistoryService;
-import liquibase.configuration.ConfigurationProperty;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SQLiteDatabase;
@@ -31,8 +48,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -58,26 +73,9 @@ import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.structure.core.View;
 import liquibase.util.ISODateFormat;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
 import liquibase.util.NowAndTodayUtil;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtil;
 
 
 /**
@@ -87,10 +85,19 @@ import java.util.regex.Pattern;
  */
 public abstract class AbstractJdbcDatabase implements Database {
 
-    private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
     private static final int FETCH_SIZE = 1000;
     private static final int DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS = 9;
-    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static final Pattern STARTS_WITH_NUMBER_PATTERN = Pattern.compile("^[0-9].*");
+    private static final Pattern NON_WORD_PATTERN = Pattern.compile(".*\\W.*");
+    private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern DATE_ONLY_PATTERN = Pattern.compile("^\\d{4}\\-\\d{2}\\-\\d{2}$");
+    private static final Pattern DATE_TIME_PATTERN = Pattern.compile("^\\d{4}\\-\\d{2}\\-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?$");
+    private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("^\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$");
+    private static final Pattern TIME_PATTERN = Pattern.compile("^\\d{2}:\\d{2}:\\d{2}$");
+    private static final Pattern NAME_WITH_DESC_PATTERN = Pattern.compile("(?i).*\\s+DESC");
+    private static final Pattern NAME_WITH_ASC_PATTERN = Pattern.compile("(?i).*\\s+ASC");
+
     private final Set<String> reservedWords = new HashSet<>();
     protected String defaultCatalogName;
     protected String defaultSchemaName;
@@ -153,24 +160,24 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void setConnection(final DatabaseConnection conn) {
-        LogService.getLog(getClass()).debug(LogType.LOG, "Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
+        Scope.getCurrentScope().getLog(getClass()).fine("Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
         this.connection = conn;
         try {
             boolean autoCommit = conn.getAutoCommit();
             if (autoCommit == getAutoCommitMode()) {
                 // Don't adjust the auto-commit mode if it's already what the database wants it to be.
-                LogService.getLog(getClass()).debug(LogType.LOG, "Not adjusting the auto commit mode; it is already " + autoCommit);
+                Scope.getCurrentScope().getLog(getClass()).fine("Not adjusting the auto commit mode; it is already " + autoCommit);
             } else {
                 // Store the previous auto-commit mode, because the connection needs to be restored to it when this
                 // AbstractDatabase type is closed. This is important for systems which use connection pools.
                 previousAutoCommit = autoCommit;
 
-                LogService.getLog(getClass()).debug(LogType.LOG, "Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
+                Scope.getCurrentScope().getLog(getClass()).fine("Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
                 connection.setAutoCommit(getAutoCommitMode());
 
             }
         } catch (DatabaseException e) {
-            LogService.getLog(getClass()).warning(LogType.LOG, "Cannot set auto commit to " + getAutoCommitMode() + " on connection");
+            Scope.getCurrentScope().getLog(getClass()).warning("Cannot set auto commit to " + getAutoCommitMode() + " on connection");
         }
 
         this.connection.attached(this);
@@ -263,7 +270,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 try {
                     defaultCatalogName = getConnectionCatalogName();
                 } catch (DatabaseException e) {
-                    LogService.getLog(getClass()).info(LogType.LOG, "Error getting default catalog", e);
+                    Scope.getCurrentScope().getLog(getClass()).info("Error getting default catalog", e);
                 }
             }
         }
@@ -298,14 +305,27 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        if ((quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
-                ( objectName == null) || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
+        if (isCatalogOrSchemaType(objectType) && preserveCaseIfRequested() == CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE) {
+            return objectName;
+        } else if ((getObjectQuotingStrategy() == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
+                (objectName == null) || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
             return objectName;
         } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
             return objectName.toUpperCase(Locale.US);
         } else {
             return objectName.toLowerCase(Locale.US);
         }
+    }
+
+    private boolean isCatalogOrSchemaType(Class<? extends DatabaseObject> objectType) {
+        return objectType.equals(Catalog.class) || objectType.equals(Schema.class);
+    }
+
+    private CatalogAndSchema.CatalogAndSchemaCase preserveCaseIfRequested() {
+        if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
+            return CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE;
+        }
+        return getSchemaAndCatalogCase();
     }
 
     @Override
@@ -322,6 +342,9 @@ public abstract class AbstractJdbcDatabase implements Database {
 
         if ((defaultSchemaName == null) && (connection != null)) {
             defaultSchemaName = getConnectionSchemaName();
+            if (defaultSchemaName != null) {
+                Scope.getCurrentScope().getLog(getClass()).info("Set default schema name to " + defaultSchemaName);
+            }
         }
 
         return defaultSchemaName;
@@ -344,6 +367,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Overwrite this method to get the default schema name for the connection.
      * If you only need to change the statement that obtains the current schema then override
+     *
      * @see AbstractJdbcDatabase#getConnectionSchemaNameCallStatement()
      */
     protected String getConnectionSchemaName() {
@@ -353,13 +377,16 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (connection instanceof OfflineConnection) {
             return ((OfflineConnection) connection).getSchema();
         }
+        if (!(connection instanceof JdbcConnection)) {
+            return defaultSchemaName;
+        }
 
         try {
             SqlStatement currentSchemaStatement = getConnectionSchemaNameCallStatement();
-            return ExecutorService.getInstance().getExecutor("jdbc", this).
+            return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).
                     queryForObject(currentSchemaStatement, String.class);
         } catch (Exception e) {
-            LogService.getLog(getClass()).info(LogType.LOG, "Error getting default schema", e);
+            Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
         }
         return null;
     }
@@ -368,9 +395,10 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Used to obtain the connection schema name through a statement
      * Override this method to change the statement.
      * Only override this if getConnectionSchemaName is left unchanges or is using this method.
+     *
      * @see AbstractJdbcDatabase#getConnectionSchemaName()
      */
-    protected SqlStatement getConnectionSchemaNameCallStatement(){
+    protected SqlStatement getConnectionSchemaNameCallStatement() {
         return new RawCallStatement("call current_schema");
     }
 
@@ -458,7 +486,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return getTimeLiteral(((java.sql.Time) date));
         } else if (date instanceof java.sql.Timestamp) {
             return getDateTimeLiteral(((java.sql.Timestamp) date));
-        } else if(date instanceof java.util.Date) {
+        } else if (date instanceof java.util.Date) {
             return getDateTimeLiteral(new java.sql.Timestamp(date.getTime()));
         } else {
             throw new RuntimeException("Unexpected type: " + date.getClass().getName());
@@ -490,7 +518,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @param isoDate value to check.
      */
     protected boolean isDateOnly(final String isoDate) {
-        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}$")
+        return DATE_ONLY_PATTERN.matcher(isoDate).matches()
                 || NowAndTodayUtil.isNowOrTodayFormat(isoDate);
     }
 
@@ -503,7 +531,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @param isoDate value to check.
      */
     protected boolean isDateTime(final String isoDate) {
-        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?$")
+        return DATE_TIME_PATTERN.matcher(isoDate).matches()
                 || NowAndTodayUtil.isNowOrTodayFormat(isoDate);
     }
 
@@ -516,7 +544,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @param isoDate value to check
      */
     protected boolean isTimestamp(final String isoDate) {
-        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$")
+        return TIMESTAMP_PATTERN.matcher(isoDate).matches()
                 || NowAndTodayUtil.isNowOrTodayFormat(isoDate);
     }
 
@@ -527,7 +555,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @param isoDate value to check
      */
     protected boolean isTimeOnly(final String isoDate) {
-        return isoDate.matches("^\\d{2}:\\d{2}:\\d{2}$")
+        return TIME_PATTERN.matcher(isoDate).matches()
                 || NowAndTodayUtil.isNowOrTodayFormat(isoDate);
     }
 
@@ -554,7 +582,6 @@ public abstract class AbstractJdbcDatabase implements Database {
 
         if (generateStartWith || generateIncrementBy) {
             autoIncrementClause += getAutoIncrementOpening();
-
             if (generateStartWith) {
                 autoIncrementClause += String.format(getAutoIncrementStartWithClause(), (startWith == null) ? defaultAutoIncrementStartWith : startWith);
             }
@@ -562,6 +589,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (generateIncrementBy) {
                 if (generateStartWith) {
                     autoIncrementClause += ", ";
+
                 }
 
                 autoIncrementClause += String.format(getAutoIncrementByClause(), (incrementBy == null) ? defaultAutoIncrementBy : incrementBy);
@@ -610,12 +638,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getConcatSql(final String... values) {
-        StringBuffer returnString = new StringBuffer();
-        for (String value : values) {
-            returnString.append(value).append(" || ");
-        }
-
-        return returnString.toString().replaceFirst(" \\|\\| $", "");
+        return join(values, " || ");
     }
 
     @Override
@@ -624,7 +647,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return databaseChangeLogTableName;
         }
 
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogTableName();
+        return GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue();
     }
 
     @Override
@@ -638,7 +661,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return databaseChangeLogLockTableName;
         }
 
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogLockTableName();
+        return GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue();
     }
 
     @Override
@@ -652,7 +675,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return liquibaseTablespaceName;
         }
 
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getLiquibaseTablespaceName();
+        return GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentValue();
     }
 
     @Override
@@ -675,9 +698,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             return liquibaseCatalogName;
         }
 
-        ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_CATALOG_NAME);
-        if (configuration.getWasOverridden()) {
-            return configuration.getValue(String.class);
+        final String configuredCatalogName = GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue();
+        if (configuredCatalogName != null) {
+            return configuredCatalogName;
         }
 
         return getDefaultCatalogName();
@@ -694,9 +717,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             return liquibaseSchemaName;
         }
 
-        ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_SCHEMA_NAME);
-        if (configuration.getWasOverridden()) {
-            return configuration.getValue(String.class);
+        final ConfiguredValue<String> configuredValue = GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentConfiguredValue();
+        if (!configuredValue.wasDefaultValueUsed()) {
+            return configuredValue.getValue();
         }
 
         return getDefaultSchemaName();
@@ -714,7 +737,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 try {
                     caseSensitive = ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
                 } catch (SQLException e) {
-                    LogService.getLog(getClass()).warning(LogType.LOG, "Cannot determine case sensitivity from JDBC driver", e);
+                    Scope.getCurrentScope().getLog(getClass()).warning("Cannot determine case sensitivity from JDBC driver", e);
                 }
             }
         }
@@ -736,10 +759,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     /*
-    * Check if given string starts with numeric values that may cause problems and should be escaped.
-    */
+     * Check if given string starts with numeric values that may cause problems and should be escaped.
+     */
     protected boolean startsWithNumeric(final String objectName) {
-        return startsWithNumberPattern.matcher(objectName).matches();
+        return STARTS_WITH_NUMBER_PATTERN.matcher(objectName).matches();
     }
 
     @Override
@@ -758,21 +781,24 @@ public abstract class AbstractJdbcDatabase implements Database {
                 typesToInclude.remove(PrimaryKey.class);
                 typesToInclude.remove(UniqueConstraint.class);
 
-                if (supportsForeignKeyDisable()) {
+                if (supportsForeignKeyDisable() || getShortName().equals("postgresql")) {
                     //We do not remove ForeignKey because they will be disabled and removed as parts of tables.
+                    // Postgress is treated as if we can disable foreign keys because we can't drop
+                    // the foreign keys of a partitioned table, as discovered in
+                    // https://github.com/liquibase/liquibase/issues/1212
                     typesToInclude.remove(ForeignKey.class);
                 }
 
                 final long createSnapshotStarted = System.currentTimeMillis();
                 snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
-                LogService.getLog(getClass()).debug(LogType.LOG, String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
+                Scope.getCurrentScope().getLog(getClass()).fine(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
 
             final long changeSetStarted = System.currentTimeMillis();
             CompareControl compareControl = new CompareControl(
-                    new CompareControl.SchemaComparison[] {
+                    new CompareControl.SchemaComparison[]{
                             new CompareControl.SchemaComparison(
                                     CatalogAndSchema.DEFAULT,
                                     schemaToDrop)},
@@ -783,7 +809,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                     compareControl);
 
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false, null).addIncludedSchema(schemaToDrop)).generateChangeSets();
-            LogService.getLog(getClass()).debug(LogType.LOG, String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
+            Scope.getCurrentScope().getLog(getClass()).fine(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
             boolean previousAutoCommit = this.getAutoCommitMode();
             this.commit(); //clear out currently executed statements
@@ -798,7 +824,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         }
                         SqlStatement[] sqlStatements = change.generateStatements(this);
                         for (SqlStatement statement : sqlStatements) {
-                            ExecutorService.getInstance().getExecutor("jdbc", this).execute(statement);
+                            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(statement);
                         }
 
                     }
@@ -814,7 +840,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             LockServiceFactory.getInstance().getLockService(this).destroy();
 
             this.setAutoCommit(previousAutoCommit);
-            LogService.getLog(getClass()).info(LogType.LOG, String.format("Successfully deleted all supported object types in schema %s.", schemaToDrop.toString()));
+            Scope.getCurrentScope().getLog(getClass()).info(String.format("Successfully deleted all supported object types in schema %s.", schemaToDrop.toString()));
         } finally {
             this.setObjectQuotingStrategy(currentStrategy);
             this.commit();
@@ -824,7 +850,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public boolean supportsDropTableCascadeConstraints() {
         return ((this instanceof SQLiteDatabase) || (this instanceof SybaseDatabase) || (this instanceof
-            SybaseASADatabase) || (this instanceof PostgresDatabase) || (this instanceof OracleDatabase));
+                SybaseASADatabase) || (this instanceof PostgresDatabase) || (this instanceof OracleDatabase));
     }
 
     @Override
@@ -833,7 +859,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return false;
         }
         if ((example.getSchema() != null) && (example.getSchema().getName() != null) && "information_schema"
-            .equalsIgnoreCase(example.getSchema().getName())) {
+                .equalsIgnoreCase(example.getSchema().getName())) {
             return true;
         }
         if ((example instanceof Table) && getSystemTables().contains(example.getName())) {
@@ -891,7 +917,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = schema.customize(this);
-        String definition = ExecutorService.getInstance().getExecutor("jdbc", this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+        String definition = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         if (definition == null) {
             return null;
         }
@@ -907,8 +933,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     public String escapeObjectName(String catalogName, String schemaName, final String objectName,
                                    final Class<? extends DatabaseObject> objectType) {
         if (supportsSchemas()) {
-            catalogName = StringUtils.trimToNull(catalogName);
-            schemaName = StringUtils.trimToNull(schemaName);
+            catalogName = StringUtil.trimToNull(catalogName);
+            schemaName = StringUtil.trimToNull(schemaName);
 
             if (catalogName == null) {
                 catalogName = this.getDefaultCatalogName();
@@ -939,8 +965,8 @@ public abstract class AbstractJdbcDatabase implements Database {
                 }
             }
         } else if (supportsCatalogs()) {
-            catalogName = StringUtils.trimToNull(catalogName);
-            schemaName = StringUtils.trimToNull(schemaName);
+            catalogName = StringUtil.trimToNull(catalogName);
+            schemaName = StringUtil.trimToNull(schemaName);
 
             if (catalogName != null) {
                 if (getOutputDefaultCatalog()) {
@@ -999,7 +1025,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.matches(".*\\W.*");
+        if (isCatalogOrSchemaType(objectType) && preserveCaseIfRequested() == CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE) {
+            return true;
+        }
+        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || NON_WORD_PATTERN.matcher(objectName).matches();
     }
 
     protected String getQuotingStartCharacter() {
@@ -1060,15 +1089,15 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String escapeColumnNameList(final String columnNames) {
         StringBuilder sb = new StringBuilder();
-        for (String columnName : StringUtils.splitAndTrim(columnNames, ",")) {
+        for (String columnName : StringUtil.splitAndTrim(columnNames, ",")) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
             boolean descending = false;
-            if (columnName.matches("(?i).*\\s+DESC")) {
+            if (NAME_WITH_DESC_PATTERN.matcher(columnName).matches()) {
                 columnName = columnName.replaceFirst("(?i)\\s+DESC$", "");
                 descending = true;
-            } else if (columnName.matches("(?i).*\\s+ASC")) {
+            } else if (NAME_WITH_ASC_PATTERN.matcher(columnName).matches()) {
                 columnName = columnName.replaceFirst("(?i)\\s+ASC$", "");
             }
             sb.append(escapeObjectName(columnName, Column.class));
@@ -1193,20 +1222,15 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void close() throws DatabaseException {
-        ExecutorService.getInstance().clearExecutor("jdbc", this);
-        DatabaseConnection connection = getConnection();
-        if (connection != null) {
-            if (previousAutoCommit != null) {
-                try {
-                    connection.setAutoCommit(previousAutoCommit);
-                } catch (DatabaseException e) {
-                    LogService.getLog(getClass()).warning(LogType.LOG, "Failed to restore the auto commit to " + previousAutoCommit);
-
-                    throw e;
-                }
-            }
-            connection.close();
+      Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("jdbc", this);
+      try (final DatabaseConnection connection = getConnection();) {
+        if (connection != null && previousAutoCommit != null) {
+          connection.setAutoCommit(previousAutoCommit);
         }
+      } catch (final DatabaseException e) {
+        Scope.getCurrentScope().getLog(getClass()).warning("Failed to restore the auto commit to " + previousAutoCommit);
+        throw e;
+      }
     }
 
     @Override
@@ -1236,7 +1260,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Default implementation, just look for "local" IPs. If the database returns a null URL we return false since we don't know it's safe to run the update.
      *
      * @throws liquibase.exception.DatabaseException
-     *
      */
     @Override
     public boolean isSafeToRunUpdate() throws DatabaseException {
@@ -1271,12 +1294,12 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, this)) {
                 continue;
             }
-            LogService.getLog(getClass()).debug(LogType.LOG, "Executing Statement: " + statement);
+            Scope.getCurrentScope().getLog(getClass()).fine("Executing Statement: " + statement);
             try {
-                ExecutorService.getInstance().getExecutor("jdbc", this).execute(statement, sqlVisitors);
+                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(statement, sqlVisitors);
             } catch (DatabaseException e) {
                 if (statement.continueOnError()) {
-                    LogService.getLog(getClass()).severe(LogType.LOG, "Error executing statement '"+statement.toString()+"', but continuing", e);
+                    Scope.getCurrentScope().getLog(getClass()).severe("Error executing statement '" + statement.toString() + "', but continuing", e);
                 } else {
                     throw e;
                 }
@@ -1286,7 +1309,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws
-        IOException {
+            IOException {
         SqlStatement[] statements = change.generateStatements(this);
         for (SqlStatement statement : statements) {
             for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
@@ -1437,13 +1460,13 @@ public abstract class AbstractJdbcDatabase implements Database {
                         getDefaultDatabaseProductName()));
             }
             String sequenceName = databaseFunction.getValue();
-            String sequenceSchemaName = ((SequenceNextValueFunction) databaseFunction).getSequenceSchemaName();
+            String sequenceSchemaName = databaseFunction.getSchemaName();
 
             sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
             if (sequenceNextValueFunction.contains("'")) {
                 /* For PostgreSQL, the quotes around dangerous identifiers (e.g. mixed-case) need to stay in place,
                  * or else PostgreSQL will not be able to find the sequence. */
-                if (! (this instanceof PostgresDatabase)) {
+                if (!(this instanceof PostgresDatabase)) {
                     sequenceName = sequenceName.replace("\"", "");
                 }
             }
@@ -1455,14 +1478,14 @@ public abstract class AbstractJdbcDatabase implements Database {
                         getDefaultDatabaseProductName()));
             }
 
-            String sequenceSchemaName = ((SequenceCurrentValueFunction) databaseFunction).getSequenceSchemaName();
+            String sequenceSchemaName = databaseFunction.getSchemaName();
             String sequenceName = databaseFunction.getValue();
             sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
 
             if (sequenceCurrentValueFunction.contains("'")) {
                 /* For PostgreSQL, the quotes around dangerous identifiers (e.g. mixed-case) need to stay in place,
                  * or else PostgreSQL will not be able to find the sequence. */
-                if (! (this instanceof PostgresDatabase)) {
+                if (!(this instanceof PostgresDatabase)) {
                     sequenceName = sequenceName.replace("\"", "");
                 }
             }
@@ -1472,7 +1495,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    private boolean isCurrentTimeFunction(final String functionValue) {
+    protected boolean isCurrentTimeFunction(final String functionValue) {
         if (functionValue == null) {
             return false;
         }
@@ -1544,7 +1567,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public String getSystemSchema(){
+    public String getSystemSchema() {
         return "information_schema";
     }
 
@@ -1591,8 +1614,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     public int getMaxFractionalDigitsForTimestamp() {
         if (getConnection() == null) {
             // if no connection is there we cannot do anything...
-            LogService.getLog(getClass()).warning(
-                    LogType.LOG, "No database connection available - specified"
+            Scope.getCurrentScope().getLog(getClass()).warning(
+                    "No database connection available - specified"
                             + " DATETIME/TIMESTAMP precision will be tried");
             return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
         }
@@ -1615,7 +1638,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (connection instanceof OfflineConnection) {
             return false;
         } else if (connection instanceof JdbcConnection) {
-            return ((JdbcConnection)getConnection()).supportsBatchUpdates();
+            return ((JdbcConnection) getConnection()).supportsBatchUpdates();
         } else {
             // Normally, the connection can only be one of the two above types. But if, for whatever reason, it is
             // not, let's err on the safe side.
@@ -1636,6 +1659,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     /**
      * This logic is used when db support catalogs
+     *
      * @return UPPER_CASE by default
      */
     @Override

@@ -1,15 +1,13 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
-import liquibase.logging.Logger;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 
@@ -24,7 +22,6 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     protected int driverVersionMajor;
     protected int driverVersionMinor;
-    private Logger log = LogService.getLog(getClass());
     private boolean shutdownEmbeddedDerby = true;
 
     public DerbyDatabase() {
@@ -32,8 +29,8 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         super.sequenceCurrentValueFunction = "(SELECT currentvalue FROM sys.syssequences WHERE sequencename = upper('%s'))";
         determineDriverVersion();
-        //add reserved words from http://developer.mimer.com/validator/sql-reserved-words.tml
-        this.addReservedWords(Arrays.asList("ABSOLUTE", "ACTION", "ADD", "AFTER", "ALL", "ALLOCATE", "ALTER", "AND", "ANY", "ARE", "ARRAY", "AS", "ASC", "ASENSITIVE", "ASSERTION", "ASYMMETRIC", "AT", "ATOMIC", "AUTHORIZATION", "AVG", "BEFORE", "BEGIN", "BETWEEN", "BIGINT", "BINARY", "BIT", "BIT_LENGTH", "BLOB", "BOOLEAN", "BOTH", "BREADTH", "BY", "CALL", "CALLED", "CASCADE", "CASCADED", "CASE", "CAST", "CATALOG", "CHAR", "CHARACTER", "CHARACTER_LENGTH", "CHAR_LENGTH", "CHECK", "CLOB", "CLOSE", "COALESCE", "COLLATE", "COLLATION", "COLUMN", "COMMIT", "CONDITION", "CONNECT", "CONNECTION", "CONSTRAINT", "CONSTRAINTS", "CONSTRUCTOR", "CONTAINS", "CONTINUE", "CONVERT", "CORRESPONDING", "COUNT", "CREATE", "CROSS", "CUBE", "CURRENT", "CURRENT_DATE", "CURRENT_DEFAULT_TRANSFORM_GROUP", "CURRENT_PATH", "CURRENT_ROLE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "CURRENT_TRANSFORM_GROUP_FOR_TYPE", "CURRENT_USER", "CURSOR", "CYCLE", "DATA", "DATE", "DAY", "DEALLOCATE", "DEC", "DECIMAL", "DECLARE", "DEFAULT", "DEFERRABLE", "DEFERRED", "DELETE", "DEPTH", "DEREF", "DESC", "DESCRIBE", "DESCRIPTOR", "DETERMINISTIC", "DIAGNOSTICS", "DISCONNECT", "DISTINCT", "DO", "DOMAIN", "DOUBLE", "DROP", "DYNAMIC", "EACH", "ELEMENT", "ELSE", "ELSEIF", "END", "EQUALS", "ESCAPE", "EXCEPT", "EXCEPTION", "EXEC", "EXECUTE", "EXISTS", "EXIT", "EXTERNAL", "EXTRACT", "FALSE", "FETCH", "FILTER", "FIRST", "FLOAT", "FOR", "FOREIGN", "FOUND", "FREE", "FROM", "FULL", "FUNCTION", "GENERAL", "GET", "GLOBAL", "GO", "GOTO", "GRANT", "GROUP", "GROUPING", "HANDLER", "HAVING", "HOLD", "HOUR", "IDENTITY", "IF", "IMMEDIATE", "IN", "INDICATOR", "INITIALLY", "INNER", "INOUT", "INPUT", "INSENSITIVE", "INSERT", "INT", "INTEGER", "INTERSECT", "INTERVAL", "INTO", "IS", "ISOLATION", "ITERATE", "JOIN", "KEY", "LANGUAGE", "LARGE", "LAST", "LATERAL", "LEADING", "LEAVE", "LEFT", "LEVEL", "LIKE", "LOCAL", "LOCALTIME", "LOCALTIMESTAMP", "LOCATOR", "LOOP", "LOWER", "MAP", "MATCH", "MAX", "MEMBER", "MERGE", "METHOD", "MIN", "MINUTE", "MODIFIES", "MODULE", "MONTH", "MULTISET", "NAMES", "NATIONAL", "NATURAL", "NCHAR", "NCLOB", "NEW", "NEXT", "NO", "NONE", "NOT", "NULL", "NULLIF", "NUMERIC", "OBJECT", "OCTET_LENGTH", "OF", "OLD", "ON", "ONLY", "OPEN", "OPTION", "OR", "ORDER", "ORDINALITY", "OUT", "OUTER", "OUTPUT", "OVER", "OVERLAPS", "PAD", "PARAMETER", "PARTIAL", "PARTITION", "PATH", "POSITION", "PRECISION", "PREPARE", "PRESERVE", "PRIMARY", "PRIOR", "PRIVILEGES", "PROCEDURE", "PUBLIC", "RANGE", "READ", "READS", "REAL", "RECURSIVE", "REF", "REFERENCES", "REFERENCING", "RELATIVE", "RELEASE", "REPEAT", "RESIGNAL", "RESTRICT", "RESULT", "RETURN", "RETURNS", "REVOKE", "RIGHT", "ROLE", "ROLLBACK", "ROLLUP", "ROUTINE", "ROW", "ROWS", "SAVEPOINT", "SCHEMA", "SCOPE", "SCROLL", "SEARCH", "SECOND", "SECTION", "SELECT", "SENSITIVE", "SESSION", "SESSION_USER", "SET", "SETS", "SIGNAL", "SIMILAR", "SIZE", "SMALLINT", "SOME", "SPACE", "SPECIFIC", "SPECIFICTYPE", "SQL", "SQLCODE", "SQLERROR", "SQLEXCEPTION", "SQLSTATE", "SQLWARNING", "START", "STATE", "STATIC", "SUBMULTISET", "SUBSTRING", "SUM", "SYMMETRIC", "SYSTEM", "SYSTEM_USER", "TABLE", "TABLESAMPLE", "TEMPORARY", "THEN", "TIME", "TIMESTAMP", "TIMEZONE_HOUR", "TIMEZONE_MINUTE", "TO", "TRAILING", "TRANSACTION", "TRANSLATE", "TRANSLATION", "TREAT", "TRIGGER", "TRIM", "TRUE", "UNDER", "UNDO", "UNION", "UNIQUE", "UNKNOWN", "UNNEST", "UNTIL", "UPDATE", "UPPER", "USAGE", "USER", "USING", "VALUE", "VALUES", "VARCHAR", "VARYING", "VIEW", "WHEN", "WHENEVER", "WHERE", "WHILE", "WINDOW", "WITH", "WITHIN", "WITHOUT", "WORK", "WRITE", "YEAR", "ZONE"));
+        //add reserved words from https://db.apache.org/derby/docs/10.2/ref/rrefkeywords29722.html
+        this.addReservedWords(Arrays.asList("ADD", "ALL", "ALLOCATE", "ALTER", "AND", "ANY", "ARE", "AS", "ASC", "ASSERTION", "AT", "AUTHORIZATION", "AVG", "BEGIN", "BETWEEN", "BIGINT", "BIT", "BOOLEAN", "BOTH", "BY", "CALL", "CASCADE", "CASCADED", "CASE", "CAST", "CHAR", "CHARACTER", "CHECK", "CLOSE", "COALESCE", "COLLATE", "COLLATION", "COLUMN", "COMMIT", "CONNECT", "CONNECTION", "CONSTRAINT", "CONSTRAINTS", "CONTINUE", "CONVERT", "CORRESPONDING", "CREATE", "CURRENT", "CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "CURRENT_USER", "CURSOR", "DEALLOCATE", "DEC", "DECIMAL", "DECLARE", "DEFAULT", "DEFERRABLE", "DEFERRED", "DELETE", "DESC", "DESCRIBE", "DIAGNOSTICS", "DISCONNECT", "DISTINCT", "DOUBLE", "DROP", "ELSE", "END", "END-EXEC", "ESCAPE", "EXCEPT", "EXCEPTION", "EXEC", "EXECUTE", "EXISTS", "EXPLAIN", "EXTERNAL", "FALSE", "FETCH", "FIRST", "FLOAT", "FOR", "FOREIGN", "FOUND", "FROM", "FULL", "FUNCTION", "GET", "GETCURRENTCONNECTION", "GLOBAL", "GO", "GOTO", "GRANT", "GROUP", "HAVING", "HOUR", "IDENTITY", "IMMEDIATE", "IN", "INDICATOR", "INITIALLY", "INNER", "INOUT", "INPUT", "INSENSITIVE", "INSERT", "INT", "INTEGER", "INTERSECT", "INTO", "IS", "ISOLATION", "JOIN", "KEY", "LAST", "LEFT", "LIKE", "LOWER", "LTRIM", "MATCH", "MAX", "MIN", "MINUTE", "NATIONAL", "NATURAL", "NCHAR", "NVARCHAR", "NEXT", "NO", "NOT", "NULL", "NULLIF", "NUMERIC", "OF", "ON", "ONLY", "OPEN", "OPTION", "OR", "ORDER", "OUTER", "OUTPUT", "OVERLAPS", "PAD", "PARTIAL", "PREPARE", "PRESERVE", "PRIMARY", "PRIOR", "PRIVILEGES", "PROCEDURE", "PUBLIC", "READ", "REAL", "REFERENCES", "RELATIVE", "RESTRICT", "REVOKE", "RIGHT", "ROLLBACK", "ROWS", "RTRIM", "SCHEMA", "SCROLL", "SECOND", "SELECT", "SESSION_USER", "SET", "SMALLINT", "SOME", "SPACE", "SQL", "SQLCODE", "SQLERROR", "SQLSTATE", "SUBSTR", "SUBSTRING", "SUM", "SYSTEM_USER", "TABLE", "TEMPORARY", "TIMEZONE_HOUR", "TIMEZONE_MINUTE", "TO", "TRANSACTION", "TRANSLATE", "TRANSLATION", "TRUE", "UNION", "UNIQUE", "UNKNOWN", "UPDATE", "UPPER", "USER", "USING", "VALUES", "VARCHAR", "VARYING", "VIEW", "WHENEVER", "WHERE", "WITH", "WORK", "WRITE", "XML", "XMLEXISTS", "XMLPARSE", "XMLQUERY", "XMLSERIALIZE", "YEAR"));
     }
 
     @Override
@@ -43,10 +40,29 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultDriver(String url) {
-        // CORE-1230 - don't shutdown derby network server
-        if (url.startsWith("jdbc:derby://")) {
-            return "org.apache.derby.jdbc.ClientDriver";
+        if (url == null) {
+            return null;
+        } else if (url.toLowerCase().startsWith("jdbc:derby://")) {
+            //Derby client driver class name for versions 10.15.X.X and above.
+            String derbyNewDriverClassName = "org.apache.derby.client.ClientAutoloadedDriver";
+            //Derby client driver class name for versions below 10.15.X.X.
+            String derbyOldDriverClassName = "org.apache.derby.jdbc.ClientDriver";
+            try {
+                // Check if we have a driver for versions 10.15.X.X and above. Load and return it if we do.
+                Class.forName(derbyNewDriverClassName);
+                return derbyNewDriverClassName;
+            } catch (ClassNotFoundException exception) {
+                // Check if we have a driver for versions below 10.15.X.X. Load and return it if we do.
+                try {
+                    Class.forName(derbyOldDriverClassName);
+                    return derbyOldDriverClassName;
+                } catch (ClassNotFoundException classNotFoundException) {
+                    // Return class for newer versions anyway
+                    return derbyNewDriverClassName;
+                } 
+            }
         } else if (url.startsWith("jdbc:derby") || url.startsWith("java:derby")) {
+            //Use EmbeddedDriver if using a derby URL but without the `://` in it
             return "org.apache.derby.jdbc.EmbeddedDriver";
         }
         return null;
@@ -118,10 +134,10 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             String dateString = super.getDateLiteral(isoDate);
             int decimalDigits = dateString.length() - dateString.indexOf('.') - 2;
             String padding = "";
-            for (int i=6; i> decimalDigits; i--) {
+            for (int i = 6; i > decimalDigits; i--) {
                 padding += "0";
             }
-            return "TIMESTAMP(" + dateString.replaceFirst("'$", padding+"'") + ")";
+            return "TIMESTAMP(" + dateString.replaceFirst("'$", padding + "'") + ")";
         }
     }
 
@@ -137,12 +153,15 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void close() throws DatabaseException {
+      // FIXME Seems not to be a good way to handle the possibility of getting `getConnection() == null`
+      if (getConnection() != null) {
         String url = getConnection().getURL();
         String driverName = getDefaultDriver(url);
         super.close();
-        if (getShutdownEmbeddedDerby() && (driverName != null) && driverName.toLowerCase().contains("embedded")) {
+        if (shutdownEmbeddedDerby && (driverName != null) && driverName.toLowerCase().contains("embedded")) {
             shutdownDerby(url, driverName);
         }
+      }
     }
 
     protected void shutdownDerby(String url, String driverName) throws DatabaseException {
@@ -152,7 +171,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             } else {
                 url += ";shutdown=true";
             }
-            LogService.getLog(getClass()).info(LogType.LOG, "Shutting down derby connection: " + url);
+            Scope.getCurrentScope().getLog(getClass()).info("Shutting down derby connection: " + url);
             // this cleans up the lock files in the embedded derby database folder
             JdbcConnection connection = (JdbcConnection) getConnection();
             ClassLoader classLoader = connection.getWrappedConnection().getClass().getClassLoader();
@@ -163,9 +182,9 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             if (e instanceof SQLException) {
                 String state = ((SQLException) e).getSQLState();
                 if ("XJ015".equals(state) || "08006".equals(state)) {
-                    // "The XJ015 error (successful shutdown of the Derby engine) and the 08006 
-                    // error (successful shutdown of a single database) are the only exceptions 
-                    // thrown by Derby that might indicate that an operation succeeded. All other 
+                    // "The XJ015 error (successful shutdown of the Derby engine) and the 08006
+                    // error (successful shutdown of a single database) are the only exceptions
+                    // thrown by Derby that might indicate that an operation succeeded. All other
                     // exceptions indicate that an operation failed."
                     // See http://db.apache.org/derby/docs/dev/getstart/rwwdactivity3.html
                     return;
@@ -178,7 +197,6 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     /**
      * Determine Apache Derby driver major/minor version.
      */
-    @SuppressWarnings({ "static-access", "unchecked" })
     protected void determineDriverVersion() {
         try {
 // Locate the Derby sysinfo class and query its version info
@@ -207,9 +225,9 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor("jdbc", this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
+            return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
         } catch (Exception e) {
-            LogService.getLog(getClass()).info(LogType.LOG, "Error getting default schema", e);
+            Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
         }
         return null;
     }
@@ -226,7 +244,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         }
         try {
             return (this.getDatabaseMajorVersion() > 10) || ((this.getDatabaseMajorVersion() == 10) && (this
-                .getDatabaseMinorVersion() > 7));
+                    .getDatabaseMinorVersion() > 7));
         } catch (DatabaseException e) {
             return false; //assume not
         }

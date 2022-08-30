@@ -1,7 +1,6 @@
 package liquibase.parser.core.yaml;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
@@ -11,7 +10,6 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.RestoredDatabaseSnapshot;
-import liquibase.util.StreamUtil;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -21,12 +19,13 @@ import java.util.Map;
 
 public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
 
+    @SuppressWarnings("java:S2095")
     @Override
     public DatabaseSnapshot parse(String path, ResourceAccessor resourceAccessor) throws LiquibaseParseException {
         Yaml yaml = new Yaml(new SafeConstructor());
 
         try (
-            InputStream stream = StreamUtil.singleInputStream(path, resourceAccessor);
+                InputStream stream = resourceAccessor.openStream(null, path);
         ) {
             if (stream == null) {
                 throw new LiquibaseParseException(path + " does not exist");
@@ -68,7 +67,7 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
         Map parsedYaml;
         try (
             InputStreamReader inputStreamReader = new InputStreamReader(
-                stream, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()
+                stream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()
             );
         ) {
             parsedYaml = (Map) yaml.load(inputStreamReader);

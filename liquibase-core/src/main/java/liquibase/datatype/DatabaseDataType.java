@@ -1,6 +1,6 @@
 package liquibase.datatype;
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Locale;
 
@@ -32,7 +32,7 @@ public class DatabaseDataType {
                     stringParams[i] = parameters[i].toString();
                 }
             }
-            type += "("+ StringUtils.join(stringParams, ", ")+")";
+            type += "("+ StringUtil.join(stringParams, ", ")+")";
         }
     }
 

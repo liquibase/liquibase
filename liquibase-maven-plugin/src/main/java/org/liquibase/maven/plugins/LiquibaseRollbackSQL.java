@@ -5,8 +5,8 @@ import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,22 +30,16 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
      *            default-value=
      *            "${project.build.directory}/liquibase/migrate.sql"
      */
+    @PropertyElement
     protected File migrationSqlOutputFile;
 
     /** The writer for writing the migration SQL. */
     private Writer outputWriter;
 
     @Override
-    protected boolean isPromptOnNonLocalDatabase() {
-        // Always run on an non-local database as we are not actually modifying
-        // the database when run on it.
-        return false;
-    }
-
-    @Override
-    protected Liquibase createLiquibase(ResourceAccessor fo, Database db)
+    protected Liquibase createLiquibase(Database db)
             throws MojoExecutionException {
-        Liquibase liquibase = super.createLiquibase(fo, db);
+        Liquibase liquibase = super.createLiquibase(db);
 
         // Setup the output file writer
         try {
@@ -95,12 +89,12 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
             throws LiquibaseException {
         switch (type) {
         case COUNT: {
-            liquibase.rollback(rollbackCount, rollbackScript,new Contexts(contexts), new LabelExpression(labels), outputWriter);
+            liquibase.rollback(rollbackCount, rollbackScript,new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
             break;
         }
         case DATE: {
             try {
-                liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels),
+                liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(getLabelFilter()),
                         outputWriter);
             } catch (ParseException e) {
                 String message = "Error parsing rollbackDate: "
@@ -110,7 +104,7 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
             break;
         }
         case TAG: {
-            liquibase.rollback(rollbackTag, rollbackScript,new Contexts(contexts), new LabelExpression(labels), outputWriter);
+            liquibase.rollback(rollbackTag, rollbackScript,new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
             break;
         }
         default: {

@@ -1,6 +1,6 @@
 package liquibase.structure.core;
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class View extends Relation {
 

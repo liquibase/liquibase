@@ -10,6 +10,7 @@ import liquibase.database.core.H2Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator;
+import liquibase.servicelocator.LiquibaseService;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Schema;
@@ -134,8 +135,8 @@ public class DiffOutputControl {
             }
             CatalogAndSchema objectCatalogAndSchema = schema.toCatalogAndSchema().standardize(accordingTo);
             for (CatalogAndSchema catalogAndSchema : includeSchemas) {
-                catalogAndSchema = schema.toCatalogAndSchema().standardize(accordingTo);
-                if (objectCatalogAndSchema.equals(catalogAndSchema, accordingTo)) {
+                CatalogAndSchema stdCatalogAndSchema = catalogAndSchema.standardize(accordingTo);
+                if (objectCatalogAndSchema.equals(stdCatalogAndSchema, accordingTo)) {
                     return true;
                 }
             }
@@ -181,6 +182,7 @@ public class DiffOutputControl {
         return this;
     }
 
+    @LiquibaseService(skip = true)
     private static class DatabaseForHash extends H2Database implements InternalDatabase {
         @Override
         public boolean isCaseSensitive() {

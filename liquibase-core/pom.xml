@@ -5,26 +5,19 @@
 
     <parent>
         <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-base</artifactId>
-        <version>${liquibase.version}</version>
-        <relativePath>../base.pom.xml</relativePath>
+        <artifactId>liquibase</artifactId>
+        <version>0-SNAPSHOT</version>
     </parent>
 
     <artifactId>liquibase-core</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
-        <dependency>
-            <groupId>commons-cli</groupId>
-            <artifactId>commons-cli</artifactId>
-            <version>1.4</version>
-            <optional>true</optional>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.7.1</version>
+            <version>1.10.11</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
@@ -38,16 +31,16 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <version>10.14.2.0</version>
-            <scope>test</scope>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>3.3.3</version>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.14.2.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -60,9 +53,9 @@
 
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <artifactId>osgi.core</artifactId>
+            <version>8.0.0</version>
             <scope>provided</scope>
-            <version>4.3.1</version>
         </dependency>
 
         <dependency>
@@ -101,6 +94,12 @@
             <version>${spring.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.github.stefanbirkner</groupId>
@@ -109,6 +108,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.6</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -120,34 +124,17 @@
         </resources>
 
         <plugins>
-            <!-- need to build javadocs for other module javadocs to reference -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <attach>false</attach>
-                    <author>false</author>
-                    <doctitle>Liquibase ${project.version} API</doctitle>
-                    <quiet>true</quiet>
-                    <doclint>none</doclint>
-                    <encoding>UTF-8</encoding>
-                    <reportOutputDirectory>${project.build.directory}/apidocs</reportOutputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>custom-javadoc</id>
-                        <goals>
-                            <goal>javadoc</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.javacc.plugin</groupId>
                 <artifactId>javacc-maven-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.0.3</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.java.dev.javacc</groupId>
+                        <artifactId>javacc</artifactId>
+                        <version>7.0.12</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
                         <id>javacc</id>
@@ -166,17 +153,79 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>5.1.8</version>
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>org.liquibase.core</Bundle-SymbolicName>
+                        <Bundle-Activator>liquibase.osgi.Activator</Bundle-Activator>
                         <Import-Package>
+                            javax.activation*;resolution:=optional,
                             javax.servlet.*;version="[2.6,4)";resolution:=optional,
                             javax.sql.*,
                             org.osgi.*,
                             org.yaml.snakeyaml.*,
                             *;resolution:=optional
                         </Import-Package>
+                        <Provide-Capability>
+                          osgi.serviceloader; osgi.serviceloader=liquibase.serializer.ChangeLogSerializer,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.parser.NamespaceDetails,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.database.Database,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.change.Change,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.database.DatabaseConnection,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.precondition.Precondition,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.serializer.SnapshotSerializer,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.configuration.AutoloadedConfigurations,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.diff.DiffGenerator,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.lockservice.LockService,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.changelog.ChangeLogHistoryService,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.datatype.LiquibaseDataType,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.configuration.ConfigurationValueProvider,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.logging.LogService,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.snapshot.SnapshotGenerator,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.parser.ChangeLogParser,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.servicelocator.ServiceLocator,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.diff.compare.DatabaseObjectComparator,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.command.LiquibaseCommand,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.license.LicenseService,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.diff.output.changelog.ChangeGenerator,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.executor.Executor,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.structure.DatabaseObject,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.parser.SnapshotParser,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.hub.HubService,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.command.CommandStep,
+                          osgi.serviceloader; osgi.serviceloader=liquibase.sqlgenerator.SqlGenerator
+                        </Provide-Capability>
+                        <Require-Capability>
+                        osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)",
+                        osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.serializer.ChangeLogSerializer)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.parser.NamespaceDetails)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.database.Database)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.change.Change)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.database.DatabaseConnection)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.precondition.Precondition)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.serializer.SnapshotSerializer)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.configuration.AutoloadedConfigurations)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.diff.DiffGenerator)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.lockservice.LockService)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.changelog.ChangeLogHistoryService)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.datatype.LiquibaseDataType)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.configuration.ConfigurationValueProvider)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.logging.LogService)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.snapshot.SnapshotGenerator)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.parser.ChangeLogParser)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.servicelocator.ServiceLocator)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.diff.compare.DatabaseObjectComparator)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.command.LiquibaseCommand)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.license.LicenseService)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.diff.output.changelog.ChangeGenerator)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.executor.Executor)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.structure.DatabaseObject)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.parser.SnapshotParser)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.hub.HubService)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.command.CommandStep)"; cardinality:=multiple,
+                        osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.sqlgenerator.SqlGenerator)"; cardinality:=multiple
+                        </Require-Capability>
                     </instructions>
                 </configuration>
                 <executions>
@@ -193,15 +242,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.2.2</version>
                 <configuration>
                     <archive>
                         <manifest>
-                            <addClasspath>true</addClasspath>
-                            <Main-Class>liquibase.integration.commandline.Main</Main-Class>
+                            <addClasspath>false</addClasspath>
                         </manifest>
                         <manifestEntries>
-                            <Liquibase-Package>liquibase.change,liquibase.command,liquibase.changelog,liquibase.database,liquibase.parser,liquibase.precondition,liquibase.datatype,liquibase.serializer,liquibase.sqlgenerator,liquibase.executor,liquibase.snapshot,liquibase.logging,liquibase.diff,liquibase.structure,liquibase.structurecompare,liquibase.lockservice,liquibase.sdk.database,liquibase.ext,liquibase.pro,com.datical.liquibase</Liquibase-Package>
                             <Build-Time>${build.timestamp}</Build-Time>
                             <Build-Number>${build.number}</Build-Number>
                             <Liquibase-Version>${project.version}</Liquibase-Version>
@@ -215,6 +262,20 @@
                         <goals>
                             <goal>test-jar</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <!-- liquibase-core jar is actually the one from liquibase-dist. So don't install just this sub-module -->
+                <artifactId>maven-install-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-install</id>
+                        <phase>none</phase>
                     </execution>
                 </executions>
             </plugin>

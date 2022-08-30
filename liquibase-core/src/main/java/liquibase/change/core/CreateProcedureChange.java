@@ -1,21 +1,20 @@
 package liquibase.change.core;
 
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
-import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
+import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -178,22 +177,22 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
         validate.checkDisallowedField("catalogName", this.getCatalogName(), database, MSSQLDatabase.class);
 
-        if ((StringUtils.trimToNull(getProcedureText()) != null) && (StringUtils.trimToNull(getPath()) != null)) {
+        if ((StringUtil.trimToNull(getProcedureText()) != null) && (StringUtil.trimToNull(getPath()) != null)) {
             validate.addError(
                 "Cannot specify both 'path' and a nested procedure text in " +
-                    ChangeFactory.getInstance().getChangeMetaData(this).getName()
+                    Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
             );
         }
 
-        if ((StringUtils.trimToNull(getProcedureText()) == null) && (StringUtils.trimToNull(getPath()) == null)) {
+        if ((StringUtil.trimToNull(getProcedureText()) == null) && (StringUtil.trimToNull(getPath()) == null)) {
             validate.addError(
                 "Must specify either 'path' or a nested procedure text in " +
-                    ChangeFactory.getInstance().getChangeMetaData(this).getName()
+                    Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
             );
         }
 
         if ((this.getReplaceIfExists() != null) && (DatabaseList.definitionMatches(getDbms(), database, true))) {
-            if (database instanceof MSSQLDatabase) {
+            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase) {
                 if (this.getReplaceIfExists() && (this.getProcedureName() == null)) {
                     validate.addError("procedureName is required if replaceIfExists = true");
                 }
@@ -210,10 +209,16 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
 
         try {
-            return StreamUtil.openStream(getPath(), isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
+            String path = getPath();
+            String relativeTo = null;
+            final Boolean isRelative = isRelativeToChangelogFile();
+            if (isRelative != null && isRelative) {
+                relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
+            }
+            return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
             throw new IOException(
-                "<" + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " path=" +
+                "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +
                 path +
                 "> -Unable to read file",
                 e
@@ -245,8 +250,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 procedureText = "";
             }
 
-            String encoding =
-                LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
             if (procedureText != null) {
                 try {
                     stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
@@ -285,22 +289,27 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         String procedureText;
         String path = getPath();
         if (path == null) {
-            procedureText = StringUtils.trimToNull(getProcedureText());
+            procedureText = StringUtil.trimToNull(getProcedureText());
         } else {
-            try {
-                InputStream stream = openSqlStream();
-                if (stream == null) {
-                    throw new IOException("File does not exist: " + path);
-                }
-                procedureText = StreamUtil.getStreamContents(stream, encoding);
-                if (getChangeSet() != null) {
-                    ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
-                    if (parameters != null) {
-                        procedureText = parameters.expandExpressions(procedureText, getChangeSet().getChangeLog());
+            if (getChangeSet() == null) {
+                //only try to read a file when inside a changest. Not when analyizing supported
+                procedureText = "NO CHANGESET";
+            } else {
+                try {
+                    InputStream stream = openSqlStream();
+                    if (stream == null) {
+                        throw new IOException(FileUtil.getFileNotFoundMessage(path));
                     }
+                    procedureText = StreamUtil.readStreamAsString(stream, encoding);
+                    if (getChangeSet() != null) {
+                        ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
+                        if (parameters != null) {
+                            procedureText = parameters.expandExpressions(procedureText, getChangeSet().getChangeLog());
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new UnexpectedLiquibaseException(e);
                 }
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException(e);
             }
         }
         return generateStatements(procedureText, endDelimiter, database);
@@ -336,6 +345,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    @SuppressWarnings("java:S2095")
     @Override
     protected Map<String, Object> createExampleValueMetaData(
         String parameterName, DatabaseChangeProperty changePropertyAnnotation) {

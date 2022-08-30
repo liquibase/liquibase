@@ -1,7 +1,6 @@
 package liquibase.executor.jvm;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.database.Database;
+import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
@@ -10,30 +9,28 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
+import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
-import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
+import liquibase.sql.SqlConfiguration;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.CompoundStatement;
 import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.DropTableStatement;
-import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.statement.core.RawParameterizedSqlStatement;
+import liquibase.util.JdbcUtil;
+import liquibase.util.StringUtil;
 
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Class to simplify execution of SqlStatements.  Based heavily on <a href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>.
@@ -42,14 +39,10 @@ import java.util.Map;
  */
 public class JdbcExecutor extends AbstractExecutor {
 
-    private Logger log = LogService.getLog(getClass());
-
     /**
-     *
      * Return the name of the Executor
      *
      * @return String   The Executor name
-     *
      */
     @Override
     public String getName() {
@@ -57,11 +50,9 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     /**
-     *
      * Return the Executor priority
      *
      * @return int      The Executor priority
-     *
      */
     @Override
     public int getPriority() {
@@ -74,7 +65,7 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     public Object execute(StatementCallback action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        log.debug("Executing with the '" + getName() + "' executor");
+        Scope.getCurrentScope().getLog(getClass()).fine("Executing with the '" + getName() + "' executor");
         DatabaseConnection con = database.getConnection();
         Statement stmt = null;
         try {
@@ -85,11 +76,10 @@ public class JdbcExecutor extends AbstractExecutor {
             Statement stmtToUse = stmt;
 
             return action.doInStatement(stmtToUse);
-        }
-        catch (SQLException ex) {
+        } catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
             stmt = null;
             String url;
             if (con.isClosed()) {
@@ -97,10 +87,9 @@ public class JdbcExecutor extends AbstractExecutor {
             } else {
                 url = con.getURL();
             }
-            throw new DatabaseException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ url)+": "+ex.getMessage(), ex);
-        }
-        finally {
-            JdbcUtils.closeStatement(stmt);
+            throw new DatabaseException("Error executing SQL " + StringUtil.join(applyVisitors(action.getStatement(), sqlVisitors), "; on " + url) + ": " + ex.getMessage(), ex);
+        } finally {
+            JdbcUtil.closeStatement(stmt);
         }
     }
 
@@ -121,16 +110,14 @@ public class JdbcExecutor extends AbstractExecutor {
 
             stmt = ((JdbcConnection) con).getUnderlyingConnection().prepareCall(sql);
             return action.doInCallableStatement(stmt);
-        }
-        catch (SQLException ex) {
+        } catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
             stmt = null;
-            throw new DatabaseException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ con.getURL())+": "+ex.getMessage(), ex);
-        }
-        finally {
-            JdbcUtils.closeStatement(stmt);
+            throw new DatabaseException("Error executing SQL " + StringUtil.join(applyVisitors(action.getStatement(), sqlVisitors), "; on " + con.getURL()) + ": " + ex.getMessage(), ex);
+        } finally {
+            JdbcUtil.closeStatement(stmt);
         }
     }
 
@@ -141,8 +128,27 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        if(sql instanceof ExecutablePreparedStatement) {
-            ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
+        if (sql instanceof RawParameterizedSqlStatement) {
+            PreparedStatementFactory factory = new PreparedStatementFactory((JdbcConnection) database.getConnection());
+
+            String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
+
+            try (PreparedStatement pstmt = factory.create(finalSql)) {
+                final List<?> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
+                for (int i = 0; i < parameters.size(); i++) {
+                    pstmt.setObject(i, parameters.get(i));
+                }
+                pstmt.execute();
+
+                return;
+            } catch (SQLException e) {
+                throw new DatabaseException(e);
+            }
+        }
+
+
+        if (sql instanceof ExecutablePreparedStatement) {
+            ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection) database.getConnection()));
             return;
         }
         if (sql instanceof CompoundStatement) {
@@ -152,12 +158,19 @@ public class JdbcExecutor extends AbstractExecutor {
             }
         }
 
-        if (sql instanceof DropTableStatement && database instanceof Db2zDatabase) {
-            execute(new ExecuteStatementCallbackAndCatch(sql, sqlVisitors), sqlVisitors);
+        execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+    }
+
+    private String applyVisitors(RawParameterizedSqlStatement sql, List<SqlVisitor> sqlVisitors) {
+        String finalSql = sql.getSql();
+        if (sqlVisitors != null) {
+            for (SqlVisitor visitor : sqlVisitors) {
+                if (visitor != null) {
+                    finalSql = visitor.modifySql(finalSql, database);
+                }
+            }
         }
-        else {
-            execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
-        }
+        return finalSql;
     }
 
 
@@ -166,6 +179,22 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        if (sql instanceof RawParameterizedSqlStatement) {
+            PreparedStatementFactory factory = new PreparedStatementFactory((JdbcConnection) database.getConnection());
+
+            String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
+
+            try (PreparedStatement pstmt = factory.create(finalSql);) {
+                final List<?> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
+                for (int i = 0; i < parameters.size(); i++) {
+                    pstmt.setObject(i, parameters.get(0));
+                }
+                return rse.extractData(pstmt.executeQuery());
+            } catch (SQLException e) {
+                throw new DatabaseException(e);
+            }
+        }
+
         if (sql instanceof CallableSqlStatement) {
             return execute(new QueryCallableStatementCallback(sql, rse), sqlVisitors);
         }
@@ -188,9 +217,9 @@ public class JdbcExecutor extends AbstractExecutor {
     public Object queryForObject(SqlStatement sql, RowMapper rowMapper, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         List results = query(sql, rowMapper, sqlVisitors);
         try {
-            return JdbcUtils.requiredSingleResult(results);
+            return JdbcUtil.requiredSingleResult(results);
         } catch (DatabaseException e) {
-            throw new DatabaseException("Expected single row from " + sql + " but got "+results.size(), e);
+            throw new DatabaseException("Expected single row from " + sql + " but got " + results.size(), e);
         }
     }
 
@@ -268,7 +297,9 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
                 }
-                log.debug(LogType.WRITE_SQL, sqlToExecute[0]);
+                for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                    listener.writeSqlWillRun(sqlToExecute[0]);
+                }
                 return stmt.executeUpdate(sqlToExecute[0]);
             }
 
@@ -304,7 +335,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void comment(String message) throws DatabaseException {
-        LogService.getLog(getClass()).debug(LogType.LOG, message);
+        Scope.getCurrentScope().getLog(getClass()).fine(message);
     }
 
     private void executeDb2ZosComplexStatement(SqlStatement sqlStatement) throws DatabaseException {
@@ -324,16 +355,21 @@ public class JdbcExecutor extends AbstractExecutor {
                         resultSet = call.executeQuery();
                         checkCallStatus(resultSet, ((CallableSql) sql).getExpectedStatus());
                     } finally {
-                        JdbcUtils.close(resultSet, call);
+                        JdbcUtil.close(resultSet, call);
                     }
                 } else {
                     Statement stmt = null;
                     try {
-                        stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
-                        stmt.execute(sql.toSql());
+                        if (sqlStatement instanceof CompoundStatement) {
+                            stmt = ((JdbcConnection) con).getUnderlyingConnection().prepareStatement(sql.toSql());
+                            ((PreparedStatement)stmt).execute();
+                        } else {
+                            stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
+                            stmt.execute(sql.toSql());
+                        }
                         con.commit();
                     } finally {
-                        JdbcUtils.closeStatement(stmt);
+                        JdbcUtil.closeStatement(stmt);
                     }
                 }
             } catch (Exception e) {
@@ -358,43 +394,9 @@ public class JdbcExecutor extends AbstractExecutor {
 
     String getErrorCode(Throwable e) {
         if (e instanceof SQLException) {
-            return "(" + ((SQLException)e).getErrorCode() + ") ";
+            return "(" + ((SQLException) e).getErrorCode() + ") ";
         }
         return "";
-    }
-
-    /**
-     *
-     * This class executes a SQL statement with a try-catch
-     * If the exception message contains "drop database" then
-     * we just log the exception and continue, otherwise we re-throw
-     * This keeps us from erroring out in the case of DB2 z/OS, where
-     * we may end up attempting to drop the same database multiple times
-     * This should only affect DB2 z/OS, since we do not drop databases
-     * for any other platform.
-     *
-     */
-    private class ExecuteStatementCallbackAndCatch extends ExecuteStatementCallback {
-        private ExecuteStatementCallbackAndCatch(SqlStatement sql, List<SqlVisitor> sqlVisitors) {
-            super(sql, sqlVisitors);
-        }
-
-        @Override
-        public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
-            try {
-                return super.doInStatement(stmt);
-            }
-            catch (DatabaseException dbe) {
-                String message = dbe.getMessage();
-                if (message != null && message.toLowerCase().contains("failed sql: drop database ")) {
-                    log.info("If this is an attempt to drop a database, the database may have already been dropped");
-                }
-                else {
-                    throw new DatabaseException(dbe);
-                }
-            }
-            return null;
-        }
     }
 
     private class ExecuteStatementCallback implements StatementCallback {
@@ -409,6 +411,8 @@ public class JdbcExecutor extends AbstractExecutor {
 
         @Override
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
+            Logger log = Scope.getCurrentScope().getLog(getClass());
+
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 if (database instanceof OracleDatabase) {
                     while (statement.matches("(?s).*[\\s\\r\\n]*[^*]/[\\s\\r\\n]*$")) { //all trailing /'s
@@ -416,7 +420,13 @@ public class JdbcExecutor extends AbstractExecutor {
                     }
                 }
 
-                log.debug(LogType.WRITE_SQL, String.format("%s", statement));
+                for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                    listener.writeSqlWillRun(String.format("%s", statement));
+                }
+
+                Level sqlLogLevel = SqlConfiguration.SHOW_AT_LOG_LEVEL.getCurrentValue();
+
+                log.log(sqlLogLevel, statement, null);
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -424,10 +434,10 @@ public class JdbcExecutor extends AbstractExecutor {
                     //if execute returns false, we can retrieve the affected rows count
                     // (true used when resultset is returned)
                     if (!stmt.execute(statement)) {
-                        log.debug(Integer.toString(stmt.getUpdateCount()) + " row(s) affected");
+                        log.log(sqlLogLevel, stmt.getUpdateCount() + " row(s) affected", null);
                     }
                 } catch (Throwable e) {
-                    throw new DatabaseException(e.getMessage()+ " [Failed SQL: " + getErrorCode(e) + statement+"]", e);
+                    throw new DatabaseException(e.getMessage() + " [Failed SQL: " + getErrorCode(e) + statement + "]", e);
                 }
                 try {
                     int updateCount = 0;
@@ -436,12 +446,12 @@ public class JdbcExecutor extends AbstractExecutor {
                         if (!stmt.getMoreResults()) {
                             updateCount = stmt.getUpdateCount();
                             if (updateCount != -1)
-                                log.debug(Integer.toString(updateCount) + " row(s) affected");
+                                log.log(sqlLogLevel, updateCount + " row(s) affected", null);
                         }
                     } while (updateCount != -1);
 
                 } catch (Exception e) {
-                    throw new DatabaseException(e.getMessage()+ " [Failed SQL: "+ getErrorCode(e) + statement+"]", e);
+                    throw new DatabaseException(e.getMessage() + " [Failed SQL: " + getErrorCode(e) + statement + "]", e);
                 }
             }
             return null;
@@ -470,9 +480,10 @@ public class JdbcExecutor extends AbstractExecutor {
          * 1. Applies all SqlVisitor to the stmt
          * 2. Executes the (possibly modified) stmt
          * 3. Reads all data from the java.sql.ResultSet into an Object and returns the Object.
+         *
          * @param stmt A JDBC Statement that is expected to return a ResultSet (e.g. SELECT)
          * @return An object representing all data from the result set.
-         * @throws SQLException If an error occurs during SQL processing
+         * @throws SQLException      If an error occurs during SQL processing
          * @throws DatabaseException If an error occurs in the DBMS-specific program code
          */
         @Override
@@ -488,15 +499,19 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Can only query with statements that return one sql statement");
                 }
-                log.debug(LogType.READ_SQL, sqlToExecute[0]);
 
-                rs = stmt.executeQuery(sqlToExecute[0]);
-                ResultSet rsToUse = rs;
-                return rse.extractData(rsToUse);
-            }
-            finally {
+                try {
+                    rs = stmt.executeQuery(sqlToExecute[0]);
+                    ResultSet rsToUse = rs;
+                    return rse.extractData(rsToUse);
+                } finally {
+                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                        listener.readSqlWillRun(sqlToExecute[0]);
+                    }
+                }
+            } finally {
                 if (rs != null) {
-                        JdbcUtils.closeResultSet(rs);
+                    JdbcUtil.closeResultSet(rs);
                 }
             }
         }
@@ -525,9 +540,8 @@ public class JdbcExecutor extends AbstractExecutor {
             try {
                 rs = cs.executeQuery();
                 return rse.extractData(rs);
-            }
-            finally {
-                JdbcUtils.closeResultSet(rs);
+            } finally {
+                JdbcUtil.closeResultSet(rs);
             }
         }
 

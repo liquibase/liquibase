@@ -5,6 +5,8 @@ import liquibase.exception.LiquibaseException;
 
 /**
  * Holds results of a {@link LiquibaseCommand} execution, including a message and whether the command succeeded or not.
+ *
+ * @deprecated Used by the old {@link LiquibaseCommand} style of command setup.
  */
 public class CommandResult  {
 

@@ -43,19 +43,13 @@ public class SmallIntType extends LiquibaseDataType {
         }
 
         if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("NUMBER", 5, 0);
+            return new DatabaseDataType("NUMBER", 5);
         }
 
-        if (database instanceof PostgresDatabase)
-        {
+
+        if (database instanceof PostgresDatabase) {
             if (isAutoIncrement()) {
-                int majorVersion = 9;
-                try {
-                    majorVersion = database.getDatabaseMajorVersion();
-                } catch (DatabaseException e) {
-                    // ignore
-                }
-                if (majorVersion < 10) {
+                if (((PostgresDatabase) database).useSerialDatatypes()) {
                     return new DatabaseDataType("SMALLSERIAL");
                 }
             }

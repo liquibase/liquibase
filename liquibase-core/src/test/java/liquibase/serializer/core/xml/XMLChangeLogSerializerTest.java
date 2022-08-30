@@ -1,10 +1,13 @@
 package liquibase.serializer.core.xml;
 
+import liquibase.Labels;
 import liquibase.change.AddColumnConfig;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.*;
 import liquibase.change.custom.CustomChangeWrapper;
+import liquibase.changelog.ChangeSet;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.precondition.CustomPreconditionWrapper;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SequenceNextValueFunction;
@@ -69,7 +72,6 @@ public class XMLChangeLogSerializerTest {
         assertEquals("column", ((Element) columns.item(0)).getTagName());
         assertEquals("NEWCOL", ((Element) columns.item(0)).getAttribute("name"));
         assertEquals("TYP", ((Element) columns.item(0)).getAttribute("type"));
-
     }
 
     @Test
@@ -186,7 +188,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("COL_HERE", node.getAttribute("columnNames"));
         assertEquals("PK_NAME", node.getAttribute("constraintName"));
         assertEquals("TABLESPACE_NAME", node.getAttribute("tablespace"));
-        assertEquals("TABLESPACE_NAME", node.getAttribute("tablespace"));
+        assertEquals("true", node.getAttribute("disabled"));
         assertEquals("true", node.getAttribute("deferrable"));
         assertEquals("true", node.getAttribute("initiallyDeferred"));
         assertEquals("true", node.getAttribute("validate"));
@@ -272,7 +274,6 @@ public class XMLChangeLogSerializerTest {
         assertEquals("true", constraintsElement.getAttribute("primaryKey"));
         assertEquals("state(id)", constraintsElement.getAttribute("references"));
         assertEquals("true", constraintsElement.getAttribute("unique"));
-
     }
 
     @Test
@@ -750,7 +751,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("OLD_NAME", node.getAttribute("oldTableName"));
         assertEquals("NEW_NAME", node.getAttribute("newTableName"));
     }
-    
+
     @Test
     public void createNode_RenameSequenceChange() throws Exception {
         RenameSequenceChange refactoring = new RenameSequenceChange();
@@ -786,7 +787,6 @@ public class XMLChangeLogSerializerTest {
         String fileName = "liquibase/change/core/SQLFileTestData.sql";
         SQLFileChange change = new SQLFileChange();
         ClassLoaderResourceAccessor opener = new ClassLoaderResourceAccessor();
-        change.setResourceAccessor(opener);
         change.setPath(fileName);
 
         Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
@@ -823,7 +823,6 @@ public class XMLChangeLogSerializerTest {
     @Test
     public void createNode_CustomChange() throws Exception {
         CustomChangeWrapper change = new CustomChangeWrapper();
-        change.setClassLoader(Thread.currentThread().getContextClassLoader());
         change.setClass("liquibase.change.custom.ExampleCustomSqlChange");
         change.setParam("tableName", "tab_name");
         change.setParam("columnName", "col_name");
@@ -882,6 +881,37 @@ public class XMLChangeLogSerializerTest {
                      attsMap("name", "count", "value", "31"),
                      attsMap(params.item(1)));
     }
+    
+    @Test
+    public void createNode_ChangeSetParameters() throws Exception {
+    	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql",null,false,ObjectQuotingStrategy.LEGACY, null);
+    	changeSet.setCreated("created");
+    	changeSet.setFailOnError(true);
+    	changeSet.setLabels(new Labels("label"));
+    	changeSet.setLogicalFilePath("path/to/file.json");
+    	
+    	
+    	Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(changeSet);
+    	
+    	assertEquals("element name","changeSet",node.getTagName());
+    	assertEquals("changeSet Attributes",
+    			attsMap("id","1",
+    					"author","tms",
+    					"runAlways","true",
+    					"runOnChange","true",
+    					"logicalFilePath","path/to/file.json",
+    					"contextFilter","context",
+    					"dbms","mssql",
+    					"objectQuotingStrategy","LEGACY",
+    					"failOnError","true",
+    					"labels","label",
+    					"created","created",
+                        "runInTransaction","false"),
+    			attsMap(node));
+    	
+    }
+    
+    
 
     @Test
     public void serialize_pretty() {
@@ -897,6 +927,35 @@ public class XMLChangeLogSerializerTest {
                 "        tableName=\"c\">\n" +
                 "    <where>Some Text</where>\n" +
                 "</update>", out);
+    }
+    
+    @Test
+    public void serialize_pretty_ChangeSetParameters() throws Exception {
+    	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql","runWith",false,ObjectQuotingStrategy.LEGACY, null);
+    	changeSet.setCreated("created");
+    	changeSet.setFailOnError(true);
+    	changeSet.setLabels(new Labels("label"));
+    	changeSet.setLogicalFilePath("path/to/file.json");
+        changeSet.setIgnore(true);
+        changeSet.setRunOrder("last");
+
+    	String out = new XMLChangeLogSerializer().serialize(changeSet, true);
+    	
+    	assertEquals("<changeSet author=\"tms\"\n"
+    			+ "        contextFilter=\"context\"\n"
+    			+ "        created=\"created\"\n"
+    			+ "        dbms=\"mssql\"\n"
+    			+ "        failOnError=\"true\"\n"
+    			+ "        id=\"1\"\n"
+                + "        ignore=\"true\"\n"
+    			+ "        labels=\"label\"\n"
+    			+ "        logicalFilePath=\"path/to/file.json\"\n"
+    			+ "        objectQuotingStrategy=\"LEGACY\"\n"
+    			+ "        runAlways=\"true\"\n"
+                + "        runInTransaction=\"false\"\n"
+    			+ "        runOnChange=\"true\"\n"
+                + "        runOrder=\"last\"/>", out);
+    	
     }
 
     @Test

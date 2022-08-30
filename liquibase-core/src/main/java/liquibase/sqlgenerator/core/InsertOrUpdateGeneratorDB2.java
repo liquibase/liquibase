@@ -1,9 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import liquibase.database.Database;
 import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.core.Db2zDatabase;
@@ -11,6 +7,10 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 
@@ -25,7 +25,7 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 	public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 		Sql[] sqls = super.generateSql(insertOrUpdateStatement, database, sqlGeneratorChain);
 		if (database instanceof Db2zDatabase) {
-			List<Sql> list = new ArrayList<Sql>(Arrays.asList(sqls));
+			List<Sql> list = new ArrayList<>(Arrays.asList(sqls));
 			list.add(new UnparsedSql("CALL " + DB2_Z_INSERT_OR_UPDATE_PROCEDURE + "()"));
 			list.add(new UnparsedSql("DROP PROCEDURE " + DB2_Z_INSERT_OR_UPDATE_PROCEDURE));
 			sqls = list.toArray(new Sql[list.size()]);
@@ -34,10 +34,8 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 	}
 
 	@Override
-	protected String getRecordCheck(
-			InsertOrUpdateStatement insertOrUpdateStatement, Database database,
-			String whereClause) {
-        StringBuffer recordCheckSql = new StringBuffer();
+	protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
+		StringBuilder recordCheckSql = new StringBuilder();
 
 		if (database instanceof Db2zDatabase) {
 			recordCheckSql.append("CREATE PROCEDURE ").append(DB2_Z_INSERT_OR_UPDATE_PROCEDURE).append("()\n");
@@ -46,13 +44,12 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 			recordCheckSql.append("BEGIN ATOMIC\n");
 		}
 		recordCheckSql.append("\tDECLARE v_reccount INTEGER;\n");
-        recordCheckSql.append("\tSET v_reccount = (SELECT COUNT(*) FROM " + database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE ");
-
+        recordCheckSql.append("\tSET v_reccount = (SELECT COUNT(*) FROM ");
+        recordCheckSql.append(database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()));
+				recordCheckSql.append(" WHERE ");
         recordCheckSql.append(whereClause);
         recordCheckSql.append(");\n");
-
         recordCheckSql.append("\tIF v_reccount = 0 THEN\n");
-
         return recordCheckSql.toString();
 	}
 	
@@ -63,10 +60,7 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 	
 	@Override
 	protected String getPostUpdateStatements(Database database) {
-        StringBuffer endStatements = new StringBuffer();
-        endStatements.append("END IF;\n");
-		endStatements.append("END\n");
-		return endStatements.toString();
+		return "END IF;\nEND\n";
 	}
 
 }

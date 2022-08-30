@@ -3,14 +3,19 @@ package liquibase.util;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.util.Date;
 
 public class ISODateFormat {
 
-    private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
-    private SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
-    private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
+    private final SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
 
@@ -35,7 +40,7 @@ public class ISODateFormat {
                 }
             }
             sb.append('.');
-            sb.append(nanosString.substring(0, lastNotNullIndex + 1));
+            sb.append(nanosString, 0, lastNotNullIndex + 1);
         }
         return sb.toString();
     }
@@ -58,6 +63,9 @@ public class ISODateFormat {
     }
 
     public Date parse(String dateAsString) throws ParseException {
+        if (dateAsString == null) {
+            return null;
+        }
         int length = dateAsString.length();
         switch (length) {
         case 8:
@@ -71,6 +79,15 @@ public class ISODateFormat {
                 return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
             }
         default:
+            if (dateAsString.contains(":") && !dateAsString.contains("-")) {
+                if (dateAsString.contains(".")) {
+                    //cannot handle milliseconds/nanoseconds in java.sql.Time, so throw exception so it's handled as a function
+                    throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
+                } else {
+                    return new java.sql.Time(timeFormat.parse(dateAsString).getTime());
+                }
+            }
+
             if ((length < 19) || (dateAsString.charAt(19) != '.')) {
                 throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
             }
@@ -78,12 +95,34 @@ public class ISODateFormat {
             if (dateAsString.contains(" ")) {
                 time = dateTimeFormatWithSpace.parse(dateAsString.substring(0, 19)).getTime();
             } else {
-                time = dateTimeFormat.parse(dateAsString.substring(0, 19)).getTime();
+                time = dateTimeFormat.parse(dateAsString.substring(0,19)).getTime();
             }
-            int nanos = Integer.parseInt(dateAsString.substring(20));
-            for (; length < 29; length++) {
-                nanos *= 10;
+
+            ZonedDateTime zonedDateTime;
+            int nanos;
+            try {
+                OffsetDateTime odt = OffsetDateTime.parse(dateAsString);
+                zonedDateTime = odt.toZonedDateTime();
+                nanos = zonedDateTime.getNano();
             }
+            catch (DateTimeParseException dtpe) {
+                if (dateAsString.contains(" ")) {
+                    dateAsString = dateAsString.replaceAll(" ", "T");
+                }
+                DateTimeFormatter formatter =
+                           new DateTimeFormatterBuilder()
+                                .appendPattern(DATE_TIME_FORMAT_STRING)
+                                .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 9, true)
+                                .toFormatter();
+                nanos = Integer.parseInt(dateAsString.substring(20));
+                for (; length < 29; length++) {
+                    nanos *= 10;
+                }
+            }
+
+
+            /*
+            */
             java.sql.Timestamp timestamp = new java.sql.Timestamp(time);
             timestamp.setNanos(nanos);
             return timestamp;

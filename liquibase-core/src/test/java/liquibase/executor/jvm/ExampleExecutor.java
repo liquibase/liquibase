@@ -1,13 +1,14 @@
 /*
  *
  * This is an example of a custom Executor class.
- * Specifying the change set attribute "runWith=<executor name>"
- * instructs Liquibase to execute the changes in the change set
+ * Specifying the changeset attribute "runWith=<executor name>"
+ * instructs Liquibase to execute the changes in the changeset
  * with the Executor.
  *
  */
 package liquibase.executor.jvm;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RollbackContainer;
@@ -31,7 +32,6 @@ import java.util.List;
  *
  */
 public class ExampleExecutor extends JdbcExecutor {
-    private Logger log = LogService.getLog(getClass());
 
     /**
      *
@@ -39,7 +39,7 @@ public class ExampleExecutor extends JdbcExecutor {
      *
      */
     public ExampleExecutor() {
-        log.info("Constructed an ExampleExecutor");
+        Scope.getCurrentScope().getLog(getClass()).info("Constructed an ExampleExecutor");
     }
 
     /**
@@ -68,9 +68,9 @@ public class ExampleExecutor extends JdbcExecutor {
 
     /**
      *
-     * Validate whether the change set can be executed by this Executor
+     * Validate whether the changeset can be executed by this Executor
      *
-     * @param   changeSet The change set to validate
+     * @param   changeSet The changeset to validate
      * @return  boolean   True if all changes can be executed by the custom Executor
      *                    False if any change cannot be executed
      *
@@ -99,7 +99,7 @@ public class ExampleExecutor extends JdbcExecutor {
             RollbackContainer container = changeSet.getRollback();
             List<Change> rollbackChanges = container.getChanges();
             for (Change change : rollbackChanges) {
-                log.info("Validating rollback change " + change.getDescription());
+                Scope.getCurrentScope().getLog(getClass()).info("Validating rollback change " + change.getDescription());
                 validateChange(changeSet, validationErrors, change, "rollback");
             }
         }
@@ -110,7 +110,7 @@ public class ExampleExecutor extends JdbcExecutor {
                                 ValidationErrors validationErrors,
                                 Change change,
                                 String type) {
-        log.info("Validating " + type + " change " + change.getDescription());
+        Scope.getCurrentScope().getLog(getClass()).info("Validating " + type + " change " + change.getDescription());
     }
 
     /**
@@ -125,7 +125,7 @@ public class ExampleExecutor extends JdbcExecutor {
      */
     @Override
     public void execute(SqlStatement action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        log.info("Executing with the '" + getName() + "' executor");
+        Scope.getCurrentScope().getLog(getClass()).info("Executing with the '" + getName() + "' executor");
         Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(action, database);
         try {
             for (Sql sql : sqls) {
@@ -133,7 +133,7 @@ public class ExampleExecutor extends JdbcExecutor {
                 for (SqlVisitor visitor : sqlVisitors) {
                     visitor.modifySql(actualSqlString, database);
                 }
-                log.info("Generated SQL for change is " + actualSqlString);
+                Scope.getCurrentScope().getLog(getClass()).info("Generated SQL for change is " + actualSqlString);
             }
         }
         catch (Exception e) {

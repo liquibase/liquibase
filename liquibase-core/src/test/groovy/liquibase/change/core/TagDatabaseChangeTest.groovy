@@ -4,7 +4,7 @@ import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import spock.lang.Unroll
 
 public class TagDatabaseChangeTest extends StandardChangeTest {

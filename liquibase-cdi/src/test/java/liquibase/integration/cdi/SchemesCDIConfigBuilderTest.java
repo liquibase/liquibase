@@ -1,9 +1,8 @@
 package liquibase.integration.cdi;
 
+import liquibase.Scope;
 import liquibase.integration.cdi.annotations.Liquibase;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,6 +27,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
+
 /**
  * @author Nikita Lipatov (https://github.com/islonik),
  * @since 27/5/17.
@@ -50,23 +50,27 @@ public class SchemesCDIConfigBuilderTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        log = LogService.getLog(SchemesCDIConfigBuilder.class);
+        log = Scope.getCurrentScope().getLog(SchemesCDIConfigBuilder.class);
 //        log.setLogLevel(LogLevel.WARNING); // you can change it to INFO or DEBUG level if you want to see them
 
-        Class c1 = SchemesCDIConfigBuilder.class;
-        final Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
+        try {
+            Class c1 = SchemesCDIConfigBuilder.class;
+            final Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
 
-        final Field field1 = c1.getDeclaredField("FILE_LOCK_TIMEOUT");
-        field1.setAccessible(true);
-        modifiersField.setInt(field1, field1.getModifiers() & ~Modifier.FINAL);
-        field1.set(null, FILE_LOCK_TIMEOUT);
+            final Field field1 = c1.getDeclaredField("FILE_LOCK_TIMEOUT");
+            field1.setAccessible(true);
+            modifiersField.setInt(field1, field1.getModifiers() & ~Modifier.FINAL);
+            field1.set(null, FILE_LOCK_TIMEOUT);
 
-        final Field field2 = c1.getDeclaredField("ROOT_PATH");
-        field2.setAccessible(true);
-        modifiersField.setInt(field2, field2.getModifiers() & ~Modifier.FINAL);
+            final Field field2 = c1.getDeclaredField("ROOT_PATH");
+            field2.setAccessible(true);
+            modifiersField.setInt(field2, field2.getModifiers() & ~Modifier.FINAL);
 
-        field2.set(null, getRootPath());
+            field2.set(null, getRootPath());
+        } catch (NoSuchFieldException e) {
+            //newer JDK version's don't have the internal fields
+        }
     }
 
     private static String getRootPath() {
@@ -189,7 +193,7 @@ public class SchemesCDIConfigBuilderTest {
 
             validateFutures(futures);
         } catch (Exception e) {
-            log.warning(LogType.LOG, e.getMessage(), e);
+            log.warning(e.getMessage(), e);
         } finally {
             executors.shutdown();
         }
@@ -218,7 +222,7 @@ public class SchemesCDIConfigBuilderTest {
 
             validateFutures(futures);
         } catch (Exception e) {
-            log.warning(LogType.LOG, e.getMessage(), e);
+            log.warning(e.getMessage(), e);
         } finally {
             executors.shutdown();
         }

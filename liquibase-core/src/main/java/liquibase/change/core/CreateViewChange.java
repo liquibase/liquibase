@@ -1,10 +1,9 @@
 package liquibase.change.core;
 
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SQLiteDatabase;
@@ -20,8 +19,10 @@ import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.core.View;
+import liquibase.util.FileUtil;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -138,18 +139,22 @@ public class CreateViewChange extends AbstractChange {
     public ValidationErrors validate(Database database) {
         ValidationErrors validate = super.validate(database);
         if (!validate.hasErrors()) {
-            if ((StringUtils.trimToNull(getSelectQuery()) != null) && (StringUtils.trimToNull(getPath()) != null)) {
-                validate.addError("Cannot specify both 'path' and a nested view definition in " + ChangeFactory.getInstance().getChangeMetaData(this).getName());
+            if ((StringUtil.trimToNull(getSelectQuery()) != null) && (StringUtil.trimToNull(getPath()) != null)) {
+                validate.addError("Cannot specify both 'path' and a nested view definition in " + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName());
             }
-            if ((StringUtils.trimToNull(getSelectQuery()) == null) && (StringUtils.trimToNull(getPath()) == null)) {
+            if ((StringUtil.trimToNull(getSelectQuery()) == null) && (StringUtil.trimToNull(getPath()) == null)) {
                 validate.addError("For a createView change, you must specify either 'path' or a nested view " +
                         "definition in " +
-                        "" + ChangeFactory
-                        .getInstance().getChangeMetaData(this).getName());
+                        "" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName());
             }
 
         }
         return validate;
+    }
+
+    @Override
+    public boolean generateStatementsVolatile(Database database) {
+        return false;
     }
 
     protected InputStream openSqlStream() throws IOException {
@@ -158,9 +163,14 @@ public class CreateViewChange extends AbstractChange {
         }
 
         try {
-            return StreamUtil.openStream(getPath(), getRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
+            String path = getPath();
+            String relativeTo = null;
+            if (ObjectUtil.defaultIfNull(getRelativeToChangelogFile(), false)) {
+                relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
+            }
+            return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
-            throw new IOException("<" + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " path=" + path + "> -Unable to read file", e);
+            throw new IOException("<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" + path + "> -Unable to read file", e);
         }
     }
 
@@ -188,7 +198,7 @@ public class CreateViewChange extends AbstractChange {
                 selectQuery = "";
             }
 
-            String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
             if (selectQuery != null) {
                 try {
                     stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
@@ -228,14 +238,14 @@ public class CreateViewChange extends AbstractChange {
 		String selectQuery;
 		String path = getPath();
 		if (path == null) {
-			selectQuery = StringUtils.trimToNull(getSelectQuery());
+			selectQuery = StringUtil.trimToNull(getSelectQuery());
 		} else {
 			try {
 				InputStream stream = openSqlStream();
 				if (stream == null) {
-					throw new IOException("File does not exist: " + path);
+					throw new IOException(FileUtil.getFileNotFoundMessage(path));
 				}
-				selectQuery = StreamUtil.getStreamContents(stream, encoding);
+				selectQuery = StreamUtil.readStreamAsString(stream, encoding);
 			    if (getChangeSet() != null) {
 					ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
 					if (parameters != null) {
@@ -256,7 +266,7 @@ public class CreateViewChange extends AbstractChange {
                     .setFullDefinition(fullDefinition));
         }
 
-        if ((database instanceof OracleDatabase) && (StringUtils.trimToNull(remarks) != null)) {
+        if ((database instanceof OracleDatabase) && (StringUtil.trimToNull(remarks) != null)) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, viewName, remarks);
             if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                 statements.add(remarksStatement);

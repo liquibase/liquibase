@@ -8,8 +8,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
-import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.JdbcUtil;
+import liquibase.util.StringUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -198,7 +198,7 @@ class ResultSetCache {
         }
 
         public String createKey(Database database, String... params) {
-            String key = StringUtils.join(params, ":");
+            String key = StringUtil.join(params, ":");
             if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
                     equals(database.getSchemaAndCatalogCase())) {
                 return key;
@@ -276,7 +276,7 @@ class ResultSetCache {
                 resultSet.setFetchSize(database.getFetchSize());
                 return extract(resultSet, informixTrimHint);
             } finally {
-                JdbcUtils.close(resultSet, statement);
+                JdbcUtil.close(resultSet, statement);
             }
         }
 
@@ -346,7 +346,7 @@ class ResultSetCache {
                     returnList.add(new CachedRow(row));
                 }
             } finally {
-                JdbcUtils.closeResultSet(resultSet);
+                JdbcUtil.closeResultSet(resultSet);
             }
             return returnList;
         }

@@ -5,7 +5,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.util.ISODateFormat;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -188,8 +188,18 @@ public class ParsedNode {
         return this;
     }
 
+    /**
+     *
+     * Match the namespace and name of this node. This is now done case-insensitively
+     *
+     * @param   node
+     * @param   namespace
+     * @param   nodename
+     * @return  boolean
+     *
+     */
     protected boolean nodeMatches(ParsedNode node, String namespace, String nodename) {
-        return namespaceMatches(node, namespace) && node.getName().equals(nodename);
+        return namespaceMatches(node, namespace) && node.getName().equalsIgnoreCase(nodename);
     }
 
     protected boolean namespaceMatches(ParsedNode node, String namespace) {
@@ -285,12 +295,12 @@ public class ParsedNode {
     public String toString() {
         String string = name;
         if (!children.isEmpty()) {
-            string += "[" + StringUtils.join(children, ",", new StringUtils.ToStringFormatter(), true) + "]";
+            string += "[" + StringUtil.join(children, ",", new StringUtil.ToStringFormatter(), true) + "]";
         }
         if (value != null) {
             String valueString;
             if (value instanceof Collection) {
-                valueString = "("+StringUtils.join(((Collection) value), ",", new StringUtils.ToStringFormatter(), true)+")";
+                valueString = "("+ StringUtil.join(((Collection) value), ",", new StringUtil.ToStringFormatter(), true)+")";
             } else {
                 valueString = value.toString();
             }

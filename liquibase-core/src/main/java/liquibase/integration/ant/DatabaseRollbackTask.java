@@ -32,29 +32,29 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
             if(rollbackCount != null) {
                 if(outputFile != null) {
                     writer = getOutputFileWriter();
-                    liquibase.rollback(rollbackCount, rollbackScript, new Contexts(getContexts()), getLabels(), writer);
+                    liquibase.rollback(rollbackCount, rollbackScript, new Contexts(getContexts()), getLabelFilter(), writer);
                 } else {
-                    liquibase.rollback(rollbackCount, rollbackScript, new Contexts(getContexts()), getLabels());
+                    liquibase.rollback(rollbackCount, rollbackScript, new Contexts(getContexts()), getLabelFilter());
                 }
             } else if(rollbackTag != null) {
                 if(outputFile != null) {
                     writer = getOutputFileWriter();
-                    liquibase.rollback(rollbackTag, rollbackScript, new Contexts(getContexts()), getLabels(), writer);
+                    liquibase.rollback(rollbackTag, rollbackScript, new Contexts(getContexts()), getLabelFilter(), writer);
                 } else {
-                    liquibase.rollback(rollbackTag, rollbackScript, new Contexts(getContexts()), getLabels());
+                    liquibase.rollback(rollbackTag, rollbackScript, new Contexts(getContexts()), getLabelFilter());
                 }
             } else if(rollbackDate != null) {
                 if(outputFile != null) {
                     writer = getOutputFileWriter();
-                    liquibase.rollback(rollbackDate, rollbackScript, new Contexts(getContexts()), getLabels(), writer);
+                    liquibase.rollback(rollbackDate, rollbackScript, new Contexts(getContexts()), getLabelFilter(), writer);
                 } else {
-                    liquibase.rollback(rollbackDate, rollbackScript, new Contexts(getContexts()), getLabels());
+                    liquibase.rollback(rollbackDate, rollbackScript, new Contexts(getContexts()), getLabelFilter());
                 }
             } else {
                 throw new BuildException("Unable to rollback database. No count, tag, or date set.");
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to rollback database. " + e.toString(), e);
+            throw new BuildException("Unable to rollback database: " + e.getMessage(), e);
         } catch (UnsupportedEncodingException e) {
             throw new BuildException("Unable to generate rollback SQL. Encoding [" + getOutputEncoding() + "] is not supported.", e);
         } catch (IOException e) {

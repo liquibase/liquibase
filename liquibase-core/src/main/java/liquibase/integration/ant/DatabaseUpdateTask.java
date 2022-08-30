@@ -26,15 +26,15 @@ public class DatabaseUpdateTask extends AbstractChangeLogBasedTask {
             FileResource outputFile = getOutputFile();
             if(outputFile != null) {
                 writer = getOutputFileWriter();
-                liquibase.update(toTag, new Contexts(getContexts()), getLabels(), writer);
+                liquibase.update(toTag, new Contexts(getContexts()), getLabelFilter(), writer);
             } else {
                 if(dropFirst) {
                     liquibase.dropAll();
                 }
-                liquibase.update(toTag, new Contexts(getContexts()), getLabels());
+                liquibase.update(toTag, new Contexts(getContexts()), getLabelFilter());
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to update database. " + e.toString(), e);
+            throw new BuildException("Unable to update database: " + e.getMessage(), e);
         } catch (UnsupportedEncodingException e) {
             throw new BuildException("Unable to generate update SQL. Encoding [" + getOutputEncoding() + "] is not supported.", e);
         } catch (IOException e) {

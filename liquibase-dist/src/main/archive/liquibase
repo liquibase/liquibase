@@ -23,40 +23,17 @@ if [ ! -n "${LIQUIBASE_HOME+x}" ]; then
   # echo "Liquibase Home: $LIQUIBASE_HOME"
 fi
 
- 
-# build classpath from all jars in lib
-if [ -f /usr/bin/cygpath ]; then
-  CP=.
-  for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
-    i=`cygpath --windows "$i"`
-    CP="$CP;$i"
-  done
-  for i in "$LIQUIBASE_HOME"/lib/*.jar; do
-    i=`cygpath --windows "$i"`
-    CP="$CP;$i"
-  done
-else
-  if [[ $(uname) = MINGW* ]]; then
-    CP_SEPARATOR=";"
-  else
-    CP_SEPARATOR=":"
-  fi
-  CP=.
-  for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
-    CP="$CP""$CP_SEPARATOR""$i"
-  done
-  CP="$CP""$CP_SEPARATOR""$LIQUIBASE_HOME/lib/"
-  for i in "$LIQUIBASE_HOME"/lib/*.jar; do
-    CP="$CP""$CP_SEPARATOR""$i"
-  done
-fi
-
 if [ -z "${JAVA_HOME}" ]; then
   #JAVA_HOME not set, try to find a bundled version
   if [ -d "${LIQUIBASE_HOME}/jre" ]; then
     JAVA_HOME="$LIQUIBASE_HOME/jre"
   elif [ -d "${LIQUIBASE_HOME}/.install4j/jre.bundle/Contents/Home" ]; then
     JAVA_HOME="${LIQUIBASE_HOME}/.install4j/jre.bundle/Contents/Home"
+  fi
+else
+  if [ ! -x "$JAVA_HOME" ] ; then
+    echo "ERROR: The JAVA_HOME environment variable is not defined correctly, so Liquibase cannot be started. JAVA_HOME is set to \"$JAVA_HOME\" and it does not exist." >&2
+    exit 1
   fi
 fi
 
@@ -65,6 +42,7 @@ if [ -z "${JAVA_HOME}" ]; then
 
   if [ -z "${JAVA_PATH}" ]; then
     echo "Cannot find java in your path. Install java or use the JAVA_HOME environment variable"
+    exit 1
   fi
 else
     #Use path in JAVA_HOME
@@ -74,4 +52,5 @@ fi
 # add any JVM options here
 JAVA_OPTS="${JAVA_OPTS-}"
 
-${JAVA_PATH} -cp "$CP" $JAVA_OPTS liquibase.integration.commandline.Main ${1+"$@"}
+export LIQUIBASE_HOME
+"${JAVA_PATH}" $JAVA_OPTS -jar "$LIQUIBASE_HOME/internal/lib/liquibase-core.jar" ${1+"$@"}

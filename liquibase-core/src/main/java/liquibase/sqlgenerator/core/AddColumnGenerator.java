@@ -2,31 +2,24 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
-import liquibase.datatype.DatabaseDataType;
-import liquibase.statement.NotNullConstraint;
-import liquibase.statement.core.AddUniqueConstraintStatement;
-import liquibase.structure.core.Schema;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.StringUtils;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.ColumnConstraint;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,7 +54,9 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
-        validationErrors.checkRequiredField("columnType", statement.getColumnType());
+        if (!ObjectUtil.defaultIfNull(statement.getComputed(), false)) {
+            validationErrors.checkRequiredField("columnType", statement.getColumnType());
+        }
         validationErrors.checkRequiredField("tableName", statement.getTableName());
 
         if (statement.isPrimaryKey() && ((database instanceof H2Database) || (database instanceof AbstractDb2Database) ||
@@ -74,16 +69,16 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             validationErrors.addError("Cannot add a non-primary key identity column");
         }
 
-        // TODO is this feature valid for other databases?
-        if ((statement.getAddAfterColumn() != null) && !(database instanceof MySQLDatabase)) {
-            validationErrors.addError("Cannot add column on specific position");
+        if (!(database instanceof MySQLDatabase || database instanceof H2Database)) {
+            validationErrors.checkDisallowedField("addAfterColumn", statement.getAddAfterColumn(), database, database.getClass());
         }
-        if ((statement.getAddBeforeColumn() != null) && !((database instanceof H2Database) || (database instanceof HsqlDatabase))) {
-            validationErrors.addError("Cannot add column on specific position");
+
+        if (!((database instanceof H2Database || database instanceof HsqlDatabase))) {
+            validationErrors.checkDisallowedField("addBeforeColumn", statement.getAddBeforeColumn(), database, database.getClass());
         }
-        if ((statement.getAddAtPosition() != null) && !(database instanceof FirebirdDatabase)) {
-            validationErrors.addError("Cannot add column on specific position");
-        }
+
+        //no databases liquibase supports currently supports adding columns at a given position. Firebird only allows position on alters
+        validationErrors.checkDisallowedField("addAtPosition", statement.getAddAtPosition(), database, database.getClass());
 
         return validationErrors;
     }
@@ -140,9 +135,17 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     }
 
     protected String generateSingleColumnSQL(AddColumnStatement statement, Database database) {
-        DatabaseDataType columnType = DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
+        DatabaseDataType columnType = null;
 
-        String alterTable = " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + columnType;
+        if (statement.getColumnType() != null) {
+            columnType = DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
+        }
+
+        String alterTable = " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName());
+
+        if (columnType != null) {
+            alterTable += " " + columnType;
+        }
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
             AutoIncrementConstraint autoIncrementConstraint = statement.getAutoIncrementConstraint();
@@ -155,7 +158,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             for (ColumnConstraint constraint : statement.getConstraints()) {
                 if (constraint instanceof NotNullConstraint) {
                     NotNullConstraint notNullConstraint = (NotNullConstraint) constraint;
-                    if (StringUtils.isNotEmpty(notNullConstraint.getConstraintName())) {
+                    if (StringUtil.isNotEmpty(notNullConstraint.getConstraintName())) {
                         alterTable += " CONSTRAINT " + database.escapeConstraintName(notNullConstraint.getConstraintName());
                         break;
                     }
@@ -167,8 +170,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             }
         } else {
             if ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
-                    instanceof MySQLDatabase) || ((database instanceof MSSQLDatabase) && "timestamp".equalsIgnoreCase
-                    (columnType.toString()))) {
+                    instanceof MySQLDatabase) || ((database instanceof MSSQLDatabase) && columnType != null && "timestamp".equalsIgnoreCase (columnType.toString()))) {
                 alterTable += " NULL";
             }
         }
@@ -181,11 +183,15 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         }
 
         if ((database instanceof MySQLDatabase) && (statement.getRemarks() != null)) {
-            alterTable += " COMMENT '" + database.escapeStringForDatabase(StringUtils.trimToEmpty(statement.getRemarks())) + "' ";
+            alterTable += " COMMENT '" + database.escapeStringForDatabase(StringUtil.trimToEmpty(statement.getRemarks())) + "' ";
+        }
+
+        if ((statement.getAddBeforeColumn() != null) && !statement.getAddBeforeColumn().isEmpty()) {
+            alterTable += " BEFORE " + database.escapeColumnName(statement.getSchemaName(), statement.getSchemaName(), statement.getTableName(), statement.getAddBeforeColumn()) + " ";
         }
 
         if ((statement.getAddAfterColumn() != null) && !statement.getAddAfterColumn().isEmpty()) {
-            alterTable += " AFTER `" + statement.getAddAfterColumn() + "` ";
+            alterTable += " AFTER " + database.escapeColumnName(statement.getSchemaName(), statement.getSchemaName(), statement.getTableName(), statement.getAddAfterColumn());
         }
 
         return alterTable;

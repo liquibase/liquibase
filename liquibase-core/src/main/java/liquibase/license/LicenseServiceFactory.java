@@ -1,49 +1,27 @@
 package liquibase.license;
 
-import java.util.Map;
-import java.util.HashMap;
+import liquibase.plugin.AbstractPluginFactory;
 
-import liquibase.logging.LogService;
-import liquibase.logging.Logger;
-import liquibase.servicelocator.ServiceLocator;
+public class LicenseServiceFactory extends AbstractPluginFactory<LicenseService> {
 
-public class LicenseServiceFactory {
-  private static final Logger LOG = LogService.getLog(LicenseServiceFactory.class);
-  private LicenseService licenseService;
-  private static LicenseServiceFactory INSTANCE = new LicenseServiceFactory();
-  private LicenseServiceFactory() {}
-
-  public static LicenseServiceFactory getInstance() {
-    if (INSTANCE == null) {
-      INSTANCE = new LicenseServiceFactory();
+    private LicenseServiceFactory() {
     }
-    return INSTANCE;
-  }
 
-  public LicenseService getLicenseService() {
-    if (licenseService != null) {
-      return licenseService;
+    @Override
+    protected Class<LicenseService> getPluginClass() {
+        return LicenseService.class;
     }
-    else {
-      Class<? extends LicenseService>[] classes = ServiceLocator.getInstance().findClasses(LicenseService.class);
-      if (classes.length > 0) {
-        try {
-          int highPriority = -1;
-          for (Class<? extends LicenseService> clazz : classes) {
-            LicenseService test = clazz.newInstance();
-            int priority = test.getPriority();
-            LOG.debug(String.format("Found an implementation of LicenseService named '%s' with priority %d",test.getClass().getName(),priority));
-            if (priority > highPriority && priority > 0) {
-              highPriority = priority;
-              licenseService = test;
-            }
-          }
-        }
-        catch (Throwable e) {
-          LOG.severe("Unable to instantiate LicenseService", e);
-        }
-      }
+
+    @Override
+    protected int getPriority(LicenseService obj, Object... args) {
+        return obj.getPriority();
     }
-    return licenseService;
-  }
+
+    public LicenseService getLicenseService() {
+        return getPlugin();
+    }
+
+    public void unregister(LicenseService service) {
+        this.removeInstance(service);
+    }
 }

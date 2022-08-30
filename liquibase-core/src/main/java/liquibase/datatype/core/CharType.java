@@ -2,19 +2,20 @@ package liquibase.datatype.core;
 
 import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
+import liquibase.database.core.H2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Locale;
 
-@DataTypeInfo(name="char", aliases = {"java.sql.Types.CHAR", "bpchar"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="char", aliases = {"java.sql.Types.CHAR", "bpchar", "character"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class CharType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -45,6 +46,10 @@ public class CharType extends LiquibaseDataType {
                 return type;
             }
             return super.toDatabaseDataType(database);
+        } else if (database instanceof H2Database) {
+            if (getRawDefinition().toLowerCase(Locale.US).contains("large object")) {
+                return new DatabaseDataType("CHARACTER LARGE OBJECT");
+            }
         }
 
         return super.toDatabaseDataType(database);
@@ -61,7 +66,7 @@ public class CharType extends LiquibaseDataType {
         }
 
         String val = String.valueOf(value);
-        if ((database instanceof MSSQLDatabase) && !StringUtils.isAscii(val)) {
+        if ((database instanceof MSSQLDatabase) && !StringUtil.isAscii(val)) {
             return "N'"+database.escapeStringForDatabase(val)+"'";
         }
 

@@ -2,30 +2,34 @@ package liquibase.executor;
 
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
+import liquibase.plugin.AbstractPluginFactory;
+import liquibase.plugin.Plugin;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class ExecutorService {
+public class ExecutorService extends AbstractPluginFactory<Executor>  {
 
-    private static ExecutorService instance = new ExecutorService();
-
-    private List<Executor> registry = new ArrayList<>();
-
-    private Map<String, Executor> executors = new HashMap<>();
+    private final Map<String, Executor> executors = new ConcurrentHashMap<>();
 
     private ExecutorService() {
-        Class<? extends Executor>[] classes;
-        try {
-            classes = ServiceLocator.getInstance().findClasses(Executor.class);
+    }
 
-            for (Class<? extends Executor> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
-            }
+    @Override
+    protected Class<Executor> getPluginClass() {
+        return Executor.class;
+    }
 
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+    @Override
+    protected int getPriority(Executor executor, Object... args) {
+        String name = (String) args[0];
+        Database database = (Database) args[1];
+        if (name.equals(executor.getName()) && executor.supports(database)) {
+            return executor.getPriority();
+        } else {
+            return Plugin.PRIORITY_NOT_APPLICABLE;
         }
+
     }
 
     private String createKey(String executorName, Database database) {
@@ -38,46 +42,13 @@ public class ExecutorService {
         if (executors.containsKey(key)) {
             return executors.get(key);
         }
-        SortedSet<Executor> foundExecutors = new TreeSet<>(new Comparator<Executor>() {
-            @Override
-            public int compare(Executor o1, Executor o2) {
-                return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
-            }
-        });
 
-        for (Executor executor : registry) {
-            if (executor.getName().toLowerCase().equals(executorName.toLowerCase())) {
-                foundExecutors.add(executor);
-            }
-        }
-        if (foundExecutors .isEmpty()) {
-            throw new UnexpectedLiquibaseException("Cannot find Executor for " +  executorName);
-        }
-
+        final Executor plugin = getPlugin(executorName.toLowerCase(), database);
         try {
-            Executor exampleService = foundExecutors .iterator().next();
-            Class<? extends Executor> aClass = exampleService.getClass();
-            Executor executor;
-            try {
-                aClass.getConstructor();
-                executor = aClass.getConstructor().newInstance();
-            } catch (NoSuchMethodException e) {
-                // must have been manually added to the registry and so already configured.
-                executor = exampleService;
-            }
-
-            return executor;
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+            return plugin.getClass().newInstance();
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
         }
-    }
-
-    private void register(Executor executor) {
-        registry.add(0, executor);
-    }
-
-    public static ExecutorService getInstance() {
-        return instance;
     }
 
     /**
@@ -92,7 +63,7 @@ public class ExecutorService {
     public Executor getExecutor(final String name, final Database database) {
         Executor returnExecutor = executors.computeIfAbsent(createKey(name, database), db -> {
             try {
-                Executor executor = getExecutorValue(name, database); //(Executor) ServiceLocator.getInstance().newInstance(Executor.class);
+                Executor executor = getExecutorValue(name, database);
                 executor.setDatabase(database);
                 return executor;
             } catch (Exception e) {

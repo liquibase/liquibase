@@ -3,7 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -11,7 +11,7 @@ import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeyStatement> {
 
@@ -26,9 +26,15 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
         validationErrors.checkRequiredField("columnNames", addPrimaryKeyStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addPrimaryKeyStatement.getTableName());
 
-        if (!((database instanceof MSSQLDatabase) || (database instanceof MockDatabase))) {
-            if ((addPrimaryKeyStatement.isClustered() != null) && !addPrimaryKeyStatement.isClustered()) {
-                validationErrors.checkDisallowedField("clustered", addPrimaryKeyStatement.isClustered(), database);
+        if (addPrimaryKeyStatement.isClustered() != null) {
+            if (database instanceof PostgresDatabase) {
+                if (addPrimaryKeyStatement.isClustered() && addPrimaryKeyStatement.getConstraintName() == null) {
+                    validationErrors.addError("Postgresql requires constraintName on addPrimaryKey when clustered=true");
+                }
+            } else if (database instanceof MSSQLDatabase || database instanceof MockDatabase) {
+                //clustered is fine
+            } else if (addPrimaryKeyStatement.isClustered()) {
+                validationErrors.addError("Cannot specify clustered=true on "+database.getShortName());
             }
         }
 
@@ -57,7 +63,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
             sql += " (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
         }
 
-        if ((StringUtils.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
+        if ((StringUtil.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
                 sql += " ON "+statement.getTablespace();
             } else if ((database instanceof AbstractDb2Database) || (database instanceof SybaseASADatabase)) {

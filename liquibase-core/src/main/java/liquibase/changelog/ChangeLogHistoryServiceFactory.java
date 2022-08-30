@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
@@ -35,12 +36,9 @@ public class ChangeLogHistoryServiceFactory {
     }
 
     private ChangeLogHistoryServiceFactory() {
-        Class<? extends ChangeLogHistoryService>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(ChangeLogHistoryService.class);
-
-            for (Class<? extends ChangeLogHistoryService> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+            for (ChangeLogHistoryService service : Scope.getCurrentScope().getServiceLocator().findInstances(ChangeLogHistoryService.class)) {
+                register(service);
             }
 
         } catch (Exception e) {
@@ -94,12 +92,13 @@ public class ChangeLogHistoryServiceFactory {
             }
     }
 
-    public synchronized void resetAll() {
-        for (ChangeLogHistoryService changeLogHistoryService : registry) {
-            changeLogHistoryService.reset();
+    public void resetAll() {
+        synchronized (ChangeLogHistoryServiceFactory.class) {
+            for (ChangeLogHistoryService changeLogHistoryService : registry) {
+                changeLogHistoryService.reset();
+            }
+            instance = null;
         }
-        instance = null;
     }
-
 }
 

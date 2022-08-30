@@ -1,8 +1,8 @@
 package liquibase.structure.core;
 
 import liquibase.statement.NotNullConstraint;
-import liquibase.util.BooleanUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.BooleanUtil;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +69,7 @@ public class Table extends Relation {
 
     @Override
     public int hashCode() {
-        return StringUtils.trimToEmpty(getName()).toUpperCase().hashCode();
+        return StringUtil.trimToEmpty(getName()).toUpperCase().hashCode();
     }
 
     @Override
@@ -102,6 +102,6 @@ public class Table extends Relation {
 
     public boolean isDefaultTablespace() {
         Boolean b = getAttribute("default_tablespace",Boolean.class);
-        return BooleanUtils.isTrue(b);
+        return BooleanUtil.isTrue(b);
     }
 }

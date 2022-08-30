@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.SQLFileChange;
 import liquibase.changelog.ChangeSet;
@@ -8,11 +9,11 @@ import liquibase.changelog.RollbackContainer;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.MigrationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 
 import java.util.List;
 import java.util.Set;
@@ -43,15 +44,28 @@ public class RollbackVisitor implements ChangeSetVisitor {
 
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         if (! (executor instanceof LoggingExecutor)) {
-            LogService.getLog(getClass()).info(LogType.USER_MESSAGE, "Rolling Back Changeset:" + changeSet);
+            Scope.getCurrentScope().getUI().sendMessage("Rolling Back Changeset: " + changeSet);
         }
-        changeSet.rollback(this.database, this.execListener);
+        sendRollbackWillRunEvent(changeSet, databaseChangeLog, database);
+        try {
+            changeSet.rollback(this.database, this.execListener);
+        }
+        catch (Exception e) {
+            fireRollbackFailed(changeSet, databaseChangeLog, database, e);
+            throw e;
+        }
         this.database.removeRanStatus(changeSet);
         sendRollbackEvent(changeSet, databaseChangeLog, database);
         this.database.commit();
         checkForEmptyRollbackFile(changeSet);
+    }
+
+    protected void fireRollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception e) {
+        if (execListener != null) {
+            execListener.rollbackFailed(changeSet, databaseChangeLog, database, e);
+        }
     }
 
     private void checkForEmptyRollbackFile(ChangeSet changeSet) {
@@ -66,14 +80,19 @@ public class RollbackVisitor implements ChangeSetVisitor {
             }
             String sql = ((SQLFileChange)change).getSql();
             if (sql.length() == 0) {
-                LogService.getLog(getClass())
-                          .info("\nNo rollback logic defined in empty rollback script. Changesets have been removed from\n" +
+                Scope.getCurrentScope().getLog(getClass()).info("\nNo rollback logic defined in empty rollback script. Changesets have been removed from\n" +
                                 "the DATABASECHANGELOG table but no other logic was performed.");
             }
         }
     }
 
-    private void sendRollbackEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2) {
+    private void sendRollbackWillRunEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+        if (execListener != null) {
+            execListener.willRollback(changeSet, databaseChangeLog, database);
+        }
+    }
+
+    private void sendRollbackEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         if (execListener != null) {
             execListener.rolledBack(changeSet, databaseChangeLog, database);
         }

@@ -31,7 +31,7 @@ public class RemoveChangeSetRanStatusGenerator extends AbstractSqlGenerator<Remo
                             .setWhere(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
                                     "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
                                     "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
-                            .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath())
+                        .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getStoredFilePath())
                     , database);
         } finally {
             database.setObjectQuotingStrategy(currentStrategy);

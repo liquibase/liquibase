@@ -10,7 +10,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -19,7 +19,7 @@ public class DiffToReport {
 
     protected DiffResult diffResult;
     private PrintStream out;
-    private StringUtils.StringUtilsFormatter formatter;
+    private StringUtil.StringUtilFormatter formatter;
 
     public DiffToReport(DiffResult diffResult, PrintStream out) {
         this.diffResult = diffResult;
@@ -34,7 +34,58 @@ public class DiffToReport {
 
         CompareControl.SchemaComparison[] schemas = diffResult.getCompareControl().getSchemaComparisons();
         if ((schemas != null) && (schemas.length > 0)) {
-            out.println("Compared Schemas: " + StringUtils.join(Arrays.asList(schemas), ", ", formatter, true));
+            out.println("Compared Schemas: " + StringUtil.join(Arrays.asList(schemas), ", ", new StringUtil.StringUtilFormatter<CompareControl.SchemaComparison>() {
+                @Override
+                public String toString(CompareControl.SchemaComparison obj) {
+                    String referenceName;
+                    String comparisonName;
+
+                    Database referenceDatabase = diffResult.getReferenceSnapshot().getDatabase();
+                    Database comparisonDatabase = diffResult.getComparisonSnapshot().getDatabase();
+
+                    if (referenceDatabase.supportsSchemas()) {
+                        referenceName = obj.getReferenceSchema().getSchemaName();
+                        if (referenceName == null) {
+                            referenceName = referenceDatabase.getDefaultSchemaName();
+                        }
+                    } else if (referenceDatabase.supportsCatalogs()) {
+                        referenceName = obj.getReferenceSchema().getCatalogName();
+                        if (referenceName == null) {
+                            referenceName = referenceDatabase.getDefaultCatalogName();
+                        }
+                    } else {
+                        return "";
+                    }
+
+                    if (comparisonDatabase.supportsSchemas()) {
+                        comparisonName = obj.getComparisonSchema().getSchemaName();
+                        if (comparisonName == null) {
+                            comparisonName = comparisonDatabase.getDefaultSchemaName();
+                        }
+                    } else if (comparisonDatabase.supportsCatalogs()) {
+                        comparisonName = obj.getComparisonSchema().getCatalogName();
+                        if (comparisonName == null) {
+                            comparisonName = comparisonDatabase.getDefaultCatalogName();
+                        }
+                    } else {
+                        return "";
+                    }
+
+                    if (referenceName == null) {
+                        referenceName = StringUtil.trimToEmpty(referenceDatabase.getDefaultSchemaName());
+                    }
+
+                    if (comparisonName == null) {
+                        comparisonName = StringUtil.trimToEmpty(comparisonDatabase.getDefaultSchemaName());
+                    }
+
+                    if (referenceName.equalsIgnoreCase(comparisonName)) {
+                        return referenceName;
+                    } else {
+                        return referenceName + " -> " + comparisonName;
+                    }
+                }
+            }, true));
         }
 
         printComparison("Product Name", diffResult.getProductNameDiff(), out);
@@ -194,9 +245,9 @@ public class DiffToReport {
 
     }
 
-    public StringUtils.StringUtilsFormatter createFormatter() {
+    public StringUtil.StringUtilFormatter createFormatter() {
         return
-            new StringUtils.StringUtilsFormatter<CompareControl.SchemaComparison>() {
+            new StringUtil.StringUtilFormatter<CompareControl.SchemaComparison>() {
                 @Override
                 public String toString(CompareControl.SchemaComparison obj) {
                     String referenceName;
@@ -234,11 +285,11 @@ public class DiffToReport {
                     }
 
                     if (referenceName == null) {
-                        referenceName = StringUtils.trimToEmpty(referenceDatabase.getDefaultSchemaName());
+                        referenceName = StringUtil.trimToEmpty(referenceDatabase.getDefaultSchemaName());
                     }
 
                     if (comparisonName == null) {
-                        comparisonName = StringUtils.trimToEmpty(comparisonDatabase.getDefaultSchemaName());
+                        comparisonName = StringUtil.trimToEmpty(comparisonDatabase.getDefaultSchemaName());
                     }
 
                     if (referenceName.equalsIgnoreCase(comparisonName)) {

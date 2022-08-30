@@ -5,11 +5,10 @@ import liquibase.Labels;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogType;
+import liquibase.exception.LiquibaseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StreamUtil;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -23,7 +22,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         Yaml yaml = new Yaml(new SafeConstructor());
 
-        try (InputStream changeLogStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor)) {
+        try (InputStream changeLogStream = resourceAccessor.openStream(null, physicalChangeLogLocation)) {
             if (changeLogStream == null) {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
@@ -46,23 +45,27 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             }
 
             for (Object obj : (List) rootList) {
-                if ((obj instanceof Map) && ((Map) obj).containsKey("property")) {
-                    Map property = (Map) ((Map) obj).get("property");
-                    ContextExpression context = new ContextExpression((String) property.get("context"));
-                    Labels labels = new Labels((String) property.get("labels"));
+                if (obj instanceof Map) {
+                    if (((Map) obj).containsKey("property")) {
+                        Map property = (Map) ((Map) obj).get("property");
+                        ContextExpression context = new ContextExpression((String) property.get("context"));
+                        Labels labels = new Labels((String) property.get("labels"));
 
-                    Boolean global = getGlobalParam(property);
+                        Boolean global = getGlobalParam(property);
 
-                    if (property.containsKey("name")) {
-                        Object value = property.get("value");
-                        if (value != null) {
-                            value = value.toString(); // TODO: not nice...
+                        if (property.containsKey("name")) {
+                            Object value = property.get("value");
+
+                            changeLogParameters.set((String) property.get("name"), value, context, labels, (String) property.get("dbms"), global, changeLog);
+                        } else if (property.containsKey("file")) {
+                            loadChangeLogParametersFromFile(changeLogParameters, resourceAccessor, changeLog, property,
+                                    context, labels, global);
                         }
+                    }
 
-                        changeLogParameters.set((String) property.get("name"), (String) value, context, labels, (String) property.get("dbms"), global, changeLog);
-                    } else if (property.containsKey("file")) {
-                        loadChangeLogParametersFromFile(changeLogParameters, resourceAccessor, changeLog, property,
-                        context, labels, global);
+                    if (((Map) obj).containsKey("changeLogId")) {
+                        String changeLogId = (String)((Map)obj).get("changeLogId");
+                        changeLog.setChangeLogId(changeLogId);
                     }
                 }
             }
@@ -94,15 +97,14 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
         return parsedYaml;
     }
     
-    private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException {
+    private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException, LiquibaseException {
         Properties props = new Properties();
         try (
-            InputStream propertiesStream = StreamUtil.singleInputStream(
-                (String) property.get("file"), resourceAccessor))
+            InputStream propertiesStream = resourceAccessor.openStream(null, (String) property.get("file")))
         {
             
             if (propertiesStream == null) {
-                log.info(LogType.LOG, "Could not open properties file " + property.get("file"));
+                log.info("Could not open properties file " + property.get("file"));
             } else {
                 props.load(propertiesStream);
 
@@ -123,7 +125,6 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 		Boolean global = null;
 		Object globalObj = property.get("global");
 		if (globalObj == null) {
-			// default behaviour before liquibase 3.4
 			global = true;
 		} else {
 			global = (Boolean) globalObj;
@@ -131,7 +132,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 		return global;
 	}
 
-    protected void replaceParameters(Object obj, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog) {
+    protected void replaceParameters(Object obj, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog) throws ChangeLogParseException{
         if (obj instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) obj).entrySet()) {
                 if ((entry.getValue() instanceof Map) || (entry.getValue() instanceof Collection)) {

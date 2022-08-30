@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -30,12 +31,9 @@ public class SqlGeneratorFactory {
     private Map<String, SortedSet<SqlGenerator>> generatorsByKey = new HashMap<>();
 
     private SqlGeneratorFactory() {
-        Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(SqlGenerator.class);
-
-            for (Class clazz : classes) {
-                register((SqlGenerator) clazz.getConstructor().newInstance());
+            for (SqlGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(SqlGenerator.class)) {
+                register(generator);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -160,7 +158,7 @@ public class SqlGeneratorFactory {
 
     private boolean isTypeEqual(Type aType, Class aClass) {
         if (aType instanceof Class) {
-            return ((Class) aType).getName().equals(aClass.getName());
+            return ((Class<?>) aType).isAssignableFrom(aClass);
         }
         return aType.equals(aClass);
     }
@@ -259,7 +257,12 @@ public class SqlGeneratorFactory {
 
     public Warnings warn(SqlStatement statement, Database database) {
         //noinspection unchecked
-        return createGeneratorChain(statement, database).warn(statement, database);
+        final SqlGeneratorChain generatorChain = createGeneratorChain(statement, database);
+        if (generatorChain != null) {
+            return generatorChain.warn(statement, database);
+        }
+        return
+           new Warnings().addWarning("No generator chain created for SQL Statement associated with database " + database.getShortName());
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(SqlStatement statement, Database database) {

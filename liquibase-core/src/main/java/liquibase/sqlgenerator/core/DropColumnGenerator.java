@@ -64,8 +64,16 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
             }
             result.add(new UnparsedSql(alterTable, getAffectedColumns(columns)));
         } else {
-            for (DropColumnStatement column : columns) {
-                result.add(generateSingleColumnSql(column, database)[0]);
+            if (database instanceof MSSQLDatabase) {
+                for (DropColumnStatement column : columns) {
+                    final Sql[] sqls = generateSingleColumnSql(column, database);
+                    result.add(sqls[0]);
+                    result.add(sqls[1]);
+                }
+            } else {
+                for (DropColumnStatement column : columns) {
+                    result.add(generateSingleColumnSql(column, database)[0]);
+                }
             }
         }
         return result.toArray(new Sql[result.size()]);
@@ -74,9 +82,17 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
     private Sql[] generateSingleColumnSql(DropColumnStatement statement, Database database) {
         if (database instanceof DB2Database) {
             return new Sql[] {new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()), getAffectedColumn(statement))};
+        } else if (database instanceof Db2zDatabase) {
+            return new Sql[]{new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " RESTRICT", getAffectedColumn(statement))};
         } else if ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
             instanceof FirebirdDatabase) || (database instanceof InformixDatabase)) {
             return new Sql[] {new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()), getAffectedColumn(statement))};
+        } else if (database instanceof MSSQLDatabase) {
+            return new Sql[] {
+                    generateDropDV(statement, database),
+                    new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP COLUMN " +
+                            database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()), getAffectedColumn(statement))
+            };
         }
         return new Sql[] {new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()), getAffectedColumn(statement))};
     }
@@ -91,5 +107,10 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
 
     protected Column getAffectedColumn(DropColumnStatement statement) {
         return new Column().setName(statement.getColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
+    }
+
+    private UnparsedSql generateDropDV(DropColumnStatement statement, Database database) {
+        return new UnparsedSql((String) DropDefaultValueGenerator.DROP_DF_MSSQL.apply(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()),
+                database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName())));
     }
 }

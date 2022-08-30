@@ -1,6 +1,6 @@
 package liquibase.structure;
 
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -10,7 +10,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -33,7 +33,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public String getObjectTypeName() {
-        return StringUtils.lowerCaseFirst(getClass().getSimpleName());
+        return StringUtil.lowerCaseFirst(getClass().getSimpleName());
     }
 
     @Override
@@ -74,7 +74,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
                 } // if they are both null, it will continue with rest
             }
             // now compare schema name
-            int compare = StringUtils.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            int compare = StringUtil.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtil.trimToEmpty(that.getSchema().getName()));
             if (compare != 0) {
                 return compare;
             }
@@ -174,11 +174,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public LiquibaseSerializable.SerializationType getSerializableFieldType(String field) {
-        if (getSerializableFieldValue(field) instanceof DatabaseObject) {
-            return LiquibaseSerializable.SerializationType.NAMED_FIELD;
-        } else {
-            return LiquibaseSerializable.SerializationType.NAMED_FIELD;
-        }
+        return LiquibaseSerializable.SerializationType.NAMED_FIELD;
     }
 
     @Override
@@ -241,6 +237,6 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
      * @return
      */
     public boolean shouldIncludeCatalogInSpecification() {
-        return LiquibaseConfiguration.getInstance().shouldIncludeCatalogInSpecification();
+        return GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION.getCurrentValue();
     }
 }

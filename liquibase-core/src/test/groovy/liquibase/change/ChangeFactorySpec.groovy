@@ -1,7 +1,8 @@
 package liquibase.change
 
+import liquibase.Scope
 import liquibase.change.core.DropTableChange
-import liquibase.util.StringUtils
+import liquibase.util.StringUtil
 import spock.lang.Specification
 
 class ChangeFactorySpec extends Specification {
@@ -13,7 +14,7 @@ class ChangeFactorySpec extends Specification {
         change.schemaName = "schem"
 
         then:
-        ChangeFactory.instance.getParameters(change) == [tableName: "tab", schemaName: "schem"]
+        Scope.currentScope.getSingleton(ChangeFactory).getParameters(change) == [tableName: "tab", schemaName: "schem"]
     }
 
     def "getParameters with no parameters set"() {
@@ -21,6 +22,6 @@ class ChangeFactorySpec extends Specification {
         def change = new DropTableChange()
 
         then:
-        StringUtils.join(ChangeFactory.instance.getParameters(change), ",") == ""
+        StringUtil.join(Scope.currentScope.getSingleton(ChangeFactory).getParameters(change), ",") == ""
     }
 }

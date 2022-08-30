@@ -1,8 +1,11 @@
 package liquibase.license; 
 
+import liquibase.plugin.Plugin;
+
+import java.util.Date;
 import java.util.List;
 
-public interface LicenseService {
+public interface LicenseService extends Plugin {
 
   /**
    *
@@ -60,6 +63,13 @@ public interface LicenseService {
   void disable();
 
   /**
+   * Delete any cached, installed licenses currently tracked by the implementation.
+   */
+  default void reset() {
+
+  }
+
+  /**
    * @return true if any installed license is valid but will expire within the next 30 days.
    */
   boolean licenseIsAboutToExpire();
@@ -72,5 +82,13 @@ public interface LicenseService {
    * would indicate that the license expired that many days ago.
    */
   int daysTilExpiration();
+
+  /**
+   * Get the expiration date of the installed license.
+   * @return the expiration date, or null if no license can be found
+   */
+  default Date getExpirationDate() {
+    return null;
+  }
 
 }

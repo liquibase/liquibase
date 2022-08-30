@@ -2,7 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,7 +58,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
     }
 
     public String getColumnNames() {
-        return StringUtils.join(getColumns(), ", ", new StringUtils.StringUtilsFormatter() {
+        return StringUtil.join(getColumns(), ", ", new StringUtil.StringUtilFormatter() {
             @Override
             public String toString(Object obj) {
                 return ((Column) obj).toString(false);

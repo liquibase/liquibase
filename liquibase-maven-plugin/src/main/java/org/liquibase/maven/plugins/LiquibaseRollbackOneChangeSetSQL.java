@@ -1,19 +1,15 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.command.AbstractSelfConfiguratingCommand;
-import liquibase.command.CommandExecutionException;
-import liquibase.command.CommandFactory;
-import liquibase.command.LiquibaseCommand;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.command.*;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.*;
 import java.util.HashMap;
@@ -34,11 +30,12 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
 
     /**
      *
-     * The change set ID to rollback
+     * The changeset ID to rollback
      *
      * @parameter property="liquibase.changeSetId"
      *
      */
+    @PropertyElement
     protected String changeSetId;
 
     /**
@@ -48,6 +45,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.changeSetAuthor"
      *
      */
+    @PropertyElement
     protected String changeSetAuthor;
 
     /**
@@ -57,6 +55,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.changeSetPath"
      *
      */
+    @PropertyElement
     protected String changeSetPath;
 
     /**
@@ -66,6 +65,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.rollbackScript"
      *
      */
+    @PropertyElement
     protected String rollbackScript;
 
     /**
@@ -75,6 +75,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.outputFile"
      *
      */
+    @PropertyElement
     protected String outputFile;
 
 
@@ -84,9 +85,9 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
     @Override
     protected void printSettings(String indent) {
       super.printSettings(indent);
-        getLog().info(indent + "Change Set ID:     " + changeSetId);
-        getLog().info(indent + "Change Set Author: " + changeSetAuthor);
-        getLog().info(indent + "Change Set Path:   " + changeSetPath);
+        getLog().info(indent + "Changeset ID:     " + changeSetId);
+        getLog().info(indent + "Changeset Author: " + changeSetAuthor);
+        getLog().info(indent + "Changeset Path:   " + changeSetPath);
         getLog().info(indent + "Rollback script:   " + rollbackScript);
     }
 
@@ -104,14 +105,9 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         //
         // Check the Pro license
         //
-        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
-        if (! hasProLicense) {
-            throw new LiquibaseException(
-               "The command 'rollbackOneChangeSetSQL' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
-        }
         Database database = liquibase.getDatabase();
-        LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand("rollbackOneChangeSet"));
-        AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand)liquibaseCommand;
+        CommandScope liquibaseCommand = new CommandScope("internalRollbackOneChangeSetSQL");
+
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         ChangeLogParameters clp = new ChangeLogParameters(database);
         Writer outputWriter = null;
@@ -124,22 +120,12 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         }
         argsMap.put("changeLogParameters", clp);
         argsMap.put("liquibase", liquibase);
-        configuratingCommand.configure(argsMap);
-        try {
-            liquibaseCommand.execute();
+
+        for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
+            liquibaseCommand.addArgumentValue(entry.getKey(), entry.getValue());
         }
-        catch (CommandExecutionException cee) {
-            throw new LiquibaseException("Error executing rollbackOneChangeSet", cee);
-        }
-        finally {
-            try {
-                outputWriter.flush();
-                closeOutputWriter(outputWriter);
-            }
-            catch (IOException ioe) {
-                LogService.getLog(getClass()).info(LogType.LOG, String.format("Unable to close output file"));
-            }
-        }
+
+        liquibaseCommand.execute();
     }
 
     private OutputStream getOutputStream() throws IOException {
@@ -150,9 +136,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         try {
             fileOut = new FileOutputStream(outputFile, false);
         } catch (IOException e) {
-            LogService.getLog(getClass()).severe(LogType.LOG, String.format(
-                    coreBundle.getString("could.not.create.output.file"),
-            outputFile));
+            Scope.getCurrentScope().getLog(getClass()).severe(String.format(coreBundle.getString("could.not.create.output.file"), outputFile));
             throw e;
         }
         return fileOut;
@@ -166,8 +150,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
     }
 
     private Writer createOutputWriter() throws IOException {
-        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .getOutputEncoding();
+        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
     }

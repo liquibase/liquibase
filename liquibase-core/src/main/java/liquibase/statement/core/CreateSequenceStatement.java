@@ -110,6 +110,7 @@ public class CreateSequenceStatement extends AbstractSqlStatement {
     public String getDataType() {
         return dataType;
     }
+
     public CreateSequenceStatement setDataType(String dataType) {
         this.dataType = dataType;
         return this;

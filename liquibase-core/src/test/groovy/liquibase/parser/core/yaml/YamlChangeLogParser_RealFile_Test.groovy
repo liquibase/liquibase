@@ -10,6 +10,7 @@ import com.example.liquibase.change.PrimaryKeyConfig
 import com.example.liquibase.change.UniqueConstraintConfig
 
 import liquibase.Contexts
+import liquibase.Scope
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
 import liquibase.change.CheckSum
@@ -31,7 +32,7 @@ import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.ObjectQuotingStrategy
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.CustomPreconditionWrapper
 import liquibase.precondition.core.AndPrecondition
@@ -113,6 +114,15 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         change.columns[2].constraints == null
     }
 
+    def "throws a nice validation error when changeSet node has typo in name"() throws ChangeLogParseException {
+        def path = "liquibase/parser/core/yaml/typoChangeLog.yaml"
+        when:
+        new YamlChangeLogParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+
+        then:
+        thrown(ChangeLogParseException.class)
+    }
+
     def "able to parse a changelog with multiple changeSets multiChangeSetChangeLog.yaml"() throws Exception {
         def path = "liquibase/parser/core/yaml/multiChangeSetChangeLog.yaml"
         when:
@@ -131,7 +141,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert !changeLog.getChangeSet(path, "nvoxland", "1").shouldAlwaysRun()
         assert !changeLog.getChangeSet(path, "nvoxland", "1").shouldRunOnChange()
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(0).getChanges().get(0)).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSets().get(0).getChanges().get(0)).getName() == "createTable"
         assert changeLog.getChangeSets().get(0).getChanges().get(0) instanceof CreateTableChange
 
         then:
@@ -144,10 +154,10 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert changeLog.getChangeSet(path, "nvoxland", "2").rollback.changes[0] instanceof RawSQLChange
         assert changeLog.getChangeSet(path, "nvoxland", "2").rollback.changes[1] instanceof RawSQLChange
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0)).getName() == "addColumn"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0)).getName() == "addColumn"
         assert changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0) instanceof AddColumnChange
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(1)).getName() == "addColumn"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(1)).getName() == "addColumn"
         assert changeLog.getChangeSets().get(1).getChanges().get(1) instanceof AddColumnChange
 
         changeLog.getChangeSet(path, "bob", "3").getChanges().size() == 1
@@ -156,7 +166,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert !changeLog.getChangeSet(path, "bob", "3").shouldAlwaysRun()
         assert !changeLog.getChangeSet(path, "bob", "3").shouldRunOnChange()
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "bob", "3").getChanges().get(0)).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSet(path, "bob", "3").getChanges().get(0)).getName() == "createTable"
         assert changeLog.getChangeSet(path, "bob", "3").getChanges().get(0) instanceof CreateTableChange
 
 
@@ -195,16 +205,16 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         changeLog.getPhysicalFilePath() == path
 
         changeLog.getPreconditions() != null
-        changeLog.getPreconditions().getNestedPreconditions().size() == 2
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().size() == 2
 
-        changeLog.getPreconditions().getNestedPreconditions().get(0).getName() == "runningAs"
-        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(0)).getUsername() == "testUser"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(0).getName() == "runningAs"
+        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(0)).getUsername() == "testUser"
 
-        changeLog.getPreconditions().getNestedPreconditions().get(1).getName() == "or"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(0).getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(0)).getType() == "mssql"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1).getName() == "or"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(0).getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(0)).getType() == "mssql"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
 
         changeLog.getChangeSets().size() == 1
     }
@@ -290,29 +300,6 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert e.message.startsWith("Syntax error in file liquibase/parser/core/yaml/malformedChangeLog.yaml")
     }
 
-    def "elements that don't correspond to anything in liquibase are ignored"() throws Exception {
-        def path = "liquibase/parser/core/yaml/unusedTagsChangeLog.yaml"
-        expect:
-        DatabaseChangeLog changeLog = new YamlChangeLogParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
-
-        changeLog.getLogicalFilePath() == path
-        changeLog.getPhysicalFilePath() == path
-
-        changeLog.getPreconditions().getNestedPreconditions().size() == 0
-        changeLog.getChangeSets().size() == 1
-
-        ChangeSet changeSet = changeLog.getChangeSets().get(0);
-        changeSet.getAuthor() == "nvoxland"
-        changeSet.getId() == "1"
-        changeSet.getChanges().size() == 1
-        changeSet.getFilePath() == path
-        changeSet.getComments() == "Some comments go here"
-
-        Change change = changeSet.getChanges().get(0);
-        ChangeFactory.getInstance().getChangeMetaData(change).getName() == "createTable"
-        assert change instanceof CreateTableChange
-    }
-
     def "changeLog parameters are correctly expanded"() throws Exception {
         when:
         def params = new ChangeLogParameters(new MockDatabase());
@@ -376,9 +363,9 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((InsertDataChange) changeLog.getChangeSet(path, "nvoxland", "multiple changes").changes[3]).columns[0].valueNumeric == 4
 
         and: "changeSet level attributes are parsed correctly"
-        that changeLog.getChangeSet(path, "nvoxland", "context and dbms").contexts.contexts, containsInAnyOrder(["test", "qa"].toArray())
+        that changeLog.getChangeSet(path, "nvoxland", "context and dbms").contextFilter.contexts, containsInAnyOrder(["test", "qa"].toArray())
         that changeLog.getChangeSet(path, "nvoxland", "context and dbms").dbmsSet, containsInAnyOrder(["mock", "oracle"].toArray())
-        changeLog.getChangeSet(path, "nvoxland", "standard changeSet").contexts.contexts.size() == 0
+        changeLog.getChangeSet(path, "nvoxland", "standard changeSet").contextFilter.contexts.size() == 0
         changeLog.getChangeSet(path, "nvoxland", "standard changeSet").dbmsSet == null
 
         assert changeLog.getChangeSet(path, "nvoxland", "runAlways set").isAlwaysRun()
@@ -450,25 +437,25 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).replace == "with_modifysql"
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).with == "after_modifysql"
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).applicableDbms == null
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).contexts == null
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).contextFilter == null
         assert !((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).applyToRollback
 
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).replace == ")"
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).with == ""
         that(((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).getApplicableDbms(), containsInAnyOrder(["mysql", "mock"].toArray()))
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).contexts == null
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).contextFilter == null
 
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).value == " , name varchar(255) )"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).contexts == null
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).contextFilter == null
         that(((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).applicableDbms, containsInAnyOrder(["mysql", "mock"].toArray()))
         assert ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).applyToRollback
 
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).value == " partitioned by stuff"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).contexts.toString() == "prod, qa"
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).contextFilter.toString() == "prod, qa"
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).applicableDbms == null
 
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).value == " engine innodb"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).contexts.toString() == "prod"
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).contextFilter.toString() == "prod"
         that(((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).getApplicableDbms(), containsInAnyOrder(["mysql"].toArray()))
 
         and: "utf8 is read correctly"
@@ -541,7 +528,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[3].defaultValueComputed.toString() == "average_size()"
 
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[4].name == "new_col_datetime"
-        new ISODateFormat().format(new java.sql.Timestamp(((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[4].defaultValueDate.time)).matches(/2014-12-\d+T\d+:15:33/) //timezones shift actual value around
+        new ISODateFormat().format(new java.sql.Timestamp(((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[4].defaultValueDate.time)).matches(/2014-12-\d+T\d+:\d+:33/) //timezones shift actual value around
 
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[5].name == "new_col_seq"
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[5].defaultValueSequenceNext.toString() == "seq_test"
@@ -584,7 +571,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
 
     def "nested objects are parsed"() {
         setup:
-        ChangeFactory.getInstance().register(CreateTableExampleChange)
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).register(new CreateTableExampleChange())
 
         when:
         def path = "liquibase/parser/core/yaml/nestedObjectsChangeLog.yaml"
@@ -662,6 +649,6 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         change1.getUniqueConstraints().get(1).getKeyColumns().get(1).getDescending() == true
 
         cleanup:
-        ChangeFactory.getInstance().unregister("createTableExample");
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).unregister("createTableExample");
     }
 }

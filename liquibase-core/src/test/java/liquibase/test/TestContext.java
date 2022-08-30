@@ -5,7 +5,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 
 import java.io.File;
 import java.net.*;
@@ -68,7 +68,7 @@ public class TestContext {
             File thisClassFile = new File(uri);
             return new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile(), "liquibase-core");
         }
-        uri = new URI(this.getClass().getClassLoader().getResource("liquibase/test/DatabaseTest.class").toExternalForm());
+        uri = new URI(this.getClass().getClassLoader().getResource("liquibase/dbtest/AbstractIntegrationTest.class").toExternalForm());
         if(!uri.isOpaque()) {
             File thisClassFile = new File(uri);
             return new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile().getParentFile(), "liquibase-core");

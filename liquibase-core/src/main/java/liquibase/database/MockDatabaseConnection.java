@@ -5,6 +5,7 @@ import liquibase.servicelocator.LiquibaseService;
 
 import java.sql.Driver;
 import java.util.Properties;
+
 @LiquibaseService(skip=true)
 public class MockDatabaseConnection implements DatabaseConnection {
 
@@ -87,7 +88,7 @@ public class MockDatabaseConnection implements DatabaseConnection {
 
 	@Override
 	public String getURL() {
-		return null;
+		return "jdbc://mock";
 	}
 
 	@Override

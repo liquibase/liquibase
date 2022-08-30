@@ -1,7 +1,7 @@
 package liquibase.diff.compare.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -9,7 +9,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Set;
 
@@ -38,7 +38,7 @@ public class CatalogComparator extends CommonCatalogSchemaComparator {
         }
 
         // the flag will be set true in multi catalog environments
-        boolean shouldIncludeCatalog = LiquibaseConfiguration.getInstance().shouldIncludeCatalogInSpecification();
+        boolean shouldIncludeCatalog = GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION.getCurrentValue();
         String object1Name;
         if (!shouldIncludeCatalog && ((Catalog) databaseObject1).isDefault()) {
             object1Name = null;
@@ -77,7 +77,7 @@ public class CatalogComparator extends CommonCatalogSchemaComparator {
                     finalCatalog1 = comparisonCatalog1;
                 }
 
-                if (StringUtils.trimToEmpty(finalCatalog1).equalsIgnoreCase(StringUtils.trimToEmpty(finalCatalog2))) {
+                if (StringUtil.trimToEmpty(finalCatalog1).equalsIgnoreCase(StringUtil.trimToEmpty(finalCatalog2))) {
                     return true;
                 }
 
@@ -87,7 +87,7 @@ public class CatalogComparator extends CommonCatalogSchemaComparator {
                     finalCatalog2 = comparisonCatalog1;
                 }
 
-                if (StringUtils.trimToEmpty(finalCatalog1).equalsIgnoreCase(StringUtils.trimToEmpty(finalCatalog2))) {
+                if (StringUtil.trimToEmpty(finalCatalog1).equalsIgnoreCase(StringUtil.trimToEmpty(finalCatalog2))) {
                     return true;
                 }
             }

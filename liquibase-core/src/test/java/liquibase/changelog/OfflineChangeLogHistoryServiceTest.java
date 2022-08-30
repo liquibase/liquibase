@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.Scope;
 import liquibase.database.OfflineConnection;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.executor.ExecutorService;
@@ -111,9 +112,9 @@ public class OfflineChangeLogHistoryServiceTest {
         // Create the new LoggingExecutor and give it the original Executor as a delegator
         // We also set the LoggingExecutor as the JDBC Executor
         //
-        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor("jdbc", database), writer, database);
-        ExecutorService.getInstance().setExecutor("logging", database, loggingExecutor);
-        ExecutorService.getInstance().setExecutor("jdbc", database, loggingExecutor);
+        LoggingExecutor loggingExecutor = new LoggingExecutor(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database), writer, database);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("logging", database, loggingExecutor);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, loggingExecutor);
         return changeLogHistoryService;
     }
 

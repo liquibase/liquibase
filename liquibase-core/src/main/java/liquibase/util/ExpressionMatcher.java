@@ -28,7 +28,7 @@ public final class ExpressionMatcher {
     private static final Pattern NESTED_EXPRESSION_PATTERN = Pattern.compile("\\([^()]+\\)");
 
     private ExpressionMatcher() {
-        throw new AssertionError("Utility class. Not designed for instantiation");
+
     }
 
     /**
@@ -40,7 +40,7 @@ public final class ExpressionMatcher {
      * @return {@code true} if provided list of items satisfy expression criteria. {@code false} otherwise.
      */
     public static boolean matches(String expression, Collection<String> items) {
-        expression = StringUtils.trimToEmpty(expression);
+        expression = StringUtil.trimToEmpty(expression);
         if (items.isEmpty()) {
             return true;
         }

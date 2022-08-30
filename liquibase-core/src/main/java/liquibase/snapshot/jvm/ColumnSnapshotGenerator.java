@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
@@ -9,27 +10,20 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.BooleanUtils;
+import liquibase.util.BooleanUtil;
 import liquibase.util.SqlUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +37,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     protected static final String COLUMN_DEF_COL = "COLUMN_DEF";
 
     private Pattern postgresStringValuePattern = Pattern.compile("'(.*)'::[\\w .]+");
-    private Pattern postgresNumberValuePattern = Pattern.compile("(\\d*)::[\\w .]+");
+    private Pattern postgresNumberValuePattern = Pattern.compile("\\(?(\\d*)\\)?::[\\w .]+");
 
 
     public ColumnSnapshotGenerator() {
@@ -52,7 +46,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
-        if (BooleanUtils.isTrue(((Column) example).getComputed()) || BooleanUtils.isTrue(((Column) example).getDescending())) {
+        if (BooleanUtil.isTrue(((Column) example).getComputed()) || BooleanUtil.isTrue(((Column) example).getDescending())) {
             return example;
         }
         Database database = snapshot.getDatabase();
@@ -140,7 +134,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     private static boolean hasValidObjectName(String objectName) {
-        if (StringUtils.isEmpty(objectName)) {
+        if (StringUtil.isEmpty(objectName)) {
             return false;
         }
         return !objectName.startsWith("SYS_") && !objectName.startsWith("BIN$");
@@ -180,7 +174,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 for (CachedRow row : allColumnsMetadataRs) {
                     treeSet.put(row.getInt("ORDINAL_POSITION"), row);
                 }
-                Logger log = LogService.getLog(getClass());
+                Logger log = Scope.getCurrentScope().getLog(getClass());
 
                 // Now we can iterate through the sorted list and repair if needed.
                 int currentOrdinal = 0;
@@ -188,8 +182,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     currentOrdinal++;
                     int rsOrdinal = row.getInt("ORDINAL_POSITION");
                     if (rsOrdinal != currentOrdinal) {
-                        log.debug(
-                                LogType.LOG, String.format(
+                        log.fine(
+                                String.format(
                                         "Repairing ORDINAL_POSITION with gaps for table=%s, column name=%s, " +
                                                 "bad ordinal=%d, new ordinal=%d",
                                         relation.getName(),
@@ -226,7 +220,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     (Map) snapshot.getScratchData("autoIncrementColumns");
             if (autoIncrementColumns == null) {
                 autoIncrementColumns = new HashMap<>();
-                Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+                Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
                 try {
                     List<Map<String, ?>> rows = executor.queryForList(
                             new RawSqlStatement(
@@ -248,7 +242,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     snapshot.setScratchData("autoIncrementColumns", autoIncrementColumns);
                 } catch (DatabaseException e) {
-                    LogService.getLog(getClass()).info(LogType.LOG, "Could not read identity information", e);
+                    Scope.getCurrentScope().getLog(getClass()).info("Could not read identity information", e);
                 }
             }
             if ((column.getRelation() != null) && (column.getSchema() != null)) {
@@ -266,21 +260,25 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             throws SQLException, DatabaseException {
         String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
         String rawColumnName = (String) columnMetadataResultSet.get("COLUMN_NAME");
-        String rawSchemaName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
-        String rawCatalogName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_CAT"));
-        String remarks = StringUtils.trimToNull((String) columnMetadataResultSet.get("REMARKS"));
+        String rawSchemaName = StringUtil.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
+        String rawCatalogName = StringUtil.trimToNull((String) columnMetadataResultSet.get("TABLE_CAT"));
+        String remarks = StringUtil.trimToNull((String) columnMetadataResultSet.get("REMARKS"));
         if (remarks != null) {
             // Comes back escaped sometimes
             remarks = remarks.replace("''", "'");
         }
         Integer position = columnMetadataResultSet.getInt("ORDINAL_POSITION");
 
-
         Column column = new Column();
-        column.setName(StringUtils.trimToNull(rawColumnName));
+        column.setName(StringUtil.trimToNull(rawColumnName));
         column.setRelation(table);
         column.setRemarks(remarks);
         column.setOrder(position);
+        Boolean isComputed = columnMetadataResultSet.getBoolean("IS_COMPUTED");
+        if (isComputed != null) {
+            column.setComputed(isComputed);
+        }
+
 
         if (columnMetadataResultSet.get("IS_FILESTREAM") != null && (Boolean) columnMetadataResultSet.get("IS_FILESTREAM")) {
             column.setAttribute("fileStream", true);
@@ -303,7 +301,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 } else if (nullable == DatabaseMetaData.columnNullable) {
                     column.setNullable(true);
                 } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
-                    LogService.getLog(getClass()).info(LogType.LOG, "Unknown nullable state for column "
+                    Scope.getCurrentScope().getLog(getClass()).info("Unknown nullable state for column "
                             + column.toString() + ". Assuming nullable");
                     column.setNullable(true);
                 }
@@ -314,7 +312,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             if (table instanceof Table) {
                 if (database instanceof OracleDatabase) {
                     Column.AutoIncrementInformation autoIncrementInfo = new Column.AutoIncrementInformation();
-                    String data_default = StringUtils.trimToEmpty((String) columnMetadataResultSet.get("DATA_DEFAULT")).toLowerCase();
+                    String data_default = StringUtil.trimToEmpty((String) columnMetadataResultSet.get("DATA_DEFAULT")).toLowerCase();
                     if (data_default.contains("iseq$$") && data_default.endsWith("nextval")) {
                         column.setAutoIncrementInformation(autoIncrementInfo);
                     }
@@ -330,16 +328,20 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                 } else {
                     if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
+                        // It is possible to make a column in Postgres that is varchar (for example) and reported as auto-increment. In this case,
+                        // we'd rather just preserve the default value, so we remove the auto-increment information since that doesn't really make any sense.
                         String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
-                        isAutoincrement = StringUtils.trimToNull(isAutoincrement);
+                        isAutoincrement = StringUtil.trimToNull(isAutoincrement);
                         if (isAutoincrement == null) {
+                            column.setAutoIncrementInformation(null);
+                        } else if (database instanceof PostgresDatabase && PostgresDatabase.VALID_AUTO_INCREMENT_COLUMN_TYPE_NAMES.stream().noneMatch(typeName -> typeName.equalsIgnoreCase((String) columnMetadataResultSet.get("TYPE_NAME")))) {
                             column.setAutoIncrementInformation(null);
                         } else if (isAutoincrement.equals("YES")) {
                             column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
                         } else if (isAutoincrement.equals("NO")) {
                             column.setAutoIncrementInformation(null);
                         } else if (isAutoincrement.equals("")) {
-                            LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
+                            Scope.getCurrentScope().getLog(getClass()).info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
                             column.setAutoIncrementInformation(null);
                         } else {
                             throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
@@ -349,16 +351,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         String selectStatement;
                         if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
                             selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
-                            LogService.getLog(getClass()).debug("rawCatalogName : <" + rawCatalogName + ">");
-                            LogService.getLog(getClass()).debug("rawSchemaName : <" + rawSchemaName + ">");
-                            LogService.getLog(getClass()).debug("rawTableName : <" + rawTableName + ">");
-                            LogService.getLog(getClass()).debug("raw selectStatement : <" + selectStatement + ">");
+                            Scope.getCurrentScope().getLog(getClass()).fine("rawCatalogName : <" + rawCatalogName + ">");
+                            Scope.getCurrentScope().getLog(getClass()).fine("rawSchemaName : <" + rawSchemaName + ">");
+                            Scope.getCurrentScope().getLog(getClass()).fine("rawTableName : <" + rawTableName + ">");
+                            Scope.getCurrentScope().getLog(getClass()).fine("raw selectStatement : <" + selectStatement + ">");
 
 
                         } else {
                             selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
                         }
-                        LogService.getLog(getClass()).debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
+                        Scope.getCurrentScope().getLog(getClass()).fine("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
                         Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                         Statement statement = null;
                         ResultSet columnSelectRS = null;
@@ -506,7 +508,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     // SET
                     boilerLength = "6";
                 }
-                List<String> enumValues = ExecutorService.getInstance().getExecutor("jdbc", database).queryForList(
+
+                List<String> enumValues = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(
                         new RawSqlStatement(
                                 "SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, " + boilerLength +
                                         ", LENGTH(COLUMN_TYPE) - " + boilerLength +
@@ -516,7 +519,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                                         "UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units\n" +
                                         "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 " +
                                         "UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
-                                        "WHERE TABLE_NAME = '" + column.getRelation().getName() + "' \n" +
+                                        "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "' \n" +
+                                        "AND TABLE_NAME = '" + column.getRelation().getName() + "' \n" +
                                         "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
                 String enumClause = "";
                 for (String enumValue : enumValues) {
@@ -525,7 +529,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 enumClause = enumClause.replaceFirst(", $", "");
                 return new DataType(columnTypeName + "(" + enumClause + ")");
             } catch (DatabaseException e) {
-                LogService.getLog(getClass()).warning(LogType.LOG, "Error fetching enum values", e);
+                Scope.getCurrentScope().getLog(getClass()).warning("Error fetching enum values", e);
             }
         }
 
@@ -540,7 +544,11 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
             decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
             if ((decimalDigits != null) && decimalDigits.equals(0)) {
-                decimalDigits = null;
+                if (dataType == Types.TIME && database instanceof PostgresDatabase) {
+                    //that is allowed
+                } else {
+                    decimalDigits = null;
+                }
             }
         }
 
@@ -562,8 +570,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
-        if ((database instanceof PostgresDatabase) && (columnSize != null) && columnSize.equals(Integer.MAX_VALUE)) {
-            columnSize = null;
+        if ((database instanceof PostgresDatabase) && columnSize != null) {
+            if (columnSize.equals(Integer.MAX_VALUE)) {
+                columnSize = null;
+            } else if (columnTypeName.equalsIgnoreCase("numeric") && columnSize.equals(0)) {
+                columnSize = null;
+            }
+
         }
 
         // For SAP (Sybase) SQL ANywhere, JDBC returns "LONG(2147483647) binary" (the number is 2^31-1)
@@ -654,6 +667,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (database instanceof PostgresDatabase) {
+            if (columnInfo.isAutoIncrement()) {
+                columnMetadataResultSet.set(COLUMN_DEF_COL, null);
+            }
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
             if ((defaultValue != null) && (defaultValue instanceof String)) {
                 Matcher matcher = postgresStringValuePattern.matcher((String) defaultValue);

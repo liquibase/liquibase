@@ -1,5 +1,6 @@
 package liquibase.changelog.filter
 
+import liquibase.Scope
 import liquibase.change.CheckSum
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
@@ -109,7 +110,7 @@ public class ShouldRunChangeSetFilterTest extends Specification {
         Executor template = Mock(Executor.class);
         template.update(_) >> 1
 
-        ExecutorService.getInstance().setExecutor("jdbc", database, template);
+        Scope.currentScope.getSingleton(ExecutorService.class).setExecutor("jdbc", database, template);
         return database;
     }
 

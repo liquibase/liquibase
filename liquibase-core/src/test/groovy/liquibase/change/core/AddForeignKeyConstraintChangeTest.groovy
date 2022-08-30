@@ -2,7 +2,7 @@ package liquibase.change.core
 
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Column
@@ -21,6 +21,22 @@ public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
         change.setBaseColumnNames("COL_NAME");
 
         then: change.getConfirmationMessage() == "Foreign key constraint added to TABLE_NAME (COL_NAME)"
+    }
+
+    def "setDeleteCascade sets onDelete correctly"() {
+        when:
+        def change = new AddForeignKeyConstraintChange();
+        change.setDeleteCascade(true)
+
+        then:
+        change.getOnDelete() == "CASCADE"
+
+        when:
+        change.setDeleteCascade(false)
+
+        then:
+        change.getOnDelete() == null
+
     }
 
     @Unroll

@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.change.AddColumnConfig;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
@@ -198,7 +199,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-        String definition = ExecutorService.getInstance().getExecutor("jdbc", this).queryForObject(
+        String definition = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(
                 new RawSqlStatement("SELECT sql FROM sqlite_master WHERE name=" + this.quoteObject(viewName, View.class)),
                 String.class);
         // SQLite is friendly and already returns the form CREATE VIEW ... AS. However, we cannot use this, so we have

@@ -29,18 +29,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ch.qos.logback.classic.Level;
 import org.junit.Test;
 
 import liquibase.change.ColumnConfig;
 import liquibase.exception.DatabaseException;
-import org.slf4j.LoggerFactory;
 
 public class ExecutablePreparedStatementBaseTest {
-    static {
-        ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-        rootLogger.setLevel(Level.INFO);
-    }
 
     @Test
     public void dateParameterTypeIsDeclared() throws DatabaseException, SQLException {

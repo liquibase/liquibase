@@ -1,20 +1,19 @@
 package liquibase.database.core;
 
+import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class DB2Database extends AbstractDb2Database {
 
 	@Override
 	public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
 		return conn.getDatabaseProductName().startsWith("DB2")
-				&& !StringUtils.startsWith(conn.getDatabaseProductVersion(), "DSN");
+				&& !StringUtil.startsWith(conn.getDatabaseProductVersion(), "DSN");
 	}
 
 	@Override
@@ -48,11 +47,11 @@ public class DB2Database extends AbstractDb2Database {
 		if (getConnection() == null || getConnection() instanceof OfflineConnection)
 			return null;
 		try {
-			return ExecutorService.getInstance().getExecutor("jdbc", this).queryForObject(
+			return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(
 					new RawSqlStatement("SELECT fixpack_num FROM TABLE (sysproc.env_get_inst_info()) as INSTANCEINFO"),
 					Integer.class);
 		} catch (final Exception e) {
-			LogService.getLog(getClass()).info(LogType.LOG, "Error getting fix pack number", e);
+			Scope.getCurrentScope().getLog(getClass()).info("Error getting fix pack number", e);
 		}
 		return null;
 	}

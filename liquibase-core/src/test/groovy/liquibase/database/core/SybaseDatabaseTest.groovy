@@ -1,6 +1,7 @@
 package liquibase.database.core
 
 import liquibase.CatalogAndSchema
+import liquibase.Scope
 import liquibase.database.DatabaseConnection
 import liquibase.executor.Executor
 import liquibase.executor.ExecutorService
@@ -11,7 +12,7 @@ import spock.lang.Unroll
 public class SybaseDatabaseTest  extends Specification {
 
     def cleanup() {
-        ExecutorService.getInstance().reset()
+		Scope.currentScope.getSingleton(ExecutorService.class).reset()
     }
 
 	def testIsSybaseProductName() {
@@ -31,7 +32,7 @@ public class SybaseDatabaseTest  extends Specification {
         def executor = Mock(Executor)
         executor.queryForList(_ as GetViewDefinitionStatement, String.class) >> viewRows
 		SybaseDatabase database = new SybaseDatabase()
-        ExecutorService.getInstance().setExecutor("jdbc", database, executor)
+		Scope.currentScope.getSingleton(ExecutorService.class).setExecutor("jdbc", database, executor)
 
         then:
 		database.getViewDefinition(new CatalogAndSchema(null, "dbo"), "view_name") == expected
