@@ -25,7 +25,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
         try {
             Resource changelog = resourceAccessor.get(physicalChangeLogLocation);
-            if (changelog == null) {
+            if (!changelog.exists()) {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
 

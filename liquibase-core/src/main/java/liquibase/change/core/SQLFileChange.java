@@ -119,7 +119,7 @@ public class SQLFileChange extends AbstractSQLChange {
         String finalPath = path;
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
-            finalPath = resourceAccessor.resolve(getChangeSet().getChangeLog().getPhysicalFilePath(), path);
+            finalPath = resourceAccessor.get(getChangeSet().getChangeLog().getPhysicalFilePath()).resolveSibling(path).getPath();
         }
         resource = resourceAccessor.getExisting(finalPath);
 

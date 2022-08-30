@@ -1,6 +1,5 @@
 package liquibase.resource
 
-
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -9,25 +8,25 @@ class ZipResourceAccessorTest extends Specification {
     ZipResourceAccessor simpleTestAccessor
 
     def setup() {
-        simpleTestAccessor = new ZipResourceAccessor(new File(this.getClass().getClassLoader().getResource("simple-files.jar").toURI()));
+        simpleTestAccessor = new ZipResourceAccessor(new File(this.getClass().getClassLoader().getResource("simple-files.jar").toURI()))
 
     }
 
     @Unroll
-    def "Cannot construct invalid values"() {
+    def "Cannot construct invalid values IllegalArgumentException"() {
         when:
-        new ZipResourceAccessor(testFile);
+        new ZipResourceAccessor(testFile)
 
         then:
-        def e = thrown(IllegalArgumentException)
+        def e = thrown(exception)
         assert e.message.startsWith(expected)
 
         where:
-        testFile                                                                                                             | expected
-        null                                                                                                                 | "File must not be null"
-        new File("/invalid/file.zip")                                                                                        | "Non-existent file: "
-        new File("/invalid/file.jar")                                                                                        | "Non-existent file: "
-        new File(this.getClass().getClassLoader().getResource("liquibase/resource/DirectoryResourceAccessor.class").toURI()) | "Not a jar or zip file: "
+        testFile                                                                                                             | exception                | expected
+        null                                                                                                                 | IllegalArgumentException | "File must not be null"
+        new File("/invalid/file.zip")                                                                                        | FileNotFoundException    | "Non-existent file: "
+        new File("/invalid/file.jar")                                                                                        | FileNotFoundException    | "Non-existent file: "
+        new File(this.getClass().getClassLoader().getResource("liquibase/resource/DirectoryResourceAccessor.class").toURI()) | IllegalArgumentException | "Not a jar or zip file: "
     }
 
 

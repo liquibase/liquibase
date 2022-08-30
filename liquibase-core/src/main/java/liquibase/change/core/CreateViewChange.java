@@ -168,7 +168,7 @@ public class CreateViewChange extends AbstractChange {
 
             String path = getPath();
             if (ObjectUtil.defaultIfNull(getRelativeToChangelogFile(), false)) {
-                path = resourceAccessor.resolve(getChangeSet().getChangeLog().getPhysicalFilePath(), path);
+                path = resourceAccessor.get(getChangeSet().getChangeLog().getPhysicalFilePath()).resolveSibling(path).getPath();
             }
             return resourceAccessor.getExisting(path).openInputStream();
         } catch (IOException e) {

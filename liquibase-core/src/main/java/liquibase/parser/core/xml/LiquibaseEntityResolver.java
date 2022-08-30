@@ -51,7 +51,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         URL resourceUri = getSearchClassloader().getResource(path);
         if (resourceUri == null) {
             Resource resource = Scope.getCurrentScope().getResourceAccessor().get(path);
-            if (resource != null) {
+            if (resource.exists()) {
                 stream = resource.openInputStream();
             }
         } else {

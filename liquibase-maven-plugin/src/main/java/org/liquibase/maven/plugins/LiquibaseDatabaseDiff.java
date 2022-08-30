@@ -225,7 +225,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
             ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
             resourceAccessor = getResourceAccessor(artifactClassLoader);
-        } catch (MojoExecutionException e) {
+        } catch (Exception e) {
             throw new LiquibaseException("Could not create the class loader, " + e, e);
         }
 

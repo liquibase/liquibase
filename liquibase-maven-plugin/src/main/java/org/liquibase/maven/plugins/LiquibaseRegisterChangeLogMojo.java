@@ -12,6 +12,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 
@@ -80,7 +81,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
      *
      */
     @Override
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
         List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
         File baseDir = project.getBasedir();
         File sourceDir = new File(baseDir, "src/main/resources");
