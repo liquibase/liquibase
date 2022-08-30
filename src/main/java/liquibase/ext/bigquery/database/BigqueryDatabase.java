@@ -142,8 +142,6 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getJdbcCatalogName(final CatalogAndSchema schema) {
-        /*return "INFORMATION_SCHEMA";*/
-
         DatabaseConnection connection = getConnection();
         try {
             return connection.getCatalog();
@@ -151,8 +149,6 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
             e.printStackTrace();
             return null;
         }
-
-
     }
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
@@ -160,7 +156,7 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
         String definition = (String)((ExecutorService) Scope.getCurrentScope().getSingleton(ExecutorService.class))
                 .getExecutor("jdbc", this)
                 .queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
-        System.out.println("getViewDefinition "+definition);
+        Scope.getCurrentScope().getLog(this.getClass()).info("getViewDefinition "+definition);
         return definition == null ? null : CREATE_VIEW_AS_PATTERN
                 .matcher(definition)
                 .replaceFirst("");
