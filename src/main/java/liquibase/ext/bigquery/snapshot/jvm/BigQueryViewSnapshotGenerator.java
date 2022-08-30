@@ -112,9 +112,6 @@ public class BigQueryViewSnapshotGenerator extends ViewSnapshotGenerator {
                         }
 
                         view.setDefinition(definition);
-                    //} catch (DatabaseException var16) {
-                    //    throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getSchema().getCatalogName(), view.getSchema().getName(), rawViewName), var16);
-                    //}
 
                     return view;
                 }

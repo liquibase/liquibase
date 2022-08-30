@@ -40,13 +40,6 @@ public class BigQuerySequenceSnapshotGenerator extends SequenceSnapshotGenerator
                         "NULL AS INCREMENT_BY, " +
                         "NULL AS WILL_CYCLE "+
                         jdbcSchemaName+"."+database.getSystemSchema().toUpperCase() + ".COLUMNS where 1=0";
-                        /*
-                        FROM information_schema.sequences " +
-                        "WHERE " +
-                        "" +
-                        "SEQUENCE_CATALOG='" + database.getDefaultCatalogName() + "' AND " +
-                        "SEQUENCE_SCHEMA='" + database.getDefaultSchemaName() + "'";
-                        */
             }
             return super.getSelectSequenceSql(schema, database);
         }
