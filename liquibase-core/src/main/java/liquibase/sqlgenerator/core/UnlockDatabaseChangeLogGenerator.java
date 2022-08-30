@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -18,13 +19,18 @@ public class UnlockDatabaseChangeLogGenerator extends AbstractSqlGenerator<Unloc
     @Override
     public Sql[] generateSql(UnlockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	String liquibaseSchema = database.getLiquibaseSchemaName();
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        try {
+            UpdateStatement releaseStatement = new UpdateStatement(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogLockTableName());
+            releaseStatement.addNewColumnValue("LOCKED", false);
+            releaseStatement.addNewColumnValue("LOCKGRANTED", null);
+            releaseStatement.addNewColumnValue("LOCKEDBY", null);
+            releaseStatement.setWhereClause(database.escapeColumnName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID")+" = 1");
 
-        UpdateStatement releaseStatement = new UpdateStatement(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogLockTableName());
-        releaseStatement.addNewColumnValue("LOCKED", false);
-        releaseStatement.addNewColumnValue("LOCKGRANTED", null);
-        releaseStatement.addNewColumnValue("LOCKEDBY", null);
-        releaseStatement.setWhereClause(database.escapeColumnName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID")+" = 1");
-
-        return SqlGeneratorFactory.getInstance().generateSql(releaseStatement, database);
+            return SqlGeneratorFactory.getInstance().generateSql(releaseStatement, database);
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
+        }
     }
 }

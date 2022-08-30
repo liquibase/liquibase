@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="1" author="nvoxland" labels="init">
+        <comment>
+            You can add comments to changeSets.
+            They can even be multiple lines if you would like.
+            They aren't used to compute the changeSet MD5Sum, so you can update them whenever you want without causing problems.
+        </comment>        
+        <createTable tableName="person">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(50)"/>
+            <column name="lastname" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1.111" author="nvoxland" labels="run">
+        <createTable tableName="new_person">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(50)"/>
+            <column name="middle_name" type="varchar(50)"/>
+            <column name="lastname" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1.1" author="nvoxland" labels="init">
+        <createSequence sequenceName="seq_person"/>
+    </changeSet>
+
+    <changeSet id="2" author="nvoxland">
+        <comment>Add a username column so we can use "person" for authentication</comment>
+        <addColumn tableName="person">
+            <column name="username" type="varchar(8)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="13.1" author="testuser" labels="init">
+        <tagDatabase tag="version_2.0"/>
+    </changeSet>
+
+    <changeSet id="14" author="nvoxland" labels="init">
+        <createTable tableName="liquibaseRunInfo">
+            <column name="timesRan" type="int"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

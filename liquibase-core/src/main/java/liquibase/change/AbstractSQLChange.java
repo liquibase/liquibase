@@ -1,16 +1,17 @@
 package liquibase.change;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.change.core.RawSQLChange;
+import liquibase.Scope;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtil;
 
@@ -24,10 +25,18 @@ import java.util.List;
  * Implements the necessary logic to choose how the SQL string should be parsed to generate the statements.
  *
  */
+@SuppressWarnings("java:S5998")
 public abstract class AbstractSQLChange extends AbstractChange implements DbmsTargetedChange {
 
     private boolean stripComments;
     private boolean splitStatements;
+    /**
+     *
+     * @deprecated  To be removed when splitStatements is changed to be type Boolean
+     *
+     */
+    private boolean splitStatementsSet;
+
     private String endDelimiter;
     private String sql;
     private String dbms;
@@ -123,7 +132,17 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             this.splitStatements = true;
         } else {
             this.splitStatements = splitStatements;
+            splitStatementsSet = true;
         }
+    }
+
+    /**
+     * @deprecated  To be removed when splitStatements is changed to be Boolean type
+     * @return
+     */
+    @Deprecated
+    public boolean isSplitStatementsSet() {
+        return splitStatementsSet;
     }
 
     /**
@@ -176,11 +195,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
 
             if (sql != null) {
-                stream = new ByteArrayInputStream(
-                    sql.getBytes(
-                        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                        .getOutputEncoding()
-                    )
+                stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())
                 );
             }
 
@@ -192,7 +207,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 try {
                     stream.close();
                 } catch (IOException e) {
-                    LogService.getLog(getClass()).debug(LogType.LOG, "Error closing stream", e);
+                    Scope.getCurrentScope().getLog(getClass()).fine("Error closing stream", e);
                 }
             }
         }
@@ -217,10 +232,14 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
 
         String processedSQL = normalizeLineEndings(sql);
-        for (String statement : StringUtil.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
+        if (this instanceof RawSQLChange && ((RawSQLChange) this).isRerunnable()) {
+            returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
+            return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
+        }
+        for (String statement : StringUtil.processMultiLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
-                 statement = statement.replaceAll("\\n", "\r\n");
-             }
+                statement = statement.replaceAll("\\n", "\r\n");
+            }
 
             String escapedStatement = statement;
             try {
@@ -231,7 +250,11 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 escapedStatement = statement;
             }
 
-            returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
+            if (database instanceof Db2zDatabase && escapedStatement.toUpperCase().startsWith("CALL")) {
+                returnStatements.add(new RawCompoundStatement(escapedStatement, getEndDelimiter()));
+            } else {
+                returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
+            }
         }
 
         return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
@@ -270,7 +293,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         public NormalizingStream(String endDelimiter, Boolean splitStatements, Boolean stripComments, InputStream stream) {
             this.stream = new PushbackInputStream(stream, 2048);
             try {
-                this.headerStream = new ByteArrayInputStream((endDelimiter+":"+splitStatements+":"+stripComments+":").getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+                this.headerStream = new ByteArrayInputStream((endDelimiter+":"+splitStatements+":"+stripComments+":").getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
             } catch (UnsupportedEncodingException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
@@ -321,12 +344,12 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
 
         @Override
-        public void mark(int readlimit) {
-            stream.mark(readlimit);
+        public synchronized void mark(int readLimit) {
+            stream.mark(readLimit);
         }
 
         @Override
-        public void reset() throws IOException {
+        public synchronized void reset() throws IOException {
             stream.reset();
         }
 

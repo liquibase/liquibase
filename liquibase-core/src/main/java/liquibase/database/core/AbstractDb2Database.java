@@ -1,12 +1,7 @@
 package liquibase.database.core;
 
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -18,17 +13,20 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
 
-    public AbstractDb2Database() {
+    private static final int MAX_DB2_TIMESTAMP_FRACTIONAL_DIGITS = 12;
+
+	public AbstractDb2Database() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         super.sequenceCurrentValueFunction = "PREVIOUS VALUE FOR %s";
@@ -103,7 +101,7 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
         } catch (Exception e) {
             throw new RuntimeException("Could not determine current schema", e);
         } finally {
-            JdbcUtils.close(rs, stmt);
+            JdbcUtil.close(rs, stmt);
         }
 
         return defaultSchemaName;
@@ -132,23 +130,11 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
         String normalLiteral = super.getDateLiteral(isoDate);
 
         if (isDateOnly(isoDate)) {
-            StringBuffer val = new StringBuffer();
-            val.append("DATE(");
-            val.append(normalLiteral);
-            val.append(')');
-            return val.toString();
+            return "DATE(" + normalLiteral + ')';
         } else if (isTimeOnly(isoDate)) {
-            StringBuffer val = new StringBuffer();
-            val.append("TIME(");
-            val.append(normalLiteral);
-            val.append(')');
-            return val.toString();
+            return "TIME(" + normalLiteral + ')';
         } else if (isDateTime(isoDate)) {
-            StringBuffer val = new StringBuffer();
-            val.append("TIMESTAMP(");
-            val.append(normalLiteral);
-            val.append(')');
-            return val.toString();
+            return "TIMESTAMP(" + normalLiteral + ')';
         } else {
             return "UNSUPPORTED:" + isoDate;
         }
@@ -163,7 +149,7 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = schema.customize(this);
-        String definition = ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+        String definition = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
 
         return "FULL_DEFINITION: " + definition;
     }
@@ -237,11 +223,6 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
         return super.isSystemObject(example);
     }
 
-    @Override
-    public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        return objectName;
-    }
-
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectType.isAssignableFrom(Schema.class) || objectType.isAssignableFrom(Catalog.class)) {
             return true;
@@ -256,4 +237,19 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE;
     }
+
+	@Override
+	public int getMaxFractionalDigitsForTimestamp() {
+		try {
+			// See https://www.ibm.com/docs/en/db2/9.7?topic=enhancements-timestamp-data-type-allows-parameterized-precision
+			// Max precision for timestamp is 12 digits in all editions of DB from version 9.7 onwards
+			if (getDatabaseMajorVersion() > 9 || getDatabaseMajorVersion() == 9 && getDatabaseMinorVersion() >= 7) {
+				return MAX_DB2_TIMESTAMP_FRACTIONAL_DIGITS;
+			} else {
+				return super.getMaxFractionalDigitsForTimestamp();
+			} 
+		} catch (Exception e) {
+			return super.getMaxFractionalDigitsForTimestamp();
+		}
+	}
 }

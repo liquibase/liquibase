@@ -36,15 +36,6 @@
         <delete dir="${temp.dir}"/>
     </target>
 
-    <target name="testChangeLogSyncLegacy">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:changeLogSync driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                          changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-    </target>
-
     <target name="testChangeLogSync">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
@@ -53,6 +44,8 @@
         </lb:changeLogSync>
         <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                               table="DATABASECHANGELOG"/>
+        <db:assertTagExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                            tag="version_2.0"/>
     </target>
 
     <target name="testChangeLogSyncDatabaseRef">
@@ -61,6 +54,8 @@
         <lb:changeLogSync databaseref="test-db" changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>
         <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                               table="DATABASECHANGELOG"/>
+        <db:assertTagExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                            tag="version_2.0"/>
     </target>
 
     <target name="testChangeLogSyncToOutputFile">
@@ -68,6 +63,58 @@
                           outputfile="${temp.dir}/sync.sql">
             <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
         </lb:changeLogSync>
+        <au:assertFileExists file="${temp.dir}/sync.sql"/>
+    </target>
+
+    <target name="testChangeLogSyncToTag">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:changeLogSyncToTag changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
+                          toTag="version_1.0">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:changeLogSyncToTag>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+        <db:assertTagExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                            tag="version_1.0"/>
+        <db:assertTagNotExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                            tag="version_2.0"/>
+    </target>
+
+    <target name="testChangeLogSyncToLatestTag">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:changeLogSyncToTag changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
+                          toTag="version_2.0">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:changeLogSyncToTag>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+        <db:assertTagExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                            tag="version_1.0"/>
+        <db:assertTagExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                            tag="version_2.0"/>
+    </target>
+
+    <target name="testChangeLogSyncToTagDatabaseRef">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:changeLogSyncToTag databaseref="test-db" changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
+                          toTag="version_1.0"/>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+        <db:assertTagExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                            tag="version_1.0"/>
+        <db:assertTagNotExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                               tag="version_2.0"/>
+    </target>
+
+    <target name="testChangeLogSyncToTagToOutputFile">
+        <lb:changeLogSyncToTag changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
+                          outputfile="${temp.dir}/sync.sql"
+                          toTag="version_1.0">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:changeLogSyncToTag>
         <au:assertFileExists file="${temp.dir}/sync.sql"/>
     </target>
 
@@ -87,15 +134,6 @@
 
 	
 	<!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
-    
-    <target name="testChangeLogSyncChangeLegacyLogDirectory">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:changeLogSync driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-        		changelogdirectory="${liquibase.test.ant.basedir}/changelog" changelogfile="simple-changelog.xml"/>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-    </target>
 
 	<target name="testChangeLogSyncChangeLogDirectory">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
@@ -105,10 +143,12 @@
         </lb:changeLogSync>
         <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                               table="DATABASECHANGELOG"/>
+        <db:assertTagExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                            tag="version_2.0"/>
     </target>
 
 	<target name="testChangeLogSyncChangeLogDirectoryDoesNotExist">
-        <au:expectfailure expectedmessage="${liquibase.test.ant.basedir}/bad_changelog must be a directory">
+        <au:expectfailure expectedmessage="Unable to sync change log: The file simple-changelog.xml was not found">
 	        <lb:changeLogSync changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog" changelogfile="simple-changelog.xml">
 	            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
 	        </lb:changeLogSync>
@@ -129,6 +169,44 @@
         <lb:changeLogSync databaseref="test-db" changelogdirectory="${liquibase.test.ant.basedir}/changelog" changelogfile="simple-changelog.xml"/>
         <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                               table="DATABASECHANGELOG"/>
+        <db:assertTagExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                            tag="version_1.0"/>
+    </target>
+
+    <target name="testChangeLogSyncToTagChangeLogDirectory">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:changeLogSyncToTag changelogdirectory="${liquibase.test.ant.basedir}/changelog" changelogfile="simple-changelog.xml"
+                          toTag="version_1.0">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:changeLogSyncToTag>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+        <db:assertTagExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                            tag="version_1.0"/>
+        <db:assertTagNotExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                               tag="version_2.0"/>
+    </target>
+
+    <target name="testChangeLogSyncToTagChangeLogDirectoryToOutputFile">
+        <lb:changeLogSyncToTag changelogdirectory="${liquibase.test.ant.basedir}/changelog" changelogfile="simple-changelog.xml"
+                          outputfile="${temp.dir}/sync.sql" toTag="version_1.0">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:changeLogSyncToTag>
+        <au:assertFileExists file="${temp.dir}/sync.sql"/>
+    </target>
+
+    <target name="testChangeLogSyncToTagDatabaseRefChangeLogDirectory">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:changeLogSyncToTag databaseref="test-db" changelogdirectory="${liquibase.test.ant.basedir}/changelog" changelogfile="simple-changelog.xml"
+                          toTag="version_1.0"/>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+        <db:assertTagExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                            tag="version_1.0"/>
+        <db:assertTagNotExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                               tag="version_2.0"/>
     </target>
 
 </project>

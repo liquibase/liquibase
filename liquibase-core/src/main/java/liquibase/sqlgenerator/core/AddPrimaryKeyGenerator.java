@@ -26,9 +26,15 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
         validationErrors.checkRequiredField("columnNames", addPrimaryKeyStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addPrimaryKeyStatement.getTableName());
 
-        if (!((database instanceof MSSQLDatabase) || (database instanceof MockDatabase))) {
-            if ((addPrimaryKeyStatement.isClustered() != null) && !addPrimaryKeyStatement.isClustered()) {
-                validationErrors.checkDisallowedField("clustered", addPrimaryKeyStatement.isClustered(), database);
+        if (addPrimaryKeyStatement.isClustered() != null) {
+            if (database instanceof PostgresDatabase) {
+                if (addPrimaryKeyStatement.isClustered() && addPrimaryKeyStatement.getConstraintName() == null) {
+                    validationErrors.addError("Postgresql requires constraintName on addPrimaryKey when clustered=true");
+                }
+            } else if (database instanceof MSSQLDatabase || database instanceof MockDatabase) {
+                //clustered is fine
+            } else if (addPrimaryKeyStatement.isClustered()) {
+                validationErrors.addError("Cannot specify clustered=true on "+database.getShortName());
             }
         }
 
@@ -69,6 +75,9 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
 
         if ((database instanceof OracleDatabase) && (statement.getForIndexName() != null)) {
             sql += " USING INDEX "+database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(), statement.getForIndexName(), Index.class);
+        }
+        if (database instanceof OracleDatabase) {
+            sql += !statement.shouldValidate() ? " ENABLE NOVALIDATE " : "";
         }
 
         if ((database instanceof PostgresDatabase) && (statement.isClustered() != null) && statement.isClustered() &&

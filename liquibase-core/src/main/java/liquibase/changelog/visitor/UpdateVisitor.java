@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSet.ExecType;
 import liquibase.changelog.ChangeSet.RunStatus;
@@ -9,9 +10,9 @@ import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
-import liquibase.logging.Logger;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
 
 import java.util.Set;
 
@@ -19,8 +20,6 @@ public class UpdateVisitor implements ChangeSetVisitor {
 
     private Database database;
 
-    private Logger log = LogService.getLog(getClass());
-    
     private ChangeExecListener execListener;
 
     /**
@@ -44,8 +43,12 @@ public class UpdateVisitor implements ChangeSetVisitor {
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database,
                       Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+        if (! (executor instanceof LoggingExecutor)) {
+            Scope.getCurrentScope().getUI().sendMessage("Running Changeset: " + changeSet);
+        }
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
-        log.debug(LogType.LOG, "Running Changeset:" + changeSet);
+        Scope.getCurrentScope().getLog(getClass()).fine("Running Changeset: " + changeSet);
         fireWillRun(changeSet, databaseChangeLog, database, runStatus);
         ExecType execType = null;
         ObjectQuotingStrategy previousStr = this.database.getObjectQuotingStrategy();

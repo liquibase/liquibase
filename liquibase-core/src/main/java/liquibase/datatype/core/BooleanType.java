@@ -1,16 +1,19 @@
 package liquibase.datatype.core;
 
+import liquibase.Scope;
 import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtil;
 
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 @DataTypeInfo(name = "boolean", aliases = {"java.sql.Types.BOOLEAN", "java.lang.Boolean", "bit", "bool"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BooleanType extends LiquibaseDataType {
@@ -18,7 +21,18 @@ public class BooleanType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
-        if ((database instanceof AbstractDb2Database) || (database instanceof FirebirdDatabase)) {
+        if ((database instanceof FirebirdDatabase)) {
+            try {
+                if (database.getDatabaseMajorVersion() <= 2) {
+                    return new DatabaseDataType("SMALLINT");
+                }
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Error checking database major version, assuming version 3+: "+e.getMessage(), e);
+            }
+            return new DatabaseDataType("BOOLEAN");
+        }
+
+        if ((database instanceof Db2zDatabase)) {
             return new DatabaseDataType("SMALLINT");
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("bit"));
@@ -37,6 +51,11 @@ public class BooleanType extends LiquibaseDataType {
             } else {
                 return new DatabaseDataType("SMALLINT");
             }
+        } else if (database instanceof DB2Database) {
+			if (((DB2Database) database).supportsBooleanDataType())
+				return new DatabaseDataType("BOOLEAN");
+			else
+				return new DatabaseDataType("SMALLINT");
         } else if (database instanceof HsqlDatabase) {
             return new DatabaseDataType("BOOLEAN");
         } else if (database instanceof PostgresDatabase) {
@@ -56,11 +75,19 @@ public class BooleanType extends LiquibaseDataType {
 
         String returnValue;
         if (value instanceof String) {
+            value = ((String) value).replaceAll("'", "");
             if ("true".equals(((String) value).toLowerCase(Locale.US)) || "1".equals(value) || "b'1'".equals(((String) value).toLowerCase(Locale.US)) || "t".equals(((String) value).toLowerCase(Locale.US)) || ((String) value).toLowerCase(Locale.US).equals(this.getTrueBooleanValue(database).toLowerCase(Locale.US))) {
                 returnValue = this.getTrueBooleanValue(database);
             } else if ("false".equals(((String) value).toLowerCase(Locale.US)) || "0".equals(value) || "b'0'".equals(
                     ((String) value).toLowerCase(Locale.US)) || "f".equals(((String) value).toLowerCase(Locale.US)) || ((String) value).toLowerCase(Locale.US).equals(this.getFalseBooleanValue(database).toLowerCase(Locale.US))) {
                 returnValue = this.getFalseBooleanValue(database);
+            } else if (database instanceof PostgresDatabase && Pattern.matches("b?([01])\\1*(::bit|::\"bit\")?", (String) value)) {
+                returnValue = "b'" 
+                        + value.toString()
+                                .replace("b", "")
+                                .replace("\"", "")
+                                .replace("::it", "")
+                        + "'::\"bit\"";
             } else {
                 throw new UnexpectedLiquibaseException("Unknown boolean value: " + value);
             }
@@ -92,10 +119,22 @@ public class BooleanType extends LiquibaseDataType {
     }
 
     protected boolean isNumericBoolean(Database database) {
+        if ((database instanceof FirebirdDatabase)) {
+            try {
+                if (database.getDatabaseMajorVersion() <= 2) {
+                    return true;
+                }
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Error checking database major version, assuming version 3+: "+e.getMessage(), e);
+            }
+            return false;
+        }
         if (database instanceof DerbyDatabase) {
             return !((DerbyDatabase) database).supportsBooleanDataType();
-        }
-        return (database instanceof AbstractDb2Database) || (database instanceof FirebirdDatabase) || (database instanceof
+        } else if (database instanceof DB2Database) {
+			return !((DB2Database) database).supportsBooleanDataType();
+    	}
+        return (database instanceof Db2zDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
             MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof OracleDatabase) ||
             (database instanceof SQLiteDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
             SybaseDatabase);

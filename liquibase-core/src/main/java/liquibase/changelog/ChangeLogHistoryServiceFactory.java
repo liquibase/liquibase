@@ -78,7 +78,7 @@ public class ChangeLogHistoryServiceFactory {
                 ChangeLogHistoryService service;
                 try {
                     aClass.getConstructor();
-                    service = aClass.newInstance();
+                    service = aClass.getConstructor().newInstance();
                     service.setDatabase(database);
                 } catch (NoSuchMethodException e) {
                     // must have been manually added to the registry and so already configured.
@@ -92,12 +92,13 @@ public class ChangeLogHistoryServiceFactory {
             }
     }
 
-    public synchronized void resetAll() {
-        for (ChangeLogHistoryService changeLogHistoryService : registry) {
-            changeLogHistoryService.reset();
+    public void resetAll() {
+        synchronized (ChangeLogHistoryServiceFactory.class) {
+            for (ChangeLogHistoryService changeLogHistoryService : registry) {
+                changeLogHistoryService.reset();
+            }
+            instance = null;
         }
-        instance = null;
     }
-
 }
 

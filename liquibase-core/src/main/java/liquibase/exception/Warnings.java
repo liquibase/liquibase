@@ -1,11 +1,11 @@
 package liquibase.exception;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Warnings {
 
-    private List<String> messages = new ArrayList<>();
+    //use linkedHashSet to keep them in order, but don't duplicate warnings that have already been logged
+    private final LinkedHashSet<String> messages = new LinkedHashSet<>();
 
     public Warnings addWarning(String warning) {
         messages.add(warning);
@@ -20,7 +20,7 @@ public class Warnings {
     }
 
     public List<String> getMessages() {
-        return messages;
+        return new ArrayList<>(messages);
     }
 
     public boolean hasWarnings() {

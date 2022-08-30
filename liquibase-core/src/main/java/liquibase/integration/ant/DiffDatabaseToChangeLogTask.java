@@ -51,7 +51,7 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
             } catch (ParserConfigurationException e) {
                 throw new BuildException("Unable to diff databases to change log file. Error configuring parser.", e);
             } catch (DatabaseException e) {
-                throw new BuildException("Unable to diff databases to change log file. " + e.toString(), e);
+                throw new BuildException("Unable to diff databases to change log file: " + e.getMessage(), e);
             } finally {
                 FileUtils.close(printStream);
             }
@@ -146,17 +146,5 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
 
     public void setExcludeObjects(String excludeObjects) {
         this.excludeObjects = excludeObjects;
-    }
-
-    /**
-     * @deprecated Use {@link #addConfiguredXml(ChangeLogOutputFile)} instead.
-     * @param outputFile The file to write the change log to.
-     */
-    @Deprecated
-    public void setOutputFile(FileResource outputFile) {
-        log("The outputFile attribute is deprecated. Use a nested <xml>, <json>, <yaml>, or <txt> element instead.", Project.MSG_WARN);
-        ChangeLogOutputFile changeLogOutputFile = new ChangeLogOutputFile();
-        changeLogOutputFile.setOutputFile(outputFile);
-        addConfiguredXml(changeLogOutputFile);
     }
 }

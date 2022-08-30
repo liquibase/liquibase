@@ -17,6 +17,7 @@ public class AddColumnStatement extends AbstractSqlStatement {
     private String addAfterColumn;
     private String addBeforeColumn;
     private Integer addAtPosition;
+    private Boolean computed;
     private Set<ColumnConstraint> constraints = new HashSet<>();
 
     private List<AddColumnStatement> columns = new ArrayList<>();
@@ -126,6 +127,42 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return true;
     }
 
+    public boolean shouldValidateNullable() {
+        if (isPrimaryKey()) {
+            return false;
+        }
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof NotNullConstraint) {
+                if (!((NotNullConstraint) constraint).shouldValidateNullable()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean shouldValidateUnique() {
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof UniqueConstraint) {
+                if (!((UniqueConstraint) constraint).shouldValidateUnique()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean shouldValidatePrimaryKey() {
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof PrimaryKeyConstraint) {
+                if (!((PrimaryKeyConstraint) constraint).shouldValidatePrimaryKey()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public boolean isUnique() {
         for (ColumnConstraint constraint : getConstraints()) {
             if (constraint instanceof UniqueConstraint) {
@@ -178,5 +215,13 @@ public class AddColumnStatement extends AbstractSqlStatement {
 
     public void setDefaultValueConstraintName(String defaultValueConstraintName) {
         this.defaultValueConstraintName = defaultValueConstraintName;
+    }
+
+    public Boolean getComputed() {
+        return computed;
+    }
+
+    public void setComputed(Boolean computed) {
+        this.computed = computed;
     }
 }

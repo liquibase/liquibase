@@ -1,12 +1,12 @@
 package liquibase.lockservice;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
+import liquibase.listener.SqlListener;
 import liquibase.test.TestContext;
 import org.junit.After;
 import org.junit.Before;
@@ -19,7 +19,7 @@ public class LockServiceExecuteTest {
 
     @Before
     public void setUp() throws DatabaseException, LockException {
-        ExecutorService.getInstance().reset();
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
         LockServiceFactory.getInstance().resetAll();
 
         fixupLockTables();
@@ -38,7 +38,9 @@ public class LockServiceExecuteTest {
                                         database.getLiquibaseSchemaName(),
                                         database.getDatabaseChangeLogTableName()
                                 );
-                        LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                        for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                            listener.writeSqlWillRun(sql);
+                        }
                         statement.execute(sql);
                     } catch (Exception e) {
                         //ok
@@ -50,7 +52,9 @@ public class LockServiceExecuteTest {
                                         database.getLiquibaseSchemaName(),
                                         database.getDatabaseChangeLogLockTableName()
                                 );
-                        LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                        for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                            listener.writeSqlWillRun(sql);
+                        }
                         statement.execute(sql);
                     } catch (Exception e) {
                         //ok
@@ -123,7 +127,7 @@ public class LockServiceExecuteTest {
 //                new DatabaseTest() {
 //
 //                    public void performTest(Database database) throws Exception {
-//                        Executor executor = ExecutorService.getInstance().getExecutor(database);
+//                        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(database);
 //                        try {
 //                            LockService.getInstance(database).resetAll();
 //
@@ -156,7 +160,7 @@ public class LockServiceExecuteTest {
 //
 //                        LockService.getInstance(database).resetAll();
 //
-//                        Executor executor = ExecutorService.getInstance().getExecutor(database);
+//                        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(database);
 //                        try {
 //                            executor.execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false), new ArrayList<SqlVisitor>());
 //                        } catch (DatabaseException e) {
@@ -170,7 +174,7 @@ public class LockServiceExecuteTest {
 //
 //                        database.commit();
 //
-//                        ExecutorService.getInstance().setExecutor(database, (new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), new StringWriter(), database)));
+//                        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, (new LoggingExecutor(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(database), new StringWriter(), database)));
 //
 //                        LockService lockManager = LockService.getInstance(database);
 //                        lockManager.waitForLock();
@@ -189,28 +193,28 @@ public class LockServiceExecuteTest {
 //                        LockService.getInstance(database).resetAll();
 //
 //                        try {
-//                            ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false), new ArrayList<SqlVisitor>());
+//                            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false), new ArrayList<SqlVisitor>());
 //                        } catch (DatabaseException e) {
 //                            ; //must not be there
 //                        }
 //                        try {
-//                            ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false), new ArrayList<SqlVisitor>());
+//                            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false), new ArrayList<SqlVisitor>());
 //                        } catch (DatabaseException e) {
 //                            ; //must not be there
 //                        }
 //
 //                        database.commit();
 //
-////                        Database clearDatabase = database.getClass().newInstance();
+////                        Database clearDatabase = database.getClass().getConstructor().newInstance();
 ////                        clearDatabase.setConnection(database.getConnection());
 //
-//                        Executor originalTemplate = ExecutorService.getInstance().getExecutor(database);
-//                        ExecutorService.getInstance().setExecutor(database, new LoggingExecutor(originalTemplate, new StringWriter(), database));
+//                        Executor originalTemplate = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(database);
+//                        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, new LoggingExecutor(originalTemplate, new StringWriter(), database));
 //
 //                        LockService lockManager = LockService.getInstance(database);
 //                        lockManager.waitForLock();
 //
-//                        ExecutorService.getInstance().setExecutor(database, originalTemplate);
+//                        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, originalTemplate);
 //                        lockManager.waitForLock();
 //
 ////                        database.getWriteExecutor().execute(database.getSelectChangeLogLockSQL());

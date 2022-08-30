@@ -1,5 +1,6 @@
 package liquibase.integration.ant;
 
+import liquibase.GlobalConfiguration;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
@@ -14,7 +15,8 @@ import java.io.UnsupportedEncodingException;
 
 public class DiffDatabaseTask extends AbstractDatabaseDiffTask {
     private FileResource outputFile;
-    private String outputEncoding = System.getProperty("file.encoding");
+
+    private String outputEncoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
     @Override
     public void executeWithLiquibaseClassloader() throws BuildException {
@@ -26,7 +28,7 @@ public class DiffDatabaseTask extends AbstractDatabaseDiffTask {
             log("Writing diff report " + outputFile.toString(), Project.MSG_INFO);
             diffReport.print();
         } catch (DatabaseException e) {
-            throw new BuildException("Unable to make diff report. " + e.toString(), e);
+            throw new BuildException("Unable to make diff report: " + e.getMessage(), e);
         } catch (UnsupportedEncodingException e) {
             throw new BuildException("Unable to make diff report. Encoding [" + outputEncoding + "] is not supported.", e);
         } catch (IOException e) {

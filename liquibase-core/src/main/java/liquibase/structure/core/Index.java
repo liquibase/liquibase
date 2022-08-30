@@ -4,7 +4,11 @@ import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Index extends AbstractDatabaseObject {
 
@@ -228,33 +232,33 @@ public class Index extends AbstractDatabaseObject {
      */
     @Override
     public String toString() {
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append( (getName() == null) ? "(unnamed index)" : getName());
+        StringBuilder result = new StringBuilder();
+        result.append( (getName() == null) ? "(unnamed index)" : getName());
         if ((this.isUnique() != null) && this.isUnique()) {
-            stringBuffer.append(" UNIQUE ");
+            result.append(" UNIQUE ");
         }
         if ((getRelation() != null) && (getColumns() != null)) {
             String tableName = getRelation().getName();
             if ((getRelation().getSchema() != null) && (getRelation().getSchema().getName() != null)) {
                 tableName = getRelation().getSchema().getName()+"."+tableName;
             }
-            stringBuffer.append(" ON ").append(tableName);
+            result.append(" ON ").append(tableName);
             if ((getColumns() != null) && !getColumns().isEmpty()) {
-                stringBuffer.append("(");
+                result.append("(");
                 for (Column column : getColumns()) {
                     if (column == null)
                         // 0th entry of an index column list might be null if index only has
                         // regular columns!
-                        stringBuffer.append("(null), ");
+                        result.append("(null), ");
                     else
-                        stringBuffer.append(column.toString(false)).append(", ");
+                        result.append(column.toString(false)).append(", ");
                 }
-                stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length());
-                stringBuffer.append(")");
+                result.delete(result.length() - 2, result.length());
+                result.append(")");
             } else {
-                stringBuffer.append("()");
+                result.append("()");
             }
         }
-        return stringBuffer.toString();
+        return result.toString();
     }
 }

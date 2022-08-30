@@ -13,7 +13,7 @@ import java.util.*;
 
 public class DatabaseObjectCollection implements LiquibaseSerializable {
 
-    private Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> cache = new HashMap<>();
+    private Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> cache = new LinkedHashMap<>();
     private Database database;
 
     public DatabaseObjectCollection(Database database) {
@@ -165,7 +165,8 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
     }
 
     public Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> toMap() {
-        Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> returnMap = new HashMap<>();
+        Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> returnMap =
+            new LinkedHashMap<>();
         for (Class<? extends DatabaseObject> type : this.cache.keySet()) {
             returnMap.put(type, get(type));
         }

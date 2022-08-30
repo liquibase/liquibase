@@ -39,7 +39,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                                 (collectionType) && !collectionType.isInterface() && !Modifier.isAbstract
                                 (collectionType.getModifiers())) {
 
-                                String elementName = ((LiquibaseSerializable) collectionType.newInstance()).getSerializedObjectName();
+                                String elementName = ((LiquibaseSerializable) collectionType.getConstructor().newInstance()).getSerializedObjectName();
                                 List<ParsedNode> elementNodes = Collections.emptyList();
                                 if (childNode.getName().equals(elementName)) {
                                     elementNodes = Collections.singletonList(childNode);
@@ -49,7 +49,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                                 if (!elementNodes.isEmpty()) {
                                     Collection collection = ((Collection) getSerializableFieldValue(childNode.getName()));
                                     for (ParsedNode node : elementNodes) {
-                                        LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.newInstance();
+                                        LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.getConstructor().newInstance();
                                         childObject.load(node, resourceAccessor);
                                         collection.add(childObject);
                                     }
@@ -60,7 +60,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                         if (!dataTypeClass.isInterface()
                                 && !Modifier.isAbstract(dataTypeClass.getModifiers())) {
 
-                            LiquibaseSerializable childObject = (LiquibaseSerializable) dataTypeClass.newInstance();
+                            LiquibaseSerializable childObject = (LiquibaseSerializable) dataTypeClass.getConstructor().newInstance();
                             childObject.load(childNode, resourceAccessor);
                             setSerializableFieldValue(childNode.getName(), childObject);
                         }
@@ -83,7 +83,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                                     (collectionType) && !collectionType.isInterface() && !Modifier.isAbstract
                                     (collectionType.getModifiers())) {
 
-                                    String elementName = ((LiquibaseSerializable) collectionType.newInstance()).getSerializedObjectName();
+                                    String elementName = ((LiquibaseSerializable) collectionType.getConstructor().newInstance()).getSerializedObjectName();
                                     List<ParsedNode> elementNodes = Collections.emptyList();
                                     if (childNode.getName().equals(elementName)) {
                                         elementNodes = Collections.singletonList(childNode);
@@ -93,7 +93,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                                     if (!elementNodes.isEmpty()) {
                                         Collection collection = ((Collection) getSerializableFieldValue(field));
                                         for (ParsedNode node : elementNodes) {
-                                            LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.newInstance();
+                                            LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.getConstructor().newInstance();
                                             childObject.load(node, resourceAccessor);
                                             collection.add(childObject);
                                         }

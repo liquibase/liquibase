@@ -43,10 +43,6 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     @Shared resourceSupplier = new ResourceSupplier()
 
-    def before() {
-        LiquibaseConfiguration.getInstance().reset();
-    }
-
     def "namespace configured correctly"() {
         expect:
         assert new XMLChangeLogSAXParser().saxParserFactory.isNamespaceAware()
@@ -198,16 +194,16 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getPhysicalFilePath() == path
 
         changeLog.getPreconditions() != null
-        changeLog.getPreconditions().getNestedPreconditions().size() == 2
+        changeLog.getPreconditions().getNestedPreconditions()[0].nestedPreconditions.size() == 2
 
-        changeLog.getPreconditions().getNestedPreconditions()[0].getName() == "runningAs"
-        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0]).getUsername() == "testUser"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions()[0].getName() == "runningAs"
+        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions()[0]).getUsername() == "testUser"
 
-        changeLog.getPreconditions().getNestedPreconditions().get(1).getName() == "or"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions()[0].getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions()[0]).getType() == "mssql"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1).getName() == "or"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions()[0].getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions()[0]).getType() == "mssql"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0].getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
 
         changeLog.getChangeSets().size() == 1
     }
@@ -282,7 +278,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        e.message == "${path} does not exist"
+        e.message.startsWith("The file ${path} was not found")
     }
 
     def "ChangeLogParseException thrown if changelog has invalid tags"() throws Exception {
@@ -389,9 +385,9 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         ((InsertDataChange) changeLog.getChangeSet(path, "nvoxland", "multiple changes").changes[3]).columns[0].valueNumeric == 4
 
         and: "changeSet level attributes are parsed correctly"
-        that changeLog.getChangeSet(path, "nvoxland", "context and dbms").contexts.contexts, containsInAnyOrder(["test", "qa"].toArray())
+        that changeLog.getChangeSet(path, "nvoxland", "context and dbms").contextFilter.contexts, containsInAnyOrder(["test", "qa"].toArray())
         that changeLog.getChangeSet(path, "nvoxland", "context and dbms").dbmsSet, containsInAnyOrder(["mock", "oracle"].toArray())
-        changeLog.getChangeSet(path, "nvoxland", "standard changeSet").contexts.contexts.size() == 0
+        changeLog.getChangeSet(path, "nvoxland", "standard changeSet").contextFilter.contexts.size() == 0
         changeLog.getChangeSet(path, "nvoxland", "standard changeSet").dbmsSet == null
 
         assert changeLog.getChangeSet(path, "nvoxland", "runAlways set").isAlwaysRun()
@@ -463,25 +459,25 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).replace == "with_modifysql"
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).with == "after_modifysql"
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).applicableDbms == null
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).contexts == null
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).contextFilter == null
         assert !((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).applyToRollback
 
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).replace == ")"
         ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).with == ""
         that(((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).getApplicableDbms(), containsInAnyOrder(["mysql", "mock"].toArray()))
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).contexts == null
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).contextFilter == null
 
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).value == ", name varchar(255) )"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).contexts == null
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).contextFilter == null
         that(((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).applicableDbms, containsInAnyOrder(["mysql", "mock"].toArray()))
         assert ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).applyToRollback
 
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).value == " partitioned by stuff"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).contexts.toString() == "prod,qa"
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).contextFilter.toString() == "prod,qa"
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).applicableDbms == null
 
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).value == " engine innodb"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).contexts.toString() == "prod"
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).contextFilter.toString() == "prod"
         that(((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).getApplicableDbms(), containsInAnyOrder(["mysql"].toArray()))
 
         and: "utf8 is read correctly"
@@ -701,7 +697,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         Scope.getCurrentScope().getSingleton(ChangeFactory.class).unregister("createTableExample")
     }
 
-    def "change sets with matching dbms are parsed"() {
+    def "changesets with matching dbms are parsed"() {
         when:
         def path = "liquibase/parser/core/xml/rollbackWithDbmsChangeLog.xml"
         def database = new MSSQLDatabase()
@@ -711,7 +707,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getChangeSets().size() == 4
     }
 
-    def "change sets with non-matching dbms are skipped"() {
+    def "changesets with non-matching dbms are skipped"() {
         when:
         def path = "liquibase/parser/core/xml/rollbackWithDbmsChangeLog.xml"
         def database = new H2Database()
@@ -719,5 +715,31 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
         then:
         changeLog.getChangeSets().size() == 2
+    }
+
+    def "changesets exclude matching-excluded dbms"() {
+        when:
+        def path = "liquibase/parser/core/xml/excludeDbmsChangeLog.xml"
+        def database = new MSSQLDatabase()
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(database), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 2
+        def change1 = changeLog.getChangeSets().get(0).getChanges().get(0)
+        change1.getTableName() == "a"
+        change1.getColumns().get(0).getType() == "varchar(50)"
+    }
+
+    def "changesets include non-matching-excluded dbms"() {
+        when:
+        def path = "liquibase/parser/core/xml/excludeDbmsChangeLog.xml"
+        def database = new H2Database()
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(database), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 2
+        def change1 = changeLog.getChangeSets().get(0).getChanges().get(0)
+        change1.getTableName() == "a"
+        change1.getColumns().get(0).getType() == "int"
     }
 }

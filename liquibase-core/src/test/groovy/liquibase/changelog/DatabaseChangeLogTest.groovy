@@ -1,9 +1,11 @@
 package liquibase.changelog
 
-import liquibase.ContextExpression;
+import liquibase.ContextExpression
+import liquibase.Labels
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.exception.SetupException
+import liquibase.exception.UnknownChangeLogParameterException
 import liquibase.parser.core.ParsedNode
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
@@ -108,14 +110,14 @@ create view sql_view as select * from sql_table;'''
         changeLogFromChildren.load(nodeWithValue, resourceSupplier.simpleResourceAccessor)
 
         then:
-        changeLogFromChildren.preconditions.nestedPreconditions.size() == 2
-        changeLogFromValue.preconditions.nestedPreconditions.size() == 2
+        changeLogFromChildren.preconditions.nestedPreconditions[0].nestedPreconditions.size() == 2
+        changeLogFromValue.preconditions.nestedPreconditions[0].nestedPreconditions.size() == 2
 
-        ((RunningAsPrecondition) changeLogFromChildren.preconditions.nestedPreconditions[0]).username == "user1"
-        ((RunningAsPrecondition) changeLogFromValue.preconditions.nestedPreconditions[0]).username == "user1"
+        ((RunningAsPrecondition) changeLogFromChildren.preconditions.nestedPreconditions[0].nestedPreconditions[0]).username == "user1"
+        ((RunningAsPrecondition) changeLogFromValue.preconditions.nestedPreconditions[0].nestedPreconditions[0]).username == "user1"
 
-        ((RunningAsPrecondition) changeLogFromChildren.preconditions.nestedPreconditions[1]).username == "user2"
-        ((RunningAsPrecondition) changeLogFromValue.preconditions.nestedPreconditions[1]).username == "user2"
+        ((RunningAsPrecondition) changeLogFromChildren.preconditions.nestedPreconditions[0].nestedPreconditions[1]).username == "user2"
+        ((RunningAsPrecondition) changeLogFromValue.preconditions.nestedPreconditions[0].nestedPreconditions[1]).username == "user2"
 
         changeLogFromChildren.changeSets.size() == 2
         changeLogFromValue.changeSets.size() == 2
@@ -145,15 +147,15 @@ create view sql_view as select * from sql_table;'''
 
         then:
         rootChangeLog.preconditions.nestedPreconditions.size() == 3
-        ((RunningAsPrecondition) rootChangeLog.preconditions.nestedPreconditions[0]).username == "user1"
+        ((RunningAsPrecondition) rootChangeLog.preconditions.nestedPreconditions[0].nestedPreconditions[0]).username == "user1"
 
-        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions.size() == 2
-        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions[0]).username == "testUser"
-        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions[1]).nestedPreconditions.size() == 2
+        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions.nestedPreconditions[0].size() == 2
+        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions[0].nestedPreconditions[0]).username == "testUser"
+        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions[0].nestedPreconditions[1]).nestedPreconditions.size() == 2
 
-        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions.size() == 2
-        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[0]).username == "otherUser"
-        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[1]).nestedPreconditions.size() == 2
+        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions.nestedPreconditions[0].size() == 2
+        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[0].nestedPreconditions[0]).username == "otherUser"
+        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[0].nestedPreconditions[1]).nestedPreconditions.size() == 2
 
         rootChangeLog.changeSets.size() == 3
         ((CreateTableChange) rootChangeLog.getChangeSet("com/example/root.xml", "nvoxland", "1").changes[0]).tableName == "test_table"
@@ -175,18 +177,18 @@ create view sql_view as select * from sql_table;'''
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([includeAll: [path: "com/example", resourceComparator : "liquibase.changelog.ReversedChangeLogNamesComparator"]])
+                .addChildren([includeAll: [path: "com/example", resourceComparator: "liquibase.changelog.ReversedChangeLogNamesComparator"]])
                 , resourceAccessor)
 
         then:
         rootChangeLog.preconditions.nestedPreconditions.size() == 4
-        ((RunningAsPrecondition) rootChangeLog.preconditions.nestedPreconditions[0]).username == "user1"
+        ((RunningAsPrecondition) rootChangeLog.preconditions.nestedPreconditions[0].nestedPreconditions[0]).username == "user1"
 
-        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions.size() == 2
+        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions[0].nestedPreconditions.size() == 2
 
-        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions.size() == 2
-        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[0]).username == "testUser"
-        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[1]).nestedPreconditions.size() == 2
+        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[0].nestedPreconditions.size() == 2
+        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[0].nestedPreconditions[0]).username == "testUser"
+        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[0].nestedPreconditions[1]).nestedPreconditions.size() == 2
 
         ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[3]).nestedPreconditions.size() == 0
 
@@ -203,6 +205,64 @@ create view sql_view as select * from sql_table;'''
         ((RawSQLChange) rootChangeLog.getChangeSets().get(3).changes[0]).sql == testSql
     }
 
+    def "included changelogs inherit contexts, labels, and ignores via load()"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/test1.xml", context: "context1", labels: "label1"]])
+                .addChildren([include: [file: "com/example/test2.xml", context: "context2", labels: "label2", ignore: true]])
+                , resourceAccessor)
+
+        def test1ChangeLog = rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getChangeLog()
+        def test2ChangeLog = rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getChangeLog()
+
+        then:
+        test1ChangeLog.getIncludeLabels().getLabels().size() == 1
+        test1ChangeLog.getIncludeLabels().getLabels()[0] == "label1"
+        test1ChangeLog.getIncludeContextFilter().getContexts().size() == 1
+        test1ChangeLog.getIncludeContextFilter().getContexts()[0] == "context1"
+        test1ChangeLog.isIncludeIgnore() == false
+
+        test2ChangeLog.getIncludeLabels().getLabels().size() == 1
+        test2ChangeLog.getIncludeLabels().getLabels()[0] == "label2"
+        test2ChangeLog.getIncludeContextFilter().getContexts().size() == 1
+        test2ChangeLog.getIncludeContextFilter().getContexts()[0] == "context2"
+        test2ChangeLog.isIncludeIgnore() == true
+
+    }
+
+    def "included changelogs inherit contexts, labels, and ignores via include()"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/test1.xml": test1Xml,
+                "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")
+        ])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.include("com/example/test1.xml", false, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, false)
+        rootChangeLog.include("com/example/test2.xml", false, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, false)
+
+        def test1ChangeLog = rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getChangeLog()
+        def test2ChangeLog = rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getChangeLog()
+
+        then:
+        test1ChangeLog.getIncludeLabels().getLabels().size() == 1
+        test1ChangeLog.getIncludeLabels().getLabels()[0] == "label1"
+        test1ChangeLog.getIncludeContextFilter().getContexts().size() == 1
+        test1ChangeLog.getIncludeContextFilter().getContexts()[0] == "context1"
+        test1ChangeLog.isIncludeIgnore() == false
+
+        test2ChangeLog.getIncludeLabels().getLabels().size() == 1
+        test2ChangeLog.getIncludeLabels().getLabels()[0] == "label2"
+        test2ChangeLog.getIncludeContextFilter().getContexts().size() == 1
+        test2ChangeLog.getIncludeContextFilter().getContexts()[0] == "context2"
+        test2ChangeLog.isIncludeIgnore() == true
+    }
+
     def "includeAll executes include in alphabetical order"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
@@ -212,12 +272,35 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression())
+        changeLogFile.includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
 
         then:
         changeLogFile.changeSets.collect { it.filePath } == ["com/example/children/file1.sql",
                                                              "com/example/children/file2.sql",
                                                              "com/example/children/file3.sql"]
+    }
+
+    def "includeAll empty relative path"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/root/children/file2.sql": "file 2",
+                "com/example/root/children/file3.sql": "file 3",
+                "com/example/root/children/file1.sql": "file 1",
+                "com/example/not/fileX.sql"          : "file X",
+        ]) {
+            private callingPath;
+
+            @Override
+            SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+                callingPath = path;
+                return super.list(relativeTo, path, recursive, includeFiles, includeDirectories)
+            }
+        }
+        def changeLogFile = new DatabaseChangeLog("com/example/children/root.xml")
+        changeLogFile.includeAll("", true, { r -> r != changeLogFile.physicalFilePath}, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
+
+        then:
+        resourceAccessor.callingPath == ""
     }
 
     @Unroll("#featureName: #changeSets")
@@ -256,10 +339,10 @@ create view sql_view as select * from sql_table;'''
                 "com/example/children/file2.sql": "file 2",
                 "com/example/children/file3.sql": "file 3",
                 "com/example/children/file1.sql": "file 1",
-                "com/example/not/fileX.sql": "file X",
+                "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression())
+        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
 
         then:
         SetupException e = thrown()
@@ -273,13 +356,72 @@ create view sql_view as select * from sql_table;'''
                 "com/example/children/file2.sql": "file 2",
                 "com/example/children/file3.sql": "file 3",
                 "com/example/children/file1.sql": "file 1",
-                "com/example/not/fileX.sql": "file X",
+                "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression())
+        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
         then:
-        changeLogFile.changeSets.collect {it.filePath } == []
+        changeLogFile.changeSets.collect { it.filePath } == []
 
+    }
+
+    def "include fails if no parser supports the file"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/test1.invalid"]])
+                , resourceAccessor)
+
+
+        then:
+        def e = thrown(SetupException)
+        e.message == "Cannot find parser that supports com/example/test1.invalid"
+    }
+
+    def "include fails if file does not exist"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/invalid.xml"]])
+                , resourceAccessor)
+
+
+        then:
+        def e = thrown(SetupException)
+        e.message.startsWith("The file com/example/invalid.xml was not found in")
+    }
+
+    @Unroll
+    def "normalizePath: #path"() {
+        expect:
+        DatabaseChangeLog.normalizePath(path) == expected
+
+        where:
+        path                                  | expected
+        "changelog.xml"                       | "changelog.xml"
+        "path/to/changelog.xml"               | "path/to/changelog.xml"
+        "/path/to/changelog.xml"              | "path/to/changelog.xml"
+        "./path/to/changelog.xml"             | "path/to/changelog.xml"
+        "classpath:./path/to/changelog.xml"   | "path/to/changelog.xml"
+        "classpath:path/to/changelog.xml"     | "path/to/changelog.xml"
+        "classpath:/path/to/changelog.xml"    | "path/to/changelog.xml"
+        "\\path\\to\\changelog.xml"           | "path/to/changelog.xml"
+        ".\\path\\to\\changelog.xml"          | "path/to/changelog.xml"
+        "path\\to\\changelog.xml"             | "path/to/changelog.xml"
+        "path\\.\\to\\.\\changelog.xml"       | "path/to/changelog.xml"
+        "c:\\path\\to\\changelog.xml"         | "path/to/changelog.xml"
+        "c:/path/to/changelog.xml"            | "path/to/changelog.xml"
+        "D:\\a\\liquibase\\DBDocTaskTest.xml" | "a/liquibase/DBDocTaskTest.xml"
     }
 
 }

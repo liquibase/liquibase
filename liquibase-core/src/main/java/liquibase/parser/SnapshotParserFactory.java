@@ -34,7 +34,7 @@ public class SnapshotParserFactory {
     /**
      * Set the instance used by this singleton. Used primarily for testing.
      */
-    public static void setInstance(SnapshotParserFactory instance) {
+    public static synchronized void setInstance(SnapshotParserFactory instance) {
         SnapshotParserFactory.instance = instance;
     }
 

@@ -1,11 +1,13 @@
 package liquibase.datatype.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Locale;
@@ -18,6 +20,7 @@ public class IntType extends LiquibaseDataType {
 
     private boolean autoIncrement;
 
+    @Override
     public boolean isAutoIncrement() {
         return autoIncrement;
     }
@@ -32,14 +35,21 @@ public class IntType extends LiquibaseDataType {
         if ((database instanceof InformixDatabase) && isAutoIncrement()) {
             return new DatabaseDataType("SERIAL");
         }
-
-        if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof
-            OracleDatabase)) {
+        if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || database instanceof OracleDatabase) {
             return new DatabaseDataType("INTEGER");
         }
+
         if (database instanceof PostgresDatabase) {
-            if (autoIncrement) {
-                return new DatabaseDataType("SERIAL");
+            if (isAutoIncrement()) {
+                if (((PostgresDatabase) database).useSerialDatatypes()) {
+                    return new DatabaseDataType("SERIAL");
+                } else {
+                    if (GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue() || this.getRawDefinition() == null) {
+                        return new DatabaseDataType("INTEGER");
+                    } else {
+                        return new DatabaseDataType(this.getRawDefinition());
+                    }
+                }
             } else {
                 return new DatabaseDataType("INTEGER");
             }

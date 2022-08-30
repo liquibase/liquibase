@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -25,9 +26,16 @@ public class ClearDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<C
         } else {
             schemaName = database.getLiquibaseSchemaName();
         }
-        return new Sql[] {
-                new UnparsedSql("DELETE FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), schemaName, database.getDatabaseChangeLogTableName()),
-                        getAffectedTable(database, schemaName)) };
+        // use LEGACY quoting since we're dealing with system objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        try {
+            return new Sql[] {
+                    new UnparsedSql("DELETE FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), schemaName, database.getDatabaseChangeLogTableName()),
+                                    getAffectedTable(database, schemaName)) };
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
+        }
     }
 
     protected Relation getAffectedTable(Database database, String schemaName) {

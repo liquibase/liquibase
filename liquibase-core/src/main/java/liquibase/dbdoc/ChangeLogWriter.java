@@ -1,7 +1,6 @@
 package liquibase.dbdoc;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 
@@ -22,13 +21,13 @@ public class ChangeLogWriter {
         xmlFile.getParentFile().mkdirs();
         
         BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(xmlFile,
-        false), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
-        try (InputStream stylesheet = StreamUtil.singleInputStream(physicalFilePath, resourceAccessor);) {
+        false), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+        try (InputStream stylesheet = resourceAccessor.openStream(null, physicalFilePath)) {
             if (stylesheet == null) {
                 throw new IOException("Can not find " + changeLog);
             }
             changeLogStream.write("<html><body><pre>\n");
-            changeLogStream.write(StreamUtil.getStreamContents(stylesheet).replace("<", "&lt;").replace(">", "&gt;"));
+            changeLogStream.write(StreamUtil.readStreamAsString(stylesheet).replace("<", "&lt;").replace(">", "&gt;"));
             changeLogStream.write("\n</pre></body></html>");
         } finally {
             changeLogStream.close();

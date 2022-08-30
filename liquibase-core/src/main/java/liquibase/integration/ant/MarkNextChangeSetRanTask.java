@@ -19,12 +19,12 @@ public class MarkNextChangeSetRanTask extends AbstractChangeLogBasedTask {
             FileResource outputFile = getOutputFile();
             if (outputFile != null) {
                 writer = getOutputFileWriter();
-                liquibase.markNextChangeSetRan(new Contexts(getContexts()), getLabels(), writer);
+                liquibase.markNextChangeSetRan(new Contexts(getContexts()), getLabelFilter(), writer);
             } else {
-                liquibase.markNextChangeSetRan(new Contexts(getContexts()), getLabels());
+                liquibase.markNextChangeSetRan(new Contexts(getContexts()), getLabelFilter());
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to mark next changeset as ran. " + e.toString(), e);
+            throw new BuildException("Unable to mark next changeset as ran: " + e.getMessage(), e);
         } catch (IOException e) {
             throw new BuildException("Unable to mark next changeset as ran. Error creating output writer.", e);
         } finally {

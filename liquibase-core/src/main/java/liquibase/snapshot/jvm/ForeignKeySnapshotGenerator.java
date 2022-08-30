@@ -184,14 +184,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                         row.getInt(METADATA_DELETE_RULE), database);
                 foreignKey.setDeleteRule(deleteRule);
 
-                short deferrability;
-                if (((database instanceof MySQLDatabase) && ((MySQLDatabase) database)
-                    .hasBugJdbcConstraintsDeferrable()) || ((database instanceof MariaDBDatabase) && (
-                        (MariaDBDatabase) database).hasBugJdbcConstraintsDeferrable())
-                   )
-                    deferrability = DatabaseMetaData.importedKeyNotDeferrable;
-                else
-                    deferrability = row.getShort(METADATA_DEFERRABILITY);
+                short deferrability = row.getShort(METADATA_DEFERRABILITY);
 
                 // Hsqldb doesn't handle setting this property correctly, it sets it to 0.
                 // it should be set to DatabaseMetaData.importedKeyNotDeferrable(7)
@@ -208,12 +201,12 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                     throw new RuntimeException("Unknown deferrability result: " + deferrability);
                 }
                 setValidateOptionIfAvailable(database, foreignKey, row);
-                if (database.createsIndexesForForeignKeys()) {
-                    Index exampleIndex = new Index().setRelation(foreignKey.getForeignKeyTable());
-                    exampleIndex.getColumns().addAll(foreignKey.getForeignKeyColumns());
-                    exampleIndex.addAssociatedWith(Index.MARK_FOREIGN_KEY);
-                    foreignKey.setBackingIndex(exampleIndex);
-                }
+
+                Index exampleIndex = new Index().setRelation(foreignKey.getForeignKeyTable());
+                exampleIndex.getColumns().addAll(foreignKey.getForeignKeyColumns());
+                exampleIndex.addAssociatedWith(Index.MARK_FOREIGN_KEY);
+                foreignKey.setBackingIndex(exampleIndex);
+
             }
             if (snapshot.get(ForeignKey.class).contains(foreignKey)) {
                 return null;
@@ -310,7 +303,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 return false;
             }
 
-            if (driverMajorVersion >= 6 && driverMinorVersion >= 3) {
+            if (driverMajorVersion > 6 || (driverMajorVersion == 6 && driverMinorVersion >= 3)) {
                 return false;
             }
 

@@ -32,6 +32,8 @@ class DropAllForeignKeyConstraintsChangeTest extends Specification {
 
     @Unroll("SQL in #shortDbName for dropAllForeignKeys")
     def "GenerateStatements"() {
+        setup:
+        DatabaseFactory.reset()
         when:
         Database dbms = DatabaseFactory.getInstance().getDatabase(shortDbName)
         OfflineConnection conn = new OfflineConnection("offline:" + shortDbName, null)

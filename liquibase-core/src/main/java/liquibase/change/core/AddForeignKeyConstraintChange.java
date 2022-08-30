@@ -43,6 +43,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     private String onUpdate;
     private String onDelete;
 
+
     @Override
     protected String[] createSupportedDatabasesMetaData(
         String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
@@ -167,7 +168,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     /**
-     * In Oracle PL/SQL, the VALIDATE keyword defines whether a foreign key constraint on a column in a table
+     * the VALIDATE keyword defines whether a foreign key constraint on a column in a table
      * should be checked if it refers to a valid row or not.
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */
@@ -192,9 +193,20 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.initiallyDeferred = initiallyDeferred;
     }
 
+    /**
+     * @deprecated Use {@link #getOnDelete()}.
+     * <b>This always returns null</b> so it doesn't impact checksums when settings onDelete vs. deleteCascade
+     */
+    @DatabaseChangeProperty(description = "This is true to set onDelete to Cascade, priority given to onDelete tag if one exists")
+    public Boolean getDeleteCascade() {
+        return null;
+    }
+
     public void setDeleteCascade(Boolean deleteCascade) {
-        if ((deleteCascade != null) && deleteCascade) {
+        if ((deleteCascade != null) && deleteCascade && (this.onDelete == null)) {
             setOnDelete("CASCADE");
+        } else {
+            setOnDelete((String) null);
         }
     }
 

@@ -1,16 +1,16 @@
 package liquibase.database;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.OfflineChangeLogHistoryService;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.LiquibaseService;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -23,14 +23,17 @@ import liquibase.util.StringUtil;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.sql.Driver;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@LiquibaseService(skip=true)
 public class OfflineConnection implements DatabaseConnection {
-    private final String url;
-    private final String databaseShortName;
+    private String url=null;
+    private String databaseShortName=null;
     private final Map<String, String> databaseParams = new HashMap<>();
     private DatabaseSnapshot snapshot;
     private OutputLiquibaseSql outputLiquibaseSql = OutputLiquibaseSql.NONE;
@@ -43,6 +46,8 @@ public class OfflineConnection implements DatabaseConnection {
     private String catalog;
     private boolean sendsStringParametersAsUnicode = true;
     private String connectionUserName;
+
+    public OfflineConnection() {}
 
     public OfflineConnection(String url, ResourceAccessor resourceAccessor) {
         this.url = url;
@@ -75,7 +80,7 @@ public class OfflineConnection implements DatabaseConnection {
                             this.databaseMinorVersion = Integer.parseInt(versionParts[1]);
                         }
                     } catch (NumberFormatException e) {
-                        LogService.getLog(getClass()).warning(LogType.LOG, "Cannot parse database version " + productVersion);
+                        Scope.getCurrentScope().getLog(getClass()).warning("Cannot parse database version " + productVersion);
                     }
                 } else if ("productName".equals(paramEntry.getKey())) {
                     this.productName = paramEntry.getValue();
@@ -115,8 +120,20 @@ public class OfflineConnection implements DatabaseConnection {
         }
     }
 
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
     public boolean isCorrectDatabaseImplementation(Database database) {
         return database.getShortName().equalsIgnoreCase(databaseShortName);
+    }
+
+    @Override
+    public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
+       //
+       // No-op
+       //
     }
 
     @Override
@@ -125,7 +142,7 @@ public class OfflineConnection implements DatabaseConnection {
             try {
                 ObjectUtil.setProperty(database, param.getKey(), param.getValue());
             } catch (Exception e) {
-                LogService.getLog(getClass()).warning(LogType.LOG, "Error setting database parameter " + param.getKey() + ": " + e.getMessage(), e);
+                Scope.getCurrentScope().getLog(getClass()).warning("Error setting database parameter " + param.getKey() + ": " + e.getMessage(), e);
             }
         }
         if (database instanceof AbstractJdbcDatabase) {
@@ -273,7 +290,7 @@ public class OfflineConnection implements DatabaseConnection {
     }
 
     public void setConnectionUserName(String connectionUserName) {
-        this.connectionUserName = connectionUserName;
+        this.connectionUserName = StringUtil.isEmpty(connectionUserName) ? null : connectionUserName;
     }
 
     @Override

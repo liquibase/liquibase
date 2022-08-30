@@ -23,8 +23,8 @@ public class ChangeGeneratorChain {
             return null;
         }
 
-        if ((control.getObjectChangeFilter() != null) && !control.getObjectChangeFilter().includeMissing
-            (missingObject, referenceDatabase, comparisionDatabase)) {
+        if ((control.getObjectChangeFilter() != null) &&
+            !control.getObjectChangeFilter().includeMissing(missingObject, referenceDatabase, comparisionDatabase)) {
             return null;
         }
 
@@ -53,6 +53,7 @@ public class ChangeGeneratorChain {
             return null;
         }
         changes = changeGenerator.fixSchema(changes, control.getSchemaComparisons());
+        respectSchemaAndCatalogCaseIfNeeded(control, changeGenerator);
         changes = changeGenerator.fixOutputAsSchema(changes, control.getSchemaComparisons());
 
         return changes;
@@ -63,8 +64,8 @@ public class ChangeGeneratorChain {
             return null;
         }
 
-        if ((control.getObjectChangeFilter() != null) && !control.getObjectChangeFilter().includeUnexpected
-            (unexpectedObject, referenceDatabase, comparisionDatabase)) {
+        if ((control.getObjectChangeFilter() != null) &&
+            !control.getObjectChangeFilter().includeUnexpected(unexpectedObject, referenceDatabase, comparisionDatabase)) {
             return null;
         }
 
@@ -92,11 +93,18 @@ public class ChangeGeneratorChain {
         if (changes.length == 0) {
             return null;
         }
-
         changes = changeGenerator.fixSchema(changes, control.getSchemaComparisons());
+        respectSchemaAndCatalogCaseIfNeeded(control, changeGenerator);
         changes = changeGenerator.fixOutputAsSchema(changes, control.getSchemaComparisons());
 
         return changes;
+    }
+
+    private void respectSchemaAndCatalogCaseIfNeeded(DiffOutputControl control, ChangeGenerator changeGenerator) {
+        if (changeGenerator instanceof AbstractChangeGenerator) {
+            AbstractChangeGenerator abstractChangeGenerator = (AbstractChangeGenerator) changeGenerator;
+            abstractChangeGenerator.setRespectSchemaAndCatalogCase(control.shouldRespectSchemaAndCatalogCase());
+        }
     }
 
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase) {
@@ -104,8 +112,8 @@ public class ChangeGeneratorChain {
             return null;
         }
 
-        if ((control.getObjectChangeFilter() != null) && !control.getObjectChangeFilter().includeChanged
-            (changedObject, differences, referenceDatabase, comparisionDatabase)) {
+        if ((control.getObjectChangeFilter() != null) &&
+            !control.getObjectChangeFilter().includeChanged(changedObject, differences, referenceDatabase, comparisionDatabase)) {
             return null;
         }
 
@@ -134,6 +142,7 @@ public class ChangeGeneratorChain {
             return null;
         }
         changes = changeGenerator.fixSchema(changes, control.getSchemaComparisons());
+        respectSchemaAndCatalogCaseIfNeeded(control, changeGenerator);
         changes = changeGenerator.fixOutputAsSchema(changes, control.getSchemaComparisons());
         return changes;
     }

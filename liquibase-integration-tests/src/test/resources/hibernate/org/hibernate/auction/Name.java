@@ -42,13 +42,8 @@ public class Name {
 	
 	@Override
     public String toString() {
-		StringBuffer buf = new StringBuffer()
-			.append(firstName)
-			.append(' ');
-		if (initial!=null) buf.append(initial)
-			.append(' ');
-		return buf.append(lastName)
-			.toString();
+    	return initial == null
+					? String.format("%s %s", firstName, lastName)
+					: String.format("%s %s %s", firstName, initial, lastName);
 	}
-
 }

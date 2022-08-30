@@ -1,13 +1,12 @@
 package liquibase.datatype.core;
 
+import liquibase.Scope;
 import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtil;
 
@@ -16,8 +15,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @DataTypeInfo(name = "datetime", minParameters = 0, maxParameters = 1,
     aliases = {"java.sql.Types.DATETIME", "java.util.Date", "smalldatetime", "datetime2"},
@@ -28,6 +25,8 @@ public class DateTimeType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
+        String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
+
         if ((database instanceof DerbyDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
             H2Database) || (database instanceof HsqlDatabase)) {
             return new DatabaseDataType(SQL_DATETYPE_TIMESTAMP);
@@ -38,14 +37,13 @@ public class DateTimeType extends LiquibaseDataType {
 		}
 
         if (database instanceof OracleDatabase) {
-            if (getRawDefinition().toUpperCase(Locale.US).contains("TIME ZONE")) {
+            if (originalDefinition.toUpperCase(Locale.US).contains("TIME ZONE")) {
                 // remove the last data type size that comes from column size
-                return new DatabaseDataType(getRawDefinition().replaceFirst("\\(\\d+\\)$", ""));
+                return new DatabaseDataType(originalDefinition.replaceFirst("\\(\\d+\\)$", ""));
             }
             return new DatabaseDataType(SQL_DATETYPE_TIMESTAMP, getParameters());
         }
 
-        String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
             if (originalDefinition.matches("(?i)^\\[?smalldatetime.*")) {
@@ -136,8 +134,8 @@ public class DateTimeType extends LiquibaseDataType {
             Object[] params = getParameters();
             Integer precision = Integer.valueOf(params[0].toString());
             if (precision > 6) {
-                LogService.getLog(getClass()).warning(
-                        LogType.LOG, "MySQL does not support a timestamp precision"
+                Scope.getCurrentScope().getLog(getClass()).warning(
+                        "MySQL does not support a timestamp precision"
                                 + " of '" + precision + "' - resetting to"
                                 + " the maximum of '6'");
                 params = new Object[] {6};
@@ -194,9 +192,12 @@ public class DateTimeType extends LiquibaseDataType {
         } catch (ParseException e) {
             String[] genericFormats = new String[] {"yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss.SSS", "yyyy-MM-dd'T'HH:mm:ss" };
 
+            //regexp can't handle millisenconds beyond three digits
+            String shortenedValue = value.replaceFirst("(\\.\\d{3})\\d+", "$1");
+
             for (String format : genericFormats) {
                 try {
-                    return new Timestamp(new SimpleDateFormat(format).parse(value).getTime());
+                    return new Timestamp(new SimpleDateFormat(format).parse(shortenedValue).getTime());
                 } catch (ParseException ignore) {
                     //doesn't match
                 }

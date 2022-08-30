@@ -3,9 +3,10 @@ package org.liquibase.maven.plugins;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 /**
- * Writes a Liquibase tag to the database.
+ * <p>Writes a Liquibase tag to the database.</p>
  * 
  * @author Peter Murray
  * @goal tag
@@ -15,9 +16,10 @@ public class LiquibaseTag extends AbstractLiquibaseMojo {
   /**
    * The text to write to the databasechangelog.
    *
-   * @parameter expression="${liquibase.tag}"
+   * @parameter property="liquibase.tag"
    * @required
    */
+  @PropertyElement
   private String tag;
 
   @Override

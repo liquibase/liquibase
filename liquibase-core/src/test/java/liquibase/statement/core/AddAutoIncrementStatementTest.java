@@ -11,6 +11,6 @@ public class AddAutoIncrementStatementTest extends AbstractSqStatementTest<AddAu
 
     @Override
     protected AddAutoIncrementStatement createStatementUnderTest() {
-        return new AddAutoIncrementStatement("CATALOG_NAME", "SCHEMA_NAME", "TABLE_NAME", "COLUMN_NAME", "COLUMN_TYPE", null, null);
+        return new AddAutoIncrementStatement("CATALOG_NAME", "SCHEMA_NAME", "TABLE_NAME", "COLUMN_NAME", "COLUMN_TYPE", null, null, null, null);
     }
 }

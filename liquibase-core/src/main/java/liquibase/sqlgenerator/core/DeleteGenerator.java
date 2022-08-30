@@ -26,7 +26,8 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
 
     @Override
     public Sql[] generateSql(DeleteStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
+        StringBuilder sql = new StringBuilder("DELETE FROM ")
+            .append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
 
         if (statement.getWhere() != null) {
             sql.append(" WHERE ").append(replacePredicatePlaceholders(database, statement.getWhere(), statement.getWhereColumnNames(), statement.getWhereParameters()));

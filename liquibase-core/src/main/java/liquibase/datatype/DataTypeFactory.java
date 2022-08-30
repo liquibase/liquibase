@@ -73,7 +73,7 @@ public class DataTypeFactory {
 
             Comparator<Class<? extends LiquibaseDataType>> comparator = (o1, o2) -> {
                 try {
-                    return -1 * Integer.compare(o1.newInstance().getPriority(), o2.newInstance().getPriority());
+                    return -1 * Integer.compare(o1.getConstructor().newInstance().getPriority(), o2.getConstructor().newInstance().getPriority());
                 } catch (Exception e) {
                     throw new UnexpectedLiquibaseException(e);
                 }
@@ -112,6 +112,10 @@ public class DataTypeFactory {
         if (dataTypeDefinition == null) {
             return null;
         }
+        if (dataTypeDefinition.matches("^\\$\\{.*}$")) {
+            return new UnknownType(dataTypeDefinition);
+        }
+
         String dataTypeName = dataTypeDefinition;
 
         // Remove the first occurrence of (anything within parentheses). This will remove the size information from
@@ -190,7 +194,7 @@ public class DataTypeFactory {
             Iterator<Class<? extends LiquibaseDataType>> iterator = classes.iterator();
             do {
                 try {
-                    liquibaseDataType = iterator.next().newInstance();
+                    liquibaseDataType = iterator.next().getConstructor().newInstance();
                 } catch (Exception e) {
                     throw new UnexpectedLiquibaseException(e);
                 }
@@ -238,8 +242,9 @@ public class DataTypeFactory {
                 param = StringUtil.trimToNull(param);
                 if (param != null) {
                     String[] paramAndValue = param.split(":", 2);
-                    // TODO: A run-time exception will occur here if the user writes a property name into the
-                    // data type which does not exist - but what else could we do in this case, except aborting?
+                    if (paramAndValue.length < 2) {
+                        throw new UnexpectedLiquibaseException("Data type definition contains unparseable embedded information: `" + dataTypeDefinition + "`");
+                    }
                     ObjectUtil.setProperty(liquibaseDataType, paramAndValue[0], paramAndValue[1]);
                 }
             }

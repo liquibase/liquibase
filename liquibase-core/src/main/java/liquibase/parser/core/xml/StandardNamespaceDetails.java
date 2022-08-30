@@ -16,8 +16,8 @@ public class StandardNamespaceDetails implements NamespaceDetails {
     private final Pattern oldStandardUrlPattern;
 
     public StandardNamespaceDetails() {
-        standardUrlPattern = Pattern.compile("http://www.liquibase.org/xml/ns/dbchangelog/(dbchangelog-[\\d\\.]+.xsd)");
-        oldStandardUrlPattern = Pattern.compile("http://www.liquibase.org/xml/ns/migrator/(dbchangelog-[\\d\\.]+.xsd)");
+        standardUrlPattern = Pattern.compile("http://www.liquibase.org/xml/ns/dbchangelog/(dbchangelog-[\\w\\.]+.xsd)");
+        oldStandardUrlPattern = Pattern.compile("http://www.liquibase.org/xml/ns/migrator/(dbchangelog-[\\w\\.]+.xsd)");
     }
 
     @Override
@@ -54,27 +54,8 @@ public class StandardNamespaceDetails implements NamespaceDetails {
     @Override
     public String getSchemaUrl(String namespaceOrUrl) {
         if (namespaceOrUrl.equals(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE)) {
-            return "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd";
+            return "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd";
         }
         return GENERIC_EXTENSION_XSD;
-    }
-
-    @Override
-    public String getLocalPath(String namespaceOrUrl) {
-
-        if (namespaceOrUrl.equals(GENERIC_EXTENSION_XSD)) {
-            return "liquibase/parser/core/xml/dbchangelog-ext.xsd";
-        }
-        Matcher matcher = standardUrlPattern.matcher(namespaceOrUrl);
-        if (matcher.matches()) {
-            return "liquibase/parser/core/xml/"+matcher.group(1);
-        }
-
-        matcher = oldStandardUrlPattern.matcher(namespaceOrUrl);
-        if (matcher.matches()) {
-            return "liquibase/parser/core/xml/"+matcher.group(1);
-        }
-
-        return null;
     }
 }

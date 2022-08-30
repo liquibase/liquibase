@@ -8,16 +8,18 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+@SuppressWarnings("java:S2583")
 public class SqlChangeLogParser implements ChangeLogParser {
 
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        return changeLogFile.endsWith(".sql");
+        return changeLogFile.toLowerCase().endsWith(".sql");
     }
 
     @Override
@@ -34,16 +36,17 @@ public class SqlChangeLogParser implements ChangeLogParser {
         RawSQLChange change = new RawSQLChange();
 
         try {
-            InputStream sqlStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
-            if (sqlStream == null) {
-                throw new ChangeLogParseException("File does not exist: "+physicalChangeLogLocation);
+            InputStream sqlStream = resourceAccessor.openStream(null, physicalChangeLogLocation);
+            if (sqlStream != null) {
+                String sql = StreamUtil.readStreamAsString(sqlStream);
+                change.setSql(sql);
             }
-            String sql = StreamUtil.getStreamContents(sqlStream, null);
-            change.setSql(sql);
+            else {
+                throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
+            }
         } catch (IOException e) {
             throw new ChangeLogParseException(e);
         }
-        change.setResourceAccessor(resourceAccessor);
         change.setSplitStatements(false);
         change.setStripComments(false);
 

@@ -40,13 +40,6 @@
         <delete dir="${temp.dir}"/>
     </target>
 
-    <target name="testDatabaseRollbackFutureLegacy">
-        <lb:rollbackFutureDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}"
-                                   password="${db.password}" outputfile="${temp.dir}/rollback-future.sql"
-                                   changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml"/>
-        <au:assertFileExists file="${temp.dir}/rollback-future.sql"/>
-    </target>
-
     <target name="testDatabaseRollbackFuture">
         <lb:rollbackFutureDatabase outputfile="${temp.dir}/rollback-future.sql"
                                    changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml">
@@ -86,14 +79,6 @@
 	
 	
 	<!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
-    
-    <target name="testDatabaseRollbackFutureLegacyChangeLogDirectory">
-        <lb:rollbackFutureDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}"
-                                   password="${db.password}" outputfile="${temp.dir}/rollback-future.sql"
-                                   changelogdirectory="${liquibase.test.ant.basedir}/changelog"
-                                   changelogfile="changelog-with-rollback.xml"/>
-        <au:assertFileExists file="${temp.dir}/rollback-future.sql"/>
-    </target>
 
     <target name="testDatabaseRollbackFutureChangeLogDirectory">
         <lb:rollbackFutureDatabase outputfile="${temp.dir}/rollback-future.sql"
@@ -105,7 +90,7 @@
     </target>
 
     <target name="testDatabaseRollbackFutureChangeLogDirectoryDoesNotExist">
-        <au:expectfailure expectedmessage="${liquibase.test.ant.basedir}/bad_changelog must be a directory">
+        <au:expectfailure expectedmessage="Unable to generate future rollback SQL: The file changelog-with-rollback.xml was not found">
 	        <lb:rollbackFutureDatabase outputfile="${temp.dir}/rollback-future.sql"
 	                                   changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog"
 	        	                       changelogfile="changelog-with-rollback.xml">

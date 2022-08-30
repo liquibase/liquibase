@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
@@ -32,12 +31,12 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 	private final ResourceAccessor resourceAccessor;
 	private final ChangeLogParameters changeLogParameters;
     private final Stack<ParsedNode> nodeStack = new Stack();
-    private Stack<StringBuffer> textStack = new Stack<>();
+    private Stack<StringBuilder> textStack = new Stack<>();
     private ParsedNode databaseChangeLogTree;
 
 
     protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, ResourceAccessor resourceAccessor, ChangeLogParameters changeLogParameters) {
-		log = LogService.getLog(getClass());
+		log = Scope.getCurrentScope().getLog(getClass());
 		this.resourceAccessor = resourceAccessor;
 
 		databaseChangeLog = new DatabaseChangeLog();
@@ -65,7 +64,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     }
 
     @Override
-    public void characters(char ch[], int start, int length) throws SAXException {
+    public void characters(char ch[], int start, int length) {
         textStack.peek().append(new String(ch, start, length));
     }
 
@@ -90,7 +89,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 databaseChangeLogTree = node;
             }
             nodeStack.push(node);
-            textStack.push(new StringBuffer());
+            textStack.push(new StringBuilder());
         } catch (ParsedNodeException e) {
             throw new SAXException(e);
         }

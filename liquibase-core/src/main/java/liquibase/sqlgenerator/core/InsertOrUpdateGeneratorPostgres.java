@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.CockroachDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -12,6 +13,9 @@ import liquibase.statement.core.InsertOrUpdateStatement;
 public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 	@Override
     public boolean supports(InsertOrUpdateStatement statement, Database database) {
+		if (database instanceof CockroachDatabase) {
+			return false;
+		}
 		if (database instanceof PostgresDatabase) {
             try {
                 return database.getDatabaseMajorVersion() >= 9;
@@ -47,10 +51,15 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 					+ database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(),
 							insertOrUpdateStatement.getTableName()) + " WHERE " + getWhereClause(insertOrUpdateStatement, database) + ";\n");
 		}
-		generatedSql.append("IF not found THEN\n");
-		generatedSql.append(getInsertStatement(insertOrUpdateStatement,
-				database, sqlGeneratorChain));
-		generatedSql.append("END IF;\n");
+
+		// if we don't want to only update, then add the INSERT statement
+		if (!insertOrUpdateStatement.getOnlyUpdate()) {
+			generatedSql.append("IF not found THEN\n");
+			generatedSql.append(getInsertStatement(insertOrUpdateStatement,
+					database, sqlGeneratorChain));
+			generatedSql.append("END IF;\n");
+		}
+
 		generatedSql.append("END;\n");
 		generatedSql.append("$$\n");
 		generatedSql.append("LANGUAGE plpgsql;\n");

@@ -7,10 +7,11 @@ import liquibase.change.CheckSum;
 import java.util.Date;
 
 /**
- * Encapsulates information about a previously-ran change set.  Used to build rollback statements.
+ * Encapsulates information about a previously-ran changeset.  Used to build rollback statements.
  */
 public class RanChangeSet {
     private final String changeLog;
+    private final String storedChangeLog;
     private final String id;
     private final String author;
     private final CheckSum lastCheckSum;
@@ -23,6 +24,7 @@ public class RanChangeSet {
     private ContextExpression contextExpression;
     private Labels labels;
     private String deploymentId;
+    private String liquibaseVersion;
 
 
     public RanChangeSet(ChangeSet changeSet) {
@@ -41,11 +43,17 @@ public class RanChangeSet {
                 changeSet.getComments(),
                 contexts,
                 labels,
-                null);
+                null,
+                changeSet.getStoredFilePath());
     }
 
     public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag, ChangeSet.ExecType execType, String description, String comments, ContextExpression contextExpression, Labels labels, String deploymentId) {
+        this(changeLog, id, author, lastCheckSum, dateExecuted, tag, execType, description, comments, contextExpression, labels, deploymentId, null);
+    }
+
+    public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag, ChangeSet.ExecType execType, String description, String comments, ContextExpression contextExpression, Labels labels, String deploymentId, String storedChangeLog) {
         this.changeLog = changeLog;
+        this.storedChangeLog = storedChangeLog;
         this.id = id;
         this.author = author;
         this.lastCheckSum = lastCheckSum;
@@ -65,6 +73,13 @@ public class RanChangeSet {
 
     public String getChangeLog() {
         return changeLog;
+    }
+
+    /**
+     * Get the path stored in the DatabaseChangeLog table
+     */
+    public String getStoredChangeLog() {
+        return storedChangeLog;
     }
 
     public String getId() {
@@ -138,6 +153,14 @@ public class RanChangeSet {
         this.deploymentId = deploymentId;
     }
 
+    public String getLiquibaseVersion() {
+        return liquibaseVersion;
+    }
+
+    public void setLiquibaseVersion(String liquibaseVersion) {
+        this.liquibaseVersion = liquibaseVersion;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -168,7 +191,7 @@ public class RanChangeSet {
     }
 
     public boolean isSameAs(ChangeSet changeSet) {
-        return this.getChangeLog().replace('\\', '/').replaceFirst("^classpath:", "").equalsIgnoreCase(changeSet.getFilePath().replace('\\', '/').replaceFirst("^classpath:", ""))
+        return DatabaseChangeLog.normalizePath(this.getChangeLog()).equalsIgnoreCase(DatabaseChangeLog.normalizePath(changeSet.getFilePath()))
                 && this.getId().equalsIgnoreCase(changeSet.getId())
                 && this.getAuthor().equalsIgnoreCase(changeSet.getAuthor());
     }

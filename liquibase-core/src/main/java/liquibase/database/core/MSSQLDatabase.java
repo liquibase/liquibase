@@ -1,6 +1,8 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
+import liquibase.GlobalConfiguration;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -8,21 +10,27 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
-import liquibase.util.JdbcUtils;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -102,9 +110,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         defaultDataTypeParameters.put("money", 4);
         defaultDataTypeParameters.put("smallmoney", 0);
 
+        unmodifiableDataTypes.add("datetime");
 
-        // JDBC Driver version 6.2.0 does not seem to return this keyword, which causes an integration test to fail.
-        addReservedWords(Arrays.asList("KEY"));
+        addReservedWords(createReservedWordsCollection());
     }
 
     @Override
@@ -114,11 +122,15 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setDefaultSchemaName(String schemaName) {
-        if (schemaName != null && !schemaName.equalsIgnoreCase(getConnectionSchemaName())) {
-            throw new RuntimeException(String.format(
-                "Cannot use default schema name %s on Microsoft SQL Server because the login " +
-                    "schema of the current user (%s) is different and MSSQL does not support " +
-                    "setting the default schema per session.", schemaName, getConnectionSchemaName()));
+        if(this.getConnection() instanceof OfflineConnection) {
+            //skip the check below, when working with offline connection
+        } else {
+            if (schemaName != null && !schemaName.equalsIgnoreCase(getConnectionSchemaName())) {
+                throw new RuntimeException(String.format(
+                        "Cannot use default schema name %s on Microsoft SQL Server because the login " +
+                                "schema of the current user (%s) is different and MSSQL does not support " +
+                                "setting the default schema per session.", schemaName, getConnectionSchemaName()));
+            }
         }
         super.setDefaultSchemaName(schemaName);
     }
@@ -177,9 +189,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         boolean isRealSqlServerConnection = PRODUCT_NAME.equalsIgnoreCase(databaseProductName)
                 || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
 
-        if (isRealSqlServerConnection && (majorVersion <= MSSQL_SERVER_VERSIONS.MSSQL2008)) {
-            LogService.getLog(getClass()).warning(
-                LogType.LOG, String.format("Your SQL Server major version (%d) seems to indicate that your " +
+        if (isRealSqlServerConnection && (majorVersion < MSSQL_SERVER_VERSIONS.MSSQL2008)) {
+            Scope.getCurrentScope().getLog(getClass()).warning(
+                String.format("Your SQL Server major version (%d) seems to indicate that your " +
                         "software is older than SQL Server 2008. Unfortunately, this is not supported, and this " +
                         "connection cannot be used.",
                  majorVersion));
@@ -242,7 +254,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getConcatSql(String... values) {
-        StringBuffer returnString = new StringBuffer();
+        StringBuilder returnString = new StringBuilder();
         for (String value : values) {
             returnString.append(value).append(" + ");
         }
@@ -323,12 +335,12 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = schema.customize(this);
-        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this)
+        List<String> defLines = (List<String>) Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
             .queryForList(
                 new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName),
                 String.class
             );
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (String defLine : defLines) {
             sb.append(defLine);
         }
@@ -365,7 +377,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return super.escapeObjectName(objectName, objectType);
         }
 
-        if ((catalogName != null) && !catalogName.equalsIgnoreCase(this.getDefaultCatalogName())) {
+        boolean includeCatalog = GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION.getCurrentValue();
+        if ((catalogName != null) && (includeCatalog || !catalogName.equalsIgnoreCase(this.getDefaultCatalogName()))) {
             return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
         } else {
             String name = this.escapeObjectName(objectName, objectType);
@@ -397,14 +410,14 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     String sql =
                         "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'" + escapeStringForDatabase(catalog) +
                             "', 'Collation'))";
-                    String collation = ExecutorService.getInstance().getExecutor(this)
+                    String collation = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
                         .queryForObject(new RawSqlStatement(sql), String.class);
                     caseSensitive = (collation != null) && !collation.contains("_CI_");
                 } else if (getConnection() instanceof OfflineConnection) {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
             } catch (DatabaseException e) {
-                LogService.getLog(getClass()).warning(LogType.LOG, "Cannot determine case sensitivity from MSSQL", e);
+                Scope.getCurrentScope().getLog(getClass()).warning("Cannot determine case sensitivity from MSSQL", e);
             }
         }
         return (caseSensitive != null) && caseSensitive;
@@ -473,7 +486,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             schemaName = escapeObjectName(schemaName, Schema.class);
         }
 
-        dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
+        dataTypeName = dataTypeName.substring(indexOfPeriod + 1);
         if (!dataTypeName.startsWith(getQuotingStartCharacter())) {
             dataTypeName = escapeObjectName(dataTypeName, DatabaseObject.class);
         }
@@ -498,7 +511,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             schemaName = schemaName.substring(1, schemaName.length() - 1);
         }
 
-        dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
+        dataTypeName = dataTypeName.substring(indexOfPeriod + 1);
         if (dataTypeName.matches("\\[[^]\\[]++\\]")) {
             dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
         }
@@ -541,15 +554,15 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                         sendsStringParametersAsUnicode =
                             (baseType == null) || baseType.startsWith("n");
                     } finally {
-                        JdbcUtils.close(rs, ps);
+                        JdbcUtil.close(rs, ps);
                     }
                 } else if (getConnection() instanceof OfflineConnection) {
                     sendsStringParametersAsUnicode =
                         ((OfflineConnection) getConnection()).getSendsStringParametersAsUnicode();
                 }
             } catch (SQLException | DatabaseException e) {
-                LogService.getLog(getClass()).warning(
-                    LogType.LOG, "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
+                Scope.getCurrentScope().getLog(getClass()).warning(
+                    "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
             }
         }
 
@@ -581,11 +594,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     "         WHEN 5 THEN 'Azure'\n" +
                     "         ELSE 'Unknown'\n" +
                     "       END";
-                return ExecutorService.getInstance().getExecutor(this)
+                return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
                     .queryForObject(new RawSqlStatement(sql), String.class);
             }
         } catch (DatabaseException e) {
-            LogService.getLog(getClass()).warning(LogType.LOG, "Could not determine engine edition", e);
+            Scope.getCurrentScope().getLog(getClass()).warning("Could not determine engine edition", e);
         }
         return "Unknown";
     }
@@ -601,7 +614,52 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public int getDefaultFractionalDigitsForTimestamp() {
+        return 7;
+    }
+
+    @Override
     protected String getQuotingEndReplacement() {
         return "]]";
+    }
+
+    /*
+    Source: https://docs.microsoft.com/en-us/sql/t-sql/language-elements/reserved-keywords-transact-sql?view=sql-server-2017
+     */
+    private static List<String> createReservedWordsCollection() {
+        return Arrays.asList("ADD", "ALL", "ALTER", "AND", "ANY", "AS", "ASC", "AUTHORIZATION",
+                "BACKUP", "BEGIN", "BETWEEN", "BREAK", "BROWSE", "BULK", "BY",
+                "CASCADE", "CASE", "CHECK", "CHECKPOINT", "CLOSE", "CLUSTERED", "COALESCE", "COLLATE",
+                "COLUMN", "COMMIT", "COMPUTE", "CONSTRAINT", "CONTAINS", "CONTAINSTABLE", "CONTINUE",
+                "CONVERT", "CREATE", "CROSS", "CURRENT", "CURRENT_DATE", "CURRENT_TIME",
+                "CURRENT_TIMESTAMP", "CURRENT_USER", "CURSOR",
+                "DATABASE", "DBCC", "DEALLOCATE", "DECLARE", "DEFAULT", "DELETE", "DENY", "DESC",
+                "DISK", "DISTINCT", "DISTRIBUTED", "DOUBLE", "DROP", "DUMP",
+                "ELSE", "END", "ERRLVL", "ESCAPE", "EXCEPT", "EXEC", "EXECUTE", "EXISTS", "EXIT", "EXTERNAL",
+                "FETCH", "FILE", "FILLFACTOR", "FOR", "FOREIGN", "FREETEXT", "FREETEXTTABLE",
+                "FROM", "FULL", "FUNCTION",
+                "GOTO", "GRANT", "GROUP",
+                "HAVING", "HOLDLOCK",
+                "IDENTITY", "IDENTITY_INSERT", "IDENTITYCOL", "IF", "IN", "INDEX",
+                "INNER", "INSERT", "INTERSECT", "INTO", "IS",
+                "JOIN",
+                "KEY", "KILL",
+                "LEFT", "LIKE", "LINENO", "LOAD",
+                "MERGE",
+                "NATIONAL", "NOCHECK", "NONCLUSTERED", "NOT", "NULL", "NULLIF",
+                "OF", "OFF", "OFFSETS", "ON", "OPEN", "OPENDATASOURCE", "OPENQUERY", "OPENROWSET",
+                "OPENXML", "OPTION", "OR", "ORDER", "OUTER", "OVER",
+                "PERCENT", "PIVOT", "PLAN", "PRECISION", "PRIMARY", "PRINT", "PROC", "PROCEDURE", "PUBLIC",
+                "RAISERROR", "READ", "READTEXT", "RECONFIGURE", "REFERENCES",
+                "REPLICATION", "RESTORE", "RESTRICT", "RETURN", "REVERT", "REVOKE",
+                "RIGHT", "ROLLBACK", "ROWCOUNT", "ROWGUIDCOL", "RULE",
+                "SAVE", "SCHEMA", "SECURITYAUDIT", "SELECT", "SEMANTICKEYPHRASETABLE",
+                "SEMANTICSIMILARITYDETAILSTABLE", "SEMANTICSIMILARITYTABLE", "SESSION_USER",
+                "SET", "SETUSER", "SHUTDOWN", "SOME", "STATISTICS", "SYSTEM_USER",
+                "TABLE", "TABLESAMPLE", "TEXTSIZE", "THEN", "TO", "TOP", "TRAN", "TRANSACTION",
+                "TRIGGER", "TRUNCATE", "TRY_CONVERT", "TSEQUAL",
+                "UNION", "UNIQUE", "UNPIVOT", "UPDATE", "UPDATETEXT", "USE", "USER",
+                "VALUES", "VARYING", "VIEW",
+                "WAITFOR", "WHEN", "WHERE", "WHILE", "WITH", "WITHIN GROUP", "WRITETEXT");
     }
 }

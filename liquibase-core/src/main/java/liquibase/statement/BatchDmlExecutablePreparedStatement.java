@@ -1,12 +1,11 @@
 package liquibase.statement;
 
+import liquibase.Scope;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 
@@ -25,7 +24,7 @@ import java.util.List;
  */
 public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedStatementBase {
     private final List<ExecutablePreparedStatementBase> collectedStatements;
-    private final Logger LOG = LogService.getLog(getClass());
+    private final Logger LOG = Scope.getCurrentScope().getLog(getClass());
 
     public BatchDmlExecutablePreparedStatement(
             Database database, String catalogName, String schemaName, String tableName,
@@ -45,7 +44,7 @@ public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedState
     }
 
     @Override
-    protected void attachParams(List<ColumnConfig> ignored, PreparedStatement stmt)
+    protected void attachParams(List<? extends ColumnConfig> ignored, PreparedStatement stmt)
             throws SQLException, DatabaseException {
         for (ExecutablePreparedStatementBase insertStatement : collectedStatements) {
             super.attachParams(insertStatement.getColumns(), stmt);
@@ -67,7 +66,7 @@ public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedState
         for (int updateCount : updateCounts) {
             sumUpdateCounts = updateCount;
         }
-        LOG.info(LogType.LOG, String.format("Executing JDBC DML batch was successful. %d operations were executed, %d individual UPDATE events were confirmed by the database.",
+        LOG.info(String.format("Executing JDBC DML batch was successful. %d operations were executed, %d individual UPDATE events were confirmed by the database.",
                 updateCounts.length, sumUpdateCounts));
     }
 

@@ -17,12 +17,14 @@ import java.util.*;
 
 public class DiffToReport {
 
-    private DiffResult diffResult;
+    protected DiffResult diffResult;
     private PrintStream out;
+    private StringUtil.StringUtilFormatter formatter;
 
     public DiffToReport(DiffResult diffResult, PrintStream out) {
         this.diffResult = diffResult;
         this.out = out;
+        this.formatter = createFormatter();
     }
 
     public void print() throws DatabaseException {
@@ -144,6 +146,10 @@ public class DiffToReport {
         } else {
             out.println();
             for (DatabaseObject object : objects) {
+                if (!diffResult.getReferenceSnapshot().getSnapshotControl().shouldInclude(object)) {
+                    continue;
+                }
+
                 if (getIncludeSchema() && (object.getSchema() != null) && ((lastSchema == null) || !lastSchema.equals
                     (object.getSchema()))) {
                     lastSchema = object.getSchema();
@@ -239,4 +245,59 @@ public class DiffToReport {
 
     }
 
+    public StringUtil.StringUtilFormatter createFormatter() {
+        return
+            new StringUtil.StringUtilFormatter<CompareControl.SchemaComparison>() {
+                @Override
+                public String toString(CompareControl.SchemaComparison obj) {
+                    String referenceName;
+                    String comparisonName;
+
+                    Database referenceDatabase = diffResult.getReferenceSnapshot().getDatabase();
+                    Database comparisonDatabase = diffResult.getComparisonSnapshot().getDatabase();
+
+                    if (referenceDatabase.supportsSchemas()) {
+                        referenceName = obj.getReferenceSchema().getSchemaName();
+                        if (referenceName == null) {
+                            referenceName = referenceDatabase.getDefaultSchemaName();
+                        }
+                    } else if (referenceDatabase.supportsCatalogs()) {
+                        referenceName = obj.getReferenceSchema().getCatalogName();
+                        if (referenceName == null) {
+                            referenceName = referenceDatabase.getDefaultCatalogName();
+                        }
+                    } else {
+                        return "";
+                    }
+
+                    if (comparisonDatabase.supportsSchemas()) {
+                        comparisonName = obj.getComparisonSchema().getSchemaName();
+                        if (comparisonName == null) {
+                            comparisonName = comparisonDatabase.getDefaultSchemaName();
+                        }
+                    } else if (comparisonDatabase.supportsCatalogs()) {
+                        comparisonName = obj.getComparisonSchema().getCatalogName();
+                        if (comparisonName == null) {
+                            comparisonName = comparisonDatabase.getDefaultCatalogName();
+                        }
+                    } else {
+                        return "";
+                    }
+
+                    if (referenceName == null) {
+                        referenceName = StringUtil.trimToEmpty(referenceDatabase.getDefaultSchemaName());
+                    }
+
+                    if (comparisonName == null) {
+                        comparisonName = StringUtil.trimToEmpty(comparisonDatabase.getDefaultSchemaName());
+                    }
+
+                    if (referenceName.equalsIgnoreCase(comparisonName)) {
+                        return referenceName;
+                    } else {
+                        return referenceName + " -> " + comparisonName;
+                    }
+                }
+            };
+    }
 }

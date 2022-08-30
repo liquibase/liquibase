@@ -3,27 +3,28 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.core.H2Database;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.core.CreateSequenceStatement;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<CreateSequenceStatement> {
 
     protected static final String SEQUENCE_NAME = "SEQUENCE_NAME";
     protected static final String CATALOG_NAME = "CATALOG_NAME";
     protected static final String SCHEMA_NAME = "SCHEMA_NAME";
-    private DatabaseConnection mockedUnsupportedMinMaxSequenceConnection;
-    private DatabaseConnection mockedSupportedMinMaxSequenceConnection;
+//    private DatabaseConnection mockedUnsupportedMinMaxSequenceConnection;
+//    private DatabaseConnection mockedSupportedMinMaxSequenceConnection;
 
     public CreateSequenceGeneratorTest() throws Exception {
         super(new CreateSequenceGenerator());
@@ -34,67 +35,183 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
         return new CreateSequenceStatement(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
     }
 
-    @Before
-    public void setUpMocks() throws DatabaseException {
+    @Test
+    public void postgresDatabaseSupportIfNotExistsByVersion() throws Exception {
+        DatabaseConnection dbConnection = mock(DatabaseConnection.class);
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(9);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(4);
 
-        mockedUnsupportedMinMaxSequenceConnection = mock(DatabaseConnection.class);
-        when(mockedUnsupportedMinMaxSequenceConnection.getDatabaseMajorVersion()).thenReturn(1);
-        when(mockedUnsupportedMinMaxSequenceConnection.getDatabaseMinorVersion()).thenReturn(3);
-        when(mockedUnsupportedMinMaxSequenceConnection.getDatabaseProductVersion()).thenReturn("1.3.174 (2013-10-19)");
+        PostgresDatabase database = spy(new PostgresDatabase());
+        database.setConnection(dbConnection);
+        doReturn(SEQUENCE_NAME).when(database).escapeSequenceName(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
 
-        mockedSupportedMinMaxSequenceConnection = mock(DatabaseConnection.class);
-        when(mockedSupportedMinMaxSequenceConnection.getDatabaseMajorVersion()).thenReturn(1);
-        when(mockedSupportedMinMaxSequenceConnection.getDatabaseMinorVersion()).thenReturn(3);
-        when(mockedSupportedMinMaxSequenceConnection.getDatabaseProductVersion()).thenReturn("1.3.175 (2014-01-18)");
+        CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
+        createSequenceStatement.setStartValue(new BigInteger("1"));
+
+        // verify that for version <= 9.4 no IF NOT EXISTS is not in the statement
+        Sql[] sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
+        assertThat(sql).isNotEmpty().hasSize(1);
+        assertThat(sql[0].toSql()).doesNotContain("IF NOT EXISTS");
+
+        // verify that if no version is available the optional no IF NOT EXISTS is not in the statement
+        reset(dbConnection);
+        when(dbConnection.getDatabaseMajorVersion()).thenThrow(DatabaseException.class);
+
+        sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
+        assertThat(sql).isNotEmpty().hasSize(1);
+        assertThat(sql[0].toSql()).doesNotContain("IF NOT EXISTS");
+
+        reset(dbConnection);
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(9);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(5);
+
+        sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
+        assertThat(sql).isNotEmpty().hasSize(1);
+        assertThat(sql[0].toSql()).contains("IF NOT EXISTS");
     }
 
     @Test
-    public void h2DatabaseSupportsSequenceMaxValue() throws Exception {
+    public void postgresDatabaseSupportAsStructureByVersion() throws Exception {
+        DatabaseConnection dbConnection = mock(DatabaseConnection.class);
+        ValidationErrors errors;
+        PostgresDatabase postgresDatabase = spy(new PostgresDatabase());
+        postgresDatabase.setConnection(dbConnection);
+        doReturn(SEQUENCE_NAME).when(postgresDatabase).escapeSequenceName(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
 
-        H2Database h2Database = new H2Database();
-        h2Database.setConnection(mockedSupportedMinMaxSequenceConnection);
+        // verify that for version < 10 validate() method returns error
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(9);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(6);
 
         CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
-        createSequenceStatement.setMaxValue(new BigInteger("1000"));
+        createSequenceStatement.setStartValue(new BigInteger("1"));
+        createSequenceStatement.setDataType("int");
 
-        assertFalse(generatorUnderTest.validate(createSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+        errors = new CreateSequenceGenerator().validate(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).contains("dataType is not allowed on postgresql");
+
+
+        // verify that if no version is available the validate() method passes
+        reset(dbConnection);
+        when(dbConnection.getDatabaseMajorVersion()).thenThrow(DatabaseException.class);
+        errors = new CreateSequenceGenerator().validate(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
+
+
+        // verify that for version >= 10 the validate() method passes
+        reset(dbConnection);
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(10);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(0);
+
+        errors = new CreateSequenceGenerator().validate(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
     }
 
     @Test
-    public void h2DatabaseDoesNotSupportsSequenceMaxValue() throws Exception {
-
+    public void oldH2FailsValidationWithDataType() throws Exception {
+        DatabaseConnection dbConnection = mock(DatabaseConnection.class);
         H2Database h2Database = new H2Database();
-        h2Database.setConnection(mockedUnsupportedMinMaxSequenceConnection);
+        h2Database.setConnection(dbConnection);
 
-        CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
-        createSequenceStatement.setMaxValue(new BigInteger("1000"));
+        CreateSequenceStatement stmt = createSampleSqlStatement();
 
-        assertTrue(generatorUnderTest.validate(createSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+        // versions before 2.0 do not support the `with <dataType>` clause
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(1);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(4);
+
+        stmt.setDataType("BIGINT");
+        ValidationErrors errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
+        assertThat(errors.getWarningMessages()).isEmpty();
+
+        stmt.setDataType("INT");
+        errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).containsExactly("dataType is not allowed on h2");
+
+        String sql = generatorUnderTest.generateSql(stmt, h2Database, new MockSqlGeneratorChain())[0].toSql();
+        assertThat(sql).isEqualTo("CREATE SEQUENCE SCHEMA_NAME.SEQUENCE_NAME");
+
+        // since 2.0 `with <dataType>` *is* supported
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(2);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(0);
+
+        stmt.setDataType("BIGINT");
+        errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
+        assertThat(errors.getWarningMessages()).isEmpty();
+
+        sql = generatorUnderTest.generateSql(stmt, h2Database, new MockSqlGeneratorChain())[0].toSql();
+        assertThat(sql).isEqualTo("CREATE SEQUENCE SCHEMA_NAME.SEQUENCE_NAME AS BIGINT");
+
+        stmt.setDataType("INT");
+        errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
+        assertThat(errors.getWarningMessages()).isEmpty();
+
+        sql = generatorUnderTest.generateSql(stmt, h2Database, new MockSqlGeneratorChain())[0].toSql();
+        assertThat(sql).isEqualTo("CREATE SEQUENCE SCHEMA_NAME.SEQUENCE_NAME AS INT");
     }
 
-    @Test
-    public void h2DatabaseSupportsSequenceMinValue() throws Exception {
+//    @Before
+//    public void setUpMocks() throws DatabaseException {
+//
+//        mockedUnsupportedMinMaxSequenceConnection = mock(DatabaseConnection.class);
+//        when(mockedUnsupportedMinMaxSequenceConnection.getDatabaseMajorVersion()).thenReturn(1);
+//        when(mockedUnsupportedMinMaxSequenceConnection.getDatabaseMinorVersion()).thenReturn(3);
+//        when(mockedUnsupportedMinMaxSequenceConnection.getDatabaseProductVersion()).thenReturn("1.3.174 (2013-10-19)");
+//
+//        mockedSupportedMinMaxSequenceConnection = mock(DatabaseConnection.class);
+//        when(mockedSupportedMinMaxSequenceConnection.getDatabaseMajorVersion()).thenReturn(1);
+//        when(mockedSupportedMinMaxSequenceConnection.getDatabaseMinorVersion()).thenReturn(3);
+//        when(mockedSupportedMinMaxSequenceConnection.getDatabaseProductVersion()).thenReturn("1.3.175 (2014-01-18)");
+//    }
 
-        H2Database h2Database = new H2Database();
-        h2Database.setConnection(mockedSupportedMinMaxSequenceConnection);
+//    @Test
+//    public void h2DatabaseSupportsSequenceMaxValue() throws Exception {
+//
+//        H2Database h2Database = new H2Database();
+//        h2Database.setConnection(mockedSupportedMinMaxSequenceConnection);
+//
+//        CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
+//        createSequenceStatement.setMaxValue(new BigInteger("1000"));
+//
+//        assertFalse(generatorUnderTest.validate(createSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+//    }
 
-        CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
-        createSequenceStatement.setMinValue(new BigInteger("10"));
+//    @Test
+//    public void h2DatabaseDoesNotSupportsSequenceMaxValue() throws Exception {
+//
+//        H2Database h2Database = new H2Database();
+//        h2Database.setConnection(mockedUnsupportedMinMaxSequenceConnection);
+//
+//        CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
+//        createSequenceStatement.setMaxValue(new BigInteger("1000"));
+//
+//        assertTrue(generatorUnderTest.validate(createSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+//    }
 
-        assertFalse(generatorUnderTest.validate(createSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
-    }
+//    @Test
+//    public void h2DatabaseSupportsSequenceMinValue() throws Exception {
+//
+//        H2Database h2Database = new H2Database();
+//        h2Database.setConnection(mockedSupportedMinMaxSequenceConnection);
+//
+//        CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
+//        createSequenceStatement.setMinValue(new BigInteger("10"));
+//
+//        assertFalse(generatorUnderTest.validate(createSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+//    }
 
-    @Test
-    public void h2DatabaseDoesNotSupportsSequenceMinValue() throws Exception {
-
-        H2Database h2Database = new H2Database();
-        h2Database.setConnection(mockedUnsupportedMinMaxSequenceConnection);
-
-        CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
-        createSequenceStatement.setMinValue(new BigInteger("10"));
-
-        assertTrue(generatorUnderTest.validate(createSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
-    }
+//    @Test
+//    public void h2DatabaseDoesNotSupportsSequenceMinValue() throws Exception {
+//
+//        H2Database h2Database = new H2Database();
+//        h2Database.setConnection(mockedUnsupportedMinMaxSequenceConnection);
+//
+//        CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
+//        createSequenceStatement.setMinValue(new BigInteger("10"));
+//
+//        assertTrue(generatorUnderTest.validate(createSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+//    }
 
     @Override
     protected boolean shouldBeImplementation(Database database) {
