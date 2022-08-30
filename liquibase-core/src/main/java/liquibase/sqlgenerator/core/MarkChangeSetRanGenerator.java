@@ -1,7 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.ContextExpression;
-import liquibase.Labels;
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;

@@ -900,7 +900,7 @@ public class XMLChangeLogSerializerTest {
     					"runAlways","true",
     					"runOnChange","true",
     					"logicalFilePath","path/to/file.json",
-    					"context","context",
+    					"contextFilter","context",
     					"dbms","mssql",
     					"objectQuotingStrategy","LEGACY",
     					"failOnError","true",
@@ -942,7 +942,7 @@ public class XMLChangeLogSerializerTest {
     	String out = new XMLChangeLogSerializer().serialize(changeSet, true);
     	
     	assertEquals("<changeSet author=\"tms\"\n"
-    			+ "        context=\"context\"\n"
+    			+ "        contextFilter=\"context\"\n"
     			+ "        created=\"created\"\n"
     			+ "        dbms=\"mssql\"\n"
     			+ "        failOnError=\"true\"\n"

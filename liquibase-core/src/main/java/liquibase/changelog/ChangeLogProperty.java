@@ -10,14 +10,14 @@ public class ChangeLogProperty extends AbstractLiquibaseSerializable implements 
     private String file;
     private String name;
     private String value;
-    private String context;
+    private String contextFilter;
     private String labels;
     private String dbms;
     private Boolean global;
 
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<>(Arrays.asList("file", "name", "value", "context", "labels", "dbms", "global"));
+        return new LinkedHashSet<>(Arrays.asList("file", "name", "value", "contextFilter", "labels", "dbms", "global"));
     }
 
     @Override
@@ -54,12 +54,29 @@ public class ChangeLogProperty extends AbstractLiquibaseSerializable implements 
         this.value = value;
     }
 
+    /**
+     * @deprecated alias for {@link #getContextFilter()}
+     */
+    @Deprecated
     public String getContext() {
-        return context;
+        return contextFilter;
     }
 
+    /**
+     * @deprecated alias for {@link #setContextFilter(String)}
+     */
+    @Deprecated
     public void setContext(String context) {
-        this.context = context;
+        this.contextFilter = context;
+    }
+
+    public String getContextFilter() {
+        return contextFilter;
+    }
+
+    public ChangeLogProperty setContextFilter(String contextFilter) {
+        this.contextFilter = contextFilter;
+        return this;
     }
 
     public String getLabels() {
