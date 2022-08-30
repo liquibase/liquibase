@@ -8,7 +8,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -54,12 +54,12 @@ public class Ingres9Database extends AbstractJdbcDatabase {
             }
         }
         catch (Exception ex) {
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
             stmt = null;
             return null;
         }
         finally {
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtil.closeStatement(stmt);
         }
         if (definition == null) {
             return null;

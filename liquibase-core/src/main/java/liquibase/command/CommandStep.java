@@ -4,7 +4,7 @@ import liquibase.exception.CommandValidationException;
 
 /**
  * Defines a particular step in a command pipeline.
- * When a command is executed, Liquibase will find all the steps whose {@link #getName()} matches the command
+ * When a command is executed, Liquibase will find all the steps whose {@link #defineCommandNames()} matches the command
  * and run them in {@link #getOrder(CommandDefinition)} order.
  *
  * @see CommandScope#execute()
@@ -22,15 +22,15 @@ public interface CommandStep {
     int ORDER_NOT_APPLICABLE = -1;
 
     /**
-     * The command name + category names this step should be a part of.
-     * For example, if it is part of `liquibase update`, this should return {"update"}.
+     * Defines new command names
+     * For example, if it is part of `liquibase update`, this should return new String[][]{ new String[] {"update"}}.
      * If it is a part of `liquibase example init`, this should return {"example", "init"}.
      * <p>
      * This is used to determine the available command names.
      * <p>
      * This can return null if this step is not defining a new command but "cross-cutting" existing commands.
      */
-    String[] getName();
+    String[][] defineCommandNames();
 
     /**
      * The order in the pipeline that this step should be executed in.

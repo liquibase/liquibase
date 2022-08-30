@@ -19,8 +19,15 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
 
     private final SortedMap<String, CommandArgumentDefinition<?>> arguments = new TreeMap<>();
 
-    private String longDescription = "";
-    private String shortDescription = "";
+    private String longDescription = null;
+    private String shortDescription = null;
+    private boolean internal;
+    private boolean hidden;
+    private String footer;
+    private String groupFooter;
+
+    private Map<String, String> groupLongDescription = new HashMap<>();
+    private Map<String, String> groupShortDescription = new HashMap<>();
 
     protected CommandDefinition(String[] name) {
         this.name = name;
@@ -69,6 +76,29 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
         return Collections.unmodifiableList(new ArrayList<>(pipeline));
     }
 
+
+    /**
+     * Returns the given argument definition for this command. Handles argument name smoothing.
+     * Returns null if no argument matches.
+     */
+    public CommandArgumentDefinition<?> getArgument(String argName) {
+        argName = StringUtil.toCamelCase(argName);
+
+        for (CommandArgumentDefinition<?> argumentDefinition : getArguments().values()) {
+            if (argumentDefinition.getName().equalsIgnoreCase(argName)) {
+                return argumentDefinition;
+            }
+
+            for (String alias : argumentDefinition.getAliases()) {
+                if (alias.equalsIgnoreCase(argName)) {
+                    return argumentDefinition;
+                }
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Returns the arguments for this command.
      */
@@ -104,6 +134,35 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     }
 
     /**
+     * The short description of the given command group. Used in help docs.
+     */
+    public String getGroupShortDescription(String[] group) {
+        return groupShortDescription.get(StringUtil.join(group, " "));
+    }
+
+    /**
+     * Sets the short description of the given command group for help docs.
+     * If multiple command commands set different descriptions for the group, which version will be shown in any rolled up help is undefined.
+     */
+    public void setGroupShortDescription(String[] group, String shortDescription) {
+        this.groupShortDescription.put(StringUtil.join(group, " "), shortDescription);
+    }
+
+
+    /**
+     * The long description of the given command group. Used in help docs.
+     * If multiple command commands set different descriptions for the group, which version will be shown in any rolled up help is undefined.
+     */
+    public String getGroupLongDescription(String[] group) {
+        return groupLongDescription.get(StringUtil.join(group, " "));
+    }
+
+    public void setGroupLongDescription(String[] group, String longDescription) {
+        this.groupLongDescription.put(StringUtil.join(group, " "), longDescription);
+    }
+
+
+    /**
      * The long description of the command. Used in help docs.
      */
     public String getLongDescription() {
@@ -114,6 +173,20 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
         this.longDescription = longDescription;
     }
 
+    public String getHelpFooter() {
+        return footer;
+    }
+
+    public void setHelpFooter(String footer) { this.footer = footer; }
+
+    public String getGroupHelpFooter() {
+        return groupFooter;
+    }
+
+    public void setGroupHelpFooter(String groupFooter) {
+        this.groupFooter = groupFooter;
+    }
+
     void add(CommandStep step) {
         this.pipeline.add(step);
     }
@@ -121,4 +194,35 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     public void add(CommandArgumentDefinition commandArg) {
         this.arguments.put(commandArg.getName(), commandArg);
     }
+
+    /**
+     * Internal commands are ones that can be called programmatically, but should not be exposed directly and automatically through integrations.
+     */
+    public boolean getInternal() {
+        return internal;
+    }
+
+    public void setInternal(boolean internal) {
+        this.internal = internal;
+    }
+
+    /**
+     * Hidden commands are ones that can be called via integrations, but should not be normally shown in help to users.
+     * "Alias" or legacy commands are often marked as hidden commands.
+     */
+    public boolean getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
+    /**
+     * Return true if this command represents the given command
+     */
+    public boolean is(String... commandName) {
+        return Arrays.equals(getName(), commandName);
+    }
+
 }

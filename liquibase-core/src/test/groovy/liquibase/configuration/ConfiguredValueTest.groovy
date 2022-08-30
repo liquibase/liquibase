@@ -8,18 +8,18 @@ class ConfiguredValueTest extends Specification {
 
     def "empty"() {
         when:
-        def configuredValue = new ConfiguredValue("requested.key")
+        def configuredValue = new ConfiguredValue("requested.key", null, null)
 
         then:
         !configuredValue.found()
         configuredValue.getValue() == null
-        configuredValue.getProvidedValues()*.describe() == ["No configuration or default value found 'requested.key'"]
-        configuredValue.getProvidedValue().describe() == "No configuration or default value found 'requested.key'"
+        configuredValue.getProvidedValues()*.describe() == ["No configured value found 'requested.key'"]
+        configuredValue.getProvidedValue().describe() == "No configured value found 'requested.key'"
     }
 
     def "one override"() {
         when:
-        def configuredValue = new ConfiguredValue()
+        def configuredValue = new ConfiguredValue(null, null, null)
         configuredValue.override(new ProvidedValue("requested.key", "actual.key", "value", "first override", new SystemPropertyValueProvider()))
 
         then:
@@ -34,7 +34,7 @@ class ConfiguredValueTest extends Specification {
 
     def "two overrides"() {
         when:
-        def configuredValue = new ConfiguredValue()
+        def configuredValue = new ConfiguredValue(null, null, null)
         configuredValue.override(new ProvidedValue("requested.key", "actual.key", "value", "first override", new SystemPropertyValueProvider()))
         configuredValue.override(null)
         configuredValue.override(new ProvidedValue("requested.key", "other.actual.key", "second value", "second override", new ScopeValueProvider()))

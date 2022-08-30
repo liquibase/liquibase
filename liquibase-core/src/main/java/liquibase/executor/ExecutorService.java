@@ -23,7 +23,8 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
     @Override
     protected int getPriority(Executor executor, Object... args) {
         String name = (String) args[0];
-        if (name.equals(executor.getName())) {
+        Database database = (Database) args[1];
+        if (name.equals(executor.getName()) && executor.supports(database)) {
             return executor.getPriority();
         } else {
             return Plugin.PRIORITY_NOT_APPLICABLE;

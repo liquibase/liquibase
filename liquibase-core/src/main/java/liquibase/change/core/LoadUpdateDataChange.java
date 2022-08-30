@@ -1,6 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeStatus;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
@@ -12,9 +15,12 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static liquibase.change.ChangeParameterMetaData.ALL;
 
 @DatabaseChange(name = "loadUpdateData",
         description = "Loads or updates data from a CSV file into an existing table. Differs from loadData by " +
@@ -31,7 +37,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
     protected boolean hasPreparedStatementsImplemented() { return false; }
 
     @Override
-    @DatabaseChangeProperty(description = "Name of the table to insert or update data in", requiredForDatabase = "all")
+    @DatabaseChangeProperty(description = "Name of the table to insert or update data in", requiredForDatabase = ALL)
     public String getTableName() {
         return super.getTableName();
     }
@@ -41,13 +47,13 @@ public class LoadUpdateDataChange extends LoadDataChange {
     }
 
     @DatabaseChangeProperty(description = "Comma delimited list of the columns for the primary key",
-            requiredForDatabase = "all")
+            requiredForDatabase = ALL)
     public String getPrimaryKey() {
         return primaryKey;
     }
 
     @DatabaseChangeProperty(description = "If true, records with no matching database record should be ignored",
-            since = "3.3")
+            since = "3.3", supportsDatabase = ALL)
     public Boolean getOnlyUpdate() {
         if (onlyUpdate == null) {
             return false;
@@ -116,10 +122,9 @@ public class LoadUpdateDataChange extends LoadDataChange {
             where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(),
                     insertOrUpdateStatement.getSchemaName(),
                     insertOrUpdateStatement.getTableName(),
-                    thisPkColumn)).append(((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) ? " is" +
-                " " : " = ");
+                    thisPkColumn)).append(((newValue == null) || StringUtil.equalsWordNull(newValue.toString())) ? " is " : " = ");
 
-            if ((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) {
+            if ((newValue == null) || StringUtil.equalsWordNull(newValue.toString())) {
                 where.append("NULL");
             } else {
                 where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue,

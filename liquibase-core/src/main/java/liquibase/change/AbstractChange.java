@@ -13,8 +13,8 @@ import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.beans.PropertyUtils;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -64,7 +64,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             }
 
             Set<ChangeParameterMetaData> params = new HashSet<>();
-            for (PropertyDescriptor property : PropertyUtils.getInstance().getDescriptors(getClass())) {
+            for (PropertyDescriptor property : ObjectUtil.getDescriptors(getClass())) {
                 if (isInvalidProperty(property)) {
                     continue;
                 }
@@ -115,7 +115,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
         try {
             PropertyDescriptor property = null;
-            for (PropertyDescriptor prop : PropertyUtils.getInstance().getDescriptors(getClass())) {
+            for (PropertyDescriptor prop : ObjectUtil.getDescriptors(getClass())) {
                 if (prop.getDisplayName().equals(parameterName)) {
                     property = prop;
                     break;
@@ -398,14 +398,15 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      */
     @Override
     public ValidationErrors validate(Database database) {
-        ValidationErrors changeValidationErrors = new ValidationErrors();
+        ValidationErrors changeValidationErrors = new ValidationErrors(this);
 
         // Record an error if a parameter is not set, but that parameter is required by database.
         for (ChangeParameterMetaData param :
-            Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().values()) {
-            if (param.isRequiredFor(database) && (param.getCurrentValue(this) == null)) {
-                changeValidationErrors.addError(param.getParameterName() + " is required for " +
-                    Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " on " + database.getShortName());
+                Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().values()) {
+            if (param.isRequiredFor(database)) {
+                changeValidationErrors.checkRequiredField (
+                        param.getParameterName(), param.getCurrentValue(this)
+                        , " on " + database.getShortName());
             }
         }
 

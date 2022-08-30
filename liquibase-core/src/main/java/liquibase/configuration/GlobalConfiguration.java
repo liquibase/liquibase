@@ -1,6 +1,7 @@
 package liquibase.configuration;
 
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 
 import java.util.Set;
 
@@ -12,7 +13,7 @@ public class GlobalConfiguration extends liquibase.GlobalConfiguration implement
     /**
      * @deprecated
      */
-    public static final String SHOULD_RUN = liquibase.GlobalConfiguration.SHOULD_RUN.getKey();
+    public static final String SHOULD_RUN = LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey();
 
     /**
      * @deprecated
@@ -47,7 +48,7 @@ public class GlobalConfiguration extends liquibase.GlobalConfiguration implement
     /**
      * @deprecated
      */
-    public static final String OUTPUT_ENCODING = liquibase.GlobalConfiguration.OUTPUT_ENCODING.getKey();
+    public static final String OUTPUT_ENCODING = liquibase.GlobalConfiguration.OUTPUT_FILE_ENCODING.getKey();
 
     /**
      * @deprecated
@@ -119,14 +120,14 @@ public class GlobalConfiguration extends liquibase.GlobalConfiguration implement
      * @deprecated
      */
     public boolean getShouldRun() {
-        return liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentValue();
+        return LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue();
     }
 
     /**
      * @deprecated
      */
     public GlobalConfiguration setShouldRun(boolean shouldRun) {
-        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.SHOULD_RUN, shouldRun);
+        DeprecatedConfigurationValueProvider.setData(LiquibaseCommandLineConfiguration.SHOULD_RUN, shouldRun);
         return this;
     }
 
@@ -227,17 +228,16 @@ public class GlobalConfiguration extends liquibase.GlobalConfiguration implement
     }
 
     /**
-     * @deprecated
+     * @deprecated always returns "false"
      */
     public boolean getShouldFilterLogMessages() {
-        return liquibase.GlobalConfiguration.FILTER_LOG_MESSAGES.getCurrentValue();
+        return false;
     }
 
     /**
-     * @deprecated
+     * @deprecated ignores value
      */
-    public GlobalConfiguration setShouldFilterLogMessages(boolean filter) {
-        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.FILTER_LOG_MESSAGES, filter);
+    public GlobalConfiguration setShouldFilterLogMessages(boolean ignored) {
         return this;
     }
 
@@ -305,14 +305,14 @@ public class GlobalConfiguration extends liquibase.GlobalConfiguration implement
      * @deprecated
      */
     public String getOutputEncoding() {
-        return liquibase.GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+        return liquibase.GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
     }
 
     /**
      * @deprecated
      */
     public GlobalConfiguration setOutputEncoding(String name) {
-        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.OUTPUT_ENCODING, name);
+        DeprecatedConfigurationValueProvider.setData(liquibase.GlobalConfiguration.OUTPUT_FILE_ENCODING, name);
         return this;
     }
 

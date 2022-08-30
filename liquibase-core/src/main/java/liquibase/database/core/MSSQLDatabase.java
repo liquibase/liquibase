@@ -19,7 +19,7 @@ import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
@@ -554,7 +554,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                         sendsStringParametersAsUnicode =
                             (baseType == null) || baseType.startsWith("n");
                     } finally {
-                        JdbcUtils.close(rs, ps);
+                        JdbcUtil.close(rs, ps);
                     }
                 } else if (getConnection() instanceof OfflineConnection) {
                     sendsStringParametersAsUnicode =
@@ -611,6 +611,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     protected String getQuotingEndCharacter() {
         return "]";
+    }
+
+    @Override
+    public int getDefaultFractionalDigitsForTimestamp() {
+        return 7;
     }
 
     @Override

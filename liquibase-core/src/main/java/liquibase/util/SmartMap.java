@@ -8,6 +8,7 @@ import java.util.*;
  * Returns keys in alphabetical order.
  */
 public class SmartMap implements Map<String, Object> {
+
     private SortedMap<String, Object> values = new TreeMap<String, Object>();
 
     @Override

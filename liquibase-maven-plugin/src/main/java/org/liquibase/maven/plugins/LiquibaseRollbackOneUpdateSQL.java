@@ -4,12 +4,12 @@ import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.*;
 import java.util.HashMap;
@@ -27,11 +27,12 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMojo {
     /**
-     * Specifies the Deployment ID in the DATABASECHANGELOG table for all change sets you
+     * Specifies the Deployment ID in the DATABASECHANGELOG table for all changesets you
      * want to rollback.
      *
      * @parameter property="liquibase.deploymentId"
      */
+    @PropertyElement
     protected String deploymentId;
 
     /**
@@ -39,6 +40,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
      *
      * @parameter property="liquibase.force"
      */
+    @PropertyElement
     protected String force;
 
     /**
@@ -46,6 +48,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
      *
      * @parameter property="liquibase.outputFile"
      */
+    @PropertyElement
     protected String outputFile;
 
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -61,11 +64,6 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         //
         // Check the Pro license
         //
-        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
-        if (!hasProLicense) {
-            throw new LiquibaseException(
-                    "The command 'rollbackOneUpdateSQL' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
-        }
         Database database = liquibase.getDatabase();
         CommandScope liquibaseCommand = new CommandScope("internalRollbackOneUpdateSQL");
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
@@ -99,7 +97,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
     }
 
     private Writer createOutputWriter() throws IOException {
-        String charsetName = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
     }

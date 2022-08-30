@@ -34,8 +34,8 @@ public class ConvertCommandStep extends AbstractCommandStep {
     }
 
     @Override
-    public String[] getName() {
-        return new String[]{"convert"};
+    public String[][] defineCommandNames() {
+        return new String[][]{new String[] {"convert"}};
     }
 
     @Override

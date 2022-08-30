@@ -11,21 +11,23 @@ import java.util.Arrays;
 public abstract class AbstractCommandStep implements CommandStep {
 
     /**
-     * @return {@link #ORDER_DEFAULT} if the command scope's name matches {@link #getName()}. Otherwise {@link #ORDER_NOT_APPLICABLE}
+     * @return {@link #ORDER_DEFAULT} if the command scope's name matches {@link #defineCommandNames()}. Otherwise {@link #ORDER_NOT_APPLICABLE}
      */
     @Override
     public int getOrder(CommandDefinition commandDefinition) {
-        final String[] thisCommandName = getName();
-
-        if ((thisCommandName != null) && StringUtil.join(Arrays.asList(thisCommandName), " ").equalsIgnoreCase(StringUtil.join(Arrays.asList(commandDefinition.getName()), " "))) {
-            return ORDER_DEFAULT;
-        } else {
-            return ORDER_NOT_APPLICABLE;
+        final String[][] definedCommandNames = defineCommandNames();
+        if (definedCommandNames != null) {
+            for (String[] thisCommandName : definedCommandNames) {
+                if ((thisCommandName != null) && StringUtil.join(Arrays.asList(thisCommandName), " ").equalsIgnoreCase(StringUtil.join(Arrays.asList(commandDefinition.getName()), " "))) {
+                    return ORDER_DEFAULT;
+                }
+            }
         }
+        return ORDER_NOT_APPLICABLE;
     }
 
     /**
-     * Default implementation does no validation.
+     * Default implementation does no additional validation.
      */
     @Override
     public void validate(CommandScope commandScope) throws CommandValidationException {

@@ -2,22 +2,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.liquibase</groupId>
-		<artifactId>liquibase-base-module</artifactId>
-		<version>${liquibase.version}</version>
-		<relativePath>../base-module.pom.xml</relativePath>
-	</parent>
+    <parent>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase</artifactId>
+        <version>0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>liquibase-extension-examples</artifactId>
+    <artifactId>liquibase-extension-examples</artifactId>
 	<packaging>jar</packaging>
 	<description>Liquibase Examples</description>
 
-	<properties>
-		<targetMavenVersion>3.3.9</targetMavenVersion>
-	</properties>
 	<dependencies>
-  </dependencies>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
 	<build>
       <resources>
@@ -28,53 +29,10 @@
       </resources>
 
       <plugins>
-          <!-- need to build javadocs for other module javadocs to reference -->
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <configuration>
-                  <attach>false</attach>
-                  <author>false</author>
-                  <doctitle>Liquibase ${project.version} API</doctitle>
-                  <quiet>true</quiet>
-                  <doclint>none</doclint>
-                  <encoding>UTF-8</encoding>
-                  <reportOutputDirectory>${project.build.directory}/apidocs</reportOutputDirectory>
-              </configuration>
-              <executions>
-                  <execution>
-                      <id>custom-javadoc</id>
-                      <goals>
-                          <goal>javadoc</goal>
-                      </goals>
-                      <phase>package</phase>
-                  </execution>
-              </executions>
-          </plugin>
-
-          <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>javacc-maven-plugin</artifactId>
-              <version>2.6</version>
-              <executions>
-                  <execution>
-                      <id>javacc</id>
-                      <goals>
-                          <goal>javacc</goal>
-                      </goals>
-                      <configuration>
-                          <javaUnicodeEscape>false</javaUnicodeEscape>
-                          <unicodeInput>true</unicodeInput>
-                      </configuration>
-                  </execution>
-              </executions>
-          </plugin>
-
-
           <plugin>
               <groupId>org.apache.felix</groupId>
               <artifactId>maven-bundle-plugin</artifactId>
-              <version>3.3.0</version>
+              <version>5.1.8</version>
               <configuration>
                   <instructions>
                       <Bundle-SymbolicName>org.liquibase.core</Bundle-SymbolicName>
@@ -101,7 +59,7 @@
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-jar-plugin</artifactId>
-              <version>3.1.1</version>
+              <version>3.2.2</version>
               <executions>
                   <execution>
                       <goals>
@@ -119,7 +77,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.6.4</version>
 			</plugin>
 		</plugins>
 	</reporting>

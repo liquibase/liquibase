@@ -45,10 +45,15 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
         PRINT_RESULT = builder.argument("printResult", Boolean.class).defaultValue(true).build();
     }
 
+    @Override
+    public String[][] defineCommandNames() {
+        return new String[][] { COMMAND_NAME };
+    }
 
     @Override
-    public String[] getName() {
-        return COMMAND_NAME;
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        super.adjustCommandDefinition(commandDefinition);
+        commandDefinition.setInternal(true);
     }
 
     public static Class<? extends DatabaseObject>[] parseSnapshotTypes(String... snapshotTypes) {
@@ -87,7 +92,6 @@ public class InternalDiffCommandStep extends AbstractCommandStep {
         printStream.flush();
 
         resultsBuilder.addResult("statusCode", 0);
-        resultsBuilder.addResult("statusMessage", "Successfully executed diff");
     }
 
     public DiffResult createDiffResult(CommandScope commandScope) throws DatabaseException, InvalidExampleException {

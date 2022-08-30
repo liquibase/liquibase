@@ -4,9 +4,6 @@ import liquibase.change.Change
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
-import liquibase.extension.testing.TestDatabaseConnections
-
-import java.util.List
 
 class SetupAltDatabaseStructure extends SetupDatabaseStructure {
 
@@ -14,11 +11,12 @@ class SetupAltDatabaseStructure extends SetupDatabaseStructure {
         super(changes)
     }
 
-    protected Database getDatabase(TestDatabaseConnections.ConnectionStatus connectionStatus) {
-        if (connectionStatus.altConnection == null) {
+    @Override
+    protected Database getDatabase(TestSetupEnvironment testSetupEnvironment) {
+        if (testSetupEnvironment.altConnection == null) {
             throw new RuntimeException("No alt database configured")
         }
-        return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connectionStatus.altConnection))
+        return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(testSetupEnvironment.altConnection))
     }
 
 }

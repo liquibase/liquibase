@@ -8,7 +8,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.ResultSet;
@@ -276,7 +276,7 @@ class ResultSetCache {
                 resultSet.setFetchSize(database.getFetchSize());
                 return extract(resultSet, informixTrimHint);
             } finally {
-                JdbcUtils.close(resultSet, statement);
+                JdbcUtil.close(resultSet, statement);
             }
         }
 
@@ -346,7 +346,7 @@ class ResultSetCache {
                     returnList.add(new CachedRow(row));
                 }
             } finally {
-                JdbcUtils.closeResultSet(resultSet);
+                JdbcUtil.closeResultSet(resultSet);
             }
             return returnList;
         }

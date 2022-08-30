@@ -28,7 +28,7 @@ public final class ExpressionMatcher {
     private static final Pattern NESTED_EXPRESSION_PATTERN = Pattern.compile("\\([^()]+\\)");
 
     private ExpressionMatcher() {
-        throw new AssertionError("Utility class. Not designed for instantiation");
+
     }
 
     /**

@@ -14,10 +14,8 @@ public class MockSnapshotGeneratorFactory extends SnapshotGeneratorFactory{
     private List<DatabaseObject> objects;
 
     public MockSnapshotGeneratorFactory(DatabaseObject... objects) {
-        this.objects = new ArrayList<DatabaseObject>();
-        if (objects != null) {
-            this.objects.addAll(Arrays.asList(objects));
-        }
+        this.objects = new ArrayList<>();
+        addObjects(objects);
     }
 
     @Override
@@ -26,17 +24,18 @@ public class MockSnapshotGeneratorFactory extends SnapshotGeneratorFactory{
     }
 
     public void addObjects(DatabaseObject... objects) {
-        for (DatabaseObject object : objects) {
-            this.objects.add(object);
+        if (objects != null) {
+            for (DatabaseObject object : objects) {
+                this.objects.add(object);
 
-            if (object instanceof Relation) {
-                for (Column column : ((Relation) object).getColumns()) {
-                    this.objects.add(column);
+                if (object instanceof Relation) {
+                    for (Column column : ((Relation) object).getColumns()) {
+                        this.objects.add(column);
+                    }
+                    this.objects.add(object.getSchema());
                 }
-                this.objects.add(object.getSchema());
             }
         }
-
     }
 
     public void removeObjects(DatabaseObject... objects) {
