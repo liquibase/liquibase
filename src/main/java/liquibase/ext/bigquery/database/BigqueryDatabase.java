@@ -3,19 +3,25 @@ package liquibase.ext.bigquery.database;
 import com.simba.googlebigquery.googlebigquery.core.BQDriver;
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.core.GetViewDefinitionStatement;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class BigqueryDatabase extends AbstractJdbcDatabase {
 
     public static final String PRODUCT_NAME = BQDriver.DATABASE_NAME;
     public static final int BIGQUERY_PRIORITY_DATABASE = 510;
     private String liquibaseSchemaName;
+
+    private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", 34);
 
     public BigqueryDatabase() {
         this.setCurrentDateTimeFunction("CURRENT_DATETIME()");
@@ -143,6 +149,17 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
             e.printStackTrace();
             return null;
         }
+    }
+    @Override
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
+        schema = schema.customize(this);
+        String definition = (String)((ExecutorService) Scope.getCurrentScope().getSingleton(ExecutorService.class))
+                .getExecutor("jdbc", this)
+                .queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+        Scope.getCurrentScope().getLog(this.getClass()).info("getViewDefinition "+definition);
+        return definition == null ? null : CREATE_VIEW_AS_PATTERN
+                .matcher(definition)
+                .replaceFirst("");
     }
 
     @Override

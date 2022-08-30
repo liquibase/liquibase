@@ -17,5 +17,4 @@ public class BigQueryAddColumnGenerator extends AddColumnGenerator {
 	public int getPriority() {
 		return BIGQUERY_PRIORITY_DATABASE;
 	}
-
 }
