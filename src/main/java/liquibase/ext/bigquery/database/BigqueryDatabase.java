@@ -10,8 +10,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.GetViewDefinitionStatement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,7 +21,6 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
     public static final int BIGQUERY_PRIORITY_DATABASE = 510;
     private String liquibaseSchemaName;
 
-    private final Logger logger = LoggerFactory.getLogger(BigqueryDatabase.class);
     private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", 34);
 
     public BigqueryDatabase() {
@@ -159,7 +156,7 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
         String definition = (String)((ExecutorService) Scope.getCurrentScope().getSingleton(ExecutorService.class))
                 .getExecutor("jdbc", this)
                 .queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
-        logger.debug("getViewDefinition "+definition);
+        Scope.getCurrentScope().getLog(this.getClass()).info("getViewDefinition "+definition);
         return definition == null ? null : CREATE_VIEW_AS_PATTERN
                 .matcher(definition)
                 .replaceFirst("");
