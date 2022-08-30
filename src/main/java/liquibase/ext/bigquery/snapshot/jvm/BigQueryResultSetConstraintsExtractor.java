@@ -49,7 +49,7 @@ public class BigQueryResultSetConstraintsExtractor extends BigQueryResultSetCach
     }
 
     private String createSql(String catalog, String schema, String table) {
-        System.out.println("Creating SQL");
+
         CatalogAndSchema catalogAndSchema = (new CatalogAndSchema(catalog, schema)).customize(this.database);
         String jdbcSchemaName = this.database.correctObjectName(((AbstractJdbcDatabase)this.database).getJdbcSchemaName(catalogAndSchema), Schema.class);
         String sql = "select NULL AS CONSTRAINT_NAME, NULL AS CONSTRAINT_TYPE, NULL AS TABLE_NAME from " + jdbcSchemaName+"."+this.database.getSystemSchema().toUpperCase() + ".COLUMNS where TABLE_SCHEMA='" + jdbcSchemaName + "' AND 1=0"; //and CONSTRAINT_TYPE='UNIQUE'";

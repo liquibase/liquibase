@@ -38,13 +38,11 @@ public class BigQueryUniqueConstraintSnapshotGenerator extends UniqueConstraintS
 
     @Override
     protected List<CachedRow> listConstraints(Table table, DatabaseSnapshot snapshot, Schema schema) throws DatabaseException, SQLException {
-        System.out.println("list constraints");
         return (new BigQueryResultSetConstraintsExtractor(snapshot, schema.getCatalogName(), schema.getName(), table.getName())).fastFetch();
     }
 
     @Override
     protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database, DatabaseSnapshot snapshot) throws DatabaseException {
-        System.out.println("list columns");
         Relation table = example.getRelation();
         Schema schema = table.getSchema();
         String name = example.getName();
@@ -52,7 +50,6 @@ public class BigQueryUniqueConstraintSnapshotGenerator extends UniqueConstraintS
         String constraintName = database.correctObjectName(name, UniqueConstraint.class);
         String tableName = database.correctObjectName(table.getName(), Table.class);
 
-        System.out.println("System schema: " +database.getSystemSchema());
         String sql = "select CONSTRAINT_NAME, CONSTRAINT_NAME as COLUMN_NAME from " + database.getSystemSchema() + ".TABLE_CONSTRAINTS where CONSTRAINT_TYPE='UNIQUE'";
         if (schemaName != null) {
             sql = sql + "and CONSTRAINT_SCHEMA='" + schemaName + "' ";
@@ -85,7 +82,7 @@ public class BigQueryUniqueConstraintSnapshotGenerator extends UniqueConstraintS
         Database database = snapshot.getDatabase();
         UniqueConstraint exampleConstraint = (UniqueConstraint)example;
         Relation table = exampleConstraint.getRelation();
-        System.out.println("Relation: "+table.getName());
+
         List<Map<String, ?>> metadata = this.listColumns(exampleConstraint, database, snapshot);
         if (metadata.isEmpty()) {
             return null;

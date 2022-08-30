@@ -1,14 +1,8 @@
 package liquibase.ext.bigquery.snapshot.jvm;
 
-import liquibase.Scope;
+
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
+
 import liquibase.ext.bigquery.database.BigqueryDatabase;
 
 
