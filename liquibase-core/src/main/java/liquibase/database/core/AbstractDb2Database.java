@@ -24,7 +24,9 @@ import java.util.Locale;
 
 public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
 
-    public AbstractDb2Database() {
+    private static final int MAX_DB2_TIMESTAMP_FRACTIONAL_DIGITS = 12;
+
+	public AbstractDb2Database() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         super.sequenceCurrentValueFunction = "PREVIOUS VALUE FOR %s";
@@ -235,4 +237,19 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE;
     }
+
+	@Override
+	public int getMaxFractionalDigitsForTimestamp() {
+		try {
+			// See https://www.ibm.com/docs/en/db2/9.7?topic=enhancements-timestamp-data-type-allows-parameterized-precision
+			// Max precision for timestamp is 12 digits in all editions of DB from version 9.7 onwards
+			if (getDatabaseMajorVersion() > 9 || getDatabaseMajorVersion() == 9 && getDatabaseMinorVersion() >= 7) {
+				return MAX_DB2_TIMESTAMP_FRACTIONAL_DIGITS;
+			} else {
+				return super.getMaxFractionalDigitsForTimestamp();
+			} 
+		} catch (Exception e) {
+			return super.getMaxFractionalDigitsForTimestamp();
+		}
+	}
 }

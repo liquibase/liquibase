@@ -211,26 +211,29 @@ public class LiquibaseCommandLine {
     private int handleException(Throwable exception) {
         Throwable cause = exception;
 
-        String bestMessage = exception.getMessage();
-        while (cause.getCause() != null) {
-            if (StringUtil.trimToNull(cause.getMessage()) != null) {
-                bestMessage = cause.getMessage();
+        String uiMessage = "";
+        while (cause != null) {
+            String newMessage = StringUtil.trimToNull(cleanExceptionMessage(cause.getMessage()));
+            if (newMessage != null) {
+                if (!uiMessage.contains(newMessage)) {
+                    if (!uiMessage.equals("")) {
+                        uiMessage += System.lineSeparator() + "  - Caused by: ";
+                    }
+                    uiMessage += newMessage;
+                }
             }
+
             cause = cause.getCause();
         }
 
-        if (bestMessage == null) {
-            bestMessage = exception.getClass().getName();
-        } else {
-            //clean up message
-            bestMessage = bestMessage.replaceFirst("^[\\w.]*exception[\\w.]*: ", "");
-            bestMessage = bestMessage.replace("Unexpected error running Liquibase: ", "");
+        if (StringUtil.isEmpty(uiMessage)) {
+            uiMessage = exception.getClass().getName();
         }
 
         if (cause instanceof CommandFailedException && ((CommandFailedException) cause).isExpected()) {
-            Scope.getCurrentScope().getLog(getClass()).severe(bestMessage);
+            Scope.getCurrentScope().getLog(getClass()).severe(uiMessage);
         } else {
-            Scope.getCurrentScope().getLog(getClass()).severe(bestMessage, exception);
+            Scope.getCurrentScope().getLog(getClass()).severe(uiMessage, exception);
         }
 
         boolean printUsage = false;
@@ -240,7 +243,7 @@ public class LiquibaseCommandLine {
                 if (exception instanceof CommandLine.UnmatchedArgumentException) {
                     System.err.println("Unexpected argument(s): " + StringUtil.join(((CommandLine.UnmatchedArgumentException) exception).getUnmatched(), ", "));
                 } else {
-                    System.err.println("Error parsing command line: " + bestMessage);
+                    System.err.println("Error parsing command line: " + uiMessage);
                 }
                 CommandLine.UnmatchedArgumentException.printSuggestions((CommandLine.ParameterException) exception, suggestionsPrintWriter);
 
@@ -248,12 +251,12 @@ public class LiquibaseCommandLine {
             } else if (exception instanceof IllegalArgumentException
                     || exception instanceof CommandValidationException
                     || exception instanceof CommandLineParsingException) {
-                System.err.println("Error parsing command line: " + bestMessage);
+                System.err.println("Error parsing command line: " + uiMessage);
                 printUsage = true;
             } else if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
-                System.err.println(bestMessage);
+                System.err.println(uiMessage);
             } else {
-                System.err.println("\nUnexpected error running Liquibase: " + bestMessage);
+                System.err.println("\nUnexpected error running Liquibase: " + uiMessage);
                 System.err.println();
 
                 if (Level.OFF.equals(this.configuredLogLevel)) {
@@ -284,6 +287,22 @@ public class LiquibaseCommandLine {
             return cfe.getExitCode();
         }
         return 1;
+    }
+
+    protected String cleanExceptionMessage(String message) {
+        if (message == null) {
+            return null;
+        }
+
+        String originalMessage;
+        do {
+            originalMessage = message;
+            message = message.replaceFirst("^[\\w.]*Exception: ", "");
+            message = message.replaceFirst("^[\\w.]*Error: ", "");
+        } while (!originalMessage.equals(message));
+
+        message = message.replace("Unexpected error running Liquibase: ", "");
+        return message;
     }
 
     public int execute(String[] args) {
@@ -1068,8 +1087,14 @@ public class LiquibaseCommandLine {
 
     protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
         LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        returnList.add("--" + StringUtil.toKabobCase(def.getName()).replace(".", "-"));
-        returnList.add("--" + def.getName().replaceAll("\\.", ""));
+        Set<String> baseNames = new HashSet<>();
+        baseNames.add(def.getName());
+        baseNames.addAll(def.getAliases());
+
+        for (String baseName : baseNames) {
+            returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
+            returnList.add("--" + baseName.replaceAll("\\.", ""));
+        }
 
         return returnList.toArray(new String[0]);
     }

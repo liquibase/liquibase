@@ -24,7 +24,7 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         List<SqlVisitor> visitorsToRemove = new ArrayList<>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
-            if ((visitor.getContexts() != null) && !visitor.getContexts().matches(contexts)) {
+            if ((visitor.getContextFilter() != null) && !visitor.getContextFilter().matches(contexts)) {
                 visitorsToRemove.add(visitor);
             }
         }
@@ -34,12 +34,12 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
             return new ChangeSetFilterResult(true, "No runtime context specified, all contexts will run", this.getClass());
         }
 
-        Collection<ContextExpression> inheritableContexts = changeSet.getInheritableContexts();
-        if (changeSet.getContexts().isEmpty() && inheritableContexts.isEmpty()) {
+        Collection<ContextExpression> inheritableContexts = changeSet.getInheritableContextFilter();
+        if (changeSet.getContextFilter().isEmpty() && inheritableContexts.isEmpty()) {
             return new ChangeSetFilterResult(true, "Changeset runs under all contexts", this.getClass());
         }
 
-        if (changeSet.getContexts().matches(contexts) && ContextExpression.matchesAll(inheritableContexts, contexts)) {
+        if (changeSet.getContextFilter().matches(contexts) && ContextExpression.matchesAll(inheritableContexts, contexts)) {
             return new ChangeSetFilterResult(true, "Context matches '"+contexts.toString()+"'", this.getClass());
         } else {
             return new ChangeSetFilterResult(false, "Context does not match '"+contexts.toString()+"'", this.getClass());
