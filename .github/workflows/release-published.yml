@@ -194,4 +194,4 @@ jobs:
         unzip '*liquibase-core*.jar' -d liquibase-core/
         unzip '*liquibase-maven-plugin*.jar' -d liquibase-maven-plugin/
         rm -rf *.jar *.zip
-        aws s3 sync . s3://javadocsliquibasecom-origin
+        aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
