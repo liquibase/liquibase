@@ -35,3 +35,4 @@ original-pom.xml
 **/logback-test.xml
 **/*.swp
 **/dependency-reduced-pom.xml
+compareGeneratedSqlWithExpectedSqlForMinimalChangesets/
