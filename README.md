@@ -13,7 +13,7 @@ Fill in `harness-config.yml` in `src/test/resources` directory.
 Build project without tests
 
 ```sh
-mvn clean install -DskipTests
+mvn package -DskipTests
 ```
 
 To run all harness tests for the extension run
