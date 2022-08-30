@@ -31,7 +31,7 @@ public class MigrationFailedException extends LiquibaseException {
     public String getMessage() {
         String message = "Migration failed";
         if (failedChangeSetName != null) {
-            message += " for change set "+ failedChangeSetName;
+            message += " for changeset "+ failedChangeSetName;
         }
         message += ":\n     Reason: "+super.getMessage();
 

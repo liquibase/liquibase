@@ -15,9 +15,4 @@ public class InformixIntegrationTest extends AbstractIntegrationTest {
         super("informix", DatabaseFactory.getInstance().getDatabase("informix"));
     }
 
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        // Seems unlikely to ever be provided by Travis, as it's not free
-        return false;
-    }
 }

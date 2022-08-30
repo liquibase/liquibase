@@ -16,6 +16,7 @@ public class SmallIntType extends LiquibaseDataType {
 
     private boolean autoIncrement;
 
+    @Override
     public boolean isAutoIncrement() {
         return autoIncrement;
     }
@@ -45,16 +46,10 @@ public class SmallIntType extends LiquibaseDataType {
             return new DatabaseDataType("NUMBER", 5);
         }
 
-        if (database instanceof PostgresDatabase)
-        {
+
+        if (database instanceof PostgresDatabase) {
             if (isAutoIncrement()) {
-                int majorVersion = 9;
-                try {
-                    majorVersion = database.getDatabaseMajorVersion();
-                } catch (DatabaseException e) {
-                    // ignore
-                }
-                if (majorVersion < 10) {
+                if (((PostgresDatabase) database).useSerialDatatypes()) {
                     return new DatabaseDataType("SMALLSERIAL");
                 }
             }

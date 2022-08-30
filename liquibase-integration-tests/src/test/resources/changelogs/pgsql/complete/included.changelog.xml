@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <preConditions>
             <dbms type="postgresql"/>
     </preConditions>
@@ -22,7 +22,7 @@
     </changeSet>
 
 
-    <changeSet id="2" author="nvoxland" context="test">
+    <changeSet id="2" author="nvoxland" contextFilter="test">
         <insert tableName="news">
             <column name="id" value="1"/>
             <column name="title" value="Liquibase 0.8 Released"/>
@@ -33,10 +33,33 @@
         </insert>
     </changeSet>
 
-    <changeSet id="3" author="nvoxland" context="demo">
+    <changeSet id="3" author="nvoxland" contextFilter="demo">
         <insert tableName="news">
             <column name="id" value="3"/>            
             <column name="title" value="Liquibase 1.0 Released"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="4" author="molivsdat">
+        <sql endDelimiter=";">
+            DROP TYPE IF EXISTS sample_enum CASCADE;
+            create type sample_enum as enum ('EnumValOne', 'EnumValTwo');
+        </sql>
+    </changeSet>
+
+    <changeSet id="5" author="sudiptosarkar">
+        <createTable tableName="sample_enum_table">
+            <column name="int_col" type="int"/>
+            <column name="str_col" type="varchar(50)"/>
+            <column name="enum_col" type="sample_enum"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="6" author="molivasdat">
+        <loadData file="datafiles/enum-data.csv" relativeToChangelogFile="true" tableName="sample_enum_table">
+            <column header="int_col" name="int_col" type="NUMERIC"/>
+            <column header="str_col" name="str_col" type="STRING"/>
+            <column header="enum_col" name="enum_col" type="OTHER"/>
+        </loadData>
     </changeSet>
 </databaseChangeLog>

@@ -33,7 +33,7 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
         boolean hasFields = false;
         for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
         {
-            if (!hashPkFields.contains(columnKey)) {
+            if (!hashPkFields.contains(columnKey) && insertOrUpdateStatement.getAllowColumnUpdate(columnKey)) {
             	hasFields = true;
             	updateClause.append(database.escapeObjectName(columnKey, Column.class)).append(" = ");
                 Object columnValue = insertOrUpdateStatement.getColumnValue(columnKey);

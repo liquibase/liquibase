@@ -103,7 +103,9 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         seq.setIncrementBy(toBigInteger(sequenceRow.get("INCREMENT_BY"), database));
         seq.setWillCycle(toBoolean(sequenceRow.get("WILL_CYCLE"), database));
         seq.setOrdered(toBoolean(sequenceRow.get("IS_ORDERED"), database));
-        seq.setDataType((String) sequenceRow.get("SEQ_TYPE"));
+        if (! (database instanceof CockroachDatabase)) {
+            seq.setDataType((String) sequenceRow.get("SEQ_TYPE"));
+        }
         seq.setAttribute("liquibase-complete", true);
 
         return seq;
@@ -171,7 +173,14 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof FirebirdDatabase) {
             return "SELECT TRIM(RDB$GENERATOR_NAME) AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0";
         } else if (database instanceof H2Database) {
-            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
+            try {
+                if (database.getDatabaseMajorVersion() <= 1) {
+                    return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
+                }
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine h2 version in order to generate sequence snapshot query");
+            }
+            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
         } else if (database instanceof HsqlDatabase) {
             return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
         } else if (database instanceof InformixDatabase) {
@@ -208,16 +217,16 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                 Scope.getCurrentScope().getLog(getClass()).warning("Failed to retrieve database version: " + ignore);
             }
             if (version < 10) { // 'pg_sequence' view does not exists yet
-                return "SELECT c.relname AS SEQUENCE_NAME FROM pg_class c " +
+                return "SELECT c.relname AS \"SEQUENCE_NAME\" FROM pg_class c " +
                         "join pg_namespace on c.relnamespace = pg_namespace.oid " +
                         "WHERE c.relkind='S' " +
                         "AND nspname = '" + schema.getName() + "' " +
                         "AND c.oid not in (select d.objid FROM pg_depend d where d.refobjsubid > 0)";
             } else {
-                return "SELECT c.relname AS SEQUENCE_NAME, " +
-                        "  s.seqmin AS MIN_VALUE, s.seqmax AS MAX_VALUE, s.seqincrement AS INCREMENT_BY, " +
-                        "  s.seqcycle AS WILL_CYCLE, s.seqstart AS START_VALUE, s.seqcache AS CACHE_SIZE, " +
-                        "  pg_catalog.format_type(s.seqtypid, NULL) AS SEQ_TYPE " +
+                return "SELECT c.relname AS \"SEQUENCE_NAME\", " +
+                    "  s.seqmin AS \"MIN_VALUE\", s.seqmax AS \"MAX_VALUE\", s.seqincrement AS \"INCREMENT_BY\", " +
+                    "  s.seqcycle AS \"WILL_CYCLE\", s.seqstart AS \"START_VALUE\", s.seqcache AS \"CACHE_SIZE\", " +
+                    "  pg_catalog.format_type(s.seqtypid, NULL) AS \"SEQ_TYPE\" " +
                         "FROM pg_class c " +
                         "JOIN pg_namespace ns on c.relnamespace = ns.oid " +
                         "JOIN pg_sequence s on c.oid = s.seqrelid " +
@@ -269,9 +278,11 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "FROM SYS.SYSSEQUENCE s " +
                     "JOIN SYS.SYSUSER u ON s.OWNER = u.USER_ID "+
                     "WHERE u.USER_NAME = '" + schema.getName() + "'";
-        	} else {
+        } else if (database.getClass().getName().contains("MaxDB")) { //have to check classname as this is currently an extension
+			return "SELECT SEQUENCE_NAME, MIN_VALUE, MAX_VALUE, INCREMENT_BY, CYCLE_FLAG AS WILL_CYCLE " +
+				   "FROM sequences WHERE SCHEMANAME = '" + schema.getName() + "'";
+		} else {
             throw new UnexpectedLiquibaseException("Don't know how to query for sequences on " + database);
-        }
-
+		}
     }
 }

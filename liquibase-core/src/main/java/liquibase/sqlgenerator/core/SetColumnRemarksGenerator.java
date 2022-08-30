@@ -2,7 +2,9 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -10,10 +12,6 @@ import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRemarksStatement> {
     @Override
@@ -34,7 +32,20 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
         validationErrors.checkRequiredField("tableName", setColumnRemarksStatement.getTableName());
         validationErrors.checkRequiredField("columnName", setColumnRemarksStatement.getColumnName());
         validationErrors.checkDisallowedField("catalogName", setColumnRemarksStatement.getCatalogName(), database, MSSQLDatabase.class);
+        if (database instanceof MySQLDatabase) {
+            validationErrors.checkRequiredField("columnDataType", StringUtil.trimToNull(setColumnRemarksStatement.getColumnDataType()));
+        }
         return validationErrors;
+    }
+
+    @Override
+    public Warnings warn(SetColumnRemarksStatement statementType, Database database, SqlGeneratorChain<SetColumnRemarksStatement> sqlGeneratorChain) {
+        final Warnings warnings = super.warn(statementType, database, sqlGeneratorChain);
+        if (database instanceof MySQLDatabase) {
+            ((MySQLDatabase) database).warnAboutAlterColumn("setColumnRemarks", warnings);
+        }
+
+        return warnings;
     }
 
     @Override
@@ -43,8 +54,12 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
         String remarksEscaped = database.escapeStringForDatabase(StringUtil.trimToEmpty(statement.getRemarks()));
 
         if (database instanceof MySQLDatabase) {
-            return new Sql[]{new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " COMMENT = '" + remarksEscaped
-                    + "'", getAffectedColumn(statement))};
+            // generate mysql sql  ALTER TABLE cat.user MODIFY COLUMN id int DEFAULT 1001  COMMENT 'A String'
+            return new Sql[]{new UnparsedSql("ALTER TABLE " + database.escapeTableName(
+                    statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY COLUMN "
+                    + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " "
+                    + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database)
+                    + " COMMENT '" + remarksEscaped + "'", getAffectedColumn(statement))};
         } else if (database instanceof MSSQLDatabase) {
             String schemaName = statement.getSchemaName();
             if (schemaName == null) {

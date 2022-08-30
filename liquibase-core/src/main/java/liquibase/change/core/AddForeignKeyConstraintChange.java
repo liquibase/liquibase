@@ -43,6 +43,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     private String onUpdate;
     private String onDelete;
 
+
     @Override
     protected String[] createSupportedDatabasesMetaData(
         String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
@@ -192,9 +193,20 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.initiallyDeferred = initiallyDeferred;
     }
 
+    /**
+     * @deprecated Use {@link #getOnDelete()}.
+     * <b>This always returns null</b> so it doesn't impact checksums when settings onDelete vs. deleteCascade
+     */
+    @DatabaseChangeProperty(description = "This is true to set onDelete to Cascade, priority given to onDelete tag if one exists")
+    public Boolean getDeleteCascade() {
+        return null;
+    }
+
     public void setDeleteCascade(Boolean deleteCascade) {
-        if ((deleteCascade != null) && deleteCascade) {
+        if ((deleteCascade != null) && deleteCascade && (this.onDelete == null)) {
             setOnDelete("CASCADE");
+        } else {
+            setOnDelete((String) null);
         }
     }
 

@@ -28,7 +28,7 @@ public class ChangeLogParserFactory {
     /**
      * Set the instance used by this singleton. Used primarily for testing.
      */
-    public static void setInstance(ChangeLogParserFactory instance) {
+    public static synchronized void setInstance(ChangeLogParserFactory instance) {
         ChangeLogParserFactory.instance = instance;
     }
 

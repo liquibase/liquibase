@@ -10,9 +10,13 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * An implementation of {@link FileSystemResourceAccessor} that builds up the file roots based on the passed {@link ClassLoader}.
@@ -20,7 +24,7 @@ import java.util.*;
  *
  * @see OSGiResourceAccessor for OSGi-based classloaders
  */
-public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
+public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implements AutoCloseable {
 
     private ClassLoader classLoader;
     protected List<FileSystem> rootPaths;
@@ -61,11 +65,20 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     try {
                         addDescription(url);
                         this.rootPaths.add(FileSystems.newFileSystem(Paths.get(url.toURI()), this.getClass().getClassLoader()));
+                    } catch (FileSystemAlreadyExistsException e) {
+                        //has been defined already, that is OK
                     } catch (ProviderNotFoundException e) {
                         if (url.toExternalForm().startsWith("file:/")) {
                             //that is expected, the classloader itself will handle it
                         } else {
                             Scope.getCurrentScope().getLog(getClass()).info("No filesystem provider for URL " + url.toExternalForm() + ". Will rely on classloader logic for listing files.");
+                        }
+                    } catch (FileSystemNotFoundException fsnfe) {
+                        if (url.toExternalForm().matches(".*!.*!.*")) {
+                            //spring sometimes sets up urls with nested urls like jar:file:/path/to/demo-0.0.1-SNAPSHOT.jar!/BOOT-INF/lib/mssql-jdbc-8.2.2.jre8.jar!/ which are not readable.
+                            //That is expected, and will be handled by the SpringResourceAccessor
+                        } else {
+                            Scope.getCurrentScope().getLog(getClass()).info("Configured classpath location " + url.toString() + " does not exist");
                         }
                     } catch (Throwable e) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Cannot create filesystem for url " + url.toExternalForm() + ": " + e.getMessage(), e);
@@ -90,6 +103,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
+    @java.lang.SuppressWarnings("squid:S2095")
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         init();
 
@@ -116,15 +130,41 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
         return returnList;
     }
 
+    /**
+     * Generates a final path to <code>streamPath</code> relative to <code>relatoveTo</code>.
+     * If the last part of relativeTo contains a dot character (`.`)
+     * this part is considered to be a file name, if it does not, it is
+     * considered to be a directory.
+     * i.e.<br>
+     * <pre>
+     * changelog/some.sql   -> some.sql is considered to be a file
+     * changelog/some_sql   -> some_sql is considered to be a directory
+     * </pre>
+     *
+     * @param relativeTo starting point of the path resolution (may be null)
+     * @param streamPath a path to a resource relative to relativeTo must not be null
+     * @return a canonicalized absolute path to a resource
+     */
     protected String getFinalPath(String relativeTo, String streamPath) {
         streamPath = streamPath.replace("\\", "/");
-        streamPath = streamPath.replaceFirst("^classpath:", "");
+        streamPath = streamPath.replaceFirst("^classpath\\*?:", "");
 
         if (relativeTo != null) {
             relativeTo = relativeTo.replace("\\", "/");
-            relativeTo = relativeTo.replaceFirst("^classpath:", "");
+            relativeTo = relativeTo.replaceFirst("^classpath\\*?:", "");
             relativeTo = relativeTo.replaceAll("//+", "/");
+            //
+            // If this is a simple file name then set the
+            // relativeTo value as if it is a root path
+            //
+            if (!relativeTo.contains("/") && relativeTo.contains(".")) {
+                relativeTo = "/";
+            }
 
+            //
+            // If this is not a simple file name and the last component
+            // of the path contains a '.' remove the last component
+            //
             if (!relativeTo.endsWith("/")) {
                 String lastPortion = relativeTo.replaceFirst(".+/", "");
                 if (lastPortion.contains(".")) {
@@ -132,13 +172,6 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 }
             }
 
-            //
-            // If this is a simple file name then set the
-            // relativeTo value as if it is a root path
-            //
-            if (! relativeTo.contains("/") && relativeTo.contains(".")) {
-                relativeTo = "/";
-            }
             streamPath = relativeTo + "/" + streamPath;
         }
 
@@ -227,31 +260,67 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         while (resources.hasMoreElements()) {
             final URL url = resources.nextElement();
+            final String urlExternalForm = url.toExternalForm();
 
             try {
-                final InputStream inputStream = url.openStream();
+                if (urlExternalForm.startsWith("jar:file:") && urlExternalForm.contains("!")) {
+                    //We can search the jar directly
+                    String jarPath = url.getPath();
+                    jarPath = jarPath.substring(5, jarPath.indexOf("!"));
+                    try (JarFile jar = new JarFile(URLDecoder.decode(jarPath, StandardCharsets.UTF_8.name()))) {
+                        String comparePath = path;
+                        if (comparePath.startsWith("/")) {
+                            comparePath = "/" + comparePath;
+                        }
+                        Enumeration<JarEntry> entries = jar.entries();
+                        while (entries.hasMoreElements()) {
+                            JarEntry entry = entries.nextElement();
+                            String name = entry.getName();
+                            if (name.startsWith(comparePath) && !comparePath.equals(name)) {
+                                if (entry.isDirectory()) {
+                                    if (!includeDirectories) {
+                                        continue;
+                                    }
 
-                final String fileList = StreamUtil.readStreamAsString(inputStream);
-                if (!fileList.isEmpty()) {
-                    for (String childName : fileList.split("\n")) {
-                        String childPath = (path + "/" + childName).replaceAll("//+", "/");
+                                    if (recursive || !name.substring(comparePath.length()).contains("/")) {
+                                        returnSet.add(name);
+                                    }
+                                } else {
+                                    if (includeFiles) {
+                                        if (recursive || !name.substring(comparePath.length()).contains("/")) {
+                                            returnSet.add(name);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    //fall back to seeing if the stream lists sub-directories
+                    final InputStream inputStream = url.openStream();
 
-                        if (isDirectory(childPath)) {
-                            if (includeDirectories) {
-                                returnSet.add(childPath);
-                            }
-                            if (recursive) {
-                                returnSet.addAll(listFromClassLoader(childPath, recursive, includeFiles, includeDirectories));
-                            }
-                        } else {
-                            if (includeFiles) {
-                                returnSet.add(childPath);
+                    final String fileList = StreamUtil.readStreamAsString(inputStream);
+                    if (!fileList.isEmpty()) {
+                        for (String childName : fileList.split("\n")) {
+                            String childPath = (path + "/" + childName).replaceAll("//+", "/");
+
+                            if (isDirectory(childPath)) {
+                                if (includeDirectories) {
+                                    returnSet.add(childPath);
+                                }
+                                if (recursive) {
+                                    returnSet.addAll(listFromClassLoader(childPath, recursive, includeFiles, includeDirectories));
+                                }
+                            } else {
+                                if (includeFiles) {
+                                    returnSet.add(childPath);
+                                }
                             }
                         }
                     }
                 }
             } catch (IOException e) {
-                Scope.getCurrentScope().getLog(getClass()).severe("Cannot list resources in " + url.toExternalForm() + ": " + e.getMessage(), e);
+                Scope.getCurrentScope().getLog(getClass()).severe("Cannot list resources in " + urlExternalForm + ": " + e.getMessage(), e);
             }
         }
         return returnSet;
@@ -285,5 +354,18 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
         init();
 
         return description;
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (rootPaths != null) {
+            for (final FileSystem rootPath : rootPaths) {
+                try {
+                    rootPath.close();
+                } catch (final Exception e) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Cannot close path " + e.getMessage(), e);
+                }
+            }
+        }
     }
 }

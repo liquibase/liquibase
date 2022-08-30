@@ -44,7 +44,7 @@ public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedState
     }
 
     @Override
-    protected void attachParams(List<ColumnConfig> ignored, PreparedStatement stmt)
+    protected void attachParams(List<? extends ColumnConfig> ignored, PreparedStatement stmt)
             throws SQLException, DatabaseException {
         for (ExecutablePreparedStatementBase insertStatement : collectedStatements) {
             super.attachParams(insertStatement.getColumns(), stmt);

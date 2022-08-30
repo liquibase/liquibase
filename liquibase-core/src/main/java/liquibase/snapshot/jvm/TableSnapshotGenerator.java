@@ -11,7 +11,7 @@ import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.BooleanUtils;
+import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.SQLException;
@@ -89,7 +89,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         Table table = new Table().setName(cleanNameFromDatabase(rawTableName, database));
         table.setRemarks(remarks);
         table.setTablespace(tablespace);
-        table.setDefaultTablespace(BooleanUtils.isTrue(Boolean.parseBoolean(defaultTablespaceString)));
+        table.setDefaultTablespace(BooleanUtil.isTrue(Boolean.parseBoolean(defaultTablespaceString)));
 
         CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));

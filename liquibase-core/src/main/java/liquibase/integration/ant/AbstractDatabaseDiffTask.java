@@ -21,7 +21,7 @@ public abstract class AbstractDatabaseDiffTask extends BaseLiquibaseTask {
     protected DiffResult getDiffResult() {
         Liquibase liquibase = getLiquibase();
         Database targetDatabase = liquibase.getDatabase();
-        Database referenceDatabase = createDatabaseFromType(referenceDatabaseType);
+        Database referenceDatabase = createDatabaseFromType(referenceDatabaseType, getResourceAccessor());
 
         CatalogAndSchema targetCatalogAndSchema = buildCatalogAndSchema(targetDatabase);
         CatalogAndSchema referenceCatalogAndSchema = buildCatalogAndSchema(referenceDatabase);
@@ -78,96 +78,5 @@ public abstract class AbstractDatabaseDiffTask extends BaseLiquibaseTask {
 
     public void setDiffTypes(String diffTypes) {
         this.diffTypes = diffTypes;
-    }
-
-    /*************************
-     * Deprecated attributes *
-     *************************/
-
-    /**
-     * Helper method for deprecated ant attributes. This method will be removed when the deprecated methods are removed.
-     * Do not rely on this method.
-     */
-    private DatabaseType getReferenceDatabaseType() {
-        if(referenceDatabaseType == null) {
-            referenceDatabaseType = new DatabaseType(getProject());
-        }
-        return referenceDatabaseType;
-    }
-
-    @Deprecated
-    public String getReferenceDriver() {
-        return getReferenceDatabaseType().getDriver();
-    }
-
-    @Deprecated
-    public void setReferenceDriver(String referenceDriver) {
-        log("The referenceDriver attribute is deprecated. Use a nested <referenceDatabase> element or set the referenceDatabaseRef attribute instead.", Project.MSG_WARN);
-        getReferenceDatabaseType().setDriver(referenceDriver);
-    }
-
-    @Deprecated
-    public String getReferenceUrl() {
-        return getReferenceDatabaseType().getUrl();
-    }
-
-    @Deprecated
-    public void setReferenceUrl(String referenceUrl) {
-        log("The referenceUrl attribute is deprecated. Use a nested <referenceDatabase> element or set the referenceDatabaseRef attribute instead.", Project.MSG_WARN);
-        getReferenceDatabaseType().setUrl(referenceUrl);
-    }
-
-    @Deprecated
-    public String getReferenceUsername() {
-        return getReferenceDatabaseType().getUser();
-    }
-
-    @Deprecated
-    public void setReferenceUsername(String referenceUsername) {
-        log("The referenceUsername attribute is deprecated. Use a nested <referenceDatabase> element or set the referenceDatabaseRef attribute instead.", Project.MSG_WARN);
-        getReferenceDatabaseType().setUser(referenceUsername);
-    }
-
-    @Deprecated
-    public String getReferencePassword() {
-        return getReferenceDatabaseType().getPassword();
-    }
-
-    @Deprecated
-    public void setReferencePassword(String referencePassword) {
-        log("The referencePassword attribute is deprecated. Use a nested <referenceDatabase> element or set the referenceDatabaseRef attribute instead.", Project.MSG_WARN);
-        getReferenceDatabaseType().setPassword(referencePassword);
-    }
-
-    @Deprecated
-    public String getReferenceDefaultCatalogName() {
-        return getReferenceDatabaseType().getDefaultCatalogName();
-    }
-
-    @Deprecated
-    public void setReferenceDefaultCatalogName(String referenceDefaultCatalogName) {
-        log("The referenceDefaultCatalogName attribute is deprecated. Use a nested <referenceDatabase> element or set the referenceDatabaseRef attribute instead.", Project.MSG_WARN);
-        getReferenceDatabaseType().setDefaultCatalogName(referenceDefaultCatalogName);
-    }
-
-    @Deprecated
-    public String getReferenceDefaultSchemaName() {
-        return getReferenceDatabaseType().getDefaultSchemaName();
-    }
-
-    @Deprecated
-    public void setReferenceDefaultSchemaName(String referenceDefaultSchemaName) {
-        log("The referenceDefaultSchemaName attribute is deprecated. Use a nested <referenceDatabase> element or set the referenceDatabaseRef attribute instead.", Project.MSG_WARN);
-        getReferenceDatabaseType().setDefaultSchemaName(referenceDefaultSchemaName);
-    }
-
-    @Deprecated
-    public String getDataDir() {
-        return null;
-    }
-
-    @Deprecated
-    public void setDataDir(String dataDir) {
-        log("The dataDir attribute is deprecated. It is no longer needed and will be removed in the future.", Project.MSG_WARN);
     }
 }

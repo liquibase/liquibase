@@ -17,4 +17,5 @@ liquibase.precondition.core.SequenceExistsPrecondition
 liquibase.precondition.core.SqlPrecondition
 liquibase.precondition.core.TableExistsPrecondition
 liquibase.precondition.core.TableIsEmptyPrecondition
+liquibase.precondition.core.UniqueConstraintExistsPrecondition
 liquibase.precondition.core.ViewExistsPrecondition

@@ -184,14 +184,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                         row.getInt(METADATA_DELETE_RULE), database);
                 foreignKey.setDeleteRule(deleteRule);
 
-                short deferrability;
-                if (((database instanceof MySQLDatabase) && ((MySQLDatabase) database)
-                    .hasBugJdbcConstraintsDeferrable()) || ((database instanceof MariaDBDatabase) && (
-                        (MariaDBDatabase) database).hasBugJdbcConstraintsDeferrable())
-                   )
-                    deferrability = DatabaseMetaData.importedKeyNotDeferrable;
-                else
-                    deferrability = row.getShort(METADATA_DEFERRABILITY);
+                short deferrability = row.getShort(METADATA_DEFERRABILITY);
 
                 // Hsqldb doesn't handle setting this property correctly, it sets it to 0.
                 // it should be set to DatabaseMetaData.importedKeyNotDeferrable(7)

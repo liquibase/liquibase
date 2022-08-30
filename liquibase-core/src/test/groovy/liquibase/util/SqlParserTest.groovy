@@ -28,6 +28,10 @@ class SqlParserTest extends Specification {
         "a\nstring\n\nwith\nnewlines"                                                                      | ["a", "string", "with", "newlines"]
         "a string /* with a comment */ here"                                                               | ["a", "string", "here"]
         "a string /* with a 'quoted' comment */ here"                                                      | ["a", "string", "here"]
+        "a string /* with a \n'quoted' comment */ here"                                                    | ["a", "string", "here"]
+        "a string /* with a \r\n'quoted' comment */ here"                                                  | ["a", "string", "here"]
+        """a string /* with a
+'quoted' comment */ here"""                                                                                | ["a", "string", "here"]
         "one string; and another"                                                                          | ["one", "string", ";", "and", "another"]
         "'a quoted semicolon; here' and /* a commented semicolon; here */"                                 | ["'a quoted semicolon; here'", "and"]
         "--here is a comment\nand a statement;\nand another --followed by a comment"                       | ["and", "a", "statement", ";", "and", "another"]
@@ -46,6 +50,7 @@ class SqlParserTest extends Specification {
         "a ~ b"                                                                                            | ["a", "~", "b"]
         "a > b"                                                                                            | ["a", ">", "b"]
         "a <> b"                                                                                           | ["a", "<", ">", "b"]
+        "a != '\\\\' here"                                                                                      | ["a", "!", "=", "'\\\\'", "here"]
 
     }
 
@@ -60,6 +65,10 @@ class SqlParserTest extends Specification {
         "x\u0282abc"                                        | ["x\u0282abc"] //unicode letter
         "x \u2013 abc"                                      | ["x", "\u2013", "abc"] //ndash synmbol
         "x 'quote with unicode punctuation \u2013 in it' y" | ["x", "'quote with unicode punctuation \u2013 in it'", "y"]
+        "string with degree sign sample 32\u00b0C"          | ["string", "with", "degree", "sign", "sample", "32", "\u00b0", "C"]
+        "currency symbols like € or ₿"                           | ["currency", "symbols",  "like", "€", "or", "₿"]
+        "symbols ><#|\\!?£°§%&()[]{}^àìùòèéç"               | ["symbols",">","<", "#","|", "\\", "!", "?", "£","°", "§", "%", "&", "(",")","[","]","{","}","^","àìùòèéç"]
+        "specials \$@"                                      | ["specials", "\$@"]
     }
 
     @Unroll("#featureName `#input`")

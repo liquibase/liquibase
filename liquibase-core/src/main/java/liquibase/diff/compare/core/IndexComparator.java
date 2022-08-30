@@ -120,6 +120,14 @@ public class IndexComparator implements DatabaseObjectComparator {
                     return false;
                 }
                 for (int i=0; i<referenceList.size(); i++) {
+                    //
+                    // Check for nulls
+                    // If both reference and comparison objects are null then return true
+                    // else if only one is null then return false
+                    //
+                    if (referenceList.get(i) == null || compareList.get(i) == null) {
+                        return referenceList.get(i) == compareList.get(i);
+                    }
                     if (!StringUtil.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtil.trimToEmpty(compareList.get(i).getName()))) {
                         return false;
                     }

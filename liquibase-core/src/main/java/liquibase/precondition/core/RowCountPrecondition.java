@@ -75,7 +75,7 @@ public class RowCountPrecondition extends AbstractPrecondition {
 
             int result = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForInt(statement);
             if (result != expectedRows) {
-                throw new PreconditionFailedException(getFailureMessage(result), changeLog, this);
+                throw new PreconditionFailedException(getFailureMessage(result, expectedRows), changeLog, this);
             }
 
         } catch (PreconditionFailedException e) {
@@ -85,8 +85,8 @@ public class RowCountPrecondition extends AbstractPrecondition {
         }
     }
 
-    protected String getFailureMessage(int result) {
-        return "Table "+tableName+" is not empty. Contains "+result+" rows";
+    protected String getFailureMessage(int result, int expectedRows) {
+        return "Table "+tableName+" does not have the expected row count of "+expectedRows+". It contains "+result+" rows";
     }
 
     @Override
