@@ -32,8 +32,14 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
     }
 
     @Override
-    public String[] getName() {
-        return COMMAND_NAME;
+    public String[][] defineCommandNames() {
+        return new String[][] { COMMAND_NAME };
+    }
+
+    @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        super.adjustCommandDefinition(commandDefinition);
+        commandDefinition.setInternal(true);
     }
 
     @Override
@@ -65,7 +71,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
         }
 
         if (deployment == null) {
-            output.println("No changeSets deployed");
+            output.println("No changesets deployed");
         } else {
             deployment.printReport(output);
         }
@@ -109,7 +115,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
                 long executionMs = last.getDateExecuted().getTime() - firstChangeSet.getDateExecuted().getTime();
                 executionTime = (executionMs / 1000F) + "s";
             }
-            String message = "- Database updated at " + dateFormat.format(firstChangeSet.getDateExecuted()) + ". Applied " + changeSets.size() + " changeSet(s)";
+            String message = "- Database updated at " + dateFormat.format(firstChangeSet.getDateExecuted()) + ". Applied " + changeSets.size() + " changeset(s)";
 
             if (executionTime != null) {
                 message += " in " + executionTime;

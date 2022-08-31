@@ -27,7 +27,7 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         InputStream stream = null;
         if (contentByFileName.containsKey(streamPath)) {
-            stream = new ByteArrayInputStream(contentByFileName.get(streamPath).getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
+            stream = new ByteArrayInputStream(contentByFileName.get(streamPath).getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
         }
         if (stream == null) {
             return null;

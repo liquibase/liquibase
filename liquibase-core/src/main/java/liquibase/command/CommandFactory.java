@@ -2,6 +2,7 @@ package liquibase.command;
 
 import liquibase.Scope;
 import liquibase.SingletonObject;
+import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.StringUtil;
 
 import java.util.*;
@@ -10,6 +11,7 @@ import java.util.*;
  * Manages the command related implementations.
  */
 public class CommandFactory implements SingletonObject {
+    private Collection<CommandStep> allInstances;
 
     private final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new HashMap<>();
 
@@ -30,8 +32,7 @@ public class CommandFactory implements SingletonObject {
      */
     public CommandDefinition getCommandDefinition(String... commandName) throws IllegalArgumentException{
         CommandDefinition commandDefinition = new CommandDefinition(commandName);
-
-        for (CommandStep step : Scope.getCurrentScope().getServiceLocator().findInstances(CommandStep.class)) {
+        for (CommandStep step : findAllInstances()) {
             if (step.getOrder(commandDefinition) > 0) {
                 commandDefinition.add(step);
             }
@@ -60,18 +61,24 @@ public class CommandFactory implements SingletonObject {
 
     /**
      * Returns all known {@link CommandDefinition}s.
+     *
+     * @param includeInternal if true, also include commands marked as {@link CommandDefinition#getInternal()}
      */
-    public SortedSet<CommandDefinition> getCommands() {
+    public SortedSet<CommandDefinition> getCommands(boolean includeInternal) {
         Map<String, String[]> commandNames = new HashMap<>();
-        for (CommandStep step : Scope.getCurrentScope().getServiceLocator().findInstances(CommandStep.class)) {
-            final String[] name = step.getName();
-            commandNames.put(StringUtil.join(name, " "), name);
+        for (CommandStep step : findAllInstances()) {
+            for (String[] name : step.defineCommandNames()) {
+                commandNames.put(StringUtil.join(name, " "), name);
+            }
         }
 
         SortedSet<CommandDefinition> commands = new TreeSet<>();
         for (String[] commandName : commandNames.values()) {
             try {
-                commands.add(getCommandDefinition(commandName));
+                final CommandDefinition definition = getCommandDefinition(commandName);
+                if (includeInternal || !definition.getInternal()) {
+                    commands.add(definition);
+                }
             } catch (IllegalArgumentException e) {
                 //not a full command, like ConvertCommandStep
             }
@@ -127,5 +134,19 @@ public class CommandFactory implements SingletonObject {
             }
         }
 
+    }
+
+    //
+    // Find and cache all instances of CommandStep
+    //
+    private synchronized Collection<CommandStep> findAllInstances() {
+        if (this.allInstances == null) {
+            this.allInstances = new ArrayList<>();
+
+            ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
+            this.allInstances.addAll(serviceLocator.findInstances(CommandStep.class));
+        }
+
+        return this.allInstances;
     }
 }

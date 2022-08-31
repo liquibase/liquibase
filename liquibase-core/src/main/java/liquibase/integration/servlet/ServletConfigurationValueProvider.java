@@ -1,14 +1,13 @@
 package liquibase.integration.servlet;
 
-import liquibase.configuration.ConfigurationValueProvider;
+import liquibase.configuration.AbstractConfigurationValueProvider;
 import liquibase.configuration.ProvidedValue;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.servlet.ServletContext;
 
-public class ServletConfigurationValueProvider implements ConfigurationValueProvider {
+public class ServletConfigurationValueProvider extends AbstractConfigurationValueProvider {
 
     private static final String JAVA_COMP_ENV = "java:comp/env";
 
@@ -17,10 +16,10 @@ public class ServletConfigurationValueProvider implements ConfigurationValueProv
         return 30;
     }
 
-    private final ServletContext servletContext;
+    private final GenericServletWrapper.ServletContext servletContext;
     private final InitialContext initialContext;
 
-    public ServletConfigurationValueProvider(ServletContext servletContext, InitialContext initialContext) {
+    public ServletConfigurationValueProvider(GenericServletWrapper.ServletContext servletContext, InitialContext initialContext) {
         this.servletContext = servletContext;
         this.initialContext = initialContext;
     }

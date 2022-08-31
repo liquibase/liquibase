@@ -1,14 +1,17 @@
 package liquibase.diff.output;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -24,13 +27,18 @@ import java.util.regex.Pattern;
  */
 public class StandardObjectChangeFilter implements ObjectChangeFilter {
 
-    private FilterType filterType;
+    private final FilterType filterType;
 
-    private List<Filter> filters = new ArrayList<>();
+    private final List<Filter> filters = new ArrayList<>();
+    private final static List<DatabaseObject> databaseObjects = new ArrayList<>();
     private boolean catalogOrSchemaFilter;
 
     public StandardObjectChangeFilter(FilterType type, String filter) {
         this.filterType = type;
+        if (databaseObjects.isEmpty()) {
+            ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
+            databaseObjects.addAll(serviceLocator.findInstances(DatabaseObject.class));
+        }
         parseFilter(filter);
     }
 
@@ -47,15 +55,14 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
             if (split.length == 1) {
                 filters.add(new Filter(null, Pattern.compile(split[0])));
             } else {
-                String className = StringUtil.upperCaseFirst(split[0]);
-                className = "liquibase.structure.core."+className;
-                try {
-                    Class<DatabaseObject> clazz = (Class<DatabaseObject>) Class.forName(className);
-                    filters.add(new Filter(clazz, Pattern.compile(split[1])));
-                    catalogOrSchemaFilter |= "Catalog".equals(className) || "Schema".equals(className);
-                } catch (ClassNotFoundException e) {
-                    throw new UnexpectedLiquibaseException(e);
+                String className = split[0];
+                Optional<DatabaseObject> databaseObject = databaseObjects.stream().filter(instance -> instance.getClass().getSimpleName().equalsIgnoreCase(className)).findAny();
+                if (databaseObject.isPresent()) {
+                    filters.add(new Filter((Class<DatabaseObject>) databaseObject.get().getClass(), Pattern.compile(split[1])));
+                } else {
+                    throw new UnexpectedLiquibaseException(className + " not found");
                 }
+                catalogOrSchemaFilter |= "Catalog".equals(className) || "Schema".equals(className);
             }
         }
     }

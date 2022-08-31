@@ -1,13 +1,18 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.change.AddColumnConfig;
+import liquibase.change.ConstraintsConfig;
+import liquibase.change.core.AddColumnChange;
 import liquibase.database.core.*;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.PrimaryKeyConstraint;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
 import org.junit.Test;
 
@@ -18,7 +23,9 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.*;
 
 public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnStatement> {
-    private static final String TABLE_NAME = "table_name";
+    private static final String SCHEMA_NAME = "schema_name";
+    private static final String CATALOG_NAME = "catalog_name";
+    private static final String TABLE_NAME = "table_name";    
     private static final String COLUMN_NAME = "column_name";
     private static final String COLUMN_TYPE = "column_type";
 
@@ -92,5 +99,37 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
 
         assertEquals(1, sql.length);
         assertEquals("ALTER TABLE " + TABLE_NAME + " ADD `PERIOD` INT NOT NULL", sql[0].toSql());
+    }
+
+    @Test
+    public void testAddColumnWithNotNullConstraintAndValue() {
+        AddColumnChange change = new AddColumnChange();
+        change.setTableName(TABLE_NAME);
+        change.setSchemaName(SCHEMA_NAME);
+
+        AddColumnConfig column = new AddColumnConfig();
+        column.setName("column1");
+        column.setType("int8");
+        column.setValueNumeric("0");
+        column.setConstraints(new ConstraintsConfig().setNullable(false));
+        change.addColumn(column);
+
+        AddColumnConfig column2 = new AddColumnConfig();
+        column2.setName("column2");
+        column2.setType("boolean");
+        column2.setValueBoolean("true");
+        column2.setConstraints(new ConstraintsConfig().setNullable(false));
+        change.addColumn(column2);
+
+        SqlStatement[] statements = change.generateStatements(new MySQLDatabase());
+        SqlGeneratorFactory instance = SqlGeneratorFactory.getInstance();
+        Sql[] sql = instance.generateSql(statements, new MySQLDatabase());
+
+        assertEquals(5, sql.length);
+        assertEquals("ALTER TABLE schema_name.table_name ADD column1 BIGINT NULL, ADD column2 BIT(1) NULL", sql[0].toSql());
+        assertEquals("UPDATE schema_name.table_name SET column1 = 0", sql[1].toSql());
+        assertEquals("UPDATE schema_name.table_name SET column2 = 1", sql[2].toSql());
+        assertEquals("ALTER TABLE schema_name.table_name MODIFY column1 BIGINT NOT NULL", sql[3].toSql());
+        assertEquals("ALTER TABLE schema_name.table_name MODIFY column2 BIT(1) NOT NULL", sql[4].toSql());
     }
 }

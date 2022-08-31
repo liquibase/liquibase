@@ -3,7 +3,9 @@ package liquibase.changelog;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.Scope;
+import liquibase.change.Change;
 import liquibase.change.CheckSum;
+import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeSet.ExecType;
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
@@ -28,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 
 @LiquibaseService(skip = true)
+@SuppressWarnings("java:S899")
 public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
     private final File changeLogFile;
@@ -119,7 +122,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     protected void writeHeader(File file) throws IOException {
         try (FileOutputStream outputStream = new FileOutputStream(file);
              Writer writer = new OutputStreamWriter(outputStream,
-                     GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue())
+                     GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())
         ) {
             CSVWriter csvWriter = new CSVWriter(writer);
             String[] columns = new String[Columns.values().length];
@@ -148,7 +151,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
         try (
-                    Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+                Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
         )
         {
             CSVReader csvReader = new CSVReader(reader);
@@ -204,10 +207,10 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         File newFile = new File(oldFile.getParentFile(), oldFile.getName()+".new");
 
         try (
-            Reader reader = new InputStreamReader(new FileInputStream(oldFile), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
-            Writer writer = new OutputStreamWriter(new FileOutputStream(newFile), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
-            CSVReader csvReader = new CSVReader(reader);
-            CSVWriter csvWriter = new CSVWriter(writer);
+                Reader reader = new InputStreamReader(new FileInputStream(oldFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+                Writer writer = new OutputStreamWriter(new FileOutputStream(newFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+                CSVReader csvReader = new CSVReader(reader);
+                CSVWriter csvWriter = new CSVWriter(writer);
         )
         {
             String[] line;
@@ -232,15 +235,23 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         File newFile = new File(oldFile.getParentFile(), oldFile.getName()+".new");
 
         try (
-            Reader reader = new InputStreamReader(new FileInputStream(oldFile), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
-            Writer writer = new OutputStreamWriter(new FileOutputStream(newFile), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
-            CSVReader csvReader = new CSVReader(reader);
-            CSVWriter csvWriter = new CSVWriter(writer);
+                Reader reader = new InputStreamReader(new FileInputStream(oldFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+                Writer writer = new OutputStreamWriter(new FileOutputStream(newFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+                CSVReader csvReader = new CSVReader(reader);
+                CSVWriter csvWriter = new CSVWriter(writer);
         )
         {
             String[] line;
             while ((line = csvReader.readNext()) != null) {
                 csvWriter.writeNext(line);
+            }
+
+            String tag = "";
+            for (Change change : changeSet.getChanges()) {
+                if (change instanceof TagDatabaseChange) {
+                    TagDatabaseChange tagChange = (TagDatabaseChange) change;
+                    tag = tagChange.getTag();
+                }
             }
 
             String[] newLine = new String[Columns.values().length];
@@ -253,10 +264,10 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             newLine[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum().toString();
             newLine[Columns.DESCRIPTION.ordinal()] = changeSet.getDescription();
             newLine[Columns.COMMENTS.ordinal()] = changeSet.getComments();
-            newLine[Columns.TAG.ordinal()] = "";
-            newLine[Columns.LIQUIBASE.ordinal()] = LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP");
+            newLine[Columns.TAG.ordinal()] = tag;
+            newLine[Columns.LIQUIBASE.ordinal()] = LiquibaseUtil.getBuildVersion();
 
-            newLine[Columns.CONTEXTS.ordinal()] = (changeSet.getContexts() == null) ? null : changeSet.getContexts().toString();
+            newLine[Columns.CONTEXTS.ordinal()] = (changeSet.getContextFilter() == null) ? null : changeSet.getContextFilter().toString();
             newLine[Columns.LABELS.ordinal()] = (changeSet.getLabels() == null) ? null : changeSet.getLabels().toString();
 
             newLine[Columns.DEPLOYMENT_ID.ordinal()] = getDeploymentId();
@@ -316,7 +327,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             lastChangeSetSequenceValue = 0;
 
             try (
-                Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+                    Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
             )
             {
                 

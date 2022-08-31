@@ -10,6 +10,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 
 import java.util.Date;
+import java.util.List;
 
 public abstract class AbstractChangeLogHistoryService implements ChangeLogHistoryService {
 
@@ -95,6 +96,23 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         } else {
             return ranChange.getDateExecuted();
         }
+    }
+
+    /**
+     *
+     * Return the last deployment ID from the changesets that have been run or null
+     *
+     * @return   String
+     * @throws   DatabaseException
+     *
+     */
+     public String getLastDeploymentId() throws DatabaseException {
+         List<RanChangeSet> ranChangeSetsList = getRanChangeSets();
+         if (ranChangeSetsList == null || ranChangeSetsList.size() == 0) {
+             return null;
+         }
+         RanChangeSet lastRanChangeSet = ranChangeSetsList.get(ranChangeSetsList.size() - 1);
+         return lastRanChangeSet.getDeploymentId();
     }
 
     protected abstract void replaceChecksum(ChangeSet changeSet) throws DatabaseException;

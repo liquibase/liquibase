@@ -13,12 +13,20 @@ import java.util.*;
 public class MockHubService implements HubService {
 
     public static UUID randomUUID;
+    public static UUID deletedUUID = UUID.randomUUID();
+    public static UUID alreadyRegisteredUUID = UUID.randomUUID();
+    public static UUID failUUID = UUID.randomUUID();
+    public static UUID notFoundChangeLogUUID = UUID.randomUUID();
     public static Date operationCreateDate;
+    public static String apiKey = UUID.randomUUID().toString();
+    public static UUID organizationId = UUID.randomUUID();
+    public static Integer numberOfProjectsInList = null;
+    public static HubChangeLog lastCreatedChangelog = null;
 
     public List<Project> returnProjects = new ArrayList<>();
     public List<Connection> returnConnections;
     public List<HubChangeLog> returnChangeLogs = new ArrayList<>();
-    public SortedMap<String, List> sentObjects = new TreeMap<>();
+    public static SortedMap<String, List> sentObjects = new TreeMap<>();
     public boolean online = true;
 
     @Override
@@ -51,32 +59,56 @@ public class MockHubService implements HubService {
     }
 
     public HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException {
-        hubChangeLog.setId(UUID.randomUUID());
+        if (randomUUID == null) {
+            randomUUID = UUID.randomUUID();
+        }
+        hubChangeLog.setId(randomUUID);
+        lastCreatedChangelog = hubChangeLog;
         return hubChangeLog;
     }
 
     @Override
     public List<Project> getProjects() throws LiquibaseHubException {
-        Project project1 = new Project();
-        project1.setId(UUID.fromString("72e4bc5a-5404-45be-b9e1-280a80c98cbf"));
-        project1.setName("Project 1");
-        project1.setCreateDate(new Date());
+        if (numberOfProjectsInList == null) {
+            Project project1 = new Project();
+            project1.setId(UUID.fromString("72e4bc5a-5404-45be-b9e1-280a80c98cbf"));
+            project1.setName("Project 1");
+            project1.setCreateDate(new Date());
 
-        Project project2 = new Project();
-        project2.setId(UUID.randomUUID());
-        project2.setName("Project 2");
-        project2.setCreateDate(new Date());
-        return Arrays.asList(project1, project2);
+            Project project2 = new Project();
+            project2.setId(UUID.randomUUID());
+            project2.setName("Project 2");
+            project2.setCreateDate(new Date());
+            return Arrays.asList(project1, project2);
+        } else {
+            List<Project> projects = new ArrayList<>(numberOfProjectsInList);
+            for(int i = 0; i < numberOfProjectsInList; i++) {
+                Project project = new Project();
+                project.setId(UUID.randomUUID());
+                project.setName("Project " + i + 1);
+                project.setCreateDate(new Date());
+                projects.add(project);
+            }
+            return projects;
+        }
     }
 
     @Override
     public Project getProject(UUID projectId) throws LiquibaseHubException {
+        if (projectId.equals(failUUID)) {
+            return null;
+        }
         Project project1 = new Project();
         project1.setId(projectId);
         project1.setName("Project 1");
         project1.setCreateDate(new Date());
 
         return project1;
+    }
+
+    @Override
+    public Project findProjectByConnectionIdOrJdbcUrl(UUID connectionId, String jdbcUrl) throws LiquibaseHubException {
+        return returnProjects.get(0);
     }
 
     @Override
@@ -96,6 +128,11 @@ public class MockHubService implements HubService {
 
     @Override
     public List<Connection> getConnections(Connection exampleConnection) {
+        if (exampleConnection != null &&
+            exampleConnection.getId() != null &&
+            exampleConnection.getId().equals(failUUID)) {
+            return new ArrayList<>();
+        }
         return returnConnections;
     }
 
@@ -129,10 +166,15 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
+    public Operation createOperation(String operationType, String operationCommand, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
         operationCreateDate = new Date();
         sentObjects.computeIfAbsent("startOperation/" + connection.getId(), k -> new ArrayList<>()).add(operationCreateDate);
 
+        return null;
+    }
+
+    @Override
+    public Operation createOperationInOrganization(String operationType, String operationCommand, UUID organizationId) throws LiquibaseHubException {
         return null;
     }
 
@@ -156,6 +198,25 @@ public class MockHubService implements HubService {
         return null;
     }
 
+    @Override
+    public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent, UUID organizationId) throws LiquibaseException {
+        sentObjects.computeIfAbsent("sendOperationEvent", k -> new ArrayList<>()).add(operationEvent);
+        return null;
+    }
+
+    @Override
+    public CoreInitOnboardingResponse validateOnboardingToken(String token) throws LiquibaseHubException {
+        CoreInitOnboardingResponse response = new CoreInitOnboardingResponse();
+        ApiKey ak = new ApiKey();
+        ak.setKey(apiKey);
+        response.setApiKey(ak);
+        Organization organization = new Organization();
+        organization.setId(organizationId);
+        organization.setName("neworg");
+        response.setOrganization(organization);
+        return response;
+    }
+
     public void reset() {
         randomUUID = UUID.randomUUID();
 
@@ -177,9 +238,28 @@ public class MockHubService implements HubService {
                         .setFileName("com/example/test.xml")
                         .setProject(this.returnProjects.get(0))
         ));
+        HubChangeLog deletedChangeLog = new HubChangeLog()
+                                           .setId(deletedUUID)
+                                           .setName("Deleted changelog")
+                                           .setFileName("com/example/deleted.xml")
+                                           .setProject(this.returnProjects.get(0));
+        deletedChangeLog.setStatus("deleted");
+        this.returnChangeLogs.add(deletedChangeLog);
+        HubChangeLog alreadyRegisteredChangeLog = new HubChangeLog()
+            .setId(alreadyRegisteredUUID)
+            .setName("Already registered changelog")
+            .setFileName("com/example/registered.xml")
+            .setProject(this.returnProjects.get(0));
+        this.returnChangeLogs.add(alreadyRegisteredChangeLog);
+        HubChangeLog notFoundChangeLog = new HubChangeLog()
+            .setId(notFoundChangeLogUUID)
+            .setName("Already registered changelog")
+            .setFileName("com/example/registered.xml")
+            .setProject(this.returnProjects.get(0));
+        this.returnChangeLogs.add(notFoundChangeLog);
         this.sentObjects = new TreeMap<>();
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
-        hubServiceFactory.setOfflineReason("Using MockHubService which is configured to be offline");
+        hubServiceFactory.setOfflineReason("HubService is configured to be offline");
         online = true;
     }
 }

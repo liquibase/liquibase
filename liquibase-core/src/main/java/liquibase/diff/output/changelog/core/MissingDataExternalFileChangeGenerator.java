@@ -14,7 +14,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Data;
 import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.csv.CSVWriter;
 
 import java.io.*;
@@ -88,7 +88,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 try (
                         FileOutputStream fileOutputStream = new FileOutputStream(fileName);
                         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
-                                fileOutputStream, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+                                fileOutputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
                         CSVWriter outputFile = new CSVWriter(new BufferedWriter(outputStreamWriter));
                 ) {
 
@@ -104,7 +104,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                         line = new String[columnNames.size()];
 
                         for (int i = 0; i < columnNames.size(); i++) {
-                            Object value = JdbcUtils.getResultSetValue(rs, i + 1);
+                            Object value = JdbcUtil.getResultSetValue(rs, i + 1);
                             if ((dataTypes[i] == null) && (value != null)) {
                                 if (value instanceof Number) {
                                     dataTypes[i] = "NUMERIC";
@@ -142,7 +142,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
 
                 LoadDataChange change = new LoadDataChange();
                 change.setFile(fileName);
-                change.setEncoding(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
+                change.setEncoding(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
                 if (outputControl.getIncludeCatalog()) {
                     change.setCatalogName(table.getSchema().getCatalogName());
                 }

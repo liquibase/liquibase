@@ -10,7 +10,6 @@ import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.DatabaseException
 import liquibase.executor.Executor
 import liquibase.executor.ExecutorService
-import liquibase.extension.testing.TestDatabaseConnections
 
 class SetupDatabaseStructure extends TestSetup {
 
@@ -21,8 +20,8 @@ class SetupDatabaseStructure extends TestSetup {
     }
 
     @Override
-    void setup(TestDatabaseConnections.ConnectionStatus connectionStatus) throws Exception {
-        Database database = getDatabase(connectionStatus)
+    void setup(TestSetupEnvironment testSetupEnvironment) throws Exception {
+        Database database = getDatabase(testSetupEnvironment)
 
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
         changeLogService.init()
@@ -34,13 +33,14 @@ class SetupDatabaseStructure extends TestSetup {
         changes.each {
             try {
                 executor.execute(it)
+                database.commit()
             } catch (DatabaseException dbe) {
                 throw new RuntimeException(dbe)
             }
         }
     }
 
-    protected Database getDatabase(TestDatabaseConnections.ConnectionStatus connectionStatus) {
-        return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connectionStatus.connection))
+    protected Database getDatabase(TestSetupEnvironment testSetupEnvironment) {
+        return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(testSetupEnvironment.connection))
     }
 }

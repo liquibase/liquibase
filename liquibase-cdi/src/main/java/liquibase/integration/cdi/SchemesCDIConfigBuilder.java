@@ -83,7 +83,7 @@ public class SchemesCDIConfigBuilder {
             }
         }
     }
-    
+
     private CDILiquibaseConfig createCDILiquibaseConfig(final String id, final InputStream is) throws IOException {
         File liquibaseDir = new File(String.format("%s/liquibase/schemes", ROOT_PATH));
         if (!liquibaseDir.exists() && (!liquibaseDir.mkdirs())) {
@@ -185,8 +185,8 @@ public class SchemesCDIConfigBuilder {
         CDILiquibaseConfig actionResult = null;
         FileLock lock = null;
         try (
-            FileOutputStream fileStream = new FileOutputStream(lockPath);
-            FileChannel fileChannel = fileStream.getChannel();
+                FileOutputStream fileStream = new FileOutputStream(lockPath);
+                FileChannel fileChannel = fileStream.getChannel();
         )
         {
             while (null == lock) {
@@ -197,7 +197,12 @@ public class SchemesCDIConfigBuilder {
                 }
                 if (null == lock) {
                     log.fine(String.format("[id = %s] Waiting for the lock...", id));
-                    Thread.sleep(FILE_LOCK_TIMEOUT);
+                    try {
+                        Thread.sleep(FILE_LOCK_TIMEOUT);
+                    } catch (InterruptedException interruptedException) {
+                        log.severe(interruptedException.getMessage(), interruptedException);
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
             log.info(String.format("[id = %s] File lock acquired, running liquibase...", id));

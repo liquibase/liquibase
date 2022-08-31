@@ -5,6 +5,7 @@ import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 /**
  *
@@ -20,6 +21,7 @@ public class LiquibaseChangeLogSyncToTagMojo extends AbstractLiquibaseChangeLogM
 	 * Update to the changeSet with the given tag command.
 	 * @parameter property="liquibase.toTag"
 	 */
+    @PropertyElement
 	protected String toTag;
 
     @Override
@@ -33,6 +35,6 @@ public class LiquibaseChangeLogSyncToTagMojo extends AbstractLiquibaseChangeLogM
     protected void performLiquibaseTask(Liquibase liquibase)
              throws LiquibaseException {
         super.performLiquibaseTask(liquibase);
-        liquibase.changeLogSync(toTag, new Contexts(contexts), new LabelExpression(labels));
+        liquibase.changeLogSync(toTag, new Contexts(contexts), new LabelExpression(getLabelFilter()));
     }
 }

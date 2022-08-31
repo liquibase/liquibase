@@ -4,9 +4,11 @@ import liquibase.Scope;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandValidationException;
+import liquibase.exception.MissingRequiredArgumentException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.ObjectUtil;
 
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -22,19 +24,21 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private static final Pattern ALLOWED_ARGUMENT_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
 
     private final String name;
+    private SortedSet<String> aliases = new TreeSet<>();
     private final Class<DataType> dataType;
 
     private String description;
     private boolean required;
+    private boolean hidden;
     private DataType defaultValue;
     private String defaultValueDescription;
-    private ConfigurationValueConverter<DataType> valueHandler;
+    private ConfigurationValueConverter<DataType> valueConverter;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
 
     protected CommandArgumentDefinition(String name, Class<DataType> type) {
         this.name = name;
         this.dataType = type;
-        this.valueHandler = value -> ObjectUtil.convert(value, type);
+        this.valueConverter = value -> ObjectUtil.convert(value, type);
     }
 
     /**
@@ -42,6 +46,13 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Aliases for the argument.  Must be camelCase alphanumeric.
+     */
+    public SortedSet<String> getAliases() {
+        return Collections.unmodifiableSortedSet(aliases);
     }
 
     /**
@@ -67,6 +78,13 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     }
 
     /**
+     * Hidden arguments are ones that can be called via integrations, but should not be normally shown in help to users.
+     */
+    public boolean getHidden() {
+        return hidden;
+    }
+
+    /**
      * The default value to use for this argument
      */
     public DataType getDefaultValue() {
@@ -75,7 +93,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
 
     /**
      * A description of the default value. Defaults to {@link String#valueOf(Object)} of {@link #getDefaultValue()} but
-     * can be explicitly with {@link Building#defaultValueDescriptionHandler(ConfigurationValueConverter)}.
+     * can be explicitly with {@link Building#defaultValue(Object, String)}.
      */
     public String getDefaultValueDescription() {
         return defaultValueDescription;
@@ -85,8 +103,8 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      * Function for converting values set in underlying {@link liquibase.configuration.ConfigurationValueProvider}s into the
      * type needed for this command.
      */
-    public ConfigurationValueConverter<DataType> getValueHandler() {
-        return valueHandler;
+    public ConfigurationValueConverter<DataType> getValueConverter() {
+        return valueConverter;
     }
 
     /**
@@ -104,7 +122,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     public void validate(CommandScope commandScope) throws CommandValidationException {
         final DataType currentValue = commandScope.getArgumentValue(this);
         if (this.isRequired() && currentValue == null) {
-            throw new CommandValidationException(this.getName(), "missing required argument");
+            throw new CommandValidationException(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getCurrentValue().convert(this.getName()), "missing required argument", new MissingRequiredArgumentException(this.getName()));
         }
     }
 
@@ -141,12 +159,20 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      * A new {@link CommandArgumentDefinition} under construction from {@link CommandBuilder}
      */
     public static class Building<DataType> {
-        private final String[] commandName;
+        private final String[][] commandNames;
         private final CommandArgumentDefinition<DataType> newCommandArgument;
 
-        Building(String[] commandName, CommandArgumentDefinition<DataType> newCommandArgument) {
-            this.commandName = commandName;
+        Building(String[][] commandNames, CommandArgumentDefinition<DataType> newCommandArgument) {
+            this.commandNames = commandNames;
             this.newCommandArgument = newCommandArgument;
+
+            //
+            // If the argument name is "url", then we set up an obfuscator to avoid bleeding credentials
+            // via the logging framework
+            //
+            if (newCommandArgument.getName().equalsIgnoreCase(CommonArgumentNames.URL.getArgumentName())) {
+                this.setValueObfuscator((ConfigurationValueObfuscator<DataType>) ConfigurationValueObfuscator.URL_OBFUSCATOR);
+            }
         }
 
         /**
@@ -165,6 +191,15 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
          */
         public Building<DataType> optional() {
             this.newCommandArgument.required = false;
+
+            return this;
+        }
+
+        /**
+         * Mark argument as hidden.
+         */
+        public Building<DataType> hidden() {
+            this.newCommandArgument.hidden = true;
 
             return this;
         }
@@ -200,10 +235,10 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         }
 
         /**
-         * Set the {@link #getValueHandler()} to use.
+         * Set the {@link #getValueConverter()} to use.
          */
         public Building<DataType> setValueHandler(ConfigurationValueConverter<DataType> valueHandler) {
-            newCommandArgument.valueHandler = valueHandler;
+            newCommandArgument.valueConverter = valueHandler;
             return this;
         }
 
@@ -212,6 +247,15 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
          */
         public Building<DataType> setValueObfuscator(ConfigurationValueObfuscator<DataType> valueObfuscator) {
             newCommandArgument.valueObfuscator = valueObfuscator;
+            return this;
+        }
+
+
+        /**
+         * Adds an alias for this command argument
+         */
+        public Building<DataType> addAlias(String alias) {
+            newCommandArgument.aliases.add(alias);
             return this;
         }
 
@@ -225,13 +269,14 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
                 throw new IllegalArgumentException("Invalid argument format: " + newCommandArgument.name);
             }
 
-            try {
-                Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandName, newCommandArgument);
-            }
-            catch (IllegalArgumentException iae) {
-                Scope.getCurrentScope().getLog(CommandArgumentDefinition.class).warning(
-                    "Unable to register command '" + commandName + "' argument '" + newCommandArgument.getName() + "': " + iae.getMessage());
-                throw iae;
+            for (String[] commandName : commandNames) {
+                try {
+                    Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandName, newCommandArgument);
+                } catch (IllegalArgumentException iae) {
+                    Scope.getCurrentScope().getLog(CommandArgumentDefinition.class).warning(
+                            "Unable to register command '" + commandName + "' argument '" + newCommandArgument.getName() + "': " + iae.getMessage());
+                    throw iae;
+                }
             }
 
             return newCommandArgument;

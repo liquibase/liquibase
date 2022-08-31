@@ -1,13 +1,13 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
-import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +30,7 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
      * @parameter property="liquibase.deploymentId"
      *
      */
+    @PropertyElement
     protected String deploymentId;
 
     /**
@@ -39,6 +40,7 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
      * @parameter property="liquibase.force"
      *
      */
+    @PropertyElement
     protected String force;
 
     @Override
@@ -58,11 +60,6 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
         //
         // Check the Pro license
         //
-        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
-        if (! hasProLicense) {
-            throw new LiquibaseException(
-                    "The command 'rollbackOneUpdate' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
-        }
         Database database = liquibase.getDatabase();
         CommandScope liquibaseCommand = new CommandScope("internalRollbackOneUpdate");
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
@@ -73,7 +70,6 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
         }
         argsMap.put("force", Boolean.TRUE);
         argsMap.put("liquibase", liquibase);
-        argsMap.put("liquibaseProLicenseKey", liquibaseProLicenseKey);
         for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
             liquibaseCommand.addArgumentValue(entry.getKey(), entry.getValue());
         }

@@ -12,7 +12,7 @@ class CommandFactoryTest extends Specification {
         then:
         command.name*.toString() == ["update"]
         command.pipeline*.class*.name == ["liquibase.command.core.UpdateCommandStep"]
-        command.arguments.keySet().contains("changeLogFile")
+        command.arguments.keySet().contains("changelogFile")
     }
 
     def "getCommand for an invalid command"() {
@@ -26,15 +26,16 @@ class CommandFactoryTest extends Specification {
 
     def "getCommands"() {
         when:
-        def commands = Scope.currentScope.getSingleton(CommandFactory).getCommands()
+        def commands = Scope.currentScope.getSingleton(CommandFactory).getCommands(false)
         def sampleCommand = commands.iterator().next()
 
         then:
         commands.size() > 5
         commands*.name*.toString().contains("[update]")
+        !commands*.name*.toString().contains("[internalDiff]")
 
-        sampleCommand.name == ["calculateCheckSum"]
-        sampleCommand.arguments.keySet().contains("changeLogFile")
+        sampleCommand.name == ["calculateChecksum"]
+        sampleCommand.arguments.keySet().contains("changelogFile")
 
     }
 }

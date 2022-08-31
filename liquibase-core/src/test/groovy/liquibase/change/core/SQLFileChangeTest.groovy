@@ -1,14 +1,17 @@
 package liquibase.change.core
 
+import liquibase.Scope
 import liquibase.change.Change
-import liquibase.change.ChangeStatus;
-import liquibase.change.StandardChangeTest;
-import liquibase.changelog.ChangeLogParameters;
+import liquibase.change.ChangeStatus
+import liquibase.change.StandardChangeTest
+import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
-import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
-import liquibase.sdk.resource.MockResourceAccessor
+import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.statement.SqlStatement
+import liquibase.test.JUnitResourceAccessor
+import liquibase.util.StreamUtil
 import spock.lang.Unroll
 
 import static org.junit.Assert.assertEquals
@@ -24,7 +27,7 @@ public class SQLFileChangeTest extends StandardChangeTest {
         change.generateStatements(new MockDatabase())
 
         then:
-         thrown(UnexpectedLiquibaseException.class)
+        thrown(UnexpectedLiquibaseException.class)
     }
 
     @Unroll
@@ -42,15 +45,15 @@ public class SQLFileChangeTest extends StandardChangeTest {
         }
 
         where:
-        fileContents | expectedStatements
+        fileContents                                                             | expectedStatements
         "SELECT * FROM customer;"                                                | ["SELECT * FROM customer"]
         "SELECT * FROM customer;\nSELECT * from table;\nSELECT * from table2;\n" | ["SELECT * FROM customer", "SELECT * from table", "SELECT * from table2"]
         "SELECT * FROM customer\ngo"                                             | ["SELECT * FROM customer"]
-        "goSELECT * FROM customer\ngo" | ["goSELECT * FROM customer"]
-        "SELECT * FROM customer\ngo\nSELECT * FROM table\ngo" | ["SELECT * FROM customer", "SELECT * FROM table"]
-        "SELECT * FROM go\ngo\nSELECT * from gogo\ngo\n" | ["SELECT * FROM go", "SELECT * from gogo"]
-        "insert into table ( col ) values (' value with; semicolon ');" | ["insert into table ( col ) values (' value with; semicolon ')"]
-        "--\n-- This is a comment\nUPDATE tablename SET column = 1;\nGO" | ["--\n-- This is a comment\nUPDATE tablename SET column = 1"]
+        "goSELECT * FROM customer\ngo"                                           | ["goSELECT * FROM customer"]
+        "SELECT * FROM customer\ngo\nSELECT * FROM table\ngo"                    | ["SELECT * FROM customer", "SELECT * FROM table"]
+        "SELECT * FROM go\ngo\nSELECT * from gogo\ngo\n"                         | ["SELECT * FROM go", "SELECT * from gogo"]
+        "insert into table ( col ) values (' value with; semicolon ');"          | ["insert into table ( col ) values (' value with; semicolon ')"]
+        "--\n-- This is a comment\nUPDATE tablename SET column = 1;\nGO"         | ["--\n-- This is a comment\nUPDATE tablename SET column = 1"]
     }
 
 
@@ -109,6 +112,33 @@ public class SQLFileChangeTest extends StandardChangeTest {
         then:
         def e = thrown(IOException)
         e.message.startsWith("The file non-existing.sql was not found")
+    }
+
+    @Unroll
+    def "openSqlStream correctly opens files"() {
+        when:
+        def changelog = new DatabaseChangeLog("com/example/changelog.xml")
+
+        def changeset = new ChangeSet("1", "auth", false, false, logicalFilePath, null, null, changelog)
+
+        def change = new SQLFileChange()
+        change.path = changePath
+        change.relativeToChangelogFile = relativeToChangelogFile
+        change.setChangeSet(changeset)
+
+        String fileContents = Scope.child([(Scope.Attr.resourceAccessor.name()): new JUnitResourceAccessor()], {
+            return StreamUtil.readStreamAsString(change.openSqlStream())
+        } as Scope.ScopedRunnerWithReturn<String>)
+
+        then:
+        fileContents.trim() == "My Logic Here"
+
+        where:
+        changePath                 | logicalFilePath      | relativeToChangelogFile
+        "com/example/my-logic.sql" | null                 | false
+        "com/example/my-logic.sql" | "a/logical/path.xml" | false
+        "my-logic.sql"             | null                 | true
+        "my-logic.sql"             | "a/logical/path.xml" | true
 
     }
 

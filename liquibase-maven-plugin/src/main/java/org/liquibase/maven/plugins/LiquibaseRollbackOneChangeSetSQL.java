@@ -9,6 +9,7 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.io.*;
 import java.util.HashMap;
@@ -29,11 +30,12 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
 
     /**
      *
-     * The change set ID to rollback
+     * The changeset ID to rollback
      *
      * @parameter property="liquibase.changeSetId"
      *
      */
+    @PropertyElement
     protected String changeSetId;
 
     /**
@@ -43,6 +45,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.changeSetAuthor"
      *
      */
+    @PropertyElement
     protected String changeSetAuthor;
 
     /**
@@ -52,6 +55,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.changeSetPath"
      *
      */
+    @PropertyElement
     protected String changeSetPath;
 
     /**
@@ -61,6 +65,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.rollbackScript"
      *
      */
+    @PropertyElement
     protected String rollbackScript;
 
     /**
@@ -70,6 +75,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      * @parameter property="liquibase.outputFile"
      *
      */
+    @PropertyElement
     protected String outputFile;
 
 
@@ -79,9 +85,9 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
     @Override
     protected void printSettings(String indent) {
       super.printSettings(indent);
-        getLog().info(indent + "Change Set ID:     " + changeSetId);
-        getLog().info(indent + "Change Set Author: " + changeSetAuthor);
-        getLog().info(indent + "Change Set Path:   " + changeSetPath);
+        getLog().info(indent + "Changeset ID:     " + changeSetId);
+        getLog().info(indent + "Changeset Author: " + changeSetAuthor);
+        getLog().info(indent + "Changeset Path:   " + changeSetPath);
         getLog().info(indent + "Rollback script:   " + rollbackScript);
     }
 
@@ -99,11 +105,6 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         //
         // Check the Pro license
         //
-        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
-        if (! hasProLicense) {
-            throw new LiquibaseException(
-               "The command 'rollbackOneChangeSetSQL' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
-        }
         Database database = liquibase.getDatabase();
         CommandScope liquibaseCommand = new CommandScope("internalRollbackOneChangeSetSQL");
 
@@ -149,7 +150,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
     }
 
     private Writer createOutputWriter() throws IOException {
-        String charsetName = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
+        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
     }

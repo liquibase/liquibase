@@ -5,10 +5,16 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.beans.PropertyVetoException;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -17,6 +23,8 @@ import java.util.*;
  */
 public class ObjectUtil {
 
+    private static final List<BeanIntrospector> introspectors = new ArrayList<>(Arrays.asList(new DefaultBeanIntrospector(), new FluentPropertyBeanIntrospector()));
+    
     /**
      * Cache for the methods of classes that we have been queried about so far.
      */
@@ -56,6 +64,9 @@ public class ObjectUtil {
      * @return the class name of the return type if the reading method is found, null if it is not found.
      */
     public static Class getPropertyType(Object object, String propertyName) {
+        if (object == null) {
+            return null;
+        }
         Method readMethod = getReadMethod(object, propertyName);
         if (readMethod == null) {
             return null;
@@ -253,7 +264,15 @@ public class ObjectUtil {
 
         try {
             if (Enum.class.isAssignableFrom(targetClass)) {
-                return (T) Enum.valueOf((Class<Enum>) targetClass, object.toString());
+                try {
+                    return (T) Enum.valueOf((Class<Enum>) targetClass, object.toString().toUpperCase());
+                } catch (Exception e) {
+                    SortedSet<String> values = new TreeSet<>();
+                    for (Enum value : ((Class<Enum>) targetClass).getEnumConstants()) {
+                        values.add(value.name());
+                    }
+                    throw new IllegalArgumentException("Invalid value "+object+". Acceptable values are "+StringUtil.join(values, ", "));
+                }
             } else if (Number.class.isAssignableFrom(targetClass)) {
                 if (object instanceof Number) {
                     Number number = (Number) object;
@@ -346,9 +365,18 @@ public class ObjectUtil {
                 } catch (ClassNotFoundException e) {
                     throw new IllegalArgumentException(e);
                 }
+            } else if (targetClass.isAssignableFrom(File.class)) {
+                return (T) new File(object.toString());
+            } else if (targetClass.equals(UUID.class)) {
+                return (T) UUID.fromString(object.toString());
+            } else if (Date.class.isAssignableFrom(targetClass)) {
+                return (T) new ISODateFormat().parse(object.toString());
             }
+
             return (T) object;
         } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(e);
+        } catch (ParseException e) {
             throw new IllegalArgumentException(e);
         }
     }
@@ -371,4 +399,100 @@ public class ObjectUtil {
             return value;
         }
     }
+
+    public static PropertyDescriptor[] getDescriptors(Class<?> targetClass) throws IntrospectionException {
+        IntrospectionContext context = new IntrospectionContext(targetClass);
+        for (BeanIntrospector introspector : introspectors) {
+            introspector.introspect(context);
+        }
+        return context.getDescriptors();
+    }
+
+
+    private interface BeanIntrospector {
+        void introspect(IntrospectionContext context) throws IntrospectionException;
+    }
+
+    private static class DefaultBeanIntrospector implements BeanIntrospector {
+        @Override
+        public void introspect(IntrospectionContext context) throws IntrospectionException {
+            PropertyDescriptor[] descriptors = Introspector.getBeanInfo(context.getTargetClass()).getPropertyDescriptors();
+            if (descriptors != null) {
+                context.addDescriptors(descriptors);
+            }
+        }
+    }
+
+    private static class FluentPropertyBeanIntrospector implements BeanIntrospector {
+        @Override
+        public void introspect(IntrospectionContext context) throws IntrospectionException {
+            for (Method method : context.getTargetClass().getMethods()) {
+                try {
+                    Class<?>[] argTypes = method.getParameterTypes();
+                    int argCount = argTypes.length;
+                    if ((argCount == 1) && method.getName().startsWith("set")) {
+                        String propertyName = Introspector.decapitalize(method.getName().substring(3));
+                        if (!"class".equals(propertyName)) {
+                            PropertyDescriptor pd = context.getDescriptor(propertyName);
+                            boolean setWriteMethod = false;
+                            if (pd == null) {
+                                pd = new PropertyDescriptor(propertyName, null, method);
+                                context.addDescriptor(pd);
+                                setWriteMethod = true;
+                            } else if ((pd.getWriteMethod() == null) && (pd.getReadMethod() != null) && (pd.getReadMethod
+                                    ().getReturnType() == argTypes[0])) {
+
+                                pd.setWriteMethod(method);
+                                setWriteMethod = true;
+                            }
+                            if (setWriteMethod) {
+                                for (Class<?> type : method.getExceptionTypes()) {
+                                    if (type == PropertyVetoException.class) {
+                                        pd.setConstrained(true);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (IntrospectionException ignored) {
+                }
+            }
+        }
+    }
+
+    private static class IntrospectionContext {
+        private final Class<?> targetClass;
+        private final Map<String, PropertyDescriptor> descriptors = new HashMap<>();
+
+        public IntrospectionContext(Class<?> targetClass) {
+            if (targetClass == null) {
+                throw new NullPointerException();
+            }
+            this.targetClass = targetClass;
+        }
+
+        public void addDescriptor(PropertyDescriptor descriptor) {
+            descriptors.put(descriptor.getName(), descriptor);
+        }
+
+        public void addDescriptors(PropertyDescriptor[] descriptors) {
+            for (PropertyDescriptor descriptor : descriptors) {
+                addDescriptor(descriptor);
+            }
+        }
+
+        public PropertyDescriptor getDescriptor(String name) {
+            return descriptors.get(name);
+        }
+
+        public PropertyDescriptor[] getDescriptors() {
+            return descriptors.values().toArray(new PropertyDescriptor[descriptors.values().size()]);
+        }
+
+        public Class<?> getTargetClass() {
+            return targetClass;
+        }
+    }
+
 }

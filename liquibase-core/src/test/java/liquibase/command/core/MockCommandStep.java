@@ -18,8 +18,8 @@ public class MockCommandStep extends AbstractCommandStep {
     }
 
     @Override
-    public String[] getName() {
-        return new String[]{"mock"};
+    public String[][] defineCommandNames() {
+        return new String[][]{new String[] {"mock"}};
     }
 
     @Override

@@ -1,21 +1,24 @@
 package liquibase;
 
-import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.AutoloadedConfigurations;
+import liquibase.configuration.ConfigurationDefinition;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Configuration container for global properties.
  */
 public class GlobalConfiguration implements AutoloadedConfigurations {
 
-    public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<String> DATABASECHANGELOG_TABLE_NAME;
     public static final ConfigurationDefinition<String> DATABASECHANGELOGLOCK_TABLE_NAME;
     public static final ConfigurationDefinition<String> LIQUIBASE_TABLESPACE_NAME;
     public static final ConfigurationDefinition<String> LIQUIBASE_CATALOG_NAME;
     public static final ConfigurationDefinition<String> LIQUIBASE_SCHEMA_NAME;
     public static final ConfigurationDefinition<String> OUTPUT_LINE_SEPARATOR;
-    public static final ConfigurationDefinition<String> OUTPUT_ENCODING;
+    public static final ConfigurationDefinition<String> OUTPUT_FILE_ENCODING;
+    public static final ConfigurationDefinition<Charset> FILE_ENCODING;
     public static final ConfigurationDefinition<Long> CHANGELOGLOCK_WAIT_TIME;
     public static final ConfigurationDefinition<Long> CHANGELOGLOCK_POLL_RATE;
     public static final ConfigurationDefinition<Boolean> CONVERT_DATA_TYPES;
@@ -26,17 +29,24 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION;
     public static final ConfigurationDefinition<Boolean> INCLUDE_CATALOG_IN_SPECIFICATION;
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
+    public static final ConfigurationDefinition<Boolean> PRESERVE_SCHEMA_CASE;
+    public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
+
+    public static final ConfigurationDefinition<DuplicateFileMode> DUPLICATE_FILE_MODE;
+
+    /**
+     * @deprecated No longer used
+     */
+    @Deprecated
     public static final ConfigurationDefinition<Boolean> FILTER_LOG_MESSAGES;
     public static final ConfigurationDefinition<Boolean> HEADLESS;
+    public static final ConfigurationDefinition<Boolean> STRICT;
+    public static final ConfigurationDefinition<Integer> DDL_LOCK_TIMEOUT;
+    public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
+    public static final ConfigurationDefinition<String> SEARCH_PATH;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
-
-        SHOULD_RUN = builder.define("shouldRun", Boolean.class)
-                .setDescription("Should Liquibase commands execute")
-                .setDefaultValue(true)
-                .addAliasKey("should.run")
-                .build();
 
         DATABASECHANGELOG_TABLE_NAME = builder.define("databaseChangelogTableName", String.class)
                 .addAliasKey("liquibase.databaseChangeLogTableName")
@@ -62,27 +72,50 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(10L)
                 .build();
 
-        LIQUIBASE_TABLESPACE_NAME = builder.define("tablespaceName", String.class)
+        LIQUIBASE_TABLESPACE_NAME = builder.define("liquibaseTablespaceName", String.class)
+                .addAliasKey("liquibase.liquibaseTableSpaceName")
+                .addAliasKey("liquibase.databaseChangeLogTablespaceName")
                 .setDescription("Tablespace to use for Liquibase objects")
                 .build();
 
-        LIQUIBASE_CATALOG_NAME = builder.define("catalogName", String.class)
+        LIQUIBASE_CATALOG_NAME = builder.define("liquibaseCatalogName", String.class)
+                .addAliasKey("liquibase.catalogName")
                 .setDescription("Catalog to use for Liquibase objects")
                 .build();
 
-        LIQUIBASE_SCHEMA_NAME = builder.define("schemaName", String.class)
+        LIQUIBASE_SCHEMA_NAME = builder.define("liquibaseSchemaName", String.class)
+                .addAliasKey("liquibase.schemaName")
                 .setDescription("Schema to use for Liquibase objects")
                 .build();
 
         OUTPUT_LINE_SEPARATOR = builder.define("outputLineSeparator", String.class)
-                .setDescription("Line separator for output. Defaults to OS default")
-                .setDefaultValue(System.getProperty("line.separator"))
+                .setDescription("Line separator for output")
+                .setDefaultValue(System.getProperty("line.separator"),"Line separator(LF or CRLF) for output. Defaults to OS default")
                 .build();
 
-        OUTPUT_ENCODING = builder.define("outputFileEncoding", String.class)
-                .setDescription("Encoding to output text in. Defaults to file.encoding system property or UTF-8")
+        FILE_ENCODING = builder.define("fileEncoding", Charset.class)
+                .setDescription("Encoding to use when reading files. Valid values include: UTF-8, UTF-16, UTF-16BE, UTF-16LE, US-ASCII, or OS to use the system configured encoding.")
+                .setDefaultValue(StandardCharsets.UTF_8)
+                .setValueHandler(value -> {
+                    if (value == null) {
+                        return StandardCharsets.UTF_8;
+                    }
+                    if (value instanceof Charset) {
+                        return (Charset) value;
+                    }
+                    final String valueString = String.valueOf(value);
+                    if (valueString.equalsIgnoreCase("os")) {
+                        return Charset.defaultCharset();
+                    } else {
+                        return Charset.forName(valueString);
+                    }
+                })
+                .setCommonlyUsed(true)
+                .build();
+
+        OUTPUT_FILE_ENCODING = builder.define("outputFileEncoding", String.class)
+                .setDescription("Encoding to use when writing files")
                 .setDefaultValue("UTF-8")
-                .addAliasKey("file.encoding")
                 .setCommonlyUsed(true)
                 .build();
 
@@ -132,14 +165,55 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         FILTER_LOG_MESSAGES = builder.define("filterLogMessages", Boolean.class)
-                .setDescription("Should Liquibase filter log messages for potentially insecure data?")
-                .setDefaultValue(true)
+                .setDescription("DEPRECATED: No longer used")
+                .setCommonlyUsed(false)
                 .build();
 
         HEADLESS = builder.define("headless", Boolean.class)
-                .setDescription("Force liquibase think it has no access to a keyboard?")
+                .setDescription("Force liquibase to think it has no access to a keyboard")
                 .setDefaultValue(false)
                 .setCommonlyUsed(true)
                 .build();
+
+        STRICT = builder.define("strict", Boolean.class)
+                .setDescription("Be stricter on allowed Liquibase configuration and setup?")
+                .setDefaultValue(false)
+                .build();
+
+        DDL_LOCK_TIMEOUT = builder.define("ddlLockTimeout", Integer.class)
+                .addAliasKey("liquibase.ddlLockTimeout")
+                .addAliasKey("ddl_lock_timeout")
+                .addAliasKey("liquibase.ddl_lock_timeout")
+                .setDescription("The DDL_LOCK_TIMEOUT parameter indicates the number of seconds a DDL command should wait for the locks to become available before throwing the resource busy error message. This applies only to Oracle databases.")
+                .build();
+
+        SECURE_PARSING = builder.define("secureParsing", Boolean.class)
+                .setDescription("If true, remove functionality from file parsers which could be used insecurely. Examples include (but not limited to) disabling remote XML entity support.")
+                .setDefaultValue(true)
+                .build();
+
+        PRESERVE_SCHEMA_CASE = builder.define("preserveSchemaCase", Boolean.class)
+                .setDescription("Should liquibase treat schema and catalog names as case sensitive?")
+                .setDefaultValue(false)
+                .build();
+
+        SHOW_BANNER = builder.define("showBanner", Boolean.class)
+                .setDescription("If true, show a Liquibase banner on startup.")
+                .setDefaultValue(true)
+                .build();
+
+        DUPLICATE_FILE_MODE = builder.define("duplicateFileMode", DuplicateFileMode.class)
+                .setDescription("How to handle multiple files being found in the search path that have duplicate paths. Options are WARN (log warning and choose one at random) or ERROR (fail current operation)")
+                .setDefaultValue(DuplicateFileMode.ERROR)
+                .build();
+
+        SEARCH_PATH = builder.define("searchPath", String.class)
+                .setDescription("Complete list of Location(s) to search for files such as changelog files in. Multiple paths can be specified by separating them with commas.")
+                .build();
+    }
+
+    public enum DuplicateFileMode {
+        WARN,
+        ERROR,
     }
 }

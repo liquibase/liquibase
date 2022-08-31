@@ -12,7 +12,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
-import liquibase.util.BooleanUtils;
+import liquibase.util.BooleanUtil;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
 import org.yaml.snakeyaml.nodes.Node;
@@ -32,7 +32,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
 
     @Override
     public void write(DatabaseSnapshot snapshot, OutputStream out) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
         writer.write(serialize(snapshot, true));
     }
 
@@ -54,7 +54,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
     @Override
     protected Object toMap(final LiquibaseSerializable object) {
         if (object instanceof DatabaseObject) {
-            if (object instanceof Column && (BooleanUtils.isTrue(((Column) object).getDescending()) || BooleanUtils.isTrue(((Column) object).getComputed()))) {
+            if (object instanceof Column && (BooleanUtil.isTrue(((Column) object).getDescending()) || BooleanUtil.isTrue(((Column) object).getComputed()))) {
                 //not really a "real" column that has a snapshot to reference, just serialize it
                 return super.toMap(object);
             } else if (alreadySerializingObject) {

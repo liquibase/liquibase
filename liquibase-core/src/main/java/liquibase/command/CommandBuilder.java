@@ -5,20 +5,27 @@ package liquibase.command;
  */
 public class CommandBuilder {
 
-    private final String[] commandName;
+    private final String[][] commandNames;
 
     /**
      * Creates a builder for the given command name
      */
-    public CommandBuilder(String[] commandName) {
-        this.commandName = commandName;
+    public CommandBuilder(String[]... commandNames) {
+        this.commandNames = commandNames;
     }
 
     /**
      * Starts the building of a new {@link CommandArgumentDefinition}.
      */
     public <DataType> CommandArgumentDefinition.Building<DataType> argument(String name, Class<DataType> type) {
-        return new CommandArgumentDefinition.Building<>(commandName, new CommandArgumentDefinition<>(name, type));
+        return new CommandArgumentDefinition.Building<>(commandNames, new CommandArgumentDefinition<>(name, type));
+    }
+
+    /**
+     * Starts the building of a new {@link CommandArgumentDefinition}.
+     */
+    public <DataType> CommandArgumentDefinition.Building<DataType> argument(CommonArgumentNames argument, Class<DataType> type) {
+        return new CommandArgumentDefinition.Building<>(commandNames, new CommandArgumentDefinition<>(argument.getArgumentName(), type));
     }
 
     /**

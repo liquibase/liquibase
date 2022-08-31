@@ -9,6 +9,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
@@ -60,7 +61,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected DataSource dataSource;
 	protected String changeLog;
 	protected String contexts;
-    protected String labels;
+    protected String labelFilter;
     protected String tag;
 	protected Map<String, String> parameters;
 	protected String defaultSchema;
@@ -170,12 +171,26 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		this.contexts = contexts;
 	}
 
+    /**
+     * @deprecated use {@link #getLabelFilter()}
+     */
     public String getLabels() {
-        return labels;
+        return getLabelFilter();
     }
 
+    /**
+     * @deprecated use {@link #setLabelFilter(String)}
+     */
     public void setLabels(String labels) {
-        this.labels = labels;
+        setLabelFilter(labels);
+    }
+
+    public String getLabelFilter() {
+        return labelFilter;
+    }
+
+    public void setLabelFilter(String labelFilter) {
+        this.labelFilter = labelFilter;
     }
 
     public String getTag() {
@@ -247,7 +262,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 */
 	@Override
     public void afterPropertiesSet() throws LiquibaseException {
-		final ConfiguredValue<Boolean> shouldRunProperty = GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
+		final ConfiguredValue<Boolean> shouldRunProperty = LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
 
 		if (!(Boolean) shouldRunProperty.getValue()) {
             Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " +shouldRunProperty.getProvidedValue().describe() + " was set to false");
@@ -280,14 +295,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
             try (
                 FileOutputStream fileOutputStream = new FileOutputStream(rollbackFile);
-                Writer output = new OutputStreamWriter(fileOutputStream, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()) )
+                Writer output = new OutputStreamWriter(fileOutputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()) )
 			{
 
                 if (tag != null) {
                     liquibase.futureRollbackSQL(tag, new Contexts(getContexts()),
-                        new LabelExpression(getLabels()), output);
+                        new LabelExpression(getLabelFilter()), output);
                 } else {
-                    liquibase.futureRollbackSQL(new Contexts(getContexts()), new LabelExpression(getLabels()), output);
+                    liquibase.futureRollbackSQL(new Contexts(getContexts()), new LabelExpression(getLabelFilter()), output);
                 }
             } catch (IOException e) {
                 throw new LiquibaseException("Unable to generate rollback file.", e);
@@ -302,15 +317,15 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         if (isTestRollbackOnUpdate()) {
             if (tag != null) {
-                liquibase.updateTestingRollback(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+                liquibase.updateTestingRollback(tag, new Contexts(getContexts()), new LabelExpression(getLabelFilter()));
             } else {
-                liquibase.updateTestingRollback(new Contexts(getContexts()), new LabelExpression(getLabels()));
+                liquibase.updateTestingRollback(new Contexts(getContexts()), new LabelExpression(getLabelFilter()));
             }
         } else {
             if (tag != null) {
-                liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+                liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabelFilter()));
             } else {
-                liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
+                liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabelFilter()));
             }
         }
     }

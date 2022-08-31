@@ -1,11 +1,13 @@
 package liquibase.integration.commandline;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandScope;
 import liquibase.command.core.InternalDiffCommandStep;
-import liquibase.command.core.InternalDiffChangeLogCommandStep;
-import liquibase.command.core.InternalGenerateChangeLogCommandStep;
+import liquibase.command.core.InternalDiffChangelogCommandStep;
+import liquibase.command.core.InternalGenerateChangelogCommandStep;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
@@ -63,6 +65,7 @@ public class CommandLineUtils {
                 databaseChangeLogTableName, databaseChangeLogLockTableName);
     }
 
+    @SuppressWarnings("java:S2095")
     public static Database createDatabaseObject(ResourceAccessor resourceAccessor,
                                                 String url,
                                                 String username,
@@ -93,6 +96,17 @@ public class CommandLineUtils {
             if (!database.supportsSchemas()) {
                 if ((defaultSchemaName != null) && (defaultCatalogName == null)) {
                     defaultCatalogName = defaultSchemaName;
+                }
+                //
+                // Get values from the configuration object if they aren't already set
+                //
+                if (liquibaseCatalogName == null) {
+                    ConfiguredValue<String> configuredValue  = GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentConfiguredValue();
+                    liquibaseCatalogName = configuredValue.getValue();
+                }
+                if (liquibaseSchemaName == null) {
+                    ConfiguredValue<String> configuredValue  = GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentConfiguredValue();
+                    liquibaseSchemaName = configuredValue.getValue();
                 }
                 if ((liquibaseSchemaName != null) && (liquibaseCatalogName == null)) {
                     liquibaseCatalogName = liquibaseSchemaName;
@@ -193,13 +207,13 @@ public class CommandLineUtils {
 
         CommandScope command = new CommandScope("internalDiffChangeLog");
         command
-                .addArgumentValue(InternalDiffChangeLogCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
-                .addArgumentValue(InternalDiffChangeLogCommandStep.TARGET_DATABASE_ARG, targetDatabase)
-                .addArgumentValue(InternalDiffChangeLogCommandStep.SNAPSHOT_TYPES_ARG, InternalDiffChangeLogCommandStep.parseSnapshotTypes(snapshotTypes))
-                .addArgumentValue(InternalDiffChangeLogCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
-                .addArgumentValue(InternalDiffChangeLogCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
-                .addArgumentValue(InternalDiffChangeLogCommandStep.CHANGELOG_FILENAME_ARG, changeLogFile)
-                .addArgumentValue(InternalDiffChangeLogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl);
+                .addArgumentValue(InternalDiffChangelogCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+                .addArgumentValue(InternalDiffChangelogCommandStep.TARGET_DATABASE_ARG, targetDatabase)
+                .addArgumentValue(InternalDiffChangelogCommandStep.SNAPSHOT_TYPES_ARG, InternalDiffChangelogCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(InternalDiffChangelogCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
+                .addArgumentValue(InternalDiffChangelogCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
+                .addArgumentValue(InternalDiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(InternalDiffChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl);
         command.setOutput(System.out);
         try {
             command.execute();
@@ -231,13 +245,13 @@ public class CommandLineUtils {
 
         CommandScope command = new CommandScope("internalGenerateChangeLog");
         command
-                .addArgumentValue(InternalGenerateChangeLogCommandStep.REFERENCE_DATABASE_ARG, originalDatabase)
-                .addArgumentValue(InternalGenerateChangeLogCommandStep.SNAPSHOT_TYPES_ARG, InternalGenerateChangeLogCommandStep.parseSnapshotTypes(snapshotTypes))
-                .addArgumentValue(InternalGenerateChangeLogCommandStep.COMPARE_CONTROL_ARG, compareControl)
-                .addArgumentValue(InternalGenerateChangeLogCommandStep.CHANGELOG_FILENAME_ARG, changeLogFile)
-                .addArgumentValue(InternalGenerateChangeLogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl)
-                .addArgumentValue(InternalGenerateChangeLogCommandStep.AUTHOR_ARG, author)
-                .addArgumentValue(InternalGenerateChangeLogCommandStep.CONTEXT_ARG, context);
+                .addArgumentValue(InternalGenerateChangelogCommandStep.REFERENCE_DATABASE_ARG, originalDatabase)
+                .addArgumentValue(InternalGenerateChangelogCommandStep.SNAPSHOT_TYPES_ARG, InternalGenerateChangelogCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(InternalGenerateChangelogCommandStep.COMPARE_CONTROL_ARG, compareControl)
+                .addArgumentValue(InternalGenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(InternalGenerateChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl)
+                .addArgumentValue(InternalGenerateChangelogCommandStep.AUTHOR_ARG, author)
+                .addArgumentValue(InternalGenerateChangelogCommandStep.CONTEXT_ARG, context);
 
         command.setOutput(System.out);
         try {
@@ -254,18 +268,20 @@ public class CommandLineUtils {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-        myVersion = LiquibaseUtil.getBuildVersion();
+        myVersion = LiquibaseUtil.getBuildVersionInfo();
         buildTimeString = LiquibaseUtil.getBuildTime();
 
         StringBuilder banner = new StringBuilder();
+        if (GlobalConfiguration.SHOW_BANNER.getCurrentValue()) {
 
-        // Banner is stored in liquibase/banner.txt in resources.
-        Class commandLinUtilsClass = CommandLineUtils.class;
-        InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
-        try {
-            banner.append(readFromInputStream(inputStream));
-        } catch (IOException e) {
-            Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
+            // Banner is stored in liquibase/banner.txt in resources.
+            Class commandLinUtilsClass = CommandLineUtils.class;
+            InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
+            try {
+                banner.append(readFromInputStream(inputStream));
+            } catch (IOException e) {
+                Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
+            }
         }
 
         banner.append(String.format(
