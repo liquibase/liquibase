@@ -39,9 +39,9 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 	@Override
 	protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
 		if (changesToApply > 0) {
-			liquibase.update(changesToApply, new Contexts(contexts), new LabelExpression(labels), outputWriter);
+			liquibase.update(changesToApply, new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
 		} else {
-			liquibase.update(toTag, new Contexts(contexts), new LabelExpression(labels), outputWriter);
+			liquibase.update(toTag, new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
 		}
 	}
 

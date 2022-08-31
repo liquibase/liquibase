@@ -2,6 +2,7 @@ package liquibase.statement;
 
 import liquibase.Scope;
 import liquibase.change.ColumnConfig;
+import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
@@ -16,18 +17,19 @@ import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.FilenameUtil;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.FilenameUtil;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
-import liquibase.change.core.LoadDataChange;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
@@ -43,6 +45,17 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private Set<Closeable> closeables;
 
     private ResourceAccessor resourceAccessor;
+
+    //Some databases do extra work on creating prepared statements, so constantly creating new prepared statements is expensive
+    //When running through a CSV file, the SQL will be the same within the same file so just storing the last seen prepared statement is all we need
+    //Ideally the creation of the prepared statements would happen at the spot where we know we should be re-using it and that code can close it.
+    // But that will have to wait for a refactoring of this code.
+    // So for now we're trading leaving at most one prepared statement unclosed at the end of the liquibase run for better re-using statements to avoid overhead
+    private static PreparedStatement lastPreparedStatement;
+    private static String lastPreparedStatementSql;
+
+    //Cache the executeWithFlags method to avoid reflection overhead
+    private static Method executeWithFlagsMethod;
 
     protected ExecutablePreparedStatementBase(Database database, String catalogName, String schemaName, String
             tableName, List<? extends ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
@@ -63,6 +76,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     @Override
     public void execute(PreparedStatementFactory factory) throws DatabaseException {
+        final Logger log = Scope.getCurrentScope().getLog(getClass());
 
         // build the sql statement
         List<ColumnConfig> cols = new ArrayList<>(getColumns().size());
@@ -71,10 +85,22 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
             listener.writeSqlWillRun(sql);
         }
-        Scope.getCurrentScope().getLog(getClass()).fine("Number of columns = " + cols.size());
+        log.fine("Number of columns = " + cols.size());
 
-        // create prepared statement
-        PreparedStatement stmt = factory.create(sql);
+        PreparedStatement stmt = getCachedStatement(sql);
+        if (stmt == null) {
+            // create prepared statement
+            stmt = factory.create(sql);
+
+            lastPreparedStatement = stmt;
+            lastPreparedStatementSql = sql;
+        } else {
+            try {
+                stmt.clearParameters();
+            } catch (SQLException e) {
+                log.fine("Error clearing parameters on prepared statement: " + e.getMessage(), e);
+            }
+        }
 
         try {
             attachParams(cols, stmt);
@@ -89,19 +115,67 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 } catch (IOException ignore) {
                 }
             }
-            JdbcUtil.closeStatement(stmt);
         }
     }
 
+    protected PreparedStatement getCachedStatement(String sql) {
+        if (lastPreparedStatement == null || lastPreparedStatementSql == null) {
+            return null;
+        }
+
+        boolean statementIsValid = true;
+        if (lastPreparedStatementSql.equals(sql)) {
+            try {
+                if (lastPreparedStatement.isClosed()) {
+                    statementIsValid = false;
+                }
+                if (statementIsValid) {
+                    final Connection connection = lastPreparedStatement.getConnection();
+                    if (connection == null || connection.isClosed()) {
+                        statementIsValid = false;
+                    }
+                }
+            } catch (SQLException e) {
+                statementIsValid = false;
+            }
+
+        } else {
+            statementIsValid = false;
+        }
+
+        if (!statementIsValid) {
+            JdbcUtil.closeStatement(lastPreparedStatement);
+            lastPreparedStatement = null;
+            lastPreparedStatementSql = null;
+        }
+
+        return lastPreparedStatement;
+    }
+
     protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
-        stmt.execute();
+        if (database instanceof PostgresDatabase) {
+            //postgresql's default prepared statement setup is slow for normal liquibase usage. Calling with QUERY_ONESHOT seems faster, even when we keep re-calling the same prepared statement for many rows in loadData
+            try {
+                if (executeWithFlagsMethod == null) {
+                    executeWithFlagsMethod = stmt.getClass().getMethod("executeWithFlags", int.class);
+                    executeWithFlagsMethod.setAccessible(true);
+                }
+
+                executeWithFlagsMethod.invoke(stmt, 1); //QueryExecutor.QUERY_ONESHOT
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                stmt.execute();
+            }
+        } else {
+            stmt.execute();
+        }
     }
 
     /**
      * Sets the list of bind variables for the execution of a DML statement
+     *
      * @param cols a list of columns with their designated values
      * @param stmt the PreparedStatement to which the values are to be attached
-     * @throws SQLException if JDBC objects to a setting (non-existent bind number, wrong column type etc.)
+     * @throws SQLException      if JDBC objects to a setting (non-existent bind number, wrong column type etc.)
      * @throws DatabaseException if an I/O error occurs during the read of LOB values
      */
     protected void attachParams(List<? extends ColumnConfig> cols, PreparedStatement stmt)
@@ -118,10 +192,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     /**
      * Sets a single bind variable for a statement to its designated value
+     *
      * @param stmt the PreparedStatement whose parameter is to be set
-     * @param i the parameter index (first bind variable is 1)
-     * @param col a ColumnConfig with information about the column, its type, and the desired value
-     * @throws SQLException if JDBC objects to a setting (non-existent bind number, wrong column type etc.)
+     * @param i    the parameter index (first bind variable is 1)
+     * @param col  a ColumnConfig with information about the column, its type, and the desired value
+     * @throws SQLException      if JDBC objects to a setting (non-existent bind number, wrong column type etc.)
      * @throws DatabaseException if an I/O error occurs during the read of LOB values
      */
     private void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException,
@@ -180,7 +255,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                                 coreBundle.getString("jdbc.bind.parameter.unknown.numeric.value.type"),
                                 col.getName(),
                                 col.getValueNumeric().toString(),
-                            col.getValueNumeric().getClass().getName()
+                                col.getValueNumeric().getClass().getName()
                         )
                 );
             }
@@ -198,9 +273,9 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             try {
                 LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
                 if (lob.length <= Integer.MAX_VALUE) {
-                    stmt.setBinaryStream(i, lob.content, (int) lob.length);
+                    stmt.setBlob(i, lob.content, (int) lob.length);
                 } else {
-                    stmt.setBinaryStream(i, lob.content, lob.length);
+                    stmt.setBlob(i, lob.content, lob.length);
                 }
             } catch (IOException | LiquibaseException e) {
                 throw new DatabaseException(e.getMessage(), e); // wrap
@@ -235,23 +310,22 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 LiquibaseDataType dataType = DataTypeFactory.getInstance().fromDescription(col.getType(), database);
                 String[] aliases = dataType.getAliases();
                 for (String alias : aliases) {
-                    if (! alias.contains("java.sql.Types")) {
+                    if (!alias.contains("java.sql.Types")) {
                         continue;
                     }
-                    String name = alias.replaceAll("java.sql.Types.","");
+                    String name = alias.replaceAll("java.sql.Types.", "");
                     try {
                         JDBCType jdbcType = Enum.valueOf(JDBCType.class, name);
                         stmt.setNull(i, jdbcType.getVendorTypeNumber());
                         isSet = true;
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         //
                         // fall back to using java.sql.Types.NULL by catching any exceptions
                         //
                     }
                     break;
                 }
-                if (! isSet) {
+                if (!isSet) {
                     LOG.info(String.format("Using java.sql.Types.NULL to set null value for type %s", dataType.getName()));
                     stmt.setNull(i, java.sql.Types.NULL);
                 }
@@ -259,6 +333,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
+    @SuppressWarnings("java:S2583")
     private LOBContent<InputStream> toBinaryStream(String valueLobFile) throws LiquibaseException, IOException {
         InputStream in = getResourceAsStream(valueLobFile);
 
@@ -302,6 +377,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
+    @SuppressWarnings("java:S2583")
     private LOBContent<Reader> toCharacterStream(String valueLobFile, String encoding)
             throws IOException, LiquibaseException {
         InputStream in = getResourceAsStream(valueLobFile);
@@ -345,21 +421,10 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
-    @java.lang.SuppressWarnings("squid:S2095")
+    @SuppressWarnings("squid:S2095")
     private InputStream getResourceAsStream(String valueLobFile) throws IOException, LiquibaseException {
         String fileName = getFileName(valueLobFile);
-        InputStreamList streams = this.resourceAccessor.openStreams(null, fileName);
-        if ((streams == null) || streams.isEmpty()) {
-            return null;
-        }
-        if (streams.size() > 1) {
-            for (InputStream stream : streams) {
-                stream.close();
-            }
-
-            throw new IOException(streams.size() + " matched " + valueLobFile);
-        }
-        return streams.iterator().next();
+        return this.resourceAccessor.openStream(null, fileName);
     }
 
     private String getFileName(String fileName) {
@@ -418,6 +483,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
         return length;
     }
+
     private class LOBContent<T> {
         private final T content;
         private final long length;

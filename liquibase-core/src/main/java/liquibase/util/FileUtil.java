@@ -11,7 +11,7 @@ public class FileUtil {
         throw new IllegalStateException("This utility class must not be instantiated. Sorry.");
     }
 
-   public static String getContents(File file) throws IOException {
+    public static String getContents(File file) throws IOException {
         if (!file.exists()) {
             return null;
         }
@@ -30,7 +30,9 @@ public class FileUtil {
     }
 
     public static void write(String contents, File file, boolean append) throws IOException {
-        file.getParentFile().mkdirs();
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
+        }
 
         try (
                 FileOutputStream output = new FileOutputStream(file, append)
@@ -41,11 +43,11 @@ public class FileUtil {
     }
 
     public static String getFileNotFoundMessage(String physicalChangeLogLocation) {
-        String message = "The file " + physicalChangeLogLocation + " was not found in" + System.lineSeparator();
+        String message = "The file " + physicalChangeLogLocation + " was not found in the configured search path:" + System.lineSeparator();
         for (String location : Scope.getCurrentScope().getResourceAccessor().describeLocations()) {
             message += "    - " + location + System.lineSeparator();
         }
-        message += "Specifying files by absolute path was removed in Liquibase 4.0. Please use a relative path or add '/' to the classpath parameter.";
+        message += "More locations can be added with the 'searchPath' parameter.";
 
         return message;
     }

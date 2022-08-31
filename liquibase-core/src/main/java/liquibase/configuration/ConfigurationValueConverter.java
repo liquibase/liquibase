@@ -37,6 +37,26 @@ public interface ConfigurationValueConverter<DataType> {
         }
     };
 
+    ConfigurationValueConverter<String> STRING = value -> {
+        if (value == null) {
+            return null;
+        }
+
+        return String.valueOf(value);
+    };
+
+    ConfigurationValueConverter<Class> CLASS = value -> {
+        if (value == null) {
+            return null;
+        }
+
+        try {
+            return Class.forName(String.valueOf(value));
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Cannot instantiate "+value+": "+e.getMessage(), e);
+        }
+    };
+
     /**
      * Converts an arbitrary object into the correct type.
      * Implementations should be able to handle <b>any</b> type passed them, often types by calling toString() on the incoming value and parsing the string.

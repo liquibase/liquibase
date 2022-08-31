@@ -16,9 +16,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -91,44 +88,6 @@ public class MavenUtils {
         return new URLClassLoader(urlArray, clazz.getClassLoader());
     }
 
-    public static boolean checkProLicense(String liquibaseProLicenseKey, String commandName, Log log) {
-        boolean hasProLicense = true;
-        LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-        if (licenseService == null) {
-            return false;
-        }
-        if (liquibaseProLicenseKey == null) {
-            log.info("");
-            if (commandName != null) {
-                log.info("The command '" + commandName + "' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com." +
-                        "Add liquibase.pro.licenseKey as a Maven property or add liquibase.pro.licenseKey=<yourKey> into your defaults file.");
-            }
-            log.info("");
-            hasProLicense = false;
-        } else {
-            Location licenseKeyLocation =
-                    new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, liquibaseProLicenseKey);
-            LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
-            if (result.code != 0) {
-                String allMessages = String.join("\n", result.messages);
-                log.warn(allMessages);
-                hasProLicense = false;
-            }
-            String licenseInfo = licenseService.getLicenseInfo();
-            log.info(licenseInfo);
-
-            //
-            // If the license has expired then just disable the service
-            //
-            if (licenseService.daysTilExpiration() < 0) {
-                licenseService.disable();
-                hasProLicense = false;
-            }
-        }
-        log.info(licenseService.getLicenseInfo());
-        return hasProLicense;
-    }
-
     /**
      * Adds the artifact file into the set of URLs so it can be used in a URLClassLoader.
      *
@@ -168,42 +127,6 @@ public class MavenUtils {
                 log.info("  artifact: " + fileUri);
             }
             urls.add(fileUri);
-        }
-    }
-
-    public static Connection getDatabaseConnection(ClassLoader classLoader,
-                                                   String driver,
-                                                   String url,
-                                                   String username,
-                                                   String password)
-            throws LiquibaseException {
-        Driver dbDriver = null;
-        try {
-            dbDriver = (Driver) Class.forName(driver,
-                    true,
-                    classLoader).getConstructor().newInstance();
-        } catch (ClassNotFoundException e) {
-            throw new LiquibaseException("Missing Class '" + e.getMessage() + "'. Database "
-                    + "driver may not be included in the project "
-                    + "dependencies or with wrong scope.");
-        } catch (ReflectiveOperationException e) {
-            throw new LiquibaseException("Failed to load JDBC driver, " + driver, e);
-        }
-
-        Properties info = new Properties();
-        info.put("user", username);
-        info.put("password", password);
-        try {
-            Connection connection = dbDriver.connect(url, info);
-            if (connection == null) {
-                throw new LiquibaseException("Connection could not be created to " + url
-                        + " with driver " + dbDriver.getClass().getName()
-                        + ".  Possibly the wrong driver for the given "
-                        + "database URL");
-            }
-            return connection;
-        } catch (SQLException e) {
-            throw new LiquibaseException(e);
         }
     }
 

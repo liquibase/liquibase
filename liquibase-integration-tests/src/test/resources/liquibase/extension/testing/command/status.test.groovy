@@ -10,6 +10,7 @@ Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   contexts (String) Changeset contexts to match
     Default: null
@@ -21,7 +22,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labels (String) Changeset labels to match
+  labelFilter (String) Changeset labels to match
     Default: null
   password (String) Password to use to connect to the database
     Default: null

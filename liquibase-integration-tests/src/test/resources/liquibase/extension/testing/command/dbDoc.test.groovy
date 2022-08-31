@@ -12,6 +12,7 @@ Required Args:
   changelogFile (String) The root changelog
   outputDirectory (String) The directory where the documentation is generated
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null

@@ -24,9 +24,9 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        URL_ARG = builder.argument("url", String.class).required()
+        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
                 .description("The JDBC database connection URL").build();
-        USERNAME_ARG = builder.argument("username", String.class)
+        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
                 .description("Username to use to connect to the database").build();
         SCHEMAS_ARG = builder.argument("schemas", String.class)
                 .description("Schemas to include in drop").build();
@@ -38,11 +38,11 @@ public class DropAllCommandStep extends AbstractCliWrapperCommandStep {
                 .description("The JDBC driver class").build();
         DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
                 .description("The JDBC driver properties file").build();
-        PASSWORD_ARG = builder.argument("password", String.class)
+        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
                 .description("Password to use to connect to the database")
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
-        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class)
+        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
                 .description("The root changelog").build();
         HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", UUID.class)
                 .description("Used to identify the specific Connection in which to record or extract data at Liquibase Hub. Available in your Liquibase Hub Project at https://hub.liquibase.com.").build();

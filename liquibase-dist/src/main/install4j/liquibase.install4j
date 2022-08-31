@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="8.0.11" transformSequenceNumber="8">
   <directoryPresets config="../../../target/liquibase-${compiler:liquibaseVersion}/examples/start-h2" />
-  <application name="Liquibase" applicationId="3799-9228-0984-2853" mediaDir="../../../target" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-installer-${compiler:sys.version}" shortName="liquibase" publisher="Datical" publisherWeb="http://liquibase.org" version="0-SNAPSHOT" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="3059500009ae915e" javaMinVersion="1.8">
+  <application name="Liquibase" applicationId="3799-9228-0984-2853" mediaDir="../../../target" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-installer-${compiler:sys.version}" shortName="liquibase" publisher="Liquibase" publisherWeb="http://liquibase.org" version="0-SNAPSHOT" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="3059500009ae915e" javaMinVersion="1.8">
     <languages>
       <principalLanguage id="en" customLocalizationFile="./messages.properties" />
     </languages>
     <variables>
       <variable name="liquibaseVersion" value="0-SNAPSHOT" />
     </variables>
-    <codeSigning macEnabled="true" macPkcs12File="../../../target/keys/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../target/keys/datical_windows.pfx" />
-    <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk11/jdk-11.0.12+7" />
+    <codeSigning macEnabled="true" macPkcs12File="../../../target/keys/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../target/keys/datical_windows.pfx" macNotarize="true" appleId="daticaldev@datical.com" useAscProvider="true" ascProvider="BQ3PYUB226">
+      <macSearchedJars>
+        <entry>jna-*</entry>
+        <entry>swt-*</entry>
+        <entry>javafx-*</entry>
+        <entry>sqlite-*</entry>
+      </macSearchedJars>
+    </codeSigning>
+    <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk17/jdk-17.0.4+8" />
   </application>
   <files>
     <mountPoints>

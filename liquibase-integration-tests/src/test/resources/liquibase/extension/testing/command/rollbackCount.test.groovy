@@ -13,6 +13,7 @@ Required Args:
   changelogFile (String) The root changelog
   count (Integer) The number of changes to rollback
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changeExecListenerClass (String) Fully-qualified class which specifies a ChangeExecListener
     Default: null
@@ -28,7 +29,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labels (String) Changeset labels to match
+  labelFilter (String) Changeset labels to match
     Default: null
   password (String) Password to use to connect to the database
     Default: null

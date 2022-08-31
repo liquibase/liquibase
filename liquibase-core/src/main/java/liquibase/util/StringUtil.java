@@ -69,8 +69,25 @@ public class StringUtil {
         String previousPiece = null;
         boolean previousDelimiter = false;
         List<Object> parsedArray = Arrays.asList(parsed.toArray(true));
-        for (Object piece : mergeTokens(parsedArray, endDelimiter)) {
-            if (splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
+        int isInClause = 0;
+        List<Object> tokens = mergeTokens(parsedArray, endDelimiter);
+        for (int i = 0; i < tokens.size(); i++) {
+            Object piece = tokens.get(i);
+            String nextPiece = null;
+            int nextIndex = i + 1;
+            while (nextPiece == null && nextIndex < tokens.size()) {
+                nextPiece = StringUtil.trimToNull(String.valueOf(tokens.get(nextIndex)));
+                nextIndex++;
+            }
+
+            if (piece instanceof String && ((String) piece).equalsIgnoreCase("BEGIN") &&  (!"transaction".equalsIgnoreCase(nextPiece) && !"trans".equalsIgnoreCase(nextPiece))) {
+                isInClause++;
+            }
+            if (piece instanceof String && ((String) piece).equalsIgnoreCase("END") && isInClause > 0  && (!"transaction".equalsIgnoreCase(nextPiece) && !"trans".equalsIgnoreCase(nextPiece))) {
+                isInClause--;
+            }
+
+            if (isInClause == 0 && splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
                 String trimmedString = StringUtil.trimToNull(currentString.toString());
                 if (trimmedString != null) {
                     returnArray.add(trimmedString);
@@ -160,6 +177,7 @@ public class StringUtil {
             if (endDelimiter.length() == 1) {
                 if ("/".equals(endDelimiter)) {
                     if (previousPiece != null && !previousPiece.endsWith("\n")) {
+                        //don't count /'s the are there for comments for division signs or any other use besides a / at the beginning of a line
                         return false;
                     }
                 }
@@ -283,6 +301,9 @@ public class StringUtil {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {
+        if (StringUtil.isEmpty(multiLineSQL)) {
+            return multiLineSQL;
+        }
         return SqlParser.parse(multiLineSQL, true, false).toString().trim();
     }
 
@@ -917,6 +938,7 @@ public class StringUtil {
         return trimRight(str.toString());
     }
 
+
     /**
      * Concatenates the addition string to the baseString string, adjusting the case of "addition" to match the base string.
      * If the string is all caps, append addition in all caps. If all lower case, append in all lower case. If baseString is mixed case, make no changes to addition.
@@ -955,7 +977,8 @@ public class StringUtil {
      * <p>Splits a camel-case string into words based on the came casing.
      * <p>
      * This code originated from the StringUtils class of https://github.com/apache/commons-lang
-     * @param str       the String to split, may be {@code null}
+     *
+     * @param str the String to split, may be {@code null}
      * @return an array of parsed Strings, {@code null} if null String input
      */
     public static String[] splitCamelCase(final String str) {
@@ -1023,7 +1046,7 @@ public class StringUtil {
         } else {
             int sz = cs.length();
 
-            for(int i = 0; i < sz; ++i) {
+            for (int i = 0; i < sz; ++i) {
                 if (!Character.isDigit(cs.charAt(i))) {
                     return false;
                 }

@@ -91,7 +91,7 @@ public class HubUpdater {
      * @param changeLogFile     Path to DatabaseChangelog for this operation
      * @param contexts          Contexts to use for filtering
      * @param labelExpression   Labels to use for filtering
-     * @param changeLogIterator Iterator to use for going through change sets
+     * @param changeLogIterator Iterator to use for going through changesets
      * @return Operation        Valid Operation object or null
      * @throws LiquibaseHubException Thrown by HubService
      * @throws DatabaseException     Thrown by Liquibase core

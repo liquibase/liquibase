@@ -14,7 +14,7 @@
     <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
 
     <properties>
-        <targetMavenVersion>3.3.9</targetMavenVersion>
+        <targetMavenVersion>3.8.5</targetMavenVersion>
     </properties>
     <dependencies>
         <dependency>
@@ -26,30 +26,34 @@
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.3.0</version>
+            <version>2.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
             <version>${targetMavenVersion}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
             <version>${targetMavenVersion}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact</artifactId>
             <version>${targetMavenVersion}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-compat</artifactId>
             <version>${targetMavenVersion}</version>
+            <scope>provided</scope>
         </dependency>
 
 
@@ -63,7 +67,7 @@
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-verifier</artifactId>
-            <version>1.6</version>
+            <version>1.8.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -73,7 +77,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.4</version>
                 <executions>
                     <execution>
                         <id>generated-helpmojo</id>
@@ -90,113 +94,74 @@
             </plugin>
 
             <plugin>
-                <!-- Converts the generated flattened-pom into a cleaner version for maven distribution -->
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>xml-maven-plugin</artifactId>
-                <version>1.0.2</version>
-                <executions>
-                    <execution>
-                        <id>transform-deploy-pom</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>transform</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.3.0</version>
                 <configuration>
-                    <forceCreation>true</forceCreation>
-                    <transformationSets>
-                        <transformationSet>
-                            <dir>${project.build.directory}/flattened-pom</dir>
-                            <includes>release.pom.xml</includes>
-                            <outputDir>${project.build.directory}</outputDir>
-                            <stylesheet>${project.basedir}/src/main/maven/liquibase-deployment-pom.xslt</stylesheet>
-                        </transformationSet>
-                    </transformationSets>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-install-plugin</artifactId>
-                <configuration>
-                    <artifactId>${project.artifactId}</artifactId>
-                    <file>${project.build.directory}/${project.artifactId}-${project.version}.jar</file>
-                    <sources>${project.build.directory}/${project.artifactId}-${project.version}-sources.jar</sources>
-                    <javadoc>${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar</javadoc>
-                    <pomFile>${project.build.directory}/release.pom.xml</pomFile>
+                    <artifactSet>
+                        <includes>
+                            <include>${project.groupId}:liquibase-maven-plugin</include>
+                        </includes>
+                    </artifactSet>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/maven/**/pom.xml</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <createSourcesJar>false</createSourcesJar>
+                    <createTestSourcesJar>false</createTestSourcesJar>
+                    <keepDependenciesWithProvidedScope>false</keepDependenciesWithProvidedScope>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                            <!-- Use a hand-crafted pom for distribution in this jar vs. what gets generated by maven -->
+                            <resource>META-INF/maven/org.liquibase/liquibase-maven-plugin/pom.xml</resource>
+                            <file>${basedir}/src/main/maven/release.pom.xml</file>
+                        </transformer>
+                    </transformers>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>custom-install</id>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
-                            <goal>install-file</goal>
+                            <goal>shade</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <groupId>io.snyk</groupId>
-                <artifactId>snyk-maven-plugin</artifactId>
-                <configuration>
-                    <skip>false</skip>
-                </configuration>
-            </plugin>
-
         </plugins>
 
     </build>
 
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-plugin-plugin</artifactId>
-                <version>2.6</version>
-            </plugin>
-        </plugins>
-    </reporting>
-
     <profiles>
         <profile>
-            <id>gpg-sign</id>
+            <id>liquibase-commercial</id>
+
             <activation>
-                <property>
-                    <name>env.GPG_PASSPHRASE</name>
-                </property>
+                <file>
+                    <exists>../../liquibase-pro/pom.xml</exists>
+                </file>
             </activation>
+
             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <artifactId>maven-install-plugin</artifactId>
                         <configuration>
-                            <passphrase>${env.GPG_PASSPHRASE}</passphrase>
-                            <gpgArguments>
-                                <arg>--batch</arg>
-                                <arg>--no-tty</arg>
-                                <!-- This is necessary for gpg to not try to use the pinentry programs -->
-                                <arg>--pinentry-mode</arg>
-                                <arg>loopback</arg>
-                            </gpgArguments>
-
-                            <skip>false</skip>
-                            <repositoryId>${deploy.repositoryId}</repositoryId>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <version>${project.version}</version>
-                            <url>${deploy.url}</url>
-                            <file>${project.build.directory}/${project.artifactId}-${project.version}.jar</file>
-                            <sources>${project.build.directory}/${project.artifactId}-${project.version}-sources.jar</sources>
-                            <javadoc>${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar</javadoc>
-                            <pomFile>${project.build.directory}/release.pom.xml</pomFile>
+                            <artifactId>liquibase-maven-plugin</artifactId>
+                            <file>${project.build.directory}/liquibase-maven-plugin-${project.version}.jar</file>
+                            <sources>${project.build.directory}/liquibase-maven-plugin-${project.version}-sources.jar</sources>
+                            <pomFile>${basedir}/src/main/maven/release.pom.xml</pomFile>
                         </configuration>
                         <executions>
                             <execution>
-                                <id>custom-deploy</id>
-                                <phase>deploy</phase>
+                                <id>custom-install</id>
+                                <phase>install</phase>
                                 <goals>
-                                    <goal>sign-and-deploy-file</goal>
+                                    <goal>install-file</goal>
                                 </goals>
                             </execution>
                         </executions>
@@ -204,6 +169,17 @@
                 </plugins>
             </build>
         </profile>
+
     </profiles>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>3.6.4</version>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>
 

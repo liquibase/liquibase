@@ -25,6 +25,14 @@ class SpringResourceAccessorTest extends Specification {
         list.size() == 1
     }
 
+    def "openStreams for relative file in root"() {
+        when:
+        def list = resourceAccessor.openStreams("file-in-root.txt", "liquibase/database/core/UnsupportedDatabase.class")
+
+        then:
+        list.size() == 1
+    }
+
     def "list just non-recursive files"() {
         when:
         def list = resourceAccessor.list(null, "liquibase/database", false, true, false).toListString()
@@ -65,6 +73,16 @@ class SpringResourceAccessorTest extends Specification {
         list.contains("MSSQLDatabaseTest.class,")
     }
 
+    def "list relative to file in root"() {
+        when:
+        def list = resourceAccessor.list("liquibase.properties", "liquibase/database/core", false, true, true).toListString()
+
+        then:
+        !list.contains("file-in-root.txt")
+        list.contains("/OracleDatabaseTest.class,")
+        list.contains("MSSQLDatabaseTest.class,")
+    }
+
 
     def "list relative to directory"() {
         when:
@@ -82,16 +100,16 @@ class SpringResourceAccessorTest extends Specification {
         new SpringResourceAccessor().finalizeSearchPath(input) == expected
 
         where:
-        input | expected
-        "/path/to/file" | "classpath*:/path/to/file"
-        "//path////to/file" | "classpath*:/path/to/file"
-        "path/to/file" | "classpath*:/path/to/file"
-        "classpath:path/to/file" | "classpath*:/path/to/file"
-        "classpath:/path/to/file" | "classpath*:/path/to/file"
+        input                               | expected
+        "/path/to/file"                     | "classpath*:/path/to/file"
+        "//path////to/file"                 | "classpath*:/path/to/file"
+        "path/to/file"                      | "classpath*:/path/to/file"
+        "classpath:path/to/file"            | "classpath*:/path/to/file"
+        "classpath:/path/to/file"           | "classpath*:/path/to/file"
         "classpath:classpath:/path/to/file" | "classpath*:/path/to/file"
-        "classpath*:/path/to/file" | "classpath*:/path/to/file"
-        "classpath*:path/to/file" | "classpath*:/path/to/file"
-
+        "classpath*:/path/to/file"          | "classpath*:/path/to/file"
+        "classpath*:path/to/file"           | "classpath*:/path/to/file"
+        "file:/path/to/file"                | "file:/path/to/file"
     }
 
 

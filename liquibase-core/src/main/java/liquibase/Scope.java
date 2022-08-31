@@ -11,6 +11,7 @@ import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
 import liquibase.logging.core.LogServiceFactory;
+import liquibase.osgi.Activator;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
@@ -55,6 +56,7 @@ public class Scope {
         fileEncoding,
         databaseChangeLog,
         changeSet,
+        osgiPlatform
     }
 
     private static ScopeManager scopeManager;
@@ -95,6 +97,7 @@ public class Scope {
             }
 
             rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
+            rootScope.values.put(Attr.osgiPlatform.name(), Activator.OSGIContainerChecker.isOsgiPlatform());
         }
         return scopeManager.getCurrentScope();
     }

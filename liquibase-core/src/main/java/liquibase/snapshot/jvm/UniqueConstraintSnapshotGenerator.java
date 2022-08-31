@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import java.util.stream.Collectors;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -139,7 +140,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database, DatabaseSnapshot snapshot) throws DatabaseException {
         Relation table = example.getRelation();
-        Schema schema = table.getSchema();
+        Schema schema = example.getSchema();
         String name = example.getName();
 
         boolean bulkQuery;
@@ -176,25 +177,40 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 sql += "order by ordinal_position";
             } else if (database instanceof PostgresDatabase) {
+                List<String> conditions = new ArrayList<>();
                 sql = "select const.CONSTRAINT_NAME, COLUMN_NAME, const.constraint_schema as CONSTRAINT_CONTAINER "
                         + "from " + database.getSystemSchema() + ".table_constraints const "
                         + "join " + database.getSystemSchema() + ".key_column_usage col "
                         + "on const.constraint_schema=col.constraint_schema "
                         + "and const.table_name=col.table_name "
-                        + "and const.constraint_name=col.constraint_name "
-                        + "where const.constraint_catalog='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' ";
-
+                        + "and const.constraint_name=col.constraint_name ";
+                if (schema.getCatalogName() != null) {
+                    conditions.add("const.constraint_catalog='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "'");
+                }
                 if (database instanceof CockroachDatabase) {
-                    sql += " and (select count(*) from (select indexdef from pg_indexes where schemaname='" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + "' AND indexname='" + database.correctObjectName(name, UniqueConstraint.class) + "' AND (position('DESC,' in indexdef) > 0 OR position('DESC)' in indexdef) > 0))) = 0"
-                            + "and const.constraint_name != 'primary' ";
+                    conditions.add("(select count(*) from (select indexdef from pg_indexes where schemaname='\" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + \"' AND indexname='\" + database.correctObjectName(name, UniqueConstraint.class) + \"' AND (position('DESC,' in indexdef) > 0 OR position('DESC)' in indexdef) > 0))) = 0");
+                    conditions.add("const.constraint_name != 'primary'");
                 }
-                    sql += "and const.constraint_schema='" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + "' ";
+                if (schema.getSchema().getName() != null) {
+                    conditions.add("const.constraint_schema='" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + "'");
+                }
                 if (!bulkQuery) {
-                    sql += "and const.table_name='" + database.correctObjectName(example.getRelation().getName(), Table.class) + "' "
-                            + "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'";
+                    conditions.add("const.table_name='" + database.correctObjectName(example.getRelation().getName(), Table.class) + "'");
+                    if (name != null) {
+                        conditions.add("const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "' ");
+                    }
                 }
 
-                sql += "order by ordinal_position";
+                if (!conditions.isEmpty()) {
+                    sql += " WHERE ";
+                    sql += conditions.stream().collect(Collectors.joining(" AND "));
+                }
+
+                sql += " order by ordinal_position";
+            } else if (database.getClass().getName().contains("MaxDB")) { //have to check classname as this is currently an extension
+				sql = "select CONSTRAINTNAME as constraint_name, COLUMNNAME as column_name from CONSTRAINTCOLUMNS WHERE CONSTRAINTTYPE = 'UNIQUE_CONST' AND tablename = '"
+						+ database.correctObjectName(example.getRelation().getName(), Table.class) + "' AND constraintname = '"
+						+ database.correctObjectName(name, UniqueConstraint.class) + "'";
             } else if (database instanceof MSSQLDatabase) {
                 sql =
                         "SELECT " +
@@ -226,7 +242,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                             "[ic].[key_ordinal]";
 
             } else if (database instanceof OracleDatabase) {
-                sql = "select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name, f.validated as constraint_validate " +
+                sql = "select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name, f.validated as constraint_validate, ucc.table_name " +
                         "from all_cons_columns ucc " +
                         "INNER JOIN all_constraints f " +
                         "ON ucc.owner = f.owner " +
@@ -330,9 +346,33 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         + "where KC.CONSTNAME = TC.CONSTNAME "
                         + "and KC.TBCREATOR = TC.TBCREATOR "
                         + "and TC.TYPE='U' "
-                        + (bulkQuery? "" : "and KC.CONSTNAME='" + database.correctObjectName(name, UniqueConstraint.class) + "' ")
+                        + (bulkQuery ? "" : "and KC.CONSTNAME='" + database.correctObjectName(name, UniqueConstraint.class) + "' ")
                         + "and TC.TBCREATOR = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
                         + "order by KC.COLSEQ";
+            } else if (database instanceof H2Database && database.getDatabaseMajorVersion() >= 2) {
+                String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
+                String schemaName = database.correctObjectName(schema.getName(), Schema.class);
+                String constraintName = database.correctObjectName(name, UniqueConstraint.class);
+                String tableName = database.correctObjectName(table.getName(), Table.class);
+                sql = "select table_constraints.CONSTRAINT_NAME, index_columns.COLUMN_NAME, table_constraints.constraint_schema as CONSTRAINT_CONTAINER "
+                        + "from information_schema.table_constraints " +
+                        "join information_schema.index_columns on index_columns.index_name=table_constraints.index_name "
+                        + "where constraint_type='UNIQUE' ";
+                if (catalogName != null) {
+                    sql += "and constraint_catalog='" + catalogName + "' ";
+                }
+                if (schemaName != null) {
+                    sql += "and constraint_schema='" + schemaName + "' ";
+                }
+
+                if (!bulkQuery) {
+                    if (tableName != null) {
+                        sql += "and table_constraints.table_name='" + tableName + "' ";
+                    }
+                    if (constraintName != null) {
+                        sql += "and constraint_name='" + constraintName + "'";
+                    }
+                }
             } else {
                 // If we do not have a specific handler for the RDBMS, we assume that the database has an
                 // INFORMATION_SCHEMA we can use. This is a last-resort measure and might fail.

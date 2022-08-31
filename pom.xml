@@ -63,16 +63,13 @@
         <build.repository.owner>unknown</build.repository.owner>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring.version>5.0.12.RELEASE</spring.version>
-        <sonar.projectKey>org.liquibase:liquibase-parent</sonar.projectKey>
-        <sonar.organization>liquibase-core</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <spring.version>5.2.22.RELEASE</spring.version>
         <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
         <groovy.version>2.4.17</groovy.version>
         <dependency.spock.version>1.3-groovy-2.4</dependency.spock.version>
-        <junit.version>4.12</junit.version>
-
-        <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
+        <junit.version>4.13.2</junit.version>
+        <trimStackTrace>false</trimStackTrace>
+        <argLine></argLine>
     </properties>
 
 
@@ -85,6 +82,7 @@
         <module>liquibase-dist</module>
         <module>liquibase-extension-examples</module>
         <module>liquibase-extension-testing</module>
+        <module>liquibase-snowflake</module>
     </modules>
 
     <dependencies>
@@ -92,7 +90,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.27</version>
+            <version>1.30</version>
             <optional>true</optional>
         </dependency>
 
@@ -105,25 +103,30 @@
 
         <dependency>
             <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
-            <version>1.3</version>
+            <artifactId>hamcrest</artifactId>
+            <version>2.2</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.13.2</version>
+            <version>3.23.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.3.3</version>
+            <version>4.7.0</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>4.7.0</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency> <!-- use a specific Groovy version rather than the one specified by spock-core -->
             <groupId>org.codehaus.groovy</groupId>
@@ -155,71 +158,98 @@
         <dependency> <!-- enables mocking of classes without default constructor (together with CGLIB) -->
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
-            <version>2.1</version>
+            <version>3.3</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.200</version>
+            <version>2.1.214</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.2</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>6.0.6</version>
+            <version>8.0.30</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>8.2.2.jre8</version>
+            <version>11.2.0.jre8</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.12</version>
+            <version>42.5.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>2.7.0</version>
+            <version>3.0.7</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.ibm.db2</groupId>
+            <artifactId>jcc</artifactId>
+            <version>11.5.7.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>21.6.0.0.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.39.2.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.snowflake</groupId>
+            <artifactId>snowflake-jdbc</artifactId>
+            <version>3.13.21</version>
+        </dependency>
+
 
         <!-- needed for newer java versions -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.3.0</version>
+            <version>2.3.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
+            <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-core</artifactId>
-            <version>2.3.0</version>
+            <version>4.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>2.3.0</version>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>4.0.0</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -227,12 +257,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.10.1</version>
             </plugin>
 
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.0.2</version>
+                <version>3.3.0</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -240,7 +270,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.4.1</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -262,7 +292,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.6.2</version>
+                <version>1.13.1</version>
                 <executions>
                     <execution>
                         <goals>
@@ -277,44 +307,25 @@
                 </executions>
             </plugin>
 
-<!--            <plugin>-->
-<!--                <groupId>org.jacoco</groupId>-->
-<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
-<!--                <version>0.8.5</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <goals>-->
-<!--                            <goal>prepare-agent</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>report</id>-->
-<!--                        <phase>test</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>report</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.1</version>
+                <version>2.22.2</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.surefire</groupId>
                         <artifactId>surefire-junit4</artifactId>
-                        <version>2.22.1</version>
+                        <version>2.22.2</version>
                     </dependency>
                 </dependencies>
                 <configuration>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
                 </configuration>
             </plugin>
 
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
+                <version>3.0.0</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -344,7 +355,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.1</version>
                 <configuration>
                     <attach>true</attach>
                     <author>false</author>
@@ -378,7 +389,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.1.0</version>
+                <version>1.3.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <outputDirectory>${project.build.directory}/flattened-pom</outputDirectory>
@@ -408,21 +419,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <!-- by default don't run snyk on all modules. On  ones that "ship", mark them as skip=false -->
-                <groupId>io.snyk</groupId>
-                <artifactId>snyk-maven-plugin</artifactId>
-                <version>1.2.9</version>
-                <configuration>
-                    <skip>true</skip>
-                    <apiToken>${env.SNYK_API_TOKEN}</apiToken>
-                    <failOnSeverity>high</failOnSeverity>
-                    <org>${env.SNYK_ORG}</org>
-                    <includeProvidedDependencies>false</includeProvidedDependencies>
-                </configuration>
-            </plugin>
-
-
             <!--        <plugin>-->
             <!--            <artifactId>maven-install-plugin</artifactId>-->
             <!--            <version>2.5.2</version>-->
@@ -446,7 +442,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>2.5.2</version>
+                    <version>3.0.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -460,42 +456,70 @@
             </activation>
             <properties>
                 <maven.compiler.release>8</maven.compiler.release>
-                <!-- CDILiquibaseTest is currently failing without this setting -->
-                <argLine>--illegal-access=permit</argLine>
             </properties>
-        </profile>
-        <profile>
-            <id>liquibase-pro-submodule</id>
-            <activation>
-                <file>
-                    <exists>../liquibase-pro/pom.xml</exists>
-                </file>
-            </activation>
-            <modules>
-                <module>../liquibase-pro</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>gpg-sign</id>
-            <activation>
-                <property>
-                    <name>env.GPG_PASSPHRASE</name>
-                </property>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
-                            <passphrase>${env.GPG_PASSPHRASE}</passphrase>
-                            <gpgArguments>
-                                <arg>--batch</arg>
-                                <!-- This is necessary for gpg to not try to use the pinentry programs -->
-                                <arg>--pinentry-mode</arg>
-                                <arg>loopback</arg>
-                            </gpgArguments>
+                            <!-- CDILiquibaseTest is currently failing without this setting -->
+                            <argLine>
+                                @{argLine}
+                                --illegal-access=warn
+                                --add-opens java.base/java.lang=ALL-UNNAMED
+                            </argLine>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>sonar</id>
+            <properties>
+                <sonar.organization>liquibase</sonar.organization>
+                <sonar.projectKey>liquibase</sonar.projectKey>
+                <sonar.projectName>Liquibase</sonar.projectName>
+                <sonar.projectDescription>Liquibase</sonar.projectDescription>
+                <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+                <sonar.scm.provider>git</sonar.scm.provider>
+                <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonarsource.scanner.maven</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                        <version>3.9.1.2184</version>
+                        <executions>
+                            <execution>
+                                <id>sonar</id>
+                                <goals>
+                                    <goal>sonar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.8.8</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

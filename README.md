@@ -1,4 +1,4 @@
-# Liquibase [![Build and Test](https://github.com/liquibase/liquibase/actions/workflows/build.yml/badge.svg)](https://github.com/liquibase/liquibase/actions/workflows/build.yml)
+# Liquibase [![Build and Test](https://github.com/liquibase/liquibase/actions/workflows/build.yml/badge.svg)](https://github.com/liquibase/liquibase/actions/workflows/build.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=liquibase&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=liquibase)
 <p align="center"><img src="https://github.com/liquibase/liquibase/blob/master/Liquibase.png" width="30%" height="30%"></p>
 
 Liquibase helps millions of teams track, version, and deploy database schema changes. It will help you to:
@@ -29,7 +29,7 @@ Liquibase system requirements can be found on the [Download Liquibase](https://w
 2. Make sure to add Liquibase to your PATH.
 3. Copy the included `examples` directory to the needed location.
 4. Open your CLI and navigate to your `examples/sql` or `examples/xml` directory.
-5. Start the included H2 database with the `./start-h2` command.
+5. Start the included H2 database with the `liquibase init start-h2` command.
 6. Run the `liquibase update` command.
 7. Optionally, follow the prompt for your email to register for [Liquibase Hub](https://hub.liquibase.com/).
 8. Run the `liquibase history` command.
@@ -75,4 +75,4 @@ LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.co
 
 [Liquibase Blog](https://www.liquibase.org/blog)
 
-[Get Support & Advanced Features](https://www.liquibase.com/contact)
+[Get Support & Advanced Features](https://liquibase.com/pricing)

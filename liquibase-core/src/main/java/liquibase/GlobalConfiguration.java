@@ -29,10 +29,21 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION;
     public static final ConfigurationDefinition<Boolean> INCLUDE_CATALOG_IN_SPECIFICATION;
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
+    public static final ConfigurationDefinition<Boolean> PRESERVE_SCHEMA_CASE;
+    public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
+
+    public static final ConfigurationDefinition<DuplicateFileMode> DUPLICATE_FILE_MODE;
+
+    /**
+     * @deprecated No longer used
+     */
+    @Deprecated
     public static final ConfigurationDefinition<Boolean> FILTER_LOG_MESSAGES;
     public static final ConfigurationDefinition<Boolean> HEADLESS;
     public static final ConfigurationDefinition<Boolean> STRICT;
     public static final ConfigurationDefinition<Integer> DDL_LOCK_TIMEOUT;
+    public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
+    public static final ConfigurationDefinition<String> SEARCH_PATH;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -154,8 +165,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         FILTER_LOG_MESSAGES = builder.define("filterLogMessages", Boolean.class)
-                .setDescription("Should Liquibase filter log messages for potentially insecure data?")
-                .setDefaultValue(true)
+                .setDescription("DEPRECATED: No longer used")
+                .setCommonlyUsed(false)
                 .build();
 
         HEADLESS = builder.define("headless", Boolean.class)
@@ -175,5 +186,34 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .addAliasKey("liquibase.ddl_lock_timeout")
                 .setDescription("The DDL_LOCK_TIMEOUT parameter indicates the number of seconds a DDL command should wait for the locks to become available before throwing the resource busy error message. This applies only to Oracle databases.")
                 .build();
+
+        SECURE_PARSING = builder.define("secureParsing", Boolean.class)
+                .setDescription("If true, remove functionality from file parsers which could be used insecurely. Examples include (but not limited to) disabling remote XML entity support.")
+                .setDefaultValue(true)
+                .build();
+
+        PRESERVE_SCHEMA_CASE = builder.define("preserveSchemaCase", Boolean.class)
+                .setDescription("Should liquibase treat schema and catalog names as case sensitive?")
+                .setDefaultValue(false)
+                .build();
+
+        SHOW_BANNER = builder.define("showBanner", Boolean.class)
+                .setDescription("If true, show a Liquibase banner on startup.")
+                .setDefaultValue(true)
+                .build();
+
+        DUPLICATE_FILE_MODE = builder.define("duplicateFileMode", DuplicateFileMode.class)
+                .setDescription("How to handle multiple files being found in the search path that have duplicate paths. Options are WARN (log warning and choose one at random) or ERROR (fail current operation)")
+                .setDefaultValue(DuplicateFileMode.ERROR)
+                .build();
+
+        SEARCH_PATH = builder.define("searchPath", String.class)
+                .setDescription("Complete list of Location(s) to search for files such as changelog files in. Multiple paths can be specified by separating them with commas.")
+                .build();
+    }
+
+    public enum DuplicateFileMode {
+        WARN,
+        ERROR,
     }
 }

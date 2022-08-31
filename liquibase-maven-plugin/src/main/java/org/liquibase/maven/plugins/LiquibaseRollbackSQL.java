@@ -89,12 +89,12 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
             throws LiquibaseException {
         switch (type) {
         case COUNT: {
-            liquibase.rollback(rollbackCount, rollbackScript,new Contexts(contexts), new LabelExpression(labels), outputWriter);
+            liquibase.rollback(rollbackCount, rollbackScript,new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
             break;
         }
         case DATE: {
             try {
-                liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels),
+                liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(getLabelFilter()),
                         outputWriter);
             } catch (ParseException e) {
                 String message = "Error parsing rollbackDate: "
@@ -104,7 +104,7 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
             break;
         }
         case TAG: {
-            liquibase.rollback(rollbackTag, rollbackScript,new Contexts(contexts), new LabelExpression(labels), outputWriter);
+            liquibase.rollback(rollbackTag, rollbackScript,new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
             break;
         }
         default: {

@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.ContextExpression;
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -24,11 +23,6 @@ import liquibase.util.StringUtil;
 
 public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSetRanStatement> {
 
-    public static final String AND = " AND ";
-    public static final String OPEN_BRACKET = "(";
-    public static final String CLOSE_BRACKET = ")";
-    public static final String WHITESPACE = " ";
-    public static final String COMMA = ",";
     private static final String COMMENTS = "COMMENTS";
     private static final String CONTEXTS = "CONTEXTS";
     private static final String LABELS = "LABELS";
@@ -121,42 +115,12 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         return limitSize(StringUtil.trimToEmpty(changeSet.getComments()));
     }
 
-    private String getContextsColumn(ChangeSet changeSet) {
-        return ((changeSet.getContexts() == null) || changeSet.getContexts()
-                .isEmpty()) ? null : buildFullContext(changeSet);
+    protected String getContextsColumn(ChangeSet changeSet) {
+        return changeSet.buildFullContext();
     }
 
-    private String getLabelsColumn(ChangeSet changeSet) {
-        return ((changeSet.getLabels() == null) || changeSet.getLabels()
-                .isEmpty()) ? null : changeSet.getLabels().toString();
-    }
-
-    private String buildFullContext(ChangeSet changeSet) {
-        StringBuilder contextExpression = new StringBuilder();
-        boolean notFirstContext = false;
-        for (ContextExpression inheritableContext : changeSet.getInheritableContexts()) {
-            appendContext(contextExpression, inheritableContext.toString(), notFirstContext);
-            notFirstContext = true;
-        }
-        ContextExpression changeSetContext = changeSet.getContexts();
-        if ((changeSetContext != null) && !changeSetContext.isEmpty()) {
-            appendContext(contextExpression, changeSetContext.toString(), notFirstContext);
-        }
-        return contextExpression.toString();
-    }
-
-    private void appendContext(StringBuilder contextExpression, String contextToAppend, boolean notFirstContext) {
-        boolean complexExpression = contextToAppend.contains(COMMA) || contextToAppend.contains(WHITESPACE);
-        if (notFirstContext) {
-            contextExpression.append(AND);
-        }
-        if (complexExpression) {
-            contextExpression.append(OPEN_BRACKET);
-        }
-        contextExpression.append(contextToAppend);
-        if (complexExpression) {
-            contextExpression.append(CLOSE_BRACKET);
-        }
+    protected String getLabelsColumn(ChangeSet changeSet) {
+        return changeSet.buildFullLabels();
     }
 
     private String limitSize(String string) {

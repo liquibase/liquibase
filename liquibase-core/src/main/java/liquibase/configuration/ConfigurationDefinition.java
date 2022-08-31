@@ -1,6 +1,5 @@
 package liquibase.configuration;
 
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.util.ObjectUtil;
@@ -101,7 +100,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
                 } else {
                     obfuscatedValue = valueObfuscator.obfuscate(defaultValue);
                 }
-                if (!loggedUsingDefault && !key.equals(GlobalConfiguration.FILTER_LOG_MESSAGES.getKey())) {
+                if (!loggedUsingDefault) {
                     Scope.getCurrentScope().getLog(getClass()).fine("Configuration " + key + " is using the default value of " + obfuscatedValue);
                     loggedUsingDefault = true;
                 }
@@ -248,16 +247,18 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         public <T> Building<T> define(String key, Class<T> dataType) {
             final ConfigurationDefinition<T> definition = new ConfigurationDefinition<>(defaultKeyPrefix + "." + key, dataType);
 
-            return new Building<>(definition);
+            return new Building<>(definition, defaultKeyPrefix);
         }
     }
 
     public static class Building<DataType> {
 
         private final ConfigurationDefinition<DataType> definition;
+        private final String defaultKeyPrefix;
 
-        private Building(ConfigurationDefinition<DataType> definition) {
+        private Building(ConfigurationDefinition<DataType> definition, String defaultKeyPrefix) {
             this.definition = definition;
+            this.defaultKeyPrefix = defaultKeyPrefix;
         }
 
         public Building<DataType> addAliasKey(String alias) {
@@ -312,6 +313,17 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         public Building<DataType> setInternal(boolean internal) {
             definition.internal = internal;
 
+            return this;
+        }
+
+        public Building<DataType> addAliases(Collection<String> aliases) {
+            for (String alias : aliases) {
+                if (!alias.contains(".")) {
+                    alias = defaultKeyPrefix + "." + alias;
+
+                    addAliasKey(alias);
+                }
+            }
             return this;
         }
 

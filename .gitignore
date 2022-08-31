@@ -13,6 +13,9 @@ release.properties
 /bin
 **/liquibase.integrationtest.local.properties
 **/liquibase.test.local.properties
+**/liquibase.local.properties
+**/liquibase.sdk.local.yaml
+**/liquibase.sdk.local.yml
 derby.log
 .idea
 *.iml

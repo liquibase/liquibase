@@ -273,6 +273,16 @@ class CustomChangeWrapperTest extends Specification {
 
     }
 
+    def "customChange without class fails expectedly"() {
+        when:
+        def node = new ParsedNode(null, "customChange")
+        def change = new CustomChangeWrapper()
+        change.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        thrown(ParsedNodeException.class)
+    }
+
     def "load handles params in a 'params' collection"() {
         when:
         def node = new ParsedNode(null, "customChange")

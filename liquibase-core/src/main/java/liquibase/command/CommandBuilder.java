@@ -22,6 +22,13 @@ public class CommandBuilder {
     }
 
     /**
+     * Starts the building of a new {@link CommandArgumentDefinition}.
+     */
+    public <DataType> CommandArgumentDefinition.Building<DataType> argument(CommonArgumentNames argument, Class<DataType> type) {
+        return new CommandArgumentDefinition.Building<>(commandNames, new CommandArgumentDefinition<>(argument.getArgumentName(), type));
+    }
+
+    /**
      * Starts the building of a new {@link CommandResultDefinition}.
      */
     public <DataType> CommandResultDefinition.Building<DataType> result(String name, Class<DataType> type) {
