@@ -14,7 +14,7 @@ public class ChangelogSyncCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> LABELS_ARG;
+    public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
@@ -39,8 +39,9 @@ public class ChangelogSyncCommandStep extends AbstractCliWrapperCommandStep {
             .description("The database password")
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
-        LABELS_ARG = builder.argument("labels", String.class)
-            .description("Label expression to use for filtering which changes to mark as executed").build();
+        LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
+                .addAlias("labels")
+                .description("Label expression to use for filtering which changes to mark as executed").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
             .description("Context string to use for filtering which changes to mark as executed").build();
     }
