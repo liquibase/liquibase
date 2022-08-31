@@ -1,9 +1,8 @@
 package liquibase.resource;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import liquibase.Scope;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.GZIPInputStream;
@@ -59,7 +58,13 @@ public class PathResource extends AbstractResource {
     public OutputStream openOutputStream(boolean createIfNeeded) throws IOException {
         if (!exists()) {
             if (createIfNeeded) {
-                path.getParent().toFile().mkdirs();
+                Path parent = path.getParent();
+                if (parent != null) {
+                    boolean mkdirs = parent.toFile().mkdirs();
+                    if (!mkdirs) {
+                        Scope.getCurrentScope().getLog(getClass()).warning("Failed to create parent directories for file " + path);
+                    }
+                }
             } else {
                 throw new IOException("File " + this.getUri() + " does not exist");
             }
