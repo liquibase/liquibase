@@ -1,83 +1,101 @@
 package liquibase.util;
 
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.integration.commandline.CommandLineUtils;
+import liquibase.Scope;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
+import java.util.Enumeration;
 import java.util.Properties;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 public class LiquibaseUtil {
 
+    private static Properties liquibaseBuildProperties;
+
+    /**
+     * Return the configured build.version. Will always be "DEV" for non-release builds.
+     */
     public static String getBuildVersion() {
-        return getBuildInfo("build.version","Bundle-Version");
+        return getBuildInfo("build.version");
+    }
+
+    /**
+     * Return the build version for release builds and a more descriptive string for snapshot builds.
+     */
+    public static String getBuildVersionInfo() {
+        String version = getBuildInfo("build.version");
+        if (version.equals("DEV")) {
+            final String buildCommit = getBuildInfo("build.commit");
+            if (buildCommit.equals("unknown")) {
+                version = "[local build]";
+            } else {
+                version = "[Core: " + getBuildInfo("build.repository.owner") + "/" + getBuildInfo("build.repository.name") + "/" + getBuildInfo("build.branch") + "/" + getBuildInfo("build.number") + "/" + buildCommit.substring(0, 6) + "/" + getBuildInfo("build.timestamp");
+
+                if (!getBuildInfo("build.pro.number").equals("UNKNOWN")) {
+                    version += ", Pro: " + getBuildInfo("build.pro.branch") + "/" + getBuildInfo("build.pro.number") + "/" + getBuildInfo("build.pro.commit").substring(0, 6) + "/" + getBuildInfo("build.pro.timestamp");
+                }
+
+                version += "]";
+            }
+        }
+
+        return version;
     }
 
     public static String getBuildTime() {
-        return getBuildInfo("build.timestamp", "Build-Time");
+        return getBuildInfo("build.timestamp");
     }
 
-    // will extract the information from either buildinfo.properties, which should be a properties file in
-    // the jar file, or from the jar file's MANIFEST.MF, which should also have similar information.
-    private static String getBuildInfo(String propertyId, String manifestId) {
-        String buildInfoValue = "UNKNOWN";
+    public static String getBuildNumber() {
+        return getBuildInfo("build.number");
+    }
 
-        Class clazz = LiquibaseUtil.class;
-        String className = clazz.getSimpleName() + ".class";
-        String classPath = clazz.getResource(className).toString();
-        if (classPath.startsWith("jar")) {
-            String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) +
-                    "/META-INF/MANIFEST.MF";
-            Manifest manifest = null;
-            try {
-                manifest = new Manifest(new URL(manifestPath).openStream());
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException("Cannot open a URL to the manifest of our own JAR file.");
-            }
-            Attributes attr = manifest.getMainAttributes();
-
-            if (attr.containsKey(manifestId)) {
-                buildInfoValue = attr.getValue(manifestId);
-            }
-        }
-
-        if (buildInfoValue.equals("UNKNOWN")) {
-            Properties buildInfo = new Properties();
-            ClassLoader classLoader = LiquibaseUtil.class.getClassLoader();
-
-            URL buildInfoFile = classLoader.getResource("buildinfo.properties");
-            InputStream in = null;
-            try {
-                if (buildInfoFile != null) {
-                    URLConnection connection = buildInfoFile.openConnection();
-                    connection.setUseCaches(false);
-                    in = connection.getInputStream();
-                    buildInfo.load(in);
-                    String o = (String) buildInfo.get(propertyId);
-
-                    if (o != null) {
-                        buildInfoValue = o;
-                    }
-                }
-
-            } catch (IOException e) {
-                // This is not a fatal exception.
-                // Build info will be returned as 'UNKNOWN'        }
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
+    // will extract the information from liquibase.build.properties, which should be a properties file in
+    // the jar file.
+    private static String getBuildInfo(String propertyId) {
+        if (liquibaseBuildProperties == null) {
+            Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
+            if (Boolean.TRUE.equals(osgiPlatform)) {
+                Bundle bundle = FrameworkUtil.getBundle(LiquibaseUtil.class);
+                URL propURL = bundle.getEntry("liquibase.build.properties");
+                if (propURL == null) {
+                    Scope.getCurrentScope().getLog(LiquibaseUtil.class).severe("Cannot read liquibase.build.properties");
+                } else {
+                    try (InputStream buildProperties = propURL.openStream()) {
+                        liquibaseBuildProperties = new Properties();
+                        if (buildProperties != null) {
+                            liquibaseBuildProperties.load(buildProperties);
+                        }
                     } catch (IOException e) {
-                        // TODO Log this error and remove the RuntimeException.
-                        throw new RuntimeException("Failed to close InputStream in LiquibaseUtil.", e);
+                        Scope.getCurrentScope().getLog(LiquibaseUtil.class).severe("Cannot read liquibase.build.properties", e);
                     }
+                }
+            } else {
+                try {
+                    liquibaseBuildProperties = new Properties();
+                    final Enumeration<URL> propertiesUrls = Scope.getCurrentScope().getClassLoader().getResources("liquibase.build.properties");
+                    while (propertiesUrls.hasMoreElements()) {
+                        final URL url = propertiesUrls.nextElement();
+                        try (InputStream buildProperties = url.openStream()) {
+                            if (buildProperties != null) {
+                                liquibaseBuildProperties.load(buildProperties);
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    Scope.getCurrentScope().getLog(LiquibaseUtil.class).severe("Cannot read liquibase.build.properties", e);
                 }
             }
         }
-        return buildInfoValue;
+
+        String value;
+        value = liquibaseBuildProperties.getProperty(propertyId);
+        if (value == null) {
+            value = "UNKNOWN";
+        }
+        return value;
     }
+
 }

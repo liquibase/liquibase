@@ -5,14 +5,14 @@ import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
 import liquibase.parser.core.xml.LiquibaseEntityResolver;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.serializer.LiquibaseSerializable.SerializationType;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -48,6 +48,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     private Document currentChangeLogFileDOM;
 
     private static final String XML_VERSION = "1.1";
+    private final LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
 
     public XMLChangeLogSerializer() {
         try {
@@ -97,7 +98,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-        documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
+        documentBuilder.setEntityResolver(resolver);
 
         Document doc = documentBuilder.newDocument();
         doc.setXmlVersion(XML_VERSION);
@@ -111,7 +112,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         for (NamespaceDetails details : NamespaceDetailsFactory.getInstance().getNamespaceDetails()) {
             for (String namespace : details.getNamespaces()) {
-                if (details.supports(this, namespace)) {
+                if (details.getPriority() > 0 && details.supports(this, namespace)) {
                     String shortName = details.getShortName(namespace);
                     String url = details.getSchemaUrl(namespace);
                     if (shortName != null) {
@@ -167,7 +168,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             } else {
                 existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
 
-                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())), out);
+                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())), out);
             }
             out.flush();
         }
@@ -210,7 +211,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         } else if (value instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
                 Element mapNode = currentChangeLogFileDOM.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, qualifyName(objectName, objectNamespace, parentNamespace));
-                setValueOnNode(mapNode, objectNamespace, (String) entry.getKey(), entry.getValue(), serializationType, objectNamespace);
+                if (serializationType == SerializationType.NESTED_OBJECT) {
+                    setValueOnNode(mapNode, objectNamespace, (String) entry.getKey(), entry.getValue(), serializationType, objectNamespace);
+                } else {
+                    setValueOnNode(mapNode, objectNamespace, "name", entry.getKey(), SerializationType.NAMED_FIELD, objectNamespace);
+                    setValueOnNode(mapNode, objectNamespace, "value", entry.getValue(), serializationType, objectNamespace);
+                }
                 node.appendChild(mapNode);
             }
         } else if (value instanceof LiquibaseSerializable) {
@@ -388,17 +394,17 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             if (constraints.isDeferrable() != null) {
                 constraintsElement.setAttribute("deferrable", constraints.isDeferrable().toString());
             }
-            if (constraints.shouldValidateNullable() != null) {
-                constraintsElement.setAttribute("validateNullable", constraints.shouldValidateNullable().toString());
+            if (constraints.getValidateNullable() != null) {
+                constraintsElement.setAttribute("validateNullable", constraints.getValidateNullable().toString());
             }
-            if (constraints.shouldValidateUnique() != null) {
-                constraintsElement.setAttribute("validateUnique", constraints.shouldValidateUnique().toString());
+            if (constraints.getValidateUnique() != null) {
+                constraintsElement.setAttribute("validateUnique", constraints.getValidateUnique().toString());
             }
-            if (constraints.shouldValidatePrimaryKey() != null) {
-                constraintsElement.setAttribute("validatePrimaryKey", constraints.shouldValidatePrimaryKey().toString());
+            if (constraints.getValidatePrimaryKey() != null) {
+                constraintsElement.setAttribute("validatePrimaryKey", constraints.getValidatePrimaryKey().toString());
             }
-            if (constraints.shouldValidateForeignKey() != null) {
-                constraintsElement.setAttribute("validateForeignKey", constraints.shouldValidateForeignKey().toString());
+            if (constraints.getValidateForeignKey() != null) {
+                constraintsElement.setAttribute("validateForeignKey", constraints.getValidateForeignKey().toString());
             }
             if (constraints.isDeleteCascade() != null) {
                 constraintsElement.setAttribute("deleteCascade", constraints.isDeleteCascade().toString());

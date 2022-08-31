@@ -17,6 +17,11 @@ class AbstractResourceAccessorTest extends Specification {
             SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
                 return null
             }
+
+            @Override
+            SortedSet<String> describeLocations() {
+                return null
+            }
         }
     }
 }

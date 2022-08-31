@@ -1,12 +1,11 @@
 package liquibase.database.core;
 
-import java.util.Arrays;
-
 import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogType;
 import liquibase.util.StringUtil;
+
+import java.util.Arrays;
 
 
 /**
@@ -49,14 +48,23 @@ public class MariaDBDatabase extends MySQLDatabase {
         int major = 0;
         int minor = 0;
         int patch = 0;
+        String productVersion = null;
 
+        try {
+            productVersion = getDatabaseProductVersion();
+            if (productVersion != null && productVersion.toLowerCase().contains("clustrix")) {
+                return 6;
+            }
+        } catch (DatabaseException dbe) {
+
+        }
         try {
             major = getDatabaseMajorVersion();
             minor = getDatabaseMinorVersion();
             patch = getDatabasePatchVersion();
         } catch (DatabaseException x) {
             Scope.getCurrentScope().getLog(getClass()).warning(
-                    LogType.LOG, "Unable to determine exact database server version"
+                    "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);
             return 0;
@@ -79,8 +87,9 @@ public class MariaDBDatabase extends MySQLDatabase {
         if (PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName())) {
             return true; // Identified as MariaDB product
         } else {
-            return (("MYSQL".equalsIgnoreCase(conn.getDatabaseProductName())) && conn.getDatabaseProductVersion()
-                    .toLowerCase().contains("mariadb"));
+            return ("MYSQL".equalsIgnoreCase(conn.getDatabaseProductName()) &&
+                (conn.getDatabaseProductVersion().toLowerCase().contains("mariadb") ||
+                 conn.getDatabaseProductVersion().toLowerCase().contains("clustrix")));
         }
     }
 
@@ -96,9 +105,10 @@ public class MariaDBDatabase extends MySQLDatabase {
     @Override
     public boolean supportsSequences() {
         try {
-            return getDatabaseMajorVersion() >= 10 && getDatabaseMinorVersion() >= 3;
-        } catch (DatabaseException e) {
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Cannot retrieve database version", e);
+            // From https://liquibase.jira.com/browse/CORE-3457 (by Lijun Liao) corrected
+            int majorVersion = getDatabaseMajorVersion();
+            return majorVersion > 10 || (majorVersion == 10 && getDatabaseMinorVersion() >= 3);        } catch (DatabaseException e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Cannot retrieve database version", e);
             return false;
         }
     }

@@ -33,7 +33,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             validationErrors.checkDisallowedField("minValue", alterSequenceStatement.getMinValue(), database, H2Database.class);
         }
 
-        validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database, HsqlDatabase.class, DB2Database.class);
+        validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database, HsqlDatabase.class, DB2Database.class, MSSQLDatabase.class);
         validationErrors.checkDisallowedField("dataType", alterSequenceStatement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class);
         validationErrors.checkRequiredField("sequenceName", alterSequenceStatement.getSequenceName());
 
@@ -74,7 +74,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if ((statement.getCacheSize() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase)) {
+        if ((statement.getCacheSize() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof MariaDBDatabase)) {
             if (statement.getCacheSize().equals(BigInteger.ZERO)) {
                 buffer.append(" NOCACHE ");
             } else {
@@ -82,11 +82,17 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if ((statement.getCycle() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase)) {
+        if ((statement.getCycle() != null) &&
+                (database instanceof OracleDatabase || database instanceof PostgresDatabase
+                || database instanceof MariaDBDatabase || database instanceof MSSQLDatabase)) {
             if (statement.getCycle()) {
                 buffer.append(" CYCLE ");
             } else {
-                buffer.append(" NOCYCLE ");
+                if(database instanceof OracleDatabase || database instanceof MariaDBDatabase) {
+                    buffer.append(" NOCYCLE ");
+                } else if(database instanceof PostgresDatabase || database instanceof MSSQLDatabase) {
+                    buffer.append(" NO CYCLE ");
+                }
             }
         }
 

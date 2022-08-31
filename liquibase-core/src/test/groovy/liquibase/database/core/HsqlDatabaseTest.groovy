@@ -1,10 +1,6 @@
 package liquibase.database.core
 
-
 import liquibase.database.Database
-import liquibase.database.DatabaseConnection
-import liquibase.database.ObjectQuotingStrategy
-import liquibase.structure.core.Table
 import spock.lang.Specification
 
 import static org.junit.Assert.*
@@ -43,19 +39,19 @@ public class HsqlDatabaseTest extends Specification {
         assertEquals("\"Test\"", databaseWithAllQuoting.escapeObjectName("Test", Table.class));
     }
 
-    public void testUsingOracleSyntax() {
-        HsqlDatabase database = new HsqlDatabase();
-        DatabaseConnection conn = Mock(DatabaseConnection.class);
-        when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb;sql.syntax_ora=true;sql.enforce_names=true");
-        database.setConnection(conn);
-        assertTrue("Using oracle syntax", database.isUsingOracleSyntax());
-    }
-
-    public void testNotUsingOracleSyntax() {
-        HsqlDatabase database = new HsqlDatabase();
-        DatabaseConnection conn = Mock(DatabaseConnection.class);
-        when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb");
-        database.setConnection(conn);
-        assertFalse("Using oracle syntax", database.isUsingOracleSyntax());
-    }
+//    public void testUsingOracleSyntax() {
+//        HsqlDatabase database = new HsqlDatabase();
+//        DatabaseConnection conn = Mock(DatabaseConnection.class);
+//        when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb;sql.syntax_ora=true;sql.enforce_names=true");
+//        database.setConnection(conn);
+//        assertTrue("Using oracle syntax", database.isUsingOracleSyntax());
+//    }
+//
+//    public void testNotUsingOracleSyntax() {
+//        HsqlDatabase database = new HsqlDatabase();
+//        DatabaseConnection conn = Mock(DatabaseConnection.class);
+//        when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb");
+//        database.setConnection(conn);
+//        assertFalse("Using oracle syntax", database.isUsingOracleSyntax());
+//    }
 }

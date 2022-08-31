@@ -27,6 +27,7 @@ public interface ResourceAccessor {
 
     /**
      * Returns a single stream matching the given path. See {@link #openStreams(String, String)} for details about path options.
+     * Implementations should respect {@link liquibase.GlobalConfiguration#DUPLICATE_FILE_MODE}
      *
      * @param relativeTo Location that streamPath should be found relative to. If null, streamPath is an absolute path
      * @return null if the resource does not exist
@@ -53,5 +54,10 @@ public interface ResourceAccessor {
      * @throws IOException if there is an error reading an existing root.
      */
     SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException;
+
+    /**
+     * Returns a description of the places this classloader will look for paths. Used in error messages and other troubleshooting cases.
+     */
+    SortedSet<String> describeLocations();
 
 }

@@ -2,7 +2,7 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -10,7 +10,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -20,7 +19,7 @@ import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
@@ -111,6 +110,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         defaultDataTypeParameters.put("money", 4);
         defaultDataTypeParameters.put("smallmoney", 0);
 
+        unmodifiableDataTypes.add("datetime");
+
         addReservedWords(createReservedWordsCollection());
     }
 
@@ -121,11 +122,15 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setDefaultSchemaName(String schemaName) {
-        if (schemaName != null && !schemaName.equalsIgnoreCase(getConnectionSchemaName())) {
-            throw new RuntimeException(String.format(
-                "Cannot use default schema name %s on Microsoft SQL Server because the login " +
-                    "schema of the current user (%s) is different and MSSQL does not support " +
-                    "setting the default schema per session.", schemaName, getConnectionSchemaName()));
+        if(this.getConnection() instanceof OfflineConnection) {
+            //skip the check below, when working with offline connection
+        } else {
+            if (schemaName != null && !schemaName.equalsIgnoreCase(getConnectionSchemaName())) {
+                throw new RuntimeException(String.format(
+                        "Cannot use default schema name %s on Microsoft SQL Server because the login " +
+                                "schema of the current user (%s) is different and MSSQL does not support " +
+                                "setting the default schema per session.", schemaName, getConnectionSchemaName()));
+            }
         }
         super.setDefaultSchemaName(schemaName);
     }
@@ -186,7 +191,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         if (isRealSqlServerConnection && (majorVersion < MSSQL_SERVER_VERSIONS.MSSQL2008)) {
             Scope.getCurrentScope().getLog(getClass()).warning(
-                LogType.LOG, String.format("Your SQL Server major version (%d) seems to indicate that your " +
+                String.format("Your SQL Server major version (%d) seems to indicate that your " +
                         "software is older than SQL Server 2008. Unfortunately, this is not supported, and this " +
                         "connection cannot be used.",
                  majorVersion));
@@ -330,7 +335,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = schema.customize(this);
-        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this)
+        List<String> defLines = (List<String>) Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
             .queryForList(
                 new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName),
                 String.class
@@ -372,7 +377,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return super.escapeObjectName(objectName, objectType);
         }
 
-        boolean includeCatalog = LiquibaseConfiguration.getInstance().shouldIncludeCatalogInSpecification();
+        boolean includeCatalog = GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION.getCurrentValue();
         if ((catalogName != null) && (includeCatalog || !catalogName.equalsIgnoreCase(this.getDefaultCatalogName()))) {
             return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
         } else {
@@ -405,14 +410,14 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     String sql =
                         "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'" + escapeStringForDatabase(catalog) +
                             "', 'Collation'))";
-                    String collation = ExecutorService.getInstance().getExecutor(this)
+                    String collation = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
                         .queryForObject(new RawSqlStatement(sql), String.class);
                     caseSensitive = (collation != null) && !collation.contains("_CI_");
                 } else if (getConnection() instanceof OfflineConnection) {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
             } catch (DatabaseException e) {
-                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Cannot determine case sensitivity from MSSQL", e);
+                Scope.getCurrentScope().getLog(getClass()).warning("Cannot determine case sensitivity from MSSQL", e);
             }
         }
         return (caseSensitive != null) && caseSensitive;
@@ -549,7 +554,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                         sendsStringParametersAsUnicode =
                             (baseType == null) || baseType.startsWith("n");
                     } finally {
-                        JdbcUtils.close(rs, ps);
+                        JdbcUtil.close(rs, ps);
                     }
                 } else if (getConnection() instanceof OfflineConnection) {
                     sendsStringParametersAsUnicode =
@@ -557,7 +562,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 }
             } catch (SQLException | DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                    LogType.LOG, "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
+                    "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
             }
         }
 
@@ -589,11 +594,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     "         WHEN 5 THEN 'Azure'\n" +
                     "         ELSE 'Unknown'\n" +
                     "       END";
-                return ExecutorService.getInstance().getExecutor(this)
+                return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
                     .queryForObject(new RawSqlStatement(sql), String.class);
             }
         } catch (DatabaseException e) {
-            Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Could not determine engine edition", e);
+            Scope.getCurrentScope().getLog(getClass()).warning("Could not determine engine edition", e);
         }
         return "Unknown";
     }
@@ -606,6 +611,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     protected String getQuotingEndCharacter() {
         return "]";
+    }
+
+    @Override
+    public int getDefaultFractionalDigitsForTimestamp() {
+        return 7;
     }
 
     @Override

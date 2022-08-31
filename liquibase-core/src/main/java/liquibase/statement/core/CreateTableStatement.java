@@ -1,5 +1,6 @@
 package liquibase.statement.core;
 
+import liquibase.ContextExpression;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.*;
 
@@ -19,7 +20,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private Map<String, String> columnRemarks = new HashMap<>();
 
     private PrimaryKeyConstraint primaryKeyConstraint;
-    private Map<String,NotNullConstraint> notNullConstraints = new HashMap<String, NotNullConstraint>();
+    private Map<String, NotNullConstraint> notNullConstraints = new HashMap<String, NotNullConstraint>();
     private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<ForeignKeyConstraint>();
 
     /* NOT NULL constraints in RDBMSs are curious beasts. In some RDBMS, they do not exist as constraints at all, i.e.
@@ -29,7 +30,8 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
        in line with the column (this implies that a NN constraint can always affects exactly one column). */
     private HashMap<String, NotNullConstraint> notNullColumns = new HashMap<>();
 
-    private Set<UniqueConstraint> uniqueConstraints = new HashSet<>();
+    private Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
+    private Set<String> computedColumns = new HashSet<>();
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName = catalogName;
@@ -37,8 +39,8 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         this.tableName = tableName;
     }
 
-    public CreateTableStatement(String catalogName, String schemaName, String tableName,String remarks) {
-        this(catalogName,schemaName,tableName);
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks) {
+        this(catalogName, schemaName, tableName);
         this.remarks = remarks;
     }
 
@@ -87,12 +89,13 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         return uniqueConstraints;
     }
 
+    @java.lang.SuppressWarnings("squid:S4275")
     public Map<String, NotNullConstraint> getNotNullColumns() {
         return notNullConstraints;
     }
 
     public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String keyName,
-        String tablespace, ColumnConstraint... constraints) {
+                                                    String tablespace, ColumnConstraint... constraints) {
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
         pkConstraint.addColumns(columnName);
         pkConstraint.setTablespace(tablespace);
@@ -108,20 +111,33 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     }
 
     public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue,
-        Boolean validate,String keyName, String tablespace, ColumnConstraint... constraints) {
+                                                    Boolean validate, String keyName, String tablespace, ColumnConstraint... constraints) {
+        return addPrimaryKeyColumn(columnName, columnType, defaultValue, validate, false, false, keyName, tablespace, constraints);
+    }
+
+
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue,
+                                                    Boolean validate, boolean deferrable, boolean initiallyDeferred, String keyName, String tablespace, ColumnConstraint... constraints) {
+        return addPrimaryKeyColumn(columnName, columnType, defaultValue, validate, deferrable, initiallyDeferred, keyName, tablespace, null, constraints);
+    }
+
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue,
+                                                    Boolean validate, boolean deferrable, boolean initiallyDeferred, String keyName, String tablespace, String remarks, ColumnConstraint... constraints) {
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
-        if (validate!=null) {
+        if (validate != null) {
             pkConstraint.setValidatePrimaryKey(validate);
         }
         pkConstraint.addColumns(columnName);
         pkConstraint.setTablespace(tablespace);
+        pkConstraint.setDeferrable(deferrable);
+        pkConstraint.setInitiallyDeferred(initiallyDeferred);
 
         List<ColumnConstraint> allConstraints = new ArrayList<ColumnConstraint>(Arrays.asList(constraints));
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 
 
-        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue, remarks, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
 
         return this;
     }
@@ -132,7 +148,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
 
     public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue) {
         if (defaultValue instanceof ColumnConstraint) {
-            return addColumn(columnName,  columnType, null, new ColumnConstraint[]{(ColumnConstraint) defaultValue});
+            return addColumn(columnName, columnType, null, new ColumnConstraint[]{(ColumnConstraint) defaultValue});
         }
         return addColumn(columnName, columnType, defaultValue, new ColumnConstraint[0]);
     }
@@ -142,7 +158,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     }
 
     public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, ColumnConstraint[] constraints) {
-        return addColumn(columnName,columnType,defaultValue,null,constraints);
+        return addColumn(columnName, columnType, defaultValue, null, constraints);
     }
 
     public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String remarks, ColumnConstraint... constraints) {
@@ -158,7 +174,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         if (defaultValueConstraintName != null) {
             defaultValueConstraintNames.put(columnName, defaultValueConstraintName);
         }
-        if(remarks != null) {
+        if (remarks != null) {
             this.columnRemarks.put(columnName, remarks);
         }
         if (constraints != null) {
@@ -245,5 +261,13 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
 
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
+    }
+
+    public void setComputed(String columnName) {
+        this.computedColumns.add(columnName);
+    }
+
+    public boolean isComputed(String columnName) {
+        return this.computedColumns.contains(columnName);
     }
 }

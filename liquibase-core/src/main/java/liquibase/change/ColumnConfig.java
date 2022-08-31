@@ -10,16 +10,8 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.UniqueConstraint;
-import liquibase.util.ISODateFormat;
-import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtil;
-import liquibase.util.NowAndTodayUtil;
-import liquibase.util.NowAndTodayUtil;
+import liquibase.structure.core.*;
+import liquibase.util.*;
 
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -72,8 +64,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig(Column columnSnapshot) {
         setName(columnSnapshot.getName());
-        setComputed(((columnSnapshot.getComputed() != null) && columnSnapshot.getComputed()) ? Boolean.TRUE : null);
-        setDescending(((columnSnapshot.getDescending() != null) && columnSnapshot.getDescending()) ? Boolean.TRUE : null);
+        setComputed(BooleanUtil.isTrue(columnSnapshot.getComputed()) ? Boolean.TRUE : null);
+        setDescending(BooleanUtil.isTrue(columnSnapshot.getDescending()) ? Boolean.TRUE : null);
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
         }
@@ -102,7 +94,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         if ((columnSnapshot.isNullable() != null) && !columnSnapshot.isNullable()) {
             constraints.setNullable(columnSnapshot.isNullable());
-            constraints.setShouldValidateNullable(columnSnapshot.shouldValidateNullable());
+            constraints.setValidateNullable(columnSnapshot.getValidateNullable());
             nonDefaultConstraints = true;
         }
 
@@ -157,6 +149,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                             "(" +
                             fk.getPrimaryKeyColumns().get(0).getName() +
                             ")");
+                        constraints.setDeleteCascade(fk.getDeleteRule() != null && fk.getDeleteRule() == ForeignKeyConstraintType.importedKeyCascade);
                         nonDefaultConstraints = true;
                     }
                 }
@@ -315,7 +308,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     /**
      * Set the valueBoolean based on a given string.
-     * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a boolean.
+     * If the passed value cannot be parsed as a boolean, it is assumed to be a function that returns a boolean.
      * If the string "null" or an empty string is passed, it will set a null value.
      * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
      */
@@ -588,7 +581,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     /**
      * Set the defaultValueBoolean based on a given string.
-     * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a boolean.
+     * If the passed value cannot be parsed as a boolean, it is assumed to be a function that returns a boolean.
      * If the string "null" or an empty string is passed, it will set a null value.
      * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
      */
@@ -883,10 +876,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         constraints.setForeignKeyName(constraintsNode.getChildValue(null, "foreignKeyName", String.class));
         constraints.setInitiallyDeferred(constraintsNode.getChildValue(null, "initiallyDeferred", Boolean.class));
         constraints.setDeferrable(constraintsNode.getChildValue(null, "deferrable", Boolean.class));
-        constraints.setShouldValidateNullable(constraintsNode.getChildValue(null, "validateNullable", Boolean.class));
-        constraints.setShouldValidateUnique(constraintsNode.getChildValue(null, "validateUnique", Boolean.class));
-        constraints.setShouldValidatePrimaryKey(constraintsNode.getChildValue(null, "validatePrimaryKey", Boolean.class));
-        constraints.setShouldValidateForeignKey(constraintsNode.getChildValue(null, "validateForeignKey", Boolean.class));
+        constraints.setValidateNullable(constraintsNode.getChildValue(null, "validateNullable", Boolean.class));
+        constraints.setValidateUnique(constraintsNode.getChildValue(null, "validateUnique", Boolean.class));
+        constraints.setValidatePrimaryKey(constraintsNode.getChildValue(null, "validatePrimaryKey", Boolean.class));
+        constraints.setValidateForeignKey(constraintsNode.getChildValue(null, "validateForeignKey", Boolean.class));
         setConstraints(constraints);
     }
 

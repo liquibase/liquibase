@@ -2,17 +2,20 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.BooleanType;
 import liquibase.datatype.core.CharType;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
+import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -24,7 +27,7 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
         Object defaultValue = addDefaultValueStatement.getDefaultValue();
 
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkRequiredField("defaultValue", defaultValue);
+        validationErrors.checkRequiredField("defaultValue", defaultValue, true);
         validationErrors.checkRequiredField("columnName", addDefaultValueStatement.getColumnName());
         validationErrors.checkRequiredField("tableName", addDefaultValueStatement.getTableName());
         if (!database.supportsSequences() && (defaultValue instanceof SequenceNextValueFunction)) {
@@ -44,7 +47,7 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
             LiquibaseDataType dataType = DataTypeFactory.getInstance().fromDescription(columnDataType, database);
             boolean typeMismatch = false;
             if (dataType instanceof BooleanType) {
-                if (!(defaultValue instanceof Boolean)) {
+                if (!(defaultValue instanceof Boolean) && !(defaultValue instanceof DatabaseFunction)) {
                     typeMismatch = true;
                 }
             } else if (dataType instanceof CharType) {
@@ -59,6 +62,17 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
         }
 
         return validationErrors;
+    }
+
+    @Override
+    public Warnings warn(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        Warnings warnings = super.warn(statement, database, sqlGeneratorChain);
+
+        if (database instanceof MySQLDatabase) {
+            ((MySQLDatabase) database).warnAboutAlterColumn("addDefaultValue", warnings);
+        }
+
+        return warnings;
     }
 
     @Override

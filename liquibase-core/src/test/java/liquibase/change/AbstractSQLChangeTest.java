@@ -1,11 +1,15 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MockDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.StreamUtil;
 import org.junit.Test;
 
@@ -117,7 +121,7 @@ public class AbstractSQLChangeTest {
 //    public void generateStatements_nullSqlMakesNoStatements() {
 //        assertEquals(0, new ExampleAbstractSQLChange(null).generateStatements(mock(Database.class)).length);
 //    }
-
+//
 //    @Test
 //    public void generateStatements() {
 //        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("LINE 1;\n--a comment\nLINE 2;\nLINE 3;");
@@ -130,7 +134,7 @@ public class AbstractSQLChangeTest {
 //        assertEquals("LINE 2", ((RawSqlStatement) statements[1]).getSql());
 //        assertEquals("LINE 3", ((RawSqlStatement) statements[2]).getSql());
 //    }
-
+//
 //    @Test
 //    public void generateStatements_crlfEndingStandardizes() {
 //        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("LINE 1;\r\n--a comment\r\nLINE 2;\r\nLINE 3;");
@@ -167,7 +171,7 @@ public class AbstractSQLChangeTest {
 //        assertEquals("--a comment\nLINE 2", ((RawSqlStatement) statements[1]).getSql());
 //        assertEquals("LINE 3", ((RawSqlStatement) statements[2]).getSql());
 //    }
-
+//
 //    @Test
 //    public void generateStatements_noSplit() {
 //        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("LINE 1;\n--a comment\nLINE 2;\nLINE 3;");
@@ -178,7 +182,7 @@ public class AbstractSQLChangeTest {
 //        assertEquals(1, statements.length);
 //        assertEquals("LINE 1;\n\nLINE 2;\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
 //    }
-
+//
 //    @Test
 //    public void generateStatements_noSplitKeepComments() {
 //        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("LINE 1;\n--a comment\nLINE 2;\nLINE 3;");

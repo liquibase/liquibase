@@ -23,8 +23,8 @@ public class ChangeGeneratorChain {
             return null;
         }
 
-        if ((control.getObjectChangeFilter() != null) && !control.getObjectChangeFilter().includeMissing
-            (missingObject, referenceDatabase, comparisionDatabase)) {
+        if ((control.getObjectChangeFilter() != null) &&
+            !control.getObjectChangeFilter().includeMissing(missingObject, referenceDatabase, comparisionDatabase)) {
             return null;
         }
 
@@ -64,8 +64,8 @@ public class ChangeGeneratorChain {
             return null;
         }
 
-        if ((control.getObjectChangeFilter() != null) && !control.getObjectChangeFilter().includeUnexpected
-            (unexpectedObject, referenceDatabase, comparisionDatabase)) {
+        if ((control.getObjectChangeFilter() != null) &&
+            !control.getObjectChangeFilter().includeUnexpected(unexpectedObject, referenceDatabase, comparisionDatabase)) {
             return null;
         }
 
@@ -112,8 +112,8 @@ public class ChangeGeneratorChain {
             return null;
         }
 
-        if ((control.getObjectChangeFilter() != null) && !control.getObjectChangeFilter().includeChanged
-            (changedObject, differences, referenceDatabase, comparisionDatabase)) {
+        if ((control.getObjectChangeFilter() != null) &&
+            !control.getObjectChangeFilter().includeChanged(changedObject, differences, referenceDatabase, comparisionDatabase)) {
             return null;
         }
 

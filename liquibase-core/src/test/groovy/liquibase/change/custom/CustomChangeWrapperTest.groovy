@@ -249,13 +249,38 @@ class CustomChangeWrapperTest extends Specification {
         }
 
         then:
-        change.resourceAccessor == resourceSupplier.simpleResourceAccessor
         change.getCustomChange() instanceof liquibase.change.custom.ExampleCustomSqlChange
         change.params.size() == 3
         change.getParamValue("param 1") == "param 1 value"
         change.getParamValue("param 2") == "param 2 value"
         change.getParamValue("param 3") == "param 3 value"
 
+    }
+
+    def "load of param without name fails well"() {
+        when:
+        def node = new ParsedNode(null, "customChange")
+                .addChild(null, "class", "liquibase.change.custom.ExampleCustomSqlChange")
+                .addChild(new ParsedNode(null, "param").addChildren([nameo: "param 1", value: "param 1 value"]))
+                .addChild(new ParsedNode(null, "param").addChildren([name: "param 2", value: "param 2 value"]))
+                .addChild(new ParsedNode(null, "otherNode").setValue("should be ignored"))
+                .addChild(new ParsedNode(null, "param").addChildren([name: "param 3"]).setValue("param 3 value"))
+        def change = new CustomChangeWrapper()
+        change.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        thrown(ParsedNodeException.class)
+
+    }
+
+    def "customChange without class fails expectedly"() {
+        when:
+        def node = new ParsedNode(null, "customChange")
+        def change = new CustomChangeWrapper()
+        change.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        thrown(ParsedNodeException.class)
     }
 
     def "load handles params in a 'params' collection"() {
@@ -274,7 +299,6 @@ class CustomChangeWrapperTest extends Specification {
         }
 
         then:
-        change.resourceAccessor == resourceSupplier.simpleResourceAccessor
         change.getCustomChange() instanceof ExampleCustomSqlChange
         change.params.size() == 3
         change.getParamValue("param 1") == "param 1 value"
@@ -293,7 +317,6 @@ class CustomChangeWrapperTest extends Specification {
         }
 
         then:
-        change.resourceAccessor == resourceSupplier.simpleResourceAccessor
         change.getCustomChange() instanceof ExampleCustomSqlChange
         change.params.size() == 2
         change.getParamValue("tableName") == "my_table"

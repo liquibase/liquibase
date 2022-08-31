@@ -3,8 +3,7 @@ package liquibase.sdk.supplier.resource;
 import liquibase.Scope;
 import liquibase.change.ChangeFactory;
 import liquibase.change.core.CreateProcedureChange;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.InputStreamList;
@@ -13,7 +12,9 @@ import liquibase.resource.ResourceAccessor;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class ResourceSupplier {
 
@@ -34,8 +35,7 @@ public class ResourceSupplier {
         @Override
         public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
             InputStream stream = null;
-            String encoding = LiquibaseConfiguration.getInstance().getConfiguration(
-                    GlobalConfiguration.class).getOutputEncoding();
+            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
             if (streamPath.toLowerCase().endsWith("csv")) {
                 stream = new ByteArrayInputStream(USERS_CSV.getBytes(encoding));
             } else if (streamPath.toLowerCase().endsWith("my-logic.sql")) {
@@ -56,6 +56,11 @@ public class ResourceSupplier {
         @Override
         public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
             return null;
+        }
+
+        @Override
+        public SortedSet<String> describeLocations() {
+            return new TreeSet<>(Arrays.asList("Logic in ResourceSupplier.java"));
         }
     }
 }

@@ -4,7 +4,7 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * Clears all checksums in the current changelog, so they will be recalculated next update.
+ * <p>Clears all checksums in the current changelog, so they will be recalculated next update.</p>
  * 
  * @author Nathan Voxland
  * @goal clearCheckSums

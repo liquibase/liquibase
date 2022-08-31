@@ -72,5 +72,4 @@ class CompositeResourceAccessorTest extends Specification {
         [] as SortedSet   | [] as SortedSet    | [] as SortedSet
         validResources    | validResources     | validResources
     }
-
 }

@@ -26,23 +26,55 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
     public boolean add(URI uri, InputStream inputStream) {
         Logger log = Scope.getCurrentScope().getLog(getClass());
 
-        boolean duplicate = streams.put(uri, inputStream) != null;
+        boolean duplicate = alreadySaw(uri);
         if (duplicate) {
-            log.fine("Closing duplicate stream for "+uri);
+            log.fine("Closing duplicate stream for " + uri);
             try {
                 inputStream.close();
             } catch (IOException e) {
-                log.warning("Cannot close stream for "+uri, e);
+                log.warning("Cannot close stream for " + uri, e);
             }
+        } else {
+            streams.put(uri, inputStream);
         }
         return duplicate;
+    }
+
+    protected boolean alreadySaw(URI uri) {
+        if (streams.isEmpty()) {
+            return false;
+        }
+        if (streams.containsKey(uri)) {
+            return true;
+        }
+
+
+        //standardize url strings between file:// and jar:file:
+        String thisUriStringBase = uri.toString()
+                .replaceFirst("^file://", "")
+                .replaceFirst("^jar:file:", "")
+                .replaceFirst("!/", "!");
+
+        for (URI seenURI : streams.keySet()) {
+            if (seenURI.toString()
+                    .replaceFirst("^file://", "")
+                    .replaceFirst("^jar:file:", "")
+                    .replaceFirst("!/", "!")
+                    .equals(thisUriStringBase)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void addAll(InputStreamList streams) {
         if (streams == null) {
             return;
         }
-        this.streams.putAll(streams.streams);
+
+        for (Map.Entry<URI, InputStream> entry : streams.streams.entrySet()) {
+            add(entry.getKey(), entry.getValue());
+        }
     }
 
     /**

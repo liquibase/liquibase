@@ -11,8 +11,8 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.beans.PropertyUtils;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
@@ -28,6 +28,8 @@ import java.util.*;
 public class ChangeParameterMetaData {
 
     public static final String COMPUTE = "COMPUTE";
+    public static final String ALL = "all";
+    public static final String NONE = "none";
 
     private Change change;
     private String parameterName;
@@ -42,6 +44,10 @@ public class ChangeParameterMetaData {
     private Set<String> supportedDatabases;
     private String mustEqualExisting;
     private LiquibaseSerializable.SerializationType serializationType;
+    private String[] requiredForDatabaseArg;
+    private String[] supportedDatabasesArg;
+    private Optional<Method> readMethodRef = Optional.empty();
+    private Optional<Method> writeMethodRef = Optional.empty();
 
     public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
                                    Map<String, Object> exampleValues, String since, Type dataType,
@@ -70,11 +76,11 @@ public class ChangeParameterMetaData {
             this.dataTypeClass = (Class) dataType;
         } else if (dataType instanceof ParameterizedType) {
             this.dataType = StringUtil.lowerCaseFirst(
-                ((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName() +
-                    " of " +
-                    StringUtil.lowerCaseFirst(
-                        ((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()
-                    )
+                    ((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName() +
+                            " of " +
+                            StringUtil.lowerCaseFirst(
+                                    ((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()
+                            )
             );
             this.dataTypeClass = (Class) ((ParameterizedType) dataType).getRawType();
             this.dataTypeClassParameters = ((ParameterizedType) dataType).getActualTypeArguments();
@@ -84,19 +90,25 @@ public class ChangeParameterMetaData {
         this.serializationType = serializationType;
         this.since = since;
 
-        this.supportedDatabases = Collections.unmodifiableSet(analyzeSupportedDatabases(supportedDatabases));
-        this.requiredForDatabase = Collections.unmodifiableSet(analyzeRequiredDatabases(requiredForDatabase));
+        this.supportedDatabasesArg = supportedDatabases;
+        this.requiredForDatabaseArg = requiredForDatabase;
+    }
+
+    public ChangeParameterMetaData withAccessors(Method readMethod, Method writeMethod) {
+        this.readMethodRef = Optional.ofNullable(readMethod);
+        this.writeMethodRef = Optional.ofNullable(writeMethod);
+        return this;
     }
 
     protected Set<String> analyzeSupportedDatabases(String[] supportedDatabases) {
         if (supportedDatabases == null) {
-            supportedDatabases = new String[]{ChangeParameterMetaData.COMPUTE};
+            supportedDatabases = new String[]{COMPUTE};
         }
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if ((supportedDatabases.length == 1) && StringUtil.join(supportedDatabases, ",").equals
-            (ChangeParameterMetaData.COMPUTE)) {
+        if ((supportedDatabases.length == 1)
+                && StringUtil.join(supportedDatabases, ",").equals(COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 if ((database.getShortName() == null) || "unsupported".equals(database.getShortName())) {
@@ -112,8 +124,8 @@ public class ChangeParameterMetaData {
                         this.setValue(testChange, this.getExampleValue(database));
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
                         if (finalErrors.getUnsupportedErrorMessages().isEmpty() || (finalErrors
-                            .getUnsupportedErrorMessages().size() == originalErrors.getUnsupportedErrorMessages()
-                            .size())) {
+                                .getUnsupportedErrorMessages().size() == originalErrors.getUnsupportedErrorMessages()
+                                .size())) {
                             computedDatabases.add(database.getShortName());
                         }
                         validDatabases++;
@@ -124,12 +136,12 @@ public class ChangeParameterMetaData {
             }
 
             if (validDatabases == 0) {
-                return new HashSet<>(Arrays.asList("all"));
+                return new HashSet<>(Arrays.asList(ALL));
             } else if (computedDatabases.size() == validDatabases) {
-                computedDatabases = new HashSet<>(Arrays.asList("all"));
+                computedDatabases = new HashSet<>(Arrays.asList(ALL));
             }
 
-            computedDatabases.remove("none");
+            computedDatabases.remove(NONE);
 
             return computedDatabases;
         } else {
@@ -140,13 +152,13 @@ public class ChangeParameterMetaData {
 
     protected Set<String> analyzeRequiredDatabases(String[] requiredDatabases) {
         if (requiredDatabases == null) {
-            requiredDatabases = new String[]{ChangeParameterMetaData.COMPUTE};
+            requiredDatabases = new String[]{COMPUTE};
         }
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if ((requiredDatabases.length == 1) && StringUtil.join(requiredDatabases, ",").equals
-            (ChangeParameterMetaData.COMPUTE)) {
+        if ((requiredDatabases.length == 1)
+                && StringUtil.join(requiredDatabases, ",").equals(COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 try {
@@ -156,8 +168,8 @@ public class ChangeParameterMetaData {
                         this.setValue(testChange, this.getExampleValue(database));
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
                         if (!originalErrors.getRequiredErrorMessages().isEmpty() && (finalErrors
-                            .getRequiredErrorMessages().size() < originalErrors.getRequiredErrorMessages().size())
-                         ) {
+                                .getRequiredErrorMessages().size() < originalErrors.getRequiredErrorMessages().size())
+                        ) {
                             computedDatabases.add(database.getShortName());
                         }
                         validDatabases++;
@@ -170,14 +182,14 @@ public class ChangeParameterMetaData {
             if (validDatabases == 0) {
                 return new HashSet<>();
             } else if (computedDatabases.size() == validDatabases) {
-                computedDatabases = new HashSet<>(Arrays.asList("all"));
+                computedDatabases = new HashSet<>(Arrays.asList(ALL));
             }
 
-            computedDatabases.remove("none");
+            computedDatabases.remove(NONE);
         } else {
             computedDatabases = new HashSet<>(Arrays.asList(requiredDatabases));
         }
-        computedDatabases.remove("none");
+        computedDatabases.remove(NONE);
         return computedDatabases;
     }
 
@@ -234,10 +246,16 @@ public class ChangeParameterMetaData {
      * This method will never return a null value
      */
     public Set<String> getRequiredForDatabase() {
+        if (requiredForDatabase == null) {
+            requiredForDatabase = Collections.unmodifiableSet(analyzeRequiredDatabases(requiredForDatabaseArg));
+        }
         return requiredForDatabase;
     }
 
     public Set<String> getSupportedDatabases() {
+        if (supportedDatabases == null) {
+            supportedDatabases = Collections.unmodifiableSet(analyzeSupportedDatabases(supportedDatabasesArg));
+        }
         return supportedDatabases;
     }
 
@@ -247,11 +265,11 @@ public class ChangeParameterMetaData {
      * required database list contains the string "all"
      */
     public boolean isRequiredFor(Database database) {
-        return requiredForDatabase.contains("all") || requiredForDatabase.contains(database.getShortName());
+        return getRequiredForDatabase().contains(ALL) || getRequiredForDatabase().contains(database.getShortName());
     }
 
     public boolean supports(Database database) {
-        return supportedDatabases.contains("all") || supportedDatabases.contains(database.getShortName());
+        return getSupportedDatabases().contains(ALL) || getSupportedDatabases().contains(database.getShortName());
     }
 
 
@@ -260,21 +278,37 @@ public class ChangeParameterMetaData {
      */
     public Object getCurrentValue(Change change) {
         try {
-            for (PropertyDescriptor descriptor : PropertyUtils.getInstance().getDescriptors(change.getClass())) {
+            return getReadMethod(change).invoke(change);
+        } catch (UnexpectedLiquibaseException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    private Method getReadMethod(Change change) {
+        if (readMethodRef.isPresent()) {
+            return readMethodRef.orElseThrow(() -> new UnexpectedLiquibaseException("No readMethod for " + parameterName));
+        }
+
+        try {
+            readMethodRef = Optional.empty();
+            for (PropertyDescriptor descriptor : ObjectUtil.getDescriptors(change.getClass())) {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method readMethod = descriptor.getReadMethod();
                     if (readMethod == null) {
                         readMethod = change.getClass().getMethod(
-                            "is" + StringUtil.upperCaseFirst(descriptor.getName())
+                                "is" + StringUtil.upperCaseFirst(descriptor.getName())
                         );
                     }
-                    return readMethod.invoke(change);
+                    readMethodRef = Optional.of(readMethod);
+                    return readMethod;
                 }
             }
-            throw new RuntimeException("Could not find readMethod for " + this.parameterName);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
+        throw new UnexpectedLiquibaseException("Could not find readMethod for " + this.parameterName);
     }
 
     /**
@@ -295,35 +329,53 @@ public class ChangeParameterMetaData {
                 }
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException("Cannot convert string value '" + value + "' to " +
-                    dataType + ": " + e.getMessage());
+                        dataType + ": " + e.getMessage());
             }
         }
 
         try {
-            for (PropertyDescriptor descriptor : PropertyUtils.getInstance().getDescriptors(change.getClass())) {
-                if (descriptor.getDisplayName().equals(this.parameterName)) {
-                    Method writeMethod = descriptor.getWriteMethod();
-                    if (writeMethod == null) {
-                        throw new UnexpectedLiquibaseException("Could not find writeMethod for " + this.parameterName);
-                    }
-                    Class<?> expectedWriteType = writeMethod.getParameterTypes()[0];
-                    if ((value != null) && !expectedWriteType.isAssignableFrom(value.getClass())) {
-                        if (expectedWriteType.equals(String.class)) {
-                            value = value.toString();
-                        } else {
-                            throw new UnexpectedLiquibaseException(
-                                "Could not convert " + value.getClass().getName() +
-                                " to " +
-                                expectedWriteType.getName()
-                            );
-                        }
-                    }
-                    writeMethod.invoke(change, value);
+            Method writeMethod = getWriteMethod(change);
+            Class<?> expectedWriteType = writeMethod.getParameterTypes()[0];
+            if ((value != null) && !expectedWriteType.isAssignableFrom(value.getClass())) {
+                if (expectedWriteType.equals(String.class)) {
+                    value = value.toString();
+                } else {
+                    throw new UnexpectedLiquibaseException(
+                            "Could not convert " + value.getClass().getName() +
+                                    " to " +
+                                    expectedWriteType.getName()
+                    );
                 }
             }
+            writeMethod.invoke(change, value);
+        } catch (UnexpectedLiquibaseException e) {
+            throw e;
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException("Error setting " + this.parameterName + " to " + value, e);
         }
+    }
+
+    private Method getWriteMethod(Change change) {
+        if (writeMethodRef.isPresent()) {
+            return writeMethodRef.orElseThrow(() -> new UnexpectedLiquibaseException("No writeMethod for " + parameterName));
+        }
+
+        try {
+            writeMethodRef = Optional.empty();
+            for (PropertyDescriptor descriptor : ObjectUtil.getDescriptors(change.getClass())) {
+                if (descriptor.getDisplayName().equals(this.parameterName)) {
+                    Method writeMethod = descriptor.getWriteMethod();
+                    if (writeMethod == null) {
+                        break;
+                    }
+                    writeMethodRef = Optional.of(writeMethod);
+                    return writeMethod;
+                }
+            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        throw new UnexpectedLiquibaseException("Could not find writeMethod for " + this.parameterName);
     }
 
     /**
@@ -356,8 +408,8 @@ public class ChangeParameterMetaData {
         if (exampleValues != null) {
             Object exampleValue = null;
 
-            for (Map.Entry<String, Object> entry: exampleValues.entrySet()) {
-                if ("all".equalsIgnoreCase(entry.getKey())) {
+            for (Map.Entry<String, Object> entry : exampleValues.entrySet()) {
+                if (ALL.equalsIgnoreCase(entry.getKey())) {
                     exampleValue = entry.getValue();
                 } else if (DatabaseList.definitionMatches(entry.getKey(), database, false)) {
                     return entry.getValue();
@@ -386,20 +438,19 @@ public class ChangeParameterMetaData {
         standardExamples.put("primaryKey", "pk_id");
 
 
-
         if (standardExamples.containsKey(parameterName)) {
             return standardExamples.get(parameterName);
         }
 
-        for (String prefix : new String[] {"base", "referenced", "new", "old"}) {
+        for (String prefix : new String[]{"base", "referenced", "new", "old"}) {
             if (parameterName.startsWith(prefix)) {
-                String mainName = StringUtil.lowerCaseFirst(parameterName.replaceFirst("^"+prefix, ""));
+                String mainName = StringUtil.lowerCaseFirst(parameterName.replaceFirst("^" + prefix, ""));
                 if (standardExamples.containsKey(mainName)) {
                     return standardExamples.get(mainName);
                 }
             }
         }
-    
+
         switch (dataType) {
             case "string":
                 return "A String";
@@ -411,7 +462,7 @@ public class ChangeParameterMetaData {
                 return new BigInteger("371717");
             case "list":
                 return null; // TODO
-        
+
             case "sequenceNextValueFunction":
                 return new SequenceNextValueFunction("seq_name");
             case "databaseFunction":

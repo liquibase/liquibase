@@ -20,6 +20,7 @@ import liquibase.structure.core.Sequence;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 /**
  * Snapshot generator for a SEQUENCE object in a JDBC-accessible database
@@ -39,7 +40,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
 
         //noinspection unchecked
-        List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)));
+        List<Map<String, ?>> sequences = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)));
 
         if (sequences != null) {
             for (Map<String, ?> sequence : sequences) {
@@ -56,8 +57,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         List<Map<String, ?>> sequences;
         if (database instanceof Db2zDatabase) {
-            sequences = ExecutorService.getInstance()
-                    .getExecutor(database)
+            sequences = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                    .getExecutor("jdbc", database)
                     .queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
             return getSequences(example, database, sequences);
         } else {
@@ -71,8 +72,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                 return null;
             }
 
-            sequences = ExecutorService.getInstance()
-                    .getExecutor(database)
+            sequences = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                    .getExecutor("jdbc", database)
                     .queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
             DatabaseObject sequenceRow = getSequences(example, database, sequences);
             return sequenceRow;
@@ -102,7 +103,9 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         seq.setIncrementBy(toBigInteger(sequenceRow.get("INCREMENT_BY"), database));
         seq.setWillCycle(toBoolean(sequenceRow.get("WILL_CYCLE"), database));
         seq.setOrdered(toBoolean(sequenceRow.get("IS_ORDERED"), database));
-        seq.setDataType((String) sequenceRow.get("SEQ_TYPE"));
+        if (! (database instanceof CockroachDatabase)) {
+            seq.setDataType((String) sequenceRow.get("SEQ_TYPE"));
+        }
         seq.setAttribute("liquibase-complete", true);
 
         return seq;
@@ -170,7 +173,14 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof FirebirdDatabase) {
             return "SELECT TRIM(RDB$GENERATOR_NAME) AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0";
         } else if (database instanceof H2Database) {
-            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
+            try {
+                if (database.getDatabaseMajorVersion() <= 1) {
+                    return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
+                }
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine h2 version in order to generate sequence snapshot query");
+            }
+            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
         } else if (database instanceof HsqlDatabase) {
             return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
         } else if (database instanceof InformixDatabase) {
@@ -207,16 +217,16 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                 Scope.getCurrentScope().getLog(getClass()).warning("Failed to retrieve database version: " + ignore);
             }
             if (version < 10) { // 'pg_sequence' view does not exists yet
-                return "SELECT c.relname AS SEQUENCE_NAME FROM pg_class c " +
+                return "SELECT c.relname AS \"SEQUENCE_NAME\" FROM pg_class c " +
                         "join pg_namespace on c.relnamespace = pg_namespace.oid " +
                         "WHERE c.relkind='S' " +
                         "AND nspname = '" + schema.getName() + "' " +
                         "AND c.oid not in (select d.objid FROM pg_depend d where d.refobjsubid > 0)";
             } else {
-                return "SELECT c.relname AS SEQUENCE_NAME, " +
-                        "  s.seqmin AS MIN_VALUE, s.seqmax AS MAX_VALUE, s.seqincrement AS INCREMENT_BY, " +
-                        "  s.seqcycle AS WILL_CYCLE, s.seqstart AS START_VALUE, s.seqcache AS CACHE_SIZE, " +
-                        "  pg_catalog.format_type(s.seqtypid, NULL) AS SEQ_TYPE " +
+                return "SELECT c.relname AS \"SEQUENCE_NAME\", " +
+                    "  s.seqmin AS \"MIN_VALUE\", s.seqmax AS \"MAX_VALUE\", s.seqincrement AS \"INCREMENT_BY\", " +
+                    "  s.seqcycle AS \"WILL_CYCLE\", s.seqstart AS \"START_VALUE\", s.seqcache AS \"CACHE_SIZE\", " +
+                    "  pg_catalog.format_type(s.seqtypid, NULL) AS \"SEQ_TYPE\" " +
                         "FROM pg_class c " +
                         "JOIN pg_namespace ns on c.relnamespace = ns.oid " +
                         "JOIN pg_sequence s on c.oid = s.seqrelid " +
@@ -232,6 +242,32 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "CAST(INCREMENT AS BIGINT) AS INCREMENT_BY, " +
                     "CYCLE_OPTION AS WILL_CYCLE " +
                     "FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
+        } else if (database instanceof MariaDBDatabase) {
+            StringJoiner j = new StringJoiner(" \n UNION\n");
+            try {
+                List<Map<String, ?>> res = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                        .getExecutor("jdbc", database)
+                        .queryForList(new RawSqlStatement("select table_name AS SEQUENCE_NAME " +
+                                                        "from information_schema.TABLES " +
+                                                        "where TABLE_SCHEMA = '" + schema.getName() +"' " +
+                                                        "and TABLE_TYPE = 'SEQUENCE' order by table_name;"));
+                if (res.size() == 0) {
+                    return "SELECT 'name' AS SEQUENCE_NAME from dual WHERE 1=0";
+                }
+                for (Map<String, ?> e : res) {
+                    String seqName = (String) e.get("SEQUENCE_NAME");
+                    j.add(String.format("SELECT '%s' AS SEQUENCE_NAME, " +
+                            "START_VALUE AS START_VALUE, " +
+                            "MINIMUM_VALUE AS MIN_VALUE, " +
+                            "MAXIMUM_VALUE AS MAX_VALUE, " +
+                            "INCREMENT AS INCREMENT_BY, " +
+                            "CYCLE_OPTION AS WILL_CYCLE " +
+                            "FROM %s ", seqName, seqName));
+                }
+            } catch (DatabaseException e) {
+                throw new UnexpectedLiquibaseException("Could not get list of schemas ", e);
+            }
+            return j.toString();
         } else if (database instanceof SybaseASADatabase) {
         	return "SELECT SEQUENCE_NAME, " +
                     "START_WITH AS START_VALUE, " +
@@ -242,9 +278,11 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "FROM SYS.SYSSEQUENCE s " +
                     "JOIN SYS.SYSUSER u ON s.OWNER = u.USER_ID "+
                     "WHERE u.USER_NAME = '" + schema.getName() + "'";
-        	} else {
+        } else if (database.getClass().getName().contains("MaxDB")) { //have to check classname as this is currently an extension
+			return "SELECT SEQUENCE_NAME, MIN_VALUE, MAX_VALUE, INCREMENT_BY, CYCLE_FLAG AS WILL_CYCLE " +
+				   "FROM sequences WHERE SCHEMANAME = '" + schema.getName() + "'";
+		} else {
             throw new UnexpectedLiquibaseException("Don't know how to query for sequences on " + database);
-        }
-
+		}
     }
 }

@@ -1,5 +1,5 @@
 ---
-name: Bug report
+name: Bug report or Feature request
 about: Create a report to help us improve
 title: ''
 labels: Status:Discovery
@@ -7,23 +7,47 @@ assignees: ''
 
 ---
 
-**Description**
-A clear and concise description of what the bug is.
+<!--- This environment context section helps us quickly review your PR. 
+      Please take a minute to fill-out this information. -->
+## Environment
 
-**To Reproduce**
-Steps to reproduce the behavior. Please be as precise as possible. Ideally, include things like the files used if possible, the commands used, how the product was installed and how it is used, what database platform and version is being used, properties files/POM files/config files, extensions used... 
+**Liquibase Version**:
 
-Ensure private information is redacted.
+**Liquibase Integration & Version**: <Pick one: CLI, maven, gradle, spring boot, servlet, etc.>
 
-Please specify the exact commands used, from CLI, from maven, etc.
+**Liquibase Extension(s) & Version**: 
 
-Describe the actual problematic behavior. Include console outout if relevant, log files if available. Ensure private information is redacted.
+**Database Vendor & Version**:
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**Operating System Type & Version**:
 
-**Screenshots**
+**Infrastructure Type/Provider**: <AWC, GCS, Azure, VM, etc>
+
+
+## Description
+
+A clear and concise description of the issue being addressed.
+- Describe the actual problematic behavior.
+- Ensure private information is redacted.
+
+## Steps To Reproduce
+
+List the steps to reproduce the behavior.
+- Please be precise and ensure private information is redacted
+- Include things like
+  - Files used - sql scripts, changelog file(s), property file(s), config files, POM Files
+  - Exact commands used - CLI, maven, gradle, spring boot, servlet, etc.
+
+## Actual Behavior
+A clear and concise description of what happens in the software with the **version used**.
+- Include console output if relevant
+- Include log files if available.
+
+## Expected/Desired Behavior
+A clear and concise description of what happens in the software **after** a fix is created and merged.
+
+## Screenshots (if appropriate)
 If applicable, add screenshots to help explain your problem.
 
-**Additional context**
+## Additional Context
 Add any other context about the problem here.

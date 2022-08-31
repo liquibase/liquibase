@@ -17,7 +17,7 @@ public abstract class AbstractChangeLogParser implements ChangeLogParser {
             return null;
         }
 
-        DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
+        DatabaseChangeLog changeLog = new DatabaseChangeLog(DatabaseChangeLog.normalizePath(physicalChangeLogLocation));
         changeLog.setChangeLogParameters(changeLogParameters);
         try {
             changeLog.load(parsedNode, resourceAccessor);

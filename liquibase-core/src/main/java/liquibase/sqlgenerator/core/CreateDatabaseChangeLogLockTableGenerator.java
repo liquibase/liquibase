@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
@@ -29,7 +30,14 @@ public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenera
                 .addColumn("LOCKGRANTED", DataTypeFactory.getInstance().fromDescription(dateTimeTypeString, database))
                 .addColumn("LOCKEDBY", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database));
 
-        return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
+        // use LEGACY quoting since we're dealing with system objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        try {
+            return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
+        }
     }
 
     protected String getCharTypeName(Database database) {

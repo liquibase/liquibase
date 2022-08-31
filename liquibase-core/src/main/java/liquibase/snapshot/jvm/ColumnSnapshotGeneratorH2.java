@@ -11,11 +11,15 @@ import liquibase.structure.core.Column;
 public class ColumnSnapshotGeneratorH2 extends ColumnSnapshotGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        if (Column.class.isAssignableFrom(objectType) && (database instanceof H2Database)) {
-            return PRIORITY_DATABASE;
-        } else {
+        if (!(database instanceof H2Database)) {
             return PRIORITY_NONE;
         }
+
+        int priority = super.getPriority(objectType, database);
+        if (priority == 0) {
+            return priority;
+        }
+        return priority + 5;
     }
 
     @Override

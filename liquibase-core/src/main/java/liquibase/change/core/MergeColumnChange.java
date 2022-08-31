@@ -2,9 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.Db2zDatabase;
-import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.*;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -128,11 +126,18 @@ public class MergeColumnChange extends AbstractChange {
         addNewColumnChange.addColumn(columnConfig);
         statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
-        String updateStatement = "UPDATE " + database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()) +
-                " SET " + database.escapeObjectName(getFinalColumnName(), Column.class)
-                + " = " + database.getConcatSql(database.escapeObjectName(getColumn1Name(), Column.class)
-                , "'" + getJoinString() + "'", database.escapeObjectName(getColumn2Name(), Column.class));
-
+        String updateStatement = "";
+        if (database instanceof MySQLDatabase || database instanceof MariaDBDatabase) {
+            updateStatement = "UPDATE " + database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()) +
+                    " SET " + database.escapeObjectName(getFinalColumnName(), Column.class)
+                    + " = " + database.getConcatSql("'" + getJoinString() + "'"
+                    , database.escapeObjectName(getColumn1Name(), Column.class), database.escapeObjectName(getColumn2Name(), Column.class));
+        } else {
+            updateStatement = "UPDATE " + database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()) +
+                    " SET " + database.escapeObjectName(getFinalColumnName(), Column.class)
+                    + " = " + database.getConcatSql(database.escapeObjectName(getColumn1Name(), Column.class)
+                    , "'" + getJoinString() + "'", database.escapeObjectName(getColumn2Name(), Column.class));
+        }
         statements.add(new RawSqlStatement(updateStatement));
         
         if (database instanceof SQLiteDatabase) {

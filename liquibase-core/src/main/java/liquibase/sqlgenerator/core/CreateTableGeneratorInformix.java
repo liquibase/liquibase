@@ -3,8 +3,6 @@ package liquibase.sqlgenerator.core;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -108,7 +106,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                         buffer.append(" ").append(autoIncrementClause);
                     }
                 } else {
-                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
+                    Scope.getCurrentScope().getLog(getClass()).warning(database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
                 }
             }
 

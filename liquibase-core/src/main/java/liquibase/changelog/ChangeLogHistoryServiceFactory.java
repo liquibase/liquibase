@@ -92,12 +92,13 @@ public class ChangeLogHistoryServiceFactory {
             }
     }
 
-    public synchronized void resetAll() {
-        for (ChangeLogHistoryService changeLogHistoryService : registry) {
-            changeLogHistoryService.reset();
+    public void resetAll() {
+        synchronized (ChangeLogHistoryServiceFactory.class) {
+            for (ChangeLogHistoryService changeLogHistoryService : registry) {
+                changeLogHistoryService.reset();
+            }
+            instance = null;
         }
-        instance = null;
     }
-
 }
 

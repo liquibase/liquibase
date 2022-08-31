@@ -1,7 +1,6 @@
 package liquibase.integration.ant;
 
-import liquibase.logging.LogLevel;
-import liquibase.logging.LogType;
+import liquibase.logging.LogMessageFilter;
 import liquibase.logging.core.AbstractLogger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
@@ -15,12 +14,24 @@ public final class AntTaskLogger extends AbstractLogger {
 
     private final Task task;
 
+    /**
+     * @deprecated use {@link AntTaskLogger(Task)} instead
+     */
+    @Deprecated
+    public AntTaskLogger(Task task, LogMessageFilter ignored) {
+        this(task);
+    }
+
     public AntTaskLogger(Task task) {
         this.task = task;
     }
 
     @Override
-    public void log(Level level, LogType target, String message, Throwable e) {
+    public void log(Level level, String message, Throwable e) {
+        if (level == Level.OFF) {
+            return;
+        }
+
         int antLevel;
         if (level.intValue() == Level.SEVERE.intValue()) {
             antLevel = Project.MSG_ERR;
@@ -37,6 +48,6 @@ public final class AntTaskLogger extends AbstractLogger {
             //lower than FINE
             antLevel = Project.MSG_DEBUG;
         }
-        task.log(message, e, antLevel);
+        task.log(filterMessage(message), e, antLevel);
     }
 }
