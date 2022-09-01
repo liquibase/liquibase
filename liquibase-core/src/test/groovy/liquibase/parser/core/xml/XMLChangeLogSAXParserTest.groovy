@@ -60,7 +60,7 @@ class XMLChangeLogSAXParserTest extends Specification {
         changeSets.size() == 8
         changeSets.get(0).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(1).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
-        changeSets.get(1).getContexts().getContexts().size() == 1
+        changeSets.get(1).getContextFilter().getContexts().size() == 1
         changeSets.get(2).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
         changeSets.get(2).getLabels().getLabels().size() == 1
         changeSets.get(3).toString() == "liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser"
@@ -80,7 +80,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        e.message.contains("Unable to resolve xml entity file:///invalid.txt locally: liquibase.secureParsing is set to 'true' which does not allow remote lookups. Set it to 'false' to allow remote lookups of xsd files")
+        e.message.contains("Unable to resolve xml entity file:///invalid.txt. liquibase.secureParsing is set to 'true'")
     }
 
     def "allows liquibase.secureParsing=false to disable secure parsing"() {
@@ -99,7 +99,7 @@ class XMLChangeLogSAXParserTest extends Specification {
 
     def "getSchemaVersion"() {
         expect:
-        XMLChangeLogSAXParser.getSchemaVersion() == "next" //because test run in an environment with build.version == DEV
+        XMLChangeLogSAXParser.getSchemaVersion() == "latest" //because test run in an environment with build.version == DEV
     }
 
     @Unroll
@@ -109,12 +109,12 @@ class XMLChangeLogSAXParserTest extends Specification {
 
         where:
         buildVersion | expected
-        "DEV"        | "next"
+        "DEV"        | "latest"
         "4.11.0"     | "4.11"
         "4.11.1"     | "4.11"
-        "4"          | "next" //weird versions go to next
-        ""           | "next" //weird versions go to next
-        null         | "next" //weird versions go to next
+        "4"          | "latest" //weird versions go to latest
+        ""           | "latest" //weird versions go to latest
+        null         | "latest" //weird versions go to latest
     }
 
 }

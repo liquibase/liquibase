@@ -267,7 +267,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             newLine[Columns.TAG.ordinal()] = tag;
             newLine[Columns.LIQUIBASE.ordinal()] = LiquibaseUtil.getBuildVersion();
 
-            newLine[Columns.CONTEXTS.ordinal()] = (changeSet.getContexts() == null) ? null : changeSet.getContexts().toString();
+            newLine[Columns.CONTEXTS.ordinal()] = (changeSet.getContextFilter() == null) ? null : changeSet.getContextFilter().toString();
             newLine[Columns.LABELS.ordinal()] = (changeSet.getLabels() == null) ? null : changeSet.getLabels().toString();
 
             newLine[Columns.DEPLOYMENT_ID.ordinal()] = getDeploymentId();

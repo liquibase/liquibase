@@ -14,6 +14,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtil;
 
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -303,13 +304,13 @@ public class H2Database extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String getAutoIncrementStartWithClause() {
-	return "%d";
-    }
+    public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy, String generationType, Boolean defaultOnNull) {
+        final String clause = super.getAutoIncrementClause(startWith, incrementBy, generationType, defaultOnNull);
+        if (clause.startsWith("AUTO_INCREMENT")) {
+            return clause;
+        }
 
-    @Override
-    protected String getAutoIncrementByClause() {
-	return "%d";
+        return clause.replace(",", ""); //h2 doesn't use commas between the values
     }
 
     @Override

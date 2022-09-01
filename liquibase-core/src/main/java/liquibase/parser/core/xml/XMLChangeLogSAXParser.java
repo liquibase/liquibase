@@ -59,6 +59,14 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         return saxParserFactory;
     }
 
+    /**
+     * When set to true, a warning will be printed to the console if the XSD version used does not match the version
+     * of Liquibase. If "latest" is used as the XSD version, no warning is printed.
+     */
+    public void setShouldWarnOnMismatchedXsdVersion(boolean shouldWarnOnMismatchedXsdVersion) {
+        resolver.setShouldWarnOnMismatchedXsdVersion(shouldWarnOnMismatchedXsdVersion);
+    }
+
     @Override
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         try (InputStream inputStream = resourceAccessor.openStream(null, physicalChangeLogLocation)) {
@@ -165,7 +173,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             finalVersion = splitVersion[0] + "." + splitVersion[1];
         }
         if (finalVersion == null) {
-            finalVersion = "next";
+            finalVersion = "latest";
         }
         return finalVersion;
     }

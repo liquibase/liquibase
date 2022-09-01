@@ -19,7 +19,7 @@ import spock.lang.Unroll
 
 import static spock.util.matcher.HamcrestSupport.that
 
-public class FormattedSqlChangeLogParserTest extends Specification {
+class FormattedSqlChangeLogParserTest extends Specification {
 
     private static final String VALID_CHANGELOG = """
 --liquibase formatted sql
@@ -34,7 +34,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
 select * from \${tableNameProp};
 
 
---changeset "n voxland":"change 2" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
+--changeset "n voxland":"change 2" (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true contextFilter:y dbms:mysql runInTransaction:false failOnError:false)
 create table table1 (
     id int primary key
 );
@@ -72,7 +72,7 @@ create table mysql_boo (
 );
 -- rollback drop table mysql_boo;
 
--- changeset multicontext:1 context:first,second,third
+-- changeset multicontext:1 contextFilter:first,second,third
 select 1;
 
 --changeset bboisvert:with_preconditions
@@ -84,7 +84,7 @@ create table my_table (
 );
 -- rollback drop table my_table;
 
---changeset complexContext:1 context:"a or b"
+--changeset complexContext:1 contextFilter:"a or b"
 select 1
 
 -- changeset the_user:the_user-1 runWith:\${runWith}
@@ -151,6 +151,11 @@ create table table88 (
 create table table99 (
     id int primary key
 );
+
+-- changeset the_user:theid context:oldstyle
+create table old_style_context (
+    id int primary key
+);
 """.trim()
 
     private static final String END_DELIMITER_CHANGELOG = """
@@ -165,9 +170,12 @@ END reany_procedure_name;
 
 
 grant /*Beware, this comment should not be seen as a delimiter! */
-    execute on any_procedure_name to ANY_USER1/
-grant execute on any_procedure_name to ANY_USER2/
-grant execute on any_procedure_name to ANY_USER3/
+    execute on any_procedure_name to ANY_USER1
+/
+grant execute on any_procedure_name to ANY_USER2
+/
+grant execute on any_procedure_name to ANY_USER3
+/
 -- rollback drop PROCEDURE refresh_all_fos_permission_views/
 """
 
@@ -186,11 +194,34 @@ grant execute on any_procedure_name to ANY_USER3/
                     "-precondition 123\n" +
                     "select 1;"
 
+    private static final String VALID_ALL_CAPS_CHANGELOG = """
+--LIQUIBASE FORMATTED SQL
+
+--CHANGESET SOME_USER:ALL_CAPS_SCRIPT_1
+CREATE TABLE ALL_CAPS_TABLE_1 (
+    ID INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    NAME VARCHAR(50) NOT NULL,
+    ADDRESS1 VARCHAR(50),
+    ADDRESS2 VARCHAR(50),
+    CITY VARCHAR(30)
+)
+
+--CHANGESET SOME_USER:ALL_CAPS_SCRIPT_2
+CREATE TABLE ALL_CAPS_TABLE_2 (
+    ID INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    NAME VARCHAR(50) NOT NULL,
+    ADDRESS1 VARCHAR(50),
+    ADDRESS2 VARCHAR(50),
+    CITY VARCHAR(30)
+)
+"""
+
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
         assert !new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.SQL", new JUnitResourceAccessor())
+        assert new MockFormattedSqlChangeLogParser(VALID_ALL_CAPS_CHANGELOG).supports("BLAH.SQL", new JUnitResourceAccessor())
     }
 
     def invalidPrecondition() throws Exception {
@@ -218,7 +249,7 @@ grant execute on any_procedure_name to ANY_USER3/
 
         changeLog.getLogicalFilePath() == "asdf.sql"
 
-        changeLog.getChangeSets().size() == 21
+        changeLog.getChangeSets().size() == 22
 
         changeLog.getChangeSets().get(0).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(0).getId() == "1"
@@ -230,7 +261,7 @@ grant execute on any_procedure_name to ANY_USER3/
         assert !changeLog.getChangeSets().get(0).isAlwaysRun()
         assert !changeLog.getChangeSets().get(0).isRunOnChange()
         assert changeLog.getChangeSets().get(0).isRunInTransaction()
-        assert changeLog.getChangeSets().get(0).getContexts().isEmpty()
+        assert changeLog.getChangeSets().get(0).getContextFilter().isEmpty()
         changeLog.getChangeSets().get(0).getDbmsSet() == null
 
 
@@ -247,7 +278,7 @@ grant execute on any_procedure_name to ANY_USER3/
         assert changeLog.getChangeSets().get(1).isAlwaysRun()
         assert changeLog.getChangeSets().get(1).isRunOnChange()
         assert !changeLog.getChangeSets().get(1).isRunInTransaction()
-        changeLog.getChangeSets().get(1).getContexts().toString() == "y"
+        changeLog.getChangeSets().get(1).getContextFilter().toString() == "y"
         StringUtil.join(changeLog.getChangeSets().get(1).getDbmsSet(), ",") == "mysql"
         changeLog.getChangeSets().get(1).rollback.changes.size() == 1
         ((RawSQLChange) changeLog.getChangeSets().get(1).rollback.changes[0]).getSql().replace("\r\n", "\n") == "delete from table1;\ndrop table table1;"
@@ -298,9 +329,9 @@ grant execute on any_procedure_name to ANY_USER3/
         assert changeLog.getChangeSets().get(7).getChanges().get(0) instanceof RawSQLChange
         ((RawSQLChange) changeLog.getChangeSets().get(7).getChanges().get(0)).getSql() == "select 1;"
         changeLog.getChangeSets().get(7).rollback.changes.size() == 0
-        assert changeLog.getChangeSets().get(7).getContexts().toString().contains("first")
-        assert changeLog.getChangeSets().get(7).getContexts().toString().contains("second")
-        assert changeLog.getChangeSets().get(7).getContexts().toString().contains("third")
+        assert changeLog.getChangeSets().get(7).getContextFilter().toString().contains("first")
+        assert changeLog.getChangeSets().get(7).getContextFilter().toString().contains("second")
+        assert changeLog.getChangeSets().get(7).getContextFilter().toString().contains("third")
 
         changeLog.getChangeSets().get(10).getRunWith() == "sqlplus"
 
@@ -328,7 +359,7 @@ grant execute on any_procedure_name to ANY_USER3/
         assert cs.rollback.changes[0] instanceof RawSQLChange
         ((RawSQLChange) cs.rollback.changes[0]).getSql() == "drop table my_table;"
 
-        changeLog.getChangeSets().get(9).getContexts().toString() == "a or b"
+        changeLog.getChangeSets().get(9).getContextFilter().toString() == "a or b"
 
         changeLog.getChangeSets().get(11).getId().equalsIgnoreCase("CREATE_PROCEDURE_[dbo].[CustOrderHist1]")
 
@@ -343,9 +374,11 @@ grant execute on any_procedure_name to ANY_USER3/
         changeLog.getChangeSets().get(19).getId().equalsIgnoreCase("<the_user>")
 
         changeLog.getChangeSets().get(20).getId().equalsIgnoreCase("+the_user+")
+
+        changeLog.getChangeSets().get(21).getContextFilter().toString() == "oldstyle"
     }
 
-    def "parse change set with colon in ID"() throws Exception {
+    def "parse changeset with colon in ID"() throws Exception {
         when:
         String changeLogWithOneGoodOneBad = "   \n\n" +
                 "--liquibase formatted sql\n\n" +
@@ -364,7 +397,7 @@ grant execute on any_procedure_name to ANY_USER3/
         assert changeSet.getId() == "ID:1"
     }
 
-    def "parse change set with invalid change set attributes"() throws Exception {
+    def "parse changeset with invalid changeset attributes"() throws Exception {
         when:
         String changeLogWithInvalidChangeSetAttributes =
                 "--liquibase formatted sql\n\n" +
@@ -382,7 +415,7 @@ grant execute on any_procedure_name to ANY_USER3/
         assert e
     }
 
-    def "parse change set with one good one bad"() throws Exception {
+    def "parse changeset with one good one bad"() throws Exception {
         when:
         String changeLogWithOneGoodOneBad = "   \n\n" +
                 "--liquibase formatted sql\n\n" +
@@ -401,7 +434,7 @@ grant execute on any_procedure_name to ANY_USER3/
         thrown(ChangeLogParseException)
     }
 
-    def "parse change set with only author"() throws Exception {
+    def "parse changeset with only author"() throws Exception {
         when:
         String changeLogWithOnlyAuthor= "   \n\n" +
                 "--liquibase formatted sql\n\n" +
@@ -490,6 +523,61 @@ grant execute on any_procedure_name to ANY_USER3/
         assert e.getMessage().toLowerCase().contains("-property name")
     }
 
+    def "parse strings that contain keywords not at the beginning"() throws Exception {
+        when:
+        def changeLog = new MockFormattedSqlChangeLogParser("""
+--liquibase formatted sql
+
+--changeset example:1
+not a property here
+- not a property here
+-- not a property here
+not a changeset here
+- not a changeset here
+-- not a changeset here
+not a rollback here
+- not a rollback here
+-- not a rollback here
+not a precondition here
+- not a precondition here
+-- not a precondition here
+not a comment here
+- not a comment here
+-- not a comment here
+not validCheckSum here
+- not validCheckSum here
+-- not validCheckSum here
+not ignoreLines here
+- not ignoreLines here
+-- not ignoreLines here
+""".trim()).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        StringUtil.standardizeLineEndings(((RawSQLChange) changeLog.getChangeSets()[0].getChanges()[0]).getSql().trim()) == StringUtil.standardizeLineEndings("""
+not a property here
+- not a property here
+-- not a property here
+not a changeset here
+- not a changeset here
+-- not a changeset here
+not a rollback here
+- not a rollback here
+-- not a rollback here
+not a precondition here
+- not a precondition here
+-- not a precondition here
+not a comment here
+- not a comment here
+-- not a comment here
+not validCheckSum here
+- not validCheckSum here
+-- not validCheckSum here
+not ignoreLines here
+- not ignoreLines here
+-- not ignoreLines here
+""".trim())
+    }
+
     def parse_withComment() throws Exception {
         when:
         String changeLogWithComment = "--liquibase formatted sql\n\n" +
@@ -546,7 +634,7 @@ grant execute on any_procedure_name to ANY_USER3/
         then:
         def e = thrown(ChangeLogParseException)
         assert e : "ChangeLogParseException should be thrown"
-        assert e.getMessage().contains("do not allow comment lines outside of change sets")
+        assert e.getMessage().contains("do not allow comment lines outside of changesets")
     }
 
     def parse_withWithIgnoreNotIgnoreLines() {
@@ -617,13 +705,14 @@ grant execute on any_procedure_name to ANY_USER3/
         changeLog.getChangeSets().size() == 1
         changeLog.getChangeSets().get(0).getChanges().size() == 1
         def statements = changeLog.getChangeSets().get(0).getChanges().get(0).generateStatements(new MockDatabase())
-        statements.size() == 4
-        statements[0].toString() == "CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n" +
+        statements*.toString() == [
+                "CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n" +
                 "    DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);\n" +
-                "END reany_procedure_name;"
-        statements[1].toString() == "grant \n    execute on any_procedure_name to ANY_USER1"
-        statements[2].toString() == "grant execute on any_procedure_name to ANY_USER2"
-        statements[3].toString() == "grant execute on any_procedure_name to ANY_USER3"
+                "END reany_procedure_name;",
+                "grant \n    execute on any_procedure_name to ANY_USER1",
+                "grant execute on any_procedure_name to ANY_USER2",
+                "grant execute on any_procedure_name to ANY_USER3",
+        ]
     }
 
     @Unroll("#featureName: #example")
@@ -639,6 +728,14 @@ grant execute on any_procedure_name to ANY_USER3/
         where:
         example                                                                                                       | expected
         "--liquibase formatted sql\n--changeset John Doe:12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"      | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
+    }
+
+    def parse_withAllCaps() {
+        when:
+        def changeLog = new MockFormattedSqlChangeLogParser(VALID_ALL_CAPS_CHANGELOG).parse("ALL_CAPS.SQL", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 2
     }
 
     @LiquibaseService(skip = true)

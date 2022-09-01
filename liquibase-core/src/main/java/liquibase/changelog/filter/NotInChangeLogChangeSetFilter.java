@@ -17,9 +17,9 @@ public class NotInChangeLogChangeSetFilter implements ChangeSetFilter {
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         if (changeSets.contains(changeSet)) {
-            return new ChangeSetFilterResult(false, "Change set is in change log", this.getClass());
+            return new ChangeSetFilterResult(false, "Changeset is in change log", this.getClass());
         } else {
-            return new ChangeSetFilterResult(true, "Change set is not in change log", this.getClass());
+            return new ChangeSetFilterResult(true, "Changeset is not in change log", this.getClass());
         }
     }
 }

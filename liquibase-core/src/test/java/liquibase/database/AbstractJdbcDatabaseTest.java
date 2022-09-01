@@ -1,7 +1,14 @@
 package liquibase.database;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Test;
 import liquibase.Scope;
 import liquibase.change.core.CreateTableChange;
+import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.sdk.executor.MockExecutor;
 import liquibase.sql.visitor.AppendSqlVisitor;
@@ -9,14 +16,6 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 /**
  * Base test class for database-specific tests
@@ -88,14 +87,14 @@ public abstract class AbstractJdbcDatabaseTest {
 //    }
 
     @Test
-    public void escapeTableName_noSchema() {
-        Database database = getDatabase();
+    public void escapeTableName_noSchema() throws DatabaseException {
+        final Database database = getDatabase();
         assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
     }
 
     @Test
-    public void escapeTableName_withSchema() {
-        Database database = getDatabase();
+    public void escapeTableName_withSchema() throws DatabaseException {
+        final Database database = getDatabase();
         if (database.supportsCatalogInObjectName(Table.class)) {
             assertEquals("catalogName.schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
         } else {
@@ -283,7 +282,7 @@ public abstract class AbstractJdbcDatabaseTest {
         assertTrue(tableName.matches("[\\[\\\"`]?My Table  [\\]\\\"`]?"));
 
         tableName = database.escapeObjectName("MyTable", Table.class);
-        assertTrue(tableName.equals("MyTable"));
+        assertEquals("MyTable", tableName);
 
         tableName = database.escapeObjectName("My Table", Table.class);
         assertTrue(tableName.matches("[\\[\\\"`]?My Table[\\]\\\"`]?"));
