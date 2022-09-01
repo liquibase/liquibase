@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <preConditions>
             <dbms type="oracle"/>
             <runningAs username="${loginUser}"/>
@@ -38,7 +38,7 @@
         <comment>Fix misspelled "username" column</comment>
         <renameColumn tableName="person" oldColumnName="usernae" newColumnName="username"/>
     </changeSet>
-    <changeSet id="5" author="nvoxland" context="test">
+    <changeSet id="5" author="nvoxland" contextFilter="test">
         <insert tableName="person">
             <column name="id" value="1"/>
             <column name="firstname" value="John"/>
@@ -72,7 +72,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="7" author="bjohnson" context="test">
+    <changeSet id="7" author="bjohnson" contextFilter="test">
         <insert tableName="employee">
             <column name="id" value="1"/>
             <column name="name" value="ACME Corp"/>

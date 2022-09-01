@@ -48,6 +48,16 @@ class LiquibaseCommandLineTest extends Specification {
     }
 
     @Unroll
+    def "toArgNames for command arguments and aliases"() {
+        expect:
+        LiquibaseCommandLine.toArgNames(new CommandBuilder([["argCommand"]] as String[][]).argument(argName, String).addAlias(alias).build()).join(", ") == expected
+
+        where:
+        prefix          | argName          | alias                 | expected
+        "liquibase"     | "test"           | "testAlias"           | "--test-alias, --testAlias, --test"
+    }
+
+    @Unroll
     def "adjustLegacyArgs"() {
         expect:
         new LiquibaseCommandLine().adjustLegacyArgs(input as String[]).toArrayString() == (expected as String[]).toArrayString()
