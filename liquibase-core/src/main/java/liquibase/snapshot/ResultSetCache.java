@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
-class ResultSetCache {
+public class ResultSetCache {
     private Map<String, Integer> timesSingleQueried = new HashMap<>();
     private Map<String, Boolean> didBulkQuery = new HashMap<>();
     private boolean bulkTracking = true;
@@ -254,15 +254,15 @@ class ResultSetCache {
             throw new UnexpectedLiquibaseException("Not Implemented");
         }
 
-        boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+        protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
             return resultSetCache.getTimesSingleQueried(schemaKey) >= 3;
         }
 
-        List<CachedRow> executeAndExtract(String sql, Database database) throws DatabaseException, SQLException {
+        protected List<CachedRow> executeAndExtract(String sql, Database database) throws DatabaseException, SQLException {
             return executeAndExtract(sql, database, false);
         }
 
-        List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint)
+        protected List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint)
                 throws DatabaseException, SQLException {
             if (sql == null) {
                 return new ArrayList<>();

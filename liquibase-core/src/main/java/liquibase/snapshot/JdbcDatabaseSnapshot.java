@@ -278,7 +278,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     if (database instanceof OracleDatabase || database instanceof MSSQLDatabase) {
                         return JdbcDatabaseSnapshot.this.getAllCatalogsStringScratchData() != null || (tableName == null && indexName == null) || super.shouldBulkSelect(schemaKey, resultSetCache);
                     }
@@ -374,7 +374,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             }
 
             @Override
-            boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+            protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                 return !(tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName()));
             }
 
@@ -934,7 +934,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             }
 
             @Override
-            boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+            protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                 if (database instanceof AbstractDb2Database || database instanceof MSSQLDatabase) {
                     return super.shouldBulkSelect(schemaKey, resultSetCache); //can bulk and fast fetch
                 } else {
@@ -977,7 +977,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             }
 
             @Override
-            boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+            protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                 if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) ||
                         tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
                     return false;
@@ -1061,7 +1061,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return getResultSetCache("getTables").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     return table == null || getAllCatalogsStringScratchData() != null || super.shouldBulkSelect(schemaKey, resultSetCache);
                 }
 
@@ -1222,7 +1222,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return getResultSetCache("getViews").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     return view == null || getAllCatalogsStringScratchData() != null || super.shouldBulkSelect(schemaKey, resultSetCache);
                 }
 
@@ -1532,7 +1532,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     if ((database instanceof OracleDatabase) || (database instanceof MSSQLDatabase)) {
                         return table == null || getAllCatalogsStringScratchData() != null || super.shouldBulkSelect(schemaKey, resultSetCache);
                     } else {
@@ -1546,7 +1546,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return getResultSetCache("getUniqueConstraints").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     return tableName == null || getAllCatalogsStringScratchData() != null || super.shouldBulkSelect(schemaKey, resultSetCache);
                 }
 
