@@ -4,13 +4,11 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
-    <changeSet id="1" author="oleh">
+    <changeSet id="1" author="ewojtach">
         <createTable tableName="test_table">
-            <column name="test_id" type="int">
-                <constraints nullable="false"/>
+            <column name="test_id" type="INTEGER">
             </column>
-            <column name="test_column" type="string(50)">
-                <constraints nullable="false"/>
+            <column name="test_column" type="STRING">
             </column>
         </createTable>
     </changeSet>

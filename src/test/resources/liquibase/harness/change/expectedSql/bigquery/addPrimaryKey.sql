@@ -1,2 +1,1 @@
-INVALID TEST
--- BigQuery doesn't support primary keys
+INVALID TEST BigQuery does not support PK

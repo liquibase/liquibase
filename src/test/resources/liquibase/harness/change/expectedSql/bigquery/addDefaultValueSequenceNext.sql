@@ -1,2 +1,1 @@
-INVALID TEST
--- BigQuery doesn't support default values
+INVALID TEST BigQuery does not support default values for columns

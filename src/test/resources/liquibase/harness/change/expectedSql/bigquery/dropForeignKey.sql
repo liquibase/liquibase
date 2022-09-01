@@ -1,2 +1,1 @@
-INVALID TEST
--- BigQuery doesn't support foreign key
+INVALID TEST BigQuery does not support FK

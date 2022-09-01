@@ -8,10 +8,8 @@
     <changeSet author="oleh" id="1">
         <createTable tableName="test_table">
             <column name="test_id" type="int">
-                <constraints nullable="false"/>
             </column>
-            <column name="test_column" type="string(50)">
-                <constraints nullable="false"/>
+            <column name="test_column" type="STRING">
             </column>
         </createTable>
             <dropTable tableName="test_table"/>

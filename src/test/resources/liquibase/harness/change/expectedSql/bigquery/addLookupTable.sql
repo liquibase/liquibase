@@ -1,2 +1,1 @@
-INVALID TEST
--- BigQuery doesn't support Lookup Tables
+CREATE TABLE authors_data AS SELECT DISTINCT email AS authors_email FROM authors WHERE email IS NOT NULL

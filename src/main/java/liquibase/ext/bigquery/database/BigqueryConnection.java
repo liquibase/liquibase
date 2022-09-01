@@ -97,7 +97,7 @@ public class BigqueryConnection extends JdbcConnection {
             String url = con.getMetaData().getURL();
             Scope.getCurrentScope().getLog(this.getClass()).fine(String.format("Returning connection, url %s BQConnection Location=%s", url, getUnderlyingBQConnectionLocation()));
         } catch (SQLException e) {
-            //
+            Scope.getCurrentScope().getLog(this.getClass()).severe("getUnderlyingConnection error: ", e);
         }
         return con;
     }
@@ -117,8 +117,10 @@ public class BigqueryConnection extends JdbcConnection {
 
     public void openConn(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
         try {
+            Scope.getCurrentScope().getLog(this.getClass()).info("opening connection " + url);
             this.con = (S42Connection) driverObject.connect(url, driverProperties);
             if (this.con == null) {
+                Scope.getCurrentScope().getLog(this.getClass()).severe("Connection could not be created");
                 throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
             }
         } catch (SQLException sqle) {

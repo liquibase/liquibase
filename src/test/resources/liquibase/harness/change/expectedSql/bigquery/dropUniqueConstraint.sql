@@ -1,2 +1,1 @@
-INVALID TEST
--- BigQuery doesn't support unique constraints
+INVALID TEST BigQuery does not support constraints

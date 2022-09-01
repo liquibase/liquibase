@@ -1,2 +1,1 @@
-INVALID TEST
--- BigQuery doesn't support text datatype
+CREATE TABLE createTableDataTypeText (textCol STRING)
