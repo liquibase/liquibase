@@ -82,7 +82,7 @@ public class SqlGeneratorFactory {
         return generators;
     }
 
-    public SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
+    public synchronized SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
         String databaseName = null;
         if (database == null) {
             databaseName = "NULL";
