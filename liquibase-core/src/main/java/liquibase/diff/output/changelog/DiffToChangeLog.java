@@ -93,7 +93,7 @@ public class DiffToChangeLog {
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         this.changeSetPath = changeLogFile;
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-        Resource file = pathHandlerFactory.getResource(changeLogFile, false);
+        Resource file = pathHandlerFactory.getResource(changeLogFile, true);
 
         final Map<String, Object> newScopeObjects = new HashMap<>();
 
