@@ -70,9 +70,7 @@ class SpringResourceAccessorTest extends Specification {
         def list = resourceAccessor.list("liquibase/database", "core", true, true, true).toListString()
 
         then:
-        !list.contains("/Database.class,")
-        list.contains("/OracleDatabaseTest.class,")
-        list.contains("MSSQLDatabaseTest.class,")
+        thrown(IOException)
     }
 
     @Unroll
