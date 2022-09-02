@@ -215,9 +215,6 @@
                         <logging>DEBUG</logging>
                         <changeLogFile>target/classes/changelog.sql</changeLogFile>
                         <outputChangeLogFile>target/classes/generatedChangelog.bigquery.sql</outputChangeLogFile>
-                        <diffTypes>tables,views</diffTypes>
-                        <diffIncludeCatalog>true</diffIncludeCatalog>
-                        <diffIncludeSchema>true</diffIncludeSchema>
                     </configuration>
                 </plugin>
 
