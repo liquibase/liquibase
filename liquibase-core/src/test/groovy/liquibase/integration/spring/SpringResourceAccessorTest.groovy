@@ -16,7 +16,15 @@ class SpringResourceAccessorTest extends Specification {
         resourceAccessor.getAll("invalid/path") == null
     }
 
-    def "search non-recursive files"() {
+    def "openStreams for relative file in root"() {
+        when:
+        def list = resourceAccessor.openStreams("file-in-root.txt", "liquibase/database/core/UnsupportedDatabase.class")
+
+        then:
+        list.size() == 1
+    }
+
+    def "list just non-recursive files"() {
         when:
         def list = resourceAccessor.search("liquibase/database", false)*.getPath()
 
@@ -31,9 +39,40 @@ class SpringResourceAccessorTest extends Specification {
         def list = resourceAccessor.search("liquibase/database", true)*.getPath()
 
         then:
-        list.contains("liquibase/database/AbstractJdbcDatabaseTest.class")
-        list.contains("liquibase/database/DatabaseFactoryTest.class")
-        list.contains("liquibase/database/core/H2Database.class")
+        list.contains("database/core/UnsupportedDatabaseTest.class,")
+        list.contains("database/core/")
+        list.contains("liquibase/sqlgenerator/core/SelectFromDatabaseChangeLogGeneratorTest.class")
+    }
+
+    def "list relative to file"() {
+        when:
+        def list = resourceAccessor.list("liquibase/database/Database.class", "core", true, true, true).toListString()
+
+        then:
+        !list.contains("/Database.class,")
+        list.contains("/OracleDatabaseTest.class,")
+        list.contains("MSSQLDatabaseTest.class,")
+    }
+
+    def "list relative to file in root"() {
+        when:
+        def list = resourceAccessor.list("liquibase.properties", "liquibase/database/core", false, true, true).toListString()
+
+        then:
+        !list.contains("file-in-root.txt")
+        list.contains("/OracleDatabaseTest.class,")
+        list.contains("MSSQLDatabaseTest.class,")
+    }
+
+
+    def "list relative to directory"() {
+        when:
+        def list = resourceAccessor.list("liquibase/database", "core", true, true, true).toListString()
+
+        then:
+        !list.contains("/Database.class,")
+        list.contains("/OracleDatabaseTest.class,")
+        list.contains("MSSQLDatabaseTest.class,")
     }
 
     @Unroll
