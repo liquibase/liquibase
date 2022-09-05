@@ -69,6 +69,9 @@ public abstract class AbstractResource implements Resource {
      * Convenience method for computing the relative path in {@link #resolve(String)} implementations
      */
     protected String resolvePath(String other) {
+        if (getPath().endsWith("/")) {
+            return getPath() + other;
+        }
         return getPath() + "/" + other;
     }
 
@@ -76,6 +79,10 @@ public abstract class AbstractResource implements Resource {
      * Convenience method for computing the relative path in {@link #resolveSibling(String)} implementations.
      */
     protected String resolveSiblingPath(String other) {
-        return getPath().replaceFirst("/[^/]*$", "") + "/" + other;
+        if (getPath().contains("/")) {
+            return getPath().replaceFirst("/[^/]*$", "") + "/" + other;
+        } else {
+            return "/" + other;
+        }
     }
 }

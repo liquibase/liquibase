@@ -3,6 +3,7 @@ package liquibase.changelog;
 import liquibase.Scope;
 import liquibase.GlobalConfiguration;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
+import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
@@ -27,10 +28,10 @@ public class ChangelogRewriter {
         //
         // Make changes to the changelog file
         //
-        final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
         SortedSet<Resource> list = null;
         try {
-            Resource resource = resourceAccessor.get(changeLogFile);
+            Resource resource = pathHandlerFactory.getResource(changeLogFile, true);
             String changeLogString;
             String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
@@ -108,9 +109,9 @@ public class ChangelogRewriter {
         //
         // Make changes to the changelog file
         //
-        final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
         try {
-            Resource resource = resourceAccessor.get(changeLogFile);
+            Resource resource = pathHandlerFactory.getResource(changeLogFile, true);
             InputStream is = resource.openInputStream();
             String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
             String changeLogString = StreamUtil.readStreamAsString(is, encoding);

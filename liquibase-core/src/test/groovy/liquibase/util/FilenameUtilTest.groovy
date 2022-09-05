@@ -55,7 +55,9 @@ class FilenameUtilTest extends Specification {
         null           | "liquibase\\delta-changelogs/" | "liquibase/delta-changelogs"
         null           | "liquibase/delta-changelogs"   | "liquibase/delta-changelogs"
         "base/path"    | "liquibase/changelogs"         | "base/path/liquibase/changelogs"
+        "base/path"    | "/liquibase/changelogs"        | "base/path/liquibase/changelogs"
         "\\base\\path" | "liquibase/changelogs"         | "/base/path/liquibase/changelogs"
+        "\\base\\path" | "\\liquibase\\changelogs"         | "/base/path/liquibase/changelogs"
     }
 
     @Unroll
