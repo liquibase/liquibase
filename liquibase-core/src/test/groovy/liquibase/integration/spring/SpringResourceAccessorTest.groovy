@@ -39,6 +39,7 @@ class SpringResourceAccessorTest extends Specification {
         def list = resourceAccessor.search("liquibase/database", true)*.getPath()
 
         then:
+
         list.contains("liquibase/database/AbstractJdbcDatabaseTest.class")
         list.contains("liquibase/database/DatabaseFactoryTest.class")
         list.contains("liquibase/database/core/H2Database.class")
@@ -53,7 +54,6 @@ class SpringResourceAccessorTest extends Specification {
         list.contains("/OracleDatabaseTest.class,")
         list.contains("MSSQLDatabaseTest.class,")
     }
-
     def "list relative to file in root"() {
         when:
         def list = resourceAccessor.list("liquibase.properties", "liquibase/database/core", false, true, true).toListString()
