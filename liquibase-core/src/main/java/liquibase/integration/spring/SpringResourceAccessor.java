@@ -109,7 +109,33 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         }
     }
 
-     /**
+    /**
+     * Returns the complete path to the resource, taking the relative path into account
+     */
+    protected String getCompletePath(String relativeTo, String path) throws IOException {
+        path = path.replace("\\", "/");
+
+        String searchPath;
+        if (relativeTo == null) {
+            searchPath = path;
+        } else {
+            relativeTo = relativeTo.replace("\\", "/");
+
+            boolean relativeIsFile;
+            Resource rootResource = getResource(relativeTo);
+            relativeIsFile = resourceIsFile(rootResource);
+
+            if (relativeIsFile) {
+                String relativePath = relativeTo.replaceFirst("[^/]+$", "");
+                searchPath = relativePath + path;
+            } else {
+                searchPath = relativeTo + "/" + path;
+            }
+        }
+        return searchPath;
+    }
+
+    /**
      * Looks up the given resource.
      */
     protected Resource getResource(String resourcePath) {
