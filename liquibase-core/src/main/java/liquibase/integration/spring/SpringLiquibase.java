@@ -61,7 +61,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected DataSource dataSource;
 	protected String changeLog;
 	protected String contexts;
-    protected String labels;
+    protected String labelFilter;
     protected String tag;
 	protected Map<String, String> parameters;
 	protected String defaultSchema;
@@ -171,12 +171,26 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		this.contexts = contexts;
 	}
 
+    /**
+     * @deprecated use {@link #getLabelFilter()}
+     */
     public String getLabels() {
-        return labels;
+        return getLabelFilter();
     }
 
+    /**
+     * @deprecated use {@link #setLabelFilter(String)}
+     */
     public void setLabels(String labels) {
-        this.labels = labels;
+        setLabelFilter(labels);
+    }
+
+    public String getLabelFilter() {
+        return labelFilter;
+    }
+
+    public void setLabelFilter(String labelFilter) {
+        this.labelFilter = labelFilter;
     }
 
     public String getTag() {
@@ -286,9 +300,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
                 if (tag != null) {
                     liquibase.futureRollbackSQL(tag, new Contexts(getContexts()),
-                        new LabelExpression(getLabels()), output);
+                        new LabelExpression(getLabelFilter()), output);
                 } else {
-                    liquibase.futureRollbackSQL(new Contexts(getContexts()), new LabelExpression(getLabels()), output);
+                    liquibase.futureRollbackSQL(new Contexts(getContexts()), new LabelExpression(getLabelFilter()), output);
                 }
             } catch (IOException e) {
                 throw new LiquibaseException("Unable to generate rollback file.", e);
@@ -303,15 +317,15 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         if (isTestRollbackOnUpdate()) {
             if (tag != null) {
-                liquibase.updateTestingRollback(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+                liquibase.updateTestingRollback(tag, new Contexts(getContexts()), new LabelExpression(getLabelFilter()));
             } else {
-                liquibase.updateTestingRollback(new Contexts(getContexts()), new LabelExpression(getLabels()));
+                liquibase.updateTestingRollback(new Contexts(getContexts()), new LabelExpression(getLabelFilter()));
             }
         } else {
             if (tag != null) {
-                liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+                liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabelFilter()));
             } else {
-                liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
+                liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabelFilter()));
             }
         }
     }
