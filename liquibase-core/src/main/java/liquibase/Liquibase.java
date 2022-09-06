@@ -34,7 +34,6 @@ import liquibase.logging.core.CompositeLogService;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -80,6 +79,7 @@ public class Liquibase implements AutoCloseable {
     private ChangeLogSyncListener changeLogSyncListener;
 
     private UUID hubConnectionId;
+    private Map<String, Boolean> upToDateFastCheck = new HashMap<>();
 
     private enum RollbackMessageType {
         WILL_ROLLBACK, ROLLED_BACK, ROLLBACK_FAILED
@@ -207,27 +207,8 @@ public class Liquibase implements AutoCloseable {
      */
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
-
-            ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-
-            // Double checked locking: we first test whether there appears to
-            // be any work to do, before obtaining an exclusive write lock.
-            //
-            // This allows multiple peer services to boot in parallel
-            // in the common case where there are no changelogs to run.
-            //
-            // If it looks like there are changelogs to run, we need to re-check
-            // this after obtaining the lock, in case a peer service has already
-            // done the work after getting the lock, but if there is not then
-            // we can do nothing without needing to ever acquire the lock.
-            if (listUnrunChangeSets(contexts, labelExpression).isEmpty()) {
-                LOG.info("No un-run changesets");
+            if (isUpToDateFastCheck(contexts, labelExpression)) {
                 return;
-            } else {
-                // Discard the cached fetched un-run changeset list, as if
-                // another peer is running the changesets in parallel, we may
-                // get a different answer after taking out the write lock
-                changeLogService.reset();
             }
 
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
@@ -246,7 +227,7 @@ public class Liquibase implements AutoCloseable {
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
                 }
 
-                changeLogService.generateDeploymentId();
+                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
 
                 changeLog.validate(database, contexts, labelExpression);
 
@@ -305,6 +286,38 @@ public class Liquibase implements AutoCloseable {
                 setChangeExecListener(null);
             }
         });
+    }
+
+    /**
+     * Performs check of the historyService to determine if there is no unrun changesets without obtaining an exclusive write lock.
+     * This allows multiple peer services to boot in parallel in the common case where there are no changelogs to run.
+     * <p>
+     * If we see that there is nothing in the changelog to run and this returns <b>true</b>, then regardless of the lock status we already know we are "done" and can finish up without waiting for the lock.
+     * <p>
+     * But, if there are changelogs that might have to be ran and this returns <b>false</b>, you MUST get a lock and do a real check to know what changesets actually need to run.
+     * <p>
+     * NOTE: to reduce the number of queries to the databasehistory table, this method will cache the "fast check" results within this instance under the assumption that the total changesets will not change within this instance.
+     */
+    protected boolean isUpToDateFastCheck(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        String cacheKey = contexts +"/"+ labelExpression;
+        if (!this.upToDateFastCheck.containsKey(cacheKey)) {
+            try {
+                if (listUnrunChangeSets(contexts, labelExpression, false).isEmpty()) {
+                    LOG.fine("Fast check found no un-run changesets");
+                    upToDateFastCheck.put(cacheKey, true);
+                } else {
+                    upToDateFastCheck.put(cacheKey, false);
+                }
+            } finally {
+                // Discard the cached fetched un-run changeset list, as if
+                // another peer is running the changesets in parallel, we may
+                // get a different answer after taking out the write lock
+
+                ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+                changeLogService.reset();
+            }
+        }
+        return upToDateFastCheck.get(cacheKey);
     }
 
     /**
@@ -473,10 +486,14 @@ public class Liquibase implements AutoCloseable {
 
                 outputHeader("Update Database Script");
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                lockService.waitForLock();
+                if (isUpToDateFastCheck(contexts, labelExpression)) {
+                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("logging", database).comment("Database is up to date, no changesets to execute");
+                } else {
+                    LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                    lockService.waitForLock();
 
-                update(contexts, labelExpression, checkLiquibaseTables);
+                    update(contexts, labelExpression, checkLiquibaseTables);
+                }
 
                 flushOutputWriter(output);
 
