@@ -284,7 +284,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
 
-        def resourceAccessor = Scope.getCurrentScope().getResourceAccessor()
+        def resourceAccessor = null
 
         if (testDef.searchPath == null) {
             testDef.searchPath = "."
