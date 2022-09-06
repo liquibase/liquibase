@@ -1,9 +1,11 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.database.Database;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.LiquibaseException;
@@ -90,6 +92,20 @@ public class LiquibaseGenerateChangeLogMojo extends
     @PropertyElement
     protected String diffIncludeObjects;
 
+    /**
+     * Specifies the a list of schemas to indicate liquibase where to apply change objects or where to read current state from
+     * @parameter property="liquibase.schemas"
+     */
+    @PropertyElement
+    protected String schemas;
+
+    /**
+     * Flag to Indicate liquibase whether or not to include schema name on changelog
+     * @parameter property="liquibase.includeSchema"
+     */
+    @PropertyElement
+    protected  Boolean includeSchema;
+
 
     @Override
 	protected void performLiquibaseTask(Liquibase liquibase)
@@ -108,7 +124,7 @@ public class LiquibaseGenerateChangeLogMojo extends
 
         getLog().info("Generating Change Log from database " + database.toString());
         try {
-            DiffOutputControl diffOutputControl = new DiffOutputControl(outputDefaultCatalog, outputDefaultSchema, true, null);
+            DiffOutputControl diffOutputControl = new DiffOutputControl(outputDefaultCatalog, includeSchema == null ? Boolean.FALSE : includeSchema, true, null);
             if ((diffExcludeObjects != null) && (diffIncludeObjects != null)) {
                 throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
             }
@@ -124,7 +140,11 @@ public class LiquibaseGenerateChangeLogMojo extends
             //
             boolean b = dataDir != null;
             Scope.child(GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getKey(), b, () -> {
-                CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtil.trimToNull(diffTypes),
+            CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(schemas, null, null,
+                    defaultCatalogName, defaultSchemaName, null, null, database);
+            CatalogAndSchema[] targetSchemas = computedSchemas.finalTargetSchemas;
+
+                CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, targetSchemas, StringUtil.trimToNull(diffTypes),
                         StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl);
                 getLog().info("Output written to Change Log file, " + outputChangeLogFile);
             });
