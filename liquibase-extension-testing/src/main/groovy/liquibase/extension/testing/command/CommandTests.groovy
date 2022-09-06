@@ -307,8 +307,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
 
             config.registerProvider(searchPathPropertiesProvider)
-            resourceAccessor =
-                    new CompositeResourceAccessor(new SearchPathResourceAccessor(testDef.searchPath, null), Scope.getCurrentScope().getResourceAccessor())
+            resourceAccessor = new SearchPathResourceAccessor(testDef.searchPath)
         }
 
         def scopeSettings = [
