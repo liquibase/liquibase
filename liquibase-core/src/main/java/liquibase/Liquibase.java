@@ -208,6 +208,28 @@ public class Liquibase implements AutoCloseable {
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
 
+            ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+
+            // Double checked locking: we first test whether there appears to
+            // be any work to do, before obtaining an exclusive write lock.
+            //
+            // This allows multiple peer services to boot in parallel
+            // in the common case where there are no changelogs to run.
+            //
+            // If it looks like there are changelogs to run, we need to re-check
+            // this after obtaining the lock, in case a peer service has already
+            // done the work after getting the lock, but if there is not then
+            // we can do nothing without needing to ever acquire the lock.
+            if (listUnrunChangeSets(contexts, labelExpression).isEmpty()) {
+                LOG.info("No un-run changesets");
+                return;
+            } else {
+                // Discard the cached fetched un-run changeset list, as if
+                // another peer is running the changesets in parallel, we may
+                // get a different answer after taking out the write lock
+                changeLogService.reset();
+            }
+
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             lockService.waitForLock();
 
@@ -216,7 +238,7 @@ public class Liquibase implements AutoCloseable {
 
             Operation updateOperation = null;
             BufferedLogService bufferLog = new BufferedLogService();
-            DatabaseChangeLog changeLog = null;
+            DatabaseChangeLog changeLog;
             HubUpdater hubUpdater = null;
             try {
                 changeLog = getDatabaseChangeLog();
@@ -224,7 +246,7 @@ public class Liquibase implements AutoCloseable {
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
                 }
 
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+                changeLogService.generateDeploymentId();
 
                 changeLog.validate(database, contexts, labelExpression);
 
