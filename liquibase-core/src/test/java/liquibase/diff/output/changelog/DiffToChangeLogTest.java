@@ -17,7 +17,7 @@ import static org.junit.Assert.assertThat;
 
 public class DiffToChangeLogTest {
     @Test
-    public void getOrderedOutputTypes_isConsistant() throws Exception {
+    public void getOrderedOutputTypes_isConsistent() throws Exception {
         MySQLDatabase database = new MySQLDatabase();
         DiffToChangeLog obj = new DiffToChangeLog(new DiffResult(new EmptyDatabaseSnapshot(database), new EmptyDatabaseSnapshot(database), new CompareControl()), null);
 

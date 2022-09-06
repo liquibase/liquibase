@@ -2,7 +2,7 @@ liquibase.database.core.CockroachDatabase
 liquibase.database.core.DB2Database
 liquibase.database.core.Db2zDatabase
 liquibase.database.core.DerbyDatabase
-liquibase.database.core.Firebird3Database
+liquibase.database.core.EnterpriseDBDatabase
 liquibase.database.core.FirebirdDatabase
 liquibase.database.core.H2Database
 liquibase.database.core.HsqlDatabase

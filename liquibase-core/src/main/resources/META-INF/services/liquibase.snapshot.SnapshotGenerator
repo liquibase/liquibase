@@ -3,7 +3,6 @@ liquibase.snapshot.jvm.ColumnSnapshotGenerator
 liquibase.snapshot.jvm.ColumnSnapshotGeneratorH2
 liquibase.snapshot.jvm.ColumnSnapshotGeneratorInformix
 liquibase.snapshot.jvm.ColumnSnapshotGeneratorOracle
-liquibase.snapshot.jvm.ColumnSnapshotGeneratorPostgres
 liquibase.snapshot.jvm.DataSnapshotGenerator
 liquibase.snapshot.jvm.ForeignKeySnapshotGenerator
 liquibase.snapshot.jvm.IndexSnapshotGenerator

@@ -2,11 +2,10 @@ package org.liquibase.maven.plugins;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.hub.HubConfiguration;
 import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.liquibase.maven.property.PropertyElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +27,7 @@ public class LiquibaseDropAll extends AbstractLiquibaseChangeLogMojo {
   	 * @parameter property="liquibase.schemas"
      *
   	 */
+	@PropertyElement
   	protected String schemas;
 
 	  /**
@@ -36,6 +36,7 @@ public class LiquibaseDropAll extends AbstractLiquibaseChangeLogMojo {
   	 * @parameter property="liquibase.hubConnectionId"
   	 *
   	 */
+	  @PropertyElement
   	protected String hubConnectionId;
 
     protected String catalog;
@@ -45,10 +46,9 @@ public class LiquibaseDropAll extends AbstractLiquibaseChangeLogMojo {
     		//
 	    	// Override because changeLogFile is not required
 		    //
-  			HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-			  String liquibaseHubApiKey = hubConfiguration.getLiquibaseHubApiKey();
-  			String hubMode = hubConfiguration.getLiquibaseHubMode();
-  			if (liquibaseHubApiKey != null && ! hubMode.toLowerCase().equals("off")) {
+			  String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
+  			HubConfiguration.HubMode hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
+  			if (liquibaseHubApiKey != null && hubMode != HubConfiguration.HubMode.OFF) {
   		  		if (hubConnectionId == null && changeLogFile == null) {
   		    			String errorMessage =
   									"\nThe dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +

@@ -1,7 +1,6 @@
 package liquibase.parser.core.yaml;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
@@ -20,6 +19,7 @@ import java.util.Map;
 
 public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
 
+    @SuppressWarnings("java:S2095")
     @Override
     public DatabaseSnapshot parse(String path, ResourceAccessor resourceAccessor) throws LiquibaseParseException {
         Yaml yaml = new Yaml(new SafeConstructor());
@@ -67,7 +67,7 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
         Map parsedYaml;
         try (
             InputStreamReader inputStreamReader = new InputStreamReader(
-                stream, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()
+                stream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()
             );
         ) {
             parsedYaml = (Map) yaml.load(inputStreamReader);

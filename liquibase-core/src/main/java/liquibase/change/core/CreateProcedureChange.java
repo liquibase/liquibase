@@ -1,14 +1,13 @@
 package liquibase.change.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.ChangeSet;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
@@ -214,7 +213,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             String relativeTo = null;
             final Boolean isRelative = isRelativeToChangelogFile();
             if (isRelative != null && isRelative) {
-                relativeTo = getChangeSet().getFilePath();
+                relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
             }
             return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
@@ -251,8 +250,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 procedureText = "";
             }
 
-            String encoding =
-                LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
             if (procedureText != null) {
                 try {
                     stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
@@ -347,6 +345,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    @SuppressWarnings("java:S2095")
     @Override
     protected Map<String, Object> createExampleValueMetaData(
         String parameterName, DatabaseChangeProperty changePropertyAnnotation) {

@@ -4,8 +4,6 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -13,6 +11,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.cdi.annotations.LiquibaseType;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
@@ -78,9 +77,12 @@ public class CDILiquibase implements Extension {
     @LiquibaseType
     ResourceAccessor resourceAccessor;
 
-    @Inject @LiquibaseType
-    private CDILiquibaseConfig config;
-    @Inject @LiquibaseType
+    @Inject
+    @LiquibaseType
+    protected CDILiquibaseConfig config;
+
+    @Inject
+    @LiquibaseType
     private DataSource dataSource;
     private boolean initialized;
     private boolean updateSuccessful;
@@ -95,40 +97,43 @@ public class CDILiquibase implements Extension {
 
     @PostConstruct
     public void onStartup() {
-        Logger log = Scope.getCurrentScope().getLog(getClass());
-
-        log.info("Booting Liquibase " + LiquibaseUtil.getBuildVersion());
-        String hostName;
         try {
-            hostName = NetUtil.getLocalHostName();
-        } catch (Exception e) {
-            log.warning("Cannot find hostname: " + e.getMessage());
-            log.fine("", e);
-            return;
-        }
+            Logger log = Scope.getCurrentScope().getLog(getClass());
 
-        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
-        if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-            log.info(String.format("Liquibase did not run on %s because %s was set to false.",
-                    hostName,
-                liquibaseConfiguration.describeValueLookupLogic(
-                    GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN)
-            ));
-            return;
-        }
-        if (!config.getShouldRun()) {
-            log.info(String.format("Liquibase did not run on %s because CDILiquibaseConfig.shouldRun was set to false.", hostName));
-            return;
-        }
-        initialized = true;
-        try {
+            log.info("Booting Liquibase " + LiquibaseUtil.getBuildVersionInfo());
+            String hostName;
+            try {
+                hostName = NetUtil.getLocalHostName();
+            } catch (Exception e) {
+                log.warning("Cannot find hostname: " + e.getMessage());
+                log.fine("", e);
+                return;
+            }
+
+            if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
+                log.info(String.format("Liquibase did not run on %s because %s was set to false.",
+                        hostName,
+                        LiquibaseCommandLineConfiguration.SHOULD_RUN.getKey()
+                ));
+                return;
+            }
+            if (!config.getShouldRun()) {
+                log.info(String.format("Liquibase did not run on %s because CDILiquibaseConfig.shouldRun was set to false.", hostName));
+                return;
+            }
+            initialized = true;
             performUpdate();
-        } catch (LiquibaseException e) {
+        } catch (Throwable e) {
+            Scope.getCurrentScope().getLog(getClass()).severe(e.getMessage(), e);
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+
             throw new UnexpectedLiquibaseException(e);
         }
     }
 
-    private void performUpdate() throws LiquibaseException {
+    protected void performUpdate() throws LiquibaseException {
         Connection c = null;
         Liquibase liquibase = null;
         try {
@@ -161,7 +166,7 @@ public class CDILiquibase implements Extension {
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
         Liquibase liquibase = new Liquibase(config.getChangeLog(), resourceAccessor, createDatabase(c));
         if (config.getParameters() != null) {
-            for(Map.Entry<String, String> entry: config.getParameters().entrySet()) {
+            for (Map.Entry<String, String> entry : config.getParameters().entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
         }
@@ -176,6 +181,7 @@ public class CDILiquibase implements Extension {
     /**
      * Subclasses may override this method add change some database settings such as
      * default schema before returning the database object.
+     *
      * @param c
      * @return a Database implementation retrieved from the {@link liquibase.database.DatabaseFactory}.
      * @throws DatabaseException

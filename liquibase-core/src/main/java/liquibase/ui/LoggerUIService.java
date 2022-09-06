@@ -2,6 +2,7 @@ package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
 import liquibase.Scope;
+import liquibase.exception.LiquibaseException;
 
 import java.util.logging.Level;
 
@@ -34,13 +35,25 @@ public class LoggerUIService extends AbstractExtensibleObject implements UIServi
 
     }
 
+    @Override
+    public void setAllowPrompt(boolean allowPrompt) throws IllegalArgumentException {
+        if (allowPrompt) {
+            throw new IllegalArgumentException("allowPrompt=true not allowed in LoggerUIService");
+        }
+    }
+
+    @Override
+    public boolean getAllowPrompt() {
+        return false;
+    }
+
     /**
      *
      * This implementation simply returns the default value, since it cannot prompt the user.
      */
     @Override
-    public <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
-        return defaultValue;
+    public <T> T prompt(String prompt, T valueIfNoEntry, InputHandler<T> inputHandler, Class<T> type) {
+        return valueIfNoEntry;
     }
 
     public Level getStandardLogLevel() {

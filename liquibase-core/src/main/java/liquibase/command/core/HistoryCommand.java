@@ -1,20 +1,17 @@
 package liquibase.command.core;
 
-import liquibase.changelog.ChangeLogHistoryService;
-import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.changelog.RanChangeSet;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandResult;
+import liquibase.command.CommandScope;
 import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 
 import java.io.PrintStream;
-import java.io.Writer;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
+/**
+ * @deprecated Implement commands with {@link liquibase.command.CommandStep} and call them with {@link liquibase.command.CommandFactory#getCommandDefinition(String...)}.
+ */
 public class HistoryCommand extends AbstractCommand {
 
     private Database database;
@@ -52,68 +49,15 @@ public class HistoryCommand extends AbstractCommand {
     }
 
     @Override
-    protected CommandResult run() throws Exception {
-        ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+    public CommandResult run() throws Exception {
+        final CommandScope commandScope = new CommandScope("internalHistory");
+        commandScope.setOutput(getOutputStream());
 
-        outputStream.println("Liquibase History for " + database.getConnection().getURL());
-        outputStream.println("");
+        commandScope.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, this.getDatabase());
+        commandScope.addArgumentValue(InternalHistoryCommandStep.DATE_FORMAT_ARG, this.dateFormat);
 
-        DeploymentDetails deployment = null;
-        for (RanChangeSet ranChangeSet : historyService.getRanChangeSets()) {
-            final String thisDeploymentId = ranChangeSet.getDeploymentId();
-            if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
-                if (deployment != null) {
-                    deployment.printReport();
-                }
-                deployment = new DeploymentDetails();
-            }
-            deployment.changeSets.add(ranChangeSet);
-        }
-
-        if (deployment == null) {
-            outputStream.println("No changeSets deployed");
-        } else {
-            deployment.printReport();
-        }
+        commandScope.execute();
 
         return new CommandResult("OK");
     }
-
-    private class DeploymentDetails {
-        List<RanChangeSet> changeSets = new ArrayList<>();
-
-        void printReport() {
-            String executionTime = null;
-            RanChangeSet firstChangeSet = changeSets.get(0);
-            if (changeSets.size() > 1) {
-                RanChangeSet last = changeSets.get(changeSets.size() - 1);
-
-                long executionMs = last.getDateExecuted().getTime() - firstChangeSet.getDateExecuted().getTime();
-                executionTime = (executionMs / 1000F) + "s";
-            }
-            String message = "- Database updated at " + dateFormat.format(firstChangeSet.getDateExecuted()) + ". Applied " + changeSets.size() + " changeSet(s)";
-
-            if (executionTime != null) {
-                message += " in " + executionTime;
-            }
-
-            message += ", DeploymentId: " + firstChangeSet.getDeploymentId();
-
-            outputStream.println(message);
-
-            for (RanChangeSet changeSet : changeSets) {
-                outputStream.println("  " + changeSet.toString());
-            }
-
-            outputStream.println("");
-        }
-
-        String getDeploymentId() {
-            if (changeSets.size() == 0) {
-                return null;
-            }
-            return changeSets.get(0).getDeploymentId();
-        }
-    }
-
 }

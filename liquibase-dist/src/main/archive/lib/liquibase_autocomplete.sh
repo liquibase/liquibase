@@ -7,13 +7,13 @@ _liquibase()
 
     # Liquibase options, has to be improved to be more context aware
     opts="
-  help 
-  update 
-  updateSQL 
-  updateCount 
-  updateCountSQL 
-  updateToTag 
-  updateToTagSQL 
+  help
+  update
+  updateSQL
+  updateCount
+  updateCountSQL
+  updateToTag
+  updateToTagSQL
   status
   registerChangeLog
   syncHub
@@ -46,6 +46,17 @@ _liquibase()
   clearCheckSums
   changelogSync
   changelogSyncSQL
+  changeLogSyncToTag
+  changeLogSyncToTagSQL
+  checks^show
+  checks^run
+  checks^bulk-set
+  checks^delete^--check-name=<check_short_name>
+  checks^customize^--check-name=<check_short_name>
+  checks^enable^--check-name=<check_short_name>
+  checks^disable^--check-name=<check_short_name>
+  checks^copy^--check-name=<check_short_name>
+  checks^reset^--check-name=<check_short_name>
   markNextChangeSetRan
   markNextChangeSetRanSQL
   listLocks
@@ -113,6 +124,7 @@ _liquibase()
   --diffTypes=<catalog,tables,functions,views,columns,indexes,foreignkeys,primarykeys,uniqueconstraints,data,storedprocedure,triggers,sequences> -D<property.name>=<property.value>
   --verbose
   --liquibaseProLicenseKey"
+    
     # Handle --xxxxxx=
     if [[ ${prev} == "--"* && ${cur} == "=" ]] ; then
         COMPREPLY=(*)
@@ -136,6 +148,15 @@ _liquibase()
         # If there's only one option, without =, then allow a space
         compopt +o nospace
     fi
+     
+    # Handle subcommands
+    for i in "${!COMPREPLY[@]}"; do 
+      temp="${COMPREPLY[$i]}"
+      COMPREPLY[$i]="${temp//\^/ }"
+    done
+    
     return 0
 }
+
+  
 complete -o nospace -F _liquibase liquibase

@@ -1,16 +1,13 @@
 package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.configuration.ConfigurationProperty;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 
-import java.io.Console;
-import java.io.PrintStream;
+import java.io.*;
 
 /**
  * {@link UIService} implementation that sends messages to stdout and stderr.
@@ -20,8 +17,14 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     private PrintStream outputStream = System.out;
     private PrintStream errorStream = System.out;
     private boolean outputStackTraces = false;
+    private boolean allowPrompt = false;
 
     private ConsoleWrapper console;
+
+    public static final String TERM_PROGRAM = "TERM_PROGRAM";
+    public static final String MINTTY = "mintty";
+    public static final String MSYSTEM = "MSYSTEM";
+    public static final String MINGW64 = "mingw64";
 
     public ConsoleUIService() {
     }
@@ -57,13 +60,30 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     }
 
     @Override
-    public <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
+    public void setAllowPrompt(boolean allowPrompt) throws IllegalArgumentException {
+        this.allowPrompt = allowPrompt;
+    }
+
+    @Override
+    public boolean getAllowPrompt() {
+        return getConsole().supportsInput() && allowPrompt;
+    }
+
+    @Override
+    public <T> T prompt(String prompt, T valueIfNoEntry, InputHandler<T> inputHandler, Class<T> type) {
+        //
+        // Check the allowPrompt flag
+        //
         Logger log = Scope.getCurrentScope().getLog(getClass());
+        if (! allowPrompt) {
+            log.fine("No prompt for input is allowed at this time");
+            return valueIfNoEntry;
+        }
         final ConsoleWrapper console = getConsole();
 
         if (!console.supportsInput()) {
-            log.fine("No console attached. Skipping interactive prompt: '" + prompt + "'. Using default value '" + defaultValue + "'");
-            return defaultValue;
+            log.fine("No console attached. Skipping interactive prompt: '" + prompt + "'. Using default value '" + valueIfNoEntry + "'");
+            return valueIfNoEntry;
         }
 
         if (inputHandler == null) {
@@ -71,8 +91,8 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
         }
 
         String initialMessage = prompt;
-        if (defaultValue != null) {
-            initialMessage += " (default \"" + defaultValue + "\")";
+        if (valueIfNoEntry != null) {
+            initialMessage += " [" + valueIfNoEntry + "]";
         }
         this.sendMessage(initialMessage + ": ");
 
@@ -80,12 +100,22 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             String input = StringUtil.trimToNull(console.readLine());
             try {
                 if (input == null) {
-                    return defaultValue;
+                    if (inputHandler.shouldAllowEmptyInput()) {
+                        return valueIfNoEntry;
+                    } else {
+                        throw new IllegalArgumentException("Empty values are not permitted.");
+                    }
                 }
                 return inputHandler.parseInput(input, type);
-            } catch (IllegalArgumentException e) {
-                this.sendMessage("Invalid value: \"" + input + "\"");
-                this.sendMessage(prompt + ": ");
+            }  catch (IllegalArgumentException e) {
+                String message;
+                if (e.getMessage() != null) {
+                    message = e.getMessage();
+                } else {
+                    message = "Invalid value: \"" + input + "\"";
+                }
+                this.sendMessage(message);
+                this.sendMessage(initialMessage + ": ");
             }
         }
     }
@@ -95,24 +125,40 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
      */
     protected ConsoleWrapper getConsole() {
         if (console == null) {
-            final ConfigurationProperty headless = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.HEADLESS);
-            boolean headlessConfigValue = headless.getValue(Boolean.class);
-            boolean wasHeadlessOverridden = headless.getWasOverridden();
+            final ConfiguredValue<Boolean> headlessValue = GlobalConfiguration.HEADLESS.getCurrentConfiguredValue();
+            boolean headlessConfigValue = headlessValue.getValue();
+            boolean wasHeadlessOverridden = !headlessValue.wasDefaultValueUsed();
 
             final Logger log = Scope.getCurrentScope().getLog(getClass());
 
             if (headlessConfigValue) {
                 log.fine("Not prompting for user input because liquibase.headless=true. Set to 'false' in liquibase.properties to change this behavior.");
-                console = new ConsoleWrapper(null);
+                console = new ConsoleWrapper(null, false);
             } else {
+                //
+                // If no system console and headless was not overridden as headless=false
+                // then first, check the TERM_PROGRAM environment variable setting
+                // to detect whether we need to read from stdin
+                // otherwise check the MSYSTEM environment variable to look for the value "mingw"
+                //
                 final Console systemConsole = System.console();
-
-                this.console = new ConsoleWrapper(systemConsole);
+                boolean useStdIn = wasHeadlessOverridden;
+                String minTtyValue = System.getenv(TERM_PROGRAM);
+                if (systemConsole == null && ! useStdIn) {
+                    if (StringUtil.isNotEmpty(minTtyValue)) {
+                        useStdIn = minTtyValue.equalsIgnoreCase(MINTTY);
+                    }
+                    if (! useStdIn) {
+                        String msystem = System.getenv(MSYSTEM);
+                        useStdIn = msystem != null && msystem.equalsIgnoreCase(MINGW64);
+                    }
+                }
+                this.console = new ConsoleWrapper(systemConsole, useStdIn);
 
                 if (systemConsole == null) {
                     log.fine("No system console detected for user input");
-                    if (wasHeadlessOverridden) {
-                        throw new UnexpectedLiquibaseException("liquibase.headless was set to false, but Liquibase was run in an environment with no system console");
+                    if (useStdIn) {
+                        log.fine("Input will be from stdin");
                     }
                 } else {
                     log.fine("A system console was detected for user input");
@@ -165,20 +211,43 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     public static class ConsoleWrapper {
 
         private final Console console;
+        private final boolean useStdin;
 
+        /**
+         *
+         * This constructor is used for extensions that provide UIService implementations
+         *
+         * @param   console    the console to use
+         *
+         */
         public ConsoleWrapper(Console console) {
+            this(console, false);
+        }
+
+        public ConsoleWrapper(Console console, boolean useStdInParam) {
             this.console = console;
+            this.useStdin = useStdInParam;
         }
 
         public String readLine() {
             if (console == null) {
-                return "";
+                if (! useStdin) {
+                    return "";
+                }
+                try {
+                    return new BufferedReader(new InputStreamReader(System.in)).readLine();
+                } catch (IOException ioe) {
+                    //
+                    // Throw an exception if we can't read
+                    //
+                    throw new RuntimeException("Unable to read from the system input stream", ioe);
+                }
             }
             return console.readLine();
         }
 
         public boolean supportsInput() {
-            return console != null;
+            return console != null || useStdin;
         }
     }
 }

@@ -55,20 +55,18 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
                         if (property.containsKey("name")) {
                             Object value = property.get("value");
-                            if (value != null) {
-                                value = value.toString(); // TODO: not nice...
-                            }
 
-                            changeLogParameters.set((String) property.get("name"), (String) value, context, labels, (String) property.get("dbms"), global, changeLog);
+                            changeLogParameters.set((String) property.get("name"), value, context, labels, (String) property.get("dbms"), global, changeLog);
                         } else if (property.containsKey("file")) {
                             loadChangeLogParametersFromFile(changeLogParameters, resourceAccessor, changeLog, property,
                                     context, labels, global);
                         }
                     }
-                }
-                else if (((Map) obj).containsKey("changeLogId")) {
-                    String changeLogId = (String)((Map)obj).get("changeLogId");
-                    changeLog.setChangeLogId(changeLogId);
+
+                    if (((Map) obj).containsKey("changeLogId")) {
+                        String changeLogId = (String)((Map)obj).get("changeLogId");
+                        changeLog.setChangeLogId(changeLogId);
+                    }
                 }
             }
 
@@ -127,7 +125,6 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 		Boolean global = null;
 		Object globalObj = property.get("global");
 		if (globalObj == null) {
-			// default behaviour before liquibase 3.4
 			global = true;
 		} else {
 			global = (Boolean) globalObj;
@@ -135,7 +132,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 		return global;
 	}
 
-    protected void replaceParameters(Object obj, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog) {
+    protected void replaceParameters(Object obj, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog) throws ChangeLogParseException{
         if (obj instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) obj).entrySet()) {
                 if ((entry.getValue() instanceof Map) || (entry.getValue() instanceof Collection)) {

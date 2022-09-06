@@ -10,10 +10,12 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
+
+    private String searchPath;
     private String changeLogDirectory;
     private String changeLogFile;
     private String contexts;
-    private LabelExpression labels;
+    private LabelExpression labelFilter;
     private FileResource outputFile;
     private String outputEncoding;
 
@@ -42,7 +44,20 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
     public void setChangeLogDirectory(String changeLogDirectory) {
         this.changeLogDirectory = changeLogDirectory;
     }
-    
+
+    /**
+     * Gets the change log directory set from Ant.
+     * @return The change log directory resource.
+     */
+    @Override
+    public String getSearchPath() {
+        return searchPath;
+    }
+
+    public void setSearchPath(String searchPath) {
+        this.searchPath = searchPath;
+    }
+
     /**
      * Gets the change log file set from Ant.
      * @return The change log file resource.
@@ -64,12 +79,26 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
         this.contexts = contexts;
     }
 
+    /**
+     * @deprecated use {@link #getLabelFilter()}
+     */
     public LabelExpression getLabels() {
-        return labels;
+        return getLabelFilter();
     }
 
-    public void setLabels(String labels) {
-        this.labels = new LabelExpression(labels);
+    /**
+     * @deprecated use {@link #setLabelFilter(String)}
+     */
+    public void setLabels(String labelFilter) {
+        this.setLabelFilter(labelFilter);
+    }
+
+    public LabelExpression getLabelFilter() {
+        return labelFilter;
+    }
+
+    public void setLabelFilter(String labelFilter) {
+        this.labelFilter = new LabelExpression(labelFilter);
     }
 
     public FileResource getOutputFile() {

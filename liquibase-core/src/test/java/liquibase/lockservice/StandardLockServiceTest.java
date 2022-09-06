@@ -1,341 +1,102 @@
 package liquibase.lockservice;
 
+import liquibase.Scope;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LockException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.MockedStatic;
 
-@SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 public class StandardLockServiceTest {
 
+    public static final LocalDateTime LOCKGRANTED_DATETIME = LocalDateTime.of(2021, 6, 1, 20, 34);
+    public static final Date LOCKGRANTED_DATE = Date.from(Instant.ofEpochMilli(1622580938000l));
+    public static final int ID0 = 23;
+    public static final int ID1 = 42;
+    public static final String LOCKEDBY = "The devil";
     private StandardLockService lockService;
+    private Scope mockedScope;
 
     @Before
-    public void before() {
-        lockService = new StandardLockService();
-        lockService.reset();
+    public void before() throws Exception {
+        Executor executor = Mockito.mock(Executor.class);
+        Mockito
+            .when(executor.queryForList(Mockito.any()))
+            .thenReturn(sampleLockData());
+        ExecutorService executorService = Mockito.mock(ExecutorService.class);
+        Mockito
+            .when(executorService.getExecutor(Mockito.any(), Mockito.any()))
+            .thenReturn(executor);
+
+        Map<String, Object> scopeValues = new TreeMap<>();
+
+        scopeValues.put(ExecutorService.class.getName(), executorService);
+
+        mockedScope = Mockito.mock(Scope.class);
+        Mockito.when(mockedScope.getSingleton(ExecutorService.class)).thenReturn(executorService);
+
+        lockService = new StandardLockService() {
+            @Override
+            public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
+                return true;
+            }
+        };
     }
 
-    @After
-    public void after() {
-        lockService.reset();
+    @Test
+    public void shouldAcceptLocaldatetimeInLOCKGRANTED() throws LockException {
+        try (MockedStatic<Scope> scope = Mockito.mockStatic(Scope.class)) {
+            scope.when(Scope::getCurrentScope).thenReturn(mockedScope);
+            DatabaseChangeLogLock[] databaseChangeLogLocks = lockService.listLocks();
+
+            Assertions.assertThat(databaseChangeLogLocks)
+                .hasSize(2);
+
+            Assertions.assertThat(databaseChangeLogLocks[0].getId())
+                .isEqualTo(ID0);
+            Assertions.assertThat(databaseChangeLogLocks[0].getLockGranted())
+                .isEqualTo(Date.from((LOCKGRANTED_DATETIME).atZone(ZoneId.systemDefault()).toInstant()));
+            Assertions.assertThat(databaseChangeLogLocks[0].getLockedBy())
+                .isEqualTo(LOCKEDBY);
+
+            Assertions.assertThat(databaseChangeLogLocks[1].getId())
+                .isEqualTo(ID1);
+            Assertions.assertThat(databaseChangeLogLocks[1].getLockGranted())
+                .isEqualTo(LOCKGRANTED_DATE);
+            Assertions.assertThat(databaseChangeLogLocks[1].getLockedBy())
+                .isEqualTo(LOCKEDBY);
+        }
     }
 
-//    @Test
-//    public void aquireLock_hasLockAlready() throws Exception {
-//        Database database = createMock(Database.class);
-//        replay(database);
-//
-//        lockService.setDatabase(database);
-//        assertFalse(lockService.hasChangeLogLock());
-//
-//        Field field = lockService.getClass().getDeclaredField("hasChangeLogLock");
-//        field.setAccessible(true);
-//        field.set(lockService, true);
-//
-//        assertTrue(lockService.hasChangeLogLock());
-//
-//        assertTrue(lockService.acquireLock());
-//    }
+    private static List<Map<String, ?>> sampleLockData() {
+        Map<String, Object> columnMapRow0 = new TreeMap<>();
 
+        columnMapRow0.put("ID", ID0);
+        columnMapRow0.put("LOCKED", true);
+        columnMapRow0.put("LOCKGRANTED", LOCKGRANTED_DATETIME);
+        columnMapRow0.put("LOCKEDBY", LOCKEDBY);
 
-//    @Test
-//    public void acquireLock_tableExistsNotLocked() throws Exception {
-//        Database database = createMock(Database.class);
-//        Executor executor = createMock(Executor.class);
-//
-////        database.checkDatabaseChangeLogLockTable();
-////        expectLastCall();
-//
-//        database.rollback();
-//        expectLastCall().anyTimes();
-//
-//        database.setCanCacheLiquibaseTableInfo(true);
-//        expectLastCall();
-//
-//        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(false);
-//
-//        executor.comment("Lock Database");
-//        expectLastCall();
-//
-//        expect(executor.update(isA(LockDatabaseChangeLogStatement.class))).andReturn(1);
-//
-//        database.commit();
-//        expectLastCall();
-//
-//        replay(executor);
-//        replay(database);
-//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
-//
-//        LockServiceImpl service = new LockServiceImpl();
-//        service.setDatabase(database);
-//        assertTrue(service.acquireLock());
-//
-//        verify(database);
-//        verify(executor);
-//    }
+        Map<String, Object> columnMapRow1 = new TreeMap<>();
 
-//    @Test
-//    public void acquireLock_tableExistsIsLocked() throws Exception {
-//        Database database = createMock(Database.class);
-//        Executor executor = createMock(Executor.class);
-//
-////        database.checkDatabaseChangeLogLockTable();
-////        expectLastCall();
-//
-//        database.rollback();
-//        expectLastCall().anyTimes();
-//
-//        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true);
-//
-//        replay(database);
-//        replay(executor);
-//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
-//
-//        LockServiceImpl service = new LockServiceImpl();
-//        service.setDatabase(database);
-//        assertFalse(service.acquireLock());
-//
-//        verify(database);
-//    }
+        columnMapRow1.put("ID", ID1);
+        columnMapRow1.put("LOCKED", 1);
+        columnMapRow1.put("LOCKGRANTED", LOCKGRANTED_DATE);
+        columnMapRow1.put("LOCKEDBY", LOCKEDBY);
 
-//    @Test
-//    public void waitForLock_notLocked() throws Exception {
-//        Database database = createMock(Database.class);
-//        Executor executor = createMock(Executor.class);
-//
-//
-////        database.checkDatabaseChangeLogLockTable();
-////        expectLastCall();
-//
-//        database.setCanCacheLiquibaseTableInfo(true);
-//        expectLastCall();
-//
-//        database.rollback();
-//        expectLastCall().anyTimes();
-//
-//        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(false);
-//
-//        expect(database.getDatabaseChangeLogLockTableName()).andReturn("DATABASECHANGELOGLOCK");
-//        expect(database.getLiquibaseCatalogName()).andReturn("LQCAT");
-//        expect(database.getLiquibaseSchemaName()).andReturn("LQSCHM");
-//        database.setCanCacheLiquibaseTableInfo(true);
-//        expectLastCall();
-//
-//        executor.comment("Lock Database");
-//        expectLastCall();
-//
-//        expect(executor.update(isA(LockDatabaseChangeLogStatement.class))).andReturn(1);
-//
-//        database.commit();
-//        expectLastCall();
-//
-//        replay(database);
-//        replay(executor);
-//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
-//
-//        LockServiceImpl service = new LockServiceImpl();
-//        service.setDatabase(database);
-//        service.waitForLock();
-//
-//        verify(database);
-//        verify(executor);
-//    }
-
-//    @Test
-//    public void waitForLock_lockedThenReleased() throws Exception {
-//        Database database = createMock(Database.class);
-//        Executor executor = createMock(Executor.class);
-//
-////        database.checkDatabaseChangeLogLockTable();
-////        expectLastCall().anyTimes();
-//
-//        database.setCanCacheLiquibaseTableInfo(true);
-//        expectLastCall();
-//
-//        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true);
-//        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true);
-//        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true);
-//        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(false);
-//
-//        executor.comment("Lock Database");
-//        expectLastCall();
-//
-//        database.rollback();
-//        expectLastCall().anyTimes();
-//
-//        expect(executor.update(isA(LockDatabaseChangeLogStatement.class))).andReturn(1);
-//
-//        database.commit();
-//        expectLastCall();
-//
-//        replay(database);
-//        replay(executor);
-//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
-//
-//        LockServiceImpl service = new LockServiceImpl();
-//        service.setDatabase(database);
-//        service.setChangeLogLockRecheckTime(1);
-//        service.waitForLock();
-//
-//        verify(database);
-//        verify(executor);
-//    }
-
-//    @Test
-//    public void waitForLock_lockedThenTimeout() throws Exception {
-//        Database database = createMock(Database.class);
-//        Executor executor = createMock(Executor.class);
-//
-////        database.checkDatabaseChangeLogLockTable();
-////        expectLastCall().anyTimes();
-//
-////        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
-////        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
-//
-//        List<Map<String, ?>> resultList = new ArrayList<Map<String, ?>>();
-//        Map<String, Object> result = new HashMap<String, Object>();
-//        result.put("ID", 1);
-//        result.put("LOCKED", true);
-//        Date lockDate = new Date();
-//        result.put("LOCKGRANTED", lockDate);
-//        result.put("LOCKEDBY", "Locker");
-//        resultList.add(result);
-//
-//        expect(executor.queryForList(isA(SelectFromDatabaseChangeLogLockStatement.class))).andReturn(resultList);
-//
-//        database.rollback();
-//        expectLastCall().anyTimes();
-//
-//        replay(database);
-//        replay(executor);
-//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
-//
-//        LockServiceImpl service = new LockServiceImpl();
-//        service.setDatabase(database);
-//        service.setChangeLogLockWaitTime(10);
-//        service.setChangeLogLockRecheckTime(5);
-//
-//        try {
-//            service.waitForLock();
-//            fail("Should have thrown exception");
-//        } catch (LockException e) {
-//            assertEquals("Could not acquire change log lock.  Currently locked by Locker since " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lockDate), e.getMessage());
-//        }
-//
-//        verify(database);
-//    }
-
-//    @Test
-//    public void releaseLock_tableExistsAndLocked() throws Exception {
-//        Database database = createMock(Database.class);
-//        Executor executor = createMock(Executor.class);
-//
-//        expect(executor.update(isA(UnlockDatabaseChangeLogStatement.class))).andReturn(1);
-////        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
-//        database.commit();
-//        expectLastCall().atLeastOnce();
-//
-//        database.setCanCacheLiquibaseTableInfo(false);
-//        expectLastCall();
-//
-//        executor.comment("Release Database Lock");
-//        expectLastCall().anyTimes();
-//
-//        database.rollback();
-//        expectLastCall().anyTimes();
-//
-//        replay(database);
-//        replay(executor);
-//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
-//
-//        LockServiceImpl service = new LockServiceImpl();
-//        service.setDatabase(database);
-//        service.releaseLock();
-//
-//        verify(database);
-//    }
-
-//    @Test
-//    public void listLocks_hasLocks() throws Exception {
-//        Database database = createMock(Database.class);
-//        Executor executor = createMock(Executor.class);
-//
-////        database.checkDatabaseChangeLogLockTable();
-////        expectLastCall().anyTimes();
-//
-////        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
-////        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
-//
-//        List<Map<String, ?>> resultList = new ArrayList<Map<String, ?>>();
-//        Map<String, Object> result = new HashMap<String, Object>();
-//        result.put("ID", 1);
-//        result.put("LOCKED", true);
-//        Date lockDate = new Date();
-//        result.put("LOCKGRANTED", lockDate);
-//        result.put("LOCKEDBY", "Locker");
-//        resultList.add(result);
-//
-//        expect(executor.queryForList(isA(SelectFromDatabaseChangeLogLockStatement.class))).andReturn(resultList);
-//
-//        replay(database);
-//        replay(executor);
-//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
-//
-//        LockServiceImpl service = new LockServiceImpl();
-//        service.setDatabase(database);
-//        DatabaseChangeLogLock[] locks = service.listLocks();
-//        assertEquals(1, locks.length);
-//        assertEquals(1, locks[0].getId());
-//        assertEquals("Locker", locks[0].getLockedBy());
-//        assertEquals(lockDate, locks[0].getLockGranted());
-//
-//        verify(database);
-//    }
-
-//    @Test
-//    public void listLocks_tableExistsUnlocked() throws Exception {
-//        Database database = createMock(Database.class);
-//        Executor executor = createMock(Executor.class);
-//
-////        database.checkDatabaseChangeLogLockTable();
-////        expectLastCall().anyTimes();
-//
-////        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
-////        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
-//
-//        List<Map<String, ?>> resultList = new ArrayList<Map<String, ?>>();
-//
-//        expect(executor.queryForList(isA(SelectFromDatabaseChangeLogLockStatement.class))).andReturn(resultList);
-//
-//        replay(database);
-//        replay(executor);
-//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
-//
-//        LockServiceImpl service = new LockServiceImpl();
-//        service.setDatabase(database);
-//        DatabaseChangeLogLock[] locks = service.listLocks();
-//        assertEquals(0, locks.length);
-//
-//        verify(database);
-//    }
-
-//    @Test
-//    public void listLocks_tableDoesNotExists() throws Exception {
-//        Database database = createMock(Database.class);
-//
-////        expect(database.hasDatabaseChangeLogLockTable()).andReturn(false);
-//
-//        replay(database);
-//
-//        LockServiceImpl service = new LockServiceImpl();
-//        service.setDatabase(database);
-//        DatabaseChangeLogLock[] locks = service.listLocks();
-//        assertEquals(0, locks.length);
-//
-//        verify(database);
-//    }
-
-    public void testNothing() {
-
+        return Arrays.asList(columnMapRow0, columnMapRow1);
     }
-
 }

@@ -2,13 +2,13 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
+import liquibase.change.Change;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
@@ -16,13 +16,12 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Encapsulates MySQL database support.
@@ -30,6 +29,9 @@ import java.util.Set;
 public class MySQLDatabase extends AbstractJdbcDatabase {
     private static final String PRODUCT_NAME = "MySQL";
     private static final Set<String> RESERVED_WORDS = createReservedWords();
+
+    /** Pattern used to extract function precision like 3 in CURRENT_TIMESTAMP(3) */
+    public static final Pattern PRECISION_PATTERN = Pattern.compile("\\(\\d+\\)");
 
     public MySQLDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
@@ -77,7 +79,8 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         // it may still not be a MySQL, but a MariaDB.
         return (
                 (PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName()))
-                        && (!conn.getDatabaseProductVersion().toLowerCase().contains("mariadb"))
+                        && (!conn.getDatabaseProductVersion().toLowerCase().contains("mariadb") &&
+                            !conn.getDatabaseProductVersion().toLowerCase().contains("clustrix"))
         );
     }
 
@@ -345,7 +348,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         return new HashSet<String>(Arrays.asList("ACCESSIBLE",
             "ADD",
             "ADMIN",
-                "ALL",
+            "ALL",
             "ALTER",
             "ANALYZE",
             "AND",
@@ -358,7 +361,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "BINARY",
             "BLOB",
             "BOTH",
-                "BUCKETS",
+            "BUCKETS",
             "BY",
             "CALL",
             "CASCADE",
@@ -375,9 +378,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "CONVERT",
             "CREATE",
             "CROSS",
-                "CLONE",
-                "COMPONENT",
-                "CUME_DIST",
+            "CLONE",
+            "COMPONENT",
+            "CUBE",
+            "CUME_DIST",
             "CURRENT_DATE",
             "CURRENT_TIME",
             "CURRENT_TIMESTAMP",
@@ -393,13 +397,13 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "DECIMAL",
             "DECLARE",
             "DEFAULT",
-                "DEFINITION",
+            "DEFINITION",
             "DELAYED",
             "DELETE",
-                "DENSE_RANK",
+            "DENSE_RANK",
             "DESC",
             "DESCRIBE",
-                "DESCRIPTION",
+            "DESCRIPTION",
             "DETERMINISTIC",
             "DISTINCT",
             "DISTINCTROW",
@@ -410,38 +414,38 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "EACH",
             "ELSE",
             "ELSEIF",
-                "EMPTY",
+            "EMPTY",
             "ENCLOSED",
             "ESCAPED",
-                "EXCEPT",
-                "EXCLUDE",
+            "EXCEPT",
+            "EXCLUDE",
             "EXISTS",
             "EXIT",
             "EXPLAIN",
             "FALSE",
             "FETCH",
-                "FIRST_VALUE",
+            "FIRST_VALUE",
             "FLOAT",
             "FLOAT4",
             "FLOAT8",
-                "FOLLOWING",
+            "FOLLOWING",
             "FOR",
             "FORCE",
             "FOREIGN",
             "FROM",
             "FULLTEXT",
-                "GEOMCOLLECTION",
+            "GEOMCOLLECTION",
             "GENERATED",
             "GET",
-                "GET_MASTER_PUBLIC_KEY",
+            "GET_MASTER_PUBLIC_KEY",
             "GRANT",
             "GROUP",
             "GROUPING",
-                "GROUPS",
-                "HAVING",
+            "GROUPS",
+            "HAVING",
             "HIGH_PRIORITY",
-                "HISTOGRAM",
-                "HISTORY",
+            "HISTOGRAM",
+            "HISTORY",
             "HOUR_MICROSECOND",
             "HOUR_MINUTE",
             "HOUR_SECOND",
@@ -465,16 +469,16 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "INTO",
             "IS",
             "ITERATE",
-                "INVISIBLE",
+            "INVISIBLE",
             "JOIN",
-                "JSON_TABLE",
+            "JSON_TABLE",
             "KEY",
             "KEYS",
             "KILL",
             "LAG",
-                "LAST_VALUE",
-                "LEAD",
-                "LEADING",
+            "LAST_VALUE",
+            "LEAD",
+            "LEADING",
             "LEAVE",
             "LEFT",
             "LIKE",
@@ -486,12 +490,12 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "LOCALTIMESTAMP",
             "LOCK",
             "LOCKED",
-                "LONG",
+            "LONG",
             "LONGBLOB",
             "LONGTEXT",
             "LOOP",
             "LOW_PRIORITY",
-                "MASTER_PUBLIC_KEY_PATH",
+            "MASTER_PUBLIC_KEY_PATH",
             "MASTER_SSL_VERIFY_SERVER_CERT",
             "MATCH",
             "MAXVALUE",
@@ -504,69 +508,69 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "MOD",
             "MODIFIES",
             "NATURAL",
-                "NESTED",
+            "NESTED",
             "NOT",
             "NOWAIT",
-                "NO_WRITE_TO_BINLOG",
+            "NO_WRITE_TO_BINLOG",
             "NTH_VALUE",
-                "NTILE",
-                "NULL",
+            "NTILE",
+            "NULL",
             "NULLS",
-                "NUMERIC",
+            "NUMERIC",
             "OF",
-                "ON",
+            "ON",
             "OPTIMIZE",
             "OPTIMIZER_COSTS",
             "OPTION",
             "OPTIONALLY",
             "OR",
             "ORDER",
-                "ORDINALITY",
-                "ORGANIZATION",
+            "ORDINALITY",
+            "ORGANIZATION",
             "OUT",
             "OUTER",
             "OUTFILE",
-                "OTHERS",
-                "OVER",
+            "OTHERS",
+            "OVER",
             "PARTITION",
             "PATH",
-                "PERCENT_RANK",
-                "PERSIST",
-                "PERSIST_ONLY",
-                "PRECEDING",
-                "PRECISION",
+            "PERCENT_RANK",
+            "PERSIST",
+            "PERSIST_ONLY",
+            "PRECEDING",
+            "PRECISION",
             "PRIMARY",
             "PROCEDURE",
-                "PROCESS",
+            "PROCESS",
             "PURGE",
             "RANGE",
             "RANK",
-                "READ",
+            "READ",
             "READS",
             "READ_WRITE",
             "REAL",
             "RECURSIVE",
-                "REFERENCE",
-                "REFERENCES",
+            "REFERENCE",
+            "REFERENCES",
             "REGEXP",
             "RELEASE",
-                "REMOTE",
+            "REMOTE",
             "RENAME",
             "REPEAT",
             "REPLACE",
             "REQUIRE",
             "RESIGNAL",
-                "RESOURCE",
-                "RESPECT",
-                "RESTART",
+            "RESOURCE",
+            "RESPECT",
+            "RESTART",
             "RESTRICT",
             "RETURN",
-                "REUSE",
+            "REUSE",
             "REVOKE",
             "RIGHT",
             "RLIKE",
-                "ROLE",
-                "ROW_NUMBER",
+            "ROLE",
+            "ROW_NUMBER",
             "SCHEMA",
             "SCHEMAS",
             "SECOND_MICROSECOND",
@@ -576,7 +580,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "SET",
             "SHOW",
             "SIGNAL",
-                "SKIP",
+            "SKIP",
             "SMALLINT",
             "SPATIAL",
             "SPECIFIC",
@@ -588,16 +592,16 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "SQL_CALC_FOUND_ROWS",
             "SQL_SMALL_RESULT",
             "SRID",
-                "SSL",
+            "SSL",
             "STARTING",
             "STORED",
             "STRAIGHT_JOIN",
             "SYSTEM",
-                "TABLE",
+            "TABLE",
             "TERMINATED",
             "THEN",
-                "THREAD_PRIORITY",
-                "TIES",
+            "THREAD_PRIORITY",
+            "TIES",
             "TINYBLOB",
             "TINYINT",
             "TINYTEXT",
@@ -606,7 +610,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "TRIGGER",
             "TRUE",
             "UNBOUNDED",
-                "UNDO",
+            "UNDO",
             "UNION",
             "UNIQUE",
             "UNLOCK",
@@ -624,12 +628,12 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "VARCHARACTER",
             "VARYING",
             "VCPU",
-                "VISIBLE",
-                "VIRTUAL",
+            "VISIBLE",
+            "VIRTUAL",
             "WHEN",
             "WHERE",
             "WHILE",
-                "WINDOW",
+            "WINDOW",
             "WITH",
             "WRITE",
             "XOR",
@@ -638,4 +642,29 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         ));
     }
 
+    protected String getCurrentDateTimeFunction(int precision) {
+        return currentDateTimeFunction.replace("()", "("+precision+")");
+    }
+
+    @Override
+    public String generateDatabaseFunctionValue(DatabaseFunction databaseFunction) {
+        if (databaseFunction.getValue() != null && isCurrentTimeFunction(databaseFunction.getValue().toLowerCase())) {
+            int precision = extractPrecision(databaseFunction);
+            return precision != 0 ? getCurrentDateTimeFunction(precision) : getCurrentDateTimeFunction();
+        }
+        return super.generateDatabaseFunctionValue(databaseFunction);
+    }
+
+    private int extractPrecision(DatabaseFunction databaseFunction) {
+        int precision = 0;
+        Matcher precisionMatcher = PRECISION_PATTERN.matcher(databaseFunction.getValue());
+        if (precisionMatcher.find()) {
+            precision = Integer.parseInt(precisionMatcher.group().replaceAll("[(,)]", ""));
+        }
+        return precision;
+    }
+
+    public void warnAboutAlterColumn(String changeName, Warnings warnings ) {
+        warnings.addWarning("Due to " + this.getShortName() + " SQL limitations, " + changeName + " will lose primary key/autoincrement/not null/comment settings explicitly redefined in the change. Use <sql> or <modifySql> to re-specify all configuration if this is the case");
+    }
 }

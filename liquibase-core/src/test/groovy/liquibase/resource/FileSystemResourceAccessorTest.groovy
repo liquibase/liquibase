@@ -1,5 +1,7 @@
 package liquibase.resource
 
+import liquibase.GlobalConfiguration
+import liquibase.Scope
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -102,17 +104,29 @@ class FileSystemResourceAccessorTest extends Specification {
         ]
     }
 
-    def "openStream throws an error if multiple files match"() {
+    def "openStream throws an error if multiple files match and duplicateFileMode == error"() {
         when:
-        simpleTestAccessor.openStream(null, "com/example/everywhere/file-everywhere.txt",)
+        Scope.child(GlobalConfiguration.DUPLICATE_FILE_MODE.getKey(), GlobalConfiguration.DuplicateFileMode.ERROR, { ->
+            simpleTestAccessor.openStream(null, "com/example/everywhere/file-everywhere.txt",)
+        } as Scope.ScopedRunner)
 
         then:
         def e = thrown(IOException)
-        e.message.startsWith("Found 3 files that match com/example/everywhere/file-everywhere.txt: file:")
+        e.message.startsWith("Found 3 files with the path 'com/example/everywhere/file-everywhere.txt':")
         e.message.contains("file-everywhere.txt")
         e.message.contains("test-classes")
         e.message.contains("simple-files.jar")
         e.message.contains("simple-files.zip")
+    }
+
+    def "openStream does not throw an error if multiple files match and duplicateFileMode == warn"() {
+        when:
+        Scope.child(GlobalConfiguration.DUPLICATE_FILE_MODE.getKey(), GlobalConfiguration.DuplicateFileMode.WARN, { ->
+            simpleTestAccessor.openStream(null, "com/example/everywhere/file-everywhere.txt",)
+        } as Scope.ScopedRunner)
+
+        then:
+        noExceptionThrown()
     }
 
     def "openStream returns null if nothing matches"() {
@@ -152,16 +166,21 @@ class FileSystemResourceAccessorTest extends Specification {
         simpleTestAccessor.list(relativeTo, path, recursive, includeFiles, includeDirectories) == expected as SortedSet
 
         where:
-        relativeTo              | path          | recursive | includeFiles | includeDirectories | expected
-        null                    | "com/example" | false     | true         | false              | ["com/example/file with space.txt", "com/example/file-in-jar.txt", "com/example/file-in-zip.txt", "com/example/my-logic.sql", "com/example/users.csv"]
-        "com"                   | "example"     | false     | true         | false              | ["com/example/file with space.txt", "com/example/file-in-jar.txt", "com/example/file-in-zip.txt", "com/example/my-logic.sql", "com/example/users.csv"]
-        "com/example/users.csv" | "everywhere"  | false     | true         | false              | ["com/example/everywhere/file-everywhere.txt", "com/example/everywhere/other-file-everywhere.txt"]
-        null                    | "com/example" | false     | true         | true               | ["com/example/everywhere", "com/example/file with space.txt", "com/example/file-in-jar.txt", "com/example/file-in-zip.txt", "com/example/jar", "com/example/liquibase", "com/example/my-logic.sql", "com/example/shared", "com/example/users.csv", "com/example/zip"]
-        null                    | "com/example" | true      | true         | true               | ["com/example/everywhere", "com/example/everywhere/file-everywhere.txt", "com/example/everywhere/other-file-everywhere.txt", "com/example/file with space.txt", "com/example/file-in-jar.txt", "com/example/file-in-zip.txt", "com/example/jar", "com/example/jar/file-in-jar.txt", "com/example/liquibase", "com/example/liquibase/change", "com/example/liquibase/change/ColumnConfig.class", "com/example/liquibase/change/ComputedConfig.class", "com/example/liquibase/change/CreateTableExampleChange.class", "com/example/liquibase/change/DefaultConstraintConfig.class", "com/example/liquibase/change/IdentityConfig.class", "com/example/liquibase/change/KeyColumnConfig.class", "com/example/liquibase/change/PrimaryKeyConfig.class", "com/example/liquibase/change/UniqueConstraintConfig.class", "com/example/my-logic.sql", "com/example/shared", "com/example/shared/file-in-jar.txt", "com/example/shared/file-in-zip.txt", "com/example/users.csv", "com/example/zip", "com/example/zip/file-in-zip.txt"]
-        null                    | "com/example" | true      | true         | false              | ["com/example/everywhere/file-everywhere.txt", "com/example/everywhere/other-file-everywhere.txt", "com/example/file with space.txt", "com/example/file-in-jar.txt", "com/example/file-in-zip.txt", "com/example/jar/file-in-jar.txt", "com/example/liquibase/change/ColumnConfig.class", "com/example/liquibase/change/ComputedConfig.class", "com/example/liquibase/change/CreateTableExampleChange.class", "com/example/liquibase/change/DefaultConstraintConfig.class", "com/example/liquibase/change/IdentityConfig.class", "com/example/liquibase/change/KeyColumnConfig.class", "com/example/liquibase/change/PrimaryKeyConfig.class", "com/example/liquibase/change/UniqueConstraintConfig.class", "com/example/my-logic.sql", "com/example/shared/file-in-jar.txt", "com/example/shared/file-in-zip.txt", "com/example/users.csv", "com/example/zip/file-in-zip.txt"]
-        null                    | "com/example" | true      | false        | true               | ["com/example/everywhere", "com/example/jar", "com/example/liquibase", "com/example/liquibase/change", "com/example/shared", "com/example/zip"]
-        null                    | "com/example" | true      | false        | false              | []
-        null                    | "com/example" | false     | false        | false              | []
+        relativeTo                                     | path          | recursive | includeFiles | includeDirectories | expected
+        null                                           | "com/example" | false     | true         | false              | ["com/example/file with space.txt", "com/example/file-in-jar.txt", "com/example/file-in-zip.txt", "com/example/my-logic.sql", "com/example/users.csv"]
+        "com"                                          | "example"     | false     | true         | false              | ["com/example/file with space.txt", "com/example/file-in-jar.txt", "com/example/file-in-zip.txt", "com/example/my-logic.sql", "com/example/users.csv"]
+        "com/example/users.csv"                        | "everywhere"  | false     | true         | false              | ["com/example/everywhere/file-everywhere.txt", "com/example/everywhere/other-file-everywhere.txt"]
+        null                                           | "com/example" | false     | true         | true               | ["com/example/directory", "com/example/everywhere", "com/example/file with space.txt", "com/example/file-in-jar.txt", "com/example/file-in-zip.txt", "com/example/jar", "com/example/liquibase", "com/example/my-logic.sql", "com/example/shared", "com/example/users.csv", "com/example/zip"]
+        null                                           | "com/example" | true      | true         | true               | ["com/example/directory", "com/example/directory/file-in-directory.txt", "com/example/everywhere", "com/example/everywhere/file-everywhere.txt", "com/example/everywhere/other-file-everywhere.txt", "com/example/file with space.txt", "com/example/file-in-jar.txt", "com/example/file-in-zip.txt", "com/example/jar", "com/example/jar/file-in-jar.txt", "com/example/liquibase", "com/example/liquibase/change", "com/example/liquibase/change/ColumnConfig.class", "com/example/liquibase/change/ComputedConfig.class", "com/example/liquibase/change/CreateTableExampleChange.class", "com/example/liquibase/change/DefaultConstraintConfig.class", "com/example/liquibase/change/IdentityConfig.class", "com/example/liquibase/change/KeyColumnConfig.class", "com/example/liquibase/change/PrimaryKeyConfig.class", "com/example/liquibase/change/UniqueConstraintConfig.class", "com/example/my-logic.sql", "com/example/shared", "com/example/shared/file-in-jar.txt", "com/example/shared/file-in-zip.txt", "com/example/users.csv", "com/example/zip", "com/example/zip/file-in-zip.txt"]
+        null                                           | "com/example" | true      | true         | false              | ["com/example/directory/file-in-directory.txt", "com/example/everywhere/file-everywhere.txt", "com/example/everywhere/other-file-everywhere.txt", "com/example/file with space.txt", "com/example/file-in-jar.txt", "com/example/file-in-zip.txt", "com/example/jar/file-in-jar.txt", "com/example/liquibase/change/ColumnConfig.class", "com/example/liquibase/change/ComputedConfig.class", "com/example/liquibase/change/CreateTableExampleChange.class", "com/example/liquibase/change/DefaultConstraintConfig.class", "com/example/liquibase/change/IdentityConfig.class", "com/example/liquibase/change/KeyColumnConfig.class", "com/example/liquibase/change/PrimaryKeyConfig.class", "com/example/liquibase/change/UniqueConstraintConfig.class", "com/example/my-logic.sql", "com/example/shared/file-in-jar.txt", "com/example/shared/file-in-zip.txt", "com/example/users.csv", "com/example/zip/file-in-zip.txt"]
+        null                                           | "com/example" | true      | false        | true               | ["com/example/directory", "com/example/everywhere", "com/example/jar", "com/example/liquibase", "com/example/liquibase/change", "com/example/shared", "com/example/zip"]
+        null                                           | "com/example" | true      | false        | false              | []
+        null                                           | "com/example" | false     | false        | false              | []
+        "com/example/directory/file-in-directory.txt"  | "./"          | true      | true         | false              | ["com/example/directory/file-in-directory.txt"]
+        "com/example/directory/file-in-directory.txt"  | ""            | true      | true         | false              | ["com/example/directory/file-in-directory.txt"]
+        "com/example/zip/file-in-zip.txt"              | "./"          | true      | true         | false              | ["com/example/zip/file-in-zip.txt"]
+        "com/example/zip/file-in-zip.txt"              | ""            | true      | true         | false              | ["com/example/zip/file-in-zip.txt"]
+
     }
 
 }
