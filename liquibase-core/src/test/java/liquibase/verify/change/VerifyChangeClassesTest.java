@@ -9,6 +9,7 @@ import liquibase.change.ChangeParameterMetaData;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.Db2zDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.serializer.LiquibaseSerializable;
@@ -54,7 +55,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 continue; //not a real change
             }
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-                if (database.getShortName() == null) {
+                if (database.getShortName() == null || database instanceof MockDatabase) {
                     continue;
                 }
 
@@ -88,6 +89,12 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                         requiredParams.add("minValue");
                     } else {
                         requiredParams.add("incrementBy");
+                    }
+                }
+
+                if ("dropNotNullConstraint".equalsIgnoreCase(changeName)) {
+                    if ("oracle".equalsIgnoreCase(database.getShortName())) { //oracle must have either columnName or constraintName
+                        requiredParams.add("columnName");
                     }
                 }
 

@@ -1,25 +1,7 @@
 package liquibase.database.core;
 
-import static java.util.ResourceBundle.getBundle;
-
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -39,14 +21,22 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
+
+import java.lang.reflect.Method;
+import java.sql.*;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.util.ResourceBundle.getBundle;
 
 /**
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
-	private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
+	public static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
     public static final String PRODUCT_NAME = "oracle";
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -87,7 +77,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return PRIORITY_DEFAULT;
     }
 
-    private final void tryProxySession(final String url, final Connection con) {
+    private void tryProxySession(final String url, final Connection con) {
         Matcher m = PROXY_USER.matcher(url);
         if (m.matches()) {
             Properties props = new Properties();
@@ -98,14 +88,23 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 method.invoke(con, 1, props);
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
+                return;
+            }
+            try {
+                Method method = con.getClass().getMethod("isProxySession");
+                method.setAccessible(true);
+                boolean b = (boolean)method.invoke(con);
+                if (! b) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Proxy session not established on OracleDatabase: ");
+                }
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
             }
         }
     }
 
     @Override
     public void setConnection(DatabaseConnection conn) {
-        //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,
-        // HardCodedStringLiteral
         //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,
         // HardCodedStringLiteral
         reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION", "PASSWORD", "RESOURCE", "START", "SIZE", "UID", "DESC", "ORDER")); //more reserved words not returned by driver
@@ -147,17 +146,15 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     //cannot set it. That is OK
                 }
 
-                Statement statement = null;
-                ResultSet resultSet = null;
+                CallableStatement statement = null;
                 try {
-                    statement = sqlConn.createStatement();
                     //noinspection HardCodedStringLiteral
-                    resultSet = statement.executeQuery("SELECT value FROM v$parameter WHERE name = 'compatible'");
-                    String compatibleVersion = null;
-                    if (resultSet.next()) {
-                        //noinspection HardCodedStringLiteral
-                        compatibleVersion = resultSet.getString("value");
-                    }
+                    statement = sqlConn.prepareCall("{call DBMS_UTILITY.DB_VERSION(?,?)}");
+                    statement.registerOutParameter(1, Types.VARCHAR);
+                    statement.registerOutParameter(2, Types.VARCHAR);
+                    statement.execute();
+
+                    String compatibleVersion = statement.getString(2);
                     if (compatibleVersion != null) {
                         Matcher majorVersionMatcher = Pattern.compile("(\\d+)\\.(\\d+)\\..*").matcher(compatibleVersion);
                         if (majorVersionMatcher.matches()) {
@@ -166,15 +163,29 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                         }
                     }
                 } catch (SQLException e) {
-                    @SuppressWarnings("HardCodedStringLiteral") String message = "Cannot read from v$parameter: " + e.getMessage();
+                    @SuppressWarnings("HardCodedStringLiteral") String message = "Cannot read from DBMS_UTILITY.DB_VERSION: " + e.getMessage();
 
                     //noinspection HardCodedStringLiteral
                     Scope.getCurrentScope().getLog(getClass()).info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
                 } finally {
-                    JdbcUtils.close(resultSet, statement);
+                    JdbcUtil.closeStatement(statement);
                 }
 
-
+                if (GlobalConfiguration.DDL_LOCK_TIMEOUT.getCurrentValue() != null) {
+                    int timeoutValue = GlobalConfiguration.DDL_LOCK_TIMEOUT.getCurrentValue();
+                    Scope.getCurrentScope().getLog(getClass()).fine("Setting DDL_LOCK_TIMEOUT value to " + timeoutValue);
+                    String sql = "ALTER SESSION SET DDL_LOCK_TIMEOUT=" + timeoutValue;
+                    PreparedStatement ddlLockTimeoutStatement = null;
+                    try {
+                        ddlLockTimeoutStatement = sqlConn.prepareStatement(sql);
+                        ddlLockTimeoutStatement.execute();
+                    } catch (SQLException sqle) {
+                        Scope.getCurrentScope().getUI().sendErrorMessage("Unable to set the DDL_LOCK_TIMEOUT_VALUE: " + sqle.getMessage(), sqle);
+                        Scope.getCurrentScope().getLog(getClass()).warning("Unable to set the DDL_LOCK_TIMEOUT_VALUE: " + sqle.getMessage(), sqle);
+                    } finally {
+                        JdbcUtil.closeStatement(ddlLockTimeoutStatement);
+                    }
+                }
             }
         }
         super.setConnection(conn);
@@ -280,6 +291,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         if (getConnection() instanceof OfflineConnection) {
             return getConnection().getCatalog();
         }
+
+        if (!(getConnection() instanceof JdbcConnection)) {
+            return defaultCatalogName;
+        }
+
         try {
             //noinspection HardCodedStringLiteral
             return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
@@ -306,7 +322,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultCatalogName() {//NOPMD
-        return (super.getDefaultCatalogName() == null) ? null : super.getDefaultCatalogName().toUpperCase(Locale.US);
+        String defaultCatalogName = super.getDefaultCatalogName();
+        if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
+            return defaultCatalogName;
+        }
+        return (defaultCatalogName == null) ? null : defaultCatalogName.toUpperCase(Locale.US);
     }
 
     /**
@@ -543,11 +563,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         if ((databaseFunction != null) && "current_timestamp".equalsIgnoreCase(databaseFunction.toString())) {
             return databaseFunction.toString();
         }
-        if ((databaseFunction instanceof SequenceNextValueFunction) || (databaseFunction instanceof
-                SequenceCurrentValueFunction)) {
+        if ((databaseFunction instanceof SequenceNextValueFunction)
+                || (databaseFunction instanceof SequenceCurrentValueFunction)) {
             String quotedSeq = super.generateDatabaseFunctionValue(databaseFunction);
+
             // replace "myschema.my_seq".nextval with "myschema"."my_seq".nextval
-            return quotedSeq.replaceFirst("\"([^\\.\"]+)\\.([^\\.\"]+)\"", "\"$1\".\"$2\"");
+            return quotedSeq.replaceFirst("\"([^.\"]+)\\.([^.\"]+)\"", "\"$1\".\"$2\"");
 
         }
 
@@ -611,7 +632,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     this.canAccessDbaRecycleBin = false;
                 }
             } finally {
-                JdbcUtils.close(null, statement);
+                JdbcUtil.close(null, statement);
             }
         }
 

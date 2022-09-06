@@ -12,7 +12,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.ResultSet;
@@ -176,7 +176,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
             throw new PreconditionErrorException(e, changeLog, this);
 
         } finally {
-            JdbcUtils.closeStatement(statement);
+            JdbcUtil.closeStatement(statement);
         }
     }
 

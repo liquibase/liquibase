@@ -27,6 +27,7 @@ public interface ResourceAccessor {
 
     /**
      * Returns a single stream matching the given path. See {@link #openStreams(String, String)} for details about path options.
+     * Implementations should respect {@link liquibase.GlobalConfiguration#DUPLICATE_FILE_MODE}
      *
      * @param relativeTo Location that streamPath should be found relative to. If null, streamPath is an absolute path
      * @return null if the resource does not exist

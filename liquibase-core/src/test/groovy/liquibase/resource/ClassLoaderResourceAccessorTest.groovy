@@ -5,6 +5,8 @@ import liquibase.util.StreamUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.nio.file.FileSystem
+
 class ClassLoaderResourceAccessorTest extends Specification {
 
     def testResourceAccessor = new ClassLoaderResourceAccessor(new URLClassLoader(
@@ -33,6 +35,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
         "com/example/other.file"           | "/my/test.sql"                   | "com/example/my/test.sql"
         "classpath:com/example/other.file" | "my/test.sql"                    | "com/example/my/test.sql"
         "changelog.xml"                    | "sql/function.sql"               | "sql/function.sql"
+        "db-change.log/changelog.xml"      | "data/file.csv"                  | "db-change.log/data/file.csv"
     }
 
     @Unroll("#featureName: #relativeTo #streamPath")
@@ -84,9 +87,12 @@ class ClassLoaderResourceAccessorTest extends Specification {
                 [
                         null, "com/example", true, true, true,
                         [
+                                "com/example/directory",
+                                "com/example/directory/file-in-directory.txt",
                                 "com/example/everywhere",
                                 "com/example/everywhere/file-everywhere.txt",
                                 "com/example/everywhere/other-file-everywhere.txt",
+                                "com/example/file with space.txt",
                                 "com/example/file-in-jar.txt",
                                 "com/example/file-in-zip.txt",
                                 "com/example/jar",
@@ -113,7 +119,9 @@ class ClassLoaderResourceAccessorTest extends Specification {
                 [
                         null, "com/example", false, true, true,
                         [
+                                "com/example/directory",
                                 "com/example/everywhere",
+                                "com/example/file with space.txt",
                                 "com/example/file-in-jar.txt",
                                 "com/example/file-in-zip.txt",
                                 "com/example/jar",
@@ -127,6 +135,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
                 [
                         null, "com/example", false, true, false,
                         [
+                                "com/example/file with space.txt",
                                 "com/example/file-in-jar.txt",
                                 "com/example/file-in-zip.txt",
                                 "com/example/my-logic.sql",
@@ -136,6 +145,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
                 [
                         null, "com/example", false, false, true,
                         [
+                                "com/example/directory",
                                 "com/example/everywhere",
                                 "com/example/jar",
                                 "com/example/liquibase",
@@ -144,5 +154,24 @@ class ClassLoaderResourceAccessorTest extends Specification {
                         ]
                 ],
         ]
+    }
+
+    def close() {
+        setup:
+        FileSystem path1 = Mock()
+        FileSystem path2 = Mock()
+
+        when:
+        def testAccessor = new ClassLoaderResourceAccessor(this.getClass().getClassLoader())
+
+        testAccessor.rootPaths = null;
+        testAccessor.close() //no errors thrown from close() when rootPaths is null
+
+        testAccessor.rootPaths = [path1, path2]
+        testAccessor.close()
+
+        then:
+        1 * path1.close()
+        1 * path2.close()
     }
 }

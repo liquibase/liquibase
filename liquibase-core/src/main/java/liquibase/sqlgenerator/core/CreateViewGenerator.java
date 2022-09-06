@@ -74,7 +74,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
 
         if (statement.isReplaceIfExists()) {
             if (database instanceof FirebirdDatabase) {
-                viewDefinition.replaceIfExists("CREATE", "RECREATE");
+                viewDefinition.replace("CREATE", "RECREATE");
             } else if ((database instanceof SybaseASADatabase) && statement.getSelectQuery().toLowerCase().startsWith
                 ("create view")) {
                 // Sybase ASA saves view definitions with header.
@@ -91,7 +91,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                         + statement.getViewName()
                         + "] AS SELECT " +
                         "''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
-                viewDefinition.replaceIfExists("CREATE", "ALTER");
+                viewDefinition.replace("CREATE", "ALTER");
             } else if (database instanceof HsqlDatabase) {
                 sql.add(new UnparsedSql(
                     "DROP VIEW IF EXISTS " + database.escapeViewName(statement.getCatalogName(),

@@ -50,7 +50,12 @@ public class NetUtil {
      */
     public static String getLocalHostAddress() throws UnknownHostException, SocketException {
         try {
-            return getLocalHost().getHostAddress();
+            InetAddress localhost = getLocalHost();
+            if (localhost != null) {
+              return localhost.getHostAddress();
+            }
+            Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname. Unable to determine address for localhost");
+            return "unknown";
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname", e);
             return "unknown";
@@ -65,7 +70,12 @@ public class NetUtil {
      */
     public static String getLocalHostName() throws UnknownHostException, SocketException {
         try {
-            return getLocalHost().getHostName();
+            InetAddress localhost = getLocalHost();
+            if (localhost != null) {
+                return localhost.getHostName();
+            }
+            Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname. Unable to determine address for localhost");
+            return "unknown";
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname", e);
             return "unknown";

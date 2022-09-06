@@ -1,10 +1,15 @@
 package liquibase.database.core;
 
-import liquibase.database.*;
-import liquibase.test.JUnitResourceAccessor;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+import liquibase.database.AbstractJdbcDatabaseTest;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.exception.DatabaseException;
 
 /**
  * Tests for {@link MSSQLDatabase}
@@ -20,7 +25,6 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
         return "Microsoft SQL Server";
     }
 
-
     @Override
     @Test
     public void supportsInitiallyDeferrableColumns() {
@@ -34,31 +38,38 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
     @Test
-    public void getDefaultDriver() {
-        Database database = new MSSQLDatabase();
+    public void getDefaultDriver() throws DatabaseException {
+        try (Database database = new MSSQLDatabase()) {
+            assertEquals("com.microsoft.sqlserver.jdbc.SQLServerDriver", database.getDefaultDriver("jdbc:sqlserver://localhost;databaseName=liquibase"));
 
-        assertEquals("com.microsoft.sqlserver.jdbc.SQLServerDriver", database.getDefaultDriver("jdbc:sqlserver://localhost;databaseName=liquibase"));
-
-        assertNull(database.getDefaultDriver("jdbc:oracle:thin://localhost;databaseName=liquibase"));
+            assertNull(database.getDefaultDriver("jdbc:oracle:thin://localhost;databaseName=liquibase"));
+        } catch (final DatabaseException e) {
+            throw e;
+        }
     }
 
     @Override
     @Test
-    public void escapeTableName_noSchema() {
-        Database database = new MSSQLDatabase();
-        assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
-        assertEquals("[tableName€]", database.escapeTableName(null, null, "tableName€"));
+    public void escapeTableName_noSchema() throws DatabaseException {
+        try (Database database = new MSSQLDatabase()) {
+            assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
+            assertEquals("[tableName€]", database.escapeTableName(null, null, "tableName€"));
+        } catch (final DatabaseException e) {
+            throw e;
+        }
     }
 
     @Override
     @Test
-    public void escapeTableName_withSchema() {
-        Database database = new MSSQLDatabase();
-        assertEquals("catalogName.schemaName.tableName", database.escapeTableName("catalogName", "schemaName",
-            "tableName"));
-        assertEquals("[catalogName€].[schemaName€].[tableName€]", database.escapeTableName("catalogName€",
-            "schemaName€", "tableName€"));
+    public void escapeTableName_withSchema() throws DatabaseException {
+        try (Database database = new MSSQLDatabase()) {
+            assertEquals("catalogName.schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+            assertEquals("[catalogName€].[schemaName€].[tableName€]", database.escapeTableName("catalogName€", "schemaName€", "tableName€"));
+        } catch (final DatabaseException e) {
+            throw e;
+        }
     }
+
     private Database createOfflineDatabase(String url) throws Exception {
         return DatabaseFactory.getInstance().openDatabase(url, null, null, null, null);
     }
@@ -68,15 +79,15 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
         //
         // No exception should be thrown by call to setDefaultSchemaName
         //
-        Database database = createOfflineDatabase("offline:mssql");
+        final Database database = createOfflineDatabase("offline:mssql");
         database.setDefaultSchemaName("MySchema");
     }
 
     @Test
     public void isUnmodifiable() throws Exception {
-        Database database = createOfflineDatabase("offline:mssql");
+        final Database database = createOfflineDatabase("offline:mssql");
         assertTrue(database instanceof MSSQLDatabase);
-        MSSQLDatabase mssqlDatabase = (MSSQLDatabase)database;
+        final MSSQLDatabase mssqlDatabase = (MSSQLDatabase) database;
         assertTrue(mssqlDatabase.dataTypeIsNotModifiable("datetime"));
     }
 

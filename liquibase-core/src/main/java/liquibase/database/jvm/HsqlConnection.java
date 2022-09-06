@@ -4,7 +4,7 @@ import liquibase.Scope;
 import liquibase.exception.DatabaseException;
 import liquibase.listener.SqlListener;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -35,7 +35,7 @@ public class HsqlConnection extends JdbcConnection {
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
-            JdbcUtils.closeStatement(st);
+            JdbcUtil.closeStatement(st);
         }
     }
 
@@ -55,7 +55,7 @@ public class HsqlConnection extends JdbcConnection {
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
-            JdbcUtils.closeStatement(st);
+            JdbcUtil.closeStatement(st);
         }
     }
 }

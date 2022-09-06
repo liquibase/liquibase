@@ -1,6 +1,8 @@
 package liquibase.statement.core;
 
+import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.util.StringUtil;
 
 public class AddPrimaryKeyStatement extends AbstractSqlStatement {
 
@@ -8,7 +10,7 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
     private String tablespace;
-    private String columnNames;
+    private ColumnConfig[] columns;
     private String constraintName;
     private Boolean clustered;
 
@@ -17,11 +19,18 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     private String forIndexCatalogName;
     private boolean shouldValidate = true;
 
+    /**
+     * @deprecated
+     */
     public AddPrimaryKeyStatement(String catalogName, String schemaName, String tableName, String columnNames, String constraintName) {
+        this(catalogName, schemaName, tableName, ColumnConfig.arrayFromNames(columnNames), constraintName);
+    }
+
+    public AddPrimaryKeyStatement(String catalogName, String schemaName, String tableName, ColumnConfig[] columns, String constraintName) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
-        this.columnNames = columnNames;
+        this.columns = columns;
         this.constraintName = constraintName;
     }
 
@@ -46,9 +55,14 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
         return this;
     }
 
-    public String getColumnNames() {
-        return columnNames;
+    public ColumnConfig[] getColumns() {
+        return columns;
     }
+
+    public String getColumnNames() {
+        return StringUtil.join(columns, ", ", (StringUtil.StringUtilFormatter<ColumnConfig>) obj -> obj.getName() + (obj.getDescending() != null && obj.getDescending() ? " DESC" : ""));
+    }
+
 
     public String getConstraintName() {
         return constraintName;

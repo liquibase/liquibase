@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <property name="table.name" value="paramter_table"/>
     <property file="changelogs/common/dynamic.parameters.properties"/>
@@ -76,7 +76,7 @@
             <column name="dateTimeCol" valueDate="2007-08-09T13:14:15"/>
             <column name="bigintcol" valueNumeric="2"/>
         </insert>
-        <insert tableName="dataTypeTest" dbms="!derby">
+        <insert tableName="dataTypeTest" dbms="!derby,!cockroachdb">
           <column name="id" valueNumeric="2"/>
           <column name="dateCol" valueDate="current_datetime"/>
           <column name="timeCol" valueComputed="current_datetime"/>
@@ -267,22 +267,22 @@
             <column name="id" type="varchar(255)"/>
         </createTable>
     </changeSet>
-    <changeSet id="contextstest-2" author="nvoxland" context="context-a">
+    <changeSet id="contextstest-2" author="nvoxland" contextFilter="context-a">
         <insert tableName="contextsTest">
             <column name="id" value="context a"/>
         </insert>
     </changeSet>
-    <changeSet id="contextstest-3" author="nvoxland" context="context-a, context-b">
+    <changeSet id="contextstest-3" author="nvoxland" contextFilter="context-a, context-b">
         <insert tableName="contextsTest">
             <column name="id" value="a and b"/>
         </insert>
     </changeSet>
-    <changeSet id="contextstest-4" author="nvoxland" context="context-b">
+    <changeSet id="contextstest-4" author="nvoxland" contextFilter="context-b">
         <insert tableName="contextsTest">
             <column name="id" value="context b"/>
         </insert>
     </changeSet>
-    <changeSet id="contextstest-5" author="nvoxland" context="">
+    <changeSet id="contextstest-5" author="nvoxland" contextFilter="">
         <insert tableName="contextsTest">
             <column name="id" value="empty contexts"/>
         </insert>
@@ -715,10 +715,10 @@
         <createTable tableName="keepmodifysqltest">
             <column name="id" type="int"/>
         </createTable>
-        <modifySql context="test">
+        <modifySql contextFilter="test">
             <replace replace="change" with="newchange"/>
         </modifySql>
-        <modifySql context="not-context">
+        <modifySql contextFilter="not-context">
             <replace replace="keep" with="newkeep"/>
         </modifySql>
     </changeSet>
@@ -766,7 +766,7 @@
         <createTable tableName="INVALID TABLE NAME">
             <column name="id" type="int"/>
         </createTable>
-        <modifySql context="test">
+        <modifySql contextFilter="test">
             <replace replace="INVALID TABLE NAME" with="validTableName"/>
         </modifySql>
     </changeSet>
@@ -1124,6 +1124,48 @@
         <output>Message using default target</output>
         <output target="stdout">Message using stdout target</output>
         <output target="stderr">Message using stderr target</output>
+    </changeSet>
+
+    <changeSet id="fkexists-without-table-setup" author="example">
+        <sql>
+            CREATE TABLE fkexists_table1 (
+                id INT PRIMARY KEY
+            )
+        </sql>
+        <sql>
+            CREATE TABLE fkexists_table2 (
+                id INT,
+                id2 INT,
+                CONSTRAINT fkexists_1
+                    FOREIGN KEY (id)
+                        REFERENCES fkexists_table1 (id)
+            )
+        </sql>
+        <rollback>
+            <sql>
+                DROP TABLE fkexists_table1
+            </sql>
+            <sql>
+                DROP TABLE fkexists_table2
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="example" id="fkexists-without-table-check">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="id2" baseTableName="fkexists_table2"
+                                 constraintName="fkexists_2"
+                                 referencedColumnNames="id" referencedTableName="fkexists_table1"/>
+    </changeSet>
+    <changeSet author="example" id="fkexists-without-table-check2">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
+        </preConditions>
     </changeSet>
 
 </databaseChangeLog>

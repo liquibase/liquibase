@@ -1,8 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.change.core.LoadDataChange;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -44,14 +43,20 @@ public class ClobType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
-            if ((!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration
-                .CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase(Locale.US).startsWith("text"))
+            if ((!GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue()
+                    && originalDefinition.toLowerCase(Locale.US).startsWith("text"))
                 || originalDefinition.toLowerCase(Locale.US).startsWith("[text]")) {
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
                 String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?text\\]?\\s*", "");
-                type.addAdditionalInformation("(max)"
-                        + (StringUtil.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
+                type.addAdditionalInformation("(max)");
+                if(!StringUtil.isEmpty(originalExtraInfo)) {
+                    //if we still have something like (25555) remove it
+                    //since we already set it to max, otherwise add collate or other info
+                    if(originalExtraInfo.lastIndexOf(")") < (originalExtraInfo.length() - 1)) {
+                        type.addAdditionalInformation(originalExtraInfo.substring(originalExtraInfo.lastIndexOf(")") + 1));
+                    }
+                }
                 return type;
             }
         }
@@ -67,8 +72,14 @@ public class ClobType extends LiquibaseDataType {
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
                 String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?text\\]?\\s*", "");
-                type.addAdditionalInformation("(max)"
-                        + (StringUtil.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
+                type.addAdditionalInformation("(max)");
+                if(!StringUtil.isEmpty(originalExtraInfo)) {
+                    //if we still have something like (25555) remove it
+                    //since we already set it to max, otherwise add collate or other info
+                    if(originalExtraInfo.lastIndexOf(")") < (originalExtraInfo.length() - 1)) {
+                        type.addAdditionalInformation(originalExtraInfo.substring(originalExtraInfo.lastIndexOf(")") + 1));
+                    }
+                }
                 return type;
             }
             if (originalDefinition.toLowerCase(Locale.US).startsWith("ntext")
@@ -78,8 +89,14 @@ public class ClobType extends LiquibaseDataType {
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("nvarchar"));
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
                 String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?ntext\\]?\\s*", "");
-                type.addAdditionalInformation("(max)"
-                    + (StringUtil.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
+                type.addAdditionalInformation("(max)");
+                if(!StringUtil.isEmpty(originalExtraInfo)) {
+                    //if we still have something like (25555) remove it
+                    //since we already set it to max, otherwise add collate or other info
+                    if(originalExtraInfo.lastIndexOf(")") < (originalExtraInfo.length() - 1)) {
+                        type.addAdditionalInformation(originalExtraInfo.substring(originalExtraInfo.lastIndexOf(")") + 1));
+                    }
+                }
                 return type;
             }
             if ("nclob".equals(originalDefinition.toLowerCase(Locale.US))) {
