@@ -37,7 +37,7 @@ public class HTMLListWriter {
             String currentSchema = null;
             if (objects.first().getClass() == Table.class) {
                 currentSchema = ((Table )objects.first()).getAttribute("schema", new Schema()).toString();
-                fileWriter.append("<section><article><details><summary>" + currentSchema + "</summary>");
+                fileWriter.append("<div class='schema-name'>" + currentSchema + "</i></b></div>");
             }
 
 
@@ -46,8 +46,8 @@ public class HTMLListWriter {
                     String tableSchema = ((Table) object).getAttribute("schema", new Schema()).toString();
                     if (!tableSchema.equals(currentSchema)) {
                         currentSchema = tableSchema;
-                        fileWriter.append("</details>");
-                        fileWriter.append("<details><summary>" + currentSchema + "</summary>");
+                        fileWriter.append("<p>");
+                        fileWriter.append("<b><i>" + currentSchema + "</i></b><br>");
                     }
                     fileWriter.append("<A HREF=\"");
                     fileWriter.append(directory + System.getProperty("file.separator") + tableSchema);
@@ -64,8 +64,7 @@ public class HTMLListWriter {
                 fileWriter.append("</A><BR>\n");
             }
 
-            fileWriter.append("</details></article></section>\n" + 
-                    "</FONT></TD>\n" +
+            fileWriter.append("</FONT></TD>\n" +
                     "</TR>\n" +
                     "</TABLE>\n" +
                     "\n" +
