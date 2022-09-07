@@ -2,6 +2,8 @@ package liquibase.dbdoc;
 
 import liquibase.change.Change;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DatabaseHistoryException;
 import liquibase.structure.core.*;
 
 import java.io.File;
@@ -29,6 +31,16 @@ public class TableWriter extends HTMLWriter {
         writeColumns(fileWriter, table, database);
         writeTableIndexes(fileWriter, table, database);
         writeTableForeignKeys(fileWriter, table, database);
+    }
+
+    public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog, String schema) throws DatabaseHistoryException, IOException, DatabaseException {
+        File schemaOutputDir = new File(super.baseOutputDir.getPath() + System.getProperty("file.separator") + schema);
+        if (!schemaOutputDir.exists()) {
+            schemaOutputDir.mkdirs();
+        }
+        super.outputDir = schemaOutputDir;
+        super.writeHTML(object, ranChanges, changesToRun, changeLog);
+
     }
 
     private void writeColumns(Writer fileWriter, Table table, Database database) throws IOException {

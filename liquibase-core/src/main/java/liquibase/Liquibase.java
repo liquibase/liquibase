@@ -2232,15 +2232,19 @@ public class Liquibase implements AutoCloseable {
 
     public void generateDocumentation(String outputDirectory) throws LiquibaseException {
         // call without context
-        generateDocumentation(outputDirectory, new Contexts(), new LabelExpression());
+        generateDocumentation(outputDirectory, new Contexts(), new LabelExpression(), new CatalogAndSchema(null, null));
     }
 
     public void generateDocumentation(String outputDirectory, String contexts) throws LiquibaseException {
-        generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression());
+        generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression(), new CatalogAndSchema(null, null));
+    }
+
+    public void generateDocumentation(String outputDirectory, String contexts, CatalogAndSchema... schemaList) throws LiquibaseException {
+        generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression(), schemaList);
     }
 
     public void generateDocumentation(String outputDirectory, Contexts contexts,
-                                      LabelExpression labelExpression) throws LiquibaseException {
+                                      LabelExpression labelExpression, CatalogAndSchema... schemaList) throws LiquibaseException {
         runInScope(new Scope.ScopedRunner() {
             @Override
             public void run() throws Exception {
@@ -2263,7 +2267,7 @@ public class Liquibase implements AutoCloseable {
                     DBDocVisitor visitor = new DBDocVisitor(database);
                     logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
-                    visitor.writeHTML(new File(outputDirectory), resourceAccessor);
+                    visitor.writeHTML(new File(outputDirectory), resourceAccessor, schemaList);
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 } finally {

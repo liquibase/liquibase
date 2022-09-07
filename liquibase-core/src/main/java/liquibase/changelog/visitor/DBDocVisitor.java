@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -13,6 +14,7 @@ import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StreamUtil;
 
@@ -109,11 +111,11 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
     }
 
-    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException,
+    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor, CatalogAndSchema... schemaList) throws IOException,
         LiquibaseException {
         ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
         HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
-        HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);
+        TableWriter tableWriter = new TableWriter(rootOutputDir, database);
         HTMLWriter columnWriter = new ColumnWriter(rootOutputDir, database);
         HTMLWriter pendingChangesWriter = new PendingChangesWriter(rootOutputDir, database);
         HTMLWriter recentChangesWriter = new RecentChangesWriter(rootOutputDir, database);
@@ -124,7 +126,11 @@ public class DBDocVisitor implements ChangeSetVisitor {
         copyFile("liquibase/dbdoc/globalnav.html", rootOutputDir);
         copyFile("liquibase/dbdoc/overview-summary.html", rootOutputDir);
 
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+        if ( schemaList == null ) {
+            schemaList = new CatalogAndSchema[]{database.getDefaultSchema()};
+        }
+
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaList, database, new SnapshotControl(database));
 
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
         SortedSet<Table> tables = new TreeSet<>(snapshot.get(Table.class));
@@ -147,7 +153,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
             if (database.isLiquibaseObject(table)) {
                 continue;
             }
-            tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
+            tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName, table.getAttribute("schema", new Schema()).toString());
         }
 
         for (Column column : snapshot.get(Column.class)) {
