@@ -127,12 +127,6 @@
             <systemPath>${basedir}/lib/GoogleBigQueryJDBC42.jar</systemPath>
         </dependency>
 
-
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-bigquery</artifactId>
-            <version>2.10.10</version>
-        </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquerystorage</artifactId>
@@ -195,21 +189,21 @@
         </resources>
         <plugins>
 
-                <plugin>
-                    <groupId>org.liquibase</groupId>
-                    <artifactId>liquibase-maven-plugin</artifactId>
-                    <version>4.15.0</version>
-                    <configuration>
-                        <propertyFileWillOverride>true</propertyFileWillOverride>
-                        <propertyFile>target/classes/liquibase.properties</propertyFile>
-                        <logging>DEBUG</logging>
-                        <changeLogFile>target/classes/changelog.sql</changeLogFile>
-                        <outputChangeLogFile>target/classes/generatedChangelog.bigquery.sql</outputChangeLogFile>
-                        <diffTypes>tables,views</diffTypes>
-                        <diffIncludeCatalog>true</diffIncludeCatalog>
-                        <diffIncludeSchema>true</diffIncludeSchema>
-                    </configuration>
-                </plugin>
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>${liquibase.version}</version>
+                <configuration>
+                    <propertyFileWillOverride>true</propertyFileWillOverride>
+                    <propertyFile>target/classes/liquibase.properties</propertyFile>
+                    <logging>DEBUG</logging>
+                    <changeLogFile>target/classes/changelog.sql</changeLogFile>
+                    <outputChangeLogFile>target/classes/generatedChangelog.bigquery.sql</outputChangeLogFile>
+                    <diffTypes>tables,views</diffTypes>
+                    <diffIncludeCatalog>true</diffIncludeCatalog>
+                    <diffIncludeSchema>true</diffIncludeSchema>
+                </configuration>
+            </plugin>
 
 
             <plugin>
@@ -265,15 +259,6 @@
                         <phase>package</phase>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
-                <version>4.15.0</version>
-                <configuration>
-                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
-                </configuration>
-
             </plugin>
 
             <plugin>
