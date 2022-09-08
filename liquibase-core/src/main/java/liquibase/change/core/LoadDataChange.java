@@ -711,13 +711,12 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             throw new UnexpectedLiquibaseException("No file resourceAccessor specified for " + getFile());
         }
 
-        String path;
+        Resource resource;
         if (getRelativeTo() == null) {
-            path = file;
+            resource = resourceAccessor.get(file);
         } else {
-            path = resourceAccessor.get(getRelativeTo()).resolveSibling(file).getPath();
+            resource = resourceAccessor.get(getRelativeTo()).resolveSibling(file);
         }
-        Resource resource = resourceAccessor.get(path);
         if (!resource.exists()) {
             return null;
         }
@@ -792,13 +791,12 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         InputStream stream = null;
         try {
             ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-            String path;
+            Resource resource;
             if (getRelativeTo() == null) {
-                path = file;
+                resource = resourceAccessor.getExisting(file);
             } else {
-                path = resourceAccessor.get(getRelativeTo()).resolveSibling(file).getPath();
+                resource = resourceAccessor.get(getRelativeTo()).resolveSibling(file);
             }
-            Resource resource = resourceAccessor.getExisting(path);
 
             stream = new EmptyLineAndCommentSkippingInputStream(resource.openInputStream(), commentLineStartsWith);
             return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true));
