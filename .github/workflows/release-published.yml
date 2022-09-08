@@ -3,27 +3,79 @@ name: Release Extension to Sonatype
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release Tag'
+        required: true
 
 jobs:
-    release:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.collect-data.outputs.tag }}
+      version: ${{ steps.collect-data.outputs.version }}
+    steps:
+      - name: Collect Data
+        id: collect-data
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let tag;
+            if (context.payload.inputs) {
+              tag = context.payload.inputs.tag;
+            } else {
+              tag = context.payload.release.tag_name;
+            }
 
-        - name: Set up Java for publishing to Maven Central Repository
-          uses: actions/setup-java@v2
-          with:
-            java-version: '11'
-            distribution: 'adopt'
-            server-id: sonatype-nexus-staging
-            server-username: MAVEN_USERNAME
-            server-password: MAVEN_PASSWORD
-            gpg-private-key: ${{ secrets.GPG_SECRET }}
-            gpg-passphrase: GPG_PASSPHRASE
+            let version = tag.replace(/^v/, "");
 
-        - name: Publish to the Maven Central Repository
-          run: mvn -B clean deploy -Dmaven.test.skip -P release
-          env:
-            MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-            MAVEN_PASSWORD: ${{ secrets.SONATYPE_TOKEN }}
-            GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+            core.setOutput("tag", tag);
+            core.setOutput("version", version);
+
+      - run: |
+          echo "Publishing version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.tag }}"
+
+  deploy_maven:
+    name: Deploy to Maven
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Release Artifacts
+        uses: robinraju/release-downloader@v1.4
+        with:
+          tag: "${{ needs.setup.outputs.tag }}"
+          filename: "*"
+          out-file-path: "."
+
+      - name: Set up Java for publishing to Maven Central Repository
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+          server-id: sonatype-nexus-staging
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      - name: Publish to Maven Central
+        env:
+          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.SONATYPE_TOKEN }}
+        run: |
+          version=${{ needs.setup.outputs.version }}
+
+          unzip *.zip
+          
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
+            -DrepositoryId=sonatype-nexus-staging \
+            -DpomFile=liquibase-bigquery-${version}.pom \
+            -DgeneratePom=false \
+            -Dfile=liquibase-bigquery-${version}.jar \
+            -Dsources=liquibase-bigquery-${version}-sources.jar \
+            -Djavadoc=liquibase-bigquery-${version}-javadoc.jar \
+            -Dfiles=liquibase-bigquery-${version}.jar.asc,liquibase-bigquery-${version}-sources.jar.asc,liquibase-bigquery-${version}-javadoc.jar.asc,liquibase-bigquery-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,

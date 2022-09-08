@@ -1,4 +1,4 @@
-name: Release Extension (v2)
+name: Create Release
 on:
   repository_dispatch:
     types: [liquibase-release]
@@ -38,138 +38,48 @@ jobs:
           echo "Saw Liquibase version ${{ steps.collect-data.outputs.liquibaseVersion }}"
           echo "Saw Extension version ${{ steps.collect-data.outputs.extensionVersion }}"
 
-  build:
-    name: "Build and Test"
+  create-release-artifacts:
+    name: "Create release artifacts"
     runs-on: ubuntu-latest
     needs: setup
-    outputs:
-      releaseSha: ${{ steps.get-release-sha.outputs.releaseSha }}
     steps:
       - uses: actions/checkout@v2
         with:
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
           fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
 
-      - name: Cache Built Code
-        uses: actions/cache@v2
-        with:
-          key: built-code-${{ github.run_id }}
-          path: ./**/target
-
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
-          java-version: '8'
-          distribution: 'adopt'
-
-      - name: Configure git user
-        run: |
-          git config user.name "liquibot"
-          git config user.email "liquibot@liquibase.org"
-
-      - name: Download and install liquibase-core.jar
-        uses: dsaltares/fetch-gh-release-asset@master
-        with:
-          repo: "liquibase/liquibase"
-          version: "tags/v${{ needs.setup.outputs.liquibaseVersion }}"
-          file: "liquibase-core-${{ needs.setup.outputs.liquibaseVersion }}.jar"
-          target: "liquibase-core.jar"
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install liquibase-core.jar
-        run: mvn -B org.apache.maven.plugins:maven-install-plugin:3.0.0-M1:install-file -Dfile=liquibase-core.jar
-
-      - name: Update pom.xml with release versions and commit changes
-        run: |
-          mvn -B versions:set -DnewVersion=${{ needs.setup.outputs.extensionVersion }} -DallowSnapshots=false -DoldVersion="*"
-          mvn -B versions:use-dep-version -Dincludes=org.liquibase:liquibase-core -DdepVersion=${{ needs.setup.outputs.liquibaseVersion }} -DforceVersion=true
-
-          git add pom.xml
-          if git diff-index --cached --quiet HEAD --
-          then
-            echo "Nothing new to commit"
-          else
-            git commit -m "Version Bumped to ${{ needs.setup.outputs.extensionVersion }}"
-          fi
-          git tag -a -m "Version Bumped to ${{ needs.setup.outputs.extensionVersion }}" liquibase-bigquery-${{ needs.setup.outputs.extensionVersion }}
-          git push "https://liquibot:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:${{ github.ref }} --follow-tags --tags
-
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-passphrase: GPG_PASSPHRASE
         env:
-          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Get release SHA
-        id: get-release-sha
-        run: echo ::set-output name=releaseSha::$(git rev-parse HEAD)
-
-
-      - name: Build and Unit Test
-        run: mvn -B clean test package
-
-      - name: Archive Test Results
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-reports-jdk
-          path: ./**/target/surefire-reports
-
-      - name: Save Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: liquibase-bigquery
-          path: |
-            target/*.jar
-
-  draft-release:
-    needs: [ setup, build ]
-    name: Draft Release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: liquibase-bigquery
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          target_commitish: ${{ needs.build.outputs.releaseSha }}
-          name: v${{ needs.setup.outputs.extensionVersion }}
-          tag_name: liquibase-bigquery-${{ needs.setup.outputs.extensionVersion }}
-          draft: true
-          body: Support for Liquibase ${{ needs.setup.outputs.liquibaseVersion }}.
-          files: liquibase-bigquery-*.jar
+      - name: Download snapshot build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn -B liquibase-sdk:download-snapshot-artifacts -Dliquibase.sdk.repo=${{ github.repository }} -Dliquibase.sdk.branchSearch=master -Dliquibase.sdk.artifactPattern=liquibase-bigquery-artifacts -Dliquibase.sdk.downloadDirectory=original-artifacts
 
-  bump-pom-to-snapshot:
-    name: Prepare POM for Development
-    runs-on: ubuntu-latest
-    needs: [ draft-release ]
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
-          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
-
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: '8'
-          distribution: 'adopt'
-
-      - name: Configure git user
-        run: |
-          git config user.name "liquibot"
-          git config user.email "liquibot@liquibase.org"
-
-      - name: Prepare code for next version
-        run: |
-          git pull
-          mvn -B versions:set -DnextSnapshot=true
-          git add pom.xml
-          git commit -m "Version Bumped to Snapshot for Development"
-          git push "https://liquibot:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:${{ github.ref }} --follow-tags --tags
+      - name: Re-version Artifacts
         env:
-          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          (cd original-artifacts && unzip liquibase-bigquery-artifacts.zip && rm liquibase-bigquery-artifacts.zip)
+          mvn -B liquibase-sdk:create-release-artifacts -Dliquibase.sdk.repo=${{ github.repository }} -Dliquibase.sdk.inputDirectory=original-artifacts -Dliquibase.sdk.outputDirectory=final-artifacts -Dliquibase.sdk.newVersion=${{ needs.setup.outputs.extensionVersion }} -Dliquibase.sdk.gpgExecutable=/usr/bin/gpg -X
+
+      - name: Attach Files to Draft Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.setup.outputs.extensionVersion }}
+          draft: true
+          fail_on_unmatched_files: true
+          body: Support for Liquibase ${{ needs.setup.outputs.liquibaseVersion }}.
+          generate_release_notes: true
+          files: final-artifacts/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

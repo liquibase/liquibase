@@ -1,0 +1,50 @@
+name: 'Continuous Integration - Report'
+on:
+  workflow_run:
+    workflows: [Continuous Integration]
+    types: [completed]
+
+jobs:
+  test-report:
+    name: Report Test Results
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion != 'skipped'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download and Extract Artifacts
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+          mvn -B liquibase-sdk:download-snapshot-artifacts \
+            -Dliquibase.sdk.repo=${{ github.repository }} \
+            -Dliquibase.sdk.runId=${{ github.event.workflow_run.id }} \
+            -Dliquibase.sdk.downloadDirectory=artifacts \
+            -Dliquibase.sdk.artifactPattern=* \
+            -Dliquibase.sdk.unzipArtifacts=true
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          commit: ${{ github.event.workflow_run.head_sha }}
+          event_file: artifacts/Event File/event.json
+          event_name: ${{ github.event.workflow_run.event }}
+          junit_files: "artifacts/test-reports-*/**/*.xml"
+
+  build-testing-comment:
+    name: Add Build Testing Comment
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch != 'main'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Create "BUILD_TESTING" comment
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+          mvn -B liquibase-sdk:set-pull-request-comment \
+            -Dliquibase.sdk.repo=${{ github.repository }} \
+            -Dliquibase.sdk.pr.newComment=BUILD_TESTING \
+            -Dliquibase.sdk.pr.definition=${{ github.event.workflow_run.head_branch }}
