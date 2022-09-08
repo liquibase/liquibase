@@ -286,31 +286,28 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         def resourceAccessor = Scope.getCurrentScope().getResourceAccessor()
 
-        if (testDef.searchPath == null) {
-            testDef.searchPath = "."
-        }
         def config = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
 
-        searchPathPropertiesProvider = new AbstractMapConfigurationValueProvider() {
-            @Override
-            protected Map<?, ?> getMap() {
-                return Collections.singletonMap(GlobalConfiguration.SEARCH_PATH.getKey(), testDef.searchPath)
-            }
+        if (testDef.searchPath != null) {
+            searchPathPropertiesProvider = new AbstractMapConfigurationValueProvider() {
+                @Override
+                protected Map<?, ?> getMap() {
+                    return Collections.singletonMap(GlobalConfiguration.SEARCH_PATH.getKey(), testDef.searchPath)
+                }
 
-            @Override
-            protected String getSourceDescription() {
-                return "command tests search path override"
-            }
+                @Override
+                protected String getSourceDescription() {
+                    return "command tests search path override"
+                }
 
-            @Override
-            int getPrecedence() {
-                return 1
+                @Override
+                int getPrecedence() {
+                    return 1
+                }
             }
+            config.registerProvider ( searchPathPropertiesProvider )
+            resourceAccessor = new SearchPathResourceAccessor(testDef.searchPath)
         }
-
-        config.registerProvider(searchPathPropertiesProvider)
-        resourceAccessor =
-            new CompositeResourceAccessor(new SearchPathResourceAccessor(testDef.searchPath, null), Scope.getCurrentScope().getResourceAccessor())
 
         def scopeSettings = [
                 (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,

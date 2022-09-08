@@ -4,6 +4,7 @@ import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
+import liquibase.change.Change;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -125,6 +126,10 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern onErrorPattern = Pattern.compile(".*onError:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onUpdateSqlPattern = Pattern.compile(".*onUpdateSQL:(\\w+).*", Pattern.CASE_INSENSITIVE);
 
+            Pattern rollbackChangeSetIdPattern = Pattern.compile(".*changeSetId:(\\S+).*", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackChangeSetAuthorPattern = Pattern.compile(".*changesetAuthor:(\\S+).*", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackChangeSetPathPattern = Pattern.compile(".*changesetPath:(\\S+).*", Pattern.CASE_INSENSITIVE);
+
             Matcher rollbackSplitStatementsPatternMatcher=null;
             boolean rollbackSplitStatements = true;
             String rollbackEndDelimiter = null;
@@ -198,7 +203,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 if (changeSetPatternMatcher.matches()) {
                     String finalCurrentSql = changeLogParameters.expandExpressions(StringUtil.trimToNull(currentSql.toString()), changeLog);
                     if (changeSet != null) {
-
                         if (finalCurrentSql == null) {
                             throw new ChangeLogParseException("No SQL for changeset " + changeSet.toString(false));
                         }
@@ -208,9 +212,46 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         if (StringUtil.trimToNull(currentRollbackSql.toString()) != null) {
                             if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
                                 changeSet.addRollbackChange(new EmptyChange());
+                            } else if (currentRollbackSql.toString().trim().toLowerCase().contains("changesetid")) {
+                                String rollbackString = currentRollbackSql.toString().replace("\n", "").replace("\r", "");
+                                Matcher authorMatcher = rollbackChangeSetAuthorPattern.matcher(rollbackString);
+                                Matcher idMatcher = rollbackChangeSetIdPattern.matcher(rollbackString);
+                                Matcher pathMatcher = rollbackChangeSetPathPattern.matcher(rollbackString);
+
+                                String changeSetAuthor = StringUtil.trimToNull(parseString(authorMatcher));
+                                String changeSetId = StringUtil.trimToNull(parseString(idMatcher));
+                                String changeSetPath = StringUtil.trimToNull(parseString(pathMatcher));
+
+                                if (changeSetId == null) {
+                                    throw new ChangeLogParseException("'changesetId' not set in rollback block '"+rollbackString+"'");
+                                }
+
+                                if (changeSetAuthor == null) {
+                                    throw new ChangeLogParseException("'changesetAuthor' not set in rollback block '"+rollbackString+"'");
+                                }
+
+                                if (changeSetPath == null) {
+                                    changeSetPath = physicalChangeLogLocation;
+                                }
+
+                                ChangeSet rollbackChangeSet = changeLog.getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
+                                DatabaseChangeLog parent = changeLog;
+                                while ((rollbackChangeSet == null) && (parent != null)) {
+                                    parent = parent.getParentChangeLog();
+                                    if (parent != null) {
+                                        rollbackChangeSet = parent.getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
+                                    }
+                                }
+
+                                if (rollbackChangeSet == null) {
+                                    throw new ChangeLogParseException("Change set " + new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false) + " does not exist");
+                                }
+                                for (Change rollbackChange : rollbackChangeSet.getChanges()) {
+                                    changeSet.addRollbackChange(rollbackChange);
+                                }
                             } else {
                                 RawSQLChange rollbackChange = new RawSQLChange();
-                                rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeLog));
+                                rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeSet.getChangeLog()));
                                 if (rollbackSplitStatementsPatternMatcher.matches()) {
                                     rollbackChange.setSplitStatements(rollbackSplitStatements);
                                 }
@@ -434,6 +475,44 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 if (StringUtil.trimToNull(currentRollbackSql.toString()) != null) {
                     if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
                         changeSet.addRollbackChange(new EmptyChange());
+                    } else if (currentRollbackSql.toString().trim().toLowerCase().contains("changesetid")) {
+                        String rollbackString = currentRollbackSql.toString().replace("\n", "").replace("\r", "");
+
+                        Matcher authorMatcher = rollbackChangeSetAuthorPattern.matcher(rollbackString);
+                        Matcher idMatcher = rollbackChangeSetIdPattern.matcher(rollbackString);
+                        Matcher pathMatcher = rollbackChangeSetPathPattern.matcher(rollbackString);
+                        
+                        String changeSetAuthor = StringUtil.trimToNull(parseString(authorMatcher));
+                        String changeSetId = StringUtil.trimToNull(parseString(idMatcher));
+                        String changeSetPath = StringUtil.trimToNull(parseString(pathMatcher));
+
+                        if (changeSetId == null) {
+                            throw new ChangeLogParseException("'changesetId' not set in rollback block '"+rollbackString+"'");
+                        }
+
+                        if (changeSetAuthor == null) {
+                            throw new ChangeLogParseException("'changesetAuthor' not set in rollback block '"+rollbackString+"'");
+                        }
+
+                        if (changeSetPath == null) {
+                            changeSetPath = physicalChangeLogLocation;
+                        }
+
+                        ChangeSet rollbackChangeSet = changeLog.getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
+                        DatabaseChangeLog parent = changeLog;
+                        while ((rollbackChangeSet == null) && (parent != null)) {
+                            parent = parent.getParentChangeLog();
+                            if (parent != null) {
+                                rollbackChangeSet = parent.getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
+                            }
+                        }
+
+                        if (rollbackChangeSet == null) {
+                            throw new ChangeLogParseException("Change set " + new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false) + " does not exist");
+                        }
+                        for (Change rollbackChange : rollbackChangeSet.getChanges()) {
+                            changeSet.addRollbackChange(rollbackChange);
+                        }
                     } else {
                         RawSQLChange rollbackChange = new RawSQLChange();
                         rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeSet.getChangeLog()));
