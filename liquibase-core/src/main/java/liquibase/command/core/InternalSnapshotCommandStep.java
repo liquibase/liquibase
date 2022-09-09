@@ -124,7 +124,8 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
                     || database instanceof OracleDatabase
                     || database instanceof MySQLDatabase
                     || database instanceof DB2Database
-                    || database instanceof PostgresDatabase)) {
+                    || database instanceof PostgresDatabase
+                    || database.getShortName().equalsIgnoreCase("snowflake"))) {
                 Scope.getCurrentScope().getUI().sendMessage("INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
             }
         }
