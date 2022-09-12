@@ -194,6 +194,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.skyscreamer</groupId>
+            <artifactId>jsonassert</artifactId>
+            <version>1.5.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -205,18 +211,18 @@
         </resources>
         <plugins>
 
-                <plugin>
-                    <groupId>org.liquibase</groupId>
-                    <artifactId>liquibase-maven-plugin</artifactId>
-                    <version>4.15.0</version>
-                    <configuration>
-                        <propertyFileWillOverride>true</propertyFileWillOverride>
-                        <propertyFile>target/classes/liquibase.properties</propertyFile>
-                        <logging>DEBUG</logging>
-                        <changeLogFile>target/classes/changelog.sql</changeLogFile>
-                        <outputChangeLogFile>target/classes/generatedChangelog.bigquery.sql</outputChangeLogFile>
-                    </configuration>
-                </plugin>
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>4.15.0</version>
+                <configuration>
+                    <propertyFileWillOverride>true</propertyFileWillOverride>
+                    <propertyFile>target/classes/liquibase.properties</propertyFile>
+                    <logging>DEBUG</logging>
+                    <changeLogFile>target/classes/changelog.sql</changeLogFile>
+                    <outputChangeLogFile>target/classes/generatedChangelog.bigquery.sql</outputChangeLogFile>
+                </configuration>
+            </plugin>
 
 
             <plugin>
@@ -254,6 +260,7 @@
                         <configuration>
                             <includes>
                                 <include>**/*Test.java</include>
+                                <include>**/*Test.groovy</include>
                             </includes>
                         </configuration>
                     </execution>
@@ -266,6 +273,7 @@
                         <configuration>
                             <includes>
                                 <include>**/*IT.java</include>
+                                <include>**/*IT.groovy</include>
                             </includes>
                         </configuration>
                     </execution>
