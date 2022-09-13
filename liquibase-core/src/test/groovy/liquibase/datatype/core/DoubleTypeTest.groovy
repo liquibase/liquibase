@@ -29,6 +29,7 @@ class DoubleTypeTest extends Specification {
         "double"                         | new HsqlDatabase()     | "DOUBLE"
         "double"                         | new H2Database()       | "DOUBLE"
         "double precision"               | new H2Database()       | "DOUBLE PRECISION"
+        "double(20)"                     | new H2Database()       | "DOUBLE PRECISION"
         "double"                         | new MSSQLDatabase()    | "float(53)"
         "double"                         | new PostgresDatabase() | "DOUBLE PRECISION"
         "double"                         | new InformixDatabase() | "DOUBLE PRECISION"
