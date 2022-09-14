@@ -3,9 +3,6 @@ on:
   pull_request:
     branches:
       - '*'
-  push:
-    branches:
-      - '*'
 env:
   tf_version: 'latest'
 
@@ -79,7 +76,7 @@ jobs:
             create_credentials_file: 'true'
 
       - name: BigQuery Test Run
-        run: mvn -Dit.test=LiquibaseHarnessSuiteIT verify
+        run: mvn -Dit.test=LiquibaseHarnessSuiteIT -DoutputDefaultCatalog=false verify
         continue-on-error: true
 
       - name: Archive Bigquery Database Test Results
