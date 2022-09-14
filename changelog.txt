@@ -1,11 +1,11 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version 4.16.1 (2022.09.12)
+Changes in version 4.16.1 (2022.09.14)
 
 ## New and Notable Capability
 * Liquibase 4.16.0 incorrectly included the [msal4j.jar](https://mvnrepository.com/artifact/com.microsoft.azure/msal4j) and it's dependencies in `internal/lib`. This release does not include that SqlServer related library
-
+* Upgraded snakeyaml to 1.32
 ## Enhancements
 * None
 
