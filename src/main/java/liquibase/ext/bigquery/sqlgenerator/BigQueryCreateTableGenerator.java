@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.ext.bigquery.database.BigqueryDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -29,10 +30,15 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
     }
 
     @Override
+    public boolean supports(CreateTableStatement statement, Database database) {
+        return database instanceof BigqueryDatabase;
+    }
+
+    @Override
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<Sql> additionalSql = new ArrayList();
         StringBuilder buffer = new StringBuilder();
-        Scope.getCurrentScope().getLog(this.getClass()).info("inside CreateTableGenerator");
+
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");
         Iterator<String> columnIterator = statement.getColumns().iterator();

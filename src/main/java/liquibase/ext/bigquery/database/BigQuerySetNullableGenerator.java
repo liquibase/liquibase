@@ -1,8 +1,6 @@
 package liquibase.ext.bigquery.database;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -38,7 +36,7 @@ public class BigQuerySetNullableGenerator extends SetNullableGenerator {
 
         List<Sql> returnList = new ArrayList();
         returnList.add(new UnparsedSql(sql, new DatabaseObject[]{this.getAffectedColumn(statement)}));
-        if (database instanceof DB2Database) {
+        if (database instanceof BigqueryDatabase) {
             Sql[] a = SqlGeneratorFactory.getInstance().generateSql(new ReorganizeTableStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), database);
             if (a != null) {
                 returnList.addAll(Arrays.asList(a));

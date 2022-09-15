@@ -15,10 +15,11 @@ public class BigQueryColumnSnapshotGenerator extends ColumnSnapshotGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         int priority = super.getPriority(objectType, database);
-        if (database instanceof BigqueryDatabase) {
-            priority += PRIORITY_DATABASE;
+        if (priority != PRIORITY_NONE && database instanceof BigqueryDatabase) {
+            return PRIORITY_DATABASE;
         }
-        return priority;
+
+        return PRIORITY_NONE;
     }
 
 }
