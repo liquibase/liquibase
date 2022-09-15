@@ -3,16 +3,13 @@ package org.liquibase.maven.plugins;
 import liquibase.Scope;
 import liquibase.command.CommandDefinition;
 import liquibase.command.CommandFactory;
-import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.integration.commandline.Main;
-import liquibase.util.StringUtil;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.descriptor.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.MapOrientedComponent;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
@@ -26,45 +23,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-public class LiquibaseCommandMojo extends AbstractMojo implements MapOrientedComponent  {
+public class LiquibaseMojo extends AbstractMojo implements MapOrientedComponent  {
 
-    private String goal;
     private Map<String, Object> configuration;
-    private ClassLoader classloader;
-//    private List<Parameter> goalParameters;
+    private MavenProject project;
+    private MojoExecution mojoExecution;
 
-    public LiquibaseCommandMojo() {
+    public LiquibaseMojo() {
     }
 
     @Override
     public void addComponentRequirement(ComponentRequirement componentRequirement, Object o) throws ComponentConfigurationException {
-        System.out.println("Add compp");
+        //TODO: How does this get used?
     }
 
     @Override
-    public void setComponentConfiguration(Map<?, ?> map) throws ComponentConfigurationException {
-        MojoExecution mojoExecution = (MojoExecution) map.get("mojoExecution");
-        MavenProject project = (MavenProject) map.get("project");
-
-        this.goal = mojoExecution.getGoal();
-
+    public void setComponentConfiguration(Map<?, ?> config) throws ComponentConfigurationException {
+        this.mojoExecution = (MojoExecution) config.get("mojoExecution");
+        this.project = (MavenProject) config.get("project");
 
         try {
-            List classpathElements = project.getCompileClasspathElements();
-            classpathElements.add(project.getBuild().getOutputDirectory());
-            URL urls[] = new URL[classpathElements.size()];
-            for (int i = 0; i < classpathElements.size(); ++i) {
-                urls[i] = new File((String) classpathElements.get(i)).toURI().toURL();
-            }
-            this.classloader = new URLClassLoader(urls, MavenUtils.getArtifactClassloader(project,
-                    true,
-                    true,
-                    getClass(),
-                    getLog(),
-                    false));
-
             this.configuration = new HashMap<>();
-            for (Map.Entry entry : map.entrySet()) {
+            for (Map.Entry<?, ?> entry : config.entrySet()) {
                 Object value = entry.getValue();
                 if (value == null) {
                     continue;
@@ -75,7 +55,7 @@ public class LiquibaseCommandMojo extends AbstractMojo implements MapOrientedCom
                 this.configuration.put(String.valueOf(entry.getKey()), entry.getValue());
             }
 
-            Properties userProperties = ((MavenSession) map.get("session")).getUserProperties();
+            Properties userProperties = ((MavenSession) config.get("session")).getUserProperties();
             for (Map.Entry<Object, Object> entry : userProperties.entrySet()) {
                 this.configuration.put(String.valueOf(entry.getKey()), entry.getValue());
             }
@@ -86,10 +66,9 @@ public class LiquibaseCommandMojo extends AbstractMojo implements MapOrientedCom
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-//        System.out.println("EXECUTE COMMAND MOJO!!!"+goal);
-//        System.out.println(StringUtil.join(configuration, ","));
         Main.runningFromNewCli = true;
 
+        String goal = mojoExecution.getGoal();
         try {
             CommandScope commandScope = new CommandScope(goal);
 
@@ -103,7 +82,7 @@ public class LiquibaseCommandMojo extends AbstractMojo implements MapOrientedCom
             }
 
             Map<String, Object> scopeValues = new HashMap<>();
-            scopeValues.put(Scope.Attr.resourceAccessor.name(), new MavenResourceAccessor(classloader));
+            scopeValues.put(Scope.Attr.resourceAccessor.name(), new MavenResourceAccessor(project));
             Scope.child(scopeValues, () -> {
                 commandScope.execute();
             });
