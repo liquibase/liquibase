@@ -1032,6 +1032,17 @@ public class StringUtil {
     }
 
     /**
+     * @param value string to process
+     * @return string without any whitespaces formatted to lowercase.
+     */
+    public static String toLowerWithoutWhitespaces(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.toLowerCase().replaceAll("\\s+", "");
+    }
+
+    /**
      * <p>Checks whether the char sequence is numeric by checking that all chars in the sequence are
      * numbers, so (-1, 1.0 and 1F) will return false
      * <p>

@@ -90,7 +90,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.31</version>
+            <version>1.32</version>
             <optional>true</optional>
         </dependency>
 
@@ -185,7 +185,7 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>11.2.0.jre8</version>
+            <version>11.2.1.jre8</version>
             <scope>test</scope>
         </dependency>
 
