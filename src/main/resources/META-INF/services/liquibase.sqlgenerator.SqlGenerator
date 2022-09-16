@@ -9,3 +9,4 @@ liquibase.ext.bigquery.sqlgenerator.BigQueryRenameTableGenerator
 liquibase.ext.bigquery.sqlgenerator.BigQueryRenameViewGenerator
 liquibase.ext.bigquery.sqlgenerator.BigQuerySetNullableGenerator
 liquibase.ext.bigquery.sqlgenerator.BigQueryUpdateGenerator
+liquibase.ext.bigquery.sqlgenerator.BigQueryInsertOrUpdateGenerator

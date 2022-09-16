@@ -1,0 +1,44 @@
+{
+  "loadData": [
+    {
+      "author_id": 1,
+      "description": "voluptatum",
+      "title": "temporibus",
+      "inserted_date": "2015-11-18",
+      "id": 1,
+      "content": "Fugit non et doloribus repudiandae."
+    },
+    {
+      "author_id": 2,
+      "description": "aut",
+      "title": "ea",
+      "inserted_date": "1975-06-08",
+      "id": 2,
+      "content": "Tempora molestias maiores provident molestiae sint possimus quasi."
+    },
+    {
+      "author_id": 1,
+      "description": "test1@example.com",
+      "title": "Title1",
+      "inserted_date": "2000-01-01",
+      "id": 6,
+      "content": "Content1"
+    },
+    {
+      "author_id": 2,
+      "description": "test2@example.com",
+      "title": "Title2",
+      "inserted_date": "2000-01-01",
+      "id": 7,
+      "content": "Content2"
+    },
+    {
+      "author_id": 3,
+      "description": "test3@example.com",
+      "title": "Title3",
+      "inserted_date": "2000-01-01",
+      "id": 8,
+      "content": "Content3"
+    }
+  ]
+}
