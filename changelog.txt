@@ -1,6 +1,41 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.16.1 (2022.09.14)
+
+## New and Notable Capability
+* Liquibase 4.16.0 incorrectly included the [msal4j.jar](https://mvnrepository.com/artifact/com.microsoft.azure/msal4j) and it's dependencies in `internal/lib`. This release does not include that SqlServer related library
+* Upgraded snakeyaml to 1.32
+## Enhancements
+* None
+
+## Fixes
+* None
+
+Changes in version 4.16.0 (2022.09.08)
+
+## New and Notable Capability
+* [LABS] The liquibase flow command and flow files are still available under the Liquibase Labs license. If you want to try and provide feedback on this capability, please email mario@liquibase.com
+* [PRO] The Quality Checks for Databases are now available to all Pro license users. These checks inspect your active database, or a liquibase-generated snapshot for compliance with your rules. Learn more at https://docs.liquibase.com/quality-checks
+
+## Enhancements
+* Introduced "contextFilter" and "labelFilter" replacement settings by @nvoxland in #2971
+* Added support for changeset references in rollback for Formatted SQL changelogs by @atzawada in #1386
+* Add schemas and includeSchema parameters to maven generateChangeLog by @MalloD12 in #3210
+* [PRO] Two new Pro commands update-one-changeset and update-one-changeset-sql serving as complements to rollback-one-changeset and roll-back-one-changeset-sql
+
+## Fixes
+* Fix addColumn on mysql when including a "value" attribute by @nvoxland in #3070
+* Add support for AS <dataType> clause for H2 since version 2.0 by @marcus-nl in #3047
+* Fixed NUMBER not compatible with H2 by @nick318 in #3098
+* SpringResourceAccessor: fix issue with incorrect match pattern for files from classPath root by @danilmalkin in #3095
+* Made liquibase.snapshot.ResultSetCache an extensible class. by @breglerj in #2087
+* Added support for \u2116 symbol win1251 cyrillic symbol of number by @Stuchalin in #1324
+* Tidy ExecutorService code, remove superfluous map access (Issue 1841) by @jamey-clari in #1842
+* Fixed order of enum values on MySQL 8 by @Tantalon in #3150
+* Removed invalid warning in Maven by @nvoxland in #3189
+* [PRO] QC: checks show changes (--show-cols flag, drop some, etc) by @dyadyushko in #3187
+
 Changes in version 4.15.0 (2022.08.04)
 
 ## Notable Changes
