@@ -112,11 +112,6 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
 
         return SnapshotSerializerFactory.getInstance().getSerializer(format.toLowerCase(Locale.US)).serialize((DatabaseSnapshot) snapshotResults.getResult("snapshot"), true);
     }
-//
-//        public void merge(SnapshotCommandResult resultToMerge) {
-//            this.snapshot.merge(resultToMerge.snapshot);
-//        }
-//    }
 
     public static void logUnsupportedDatabase(Database database, Class callingClass) {
         if (LicenseServiceUtils.isProLicenseValid()) {

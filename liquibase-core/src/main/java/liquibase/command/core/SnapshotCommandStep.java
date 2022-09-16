@@ -125,7 +125,7 @@ public class SnapshotCommandStep extends AbstractCommandStep {
 
         CatalogAndSchema[] schemas = parseSchemas(database, commandScope.getArgumentValue(SCHEMAS_ARG));
 
-        logUnsupportedDatabase(database, this.getClass());
+        InternalSnapshotCommandStep.logUnsupportedDatabase(database, this.getClass());
         SnapshotControl snapshotControl;
         if (commandScope.getArgumentValue(SNAPSHOT_CONTROL_ARG) == null) {
             snapshotControl = new SnapshotControl(database);
@@ -255,18 +255,6 @@ public class SnapshotCommandStep extends AbstractCommandStep {
         return SnapshotSerializerFactory.getInstance()
                                         .getSerializer(format.toLowerCase(Locale.US))
                                         .serialize(snapshot, true);
-    }
-
-    private void logUnsupportedDatabase(Database database, Class callingClass) {
-        if (LicenseServiceUtils.isProLicenseValid()) {
-            if (!(database instanceof MSSQLDatabase
-                || database instanceof OracleDatabase
-                || database instanceof MySQLDatabase
-                || database instanceof DB2Database
-                || database instanceof PostgresDatabase)) {
-                Scope.getCurrentScope().getUI().sendMessage("INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
-            }
-        }
     }
 
 }
