@@ -74,8 +74,9 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
                             Scope.getCurrentScope().getLog(getClass()).info("No filesystem provider for URL " + url.toExternalForm() + ". Will rely on classloader logic for listing files.");
                         }
                     } catch (FileSystemNotFoundException fsnfe) {
-                        if (url.toExternalForm().matches(".*!.*!.*")) {
-                            //spring sometimes sets up urls with nested urls like jar:file:/path/to/demo-0.0.1-SNAPSHOT.jar!/BOOT-INF/lib/mssql-jdbc-8.2.2.jre8.jar!/ which are not readable.
+                        if (url.toExternalForm().matches("(?:.*!.*!.*)|(?:.*\\*.*)")) {
+                            //spring sometimes sets up urls with nested urls like jar:file:/path/to/demo-0.0.1-SNAPSHOT.jar!/BOOT-INF/lib/mssql-jdbc-8.2.2.jre8.jar!/
+                            //or war:file:/path/to/demo-0.0.1-SNAPSHOT.war*/WEB-INF/lib/httpclient-4.5.13.jar which are not readable.
                             //That is expected, and will be handled by the SpringResourceAccessor
                         } else {
                             Scope.getCurrentScope().getLog(getClass()).info("Configured classpath location " + url.toString() + " does not exist");
