@@ -230,6 +230,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.4.2</version>
 				<configuration>
+                    <tarLongFileMode>posix</tarLongFileMode>
                     <finalName>liquibase-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                     <attach>false</attach>
