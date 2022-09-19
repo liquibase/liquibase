@@ -24,6 +24,12 @@ import java.util.Map;
 @SuppressWarnings({"unchecked"})
 public class ColumnMapRowMapper implements RowMapper {
 
+    private final boolean caseSensitiveDatabase;
+
+    public ColumnMapRowMapper(boolean caseSensitiveDatabase) {
+        this.caseSensitiveDatabase = caseSensitiveDatabase;
+    }
+
     @Override
     public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
         ResultSetMetaData rsmd = rs.getMetaData();
@@ -55,6 +61,9 @@ public class ColumnMapRowMapper implements RowMapper {
      * @see java.sql.ResultSetMetaData#getColumnName
      */
     protected String getColumnKey(String columnName) {
+        if (this.caseSensitiveDatabase) {
+            return columnName;
+        }
         return columnName.toUpperCase(Locale.US);
     }
 
