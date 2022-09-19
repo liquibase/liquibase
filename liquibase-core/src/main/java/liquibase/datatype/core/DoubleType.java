@@ -39,8 +39,7 @@ public class DoubleType  extends LiquibaseDataType {
         if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof HsqlDatabase)) {
             return new DatabaseDataType("DOUBLE");
         }
-        String rawDefinitionDataType = getRawDefinition().toLowerCase();
-        if (database instanceof H2Database && (rawDefinitionDataType.contains("precision")) || rawDefinitionDataType.matches("double\\([1-9]?[0-9]\\)")) {
+        if (database instanceof H2Database) {
             return new DatabaseDataType("DOUBLE PRECISION");
         }
 
