@@ -90,7 +90,7 @@ public class DatabaseList {
      * @param vErrors
      */
     public static void validateDefinitions(String definition, ValidationErrors vErrors) {
-        if(!definition.contentEquals("none") && !definition.contentEquals("all")) {
+        if(!definition.contentEquals("none") && !definition.contentEquals("all") && !definition.startsWith("!")) {
             Database database = DatabaseFactory.getInstance().getDatabase(definition.toLowerCase());
             if (database == null) {
                 vErrors.addError(String.format("%s is not a supported DB", definition));
