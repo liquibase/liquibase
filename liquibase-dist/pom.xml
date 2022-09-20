@@ -77,7 +77,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.13.21</version>
+            <version>3.13.22</version>
         </dependency>
 
         <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
@@ -159,7 +159,7 @@
 		    <plugin>
                 <groupId>org.liquibase.ext</groupId>
                 <artifactId>liquibase-sdk-maven-plugin</artifactId>
-                <version>0.9.1</version>
+                <version>0.10.18</version>
             </plugin>
 
 			<plugin>
