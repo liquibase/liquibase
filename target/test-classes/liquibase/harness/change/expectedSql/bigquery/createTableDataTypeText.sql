@@ -1,1 +1,0 @@
-CREATE TABLE harness_test_ds.createTableDataTypeText (textCol STRING)
