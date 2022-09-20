@@ -176,6 +176,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         ValidationErrors validate = new ValidationErrors();
 
         validate.checkDisallowedField("catalogName", this.getCatalogName(), database, MSSQLDatabase.class);
+        if(getDbms() != null) {
+            DatabaseList.validateDefinitions(getDbms(), validate);
+        }
 
         if ((StringUtil.trimToNull(getProcedureText()) != null) && (StringUtil.trimToNull(getPath()) != null)) {
             validate.addError(
