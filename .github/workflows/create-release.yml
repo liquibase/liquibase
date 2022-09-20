@@ -96,6 +96,8 @@ jobs:
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
   build-installers:
+    permissions:
+      contents: write  # for softprops/action-gh-release to create GitHub release
     needs: [ setup, reversion ]
     name: Build Installers
     runs-on: macos-latest #needs macos for apple notarization
