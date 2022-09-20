@@ -153,7 +153,7 @@ public class JdbcExecutor extends AbstractExecutor {
         }
         if (sql instanceof CompoundStatement) {
             if (database instanceof Db2zDatabase) {
-                executeDb2ZosComplexStatement(sql);
+                executeDb2ZosComplexStatement(sql, sqlVisitors);
                 return;
             }
         }
@@ -338,7 +338,7 @@ public class JdbcExecutor extends AbstractExecutor {
         Scope.getCurrentScope().getLog(getClass()).fine(message);
     }
 
-    private void executeDb2ZosComplexStatement(SqlStatement sqlStatement) throws DatabaseException {
+    private void executeDb2ZosComplexStatement(final SqlStatement sqlStatement, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
         DatabaseConnection con = database.getConnection();
 
         if (con instanceof OfflineConnection) {
@@ -346,12 +346,19 @@ public class JdbcExecutor extends AbstractExecutor {
         }
         Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(sqlStatement, database);
         for (Sql sql : sqls) {
+            String stmtText = sql.toSql();
+            if (sqlVisitors != null) {
+                for (SqlVisitor visitor : sqlVisitors) {
+                    stmtText = visitor.modifySql(stmtText, database);
+                }
+            }
+
             try {
                 if (sql instanceof CallableSql) {
                     CallableStatement call = null;
                     ResultSet resultSet = null;
                     try {
-                        call = ((JdbcConnection) con).getUnderlyingConnection().prepareCall(sql.toSql());
+                        call = ((JdbcConnection) con).getUnderlyingConnection().prepareCall(stmtText);
                         resultSet = call.executeQuery();
                         checkCallStatus(resultSet, ((CallableSql) sql).getExpectedStatus());
                     } finally {
@@ -361,11 +368,11 @@ public class JdbcExecutor extends AbstractExecutor {
                     Statement stmt = null;
                     try {
                         if (sqlStatement instanceof CompoundStatement) {
-                            stmt = ((JdbcConnection) con).getUnderlyingConnection().prepareStatement(sql.toSql());
+                            stmt = ((JdbcConnection) con).getUnderlyingConnection().prepareStatement(stmtText);
                             ((PreparedStatement)stmt).execute();
                         } else {
                             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
-                            stmt.execute(sql.toSql());
+                            stmt.execute(stmtText);
                         }
                         con.commit();
                     } finally {
