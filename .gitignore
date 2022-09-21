@@ -13,3 +13,4 @@ src/test/resources/terraform/.terraform*
 src/test/resources/terraform/terraform*
 src/test/resources/terraform/.terraform/*
 gha-creds-*.json
+src/test/resources/harness-config.yml
