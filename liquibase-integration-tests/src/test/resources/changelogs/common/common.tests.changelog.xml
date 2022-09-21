@@ -1069,7 +1069,7 @@
             of 9 for supported DBMS.
         </comment>
         <addColumn tableName="test_timestamp_fractions">
-            <column name="timestampColumnPrec9" type="timestamp(9)"/>
+            <column name="timestampColumnPrec9" type="timestamp(6)"/>
         </addColumn>
     </changeSet>
 
