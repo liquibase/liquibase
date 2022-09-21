@@ -8,21 +8,20 @@ import liquibase.util.StreamUtil;
 import java.io.*;
 
 public class ChangeLogWriter {
-    protected File outputDir;
+    protected Resource outputDir;
     private ResourceAccessor resourceAccessor;
 
-    public ChangeLogWriter(ResourceAccessor resourceAccessor, File rootOutputDir) {
-        this.outputDir = new File(rootOutputDir, "changelogs");
+    public ChangeLogWriter(ResourceAccessor resourceAccessor, Resource rootOutputDir) {
+        this.outputDir = rootOutputDir.resolve("changelogs");
         this.resourceAccessor = resourceAccessor;
     }
 
     public void writeChangeLog(String changeLog, String physicalFilePath) throws IOException {
         String changeLogOutFile = changeLog.replace(":", "_");
-        File xmlFile = new File(outputDir, changeLogOutFile.toLowerCase() + ".html");
-        xmlFile.getParentFile().mkdirs();
+        Resource xmlFile = outputDir.resolve(changeLogOutFile.toLowerCase() + ".html");
 
-        try (BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(xmlFile,
-                false), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))) {
+        try (BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(xmlFile.openOutputStream(true),
+                GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))) {
             Resource stylesheet = resourceAccessor.get(physicalFilePath);
             if (stylesheet == null) {
                 throw new IOException("Can not find " + changeLog);
