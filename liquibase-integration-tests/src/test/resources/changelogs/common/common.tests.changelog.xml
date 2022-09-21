@@ -745,7 +745,7 @@
         <sql>insert into default_val_computed (id) values (1);</sql>
     </changeSet>
 
-    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,hsqldb,oracle,db2,mysql,postgresql,mssql"> <!-- not derby -->
+    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,oracle,db2,mysql,postgresql,mssql"> <!-- not derby -->
         <preConditions onFail="MARK_RAN">
             <not><dbms type="mysql"/></not> <!-- doesn't support default values as function -->
         </preConditions>
