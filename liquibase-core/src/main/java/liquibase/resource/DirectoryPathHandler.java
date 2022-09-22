@@ -36,15 +36,25 @@ public class DirectoryPathHandler extends AbstractPathHandler {
 
     @Override
     public Resource getResource(String path) throws IOException {
-        Path pathObj = Paths.get(path);
-        if (!pathObj.toFile().exists()) {
-            return null;
-        }
-        return new PathResource(path, pathObj);
+        return new PathResource(path, Paths.get(path));
     }
 
     @Override
     public OutputStream createResource(String path) throws IOException {
-        return Files.newOutputStream(Paths.get(path), StandardOpenOption.CREATE_NEW);
+        Path path1 = Paths.get(path);
+        // Need to create parent directories, because Files.newOutputStream won't create them.
+        Path parent = path1.getParent();
+        if (parent != null && !Files.exists(parent)) {
+            Files.createDirectories(parent);
+        }
+        return Files.newOutputStream(path1, StandardOpenOption.CREATE_NEW);
+    }
+
+    @Override
+    public boolean isAbsolute(String path) throws IOException {
+        if (path == null) {
+            return false;
+        }
+        return new File(path).isAbsolute();
     }
 }

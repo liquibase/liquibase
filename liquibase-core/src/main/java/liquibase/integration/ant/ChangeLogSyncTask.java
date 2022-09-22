@@ -22,9 +22,9 @@ public class ChangeLogSyncTask extends AbstractChangeLogBasedTask {
             FileResource outputFile = getOutputFile();
             if (outputFile != null) {
                 writer = new OutputStreamWriter(outputFile.getOutputStream(), getOutputEncoding());
-                liquibase.changeLogSync(toTag, new Contexts(getContexts()), getLabels(), writer);
+                liquibase.changeLogSync(toTag, new Contexts(getContexts()), getLabelFilter(), writer);
             } else {
-                liquibase.changeLogSync(toTag, new Contexts(getContexts()), getLabels());
+                liquibase.changeLogSync(toTag, new Contexts(getContexts()), getLabelFilter());
             }
         } catch (UnsupportedEncodingException e) {
             throw new BuildException("Unable to generate sync SQL. Encoding [" + getOutputEncoding() + "] is not supported.", e);

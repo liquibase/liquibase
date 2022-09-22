@@ -10,8 +10,8 @@ import liquibase.util.FileUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.OutputStream;
+import java.net.URI;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -41,7 +41,12 @@ public interface ResourceAccessor extends AutoCloseable {
     default InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         InputStreamList returnList = new InputStreamList();
 
-        for (Resource resource : CollectionUtil.createIfNull(getAll(resolve(relativeTo, streamPath)))) {
+        if (relativeTo != null) {
+            Resource relativeToResource = this.get(relativeTo);
+            streamPath = relativeToResource.resolveSibling(streamPath).getPath();
+        }
+
+        for (Resource resource : CollectionUtil.createIfNull(getAll(streamPath))) {
             returnList.add(resource.getUri(), resource.openInputStream());
         }
 
@@ -60,30 +65,15 @@ public interface ResourceAccessor extends AutoCloseable {
      */
     @Deprecated
     default InputStream openStream(String relativeTo, String streamPath) throws IOException {
-        Resource resource = get(resolve(relativeTo, streamPath));
-        if (resource == null) {
+        if (relativeTo != null) {
+            streamPath = this.get(relativeTo).resolveSibling(streamPath).getPath();
+        }
+        Resource resource = get(streamPath);
+        if (!resource.exists()) {
             return null;
         }
         return resource.openInputStream();
 
-    }
-
-    /**
-     * Returns the final path of a file at the given path relative to a <b>file</b> at relativeTo.
-     * Therefore, the path is within relativeTo's directory.
-     * If relativeTo is null, return path.
-     * This method should return a value even if relativeTo or path do not exist.
-     */
-    default String resolve(String relativeTo, String path) {
-        if (relativeTo == null) {
-            return path;
-        }
-        Path basePath = Paths.get(relativeTo).getParent();
-        if (basePath == null) {
-            return path;
-        }
-
-        return basePath.resolve(path).normalize().toString().replace("\\", "/");
     }
 
     /**
@@ -110,7 +100,10 @@ public interface ResourceAccessor extends AutoCloseable {
     default SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
         SortedSet<String> returnList = new TreeSet<>();
         if (includeFiles) {
-            for (Resource resource : search(resolve(relativeTo, path), recursive)) {
+            if (relativeTo != null) {
+                path = this.get(relativeTo).resolveSibling(path).getPath();
+            }
+            for (Resource resource : search(path, recursive)) {
                 returnList.add(resource.getPath());
             }
         } else {
@@ -165,7 +158,7 @@ public interface ResourceAccessor extends AutoCloseable {
      */
     default Resource getExisting(String path) throws IOException {
         Resource resource = get(path);
-        if (resource == null) {
+        if (!resource.exists()) {
             throw new FileNotFoundException(FileUtil.getFileNotFoundMessage(path));
         }
         return resource;
@@ -175,13 +168,13 @@ public interface ResourceAccessor extends AutoCloseable {
      * Finds a single specific {@link }. If multiple files match the given path, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
      * Default implementation calls {@link #getAll(String)}.
      *
-     * @return null if the path does not exist
+     * @return a Resource even if the path does not exist
      */
     default Resource get(String path) throws IOException {
         List<Resource> resources = getAll(path);
 
         if (resources == null || resources.size() == 0) {
-            return null;
+            return new NotFoundResource(path, this);
         } else if (resources.size() == 1) {
             return resources.iterator().next();
         } else {
@@ -218,4 +211,50 @@ public interface ResourceAccessor extends AutoCloseable {
      */
     List<String> describeLocations();
 
+    static class NotFoundResource extends AbstractResource {
+        private ResourceAccessor resourceAccessor;
+
+        public NotFoundResource(String path, ResourceAccessor resourceAccessor) {
+            super(path,  URI.create("resourceaccessor:"+path.replace(" ", "%20")));
+            this.resourceAccessor = resourceAccessor;
+        }
+
+        @Override
+        public InputStream openInputStream() throws IOException {
+            throw new UnexpectedLiquibaseException("Resource does not exist");
+        }
+
+        @Override
+        public boolean isWritable() {
+            return false;
+        }
+
+        @Override
+        public boolean exists() {
+            return false;
+        }
+
+        @Override
+        public Resource resolve(String other) {
+            try {
+                return resourceAccessor.get(resolvePath(other));
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+
+        @Override
+        public Resource resolveSibling(String other) {
+            try {
+                return resourceAccessor.get(resolveSiblingPath(other));
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+
+        @Override
+        public OutputStream openOutputStream(boolean createIfNeeded) throws IOException {
+            throw new UnexpectedLiquibaseException("Resource does not exist");
+        }
+    }
 }

@@ -27,7 +27,7 @@ public interface PathHandler extends Plugin {
     /**
      * Parse the given "absolute" path and return a {@link liquibase.resource.Resource} for it if it exists.
      *
-     * @return null if the resource does not exist.
+     * @return a Resource even if the resource does not exist. Callers can check {@link Resource#exists()} to determine if it exists or not
      * @throws IOException if the path is invalid
      */
     Resource getResource(String path) throws IOException;
@@ -39,4 +39,14 @@ public interface PathHandler extends Plugin {
      * @throws IOException if the path cannot be written to
      */
     OutputStream createResource(String path) throws IOException;
+
+    /**
+     *
+     * Given a path to a resource, return true if this is an absolute path or false if not
+     *
+     * @param  path       The path to consider
+     * @return boolean    True if this is an absolute path and false if not
+     *
+     */
+    boolean isAbsolute(String path) throws IOException;
 }

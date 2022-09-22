@@ -87,7 +87,7 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
 
             }
             if (StringUtil.trimToNull(changeLogFile) != null) {
-                Scope.getCurrentScope().getUI().sendMessage("Generated changelog written to " + new File(changeLogFile).getAbsolutePath());
+                Scope.getCurrentScope().getUI().sendMessage("Generated changelog written to " + changeLogFile);
             }
         } finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);

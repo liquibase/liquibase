@@ -16,7 +16,7 @@ public class RollbackToDateSqlCommandStep extends AbstractCliWrapperCommandStep 
     public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> LABELS_ARG;
+    public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> ROLLBACK_SCRIPT_ARG;
     public static final CommandArgumentDefinition<LocalDateTime> DATE_ARG;
@@ -47,7 +47,8 @@ public class RollbackToDateSqlCommandStep extends AbstractCliWrapperCommandStep 
                 .build();
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
                 .description("The root changelog").build();
-        LABELS_ARG = builder.argument("labels", String.class)
+        LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
+                .addAlias("labels")
                 .description("Changeset labels to match").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Changeset contexts to match").build();

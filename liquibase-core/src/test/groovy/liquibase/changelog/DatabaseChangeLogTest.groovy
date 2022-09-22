@@ -223,14 +223,14 @@ create view sql_view as select * from sql_table;'''
         then:
         test1ChangeLog.getIncludeLabels().getLabels().size() == 1
         test1ChangeLog.getIncludeLabels().getLabels()[0] == "label1"
-        test1ChangeLog.getIncludeContexts().getContexts().size() == 1
-        test1ChangeLog.getIncludeContexts().getContexts()[0] == "context1"
+        test1ChangeLog.getIncludeContextFilter().getContexts().size() == 1
+        test1ChangeLog.getIncludeContextFilter().getContexts()[0] == "context1"
         test1ChangeLog.isIncludeIgnore() == false
 
         test2ChangeLog.getIncludeLabels().getLabels().size() == 1
         test2ChangeLog.getIncludeLabels().getLabels()[0] == "label2"
-        test2ChangeLog.getIncludeContexts().getContexts().size() == 1
-        test2ChangeLog.getIncludeContexts().getContexts()[0] == "context2"
+        test2ChangeLog.getIncludeContextFilter().getContexts().size() == 1
+        test2ChangeLog.getIncludeContextFilter().getContexts()[0] == "context2"
         test2ChangeLog.isIncludeIgnore() == true
 
     }
@@ -252,14 +252,14 @@ create view sql_view as select * from sql_table;'''
         then:
         test1ChangeLog.getIncludeLabels().getLabels().size() == 1
         test1ChangeLog.getIncludeLabels().getLabels()[0] == "label1"
-        test1ChangeLog.getIncludeContexts().getContexts().size() == 1
-        test1ChangeLog.getIncludeContexts().getContexts()[0] == "context1"
+        test1ChangeLog.getIncludeContextFilter().getContexts().size() == 1
+        test1ChangeLog.getIncludeContextFilter().getContexts()[0] == "context1"
         test1ChangeLog.isIncludeIgnore() == false
 
         test2ChangeLog.getIncludeLabels().getLabels().size() == 1
         test2ChangeLog.getIncludeLabels().getLabels()[0] == "label2"
-        test2ChangeLog.getIncludeContexts().getContexts().size() == 1
-        test2ChangeLog.getIncludeContexts().getContexts()[0] == "context2"
+        test2ChangeLog.getIncludeContextFilter().getContexts().size() == 1
+        test2ChangeLog.getIncludeContextFilter().getContexts()[0] == "context2"
         test2ChangeLog.isIncludeIgnore() == true
     }
 
@@ -300,7 +300,7 @@ create view sql_view as select * from sql_table;'''
         changeLogFile.includeAll("", true, { r -> r != changeLogFile.physicalFilePath}, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
 
         then:
-        resourceAccessor.callingPath == "com/example/children"
+        resourceAccessor.callingPath == "com/example/children/"
     }
 
     @Unroll("#featureName: #changeSets")

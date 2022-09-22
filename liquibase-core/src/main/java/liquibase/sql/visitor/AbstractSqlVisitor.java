@@ -17,7 +17,7 @@ import java.util.Set;
 public abstract class AbstractSqlVisitor implements SqlVisitor {
     private Set<String> applicableDbms;
     private boolean applyToRollback;
-    private ContextExpression contexts;
+    private ContextExpression contextFilter;
     private Labels labels;
 
     @Override
@@ -40,14 +40,30 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
         this.applyToRollback = applyToRollback;
     }
 
-    @Override
+    /**
+     * @deprecated use {@link #getContextFilter()}
+     */
+    @Deprecated
     public ContextExpression getContexts() {
-        return contexts;
+        return contextFilter;
+    }
+
+    /**
+     * @deprecated use {@link #setContextFilter(ContextExpression)}
+     */
+    @Deprecated
+    public void setContexts(ContextExpression contexts) {
+        this.contextFilter = contexts;
     }
 
     @Override
-    public void setContexts(ContextExpression contexts) {
-        this.contexts = contexts;
+    public ContextExpression getContextFilter() {
+        return contextFilter;
+    }
+
+    @Override
+    public void setContextFilter(ContextExpression contextFilter) {
+        this.contextFilter = contextFilter;
     }
 
     public Labels getLabels() {
@@ -105,8 +121,8 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
                    if (value != null) {
                        setApplyToRollback(value);
                    }
-               } else if ("context".equals(childNode.getName()) || "contexts".equals(childNode.getName())) {
-                   setContexts(new ContextExpression((String) childNode.getValue()));
+               } else if ("contextFilter".equals(childNode.getName()) || "context".equals(childNode.getName()) || "contexts".equals(childNode.getName())) {
+                   setContextFilter(new ContextExpression((String) childNode.getValue()));
                 } else  if (ObjectUtil.hasWriteProperty(this, childNode.getName())) {
                    Object value = childNode.getValue();
                    if (value != null) {

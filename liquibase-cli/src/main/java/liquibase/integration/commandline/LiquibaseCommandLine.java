@@ -358,9 +358,9 @@ public class LiquibaseCommandLine {
                             Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue().getAbsolutePath());
                         }
 
-                        final ConfiguredValue<File> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
+                        final ConfiguredValue<String> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
                         if (outputFile.found()) {
-                            Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue().getAbsolutePath());
+                            Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue());
                         }
 
                         if (response == 0) {
@@ -525,27 +525,32 @@ public class LiquibaseCommandLine {
             }
         }
 
-        final File defaultsFile = new File(defaultsFileConfig.getValue());
-        if (defaultsFile.exists()) {
-            final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsFile);
-            liquibaseConfiguration.registerProvider(fileProvider);
-            returnList.add(fileProvider);
+        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+        Resource resource = pathHandlerFactory.getResource(defaultsFileConfig.getValue());
+        if (resource.exists()) {
+            try (InputStream defaultsStream = resource.openInputStream()) {
+                if (defaultsStream != null) {
+                    final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File exists at path " + defaultsFileConfig.getValue());
+                    liquibaseConfiguration.registerProvider(fileProvider);
+                    returnList.add(fileProvider);
+                }
+            }
         } else {
-            final InputStream defaultsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
-            if (defaultsStream == null) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFile.getAbsolutePath());
+            InputStream inputStreamOnClasspath = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultsFileConfig.getValue());
+            if (inputStreamOnClasspath == null) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFileConfig.getValue());
                 if (!defaultsFileConfig.wasDefaultValueUsed()) {
-                    //can't use UI since it's not configured correctly yet
+                            //can't use UI since it's not configured correctly yet
                     System.err.println("Could not find defaults file " + defaultsFileConfig.getValue());
                 }
             } else {
-                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File in classpath " + defaultsFileConfig.getValue());
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(inputStreamOnClasspath, "File in classpath " + defaultsFileConfig.getValue());
                 liquibaseConfiguration.registerProvider(fileProvider);
                 returnList.add(fileProvider);
-
             }
         }
 
+        final File defaultsFile = new File(defaultsFileConfig.getValue());
         File localDefaultsFile = new File(defaultsFile.getAbsolutePath().replaceFirst(".properties$", ".local.properties"));
         if (localDefaultsFile.exists()) {
             final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(localDefaultsFile) {
@@ -1087,8 +1092,14 @@ public class LiquibaseCommandLine {
 
     protected static String[] toArgNames(CommandArgumentDefinition<?> def) {
         LinkedHashSet<String> returnList = new LinkedHashSet<>();
-        returnList.add("--" + StringUtil.toKabobCase(def.getName()).replace(".", "-"));
-        returnList.add("--" + def.getName().replaceAll("\\.", ""));
+        Set<String> baseNames = new HashSet<>();
+        baseNames.add(def.getName());
+        baseNames.addAll(def.getAliases());
+
+        for (String baseName : baseNames) {
+            returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
+            returnList.add("--" + baseName.replaceAll("\\.", ""));
+        }
 
         return returnList.toArray(new String[0]);
     }

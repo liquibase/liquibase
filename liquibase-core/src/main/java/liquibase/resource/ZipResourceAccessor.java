@@ -51,7 +51,7 @@ public class ZipResourceAccessor extends AbstractPathResourceAccessor {
 
     @Override
     public void close() throws Exception {
-        this.fileSystem.close();
+        //can't close the filesystem because they often get reused and/or are being used by other things
     }
 
     @Override
