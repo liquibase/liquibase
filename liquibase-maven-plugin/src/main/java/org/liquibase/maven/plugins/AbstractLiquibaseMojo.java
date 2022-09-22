@@ -893,16 +893,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     protected ClassLoader getMavenArtifactClassLoader() throws MojoExecutionException {
-        try {
-            return MavenUtils.getArtifactClassloader(project,
-                    includeArtifact,
-                    includeTestOutputDirectory,
-                    getClass(),
-                    getLog(),
-                    verbose);
-        } catch (MalformedURLException e) {
-            throw new MojoExecutionException("Failed to create artifact classloader", e);
-        }
+        return null;
+//        try {
+//            return MavenUtils.getArtifactClassloader(project,
+//                    includeArtifact,
+//                    includeTestOutputDirectory,
+//                    getClass(),
+//                    getLog(),
+//                    verbose);
+//        } catch (MalformedURLException e) {
+//            throw new MojoExecutionException("Failed to create artifact classloader", e);
+//        }
     }
 
     /**
@@ -926,9 +927,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
-        ResourceAccessor mFO = new MavenResourceAccessor(cl);
-        ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir());
-        return new SearchPathResourceAccessor(searchPath, mFO, fsFO);
+//        ResourceAccessor mFO = new MavenResourceAccessor(cl);
+//        ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir());
+//        return new SearchPathResourceAccessor(searchPath, mFO, fsFO);
+        return null;
     }
 
     /**
