@@ -214,6 +214,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         List<Change> inverses = new ArrayList<>();
 
         DropColumnChange inverse = new DropColumnChange();
+        inverse.setCatalogName(getCatalogName());
         inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
 

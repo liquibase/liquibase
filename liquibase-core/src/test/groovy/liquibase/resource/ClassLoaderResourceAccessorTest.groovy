@@ -71,6 +71,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
                 [
                         "com/example", true,
                         [
+                                "com/example/changelog.xml",
                                 "com/example/directory/file-in-directory.txt",
                                 "com/example/everywhere/file-everywhere.txt",
                                 "com/example/everywhere/other-file-everywhere.txt",
@@ -96,6 +97,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
                 [
                         "com/example", false,
                         [
+                                "com/example/changelog.xml",
                                 "com/example/file with space.txt",
                                 "com/example/my-logic.sql",
                                 "com/example/users.csv",
