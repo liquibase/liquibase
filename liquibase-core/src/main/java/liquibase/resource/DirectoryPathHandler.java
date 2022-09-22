@@ -49,12 +49,4 @@ public class DirectoryPathHandler extends AbstractPathHandler {
         }
         return Files.newOutputStream(path1, StandardOpenOption.CREATE_NEW);
     }
-
-    @Override
-    public boolean isAbsolute(String path) throws IOException {
-        if (path == null) {
-            return false;
-        }
-        return new File(path).isAbsolute();
-    }
 }

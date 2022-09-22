@@ -40,13 +40,4 @@ public interface PathHandler extends Plugin {
      */
     OutputStream createResource(String path) throws IOException;
 
-    /**
-     *
-     * Given a path to a resource, return true if this is an absolute path or false if not
-     *
-     * @param  path       The path to consider
-     * @return boolean    True if this is an absolute path and false if not
-     *
-     */
-    boolean isAbsolute(String path) throws IOException;
 }

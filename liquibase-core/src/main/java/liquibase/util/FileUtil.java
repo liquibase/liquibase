@@ -52,5 +52,11 @@ public class FileUtil {
         return message;
     }
 
+    public static boolean isAbsolute(String path) throws IOException {
+        if (path == null) {
+            return false;
+        }
+        return new File(path).isAbsolute();
+    }
 
 }

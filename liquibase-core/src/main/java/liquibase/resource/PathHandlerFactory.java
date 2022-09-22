@@ -147,20 +147,4 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
 
         }
     }
-
-    /**
-     *
-     * Given a path to a resource, return true if this is an absolute path or false if not
-     *
-     * @param  path       The path to consider
-     * @return boolean    True if this is an absolute path and false if not
-     *
-     */
-    public boolean isAbsolute(String path) throws IOException {
-        PathHandler plugin = getPlugin(path);
-        if (plugin == null) {
-            throw new IOException("Cannot parse resource location: '" + path + "'");
-        }
-        return plugin.isAbsolute(path);
-    }
 }
