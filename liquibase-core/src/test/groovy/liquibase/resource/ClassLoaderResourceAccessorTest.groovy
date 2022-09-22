@@ -5,6 +5,7 @@ import liquibase.util.StreamUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
+
 class ClassLoaderResourceAccessorTest extends Specification {
 
     def testResourceAccessor = new ClassLoaderResourceAccessor(new URLClassLoader(
