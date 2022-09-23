@@ -20,8 +20,9 @@ public class DropViewGenerator extends AbstractSqlGenerator<DropViewStatement> {
 
     @Override
     public Sql[] generateSql(DropViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        final String command = "DROP VIEW " + (statement.isIfExists() ? "IF EXISTS " : "");
         return new Sql[] {
-                new UnparsedSql("DROP VIEW " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()), getAffectedView(statement))
+                new UnparsedSql(command + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()), getAffectedView(statement))
         };
     }
 
