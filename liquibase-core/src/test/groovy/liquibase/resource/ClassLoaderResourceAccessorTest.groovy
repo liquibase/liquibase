@@ -109,6 +109,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
                 [
                         "com/example", false,
                         [
+                                "com/example/changelog.xml",
                                 "com/example/file with space.txt",
                                 "com/example/my-logic.sql",
                                 "com/example/users.csv",

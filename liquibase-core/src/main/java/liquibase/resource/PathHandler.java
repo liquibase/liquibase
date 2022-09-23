@@ -20,7 +20,7 @@ public interface PathHandler extends Plugin {
      * Parse the given path and return a {@link ResourceAccessor} for it.
      *
      * @throws IOException if the path is invalid
-     * @throws FileNotFoundException if hte path is valid but does not exist
+     * @throws FileNotFoundException if the path is valid but does not exist
      */
     ResourceAccessor getResourceAccessor(String root) throws IOException, FileNotFoundException;
 
