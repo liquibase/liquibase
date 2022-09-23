@@ -6,10 +6,11 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.AddForeignKeyConstraintGenerator;
+import liquibase.sqlgenerator.core.DropForeignKeyConstraintGenerator;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
+import liquibase.statement.core.DropForeignKeyConstraintStatement;
 
-public class BigQueryAddForeignKeyConstraintGenerator extends AddForeignKeyConstraintGenerator {
+public class BigQueryDropForeignKeyConstraintGenerator extends DropForeignKeyConstraintGenerator {
 
     @Override
     public int getPriority() {
@@ -17,12 +18,12 @@ public class BigQueryAddForeignKeyConstraintGenerator extends AddForeignKeyConst
     }
 
     @Override
-    public boolean supports(AddForeignKeyConstraintStatement statement, Database database) {
+    public boolean supports(DropForeignKeyConstraintStatement statement, Database database) {
         return database instanceof BigqueryDatabase;
     }
 
     @Override
-    public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(DropForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql = "SELECT 1";
         return new Sql[]{
                 new UnparsedSql(sql, getAffectedForeignKey(statement))

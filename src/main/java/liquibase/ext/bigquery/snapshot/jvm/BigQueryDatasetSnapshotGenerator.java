@@ -16,12 +16,12 @@ import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BigQueryDatasetSnapshotGenerator extends SchemaSnapshotGenerator {
+
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         int priority = super.getPriority(objectType, database);
@@ -37,27 +37,10 @@ public class BigQueryDatasetSnapshotGenerator extends SchemaSnapshotGenerator {
 
         ResultSet schemas = null;
         try {
-            System.out.println("Getting BigQuery datasets");
-            System.out.println("Default catalog name: "+database.getDefaultCatalogName());
-            System.out.println("Default schema: "+database.getDefaultSchemaName());
             schemas = ((JdbcConnection) database.getConnection()).getMetaData()
-                    .getSchemas(
-                            database.getDefaultCatalogName(),
-                            null //database.getDefaultSchemaName()
-                    );
+                    .getSchemas(database.getDefaultCatalogName(), null);
 
-            ResultSetMetaData rsmd = schemas.getMetaData();
-            int columnCount = rsmd.getColumnCount();
-
-            for (int i = 1; i <= columnCount; i++ ) {
-                String name = rsmd.getColumnName(i);
-                System.out.println(name);
-                // Do stuff with name
-            }
-
-            int j = 0;
             while (schemas.next()) {
-                System.out.println(j+" "+schemas.getString("TABLE_CATALOG")+" "+schemas.getString("TABLE_SCHEM"));
                 returnList.add(JdbcUtils.getValueForColumn(schemas, "TABLE_SCHEM", database));
             }
         } finally {
@@ -69,11 +52,12 @@ public class BigQueryDatasetSnapshotGenerator extends SchemaSnapshotGenerator {
         return returnList.toArray(new String[returnList.size()]);
     }
 
-@Override
+    @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         Schema match = null;
-        String catalogName = ((Schema)example).getCatalogName();
+
+        String catalogName = ((Schema) example).getCatalogName();
         String schemaName = example.getName();
         if (database.supportsSchemas()) {
             if (catalogName == null) {
@@ -93,45 +77,41 @@ public class BigQueryDatasetSnapshotGenerator extends SchemaSnapshotGenerator {
             schemaName = null;
         }
 
-        DatabaseObject example1 = new Schema(catalogName, schemaName);
+        Schema example1 = new Schema(catalogName, schemaName);
         ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
 
         try {
             if (database.supportsSchemas()) {
-                String[] var8 = this.getDatabaseSchemaNames(database);
-                int var9 = var8.length;
+                String[] schemaNames = this.getDatabaseSchemaNames(database);
 
-                for(int var10 = 0; var10 < var9; ++var10) {
-                    String tableSchema = var8[var10];
+                for (String tableSchema : schemaNames) {
                     CatalogAndSchema schemaFromJdbcInfo = this.toCatalogAndSchema(tableSchema, database);
                     Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
                     Schema schema = new Schema(catalog, tableSchema);
                     if (DatabaseObjectComparatorFactory.getInstance().isSameObject(schema, example1, snapshot.getSchemaComparisons(), database)) {
                         if (match != null) {
-                            throw new InvalidExampleException("Found multiple catalog/schemas matching " + ((Schema)example).getCatalogName() + "." + example.getName());
+                            throw new InvalidExampleException("Found multiple catalog/schemas matching " + ((Schema) example).getCatalogName() + "." + example.getName());
                         }
 
                         match = schema;
                     }
                 }
-            } else if (((Schema)example1).getCatalog().isDefault()) {
-                match = new Schema(((Schema)example1).getCatalog(), catalogName);
+            } else if (example1.getCatalog().isDefault()) {
+                match = new Schema(example1.getCatalog(), catalogName);
             } else {
-                Catalog catalog = ((Schema)example1).getCatalog();
+                Catalog catalog = example1.getCatalog();
                 String[] dbCatalogNames = this.getDatabaseCatalogNames(database);
-                String[] var23 = dbCatalogNames;
-                int var24 = dbCatalogNames.length;
 
-                for(int var25 = 0; var25 < var24; ++var25) {
-                    String candidateCatalogName = var23[var25];
+                for (int i = 0; i < dbCatalogNames.length; ++i) {
+                    String candidateCatalogName = dbCatalogNames[i];
                     if (catalog.equals(new Catalog(candidateCatalogName))) {
                         match = new Schema(catalog, catalogName);
                     }
                 }
             }
-        } catch (SQLException var18) {
-            throw new DatabaseException(var18);
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
         } finally {
             database.setObjectQuotingStrategy(currentStrategy);
         }

@@ -25,7 +25,7 @@ public class BigqueryExecutor extends JdbcExecutor {
 
     @Override
     public void execute(SqlStatement sql) throws DatabaseException {
-        super.execute(sql);
+       super.execute(sql);
     }
 
     @Override

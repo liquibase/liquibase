@@ -105,7 +105,17 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsRestrictForeignKeys() {
-        return true;
+        return false;
+    }
+
+    @Override
+    public boolean supportsPrimaryKeyNames() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsNotNullConstraintNames() {
+        return false;
     }
 
     private String getDefaultDataset() {
@@ -150,10 +160,11 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
             return null;
         }
     }
+
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = schema.customize(this);
-        String definition = (String)((ExecutorService) Scope.getCurrentScope().getSingleton(ExecutorService.class))
+        String definition = (String) ((ExecutorService) Scope.getCurrentScope().getSingleton(ExecutorService.class))
                 .getExecutor("jdbc", this)
                 .queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         Scope.getCurrentScope().getLog(this.getClass()).info("getViewDefinition "+definition);

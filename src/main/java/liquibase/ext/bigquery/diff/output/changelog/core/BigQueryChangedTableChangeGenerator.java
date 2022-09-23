@@ -15,20 +15,21 @@ import liquibase.structure.core.Table;
 
 public class BigQueryChangedTableChangeGenerator extends ChangedTableChangeGenerator {
 
-    public BigQueryChangedTableChangeGenerator(){}
+    public BigQueryChangedTableChangeGenerator() {
+    }
 
-        @Override
-        public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-            int priority = super.getPriority(objectType, database);
-            if (database instanceof BigqueryDatabase) {
-                priority += PRIORITY_DATABASE;
-            }
-            return priority;
+    @Override
+    public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+        int priority = super.getPriority(objectType, database);
+        if (database instanceof BigqueryDatabase) {
+            priority += PRIORITY_DATABASE;
         }
+        return priority;
+    }
 
-        @Override
+    @Override
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
-        Table table = (Table)changedObject;
+        Table table = (Table) changedObject;
         Difference changedRemarks = differences.getDifference("remarks");
         if (changedRemarks != null) {
             SetTableRemarksChange change = new SetTableRemarksChange();
@@ -54,4 +55,4 @@ public class BigQueryChangedTableChangeGenerator extends ChangedTableChangeGener
     }
 
 
-    }
+}

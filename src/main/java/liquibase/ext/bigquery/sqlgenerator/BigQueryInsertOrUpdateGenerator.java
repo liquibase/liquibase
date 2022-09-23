@@ -1,8 +1,6 @@
 package liquibase.ext.bigquery.sqlgenerator;
 
-
 import java.util.Date;
-import java.util.Iterator;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.ext.bigquery.database.BigqueryDatabase;
@@ -56,6 +54,9 @@ public class BigQueryInsertOrUpdateGenerator extends InsertOrUpdateGenerator {
 
     @Override
     protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
+        if (whereClause == null || "".equals(whereClause)) {
+            whereClause = "WHERE 1 = 1";
+        }
         return "MERGE INTO " + insertOrUpdateStatement.getTableName() + " USING (SELECT 1) ON " + whereClause + " WHEN NOT MATCHED THEN ";
     }
 

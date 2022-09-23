@@ -25,21 +25,20 @@ public class StringDataTypeBigQuery extends LiquibaseDataType {
     }
 
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if(database instanceof BigqueryDatabase){
+        if (database instanceof BigqueryDatabase) {
 
-            BigqueryDatabase bqd = (BigqueryDatabase) database;
-            DatabaseDataType type =  new DatabaseDataType("STRING", this.getParameters());
-            if(this.getParameters().length==0 ){
+            DatabaseDataType type = new DatabaseDataType("STRING", this.getParameters());
+            if (this.getParameters().length == 0) {
                 type.setType("STRING");
-            }else{
+            } else {
                 String firstParameter = String.valueOf(this.getParameters()[0]);
-                Integer stringSize = Integer.valueOf(firstParameter);
-                if(stringSize==65535){
+                int stringSize = Integer.parseInt(firstParameter);
+                if (stringSize == 65535) {
                     type.setType("STRING");
                 }
             }
             return type;
-        }else{
+        } else {
             return super.toDatabaseDataType(database);
         }
 

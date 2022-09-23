@@ -15,6 +15,9 @@ import liquibase.ext.bigquery.database.BigqueryDatabase;
         priority = 1
 )
 public class BignumericDataTypeBigQuery extends LiquibaseDataType {
+
+    private final static String BIGNUMERIC = "BIGNUMERIC";
+
     public BignumericDataTypeBigQuery() {
     }
 
@@ -23,19 +26,18 @@ public class BignumericDataTypeBigQuery extends LiquibaseDataType {
     }
 
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if(database instanceof BigqueryDatabase){
+        if (database instanceof BigqueryDatabase) {
 
-            BigqueryDatabase bqd = (BigqueryDatabase) database;
-            DatabaseDataType type =  new DatabaseDataType("BIGNUMERIC", this.getParameters());
-            if(this.getParameters().length>0){
+            DatabaseDataType type = new DatabaseDataType(BIGNUMERIC, this.getParameters());
+            if (this.getParameters().length > 0) {
                 String firstParameter = String.valueOf(this.getParameters()[0]);
-                Integer typePrecision = Integer.valueOf(firstParameter);
-                if(typePrecision==77){
-                    type.setType("BIGNUMERIC");
+                int typePrecision = Integer.parseInt(firstParameter);
+                if (typePrecision == 77) {
+                    type.setType(BIGNUMERIC);
                 }
             }
             return type;
-        }else{
+        } else {
             return super.toDatabaseDataType(database);
         }
 

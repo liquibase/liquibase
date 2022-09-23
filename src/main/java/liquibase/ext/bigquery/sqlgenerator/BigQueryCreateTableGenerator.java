@@ -1,6 +1,5 @@
 package liquibase.ext.bigquery.sqlgenerator;
 
-import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DatabaseDataType;
@@ -45,7 +44,7 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
 
         String column;
         while (columnIterator.hasNext()) {
-            column = (String) columnIterator.next();
+            column = columnIterator.next();
             DatabaseDataType columnType = null;
             if (statement.getColumnTypes().get(column) != null) {
                 columnType = ((LiquibaseDataType) statement.getColumnTypes().get(column)).toDatabaseDataType(database);

@@ -25,13 +25,12 @@ public class BoolDataTypeBigQuery extends LiquibaseDataType {
     }
 
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if(database instanceof BigqueryDatabase){
+        if (database instanceof BigqueryDatabase) {
 
-            BigqueryDatabase bqd = (BigqueryDatabase) database;
-            DatabaseDataType type =  new DatabaseDataType("BOOL", this.getParameters());
+            DatabaseDataType type = new DatabaseDataType("BOOL", this.getParameters());
             type.setType("BOOL");
             return type;
-        }else{
+        } else {
             return super.toDatabaseDataType(database);
         }
 

@@ -25,13 +25,12 @@ public class GeographyDataTypeBigQuery extends LiquibaseDataType {
     }
 
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if(database instanceof BigqueryDatabase){
+        if (database instanceof BigqueryDatabase) {
 
-            BigqueryDatabase bqd = (BigqueryDatabase) database;
-            DatabaseDataType type =  new DatabaseDataType("GEOGRAPHY", this.getParameters());
+            DatabaseDataType type = new DatabaseDataType("GEOGRAPHY", this.getParameters());
             type.setType("GEOGRAPHY");
             return type;
-        }else{
+        } else {
             return super.toDatabaseDataType(database);
         }
 

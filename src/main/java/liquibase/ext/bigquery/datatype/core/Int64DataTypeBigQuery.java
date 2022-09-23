@@ -25,13 +25,12 @@ public class Int64DataTypeBigQuery extends LiquibaseDataType {
     }
 
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if(database instanceof BigqueryDatabase){
+        if (database instanceof BigqueryDatabase) {
 
-            BigqueryDatabase bqd = (BigqueryDatabase) database;
-            DatabaseDataType type =  new DatabaseDataType("INT64", this.getParameters());
+            DatabaseDataType type = new DatabaseDataType("INT64", this.getParameters());
             type.setType("INT64");
             return type;
-        }else{
+        } else {
             return super.toDatabaseDataType(database);
         }
 
