@@ -7,6 +7,7 @@ liquibase.ext.bigquery.sqlgenerator.BigqueryCreateDatabaseChangeLogLockTableGene
 liquibase.ext.bigquery.sqlgenerator.BigqueryCreateDatabaseChangeLogTableGenerator
 liquibase.ext.bigquery.sqlgenerator.BigqueryDeleteGenerator
 liquibase.ext.bigquery.sqlgenerator.BigQueryCreateTableGenerator
+liquibase.ext.bigquery.sqlgenerator.BigQueryModifyDataTypeGenerator
 liquibase.ext.bigquery.sqlgenerator.BigQueryRenameTableGenerator
 liquibase.ext.bigquery.sqlgenerator.BigQueryRenameViewGenerator
 liquibase.ext.bigquery.sqlgenerator.BigQuerySetNullableGenerator
