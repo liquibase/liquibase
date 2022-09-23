@@ -2,8 +2,8 @@ package liquibase.dbdoc;
 
 import liquibase.change.Change;
 import liquibase.database.Database;
+import liquibase.resource.Resource;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
@@ -11,8 +11,8 @@ import java.util.List;
 public class ColumnWriter extends HTMLWriter {
 
 
-    public ColumnWriter(File rootOutputDir, Database database) {
-        super(new File(rootOutputDir, "columns"), database);
+    public ColumnWriter(Resource rootOutputDir, Database database) {
+        super(rootOutputDir.resolve("columns"), database);
     }
 
     @Override
