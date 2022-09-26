@@ -28,10 +28,10 @@ public class ChangelogRewriter {
         //
         // Make changes to the changelog file
         //
-        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-        SortedSet<Resource> list = null;
+        final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+
         try {
-            Resource resource = pathHandlerFactory.getResource(changeLogFile, true);
+            Resource resource = resourceAccessor.get(changeLogFile);
             String changeLogString;
             String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
@@ -109,9 +109,9 @@ public class ChangelogRewriter {
         //
         // Make changes to the changelog file
         //
-        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+        final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         try {
-            Resource resource = pathHandlerFactory.getResource(changeLogFile, true);
+            Resource resource = resourceAccessor.get(changeLogFile);
             InputStream is = resource.openInputStream();
             String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
             String changeLogString = StreamUtil.readStreamAsString(is, encoding);

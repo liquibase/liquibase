@@ -91,26 +91,6 @@ class DirectoryPathHandlerTest extends Specification {
         def e = thrown(FileAlreadyExistsException)
     }
 
-    @Requires({ System.getProperty("os.name").toLowerCase().contains("win") })
-    @Unroll
-    def "isAbsolute (Windows): #input"() {
-        expect:
-        new DirectoryPathHandler().isAbsolute(input) == expected
-
-        where:
-        input                       | expected
-        null                        | false
-        "simple"                    | false
-        "with/path"                 | false
-        "with\\path"                | false
-        "c:\\windows\\path"         | true
-        "c:/windows/path"           | true
-        "/c:/windows/path"          | true
-        "D:\\windows\\path"         | true
-        "file:/tmp/liquibase.xml"   | false
-        "file:///tmp/liquibase.xml" | false
-    }
-
     @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("win") })
     @Unroll
     def "isAbsolute (Linux): #input"() {

@@ -60,7 +60,7 @@ public class InternalExecuteSqlCommandStep extends AbstractCommandStep {
             sqlText = sql;
         } else {
             final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-            Resource resource = pathHandlerFactory.getResource(sqlFile, true);
+            Resource resource = pathHandlerFactory.getResource(sqlFile);
             if (!resource.exists()){
                 throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
             }

@@ -1,7 +1,5 @@
 package liquibase.resource;
 
-import liquibase.Scope;
-
 import java.io.*;
 import java.nio.file.*;
 
@@ -50,13 +48,5 @@ public class DirectoryPathHandler extends AbstractPathHandler {
             Files.createDirectories(parent);
         }
         return Files.newOutputStream(path1, StandardOpenOption.CREATE_NEW);
-    }
-
-    @Override
-    public boolean isAbsolute(String path) throws IOException {
-        if (path == null) {
-            return false;
-        }
-        return new File(path).isAbsolute();
     }
 }
