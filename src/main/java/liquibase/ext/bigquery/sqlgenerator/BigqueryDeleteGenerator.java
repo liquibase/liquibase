@@ -29,7 +29,7 @@ public class BigqueryDeleteGenerator extends DeleteGenerator {
         }
         // bigquery Each time you construct a DELETE statement, you must use the WHERE keyword, followed by a condition.
         else {
-            sql.append(" WHERE 1=1");
+            sql.append(" WHERE 1 = 1");
         }
 
         return new Sql[]{new UnparsedSql(sql.toString(), getAffectedTable(statement))};

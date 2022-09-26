@@ -6,5 +6,5 @@ context: testContext
 databasesUnderTest:
   - name: bigquery
     version:
-    url: jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=lolejniczakdatabricksdemo;DefaultDataset=lharness;OAuthType=0;OAuthServiceAcctEmail=sa-liquibase@lolejniczakdatabricksdemo.iam.gserviceaccount.com;OAuthPvtKeyPath=/Users/lolejniczak/Downloads/lolejniczakdatabricksdemo-51f56a38cd69.p12;
-    dbSchema: lharness
+    url: jdbc:bigquery://https://www.googleapis.com/bigquery/v2:443;ProjectId=gh-integration-tests;DefaultDataset=harness_test_ds;OAuthType=3;timeout=3600;
+    dbSchema: harness_test_ds

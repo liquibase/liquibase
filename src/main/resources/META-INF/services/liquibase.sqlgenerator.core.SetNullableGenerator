@@ -1,1 +1,1 @@
-liquibase.ext.bigquery.database.BigQuerySetNullableGenerator
+liquibase.ext.bigquery.sqlgenerator.BigQuerySetNullableGenerator

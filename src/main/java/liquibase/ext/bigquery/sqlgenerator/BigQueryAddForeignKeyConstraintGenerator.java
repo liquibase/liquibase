@@ -23,12 +23,7 @@ public class BigQueryAddForeignKeyConstraintGenerator extends AddForeignKeyConst
 
     @Override
     public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        if (!supports(statement, database)) {
-            return sqlGeneratorChain.generateSql(statement, database);
-        }
-        String sql;
-        sql = "";
-
+        String sql = "SELECT 1";
         return new Sql[]{
                 new UnparsedSql(sql, getAffectedForeignKey(statement))
         };

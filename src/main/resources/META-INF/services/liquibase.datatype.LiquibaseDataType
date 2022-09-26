@@ -1,0 +1,7 @@
+liquibase.ext.bigquery.datatype.core.StringDataTypeBigQuery
+liquibase.ext.bigquery.datatype.core.GeographyDataTypeBigQuery
+liquibase.ext.bigquery.datatype.core.Float64DataTypeBigQuery
+liquibase.ext.bigquery.datatype.core.BoolDataTypeBigQuery
+liquibase.ext.bigquery.datatype.core.Int64DataTypeBigQuery
+liquibase.ext.bigquery.datatype.core.NumberDataTypeBigQuery
+liquibase.ext.bigquery.datatype.core.BignumericDataTypeBigQuery

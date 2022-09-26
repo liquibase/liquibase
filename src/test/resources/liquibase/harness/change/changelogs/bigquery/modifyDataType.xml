@@ -15,8 +15,9 @@
     </changeSet>
     <changeSet id="2" author="as">
         <modifyDataType  columnName="intColumn"
-                         newDataType="string(50)"
+                         newDataType="numeric"
                          tableName="modify_data_type_test"/>
+        <!-- bigquery requires that the existing column type (INT64) is assignable to the new type(NUMERIC) - for STRING it is not -->
         <rollback/>
     </changeSet>
 </databaseChangeLog>

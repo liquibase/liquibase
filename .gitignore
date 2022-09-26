@@ -4,8 +4,13 @@
 derby.log
 liquibase-bigquery.iml
 src/test/java/BigqueryIT.java
-src/test/resources/*.json
-src/main/resources/*.json
+src/test/resources/ewojtach*.json
+src/main/resources/ewojtach*.json
 src/main/resources/liquibase.properties
 ewojtach*.json
 /src/main/resources/lolejniczakdatabricksdemo-5d5e0af44293.p12
+src/test/resources/terraform/.terraform*
+src/test/resources/terraform/terraform*
+src/test/resources/terraform/.terraform/*
+gha-creds-*.json
+src/test/resources/harness-config.yml

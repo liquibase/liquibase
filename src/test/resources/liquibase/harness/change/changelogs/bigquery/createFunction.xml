@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet author="as" id="1">
+        <pro:createFunction
+                encoding="UTF-8"
+                functionName="test_function">CREATE OR REPLACE FUNCTION test_function(x INT64, y INT64)
+            RETURNS FLOAT64
+            AS (
+            (x + 4) / y
+            );
+        </pro:createFunction>
+        <rollback>
+            <pro:dropFunction functionName="test_function()"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
