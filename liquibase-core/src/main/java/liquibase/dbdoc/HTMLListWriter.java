@@ -35,7 +35,7 @@ public class HTMLListWriter {
             fileWriter.append("</B></FONT>\n" + "<BR>\n" + "<TABLE BORDER=\"0\" WIDTH=\"100%\" SUMMARY=\"\">" + "<TR>\n" + "<TD NOWRAP><FONT CLASS=\"FrameItemFont\">");
 
             String currentSchema = null;
-            if (objects.first().getClass() == Table.class) {
+            if (objects.size() > 0 && objects.first().getClass() == Table.class) {
                 currentSchema = ((Table )objects.first()).getAttribute("schema", new Schema()).toString();
                 fileWriter.append("<div class='schema-name'>" + currentSchema + "</i></b></div>");
             }
