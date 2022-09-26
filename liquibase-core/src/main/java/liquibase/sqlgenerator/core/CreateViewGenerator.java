@@ -101,7 +101,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                 // 1) It is already in the SQL
                 // 2) The DB2 version is < 10.5
                 //
-                if (!(viewDefinition.contains("or") && viewDefinition.contains("replace"))) {
+                if (!statement.getSelectQuery().toUpperCase().contains("OR REPLACE")) {
                     viewDefinition.replace("CREATE", "CREATE OR REPLACE");
                 }
             }
