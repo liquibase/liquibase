@@ -3,6 +3,7 @@ package liquibase.integration.commandline;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.CommonArgumentNames;
+import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.MissingRequiredArgumentException;
 import liquibase.util.StringUtil;
@@ -44,6 +45,13 @@ class CommandRunner implements Callable<CommandResults> {
 
         try {
             if (outputFile != null) {
+                File parentOutputFile = outputFile.getParentFile();
+                if (parentOutputFile != null) {
+                    boolean mkdirs = parentOutputFile.mkdirs();
+                    if (!mkdirs) {
+                        throw new CommandExecutionException("Failed to create directories for output file.");
+                    }
+                }
                 outputStream = new FileOutputStream(outputFile);
                 commandScope.setOutput(outputStream);
             }
