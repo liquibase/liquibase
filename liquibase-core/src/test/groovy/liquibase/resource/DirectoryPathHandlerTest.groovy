@@ -3,6 +3,8 @@ package liquibase.resource
 import liquibase.util.StreamUtil
 import liquibase.util.StringUtil
 import org.hsqldb.types.Charset
+import spock.lang.IgnoreIf
+import spock.lang.Requires
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -40,7 +42,7 @@ class DirectoryPathHandlerTest extends Specification {
 
     def "getResource when does not exist"() {
         expect:
-        new DirectoryPathHandler().getResource("/invalid/file/path.txt") == null
+        !new DirectoryPathHandler().getResource("/invalid/file/path.txt").exists()
     }
 
     @Unroll
@@ -87,5 +89,39 @@ class DirectoryPathHandlerTest extends Specification {
 
         then:
         def e = thrown(FileAlreadyExistsException)
+    }
+
+    @Requires({ System.getProperty("os.name").toLowerCase().contains("win") })
+    @Unroll
+    def "isAbsolute (Windows): #input"() {
+        expect:
+        new DirectoryPathHandler().isAbsolute(input) == expected
+
+        where:
+        input                       | expected
+        null                        | false
+        "simple"                    | false
+        "with/path"                 | false
+        "with\\path"                | false
+        "c:\\windows\\path"         | true
+        "c:/windows/path"           | true
+        "/c:/windows/path"          | true
+        "D:\\windows\\path"         | true
+        "file:/tmp/liquibase.xml"   | false
+        "file:///tmp/liquibase.xml" | false
+    }
+
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("win") })
+    @Unroll
+    def "isAbsolute (Linux): #input"() {
+        expect:
+        new DirectoryPathHandler().isAbsolute(input) == expected
+
+        where:
+        input                       | expected
+        null                        | false
+        "simple"                    | false
+        "with/path"                 | false
+        "/etc/config"               | true
     }
 }

@@ -17,7 +17,11 @@ public abstract class AbstractResource implements Resource {
                 .replaceFirst("^classpath\\*?:", "")
                 .replaceFirst("^/", "");
 
-        this.uri = uri.normalize();
+        if (uri != null) {
+            this.uri = uri.normalize();
+        } else {
+            this.uri = null;
+        }
     }
 
     @Override
@@ -36,7 +40,7 @@ public abstract class AbstractResource implements Resource {
     }
 
     @Override
-    public OutputStream openOutputStream() throws IOException {
+    public OutputStream openOutputStream(boolean createIfNeeded) throws IOException {
         if (!isWritable()) {
             throw new IOException("Read only");
         }
@@ -59,5 +63,26 @@ public abstract class AbstractResource implements Resource {
             return false;
         }
         return this.getUri().equals(((Resource) obj).getUri());
+    }
+
+    /**
+     * Convenience method for computing the relative path in {@link #resolve(String)} implementations
+     */
+    protected String resolvePath(String other) {
+        if (getPath().endsWith("/")) {
+            return getPath() + other;
+        }
+        return getPath() + "/" + other;
+    }
+
+    /**
+     * Convenience method for computing the relative path in {@link #resolveSibling(String)} implementations.
+     */
+    protected String resolveSiblingPath(String other) {
+        if (getPath().contains("/")) {
+            return getPath().replaceFirst("/[^/]*$", "") + "/" + other;
+        } else {
+            return "/" + other;
+        }
     }
 }

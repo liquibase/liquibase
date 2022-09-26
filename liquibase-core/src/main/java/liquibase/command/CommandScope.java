@@ -201,6 +201,7 @@ public class CommandScope {
 
         return new ConfigurationDefinition.Builder(key)
                 .define(argument.getName(), argument.getDataType())
+                .addAliases(argument.getAliases())
                 .setDefaultValue(argument.getDefaultValue())
                 .setDescription(argument.getDescription())
                 .setValueHandler(argument.getValueConverter())

@@ -23,7 +23,7 @@ public class LiquibaseUnexpectedChangeSetsMojo extends AbstractLiquibaseChangeLo
     protected void performLiquibaseTask(Liquibase liquibase)
         throws LiquibaseException {
         try {
-            liquibase.reportUnexpectedChangeSets(true, new Contexts(contexts), new LabelExpression((labels)), new OutputStreamWriter(System.out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+            liquibase.reportUnexpectedChangeSets(true, new Contexts(contexts), new LabelExpression((getLabelFilter())), new OutputStreamWriter(System.out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
         }
         catch (UnsupportedEncodingException e) {
             throw new UnexpectedLiquibaseException(e);

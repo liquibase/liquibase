@@ -27,11 +27,15 @@ public class ZipPathHandler extends AbstractPathHandler {
             return PRIORITY_SPECIALIZED;
         }
 
+        if (root.startsWith("jar:") && root.endsWith("!/")) { //only can handle `jar:` urls for the entire jar
+            return PRIORITY_SPECIALIZED;
+        }
+
         return PRIORITY_NOT_APPLICABLE;
     }
 
     public ResourceAccessor getResourceAccessor(String root) throws FileNotFoundException {
-        root = root.replace("jar:", "");
+        root = root.replace("jar:", "").replace("!/", "");
 
         if (root.matches("^\\w\\w+:.*")) {
             return new ZipResourceAccessor(Paths.get(URI.create(root)));
@@ -41,11 +45,7 @@ public class ZipPathHandler extends AbstractPathHandler {
 
     @Override
     public Resource getResource(String path) throws IOException {
-        Path pathObj = Paths.get(path);
-        if (!pathObj.toFile().exists()) {
-            return null;
-        }
-        return new PathResource(path, pathObj);
+        return new PathResource(path, Paths.get(path));
     }
 
     @Override

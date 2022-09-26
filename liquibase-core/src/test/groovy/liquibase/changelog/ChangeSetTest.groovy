@@ -416,17 +416,17 @@ public class ChangeSetTest extends Specification {
         changeSet.sqlVisitors.size() == 3
         assert ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).applyToRollback
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).applicableDbms == null
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).contexts == null
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).contextFilter == null
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).replace == "a"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).with == "b"
 
         that(((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).contexts.toString() == "live, test"
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).contextFilter.toString() == "live, test"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).replace == "x1"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).with == "y1"
 
         that(((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).contexts.toString() == "live, test"
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).contextFilter.toString() == "live, test"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).replace == "x2"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).with == "y2"
     }
