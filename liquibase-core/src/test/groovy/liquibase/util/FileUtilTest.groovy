@@ -1,6 +1,7 @@
 package liquibase.util
 
 import liquibase.resource.DirectoryPathHandler
+import spock.lang.IgnoreIf
 import spock.lang.Requires
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -55,5 +56,18 @@ class FileUtilTest extends Specification {
         "file:///tmp/liquibase.xml" | false
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("win") })
+    @Unroll
+    def "isAbsolute (Linux): #input"() {
+        expect:
+        FileUtil.isAbsolute(input) == expected
+
+        where:
+        input                       | expected
+        null                        | false
+        "simple"                    | false
+        "with/path"                 | false
+        "/etc/config"               | true
+    }
 
 }

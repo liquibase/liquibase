@@ -90,18 +90,4 @@ class DirectoryPathHandlerTest extends Specification {
         then:
         def e = thrown(FileAlreadyExistsException)
     }
-
-    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("win") })
-    @Unroll
-    def "isAbsolute (Linux): #input"() {
-        expect:
-        new DirectoryPathHandler().isAbsolute(input) == expected
-
-        where:
-        input                       | expected
-        null                        | false
-        "simple"                    | false
-        "with/path"                 | false
-        "/etc/config"               | true
-    }
 }
