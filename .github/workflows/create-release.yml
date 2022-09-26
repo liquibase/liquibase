@@ -14,6 +14,7 @@ jobs:
     name: Setup
     runs-on: ubuntu-latest
     outputs:
+    outputs:
       version: ${{ steps.collect-data.outputs.version }}
       branch: ${{ steps.collect-data.outputs.branch }}
     steps:
@@ -43,49 +44,67 @@ jobs:
           path: download/repo/liquibase-pro
           token: ${{ secrets.BOT_TOKEN }}
 
-
-      - name: Download liquibase-artifacts
+      - name: Download liquibase-core artifacts
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
           workflow: build.yml
           workflow_conclusion: success
           branch: ${{ needs.setup.outputs.branch }}
-          name: liquibase-artifacts
-          path: download/liquibase-artifacts
+          name: liquibase-core-artifacts
+          path: download/liquibase-core
+
+      - name: Download liquibase-commercial artifacts
+        uses: liquibase/action-download-artifact@v2-liquibase
+        with:
+          github_token: ${{ secrets.BOT_TOKEN }}
+          workflow: build.yml
+          workflow_conclusion: success
+          branch: ${{ needs.setup.outputs.branch }}
+          name: liquibase-commercial-artifacts
+          path: download/liquibase-commercial
+          repo: liquibase/liquibase-pro
 
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '8'
-          distribution: 'adopt'
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Re-version Artifacts
+      - name: Re-version LB Core Artifacts
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          .github/util/re-version.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}"
+          .github/util/sign-artifacts.sh re-version/final
+          (cd download/liquibase-core && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
+          mvn -B liquibase-sdk:create-release-artifacts -Dliquibase.sdk.repo=${{ github.repository }} -Dliquibase.sdk.inputDirectory=download/liquibase-core -Dliquibase.sdk.outputDirectory=re-version/final -Dliquibase.sdk.newVersion=${{ needs.setup.outputs.version }} -Dliquibase.sdk.gpgExecutable=/usr/bin/gpg -X
 
-          ##Sign Files
-          .github/util/sign-artifacts.sh re-version/out
-
-          mkdir re-version/final
-          mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
-          mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
-          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
-          mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
-
-          (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
-          mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
-
-      - name: Cache Completed Artifacts
+      - name: Cache Completed Core Artifacts
         uses: actions/cache@v3.0.8
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
+
+
+      - name: Re-version LB Commercial Artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          .github/util/sign-artifacts.sh re-version/final-commercial
+          # (cd download/liquibase-commercial && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
+          mvn -B liquibase-sdk:create-release-artifacts -Dliquibase.sdk.repo=${{ github.repository }} -Dliquibase.sdk.inputDirectory=download/liquibase-artifacts -Dliquibase.sdk.outputDirectory=re-version/final-commercial -Dliquibase.sdk.newVersion=${{ needs.setup.outputs.version }} -Dliquibase.sdk.gpgExecutable=/usr/bin/gpg -X
+
+      - name: Cache Completed Commercial Artifacts
+        uses: actions/cache@v3.0.8
+        with:
+          key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
+          path: re-version/final-commercial
 
       - name: Set repository tags
         run: |
@@ -104,7 +123,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Restore Completed Artifacts
+      - name: Restore Completed Core Artifacts
         uses: actions/cache@v3.0.8
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
@@ -113,8 +132,9 @@ jobs:
       - name: Set up JDK for GPG
         uses: actions/setup-java@v3
         with:
-          java-version: '8'
-          distribution: 'adopt'
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
