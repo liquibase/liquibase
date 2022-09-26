@@ -149,7 +149,7 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
                 statement.getTableName()));
 
         if (result.getNumComputedCols() > 0)
-            buffer.append("COMPUTED BY ");
+            buffer.append(" COMPUTED BY ");
 
         buffer.append(String.format("(%s)", result.getColumnExpression()));
 
