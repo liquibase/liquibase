@@ -76,9 +76,11 @@ public class DatabaseUtils {
                 }
                 executor.execute(new RawSqlStatement("USE " + schema));
             } else if (database instanceof MSSQLDatabase) {
-                executor.execute(new RawSqlStatement("USE " + defaultCatalogName));
+                    defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+                    if (defaultCatalogName != null) {
+                        executor.execute(new RawSqlStatement(String.format("USE %s", defaultCatalogName)));
+                    }
             }
-
         }
     }
 

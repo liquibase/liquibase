@@ -1,5 +1,10 @@
 package liquibase.dbtest;
 
+import groovy.lang.Tuple2;
+
+import java.io.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import liquibase.*;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataChange;
@@ -32,8 +37,10 @@ import liquibase.hub.HubConfiguration;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.precondition.core.TableExistsPrecondition;
+import liquibase.logging.core.JavaLogService;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -53,12 +60,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.io.StringWriter;
 import java.nio.file.Path;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
@@ -73,10 +77,6 @@ import static org.junit.Assume.assumeNotNull;
  * at liquibase world headquarters.  Feel free to change the return value, but don't check it in.  We are going to improve the config of this at some point.
  */
 public abstract class AbstractIntegrationTest {
-
-    public static final String ALT_TABLESPACE = "LIQUIBASE2";
-    public static final String ALT_SCHEMA = "LBSCHEM2";
-    public static final String ALT_CATALOG = "LBCAT2";
 
     @Rule
     public DatabaseTestSystem testSystem;
@@ -133,7 +133,8 @@ public abstract class AbstractIntegrationTest {
 
         if (database.supportsTablespaces()) {
             // Use the opportunity to test if the DATABASECHANGELOG table is placed in the correct tablespace
-            database.setLiquibaseTablespaceName(ALT_TABLESPACE);
+            String altTablespace = testSystem.getAltTablespace();
+            database.setLiquibaseTablespaceName(altTablespace);
         }
         if (!database.getConnection().getAutoCommit()) {
             database.rollback();
@@ -186,12 +187,15 @@ public abstract class AbstractIntegrationTest {
                     database);
             SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
 
+            String altSchema = testSystem.getAltSchema();
+            String altCatalog = testSystem.getAltCatalog();
+
             if (database.supportsSchemas()) {
-                emptyTestSchema(null, ALT_SCHEMA, database);
+                emptyTestSchema(null, altSchema, database);
             }
             if (supportsAltCatalogTests()) {
                 if (database.supportsSchemas() && database.supportsCatalogs()) {
-                    emptyTestSchema(ALT_CATALOG, ALT_SCHEMA, database);
+                    emptyTestSchema(altCatalog, altSchema, database);
                 }
             }
 
@@ -200,12 +204,12 @@ public abstract class AbstractIntegrationTest {
              * schemas AND (b) the RDBMS DOES support catalogs AND (c) someone uses "schemaName=..." in a
              * Liquibase ChangeSet. In this case, AbstractJdbcDatabase.escapeObjectName assumes the author
              * was intending to write "catalog=..." and transparently rewrites the expression.
-             * For us, this means that we have to wipe both ALT_SCHEMA and ALT_CATALOG to be sure we
+             * For us, this means that we have to wipe both altSchema and altCatalog to be sure we
              * are doing a thorough cleanup.
              */
             CatalogAndSchema[] alternativeLocations = new CatalogAndSchema[]{
-                new CatalogAndSchema(ALT_CATALOG, null),
-                new CatalogAndSchema(null, ALT_SCHEMA),
+                new CatalogAndSchema(altCatalog, null),
+                new CatalogAndSchema(null, altSchema),
                 new CatalogAndSchema("LBCAT2", database.getDefaultSchemaName()),
                 new CatalogAndSchema(null, "LBCAT2"),
                 new CatalogAndSchema("lbcat2", database.getDefaultSchemaName()),
@@ -1120,5 +1124,101 @@ public abstract class AbstractIntegrationTest {
 
         liquibase.getDatabase().getRanChangeSetList();
         liquibase.update(contexts);
+    }
+
+    @Test
+    public void testThatMultipleJVMsCanApplyChangelog() throws Exception {
+        clearDatabase();
+
+        List<ProcessBuilder> processBuilders = Arrays.asList(
+            prepareExternalLiquibaseProcess(),
+            prepareExternalLiquibaseProcess(),
+            prepareExternalLiquibaseProcess()
+        );
+
+        List<Process> processes = new ArrayList<>();
+        for (ProcessBuilder builder : processBuilders) {
+            Process process = builder.redirectErrorStream(true).start();
+            processes.add(process);
+        }
+
+        List<Tuple2<Integer, String>> outputs = new ArrayList<>();
+        for (Process process : processes) {
+            boolean exitedWithinTimeout = !process.waitFor(2, TimeUnit.MINUTES);
+
+            String output;
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                output = input.lines().limit(100).collect(Collectors.joining(System.lineSeparator()));
+            }
+
+            if (!exitedWithinTimeout) {
+                process.destroy();
+            }
+
+            outputs.add(new Tuple2<>(process.exitValue(), output));
+        }
+
+        for (Tuple2<Integer, String> output : outputs) {
+            if (output.getFirst() == 0) {
+                continue;
+            }
+
+            fail("Migration JVM failed with exit code " + output.getFirst() + ": " + output.getSecond());
+        }
+    }
+
+    private ProcessBuilder prepareExternalLiquibaseProcess() {
+        String javaHome = System.getProperty("java.home");
+        String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
+        String classpath = System.getProperty("java.class.path");
+
+        List<String> command = new LinkedList<>();
+        command.add(javaBin);
+        command.add("-cp");
+        command.add(classpath);
+        command.add(ApplyTestChangelog.class.getName());
+
+        command.add(includedChangeLog);
+        command.add(testSystem.getConnectionUrl());
+        command.add(testSystem.getUsername());
+        command.add(testSystem.getPassword());
+        command.add(contexts);
+
+        return new ProcessBuilder(command);
+    }
+
+    public static final class ApplyTestChangelog {
+
+        private static void initLogLevel() {
+            java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
+
+            final JavaLogService logService = (JavaLogService) Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
+            logService.setParent(liquibaseLogger);
+            java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
+
+            rootLogger.setLevel(java.util.logging.Level.INFO);
+            liquibaseLogger.setLevel(java.util.logging.Level.INFO);
+
+            for (java.util.logging.Handler handler : rootLogger.getHandlers()) {
+                handler.setLevel(java.util.logging.Level.INFO);
+            }
+        }
+
+        public static void main(String[] args) throws Exception {
+            String changeLogFile = Objects.requireNonNull(args[0], "Changelog is required");
+            String url = Objects.requireNonNull(args[1], "JDBC url is required");
+            String username = Objects.requireNonNull(args[2], "JDBC username is required");
+            String password = Objects.requireNonNull(args[3], "JDBC password is required");
+            String contexts = Objects.requireNonNull(args[4], "Liquibase contexts is required");
+
+            initLogLevel();
+
+            DatabaseConnection connection = new JdbcConnection(DriverManager.getConnection(url, username, password));
+            ResourceAccessor fileOpener = new JUnitResourceAccessor();
+
+            Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
+            liquibase.setChangeLogParameter("loginuser", username);
+            liquibase.update(contexts);
+        }
     }
 }
