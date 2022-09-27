@@ -293,7 +293,7 @@ public class DatabaseFactory {
             }
             if (null != driverPropertiesFile) {
                     PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-                    Resource driverProperty = pathHandlerFactory.getResource(driverPropertiesFile, true);
+                    Resource driverProperty = pathHandlerFactory.getResource(driverPropertiesFile);
                     if (driverProperty.exists()) {
                         try (InputStream stream = driverProperty.openInputStream()) {
                             LOG.fine(

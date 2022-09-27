@@ -39,13 +39,6 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
     }
 
     /**
-     * Convenience method for {@link #getResource(String, boolean)} with false for includeResourceAccessor
-     */
-    public Resource getResource(String resourcePath) throws IOException {
-        return getResource(resourcePath, false);
-    }
-
-    /**
      * Creates a new resource at the specified path and returns an OutputStream for writing to it.
      *
      * @throws java.nio.file.FileAlreadyExistsException if the file already exists
@@ -63,41 +56,28 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
     /**
      * Return the resource for the given path.
      *
-     * @param includeResourceAccessor if true, check {@link Scope#getResourceAccessor()} as well.
-     * @return null if the resource does not exist
+     * @return A resource, regardless of whether it exists or not.
      * @throws IOException if the path cannot be understood or if there is a problem parsing the path
      * @throws IOException if the path exists as both a direct resourcePath and also in the resourceAccessor (if included). Unless {@link liquibase.GlobalConfiguration#DUPLICATE_FILE_MODE} overrides that behavior.
      */
     @SuppressWarnings("java:S2095")
-    public Resource getResource(String resourcePath, boolean includeResourceAccessor) throws IOException {
+    public Resource getResource(String resourcePath) throws IOException {
         final PathHandler plugin = getPlugin(resourcePath);
         if (plugin == null) {
             throw new IOException("Cannot parse resource location: '" + resourcePath + "'");
         }
 
-        Resource foundResource = plugin.getResource(resourcePath);
-
-        if (includeResourceAccessor) {
-            ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), new FoundResourceAccessor(resourcePath, foundResource));
-
-            Resource resource = resourceAccessor.get(resourcePath);
-            if (!resource.exists()) {
-                return foundResource;
-            }
-            return resource;
-        } else {
-            return foundResource;
-        }
+        return plugin.getResource(resourcePath);
     }
 
     /**
-     * Returns the outputStream from {@link #getResource(String, boolean)} if it exists, and the outputStream from {@link #createResource(String)} if it does not.
+     * Returns the outputStream from {@link #getResource(String)} if it exists, and the outputStream from {@link #createResource(String)} if it does not.
      *
      * @return null if resourcePath does not exist and createIfNotExists is false
      * @throws IOException if there is an error opening the stream
      */
-    public OutputStream openResourceOutputStream(String resourcePath, boolean includeResourceAccessor, boolean createIfNotExists) throws IOException {
-        Resource resource = getResource(resourcePath, includeResourceAccessor);
+    public OutputStream openResourceOutputStream(String resourcePath, boolean createIfNotExists) throws IOException {
+        Resource resource = getResource(resourcePath);
         if (!resource.exists()) {
             if (createIfNotExists) {
                 return createResource(resourcePath);
@@ -146,21 +126,5 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         public void close() throws Exception {
 
         }
-    }
-
-    /**
-     *
-     * Given a path to a resource, return true if this is an absolute path or false if not
-     *
-     * @param  path       The path to consider
-     * @return boolean    True if this is an absolute path and false if not
-     *
-     */
-    public boolean isAbsolute(String path) throws IOException {
-        PathHandler plugin = getPlugin(path);
-        if (plugin == null) {
-            throw new IOException("Cannot parse resource location: '" + path + "'");
-        }
-        return plugin.isAbsolute(path);
     }
 }
