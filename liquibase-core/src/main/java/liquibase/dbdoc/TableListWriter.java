@@ -1,10 +1,10 @@
 package liquibase.dbdoc;
 
-import java.io.File;
+import liquibase.resource.Resource;
 
 public class TableListWriter extends HTMLListWriter {
 
-    public TableListWriter(File outputDir) {
+    public TableListWriter(Resource outputDir) {
         super("Current Tables", "currenttables.html", "tables", outputDir);
     }
 

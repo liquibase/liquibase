@@ -211,7 +211,7 @@ public interface ResourceAccessor extends AutoCloseable {
      */
     List<String> describeLocations();
 
-    static class NotFoundResource extends AbstractResource {
+    class NotFoundResource extends AbstractResource {
         private ResourceAccessor resourceAccessor;
 
         public NotFoundResource(String path, ResourceAccessor resourceAccessor) {
