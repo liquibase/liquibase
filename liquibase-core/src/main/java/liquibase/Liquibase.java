@@ -35,6 +35,7 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.InputStreamList;
+import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
@@ -2267,7 +2268,9 @@ public class Liquibase implements AutoCloseable {
                     DBDocVisitor visitor = new DBDocVisitor(database);
                     logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
-                    visitor.writeHTML(new File(outputDirectory), resourceAccessor);
+                    final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+                    Resource resource = pathHandlerFactory.getResource(outputDirectory);
+                    visitor.writeHTML(resource, resourceAccessor);
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 } finally {

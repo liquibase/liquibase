@@ -47,7 +47,7 @@ class CommandRunner implements Callable<CommandResults> {
         try {
             if (outputFile != null) {
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-                outputStream = pathHandlerFactory.openResourceOutputStream(outputFile, false, true);
+                outputStream = pathHandlerFactory.openResourceOutputStream(outputFile, true);
                 commandScope.setOutput(outputStream);
             }
 

@@ -32,37 +32,14 @@ class PathHandlerFactoryTest extends Specification {
         def pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory)
 
         then:
-        (pathHandlerFactory.getResource(path).exists()) == existsWithoutResourceAccessor
-        Scope.child(Scope.Attr.resourceAccessor, new JUnitResourceAccessor(), { ->
-            assert (pathHandlerFactory.getResource(path, true).exists()) == existsWithResourceAccessor
-        })
-
+        assert (pathHandlerFactory.getResource(path).exists()) == exists
 
         where:
-        path                                                               | existsWithoutResourceAccessor | existsWithResourceAccessor
-        "src/test/groovy/liquibase/resource/PathHandlerFactoryTest.groovy" | true                          | true
-        "invalid/path.txt"                                                 | false                         | false
-        "liquibase/resource/PathHandlerFactoryTest.class"                  | false                         | true
-        "/liquibase/resource/PathHandlerFactoryTest.class"                 | false                         | true
-    }
-
-    def "getResource with duplicate files"() {
-        when:
-        def pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory)
-        def path = "target/test-classes/duplicate.txt"
-
-        (path as File).createNewFile()
-        ("target/test-classes/" + path as File).getParentFile().mkdirs()
-        ("target/test-classes/" + path as File).createNewFile()
-
-
-        Scope.child(Scope.Attr.resourceAccessor, new JUnitResourceAccessor(), { ->
-            pathHandlerFactory.getResource(path, true)
-        })
-
-        then:
-        def e = thrown(IOException)
-        e.message.startsWith("Found 2 files with the path 'target/test-classes/duplicate.txt':")
+        path                                                               | exists
+        "src/test/groovy/liquibase/resource/PathHandlerFactoryTest.groovy" | true
+        "invalid/path.txt"                                                 | false
+        "liquibase/resource/PathHandlerFactoryTest.class"                  | false
+        "/liquibase/resource/PathHandlerFactoryTest.class"                 | false
     }
 
     def openResourceOutputStream() {
@@ -75,10 +52,10 @@ class PathHandlerFactoryTest extends Specification {
         def pathHandlerFactory = Scope.currentScope.getSingleton(PathHandlerFactory)
 
         then:
-        pathHandlerFactory.openResourceOutputStream(path, false, false) == null //when createIfNotExists is false
+        pathHandlerFactory.openResourceOutputStream(path, false) == null //when createIfNotExists is false
 
         when:
-        def stream = pathHandlerFactory.openResourceOutputStream(path, false, true) //createIfNotExists is true
+        def stream = pathHandlerFactory.openResourceOutputStream(path, true) //createIfNotExists is true
         stream.withWriter {
             it.write("test")
         }
@@ -89,7 +66,7 @@ class PathHandlerFactoryTest extends Specification {
 
         when:
         //can update file
-        stream = pathHandlerFactory.openResourceOutputStream(path, false, true)
+        stream = pathHandlerFactory.openResourceOutputStream(path, true)
         stream.withWriter {
             it.write("test 2")
         }
