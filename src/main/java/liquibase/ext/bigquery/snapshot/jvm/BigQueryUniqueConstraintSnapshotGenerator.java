@@ -2,7 +2,6 @@ package liquibase.ext.bigquery.snapshot.jvm;
 
 import liquibase.Scope;
 import liquibase.database.Database;
-import liquibase.database.core.H2Database;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.ext.bigquery.database.BigqueryDatabase;

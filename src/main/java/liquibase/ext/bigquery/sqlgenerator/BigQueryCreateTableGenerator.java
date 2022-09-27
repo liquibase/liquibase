@@ -1,19 +1,15 @@
 package liquibase.ext.bigquery.sqlgenerator;
 
+import liquibase.Scope;
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DatabaseDataType;
-import liquibase.datatype.LiquibaseDataType;
 import liquibase.ext.bigquery.database.BigqueryDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.core.CreateTableGenerator;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateTableStatement;
-import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -35,7 +31,7 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
 
     @Override
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        List<Sql> additionalSql = new ArrayList();
+        List<Sql> additionalSql = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
 
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
@@ -47,7 +43,7 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
             column = columnIterator.next();
             DatabaseDataType columnType = null;
             if (statement.getColumnTypes().get(column) != null) {
-                columnType = ((LiquibaseDataType) statement.getColumnTypes().get(column)).toDatabaseDataType(database);
+                columnType = statement.getColumnTypes().get(column).toDatabaseDataType(database);
             }
 
             if (columnType == null) {
@@ -57,35 +53,18 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
                 buffer.append(" ").append(columnType);
             }
 
-            String nncName;
             if (columnType != null && !columnType.isAutoIncrement() && statement.getDefaultValue(column) != null) {
                 Object defaultValue = statement.getDefaultValue(column);
 
                 if (defaultValue instanceof DatabaseFunction) {
                     buffer.append(database.generateDatabaseFunctionValue((DatabaseFunction) defaultValue));
                 } else {
-                    buffer.append(((LiquibaseDataType) statement.getColumnTypes().get(column)).objectToSql(defaultValue, database));
+                    buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
                 }
             }
 
             if (statement.getNotNullColumns().get(column) != null) {
-                if (!database.supportsNotNullConstraintNames()) {
-                    buffer.append(" NOT NULL");
-                } else {
-                    NotNullConstraint nnConstraintForThisColumn = (NotNullConstraint) statement.getNotNullColumns().get(column);
-                    nncName = StringUtil.trimToNull(nnConstraintForThisColumn.getConstraintName());
-                    if (nncName == null) {
-                        buffer.append(" NOT NULL");
-                    } else {
-                        buffer.append(" CONSTRAINT ");
-                        buffer.append(database.escapeConstraintName(nncName));
-                        buffer.append(" NOT NULL");
-                    }
-
-                    if (!nnConstraintForThisColumn.shouldValidateNullable() && database instanceof OracleDatabase) {
-                        buffer.append(" ENABLE NOVALIDATE ");
-                    }
-                }
+                Scope.getCurrentScope().getLog(this.getClass()).fine("Not null constraints are not supported by BigQuery");
             }
             if (columnIterator.hasNext()) {
                 buffer.append(", ");
@@ -96,7 +75,7 @@ public class BigQueryCreateTableGenerator extends CreateTableGenerator {
         buffer.append(",");
         String sql = buffer.toString().replaceFirst(",\\s*$", "") + ")";
 
-        additionalSql.add(0, new UnparsedSql(sql, new DatabaseObject[]{this.getAffectedTable(statement)}));
-        return (Sql[]) additionalSql.toArray(new Sql[additionalSql.size()]);
+        additionalSql.add(0, new UnparsedSql(sql, this.getAffectedTable(statement)));
+        return additionalSql.toArray(new Sql[additionalSql.size()]);
     }
 }
