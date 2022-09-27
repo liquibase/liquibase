@@ -53,6 +53,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <liquibase.sdk.github.token>${env.GITHUB_TOKEN}</liquibase.sdk.github.token>
         <maven.enforcer.requireMavenVersion>3.6</maven.enforcer.requireMavenVersion>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mmZ</maven.build.timestamp.format>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
@@ -469,6 +470,13 @@
                                 --add-opens java.base/java.lang=ALL-UNNAMED
                             </argLine>
                         </configuration>
+                    </plugin>
+
+
+                    <plugin>
+                        <groupId>org.liquibase.ext</groupId>
+                        <artifactId>liquibase-sdk-maven-plugin</artifactId>
+                        <version>0.10.18</version>
                     </plugin>
                 </plugins>
             </build>
