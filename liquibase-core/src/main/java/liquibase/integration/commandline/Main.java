@@ -128,6 +128,7 @@ public class Main {
     protected String schemas;
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
+    protected Boolean rollbackOnError;
     private boolean liquibaseProLicenseValid = false;
     protected String liquibaseHubApiKey;
     protected String liquibaseHubUrl;
