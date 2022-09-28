@@ -3,17 +3,14 @@ package liquibase.integration.commandline;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandDefinition;
-import liquibase.command.CommandFactory;
-import liquibase.command.CommandFailedException;
 import liquibase.command.core.*;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
-import liquibase.exception.CommandLineParsingException;
-import liquibase.exception.CommandValidationException;
 import liquibase.hub.HubConfiguration;
+import liquibase.integration.Integration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.LogService;
@@ -59,7 +56,7 @@ public class LiquibaseCommandLine {
     private final Set<String> legacyNoLongerCommandArguments;
     private Level configuredLogLevel;
 
-    private final CommandLine commandLine;
+    private final Integration<CommandLineIntegrationAdapter> integration;
     private FileHandler fileHandler;
 
     private final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -67,7 +64,7 @@ public class LiquibaseCommandLine {
     /**
      * Pico's defaultFactory does a lot of reflection, checking for classes we know we don't have.
      * That is slow on older JVMs and impact initial startup time, so do our own factory for performance reasons.
-     * It is easy to configure pico to it's default factory, when profiling check for `CommandLine$DefaultFactory` usage
+     * It is easy to configure pico to its default factory, when profiling check for `CommandLine$DefaultFactory` usage
      */
     private CommandLine.IFactory defaultFactory = new CommandLine.IFactory() {
         @Override
@@ -175,7 +172,7 @@ public class LiquibaseCommandLine {
                 "outputLineSeparator"
         ).collect(Collectors.toSet());
 
-        this.commandLine = buildPicoCommandLine();
+        this.integration = new Integration<>(new CommandLineIntegrationAdapter(buildPicoCommandLine()));
     }
 
     private CommandLine buildPicoCommandLine() {
@@ -199,110 +196,13 @@ public class LiquibaseCommandLine {
 
         addGlobalArguments(commandLine);
 
-        for (CommandDefinition commandDefinition : getCommands()) {
+        for (CommandDefinition commandDefinition : integration.getAvailableCommands()) {
             addSubcommand(commandDefinition, commandLine);
         }
 
-        commandLine.setExecutionExceptionHandler((ex, commandLine1, parseResult) -> LiquibaseCommandLine.this.handleException(ex));
+        commandLine.setExecutionExceptionHandler((ex, commandLine1, parseResult) -> LiquibaseCommandLine.this.integration.handleException(ex));
 
         return commandLine;
-    }
-
-    private int handleException(Throwable exception) {
-        Throwable cause = exception;
-
-        String uiMessage = "";
-        while (cause != null) {
-            String newMessage = StringUtil.trimToNull(cleanExceptionMessage(cause.getMessage()));
-            if (newMessage != null) {
-                if (!uiMessage.contains(newMessage)) {
-                    if (!uiMessage.equals("")) {
-                        uiMessage += System.lineSeparator() + "  - Caused by: ";
-                    }
-                    uiMessage += newMessage;
-                }
-            }
-
-            cause = cause.getCause();
-        }
-
-        if (StringUtil.isEmpty(uiMessage)) {
-            uiMessage = exception.getClass().getName();
-        }
-
-        if (cause instanceof CommandFailedException && ((CommandFailedException) cause).isExpected()) {
-            Scope.getCurrentScope().getLog(getClass()).severe(uiMessage);
-        } else {
-            Scope.getCurrentScope().getLog(getClass()).severe(uiMessage, exception);
-        }
-
-        boolean printUsage = false;
-        try (final StringWriter suggestionWriter = new StringWriter();
-             PrintWriter suggestionsPrintWriter = new PrintWriter(suggestionWriter)) {
-            if (exception instanceof CommandLine.ParameterException) {
-                if (exception instanceof CommandLine.UnmatchedArgumentException) {
-                    System.err.println("Unexpected argument(s): " + StringUtil.join(((CommandLine.UnmatchedArgumentException) exception).getUnmatched(), ", "));
-                } else {
-                    System.err.println("Error parsing command line: " + uiMessage);
-                }
-                CommandLine.UnmatchedArgumentException.printSuggestions((CommandLine.ParameterException) exception, suggestionsPrintWriter);
-
-                printUsage = true;
-            } else if (exception instanceof IllegalArgumentException
-                    || exception instanceof CommandValidationException
-                    || exception instanceof CommandLineParsingException) {
-                System.err.println("Error parsing command line: " + uiMessage);
-                printUsage = true;
-            } else if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
-                System.err.println(uiMessage);
-            } else {
-                System.err.println("\nUnexpected error running Liquibase: " + uiMessage);
-                System.err.println();
-
-                if (Level.OFF.equals(this.configuredLogLevel)) {
-                    System.err.println("For more information, please use the --log-level flag");
-                } else {
-                    if (LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue() == null) {
-                        exception.printStackTrace(System.err);
-                    }
-                }
-            }
-
-            if (printUsage) {
-                System.err.println();
-                System.err.println("For detailed help, try 'liquibase --help' or 'liquibase <command-name> --help'");
-            }
-
-            suggestionsPrintWriter.flush();
-            final String suggestions = suggestionWriter.toString();
-            if (suggestions.length() > 0) {
-                System.err.println();
-                System.err.println(suggestions);
-            }
-        } catch (IOException e) {
-            Scope.getCurrentScope().getLog(getClass()).warning("Error closing stream: " + e.getMessage(), e);
-        }
-        if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
-            CommandFailedException cfe = (CommandFailedException) exception.getCause();
-            return cfe.getExitCode();
-        }
-        return 1;
-    }
-
-    protected String cleanExceptionMessage(String message) {
-        if (message == null) {
-            return null;
-        }
-
-        String originalMessage;
-        do {
-            originalMessage = message;
-            message = message.replaceFirst("^[\\w.]*Exception: ", "");
-            message = message.replaceFirst("^[\\w.]*Error: ", "");
-        } while (!originalMessage.equals(message));
-
-        message = message.replace("Unexpected error running Liquibase: ", "");
-        return message;
     }
 
     public int execute(String[] args) {
@@ -310,6 +210,8 @@ public class LiquibaseCommandLine {
             final String[] finalArgs = adjustLegacyArgs(args);
 
             configureLogging(Level.OFF, null);
+
+            integration.run();
 
             Main.runningFromNewCli = true;
 
@@ -971,11 +873,6 @@ public class LiquibaseCommandLine {
 
     private String toEnvVariable(String property) {
         return StringUtil.toKabobCase(property).replace(".", "_").replace("-", "_").toUpperCase();
-    }
-
-    private SortedSet<CommandDefinition> getCommands() {
-        final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
-        return commandFactory.getCommands(false);
     }
 
     private void addGlobalArguments(CommandLine commandLine) {
