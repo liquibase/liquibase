@@ -1,5 +1,6 @@
 package liquibase.integration.commandline;
 
+import liquibase.Scope;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.CommonArgumentNames;
@@ -49,7 +50,7 @@ class CommandRunner implements Callable<CommandResults> {
                 if (parentOutputFile != null) {
                     boolean mkdirs = parentOutputFile.mkdirs();
                     if (!mkdirs) {
-                        throw new CommandExecutionException("Failed to create directories for output file.");
+                        Scope.getCurrentScope().getLog(getClass()).warning("Failed to create directories for output file.");
                     }
                 }
                 outputStream = new FileOutputStream(outputFile);
