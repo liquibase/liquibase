@@ -104,13 +104,22 @@ public class TableOutput {
             // Multi-line count
             //
             int multiLine = 0;
+            // In cases where a row contains content for a single line only, separation line doesn't appear
+            // This verifies all the row values have empty string at the end which will eventually be switched with
+            // the table line separator
+            boolean endLineAdded = false;
             do {
                 isMultiLine = false;
                 String[] newRow = new String[row.length];
                 for (int i = 0; i < row.length; i++) {
                     // If data is less than max width, use that as it is.
                     if (row[i] == null || row[i].length() < maxWidths.get(i)) {
-                        newRow[i] = multiLine == 0 ? row[i] : "";
+                        if (multiLine == 0) {
+                            newRow[i] = row[i];
+                        } else {
+                            newRow[i] = "";
+                            endLineAdded = true;
+                        }
                     } else if ((row[i].length() > (multiLine * maxWidths.get(i)))) {
                         //
                         // If the cell width is more than max width, then split the data at maxWidths.get(i).
@@ -121,6 +130,7 @@ public class TableOutput {
                         isMultiLine = true;
                     } else {
                         newRow[i] = "";
+                        endLineAdded = true;
                     }
                 }
                 finalTableList.add(newRow);
@@ -128,6 +138,9 @@ public class TableOutput {
                     multiLine++;
                 }
             } while (isMultiLine);
+            if (!endLineAdded) {
+                finalTableList.add(new String[]{""});
+            }
         }
         String[][] finalTable = new String[finalTableList.size()][finalTableList.get(0).length];
         for (int i = 0; i < finalTable.length; i++) {
@@ -175,16 +188,11 @@ public class TableOutput {
          * Output table
          */
         outputLines.append(line);
-        boolean firstLine = true;
         for (String[] strings : finalTable) {
             if (allEmptyStrings(strings)) {
                 outputLines.append(line);
             } else {
                 outputLines.append(String.format(formatString.toString(), (Object[]) strings));
-            }
-            if (firstLine) {
-                outputLines.append(line);
-                firstLine = false;
             }
         }
         try {
