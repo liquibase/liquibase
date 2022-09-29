@@ -8,6 +8,7 @@ import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.MigrationFailedException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
@@ -123,6 +124,9 @@ public class ChangeLogIterator {
                 }
             });
         } catch (Exception e) {
+            if (e instanceof MigrationFailedException) {
+                throw (MigrationFailedException) e;
+            }
             throw new LiquibaseException(e);
         } finally {
             databaseChangeLog.setRuntimeEnvironment(null);
