@@ -179,7 +179,19 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Convience method for {@link #update(Contexts)} that constructs the Context object from the passed string.
+     * Convenience method for {@link #update(Contexts)} that runs in "no context mode".
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+     */
+    public void update() throws LiquibaseException {
+        this.update(new Contexts());
+    }
+
+    /**
+     * Convenience method for {@link #update(Contexts)} that constructs the Context object from the passed string.
+     * To run in "no context mode", pass a null or empty "".
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      */
     public void update(String contexts) throws LiquibaseException {
         this.update(new Contexts(contexts));
@@ -188,17 +200,28 @@ public class Liquibase implements AutoCloseable {
     /**
      * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to date according to
      * the configured changelog file. To run in "no context mode", pass a null or empty context object.
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      */
     public void update(Contexts contexts) throws LiquibaseException {
         update(contexts, new LabelExpression());
     }
 
+    /**
+     * Liquibase update
+     *
+     * @param contexts
+     * @param labelExpression
+     * @throws LiquibaseException
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
+     */
     public void update(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         update(contexts, labelExpression, true);
     }
 
     /**
-     *
      * Liquibase update
      *
      * @param   contexts
@@ -206,6 +229,8 @@ public class Liquibase implements AutoCloseable {
      * @param   checkLiquibaseTables
      * @throws  LiquibaseException
      *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
      */
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
@@ -226,7 +251,8 @@ public class Liquibase implements AutoCloseable {
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
                 }
 
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+                ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+                changelogService.generateDeploymentId();
 
                 changeLog.validate(database, contexts, labelExpression);
 
