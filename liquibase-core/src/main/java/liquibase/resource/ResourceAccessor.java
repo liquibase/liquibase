@@ -215,7 +215,7 @@ public interface ResourceAccessor extends AutoCloseable {
         private ResourceAccessor resourceAccessor;
 
         public NotFoundResource(String path, ResourceAccessor resourceAccessor) {
-            super(path,  URI.create("resourceaccessor:"+path.replace(" ", "%20")));
+            super(path, URI.create("resourceaccessor:"+path.replace(" ", "%20").replace('\\', '/')));
             this.resourceAccessor = resourceAccessor;
         }
 
