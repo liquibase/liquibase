@@ -85,8 +85,10 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
         File baseDir = project.getBasedir();
         File sourceDir = new File(baseDir, "src/main/resources");
+        if (sourceDir.exists()) {
+            resourceAccessors.add(new DirectoryResourceAccessor(sourceDir));
+        }
         resourceAccessors.add(new DirectoryResourceAccessor(baseDir));
-        resourceAccessors.add(new DirectoryResourceAccessor(sourceDir));
         return new SearchPathResourceAccessor(resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 }

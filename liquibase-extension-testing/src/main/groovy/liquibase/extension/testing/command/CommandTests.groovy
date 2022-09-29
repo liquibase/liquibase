@@ -1100,10 +1100,19 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          *
          */
         void copyResource(String originalFile, String newFile) {
+            copyResource(originalFile, newFile, true)
+        }
+
+        void copyResource(String originalFile, String newFile, boolean writeInTargetTestClasses) {
             URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
             File f = new File(url.toURI())
             String contents = FileUtil.getContents(f)
-            File outputFile = new File("target/test-classes", newFile)
+            File outputFile
+            if (writeInTargetTestClasses) {
+                outputFile = new File("target/test-classes", newFile)
+            } else {
+                outputFile = new File(newFile)
+            }
             FileUtil.write(contents, outputFile)
             println "Copied file " + originalFile + " to file " + newFile
         }
