@@ -4,7 +4,6 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
-import liquibase.structure.core.Relation;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -102,7 +101,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                 // 1) It is already in the SQL
                 // 2) The DB2 version is < 10.5
                 //
-                if (!viewDefinition.contains("replace")) {
+                if (!statement.getSelectQuery().toUpperCase().contains("OR REPLACE")) {
                     viewDefinition.replace("CREATE", "CREATE OR REPLACE");
                 }
             }

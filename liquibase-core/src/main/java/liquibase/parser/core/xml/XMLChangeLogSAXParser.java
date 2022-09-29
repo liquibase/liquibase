@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.core.ParsedNode;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.BomAwareInputStream;
 import liquibase.util.FileUtil;
@@ -69,7 +70,8 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     @Override
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        try (InputStream inputStream = resourceAccessor.openStream(null, physicalChangeLogLocation)) {
+        try  {
+            Resource resource = resourceAccessor.get(physicalChangeLogLocation);
             SAXParser parser = saxParserFactory.newSAXParser();
             if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
                 try {
@@ -102,7 +104,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                 }
             });
 
-            if (inputStream == null) {
+            if (!resource.exists()) {
                 if (physicalChangeLogLocation.startsWith("WEB-INF/classes/")) {
                     // Correct physicalChangeLogLocation and try again.
                     return parseToNode(
@@ -115,7 +117,9 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
             XMLChangeLogSAXHandler contentHandler = new XMLChangeLogSAXHandler(physicalChangeLogLocation, resourceAccessor, changeLogParameters);
             xmlReader.setContentHandler(contentHandler);
-            xmlReader.parse(new InputSource(new BomAwareInputStream(inputStream)));
+            try (InputStream stream = resource.openInputStream()) {
+                xmlReader.parse(new InputSource(new BomAwareInputStream(stream)));
+            }
 
             return contentHandler.getDatabaseChangeLogTree();
         } catch (ChangeLogParseException e) {

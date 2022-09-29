@@ -1,9 +1,12 @@
 package liquibase.dbdoc;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
 import liquibase.structure.core.*;
 
 import java.io.File;
@@ -15,8 +18,8 @@ import java.util.List;
 
 public class TableWriter extends HTMLWriter {
 
-    public TableWriter(File rootOutputDir, Database database) {
-        super(new File(rootOutputDir, "tables"), database);
+    public TableWriter(Resource rootOutputDir, Database database) {
+        super(rootOutputDir.resolve("tables"), database);
     }
 
     @Override
@@ -34,11 +37,7 @@ public class TableWriter extends HTMLWriter {
     }
 
     public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog, String schema) throws DatabaseHistoryException, IOException, DatabaseException {
-        File schemaOutputDir = new File(super.baseOutputDir.getPath() + System.getProperty("file.separator") + schema);
-        if (!schemaOutputDir.exists()) {
-            schemaOutputDir.mkdirs();
-        }
-        super.outputDir = schemaOutputDir;
+        super.outputDir = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class).getResource(super.baseOutputDir.getPath() + System.getProperty("file.separator") + schema);
         super.writeHTML(object, ranChanges, changesToRun, changeLog);
 
     }

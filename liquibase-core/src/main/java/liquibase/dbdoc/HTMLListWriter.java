@@ -1,6 +1,7 @@
 package liquibase.dbdoc;
 
 import liquibase.GlobalConfiguration;
+import liquibase.resource.Resource;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
@@ -9,23 +10,20 @@ import java.io.*;
 import java.util.SortedSet;
 
 public class HTMLListWriter {
-    private File outputDir;
+    private Resource outputDir;
     private String directory;
     private String filename;
     private String title;
 
-    public HTMLListWriter(String title, String filename, String subdir, File outputDir) {
+    public HTMLListWriter(String title, String filename, String subdir, Resource outputDir) {
         this.title = title;
         this.outputDir = outputDir;
         this.filename = filename;
-        if (!outputDir.exists()) {
-            outputDir.mkdir();
-        }
         this.directory = subdir;
     }
 
     public void writeHTML(SortedSet objects) throws IOException {
-        Writer fileWriter = new OutputStreamWriter(new FileOutputStream(new File(outputDir, filename)), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+        Writer fileWriter = new OutputStreamWriter(outputDir.resolve(filename).openOutputStream(true), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
 
         try {
             fileWriter.append("<HTML>\n" + "<HEAD><meta charset=\"utf-8\"/>\n" + "<TITLE>\n");

@@ -8,6 +8,7 @@ import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.dbdoc.*;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -18,10 +19,7 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StreamUtil;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 public class DBDocVisitor implements ChangeSetVisitor {
@@ -111,7 +109,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
     }
 
-    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor, CatalogAndSchema... schemaList) throws IOException,
+    public void writeHTML(Resource rootOutputDir, ResourceAccessor resourceAccessor, CatalogAndSchema... schemaList) throws IOException,
         LiquibaseException {
         ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
         HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
@@ -177,14 +175,14 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
     }
 
-    private void copyFile(String fileToCopy, File rootOutputDir) throws IOException {
+    private void copyFile(String fileToCopy, Resource rootOutputDir) throws IOException {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileToCopy);
-        FileOutputStream outputStream = null;
+        OutputStream outputStream = null;
         try {
             if (inputStream == null) {
                 throw new IOException("Can not find " + fileToCopy);
             }
-            outputStream = new FileOutputStream(new File(rootOutputDir, fileToCopy.replaceFirst(".*\\/", "")), false);
+            outputStream = rootOutputDir.resolve(fileToCopy.replaceFirst(".*\\/", "")).openOutputStream(true);
             StreamUtil.copy(inputStream, outputStream);
         } finally {
             if (outputStream != null) {

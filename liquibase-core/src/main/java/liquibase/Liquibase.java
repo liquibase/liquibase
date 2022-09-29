@@ -35,6 +35,8 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.InputStreamList;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -177,7 +179,19 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Convience method for {@link #update(Contexts)} that constructs the Context object from the passed string.
+     * Convenience method for {@link #update(Contexts)} that runs in "no context mode".
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+     */
+    public void update() throws LiquibaseException {
+        this.update(new Contexts());
+    }
+
+    /**
+     * Convenience method for {@link #update(Contexts)} that constructs the Context object from the passed string.
+     * To run in "no context mode", pass a null or empty "".
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      */
     public void update(String contexts) throws LiquibaseException {
         this.update(new Contexts(contexts));
@@ -186,17 +200,28 @@ public class Liquibase implements AutoCloseable {
     /**
      * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to date according to
      * the configured changelog file. To run in "no context mode", pass a null or empty context object.
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      */
     public void update(Contexts contexts) throws LiquibaseException {
         update(contexts, new LabelExpression());
     }
 
+    /**
+     * Liquibase update
+     *
+     * @param contexts
+     * @param labelExpression
+     * @throws LiquibaseException
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
+     */
     public void update(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         update(contexts, labelExpression, true);
     }
 
     /**
-     *
      * Liquibase update
      *
      * @param   contexts
@@ -204,6 +229,8 @@ public class Liquibase implements AutoCloseable {
      * @param   checkLiquibaseTables
      * @throws  LiquibaseException
      *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
      */
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
@@ -224,7 +251,8 @@ public class Liquibase implements AutoCloseable {
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
                 }
 
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+                ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+                changelogService.generateDeploymentId();
 
                 changeLog.validate(database, contexts, labelExpression);
 
@@ -983,11 +1011,14 @@ public class Liquibase implements AutoCloseable {
     protected void executeRollbackScript(String rollbackScript, List<ChangeSet> changeSets, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         String rollbackScriptContents;
-        try (InputStream stream = resourceAccessor.openStream(null, rollbackScript)) {
-            if (stream == null) {
+        try {
+            Resource resource = resourceAccessor.get(rollbackScript);
+            if (resource == null) {
                 throw new LiquibaseException("WARNING: The rollback script '" + rollbackScript + "' was not located.  Please check your parameters. No rollback was performed");
             }
-            rollbackScriptContents = StreamUtil.readStreamAsString(stream);
+            try (InputStream stream = resource.openInputStream()) {
+                rollbackScriptContents = StreamUtil.readStreamAsString(stream);
+            }
         } catch (IOException e) {
             throw new LiquibaseException("Error reading rollbackScript " + executor + ": " + e.getMessage());
         }
@@ -2267,7 +2298,9 @@ public class Liquibase implements AutoCloseable {
                     DBDocVisitor visitor = new DBDocVisitor(database);
                     logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
-                    visitor.writeHTML(new File(outputDirectory), resourceAccessor, schemaList);
+                    final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+                    Resource resource = pathHandlerFactory.getResource(outputDirectory);
+                    visitor.writeHTML(resource, resourceAccessor, schemaList);
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 } finally {
