@@ -25,10 +25,7 @@ import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.DirectoryResourceAccessor;
-import liquibase.resource.ResourceAccessor;
+import liquibase.resource.*;
 import liquibase.ui.ConsoleUIService;
 import liquibase.util.*;
 
@@ -1577,23 +1574,11 @@ public class Main {
                     //will output to stdout:
                     currentChangeLogFile = "";
                 }
-
-                File file = new File(currentChangeLogFile);
+                final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+                Resource file = pathHandlerFactory.getResource(currentChangeLogFile);
                 if (file.exists() && (!Boolean.parseBoolean(overwriteOutputFile))) {
                     throw new LiquibaseException(
                             String.format(coreBundle.getString("changelogfile.already.exists"), currentChangeLogFile));
-                } else {
-                    try {
-                        if (!file.delete()) {
-                            // Nothing needs to be done
-                        }
-                    } catch (SecurityException e) {
-                        throw new LiquibaseException(
-                                String.format(coreBundle.getString("attempt.to.delete.the.file.failed.cannot.continue"),
-                                        currentChangeLogFile
-                                ), e
-                        );
-                    }
                 }
 
                 CatalogAndSchema[] finalTargetSchemas = computedSchemas.finalTargetSchemas;
