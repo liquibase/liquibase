@@ -3,6 +3,7 @@ package liquibase.integration.commandline;
 import liquibase.*;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.ChangeSet;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
@@ -49,6 +50,7 @@ import java.util.jar.JarFile;
 import java.util.logging.*;
 
 import static java.util.ResourceBundle.getBundle;
+import static liquibase.command.core.UpdateCommandStep.ROLLBACK_ON_ERROR;
 
 /**
  * Class for executing Liquibase via the command line.
@@ -1843,7 +1845,17 @@ public class Main {
 
             try {
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
-                    liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    try {
+                        liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    } catch (MigrationFailedException e) {
+                        if (!e.containsFailedChangeset() || !rollbackOnError) {
+                            throw e;
+                        }
+                        LicenseServiceUtils.checkProLicenseAndThrowException(command, ROLLBACK_ON_ERROR.getName());
+                        Scope.getCurrentScope().getUI().sendErrorMessage("WARNING: " + e.getMessage());
+                        Scope.getCurrentScope().getUI().sendErrorMessage("'--rollback-on-error' flag is set to true. Starting the rollback.");
+                        rollbackChangeSets(database, liquibase, e.getFailedChangeSets(), true);
+                    }
                 } else if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)) {
@@ -1991,6 +2003,33 @@ public class Main {
                 Scope.getCurrentScope().getLog(getClass()).warning(
                     coreBundle.getString("problem.closing.connection"), e);
             }
+        }
+    }
+
+    /**
+     *
+     * @param database database to apply rollback on.
+     * @param liquibase an instance of {@link Liquibase}.
+     * @param changeSets a list of {@link ChangeSet} to rollback.
+     * @throws LiquibaseException if migration fails.
+     */
+    private void rollbackChangeSets(Database database, Liquibase liquibase, List<ChangeSet> changeSets, boolean reverseRollback) throws LiquibaseException {
+        final List<ChangeSet> changeSetsToRollback = new LinkedList<>(changeSets);
+        if (reverseRollback) {
+            Collections.reverse(changeSetsToRollback);
+        }
+        for (ChangeSet changeSet : changeSetsToRollback) {
+            if (!(changeSet.getFailOnError() == null) && !changeSet.getFailOnError()) {
+                continue;
+            }
+            final Map<String, Object> argsMap = new HashMap<>();
+            argsMap.put("changeLogFile", changeLogFile);
+            argsMap.put("changeSetId", changeSet.getId());
+            argsMap.put("changeSetAuthor", changeSet.getAuthor());
+            argsMap.put("changeSetPath", changeSet.getFilePath());
+            argsMap.put("force", true);
+            final CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackOneChangeSet", argsMap);
+            liquibaseCommand.execute();
         }
     }
 
