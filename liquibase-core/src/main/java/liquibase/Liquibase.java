@@ -35,6 +35,8 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.InputStreamList;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -1009,11 +1011,14 @@ public class Liquibase implements AutoCloseable {
     protected void executeRollbackScript(String rollbackScript, List<ChangeSet> changeSets, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         String rollbackScriptContents;
-        try (InputStream stream = resourceAccessor.openStream(null, rollbackScript)) {
-            if (stream == null) {
+        try {
+            Resource resource = resourceAccessor.get(rollbackScript);
+            if (resource == null) {
                 throw new LiquibaseException("WARNING: The rollback script '" + rollbackScript + "' was not located.  Please check your parameters. No rollback was performed");
             }
-            rollbackScriptContents = StreamUtil.readStreamAsString(stream);
+            try (InputStream stream = resource.openInputStream()) {
+                rollbackScriptContents = StreamUtil.readStreamAsString(stream);
+            }
         } catch (IOException e) {
             throw new LiquibaseException("Error reading rollbackScript " + executor + ": " + e.getMessage());
         }
@@ -2289,7 +2294,9 @@ public class Liquibase implements AutoCloseable {
                     DBDocVisitor visitor = new DBDocVisitor(database);
                     logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
-                    visitor.writeHTML(new File(outputDirectory), resourceAccessor);
+                    final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+                    Resource resource = pathHandlerFactory.getResource(outputDirectory);
+                    visitor.writeHTML(resource, resourceAccessor);
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 } finally {

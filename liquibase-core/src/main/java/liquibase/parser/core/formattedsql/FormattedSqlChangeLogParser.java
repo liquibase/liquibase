@@ -12,6 +12,8 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
@@ -612,11 +614,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     }
 
     protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
-        InputStream resourceAsStream = resourceAccessor.openStream(null, physicalChangeLogLocation);
-        if (resourceAsStream == null) {
-            final File physicalChangeLogFile = new File(physicalChangeLogLocation);
-            throw new IOException(FileUtil.getFileNotFoundMessage(physicalChangeLogFile.getAbsolutePath()));
-        }
-        return resourceAsStream;
+        return resourceAccessor.getExisting(physicalChangeLogLocation).openInputStream();
     }
 }

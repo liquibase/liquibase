@@ -33,15 +33,14 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.TestSystemFactory;
-import liquibase.hub.HubConfiguration;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.precondition.core.TableExistsPrecondition;
+import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.logging.core.JavaLogService;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -842,30 +841,6 @@ public abstract class AbstractIntegrationTest {
 
         assertTrue("querying the changelog table on an empty target should return at least 1 un-run changeset", !list.isEmpty());
 
-    }
-
-    @Test
-    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
-    public void testAbsolutePathChangeLog() throws Exception {
-        assumeNotNull(this.getDatabase());
-
-        String fileUrlToChangeLog = getClass().getResource("/" + includedChangeLog).toString();
-        assertTrue(fileUrlToChangeLog.startsWith("file:/"));
-
-        String absolutePathOfChangeLog = fileUrlToChangeLog.replaceFirst("file:\\/", "");
-        if (System.getProperty("os.name").startsWith("Windows ")) {
-            absolutePathOfChangeLog = absolutePathOfChangeLog.replace('/', '\\');
-        } else {
-            absolutePathOfChangeLog = "/" + absolutePathOfChangeLog;
-        }
-        Liquibase liquibase = createLiquibase(absolutePathOfChangeLog, new FileSystemResourceAccessor(File.listRoots()));
-        clearDatabase();
-
-        liquibase.update(this.contexts);
-
-        liquibase.update(this.contexts); //try again, make sure there are no errors
-
-        clearDatabase();
     }
 
     private void dropDatabaseChangeLogTable(String catalog, String schema, Database database) {

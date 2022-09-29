@@ -11,6 +11,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -163,12 +164,13 @@ public class CreateViewChange extends AbstractChange {
         }
 
         try {
-            String path = getPath();
-            String relativeTo = null;
+            ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+
             if (ObjectUtil.defaultIfNull(getRelativeToChangelogFile(), false)) {
-                relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
+                return resourceAccessor.get(getChangeSet().getChangeLog().getPhysicalFilePath()).resolveSibling(getPath()).openInputStream();
+            } else {
+                return resourceAccessor.getExisting(getPath()).openInputStream();
             }
-            return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
             throw new IOException("<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" + path + "> -Unable to read file", e);
         }
