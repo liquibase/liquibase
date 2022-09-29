@@ -12,9 +12,9 @@ This repository contains the main source code for Liquibase. For more informatio
 
 ## Liquibase Automation and Integrations
 
-Liquibase Core works with the following databases: Apache Derby, CockroachDB, Firebird, H2, HSQL, Informix, InterBase, MariaDB, MSSQL, MySQL, Oracle, PostgreSQL, SQLite, Sybase Anywhere, Sybase Enterprise. The databases that require extensions are: [Azure Cosmos DB](https://github.com/liquibase/liquibase-cosmosdb), [Cassandra](https://github.com/liquibase/liquibase-cassandra), [Cache](https://github.com/liquibase/liquibase-cache), [DB2i](https://github.com/liquibase/liquibase-db2i), [Hibernate](https://github.com/liquibase/liquibase-hibernate), [Impala/Hive](https://github.com/eselyavka/liquibase-impala), [MaxDB](https://github.com/liquibase/liquibase-maxdb), [MongoDB](https://github.com/liquibase/liquibase-mongodb), [Redshift](https://github.com/liquibase/liquibase-redshift), [SAP HANA](https://github.com/liquibase/liquibase-hanadb), [SQLFire](https://github.com/liquibase/liquibase-sqlfire), [Snowflake](https://github.com/liquibase/liquibase-snowflake), [Teradata](https://github.com/liquibase/liquibase-teradata), [Vertica](https://github.com/liquibase/liquibase-vertica), [VoltDB](https://github.com/diorman/liquibase-voltdb). See [Liquibase Database Tutorials](https://docs.liquibase.com/workflows/database-setup-tutorials/home.html).
+Liquibase Core has built-in support for a variety of databases. Databases that are not part of Liquibase Core require extensions that you can download for free. For a full list of supported databases, see [Liquibase Database Tutorials](https://docs.liquibase.com/install/tutorials/home.html).
 
-Liquibase can be integrated with Maven, Ant, Gradle, Spring Boot, and other CI/CD tools. You can use Liquibase GitHub Actions, Liquibase and Jenkins with Spinnaker, and many different workflows.
+Liquibase can be integrated with Maven, Ant, Gradle, Spring Boot, and other CI/CD tools. For a full list, see [Liquibase Tools & Integrations](https://docs.liquibase.com/tools-integrations/home.html). You can use Liquibase GitHub Actions, Liquibase and Jenkins with Spinnaker, and many different [workflows](https://docs.liquibase.com/workflows/home.html).
 
 ## Real-time monitoring and visibility
 Try [Liquibase Hub](https://hub.liquibase.com/) to get real-time information about your deployments, an overview of recent commands for the specific database you’re working on, and a place for your team collaboration.
@@ -35,7 +35,7 @@ Liquibase system requirements can be found on the [Download Liquibase](https://w
 8. Run the `liquibase history` command.
 9. If you entered your email, check the report link and the output of the `history` command to see they match. 
 
-See also how to [get started with Liquibase in minutes](https://www.liquibase.org/get-started/quickstart) or refer to our [Liquibase Installation](https://docs.liquibase.com/concepts/installation/home.html) documentation page for more details.
+See also how to [get started with Liquibase in minutes](https://www.liquibase.org/get-started/quickstart) or refer to our [Installing Liquibase](https://docs.liquibase.com/install/home.html) documentation page for more details.
 
 ## Documentation
 
