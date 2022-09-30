@@ -14,6 +14,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.H2Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -630,6 +631,9 @@ public abstract class AbstractIntegrationTest {
             }
             if (database instanceof PostgresDatabase) {
                 compareControl.addSuppressedField(Column.class, "type"); //database returns different nvarchar2 info even though they are the same
+            }
+            if (database instanceof H2Database) {
+                compareControl.addSuppressedField(View.class, "name"); //database returns different case as it was created with QUOTE_ALL_OBJECTS
             }
 
             DiffOutputControl diffOutputControl = new DiffOutputControl();
