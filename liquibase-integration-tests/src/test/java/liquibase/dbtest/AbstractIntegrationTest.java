@@ -1,10 +1,6 @@
 package liquibase.dbtest;
 
 import groovy.lang.Tuple2;
-
-import java.io.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import liquibase.*;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataChange;
@@ -14,6 +10,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.H2Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -33,14 +30,13 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.TestSystemFactory;
-import liquibase.hub.HubConfiguration;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
-import liquibase.precondition.core.TableExistsPrecondition;
 import liquibase.logging.core.JavaLogService;
+import liquibase.precondition.core.TableExistsPrecondition;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -60,12 +56,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import java.io.*;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static liquibase.test.SnapshotAssert.assertThat;
 import static org.junit.Assert.*;
@@ -635,6 +634,9 @@ public abstract class AbstractIntegrationTest {
             if (database instanceof PostgresDatabase) {
                 compareControl.addSuppressedField(Column.class, "type"); //database returns different nvarchar2 info even though they are the same
             }
+            if (database instanceof H2Database) {
+                compareControl.addSuppressedField(View.class, "name"); //database returns different case as it was created with QUOTE_ALL_OBJECTS
+            }
 
             DiffOutputControl diffOutputControl = new DiffOutputControl();
             File tempFile = tempDirectory.getRoot().createTempFile("liquibase-test", ".xml");
@@ -654,13 +656,12 @@ public abstract class AbstractIntegrationTest {
                 output.close();
             }
 
-            Liquibase liquibase = createLiquibase(tempFile.getName());
             clearDatabase();
 
             DatabaseSnapshot emptySnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
             //run again to test changelog testing logic
-            liquibase = createLiquibase(tempFile.getName());
+            Liquibase liquibase = createLiquibase(tempFile.getName());
             try {
                 liquibase.update(this.contexts);
             } catch (ValidationFailedException e) {

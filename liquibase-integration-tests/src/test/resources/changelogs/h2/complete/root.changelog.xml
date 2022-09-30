@@ -375,4 +375,15 @@
         </addColumn>
     </changeSet>
 
+    <!-- changesets with ids 2659 are testing if creating a view camel case with quotes won't break subsequent
+         preConditions snapshots of it -->
+    <changeSet id="2659-Create-MyView-with-quotes" author="flautert" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <createView viewName="MyViewBreakDb" replaceIfExists="true">select 1</createView>
+    </changeSet>
+
+    <changeSet id="2659-Create-MyView-with-quotes-test-must-MARK_RAN" author="flautert" >
+        <preConditions onFail="MARK_RAN"><tableExists tableName="NOT_EXISTENT_TABLE"/></preConditions>
+        <dropTable tableName="NOT_EXISTENT_TABLE_DOESNT_MATTER"/>
+    </changeSet>
+
 </databaseChangeLog>
