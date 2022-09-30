@@ -21,6 +21,7 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+    public static final CommandArgumentDefinition<Boolean> ROLLBACK_ON_ERROR;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME, LEGACY_COMMAND_NAME);
@@ -52,6 +53,9 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
                 .description("Fully-qualified class which specifies a ChangeExecListener").build();
         CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
                 .description("Path to a properties file for the ChangeExecListenerClass").build();
+        ROLLBACK_ON_ERROR = builder.argument("rollbackOnError", Boolean.class)
+                .description("If set to true, will automatically rollback all the changesets deployed before and stop the deployment.")
+                .build();
     }
 
     @Override
