@@ -60,6 +60,7 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
         }
 
         final Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
+        referenceDatabase.setOutputDefaultSchema(commandScope.getArgumentValue(DIFF_OUTPUT_CONTROL_ARG).getIncludeSchema());
 
         InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
 
