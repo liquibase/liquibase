@@ -13,6 +13,7 @@ public class LicenseServiceUtils {
 
   public static final String TRIAL_LICENSE_URL = "https://liquibase.com/trial";
   private static final String BASE_INVALID_LICENSE_MESSAGE = "Using '%s' requires a valid Liquibase Pro or Labs license. Get a free license key at " + TRIAL_LICENSE_URL + ".";
+  private static final String BASE_INVALID_LICENSE_MESSAGE_FOR_FLAG = "Using '%s' flag with '%s' requires a valid Liquibase Pro or Labs license. Get a free license key at " + TRIAL_LICENSE_URL + ".";
 
   /**
    * Check for a Liquibase Pro License.
@@ -40,5 +41,27 @@ public class LicenseServiceUtils {
     if (!isProLicenseValid()) {
       throw new CommandValidationException(String.format(BASE_INVALID_LICENSE_MESSAGE + " Add liquibase.licenseKey=<yourKey> into your defaults file or use --license-key=<yourKey> before your command in the CLI.", StringUtil.join(commandNames, " ")));
     }
+  }
+
+  /**
+   * Throw an exception if there is no valid pro license.
+   * @param commandNames the name of the command; each element of the array will be joined by spaces
+   * @param flag the name of the flag that requires a verification of the pro license.
+   * @throws CommandValidationException the exception thrown if the license is not valid
+   */
+  public static void checkProLicenseAndThrowException(String[] commandNames, String flag) throws CommandValidationException {
+    if (!isProLicenseValid()) {
+      throw new CommandValidationException(String.format(BASE_INVALID_LICENSE_MESSAGE_FOR_FLAG + " Add liquibase.licenseKey=<yourKey> into your defaults file or use --license-key=<yourKey> before your command in the CLI.", flag, StringUtil.join(commandNames, " ")));
+    }
+  }
+
+  /**
+   * Throw an exception if there is no valid pro license.
+   * @param commandName the name of the command
+   * @param flag the name of the flag that requires a verification of the pro license.
+   * @throws CommandValidationException the exception thrown if the license is not valid
+   */
+  public static void checkProLicenseAndThrowException(String commandName, String flag) throws CommandValidationException {
+    checkProLicenseAndThrowException(new String[]{commandName}, flag);
   }
 }
