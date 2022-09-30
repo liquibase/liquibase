@@ -800,10 +800,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (hasCustomRollbackChanges()) {
                 final List<SqlStatement> statements = new LinkedList<>();
                 for (Change change : rollback.getChanges()) {
-                    if (((change instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
-                        continue;
-                    }
-                    if ((change instanceof RawSQLChange) && "empty".equalsIgnoreCase(((RawSQLChange)change).getSql())) {
+                    if (this.ignoreSpecificChangeTypes(change, database)) {
                         continue;
                     }
                     if (listener != null) {
@@ -862,6 +859,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
 
+    }
+
+    private boolean ignoreSpecificChangeTypes(Change change, Database database) {
+        return ((change instanceof DbmsTargetedChange) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true))
+             || ((change instanceof RawSQLChange) && "empty".equalsIgnoreCase(((RawSQLChange)change).getSql()));
     }
 
     /**
