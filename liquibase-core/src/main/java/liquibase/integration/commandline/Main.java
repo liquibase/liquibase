@@ -3,9 +3,11 @@ package liquibase.integration.commandline;
 import liquibase.*;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.ChangeSet;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
+import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.*;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -124,6 +126,7 @@ public class Main {
     protected String schemas;
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
+    protected Boolean rollbackOnError;
     private boolean liquibaseProLicenseValid = false;
     protected String liquibaseHubApiKey;
     protected String liquibaseHubUrl;
@@ -1826,7 +1829,17 @@ public class Main {
 
             try {
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
-                    liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    try {
+                        liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    } catch (MigrationFailedException e) {
+                        final Map<String, Object> argsMap = new HashMap<>();
+                        argsMap.put("changeLogFile", changeLogFile);
+                        argsMap.put("database", database);
+                        argsMap.put("liquibase", liquibase);
+                        argsMap.put("migrationFailedException", e);
+                        CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackChangesetsOnError", argsMap);
+                        liquibaseCommand.execute();
+                    }
                 } else if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)) {
