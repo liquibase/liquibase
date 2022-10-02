@@ -34,11 +34,8 @@ Currently, not supported are:
 
 ### Installing and setting up liquibase
 
-Download and install liquibase-cli from
-[here](https://www.liquibase.org/download).
-You can use plain liquibase jar file, which can be downloaded from maven repo
-Having liquibase-core-4.6.2.jar file in our working directory
-will satisfy the very first requirement.
+Download and install liquibase from
+[here](https://docs.liquibase.com/install/liquibase-windows.html).
 
 ### JDBC driver for BigQuery
 
@@ -51,17 +48,26 @@ Click JDBC 4.2-compatible to start downloading the corresponding zip file.
 When you unzip it you will find quite some number of jars and one of them,
 named GoogleBigQueryJDBC42.jar,
 will represent our BigQuery JDBC driver.
+Add files from the archive to the liquibase lib directory.
 
 ### Liquibase BigQuery extension
 
 Build this project with `mvn` or download the jar file
 corresponding to the latest release and put it
-into working directory next to liquibase-core jar file
-downloaded in previous step.
+into `liquibase/lib` lib directory.
 
 ### Starting BigQuery dataset
 
 You can create a BigQuery dataset in the GCP console, use terraform or bq client.
+
+### Test your connection
+
+Give the extension temporary use of your BigQuery user credentials for API access
+by running the following gcloud command:
+
+```sh
+gcloud auth application-default login
+```
 
 ### Create configuration file
 
@@ -116,7 +122,7 @@ logLevel: WARN
 - updating the database schema
 
 ```shell
-java -jar liquibase-core-4.6.2.jar -changeLogFile changelog.sql update
+liquibase --changeLogFile=changelog.sql update
 ```
 
 - generating the schema from current database state

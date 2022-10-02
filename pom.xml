@@ -33,6 +33,13 @@
         <tag>HEAD</tag>
     </scm>
 
+    <repositories>
+        <repository>
+            <id>local-lib-repo</id>
+            <url>file:///${pom.basedir}/src/lib</url>
+        </repository>
+    </repositories>
+
     <developers>
         <developer>
             <id>liquibase</id>
