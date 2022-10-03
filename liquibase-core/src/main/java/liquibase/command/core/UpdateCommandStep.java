@@ -54,7 +54,7 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
         CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
                 .description("Path to a properties file for the ChangeExecListenerClass").build();
         ROLLBACK_ON_ERROR = builder.argument("rollbackOnError", Boolean.class)
-                .description("If set to true, will automatically rollback all the changesets deployed before and stop the deployment.")
+                .description("If set to true, if a changeset fails to deploy, will automatically rollback all the changesets deployed before and stop the deployment.")
                 .build();
     }
 

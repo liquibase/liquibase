@@ -1837,7 +1837,8 @@ public class Main {
                         argsMap.put("database", database);
                         argsMap.put("liquibase", liquibase);
                         argsMap.put("migrationFailedException", e);
-                        CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackChangesetsOnError", argsMap);
+                        argsMap.put("rollbackOnError", rollbackOnError);
+                        final CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackChangesetsOnError", argsMap);
                         liquibaseCommand.execute();
                     }
                 } else if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {

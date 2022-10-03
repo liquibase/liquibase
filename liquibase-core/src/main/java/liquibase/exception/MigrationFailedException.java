@@ -9,26 +9,26 @@ public class MigrationFailedException extends LiquibaseException {
 
     private static final long serialVersionUID = 1L;
     private ChangeSet failedChangeSet;
-    private List<ChangeSet> failedChangeSets = null;
+    private List<ChangeSet> deployedChangeSets;
 
     public MigrationFailedException() {}
 
     public MigrationFailedException(ChangeSet failedChangeSet, String message) {
         super(message);
         this.failedChangeSet = failedChangeSet;
-        this.failedChangeSets = filterFailedChangeSets(failedChangeSet);
+        this.deployedChangeSets = filterDeployedChangeSets(failedChangeSet);
     }
 
     public MigrationFailedException(ChangeSet failedChangeSet, String message, Throwable cause) {
         super(message, cause);
         this.failedChangeSet = failedChangeSet;
-        this.failedChangeSets = filterFailedChangeSets(failedChangeSet);
+        this.deployedChangeSets = filterDeployedChangeSets(failedChangeSet);
     }
 
     public MigrationFailedException(ChangeSet failedChangeSet, Throwable cause) {
         super(cause);
         this.failedChangeSet = failedChangeSet;
-        this.failedChangeSets = filterFailedChangeSets(failedChangeSet);
+        this.deployedChangeSets = filterDeployedChangeSets(failedChangeSet);
     }
 
     /**
@@ -36,15 +36,15 @@ public class MigrationFailedException extends LiquibaseException {
      * @return true if any changeSets were deployed before {@link MigrationFailedException} was thrown.
      */
     public boolean containsDeployedChangeLogs() {
-        return !(failedChangeSets == null || failedChangeSets.isEmpty());
+        return !(deployedChangeSets == null || deployedChangeSets.isEmpty());
     }
 
     /**
      *
      * @return all changeSets that were deployed before {@link MigrationFailedException} was thrown.
      */
-    public List<ChangeSet> getDeployedChangeLogs() {
-        return new LinkedList<>(failedChangeSets);
+    public List<ChangeSet> getDeployedChangeSets() {
+        return new LinkedList<>(deployedChangeSets);
     }
 
     /**
@@ -58,29 +58,28 @@ public class MigrationFailedException extends LiquibaseException {
     /**
      *
      * @param firstFailed first changeSet from sequence that was a reason for exception.
-     * @return a list of {@link ChangeSet} that were deployed before exception fired.
+     * @return a list of {@link ChangeSet} that were deployed before exception appeared.
      */
-    private List<ChangeSet> filterFailedChangeSets(ChangeSet firstFailed) {
-        final List<ChangeSet> allChangeSetsFromChangeLog = firstFailed.getChangeLog().getChangeSets();
-        final List<ChangeSet> allChangeSetsBeforeFailedOne = new LinkedList<>();
-        for (ChangeSet changeSet : allChangeSetsFromChangeLog) {
+    private List<ChangeSet> filterDeployedChangeSets(ChangeSet firstFailed) {
+        final List<ChangeSet> changelogChangeSets = firstFailed.getChangeLog().getChangeSets();
+        final List<ChangeSet> deployedChangeSets = new LinkedList<>();
+        for (ChangeSet changeSet : changelogChangeSets) {
             if (changeSet.getId().equals(firstFailed.getId())) {
                 break;
             }
-            allChangeSetsBeforeFailedOne.add(changeSet);
+            deployedChangeSets.add(changeSet);
         }
-        return allChangeSetsBeforeFailedOne;
+        return deployedChangeSets;
     }
 
     @Override
     public String getMessage() {
         final String failedChangeSetName = failedChangeSet == null ? "(unknown)" : failedChangeSet.toString(false);
-
         String message = "Migration failed";
         if (failedChangeSetName != null) {
             message += " for changeset " + failedChangeSetName;
         }
-        message += ":\n     Reason: " + super.getMessage();
+        message += ":\n     Reason: "+super.getMessage();
 
         return message;
     }
