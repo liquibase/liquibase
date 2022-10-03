@@ -234,9 +234,18 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                         "FROM pg_class c " +
                         "JOIN pg_namespace ns on c.relnamespace = ns.oid " +
                         "JOIN pg_sequence s on c.oid = s.seqrelid " +
+                        "LEFT JOIN pg_depend d ON c.oid = d.objid " +
                         "WHERE c.relkind = 'S' " +
                         "AND ns.nspname = '" + schema.getName() + "' " +
-                        "AND c.oid not in (select d.objid FROM pg_depend d where d.refobjsubid > 0)";
+                        "AND (c.oid not in (select ds.objid FROM pg_depend ds where ds.refobjsubid > 0)" +
+                        "OR  (" +
+                        "   d.deptype = 'a' AND EXISTS (" +
+                        "       select 1 from pg_attribute a " +
+                        "        JOIN pg_class t on t.oid = d.refobjid AND a.attrelid=t.oid and a.attnum=d.refobjsubid " +
+                        "        LEFT JOIN pg_catalog.pg_attrdef ad on ad.adrelid = a.attrelid" +
+                        "        WHERE a.atthasdef = false or not (ad.adsrc like '%' || c.relname || '%'))" +
+                        "   )" +
+                        ")";
             }
         } else if (database instanceof MSSQLDatabase) {
             return "SELECT SEQUENCE_NAME, " +
