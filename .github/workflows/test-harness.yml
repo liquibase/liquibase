@@ -1,0 +1,139 @@
+name: BigQuery Cloud Integration Testing
+on:
+  pull_request:
+    branches:
+      - '*'
+env:
+  tf_version: 'latest'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: configure auth
+        id: auth
+        uses: 'google-github-actions/auth@v0'
+        with:
+          workload_identity_provider: 'projects/263903559714/locations/global/workloadIdentityPools/github-identity-pool/providers/github-identity-provider'
+          service_account: 'gh-bq-deployer@gh-integration-tests.iam.gserviceaccount.com'
+          create_credentials_file: 'true'
+
+      - name: set GCP project
+        id: config_project
+        run: gcloud config set project gh-integration-tests
+
+      - name: "Terraform Init"
+        id: terraform_init
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 1.1.7
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: src/test/resources/terraform
+          args: '-backend-config=./backend/gh.conf -upgrade'
+
+      - name: "Terraform Validate"
+        id: terraform_validate
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 1.1.7
+          tf_actions_subcommand: 'validate'
+          tf_actions_working_dir: src/test/resources/terraform
+
+      - name: "Terraform Apply"
+        uses: hashicorp/terraform-github-actions@master
+        id: terraform_apply
+        with:
+          tf_actions_version: 1.1.7
+          tf_actions_subcommand: 'apply'
+          tf_actions_working_dir: src/test/resources/terraform
+          args: '-var-file=gh.tfvars'
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [setup]
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: configure auth
+        id: auth
+        uses: 'google-github-actions/auth@v0'
+        with:
+            workload_identity_provider: 'projects/263903559714/locations/global/workloadIdentityPools/github-identity-pool/providers/github-identity-provider'
+            service_account: 'gh-bq-deployer@gh-integration-tests.iam.gserviceaccount.com'
+            create_credentials_file: 'true'
+
+      - name: BigQuery Test Run
+        run: mvn -Dit.test=LiquibaseHarnessSuiteIT -DoutputDefaultCatalog=false verify
+        continue-on-error: true
+
+      - name: Archive Bigquery Database Test Results
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: bigquery-test-results
+          path: target/surefire-reports
+
+      - name: Test Summary
+        continue-on-error: true
+        uses: test-summary/action@v1
+        with:
+          paths: "target/surefire-reports/**/TEST-*.xml"
+        if: always()
+
+  destroy:
+    runs-on: ubuntu-latest
+    needs: [setup,test]
+    defaults:
+      run:
+        working-directory: src/test/resources/terraform
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: configure auth
+        id: auth
+        uses: 'google-github-actions/auth@v0'
+        with:
+          workload_identity_provider: 'projects/263903559714/locations/global/workloadIdentityPools/github-identity-pool/providers/github-identity-provider'
+          service_account: 'gh-bq-deployer@gh-integration-tests.iam.gserviceaccount.com'
+          token_format: 'access_token'
+          create_credentials_file: 'true'
+
+      - name: set GCP project
+        id: config_project
+        run: gcloud config set project gh-integration-tests
+
+      - name: "Terraform Init"
+        id: terraform_init
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 1.1.7
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: src/test/resources/terraform
+          args: '-backend-config=./backend/gh.conf  -upgrade'
+
+      - name: "Terraform Destroy"
+        id: terraform_destroy
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 1.1.7
+          tf_actions_subcommand: 'destroy'
+          tf_actions_working_dir: src/test/resources/terraform
+          args: '-auto-approve -var-file=gh.tfvars'

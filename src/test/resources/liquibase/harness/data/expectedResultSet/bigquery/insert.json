@@ -1,0 +1,28 @@
+{
+  "insert": [
+    {
+      "author_id": 1,
+      "description": "voluptatum",
+      "title": "temporibus",
+      "inserted_date": "2015-11-18",
+      "id": 1,
+      "content": "Fugit non et doloribus repudiandae."
+    },
+    {
+      "author_id": 2,
+      "description": "aut",
+      "title": "ea",
+      "inserted_date": "1975-06-08",
+      "id": 2,
+      "content": "Tempora molestias maiores provident molestiae sint possimus quasi."
+    },
+    {
+      "author_id": 6,
+      "description": "value",
+      "title": "value",
+      "inserted_date": "2006-10-09",
+      "id": 100,
+      "content": "value"
+    }
+  ]
+}

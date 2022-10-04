@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="1" author="as">
+        <createTable tableName="modify_data_type_test">
+            <column name="intColumn" type="int"/>
+            <column name="dateColumn" type="date"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="modify_data_type_test"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="2" author="as">
+        <modifyDataType  columnName="intColumn"
+                         newDataType="numeric"
+                         tableName="modify_data_type_test"/>
+        <!-- bigquery requires that the existing column type (INT64) is assignable to the new type(NUMERIC) - for STRING it is not -->
+        <rollback/>
+    </changeSet>
+</databaseChangeLog>

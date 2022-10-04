@@ -1,0 +1,17 @@
+{
+  "snapshot": {
+    "objects": {
+      "liquibase.structure.core.Column": [
+        {
+          "column": {
+            "name": "first_name_renameColumn_test",
+            "nullable": false,
+            "type": {
+              "typeName": "STRING"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

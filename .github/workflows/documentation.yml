@@ -1,0 +1,30 @@
+name: Documentation checks
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  linting:
+    name: Documentation linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Markdown linter
+        uses: avto-dev/markdown-lint@v1
+        with:
+          config: '.markdownlint.yml'
+          args: '**/*.md'
+      - name: Markdown links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          config-file: '.mlc_config.json'
+          base-branch: main
