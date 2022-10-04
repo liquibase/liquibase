@@ -348,7 +348,7 @@
             <plugin>
                 <groupId>org.liquibase.ext</groupId>
                 <artifactId>liquibase-sdk-maven-plugin</artifactId>
-                <version>0.10.17</version>
+                <version>0.10.18</version>
             </plugin>
         </plugins>
     </build>
