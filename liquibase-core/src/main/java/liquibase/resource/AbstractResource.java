@@ -48,6 +48,14 @@ public abstract class AbstractResource implements Resource {
     }
 
     @Override
+    public OutputStream openOutputStream(boolean createIfNeeded, OpenOption openOption) throws IOException {
+        if (!isWritable()) {
+            throw new IOException("Read only");
+        }
+        throw new IOException("Write not implemented");
+    }
+
+    @Override
     public String toString() {
         return getPath();
     }

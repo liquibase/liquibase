@@ -77,6 +77,10 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
      * @throws IOException if there is an error opening the stream
      */
     public OutputStream openResourceOutputStream(String resourcePath, boolean createIfNotExists) throws IOException {
+        return openResourceOutputStream(resourcePath, createIfNotExists, OpenOption.TRUNCATE);
+    }
+
+    public OutputStream openResourceOutputStream(String resourcePath, boolean createIfNotExists, OpenOption openOption) throws IOException {
         Resource resource = getResource(resourcePath);
         if (!resource.exists()) {
             if (createIfNotExists) {
@@ -85,7 +89,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
                 return null;
             }
         }
-        return resource.openOutputStream(createIfNotExists);
+        return resource.openOutputStream(createIfNotExists, openOption);
     }
 
     /**

@@ -60,6 +60,15 @@ public interface Resource {
     OutputStream openOutputStream(boolean createIfNeeded) throws IOException;
 
     /**
+     * Opens an output stream to write to this resource. Note that calling this method will truncate (erase) the existing file.
+     *
+     * @param createIfNeeded if true, create the resource if it does not exist. If false, throw an exception if it does not exist
+     * @param openOption options specifying how the file is opened
+     * @throws IOException if there is an error writing to the resource, including if the resource does not exist or permission don't allow writing.
+     */
+    OutputStream openOutputStream(boolean createIfNeeded, OpenOption openOption) throws IOException;
+
+    /**
      * Returns a unique and complete identifier for this resource.
      * This will be different than what is returned by {@link #getPath()} because the path within the resource accessor whereas this is the a complete path to it.
      * <p>

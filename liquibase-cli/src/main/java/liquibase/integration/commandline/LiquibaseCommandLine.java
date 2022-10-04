@@ -16,6 +16,7 @@ import liquibase.exception.CommandValidationException;
 import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
+import liquibase.logging.LogFileFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
 import liquibase.resource.*;
@@ -643,9 +644,9 @@ public class LiquibaseCommandLine {
 
         if (logFile != null) {
             if (fileHandler == null) {
-                final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-                OutputStream outputStream = pathHandlerFactory.openResourceOutputStream(logFile, true);
-                fileHandler = new StreamHandler(outputStream, new SimpleFormatter()); // todo, need to figure out how to not overwrite/append=true
+                final LogFileFactory logFileFactory = Scope.getCurrentScope().getSingleton(LogFileFactory.class);
+                OutputStream outputStream = logFileFactory.getOutputStream(logFile);
+                fileHandler = new StreamHandler(outputStream, new SimpleFormatter());
                 rootLogger.addHandler(fileHandler);
             }
 
