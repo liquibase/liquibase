@@ -633,7 +633,8 @@ public abstract class AbstractIntegrationTest {
                 compareControl.addSuppressedField(Column.class, "type"); //database returns different nvarchar2 info even though they are the same
             }
             if (database instanceof H2Database) {
-                compareControl.addSuppressedField(View.class, "name"); //database returns different case as it was created with QUOTE_ALL_OBJECTS
+                //original changeset 2659-Create-MyView-with-quotes in the h2 changelog uses QUOTE_ALL_OBJECTS, but generated changesets do not use that attribute so the name comes through as differnt
+                compareControl.addSuppressedField(View.class, "name");
             }
 
             DiffOutputControl diffOutputControl = new DiffOutputControl();
