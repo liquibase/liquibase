@@ -243,7 +243,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                         "       select 1 from pg_attribute a " +
                         "        JOIN pg_class t on t.oid = d.refobjid AND a.attrelid=t.oid and a.attnum=d.refobjsubid " +
                         "        LEFT JOIN pg_catalog.pg_attrdef ad on ad.adrelid = a.attrelid" +
-                        "        WHERE a.atthasdef = false or not (ad.adsrc like '%' || c.relname || '%'))" +
+                        "        WHERE a.atthasdef = false or not (pg_get_expr(ad.adbin, ad.adrelid) like '%' || c.relname || '%'))" +
                         "   )" +
                         ")";
             }
