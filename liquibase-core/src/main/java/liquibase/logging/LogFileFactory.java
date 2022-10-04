@@ -9,6 +9,10 @@ import java.io.OutputStream;
  * This factory supports the creation of log files for internal Liquibase logging.
  */
 public class LogFileFactory extends AbstractPluginFactory<LogFilePlugin> {
+
+    private LogFileFactory() {
+    }
+
     @Override
     protected Class<LogFilePlugin> getPluginClass() {
         return LogFilePlugin.class;
