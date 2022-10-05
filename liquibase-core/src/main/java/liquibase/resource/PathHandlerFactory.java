@@ -77,7 +77,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
      * @throws IOException if there is an error opening the stream
      */
     public OutputStream openResourceOutputStream(String resourcePath, boolean createIfNotExists) throws IOException {
-        return openResourceOutputStream(resourcePath, createIfNotExists, OpenOption.TRUNCATE);
+        return openResourceOutputStream(resourcePath, createIfNotExists, null);
     }
 
     public OutputStream openResourceOutputStream(String resourcePath, boolean createIfNotExists, OpenOption openOption) throws IOException {
