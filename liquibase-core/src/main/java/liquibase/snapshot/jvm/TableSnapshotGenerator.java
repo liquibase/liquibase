@@ -19,7 +19,7 @@ import java.util.List;
 
 public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
     public TableSnapshotGenerator() {
-        super(Table.class, new Class[]{Schema.class});
+        super(Table.class, new Class[] { Schema.class});
     }
 
     @Override
@@ -39,6 +39,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 return null;
             }
+
             return table;
         } catch (SQLException e) {
             throw new DatabaseException(e);
@@ -62,6 +63,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                 for (CachedRow row : tableMetaDataRs) {
                     String tableName = row.getString("TABLE_NAME");
                     Table tableExample = (Table) new Table().setName(cleanNameFromDatabase(tableName, database)).setSchema(schema);
+
                     schema.addDatabaseObject(tableExample);
                 }
             } catch (SQLException e) {
@@ -79,6 +81,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         String remarks = StringUtil.trimToNull(tableMetadataResultSet.getString("REMARKS"));
         String tablespace = StringUtil.trimToNull(tableMetadataResultSet.getString("TABLESPACE_NAME"));
         String defaultTablespaceString = StringUtil.trimToNull(tableMetadataResultSet.getString("DEFAULT_TABLESPACE"));
+
         if (remarks != null) {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }

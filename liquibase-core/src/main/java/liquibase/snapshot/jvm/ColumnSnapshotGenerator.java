@@ -402,6 +402,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         column.setDefaultValue(defaultValue);
         column.setDefaultValueConstraintName(columnMetadataResultSet.getString("COLUMN_DEF_NAME"));
+
         return column;
     }
 
@@ -416,6 +417,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
      * @throws DatabaseException If an error occurs during processing (mostly caused by Exceptions in JDBC calls)
      */
     protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws DatabaseException {
+
         if (database instanceof OracleDatabase) {
             String dataType = columnMetadataResultSet.getString("DATA_TYPE_NAME");
             dataType = dataType.replace("VARCHAR2", "VARCHAR");

@@ -298,7 +298,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
         try {
             DatabaseMetaData metaData = ((JdbcConnection) connection).getMetaData();
             int driverMajorVersion = metaData.getDriverMajorVersion();
-            int driverMinorVersion = metaData.getDriverMinorVersion();
+            int driverMinorVersion= metaData.getDriverMinorVersion();
             String driverName = metaData.getDriverName();
 
             if (!driverName.startsWith("Microsoft")) {
