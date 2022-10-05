@@ -8,6 +8,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.structure.core.View;
+import liquibase.util.ObjectUtil;
 
 /**
  * Drops an existing view.
@@ -59,7 +60,7 @@ public class DropViewChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-                new DropViewStatement(getCatalogName(), getSchemaName(), getViewName(), ifExists != null ? ifExists : false),
+                new DropViewStatement(getCatalogName(), getSchemaName(), getViewName(), ObjectUtil.defaultIfNull(ifExists, false)),
         };
     }
 

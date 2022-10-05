@@ -260,7 +260,7 @@ public class CreateViewChange extends AbstractChange {
 		}
 
         if (!supportsReplaceIfExistsOption(database) && replaceIfExists) {
-            statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName(), true));
+            statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));
             statements.add(createViewStatement(getCatalogName(), getSchemaName(), getViewName(), selectQuery, false)
                     .setFullDefinition(fullDefinition));
         } else {
