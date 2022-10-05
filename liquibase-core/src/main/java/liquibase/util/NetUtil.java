@@ -49,7 +49,13 @@ public class NetUtil {
      */
     public static String getLocalHostAddress() throws UnknownHostException, SocketException {
         try {
-            return getLocalHost().getHostAddress();
+            InetAddress localHost = getLocalHost();
+            if(localHost != null) {
+                return localHost.getHostAddress();
+            }
+            else {
+                return "unknown";
+            }
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname", e);
             return "unknown";
@@ -64,13 +70,18 @@ public class NetUtil {
         if (hostName == null ) {
             try {
                 InetAddress localHost = getLocalHost();
-                hostName = localHost.getHostName();
-                if (hostName.equals(localHost.getHostAddress())) {
-                    //sometimes the external IP interface doesn't have a hostname associated with it but localhost always does
-                    InetAddress lHost = InetAddress.getLocalHost();
-                    if (lHost != null) {
-                        hostName =  lHost.getHostName();
+                if(localHost != null) {
+                    hostName = localHost.getHostName();
+                    if (hostName.equals(localHost.getHostAddress())) {
+                        //sometimes the external IP interface doesn't have a hostname associated with it but localhost always does
+                        InetAddress lHost = InetAddress.getLocalHost();
+                        if (lHost != null) {
+                            hostName = lHost.getHostName();
+                        }
                     }
+                }
+                else {
+                    hostName = "unknown";
                 }
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname", e);
