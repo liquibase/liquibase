@@ -72,6 +72,10 @@ public class IntType extends LiquibaseDataType {
         if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("INTEGER");
         }
+        if( database instanceof SybaseDatabase )
+        {
+        	return new DatabaseDataType("INT");
+        }
         return super.toDatabaseDataType(database);
     }
 

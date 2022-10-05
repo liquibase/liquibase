@@ -76,11 +76,22 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             List<CachedRow> metaDataNotNullConst = databaseMetaData.getNotNullConst(catalogName, schemaName, tableName);
 
             if (!metaDataColumns.isEmpty()) {
-                CachedRow data = metaDataColumns.get(0);
-                column = readColumn(data, relation, database);
-                setAutoIncrementDetails(column, database, snapshot);
+                if( database instanceof SybaseDatabase )
+                {
+                    CachedRow data = metaDataColumns.get(0);
+                    if( !data.getString("COLUMN_NAME").startsWith("sybfi") )
+                    {
+                        column = readColumn(data, relation, database);
+                        setAutoIncrementDetails(column, database, snapshot);
+                    }
+                }
+                else {
+                    CachedRow data = metaDataColumns.get(0);
+                    column = readColumn(data, relation, database);
+                    setAutoIncrementDetails(column, database, snapshot);
 
-                populateValidateNullableIfNeeded(column, metaDataNotNullConst, database);
+                    populateValidateNullableIfNeeded(column, metaDataNotNullConst, database);
+                }
             }
 
             example.setAttribute(LIQUIBASE_COMPLETE, null);
@@ -142,7 +153,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException {
-        if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
+    	if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
             return;
         }
         if (foundObject instanceof Relation) {
@@ -212,7 +223,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected void setAutoIncrementDetails(Column column, Database database, DatabaseSnapshot snapshot) {
-        if ((column.getAutoIncrementInformation() != null) &&
+    	if ((column.getAutoIncrementInformation() != null) &&
                 (database instanceof MSSQLDatabase) &&
                 (database
                         .getConnection() != null) && !(database.getConnection() instanceof OfflineConnection)) {
@@ -258,7 +269,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected Column readColumn(CachedRow columnMetadataResultSet, Relation table, Database database)
             throws SQLException, DatabaseException {
-        String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
+    	String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
         String rawColumnName = (String) columnMetadataResultSet.get("COLUMN_NAME");
         String rawSchemaName = StringUtil.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
         String rawCatalogName = StringUtil.trimToNull((String) columnMetadataResultSet.get("TABLE_CAT"));
@@ -402,7 +413,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         column.setDefaultValue(defaultValue);
         column.setDefaultValueConstraintName(columnMetadataResultSet.getString("COLUMN_DEF_NAME"));
-
         return column;
     }
 
@@ -417,7 +427,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
      * @throws DatabaseException If an error occurs during processing (mostly caused by Exceptions in JDBC calls)
      */
     protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws DatabaseException {
-
         if (database instanceof OracleDatabase) {
             String dataType = columnMetadataResultSet.getString("DATA_TYPE_NAME");
             dataType = dataType.replace("VARCHAR2", "VARCHAR");
@@ -628,7 +637,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected Object readDefaultValue(CachedRow columnMetadataResultSet, Column columnInfo, Database database) {
-        if (database instanceof MSSQLDatabase) {
+    	if (database instanceof MSSQLDatabase) {
             Object defaultValue = columnMetadataResultSet.get(COLUMN_DEF_COL);
 
             if (((defaultValue != null) && (defaultValue instanceof String)) && ("(NULL)".equals(defaultValue))) {

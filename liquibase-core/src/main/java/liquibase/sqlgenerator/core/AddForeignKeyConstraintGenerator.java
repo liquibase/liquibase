@@ -64,7 +64,10 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 			    //TODO don't know if correct
 		    } else if ((database instanceof FirebirdDatabase) && "RESTRICT".equalsIgnoreCase(statement.getOnUpdate())) {
 			    //don't use
-		    } else {
+		    } else if ( database instanceof SybaseDatabase ) {
+		    	//TODO don't know if correct
+		    }
+		    else {
 			    sb.append(" ON UPDATE ").append(statement.getOnUpdate());
 		    }
 	    }
@@ -80,7 +83,11 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
                 // see "REFERENCES Clause" in manual
             } else if ((database instanceof FirebirdDatabase) && "RESTRICT".equalsIgnoreCase(statement.getOnDelete())) {
                 //don't use
-            } else {
+            } else if ( database instanceof SybaseDatabase )
+		    {
+		    	//TODO don't know if correct
+		    }
+		    else {
                 sb.append(" ON DELETE ").append(statement.getOnDelete());
             }
         }

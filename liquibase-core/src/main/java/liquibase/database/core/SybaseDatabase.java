@@ -85,7 +85,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
      */
     @Override
     public boolean supportsDDLInTransaction() {
-    	return false;
+        return false;
     }
 
     @Override
@@ -113,9 +113,9 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     boolean isSybaseProductName(String dbProductName) {
         return
                 PRODUCT_NAME.equals(dbProductName)
-                || "Sybase SQL Server".equals(dbProductName)
-                || "sql server".equals(dbProductName)
-                || "ASE".equals(dbProductName);
+                        || "Sybase SQL Server".equals(dbProductName)
+                        || "sql server".equals(dbProductName)
+                        || "ASE".equals(dbProductName);
     }
 
     @Override
@@ -133,18 +133,18 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         return "IDENTITY";
     }
 
-	@Override
-	protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
-		// not supported
-		return false;
-	}
-	
-	@Override
-	protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
-		// not supported
-		return false;
-	}    
-    
+    @Override
+    protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
+        // not supported
+        return false;
+    }
+
+    @Override
+    protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
+        // not supported
+        return false;
+    }
+
     @Override
     public String getConcatSql(String... values) {
         return StringUtil.join(values, " + ");
@@ -200,11 +200,11 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     public boolean isSystemObject(DatabaseObject example) {
         if ((example.getSchema() != null) && (example.getSchema().getName() != null)) {
             if ((example instanceof Table) && ("sys".equals(example.getSchema().getName()) || "sybfi".equals(example
-                .getSchema().getName()))) {
+                    .getSchema().getName()))) {
                 return true;
             }
             if ((example instanceof View) && ("sys".equals(example.getSchema().getName()) || "sybfi".equals(example
-                .getSchema().getName()))) {
+                    .getSchema().getName()))) {
                 return true;
             }
         }
@@ -231,8 +231,8 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
-	@Override
-	public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
+    @Override
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = schema.customize(this);
         GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName);
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this);
@@ -240,16 +240,43 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);
         StringBuilder definition = new StringBuilder();
         for (String d : definitionRows) {
-        	definition.append(d);
+            definition.append(d);
         }
-        return definition.toString();
-	}
-	
-	/** 
-	 * @return the major version if supported, otherwise -1
-	 * @see liquibase.database.AbstractJdbcDatabase#getDatabaseMajorVersion()
-	 */
-	@Override
+        /*delete the words "CREATE VIEW [name_view] as"*/
+        String defUpper = definition.toString().toUpperCase();
+        int findPos = 0;
+        if (defUpper.contains(" AS ")) {
+            findPos = defUpper.indexOf(" AS ") + 3;
+        }
+        if (defUpper.contains(" AS\n")) {
+            if (findPos != 0 && findPos > defUpper.indexOf(" AS\n")) {
+                findPos = defUpper.indexOf(" AS\n") + 3;
+            } else if (findPos == 0) {
+                findPos = defUpper.indexOf(" AS\n") + 3;
+            }
+        }
+        if (defUpper.contains("\nAS ")) {
+            if (findPos != 0 && findPos > defUpper.indexOf("\nAS ")) {
+                findPos = defUpper.indexOf("\nAS ") + 3;
+            } else if (findPos == 0) {
+                findPos = defUpper.indexOf("\nAS ") + 3;
+            }
+        }
+        if (defUpper.contains("\nAS\n")) {
+            if (findPos != 0 && findPos > defUpper.indexOf("\nAS\n")) {
+                findPos = defUpper.indexOf("\nAS\n") + 3;
+            } else if (findPos == 0) {
+                findPos = defUpper.indexOf("\nAS\n") + 3;
+            }
+        }
+        return definition.substring(findPos, definition.toString().length());
+    }
+
+    /**
+     * @return the major version if supported, otherwise -1
+     * @see liquibase.database.AbstractJdbcDatabase#getDatabaseMajorVersion()
+     */
+    @Override
     public int getDatabaseMajorVersion() throws DatabaseException {
         if (getConnection() == null) {
             return -1;
@@ -257,17 +284,17 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         try {
             return getConnection().getDatabaseMajorVersion();
         } catch (UnsupportedOperationException e) {
-        	Scope.getCurrentScope().getLog(getClass())
-        		.warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+            Scope.getCurrentScope().getLog(getClass())
+                    .warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }
 
-	/**
-	 * @return the minor version if supported, otherwise -1
-	 * @see liquibase.database.AbstractJdbcDatabase#getDatabaseMinorVersion()
-	 */
-	@Override
+    /**
+     * @return the minor version if supported, otherwise -1
+     * @see liquibase.database.AbstractJdbcDatabase#getDatabaseMinorVersion()
+     */
+    @Override
     public int getDatabaseMinorVersion() throws DatabaseException {
         if (getConnection() == null) {
             return -1;
@@ -276,14 +303,14 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         try {
             return getConnection().getDatabaseMinorVersion();
         } catch (UnsupportedOperationException e) {
-        	Scope.getCurrentScope().getLog(getClass())
-    			.warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+            Scope.getCurrentScope().getLog(getClass())
+                    .warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }
 
     @Override
-    public String escapeIndexName(String catalogName,String schemaName, String indexName) {
+    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         return indexName;
     }
 
@@ -300,6 +327,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         if (objectName.contains("(")) { //probably a function
             return false;
         }
+
         return super.mustQuoteObjectName(objectName, objectType);
     }
 
