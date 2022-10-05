@@ -1,13 +1,18 @@
 package liquibase.extension.testing.testsystem;
 
 import liquibase.Scope;
-import liquibase.configuration.ConfigurationValueConverter;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
 import liquibase.extension.testing.util.DownloadUtil;
 import liquibase.logging.Logger;
+import liquibase.statement.SqlStatement;
 import liquibase.util.CollectionUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
@@ -318,6 +323,15 @@ public abstract class DatabaseTestSystem extends TestSystem {
         try (Statement statement = getConnection().createStatement()) {
             return statement.execute(sql);
         }
+    }
+
+    public void execute(SqlStatement sqlStatement) throws SQLException, DatabaseException {
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabaseFromFactory()).execute(sqlStatement);
+    }
+
+    public Database getDatabaseFromFactory() throws SQLException, DatabaseException {
+        DatabaseConnection connection = new JdbcConnection(getConnection());
+        return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
     }
 
 }
