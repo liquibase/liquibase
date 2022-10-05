@@ -80,6 +80,7 @@ liquibase.sqlgenerator.core.InsertSetGenerator
 liquibase.sqlgenerator.core.LockDatabaseChangeLogGenerator
 liquibase.sqlgenerator.core.MarkChangeSetRanGenerator
 liquibase.sqlgenerator.core.ModifyDataTypeGenerator
+liquibase.sqlgenerator.core.RawParameterizedSqlGenerator
 liquibase.sqlgenerator.core.RawSqlGenerator
 liquibase.sqlgenerator.core.ReindexGeneratorSQLite
 liquibase.sqlgenerator.core.RemoveChangeSetRanStatusGenerator

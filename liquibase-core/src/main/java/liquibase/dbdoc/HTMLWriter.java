@@ -6,6 +6,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
+import liquibase.resource.Resource;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 
@@ -15,21 +16,18 @@ import java.util.Date;
 import java.util.List;
 
 public abstract class HTMLWriter {
-    protected File outputDir;
+    protected Resource outputDir;
     protected Database database;
 
-    public HTMLWriter(File outputDir, Database database) {
+    public HTMLWriter(Resource outputDir, Database database) {
         this.outputDir = outputDir;
         this.database = database;
-        if (!outputDir.exists()) {
-            outputDir.mkdirs();
-        }
     }
 
     protected abstract void writeCustomHTML(Writer fileWriter, Object object, List<Change> changes, Database database) throws IOException;
 
     private Writer createFileWriter(Object object) throws IOException {
-        return new OutputStreamWriter(new FileOutputStream(new File(outputDir, DBDocUtil.toFileName(object.toString().toLowerCase()) + ".html")), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+        return new OutputStreamWriter(outputDir.resolve(DBDocUtil.toFileName(object.toString().toLowerCase()) + ".html").openOutputStream(true));
     }
 
     public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog) throws IOException, DatabaseHistoryException, DatabaseException {
