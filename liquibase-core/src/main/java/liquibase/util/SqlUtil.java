@@ -1,15 +1,11 @@
 package liquibase.util;
 
-import static java.util.Locale.US;
-
-import java.util.Locale;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
@@ -24,6 +20,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.util.Locale.US;
 
 public abstract class SqlUtil {
 
@@ -153,10 +151,10 @@ public abstract class SqlUtil {
                 if (scanner.hasNextBoolean()) {
                     value = scanner.nextBoolean();
                 } else if (scanner.hasNextInt()) {
-                if( stringVal.length()>1 )
-            	{
-            		stringVal=stringVal.substring(0, 1);
-            	}    value = Integer.valueOf(stringVal);
+                    if (stringVal.length() > 1) {
+                        stringVal = stringVal.substring(0, 1);
+                    }
+                    value = Integer.valueOf(stringVal);
                 }
 
                 // Make sure we handle BooleanType values which are not Boolean

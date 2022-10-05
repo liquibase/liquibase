@@ -175,7 +175,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 // DB2 on z/OS doesn't support ON UPDATE
                 if (!(database instanceof Db2zDatabase)) {
                     ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(
-                        row.getInt(METADATA_UPDATE_RULE), database);
+                            row.getInt(METADATA_UPDATE_RULE), database);
                     foreignKey.setUpdateRule(updateRule);
                 }
                 ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(
@@ -218,9 +218,9 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
     /**
      * Method to map 'validate' option for FK. This thing works only for ORACLE
      *
-     * @param database - DB where FK will be created
+     * @param database   - DB where FK will be created
      * @param foreignKey - FK object to persist validate option
-     * @param cachedRow - it's a cache-map to get metadata about FK
+     * @param cachedRow  - it's a cache-map to get metadata about FK
      */
     private void setValidateOptionIfAvailable(Database database, ForeignKey foreignKey, CachedRow cachedRow) {
         if (!(database instanceof OracleDatabase)) {
@@ -228,7 +228,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
         }
         final String constraintValidate = cachedRow.getString("FK_VALIDATE");
         final String VALIDATE = "VALIDATED";
-        if (constraintValidate!=null && !constraintValidate.isEmpty()) {
+        if (constraintValidate != null && !constraintValidate.isEmpty()) {
             foreignKey.setShouldValidate(VALIDATE.equals(cleanNameFromDatabase(constraintValidate.trim(), database)));
         }
     }
@@ -250,13 +250,11 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 throw new DatabaseException("Unknown constraint type: " + jdbcType);
             }
-        }
-        /*If the database used is Sybase only omit the tags onUpdate and onDelete*/
-        else if( database instanceof SybaseDatabase )
-        {
-        	return null;
-        }
-        else {
+        } else if (database instanceof SybaseDatabase) {
+            /*If the database used is Sybase only omit the tags onUpdate and onDelete*/
+
+            return null;
+        } else {
             if (jdbcType == DatabaseMetaData.importedKeyCascade) {
                 return ForeignKeyConstraintType.importedKeyCascade;
             } else if (jdbcType == DatabaseMetaData.importedKeyNoAction) {
@@ -266,7 +264,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                     //mssql doesn't support restrict. Not sure why it comes back with this type sometimes
                     return ForeignKeyConstraintType.importedKeyNoAction;
                 } else {
-                return ForeignKeyConstraintType.importedKeyRestrict;
+                    return ForeignKeyConstraintType.importedKeyRestrict;
                 }
             } else if (jdbcType == DatabaseMetaData.importedKeySetDefault) {
                 return ForeignKeyConstraintType.importedKeySetDefault;
@@ -279,15 +277,15 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     /*
-    * Sql server JDBC drivers prior to 6.3.3 used sp_fkeys to determine the delete/cascade metadata.
-    * The sp_fkeys stored procedure spec says that returned integer values of 0, 1, 2, or 4
-    * translate to cascade, noAction, SetNull, or SetDefault which are not the values in the JDBC
-    * standard.
-    *
-    * If this method returns true, the sp_fkeys values should be used. Otherwise use the standard jdbc logic
-    *
-    * The change in logic went in with https://github.com/Microsoft/mssql-jdbc/pull/490
-    */
+     * Sql server JDBC drivers prior to 6.3.3 used sp_fkeys to determine the delete/cascade metadata.
+     * The sp_fkeys stored procedure spec says that returned integer values of 0, 1, 2, or 4
+     * translate to cascade, noAction, SetNull, or SetDefault which are not the values in the JDBC
+     * standard.
+     *
+     * If this method returns true, the sp_fkeys values should be used. Otherwise use the standard jdbc logic
+     *
+     * The change in logic went in with https://github.com/Microsoft/mssql-jdbc/pull/490
+     */
     private boolean driverUsesSpFkeys(Database database) throws DatabaseException {
         if (!(database instanceof MSSQLDatabase)) {
             return false;
@@ -300,7 +298,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
         try {
             DatabaseMetaData metaData = ((JdbcConnection) connection).getMetaData();
             int driverMajorVersion = metaData.getDriverMajorVersion();
-            int driverMinorVersion= metaData.getDriverMinorVersion();
+            int driverMinorVersion = metaData.getDriverMinorVersion();
             String driverName = metaData.getDriverName();
 
             if (!driverName.startsWith("Microsoft")) {

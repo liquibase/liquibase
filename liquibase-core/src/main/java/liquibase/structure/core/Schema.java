@@ -141,7 +141,6 @@ public class Schema extends AbstractDatabaseObject {
             return;
         }
         Set<DatabaseObject> objects = this.getObjects().get(databaseObject.getClass());
-        //String obkNul="es nulo";
         if (objects == null) {
             objects = new HashSet<>();
             this.getObjects().put(databaseObject.getClass(), objects);

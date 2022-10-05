@@ -19,12 +19,12 @@ import java.util.List;
 
 public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
     public TableSnapshotGenerator() {
-        super(Table.class, new Class[] { Schema.class});
+        super(Table.class, new Class[]{Schema.class});
     }
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
-    	Database database = snapshot.getDatabase();
+        Database database = snapshot.getDatabase();
         String objectName = example.getName();
         Schema schema = example.getSchema();
 
@@ -47,7 +47,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-    	if (!snapshot.getSnapshotControl().shouldInclude(Table.class)) {
+        if (!snapshot.getSnapshotControl().shouldInclude(Table.class)) {
             return;
         }
 
@@ -64,13 +64,6 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                     Table tableExample = (Table) new Table().setName(cleanNameFromDatabase(tableName, database)).setSchema(schema);
                     schema.addDatabaseObject(tableExample);
                 }
-                for ( DatabaseObject uno: schema.getDatabaseObjects(Table.class) )
-                {
-                	Table obj = (Table) uno;
-                	System.out.println(obj.getName());
-                	System.out.println(obj.getColumns().size());
-                }
-                System.out.println(schema.getDatabaseObjects(Table.class).size());
             } catch (SQLException e) {
                 throw new DatabaseException(e);
             }
@@ -80,7 +73,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected Table readTable(CachedRow tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
-    	String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
+        String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
         String rawSchemaName = StringUtil.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
         String rawCatalogName = StringUtil.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
         String remarks = StringUtil.trimToNull(tableMetadataResultSet.getString("REMARKS"));

@@ -6,5 +6,4 @@ public enum ForeignKeyConstraintType {
     importedKeySetDefault,
     importedKeyRestrict,
     importedKeyNoAction
-    //importedKeySybase
 }

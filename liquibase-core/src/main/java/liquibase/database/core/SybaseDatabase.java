@@ -11,6 +11,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtil;
@@ -208,6 +209,11 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
                 return true;
             }
         }
+
+        if (example instanceof Column && example.getName().startsWith("sybfi")) {
+            return true;
+        }
+
         return super.isSystemObject(example);
     }
 
@@ -247,22 +253,19 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         int findPos = 0;
         if (defUpper.contains(" AS ")) {
             findPos = defUpper.indexOf(" AS ") + 3;
-        }
-        if (defUpper.contains(" AS\n")) {
+        } else if (defUpper.contains(" AS\n")) {
             if (findPos != 0 && findPos > defUpper.indexOf(" AS\n")) {
                 findPos = defUpper.indexOf(" AS\n") + 3;
             } else if (findPos == 0) {
                 findPos = defUpper.indexOf(" AS\n") + 3;
             }
-        }
-        if (defUpper.contains("\nAS ")) {
+        } else if (defUpper.contains("\nAS ")) {
             if (findPos != 0 && findPos > defUpper.indexOf("\nAS ")) {
                 findPos = defUpper.indexOf("\nAS ") + 3;
             } else if (findPos == 0) {
                 findPos = defUpper.indexOf("\nAS ") + 3;
             }
-        }
-        if (defUpper.contains("\nAS\n")) {
+        } else if (defUpper.contains("\nAS\n")) {
             if (findPos != 0 && findPos > defUpper.indexOf("\nAS\n")) {
                 findPos = defUpper.indexOf("\nAS\n") + 3;
             } else if (findPos == 0) {

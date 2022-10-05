@@ -246,9 +246,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             setOnDelete("RESTRICT");
         } else if (rule == ForeignKeyConstraintType.importedKeyNoAction){
             setOnDelete("NO ACTION");
-        }/* else if ( rule == ForeignKeyConstraintType.importedKeySybase ){
-        	setOnDelete("");
-        }*/ else {
+        } else {
             throw new UnexpectedLiquibaseException("Unknown onDelete action: "+rule);
         }
     }
@@ -266,10 +264,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             setOnUpdate("RESTRICT");
         } else if (rule == ForeignKeyConstraintType.importedKeyNoAction) {
             setOnUpdate("NO ACTION");
-        }/* else if ( rule == ForeignKeyConstraintType.importedKeySybase ) {
-        	//setOnUpdate("");
-        }*/
-        else {
+        } else {
             throw new UnexpectedLiquibaseException("Unknown onUpdate action: "+onUpdate);
         }
     }
