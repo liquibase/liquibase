@@ -174,7 +174,6 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
 
         SnapshotGeneratorFactory.resetAll();
-        emptyTestSchema(CatalogAndSchema.DEFAULT.getCatalogName(), CatalogAndSchema.DEFAULT.getSchemaName(), database);
         SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
         DatabaseSnapshot snapshot = factory.createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(getDatabase()));
 
@@ -186,7 +185,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
         assertEquals(2, seenSequences.size());
         assertEquals("seq_owned", seenSequences.get(0));
-        assertEquals("seq_unowned", seenSequences.get(0));
+        assertEquals("seq_unowned", seenSequences.get(1));
 
         assert snapshot.get(new Table(null, null, "serial_table")).getColumn("id").isAutoIncrement();
         assert !supportsIdentity || snapshot.get(new Table(null, null, "autoinc_table")).getColumn("id").isAutoIncrement();
