@@ -54,7 +54,11 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
         CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
                 .description("Path to a properties file for the ChangeExecListenerClass").build();
         ROLLBACK_ON_ERROR = builder.argument("rollbackOnError", Boolean.class)
-                .description("If set to true, if a changeset fails to deploy, will automatically rollback all the changesets deployed before and stop the deployment.")
+                .defaultValue(false)
+                .description("If set to true, and any changeset in a deployment fails, the update operation stops, and liquibase attempts to rollback " +
+                        "all changesets just deployed. A changeset marked “fail-on-error=false” does not trigger as an error, and so no rollback will " +
+                        "occur. Additionally, if a changeset is not auto-rollback compliant or does not have a rollback script, then no rollback-on-error " +
+                        "will occur for any changeset.")
                 .build();
     }
 
