@@ -60,7 +60,7 @@ public class DropViewChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-                new DropViewStatement(getCatalogName(), getSchemaName(), getViewName(), ObjectUtil.defaultIfNull(ifExists, false)),
+                new DropViewStatement(getCatalogName(), getSchemaName(), getViewName(), isIfExists()),
         };
     }
 
