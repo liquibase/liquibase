@@ -2,6 +2,7 @@ package liquibase.extension.testing.command
 
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
+import liquibase.exception.MigrationFailedException
 
 import java.util.regex.Pattern
 
@@ -34,6 +35,8 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  rollbackOnError (Boolean) If set to true, and any changeset in a deployment fails, the update operation stops, and liquibase attempts to rollback all changesets just deployed. A changeset marked “fail-on-error=false” does not trigger as an error, and so no rollback will occur. Additionally, if a changeset is not auto-rollback compliant or does not have a rollback script, then no rollback-on-error will occur for any changeset.
+    Default: false
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -84,6 +87,18 @@ Optional Args:
                 url: "",
                 changelogFile: ""
         ]
+        expectedException = CommandValidationException.class
+    }
+
+    run "Run with '--rollback-on-error' flag without a pro license throws an error", {
+        arguments = [
+                url            : { it.url },
+                username       : { it.username },
+                password       : { it.password },
+                rollbackOnError: true,
+                changelogFile  : "changelogs/hsqldb/complete/simple.changelog.xml"
+        ]
+
         expectedException = CommandValidationException.class
     }
 }
