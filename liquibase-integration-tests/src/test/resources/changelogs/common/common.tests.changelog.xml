@@ -1168,7 +1168,7 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="example" author="view-if-exists">
+    <changeSet id="example" author="view-if-exists" dbms="!oracle">
         <dropView viewName="does_not_exist" ifExists="true"/>
     </changeSet>
 

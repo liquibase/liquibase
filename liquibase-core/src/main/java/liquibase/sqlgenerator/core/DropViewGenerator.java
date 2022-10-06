@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -15,6 +16,8 @@ public class DropViewGenerator extends AbstractSqlGenerator<DropViewStatement> {
     public ValidationErrors validate(DropViewStatement dropViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("viewName", dropViewStatement.getViewName());
+
+        validationErrors.checkDisallowedField("ifExists", dropViewStatement.isIfExists(), database, OracleDatabase.class);
         return validationErrors;
     }
 
