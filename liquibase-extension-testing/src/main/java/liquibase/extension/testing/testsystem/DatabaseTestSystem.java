@@ -1,11 +1,13 @@
 package liquibase.extension.testing.testsystem;
 
 import liquibase.Scope;
+import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
@@ -334,4 +336,19 @@ public abstract class DatabaseTestSystem extends TestSystem {
         return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
     }
 
+    public void execute(Change change) throws SQLException, DatabaseException {
+        Database database = getDatabaseFromFactory();
+        SqlStatement[] statements = change.generateStatements(database);
+        for (SqlStatement statement : statements) {
+            execute(statement);
+        }
+    }
+
+    public void executeInverses(Change change) throws SQLException, DatabaseException, RollbackImpossibleException {
+        Database database = getDatabaseFromFactory();
+        SqlStatement[] statements = change.generateRollbackStatements(database);
+        for (SqlStatement statement : statements) {
+            execute(statement);
+        }
+    }
 }
