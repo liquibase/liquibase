@@ -1,6 +1,5 @@
 package liquibase.resource;
 
-import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
 
@@ -80,7 +79,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         return openResourceOutputStream(resourcePath, createIfNotExists, null);
     }
 
-    public OutputStream openResourceOutputStream(String resourcePath, boolean createIfNotExists, OpenOption openOption) throws IOException {
+    public OutputStream openResourceOutputStream(String resourcePath, boolean createIfNotExists, OpenOptions openOptions) throws IOException {
         Resource resource = getResource(resourcePath);
         if (!resource.exists()) {
             if (createIfNotExists) {
@@ -89,7 +88,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
                 return null;
             }
         }
-        return resource.openOutputStream(createIfNotExists, openOption);
+        return resource.openOutputStream(createIfNotExists, openOptions);
     }
 
     /**

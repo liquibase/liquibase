@@ -644,7 +644,7 @@ public class LiquibaseCommandLine {
         if (logFile != null) {
             if (fileHandler == null) {
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-                OutputStream outputStream = pathHandlerFactory.openResourceOutputStream(logFile, true, OpenOption.APPEND);
+                OutputStream outputStream = pathHandlerFactory.openResourceOutputStream(logFile, true, new OpenOptions.Builder().append().build());
                 fileHandler = new StreamHandler(outputStream, new SimpleFormatter());
                 rootLogger.addHandler(fileHandler);
             }

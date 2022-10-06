@@ -60,7 +60,7 @@ public class PathResource extends AbstractResource {
     }
 
     @Override
-    public OutputStream openOutputStream(boolean createIfNeeded, OpenOption openOption) throws IOException {
+    public OutputStream openOutputStream(boolean createIfNeeded, OpenOptions openOptions) throws IOException {
         if (!exists()) {
             if (createIfNeeded) {
                 Path parent = path.getParent();
@@ -78,8 +78,8 @@ public class PathResource extends AbstractResource {
         if (Files.isDirectory(this.path)) {
             throw new FileNotFoundException(this.getPath() + " is a directory");
         } else {
-            if (openOption != null) {
-                return Files.newOutputStream(this.path, openOption.getStandardOpenOption());
+            if (openOptions != null) {
+                return Files.newOutputStream(this.path, openOptions.getStandardOpenOption());
             } else {
                 return Files.newOutputStream(this.path);
             }

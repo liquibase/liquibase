@@ -1,7 +1,7 @@
 package liquibase.integration.spring;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.resource.OpenOption;
+import liquibase.resource.OpenOptions;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.WritableResource;
 
@@ -71,8 +71,8 @@ class SpringResource extends liquibase.resource.AbstractResource {
     }
 
     @Override
-    public OutputStream openOutputStream(boolean createIfNeeded, OpenOption openOption) throws IOException {
-        if (openOption == OpenOption.APPEND && exists()) {
+    public OutputStream openOutputStream(boolean createIfNeeded, OpenOptions openOptions) throws IOException {
+        if (openOptions != null && openOptions.isAppend() && exists()) {
             throw new IOException("Spring resources only support truncating the existing file.");
         }
         return openOutputStream(createIfNeeded);

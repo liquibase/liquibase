@@ -1,7 +1,5 @@
 package liquibase.resource;
 
-import liquibase.util.StringUtil;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
@@ -48,7 +46,7 @@ public abstract class AbstractResource implements Resource {
     }
 
     @Override
-    public OutputStream openOutputStream(boolean createIfNeeded, OpenOption openOption) throws IOException {
+    public OutputStream openOutputStream(boolean createIfNeeded, OpenOptions openOptions) throws IOException {
         if (!isWritable()) {
             throw new IOException("Read only");
         }
