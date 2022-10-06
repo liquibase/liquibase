@@ -72,7 +72,7 @@ class SpringResource extends liquibase.resource.AbstractResource {
 
     @Override
     public OutputStream openOutputStream(boolean createIfNeeded, OpenOption openOption) throws IOException {
-        if (openOption != null && openOption != OpenOption.TRUNCATE) {
+        if (openOption == OpenOption.APPEND && exists()) {
             throw new IOException("Spring resources only support truncating the existing file.");
         }
         return openOutputStream(createIfNeeded);
