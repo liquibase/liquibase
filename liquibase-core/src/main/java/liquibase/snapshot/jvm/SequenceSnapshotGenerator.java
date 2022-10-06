@@ -241,8 +241,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                         "OR  (" +
                         "   d.deptype = 'a' AND EXISTS (" +
                         "       select 1 from pg_attribute a " +
-                        "        JOIN pg_class t on t.oid = d.refobjid AND a.attrelid=t.oid and a.attnum=d.refobjsubid " +
-                        "        LEFT JOIN pg_catalog.pg_attrdef ad on ad.adrelid = a.attrelid" +
+                        "        JOIN pg_class t ON t.oid = d.refobjid AND a.attrelid=t.oid AND a.attnum=d.refobjsubid " +
+                        "        LEFT JOIN pg_catalog.pg_attrdef ad ON ad.adrelid = a.attrelid AND ad.adnum = a.attnum" +
                         "        WHERE a.atthasdef = false or not (pg_get_expr(ad.adbin, ad.adrelid) ilike '%' || c.relname || '%'))" +
                         "   )" +
                         ")";
