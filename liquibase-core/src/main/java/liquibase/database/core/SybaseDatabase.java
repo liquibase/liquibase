@@ -254,23 +254,11 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         if (defUpper.contains(" AS ")) {
             findPos = defUpper.indexOf(" AS ") + 3;
         } else if (defUpper.contains(" AS\n")) {
-            if (findPos != 0 && findPos > defUpper.indexOf(" AS\n")) {
-                findPos = defUpper.indexOf(" AS\n") + 3;
-            } else if (findPos == 0) {
-                findPos = defUpper.indexOf(" AS\n") + 3;
-            }
+            findPos = defUpper.indexOf(" AS\n") + 3;
         } else if (defUpper.contains("\nAS ")) {
-            if (findPos != 0 && findPos > defUpper.indexOf("\nAS ")) {
-                findPos = defUpper.indexOf("\nAS ") + 3;
-            } else if (findPos == 0) {
-                findPos = defUpper.indexOf("\nAS ") + 3;
-            }
+            findPos = defUpper.indexOf("\nAS ") + 3;
         } else if (defUpper.contains("\nAS\n")) {
-            if (findPos != 0 && findPos > defUpper.indexOf("\nAS\n")) {
-                findPos = defUpper.indexOf("\nAS\n") + 3;
-            } else if (findPos == 0) {
-                findPos = defUpper.indexOf("\nAS\n") + 3;
-            }
+            findPos = defUpper.indexOf("\nAS\n") + 3;
         }
         return definition.substring(findPos, definition.toString().length());
     }
