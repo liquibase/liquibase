@@ -16,7 +16,6 @@ import liquibase.exception.CommandValidationException;
 import liquibase.hub.HubConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
-import liquibase.logging.LogFileFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
 import liquibase.resource.*;
@@ -644,8 +643,8 @@ public class LiquibaseCommandLine {
 
         if (logFile != null) {
             if (fileHandler == null) {
-                final LogFileFactory logFileFactory = Scope.getCurrentScope().getSingleton(LogFileFactory.class);
-                OutputStream outputStream = logFileFactory.getOutputStream(logFile);
+                final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+                OutputStream outputStream = pathHandlerFactory.openResourceOutputStream(logFile, true, OpenOption.APPEND);
                 fileHandler = new StreamHandler(outputStream, new SimpleFormatter());
                 rootLogger.addHandler(fileHandler);
             }
