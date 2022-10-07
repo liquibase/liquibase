@@ -30,7 +30,7 @@ import java.util.Locale;
 public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMojo {
 
     /**
-   * Specifies the directory where Liquibase can find your <i>changelog</i> file.
+   * Specifies the directory where Liquibase can find your <i>changelog</i> file. This is an aliases for searchPath
      *
    * @parameter property="liquibase.changeLogDirectory"
      */
@@ -159,18 +159,23 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     }
 
     @Override
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException, MojoFailureException {
         List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
         resourceAccessors.add(new MavenResourceAccessor(cl));
         resourceAccessors.add(new DirectoryResourceAccessor(project.getBasedir()));
         resourceAccessors.add(new ClassLoaderResourceAccessor(getClass().getClassLoader()));
 
+        String finalSearchPath = searchPath;
+
         if (changeLogDirectory != null) {
+            if (searchPath != null) {
+                throw new MojoFailureException("Cannot specify searchPath and changeLogDirectory");
+            }
             calculateChangeLogDirectoryAbsolutePath();
-            resourceAccessors.add(new DirectoryResourceAccessor(new File(changeLogDirectory)));
+            finalSearchPath = changeLogDirectory;
         }
 
-        return new SearchPathResourceAccessor(searchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
+        return new SearchPathResourceAccessor(finalSearchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 
     @Override
