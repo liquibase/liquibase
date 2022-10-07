@@ -1,35 +1,41 @@
 package liquibase.resource;
 
-import liquibase.exception.CommandValidationException;
-
-import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
 
 /**
  * Defines the open options for {@link Resource}s in Liquibase.
  */
 public class OpenOptions {
-    private final boolean truncate;
-    private final boolean append;
+    private boolean truncate;
+    private boolean createIfNeeded;
 
-    public OpenOptions(boolean truncate, boolean append) {
+    public OpenOptions(boolean truncate, boolean createIfNeeded) {
         this.truncate = truncate;
-        this.append = append;
-        validate();
-    }
-
-    private void validate() {
-        if (truncate && append) {
-            throw new IllegalArgumentException("append and truncate not allowed");
-        }
+        this.createIfNeeded = createIfNeeded;
     }
 
     public boolean isTruncate() {
         return truncate;
     }
 
+    public void setTruncate(boolean truncate) {
+        this.truncate = truncate;
+    }
+
     public boolean isAppend() {
-        return append;
+        return !isTruncate();
+    }
+
+    public void setAppend(boolean append) {
+        this.truncate = !append;
+    }
+
+    public boolean isCreateIfNeeded() {
+        return createIfNeeded;
+    }
+
+    public void setCreateIfNeeded(boolean createIfNeeded) {
+        this.createIfNeeded = createIfNeeded;
     }
 
     public StandardOpenOption getStandardOpenOption() {
@@ -44,7 +50,7 @@ public class OpenOptions {
 
     public static class Builder {
         private boolean truncate = false;
-        private boolean append = false;
+        private boolean createIfNeeded = true;
 
         public Builder truncate() {
             this.truncate = true;
@@ -52,12 +58,17 @@ public class OpenOptions {
         }
 
         public Builder append() {
-            this.append = true;
+            this.truncate = false;
+            return this;
+        }
+
+        public Builder createIfNeeded(boolean createIfNeeded) {
+            this.createIfNeeded = createIfNeeded;
             return this;
         }
 
         public OpenOptions build() {
-            return new OpenOptions(truncate, append);
+            return new OpenOptions(truncate, createIfNeeded);
         }
     }
 }

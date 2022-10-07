@@ -261,5 +261,10 @@ public interface ResourceAccessor extends AutoCloseable {
         public OutputStream openOutputStream(boolean createIfNeeded, OpenOptions openOptions) throws IOException {
             return openOutputStream(createIfNeeded);
         }
+
+        @Override
+        public OutputStream openOutputStream(OpenOptions openOptions) throws IOException {
+            return openOutputStream(true);
+        }
     }
 }

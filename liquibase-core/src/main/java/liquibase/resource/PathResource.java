@@ -55,14 +55,9 @@ public class PathResource extends AbstractResource {
     }
 
     @Override
-    public OutputStream openOutputStream(boolean createIfNeeded) throws IOException {
-        return openOutputStream(createIfNeeded, null);
-    }
-
-    @Override
-    public OutputStream openOutputStream(boolean createIfNeeded, OpenOptions openOptions) throws IOException {
+    public OutputStream openOutputStream(OpenOptions openOptions) throws IOException {
         if (!exists()) {
-            if (createIfNeeded) {
+            if (openOptions != null && openOptions.isCreateIfNeeded()) {
                 Path parent = path.getParent();
                 if (parent != null) {
                     boolean mkdirs = parent.toFile().mkdirs();
@@ -84,5 +79,16 @@ public class PathResource extends AbstractResource {
                 return Files.newOutputStream(this.path);
             }
         }
+    }
+
+    @Override
+    public OutputStream openOutputStream(boolean createIfNeeded) throws IOException {
+        return openOutputStream(new OpenOptions.Builder().createIfNeeded(createIfNeeded).build());
+    }
+
+    @Override
+    public OutputStream openOutputStream(boolean createIfNeeded, OpenOptions openOptions) throws IOException {
+        openOptions.setCreateIfNeeded(createIfNeeded);
+        return openOutputStream(openOptions);
     }
 }
