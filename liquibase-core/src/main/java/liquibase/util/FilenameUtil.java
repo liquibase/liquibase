@@ -52,7 +52,8 @@ public class FilenameUtil {
     }
 
     /**
-     * Concatenates a filename to a base path using normal command line style rules.
+     * Concatenates a filename to a base path using normal command line style rules. This method uses the operating
+     * system rules to determine the path separator.
      * <p>
      * The returned path will be {@link #normalize(String)}'ed
      */
