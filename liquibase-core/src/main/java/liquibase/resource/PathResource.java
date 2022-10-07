@@ -88,7 +88,11 @@ public class PathResource extends AbstractResource {
 
     @Override
     public OutputStream openOutputStream(boolean createIfNeeded, OpenOptions openOptions) throws IOException {
-        openOptions.setCreateIfNeeded(createIfNeeded);
+        if (openOptions == null) {
+            openOptions = new OpenOptions(true, createIfNeeded);
+        } else {
+            openOptions.setCreateIfNeeded(createIfNeeded);
+        }
         return openOutputStream(openOptions);
     }
 }
