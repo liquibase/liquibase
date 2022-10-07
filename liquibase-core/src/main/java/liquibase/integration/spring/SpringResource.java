@@ -60,27 +60,12 @@ class SpringResource extends liquibase.resource.AbstractResource {
     }
 
     @Override
-    public OutputStream openOutputStream(boolean createIfNeeded) throws IOException {
-        return openOutputStream(new OpenOptions.Builder().createIfNeeded(createIfNeeded).build());
-    }
-
-    @Override
-    public OutputStream openOutputStream(boolean createIfNeeded, OpenOptions openOptions) throws IOException {
-        if (openOptions == null) {
-            openOptions = new OpenOptions(true, createIfNeeded);
-        } else {
-            openOptions.setCreateIfNeeded(createIfNeeded);
-        }
-        return openOutputStream(openOptions);
-    }
-
-    @Override
     public OutputStream openOutputStream(OpenOptions openOptions) throws IOException {
-        if (!resource.exists() && openOptions != null && !openOptions.isCreateIfNeeded()) {
+        if (!resource.exists() && !openOptions.isCreateIfNeeded()) {
             throw new IOException("Resource "+getUri()+" does not exist");
         }
         if (openOptions != null && openOptions.isAppend() && exists()) {
-            throw new IOException("Spring resources only support truncating the existing file.");
+            throw new IOException("Spring only supports truncating the existing resources.");
         }
         if (resource instanceof WritableResource) {
             return ((WritableResource) resource).getOutputStream();

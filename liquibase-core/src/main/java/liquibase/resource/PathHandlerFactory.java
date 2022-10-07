@@ -74,21 +74,30 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
      *
      * @return null if resourcePath does not exist and createIfNotExists is false
      * @throws IOException if there is an error opening the stream
+     *
+     * @deprecated use {@link #openResourceOutputStream(String, OpenOptions)}
      */
+    @Deprecated
     public OutputStream openResourceOutputStream(String resourcePath, boolean createIfNotExists) throws IOException {
-        return openResourceOutputStream(resourcePath, createIfNotExists, null);
+        return openResourceOutputStream(resourcePath, new OpenOptions().setCreateIfNeeded(createIfNotExists));
     }
 
-    public OutputStream openResourceOutputStream(String resourcePath, boolean createIfNotExists, OpenOptions openOptions) throws IOException {
+    /**
+     * Returns the outputStream from {@link #getResource(String)}, using settings from the passed {@link OpenOptions}.
+     *
+     * @return null if resourcePath does not exist and {@link OpenOptions#isCreateIfNeeded()} is false
+     * @throws IOException if there is an error opening the stream
+     */
+    public OutputStream openResourceOutputStream(String resourcePath, OpenOptions openOptions) throws IOException {
         Resource resource = getResource(resourcePath);
         if (!resource.exists()) {
-            if (createIfNotExists) {
+            if (openOptions.isCreateIfNeeded()) {
                 return createResource(resourcePath);
             } else {
                 return null;
             }
         }
-        return resource.openOutputStream(createIfNotExists, openOptions);
+        return resource.openOutputStream(openOptions);
     }
 
     /**

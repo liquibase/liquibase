@@ -50,26 +50,21 @@ public interface Resource {
      */
     Resource resolveSibling(String other);
 
+    /**
+     * Opens an output stream given the passed {@link OpenOptions}.
+     * Cannot pass a null OpenOptions value
+     */
     OutputStream openOutputStream(OpenOptions openOptions) throws IOException;
 
     /**
-     * Opens an output stream to write to this resource. Note that calling this method will truncate (erase) the existing file.
+     * Opens an output stream to write to this resource using the default {@link OpenOptions#OpenOptions()} settings plus the passed createIfNeeded value.
      *
-     * @param createIfNeeded if true, create the resource if it does not exist. If false, throw an exception if it does not exist
-     * @throws IOException if there is an error writing to the resource, including if the resource does not exist or permission don't allow writing.
+     * @deprecated use {@link #openOutputStream(OpenOptions)}
      */
     @Deprecated
-    OutputStream openOutputStream(boolean createIfNeeded) throws IOException;
-
-    /**
-     * Opens an output stream to write to this resource. Note that calling this method will truncate (erase) the existing file.
-     *
-     * @param createIfNeeded if true, create the resource if it does not exist. If false, throw an exception if it does not exist
-     * @param openOptions options specifying how the file is opened
-     * @throws IOException if there is an error writing to the resource, including if the resource does not exist or permission don't allow writing.
-     */
-    @Deprecated
-    OutputStream openOutputStream(boolean createIfNeeded, OpenOptions openOptions) throws IOException;
+    default OutputStream openOutputStream(boolean createIfNeeded) throws IOException {
+        return openOutputStream(new OpenOptions().setCreateIfNeeded(createIfNeeded));
+    }
 
     /**
      * Returns a unique and complete identifier for this resource.

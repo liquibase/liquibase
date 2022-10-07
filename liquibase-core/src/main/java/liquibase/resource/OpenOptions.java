@@ -1,82 +1,55 @@
 package liquibase.resource;
 
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * Defines the open options for {@link Resource}s in Liquibase.
+ * Defines the options for opening {@link Resource}s in Liquibase.
  */
 public class OpenOptions {
     private boolean truncate;
     private boolean createIfNeeded;
 
-    public OpenOptions(boolean truncate, boolean createIfNeeded) {
-        this.truncate = truncate;
-        this.createIfNeeded = createIfNeeded;
+    /**
+     * Use default options of truncate = true, createIfNeeded = true;
+     */
+    public OpenOptions() {
+        this.truncate = true;
+        this.createIfNeeded = true;
     }
 
+    /**
+     * Should an existing file be truncated when opened. Both this and {@link #isAppend()}
+     * are automatically kept in sync with each other.
+     */
     public boolean isTruncate() {
         return truncate;
     }
 
-    public void setTruncate(boolean truncate) {
+    public OpenOptions setTruncate(boolean truncate) {
         this.truncate = truncate;
+        return this;
     }
 
+    /**
+     * Should an existing file be appended to when opened. Both this and {@link #isTruncate()}
+     * are automatically kept in sync with each other.
+     */
     public boolean isAppend() {
         return !isTruncate();
     }
 
-    public void setAppend(boolean append) {
+    public OpenOptions setAppend(boolean append) {
         this.truncate = !append;
+        return this;
     }
 
+    /**
+     * If true, create the resource if it does not exist. If false, do not create the resource.
+     */
     public boolean isCreateIfNeeded() {
         return createIfNeeded;
     }
 
-    public void setCreateIfNeeded(boolean createIfNeeded) {
+    public OpenOptions setCreateIfNeeded(boolean createIfNeeded) {
         this.createIfNeeded = createIfNeeded;
-    }
-
-    public StandardOpenOption[] getStandardOpenOption() {
-        List<StandardOpenOption> options = new ArrayList<>();
-        if (isCreateIfNeeded()) {
-            options.add(StandardOpenOption.CREATE);
-        }
-
-        if (isTruncate()) {
-            options.addAll(Arrays.asList(StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE));
-        } else if (isAppend()) {
-            options.add(StandardOpenOption.APPEND);
-        }
-
-        return options.toArray(new StandardOpenOption[]{});
-    }
-
-    public static class Builder {
-        private boolean truncate = true;
-        private boolean createIfNeeded = true;
-
-        public Builder truncate() {
-            this.truncate = true;
-            return this;
-        }
-
-        public Builder append() {
-            this.truncate = false;
-            return this;
-        }
-
-        public Builder createIfNeeded(boolean createIfNeeded) {
-            this.createIfNeeded = createIfNeeded;
-            return this;
-        }
-
-        public OpenOptions build() {
-            return new OpenOptions(truncate, createIfNeeded);
-        }
+        return this;
     }
 }
