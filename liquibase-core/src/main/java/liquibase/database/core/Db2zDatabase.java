@@ -9,13 +9,6 @@ import liquibase.util.StringUtil;
 
 public class Db2zDatabase extends AbstractDb2Database {
 
-    Db2zDatabase() {
-        super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
-        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
-        super.sequenceCurrentValueFunction = "PREVIOUS VALUE FOR %s";
-        super.unquotedObjectsAreUppercased=true;
-    }
-
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("DB2") && StringUtil.startsWith(conn.getDatabaseProductVersion(), "DSN");
