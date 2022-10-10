@@ -609,6 +609,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     path = pathName;
                 } else {
                     path = resourceAccessor.get(relativeTo).resolveSibling(pathName).getPath();
+                    path = Paths.get(path).normalize().toString()
+                            .replace("\\", "");
                 }
 
                 path = path.replace("\\", "/");
@@ -700,6 +702,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (isRelativePath) {
             try {
                 fileName = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(fileName).getPath();
+                fileName = Paths.get(fileName).normalize().toString()
+                        .replace("\\", "/");
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
