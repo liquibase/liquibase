@@ -8,7 +8,6 @@ import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.Logger;
 import liquibase.snapshot.CachedRow;
@@ -38,6 +37,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     private Pattern postgresStringValuePattern = Pattern.compile("'(.*)'::[\\w .]+");
     private Pattern postgresNumberValuePattern = Pattern.compile("\\(?(\\d*)\\)?::[\\w .]+");
+
+    private final AutoIncrementSequencesCache autoIncrementSequencesCache = new AutoIncrementSequencesCache();
 
 
     public ColumnSnapshotGenerator() {
@@ -212,46 +213,15 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected void setAutoIncrementDetails(Column column, Database database, DatabaseSnapshot snapshot) {
-        if ((column.getAutoIncrementInformation() != null) &&
-                (database instanceof MSSQLDatabase) &&
-                (database
-                        .getConnection() != null) && !(database.getConnection() instanceof OfflineConnection)) {
-            Map<String, Column.AutoIncrementInformation> autoIncrementColumns =
-                    (Map) snapshot.getScratchData("autoIncrementColumns");
-            if (autoIncrementColumns == null) {
-                autoIncrementColumns = new HashMap<>();
-                Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-                try {
-                    List<Map<String, ?>> rows = executor.queryForList(
-                            new RawSqlStatement(
-                                    "SELECT object_schema_name(object_id) AS schema_name, " +
-                                            "object_name(object_id) AS table_name, name AS column_name, " +
-                                            "CAST(seed_value AS bigint) AS start_value, " +
-                                            "CAST(increment_value AS bigint) AS increment_by " +
-                                            "FROM sys.identity_columns"));
-                    for (Map row : rows) {
-                        String schemaName = (String) row.get("SCHEMA_NAME");
-                        String tableName = (String) row.get("TABLE_NAME");
-                        String columnName = (String) row.get("COLUMN_NAME");
-                        Long startValue = (Long) row.get("START_VALUE");
-                        Long incrementBy = (Long) row.get("INCREMENT_BY");
+        if ((column.getAutoIncrementInformation() != null) && (database.getConnection() != null) &&
+                !(database.getConnection() instanceof OfflineConnection) &&
+                (column.getRelation() != null) && (column.getSchema() != null)) {
 
-                        Column.AutoIncrementInformation info =
-                                new Column.AutoIncrementInformation(startValue, incrementBy);
-                        autoIncrementColumns.put(schemaName + "." + tableName + "." + columnName, info);
-                    }
-                    snapshot.setScratchData("autoIncrementColumns", autoIncrementColumns);
-                } catch (DatabaseException e) {
-                    Scope.getCurrentScope().getLog(getClass()).info("Could not read identity information", e);
-                }
-            }
-            if ((column.getRelation() != null) && (column.getSchema() != null)) {
-                Column.AutoIncrementInformation autoIncrementInformation =
-                        autoIncrementColumns.get(column.getSchema().getName() + "." + column.getRelation().getName()
-                                + "." + column.getName());
-                if (autoIncrementInformation != null) {
-                    column.setAutoIncrementInformation(autoIncrementInformation);
-                }
+            Column.AutoIncrementInformation autoIncrementInformation =
+                    this.autoIncrementSequencesCache.obtainSequencesInformation(database, snapshot)
+                            .get(String.format("%s.%s.%s", column.getSchema().getName(), column.getRelation().getName(), column.getName()));
+            if (autoIncrementInformation != null) {
+                column.setAutoIncrementInformation(autoIncrementInformation);
             }
         }
     }
