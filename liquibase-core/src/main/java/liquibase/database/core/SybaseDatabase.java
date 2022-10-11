@@ -272,13 +272,8 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         if (getConnection() == null) {
             return -1;
         }
-        try {
-            return getConnection().getDatabaseMajorVersion();
-        } catch (UnsupportedOperationException e) {
-            Scope.getCurrentScope().getLog(getClass())
-                    .warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
-            return -1;
-        }
+
+        return getConnection().getDatabaseMajorVersion();
     }
 
     /**
@@ -291,13 +286,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
             return -1;
         }
 
-        try {
-            return getConnection().getDatabaseMinorVersion();
-        } catch (UnsupportedOperationException e) {
-            Scope.getCurrentScope().getLog(getClass())
-                    .warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
-            return -1;
-        }
+        return getConnection().getDatabaseMinorVersion();
     }
 
     @Override

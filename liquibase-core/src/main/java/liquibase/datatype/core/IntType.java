@@ -63,7 +63,7 @@ public class IntType extends LiquibaseDataType {
             return type;
         }
         if ((database instanceof HsqlDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
-                InformixDatabase)) {
+                InformixDatabase) || (database instanceof SybaseDatabase)) {
             return new DatabaseDataType("INT");
         }
         if (database instanceof SQLiteDatabase) {
@@ -72,9 +72,7 @@ public class IntType extends LiquibaseDataType {
         if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("INTEGER");
         }
-        if (database instanceof SybaseDatabase) {
-            return new DatabaseDataType("INT");
-        }
+
         return super.toDatabaseDataType(database);
     }
 
