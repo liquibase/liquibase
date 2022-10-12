@@ -5,6 +5,7 @@ import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.AddPrimaryKeyChange;
+import liquibase.change.core.CreateIndexChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -132,5 +133,40 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
             }
         }
         Assert.assertTrue("There should be a table named \"FIRST_TABLE\"", found);
+    }
+
+    @Test
+    public void testCreateIndexUsingFunctions() throws Exception {
+        String function = "UPPER";
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(
+                        new RawSqlStatement("CREATE TABLE INDEX_TEST (ID INT, NAME VARCHAR(20))"));
+
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(
+                        new RawSqlStatement("CREATE INDEX INDEX_TEST_IDX ON INDEX_TEST(ID, " + function +"(NAME))"));
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
+
+        DiffToChangeLog changeLogWriter =
+                new DiffToChangeLog(diffResult,
+                        new DiffOutputControl(false, false, false, null));
+        List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
+        boolean found = false;
+        for (ChangeSet changeSet : changeSets) {
+            List<Change> changes = changeSet.getChanges();
+            for (Change change : changes) {
+                if (! (change instanceof CreateIndexChange)) {
+                    continue;
+                }
+                found = ((CreateIndexChange) change).getColumns().stream().anyMatch(c -> c.getName().toUpperCase().contains(function));
+                if (found) {
+                    break;
+                }
+            }
+            if (found) {
+                break;
+            }
+        }
+        Assert.assertTrue("There should be a sequence column starting with function \"" + function + "\"", found);
     }
 }
