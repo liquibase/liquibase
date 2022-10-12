@@ -21,11 +21,9 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
-import liquibase.util.FilenameUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -48,6 +46,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private String physicalFilePath;
     private String logicalFilePath;
     private String changeLogId;
+    private String includeRunWith;
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     private List<ChangeSet> changeSets = new ArrayList<>();
@@ -356,11 +355,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
 
         setContextFilter(new ContextExpression(context));
-        String objectQuotingStrategy = parsedNode.getChildValue(null, "objectQuotingStrategy", String.class);
-        if (objectQuotingStrategy != null) {
-            setObjectQuotingStrategy(ObjectQuotingStrategy.valueOf(objectQuotingStrategy));
+        String nodeObjectQuotingStrategy = parsedNode.getChildValue(null, "objectQuotingStrategy", String.class);
+        if (nodeObjectQuotingStrategy != null) {
+            setObjectQuotingStrategy(ObjectQuotingStrategy.valueOf(nodeObjectQuotingStrategy));
         }
         for (ParsedNode childNode : parsedNode.getChildren()) {
+            this.includeRunWith = null;
             handleChildNode(childNode, resourceAccessor);
         }
     }
@@ -393,6 +393,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             case "changeSet":
                 if (isDbmsMatch(node.getChildValue(null, "dbms", String.class))) {
                     this.addChangeSet(createChangeSet(node, resourceAccessor));
+                }
+                break;
+            case "modifyChangeSets":
+                this.includeRunWith = (String)node.getChildValue(null, "runWith");
+                for (ParsedNode modifyChildNode : node.getChildren()) {
+                    handleChildNode(modifyChildNode, resourceAccessor);
                 }
                 break;
             case "include": {
@@ -692,7 +698,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            Boolean ignore,
                            OnUnknownFileFormat onUnknownFileFormat)
             throws LiquibaseException {
-
         if (".svn".equalsIgnoreCase(fileName) || "cvs".equalsIgnoreCase(fileName)) {
             return false;
         }
@@ -749,6 +754,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             this.getPreconditions().addNestedPrecondition(preconditions);
         }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
+            changeSet.setRunWith(includeRunWith);
             addChangeSet(changeSet);
         }
 
