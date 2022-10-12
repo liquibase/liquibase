@@ -9,6 +9,7 @@ import java.util.Set;
 
 public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implements ChangeLogChild {
     private String path;
+    private String runWith;
     private Boolean errorIfMissingOrEmpty;
     private Boolean relativeToChangelogFile;
     private String resourceFilter;
@@ -16,7 +17,7 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
 
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<>(Arrays.asList("path", "errorIfMissingOrEmpty", "relativeToChangelogFile", "resourceFilter", "context"));
+        return new LinkedHashSet<>(Arrays.asList("path", "errorIfMissingOrEmpty", "relativeToChangelogFile", "resourceFilter", "context", "runWith"));
     }
 
     @Override
@@ -35,6 +36,14 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getRunWith() {
+        return runWith;
+    }
+
+    public void setRunWith(String runWith) {
+        this.runWith = runWith;
     }
 
     public Boolean getErrorIfMissingOrEmpty() {
