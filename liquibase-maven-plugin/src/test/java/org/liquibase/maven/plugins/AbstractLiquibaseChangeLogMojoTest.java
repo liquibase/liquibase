@@ -20,8 +20,9 @@ public class AbstractLiquibaseChangeLogMojoTest {
         //GIVEN
         AbstractLiquibaseChangeLogMojo mojo = new LiquibaseChangeLogMojoTest();
         mojo.project = mock(MavenProject.class);
-        when(mojo.project.getBasedir()).thenReturn(new File(System.getProperty("user.dir")));
-        mojo.changeLogDirectory = System.getProperty("user.dir");
+        String userDir = System.getProperty("user.dir");
+        when(mojo.project.getBasedir()).thenReturn(new File(userDir));
+        mojo.changeLogDirectory = userDir;
         mojo.searchPath = null;
         //WHEN
         ResourceAccessor changeLogAccessor = mojo.getResourceAccessor(mock(ClassLoader.class));
@@ -38,9 +39,10 @@ public class AbstractLiquibaseChangeLogMojoTest {
             //GIVEN
             AbstractLiquibaseChangeLogMojo mojo = new LiquibaseChangeLogMojoTest();
             mojo.project = mock(MavenProject.class);
-            when(mojo.project.getBasedir()).thenReturn(new File(System.getProperty("user.dir")));
-            mojo.changeLogDirectory = System.getProperty("user.dir");
-            mojo.searchPath = System.getProperty("user.dir");
+            String userDir = System.getProperty("user.dir");
+            when(mojo.project.getBasedir()).thenReturn(new File(userDir));
+            mojo.changeLogDirectory = userDir;
+            mojo.searchPath = userDir;
             //WHEN
             mojo.getResourceAccessor(mock(ClassLoader.class));
             //THEN
