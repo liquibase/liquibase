@@ -86,12 +86,7 @@
 
     </changeSet>
 
-    <changeSet id="defaultValueTest-1" author="nvoxland">
-        <preConditions onFail="MARK_RAN">
-            <not><dbms type="derby"/></not>
-            <not><dbms type="mysql"/></not> <!-- @todo: fails on set default now() -->
-            <not><dbms type="mariadb"/></not>
-        </preConditions>
+    <changeSet id="defaultValueTest-1" author="nvoxland" dbms="!mysql,!derby,!mariadb">
         <createTable tableName="defaultValueTest">
             <column name="id" type="int"/>
             <column name="intA" type="int"/>
@@ -730,10 +725,7 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="createTableWithDefault" author="nvoxland">
-        <preConditions onFail="MARK_RAN">
-            <not><dbms type="mysql"/></not> <!-- doesn't support default values as function -->
-        </preConditions>
+    <changeSet id="createTableWithDefault" author="nvoxland" dbms="!mysql">
         <createTable tableName="default_val_computed">
             <column name="id" type="int"/>
             <column name="testcol" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP()">
@@ -745,10 +737,7 @@
         <sql>insert into default_val_computed (id) values (1);</sql>
     </changeSet>
 
-    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,oracle,db2,mysql,postgresql,mssql"> <!-- not derby -->
-        <preConditions onFail="MARK_RAN">
-            <not><dbms type="mysql"/></not> <!-- doesn't support default values as function -->
-        </preConditions>
+    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,oracle,db2,postgresql,mssql,!mysql"> <!-- not derby -->
         <addDefaultValue tableName="default_val_computed" columnName="added_col" defaultValueComputed="CURRENT_TIMESTAMP()"/>
     </changeSet>
 
