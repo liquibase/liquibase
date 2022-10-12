@@ -169,7 +169,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
 
         if (changeLogDirectory != null) {
             if (searchPath != null) {
-                throw new MojoFailureException("Cannot specify searchPath and changeLogDirectory");
+                throw new MojoFailureException("Cannot specify searchPath and changeLogDirectory at the same time");
             }
             calculateChangeLogDirectoryAbsolutePath();
             finalSearchPath = changeLogDirectory;
