@@ -144,7 +144,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                 .execute(
-                        new RawSqlStatement("CREATE INDEX INDEX_TEST_IDX ON INDEX_TEST(ID, " + function +"(NAME))"));
+                        new RawSqlStatement("CREATE INDEX INDEX_TEST_IDX ON INDEX_TEST(ID, " + function +"(NAME)) WHERE ID > 0"));
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
 
         DiffToChangeLog changeLogWriter =
