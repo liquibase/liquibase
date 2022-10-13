@@ -52,9 +52,12 @@ public class FileUtil {
         return message;
     }
 
-    public static boolean isAbsolute(String path) throws IOException {
+    public static boolean isAbsolute(String path) {
         if (path == null) {
             return false;
+        }
+        if (path.matches("^\\w\\w+:.*")) {
+            return true;
         }
         return new File(path).isAbsolute();
     }

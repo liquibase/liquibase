@@ -2,6 +2,7 @@ package liquibase.resource;
 
 import liquibase.Scope;
 import liquibase.logging.Logger;
+import liquibase.util.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +35,10 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
         path = standardizePath(path);
 
         if (path == null) {
+            return returnList;
+        }
+        if (FileUtil.isAbsolute(path)) {
+            log.fine("Path " + path + " in " + getRootPath() + " does not exist");
             return returnList;
         }
         Path finalPath = getRootPath().resolve(path);
