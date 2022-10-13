@@ -30,13 +30,15 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
 import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.resource.InputStreamList
+import liquibase.resource.PathHandlerFactory
+import liquibase.resource.Resource
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.ui.ConsoleUIService
 import liquibase.ui.InputHandler
 import liquibase.ui.UIService
 import liquibase.util.FileUtil
+import liquibase.util.StreamUtil
 import liquibase.util.StringUtil
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.Assert
@@ -45,7 +47,6 @@ import org.junit.ComparisonFailure
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.util.concurrent.Callable
 import java.util.logging.Level
 import java.util.regex.Pattern
 import java.util.stream.Collectors
@@ -59,6 +60,7 @@ class CommandTests extends Specification {
     public static String NOT_NULL = "not_null"
 
     private ConfigurationValueProvider propertiesProvider
+    private ConfigurationValueProvider searchPathPropertiesProvider
 
     def setup() {
         def properties = new Properties()
@@ -97,6 +99,9 @@ class CommandTests extends Specification {
 
     def cleanup() {
         Scope.currentScope.getSingleton(LiquibaseConfiguration).unregisterProvider(propertiesProvider)
+        if (searchPathPropertiesProvider != null) {
+            Scope.currentScope.getSingleton(LiquibaseConfiguration).unregisterProvider(searchPathPropertiesProvider)
+        }
     }
 
     @Unroll("#featureName: #commandTestDefinition.testFile.name")
@@ -283,7 +288,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         if (testDef.searchPath != null) {
             def config = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
 
-            ConfigurationValueProvider propertiesProvider = new AbstractMapConfigurationValueProvider() {
+            searchPathPropertiesProvider = new AbstractMapConfigurationValueProvider() {
                 @Override
                 protected Map<?, ?> getMap() {
                     return Collections.singletonMap(GlobalConfiguration.SEARCH_PATH.getKey(), testDef.searchPath)
@@ -300,8 +305,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 }
             }
 
-            config.registerProvider(propertiesProvider)
-            resourceAccessor = new SearchPathResourceAccessor(Scope.getCurrentScope().getResourceAccessor())
+            config.registerProvider(searchPathPropertiesProvider)
+            resourceAccessor = new SearchPathResourceAccessor(testDef.searchPath)
         }
 
         def scopeSettings = [
@@ -360,7 +365,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         // Check to see if there was supposed to be an exception
         //
         if (testDef.expectedResults.size() > 0 && (results == null || results.getResults().isEmpty())) {
-            throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
+            String logString = logService.getLogAsString(Level.FINE)
+            throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command + "\n" + logString)
         }
 
         then:
@@ -570,10 +576,23 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     static void checkFileContent(Map<String, ?> expectedFileContent, String outputDescription) {
-        for (def check : expectedFileContent) {
+        expectedFileContent.each { def check ->
             String path = check.key
             List<Object> checks = check.value
-            String contents = FileUtil.getContents(new File(path))
+            File f = new File(path)
+            String contents
+            if (f.exists()) {
+                contents = FileUtil.getContents(f)
+            } else {
+                final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class)
+                def resource = pathHandlerFactory.getResource(path)
+                if (resource.exists()) {
+                    contents = StreamUtil.readStreamAsString(resource.openInputStream())
+                } else {
+                    contents = null
+                }
+            }
+
             contents = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(contents))
             contents = contents.replaceAll(/\s+/, " ")
             checkOutput(outputDescription, contents, checks)
@@ -1045,6 +1064,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupRunChangelog(changeLogPath, labels))
         }
 
+        /**
+         * Run a changelog with labels
+         */
+        void runChangelog(String changeLogPath, String labels, String searchPath) {
+            this.setups.add(new SetupRunChangelog(changeLogPath, labels, searchPath))
+        }
+
         /*
          * Create files and directories
          */
@@ -1080,10 +1106,19 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          *
          */
         void copyResource(String originalFile, String newFile) {
+            copyResource(originalFile, newFile, true)
+        }
+
+        void copyResource(String originalFile, String newFile, boolean writeInTargetTestClasses) {
             URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
             File f = new File(url.toURI())
             String contents = FileUtil.getContents(f)
-            File outputFile = new File("target/test-classes", newFile)
+            File outputFile
+            if (writeInTargetTestClasses) {
+                outputFile = new File("target/test-classes", newFile)
+            } else {
+                outputFile = new File(newFile)
+            }
             FileUtil.write(contents, outputFile)
             println "Copied file " + originalFile + " to file " + newFile
         }
@@ -1193,13 +1228,25 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     // to locate files that they write and then try to read
     //
     static class ClassLoaderResourceAccessorForTest extends ClassLoaderResourceAccessor {
+
         @Override
-        public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-            InputStreamList list = super.openStreams(relativeTo, streamPath)
+        List<Resource> getAll(String path) throws IOException {
+            def list = super.getAll(path)
+            if (list != null && !list.isEmpty()) {
+                return list;
+            }
+
+            return super.getAll(new File(path).getName())
+        }
+
+        @Override
+        List<Resource> search(String path, boolean recursive) throws IOException {
+            def list = super.search(path, recursive)
             if (list != null && ! list.isEmpty()) {
                 return list
             }
-            return super.openStreams(relativeTo, new File(streamPath).getName())
+
+            return super.search(new File(path).getName(), recursive)
         }
     }
 

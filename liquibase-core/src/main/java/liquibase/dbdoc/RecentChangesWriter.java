@@ -4,16 +4,16 @@ import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
+import liquibase.resource.Resource;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
 public class RecentChangesWriter extends HTMLWriter {
 
-    public RecentChangesWriter(File rootOutputDir, Database database) {
-        super(new File(rootOutputDir, "recent"), database);
+    public RecentChangesWriter(Resource rootOutputDir, Database database) {
+        super(rootOutputDir.resolve("recent"), database);
     }
 
     @Override

@@ -3,7 +3,7 @@ package liquibase.parser.core.xml
 import liquibase.GlobalConfiguration
 import liquibase.LiquibaseTest
 import liquibase.Scope
-import liquibase.resource.FileSystemResourceAccessor
+import liquibase.resource.DirectoryResourceAccessor
 import liquibase.util.LiquibaseUtil
 import org.xml.sax.InputSource
 import spock.lang.Specification
@@ -73,7 +73,7 @@ class LiquibaseEntityResolverTest extends Specification {
     @Unroll
     def "resolveEntity finds packaged files correctly even if the configured resourceAccessor doesn't have it"() {
         expect:
-        Scope.child([(Scope.Attr.resourceAccessor.name()): new FileSystemResourceAccessor(new File("."))], { ->
+        Scope.child([(Scope.Attr.resourceAccessor.name()): new DirectoryResourceAccessor(new File("."))], { ->
             new LiquibaseEntityResolver().resolveEntity(null, null, null, systemId) != null
         } as Scope.ScopedRunnerWithReturn) != null
 

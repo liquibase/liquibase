@@ -1,33 +1,30 @@
 package liquibase.resource;
 
 import liquibase.Scope;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.util.StreamUtil;
 
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLDecoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 
 /**
- * An implementation of {@link FileSystemResourceAccessor} that builds up the file roots based on the passed {@link ClassLoader}.
+ * An implementation of {@link DirectoryResourceAccessor} that builds up the file roots based on the passed {@link ClassLoader}.
  * If you are using a ClassLoader that isn't based on local files, you will need to use a different {@link ResourceAccessor} implementation.
  *
  * @see OSGiResourceAccessor for OSGi-based classloaders
  */
-public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implements AutoCloseable {
+public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
     private ClassLoader classLoader;
-    protected List<FileSystem> rootPaths;
+    private CompositeResourceAccessor additionalResourceAccessors;
     protected SortedSet<String> description;
 
     public ClassLoaderResourceAccessor() {
@@ -36,52 +33,55 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
 
     public ClassLoaderResourceAccessor(ClassLoader classLoader) {
         this.classLoader = classLoader;
+    }
 
+    @Override
+    public List<String> describeLocations() {
+        init();
+
+        return additionalResourceAccessors.describeLocations();
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (additionalResourceAccessors != null) {
+            additionalResourceAccessors.close();
+        }
     }
 
     /**
      * Performs the configuration of this resourceAccessor.
      * Not done in the constructor for performance reasons, but can be called at the beginning of every public method.
      */
-    protected void init() {
-        if (rootPaths == null) {
-            this.rootPaths = new ArrayList<>();
+    protected synchronized void init() {
+        if (additionalResourceAccessors == null) {
             this.description = new TreeSet<>();
+            this.additionalResourceAccessors = new CompositeResourceAccessor();
 
-            loadRootPaths(classLoader);
+            configureAdditionalResourceAccessors(classLoader);
         }
     }
 
-
     /**
-     * The classloader search logic in {@link #list(String, String, boolean, boolean, boolean)} does not handle jar files well.
-     * This method is called by that method to populate {@link #rootPaths} with additional paths to search.
+     * The classloader search logic in {@link #search(String, boolean)} does not handle jar files well.
+     * This method is called by that method to configure an internal {@link ResourceAccessor} with paths to search.
      */
-    protected void loadRootPaths(ClassLoader classLoader) {
+    protected void configureAdditionalResourceAccessors(ClassLoader classLoader) {
         if (classLoader instanceof URLClassLoader) {
             final URL[] urls = ((URLClassLoader) classLoader).getURLs();
             if (urls != null) {
+                PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+
                 for (URL url : urls) {
                     try {
-                        addDescription(url);
-                        this.rootPaths.add(FileSystems.newFileSystem(Paths.get(url.toURI()), this.getClass().getClassLoader()));
-                    } catch (FileSystemAlreadyExistsException e) {
-                        //has been defined already, that is OK
-                    } catch (ProviderNotFoundException e) {
-                        if (url.toExternalForm().startsWith("file:/")) {
-                            //that is expected, the classloader itself will handle it
-                        } else {
-                            Scope.getCurrentScope().getLog(getClass()).info("No filesystem provider for URL " + url.toExternalForm() + ". Will rely on classloader logic for listing files.");
+                        if (url.getProtocol().equals("file")) {
+                            additionalResourceAccessors.addResourceAccessor(pathHandlerFactory.getResourceAccessor(url.toExternalForm()));
                         }
-                    } catch (FileSystemNotFoundException fsnfe) {
-                        if (url.toExternalForm().matches(".*!.*!.*")) {
-                            //spring sometimes sets up urls with nested urls like jar:file:/path/to/demo-0.0.1-SNAPSHOT.jar!/BOOT-INF/lib/mssql-jdbc-8.2.2.jre8.jar!/ which are not readable.
-                            //That is expected, and will be handled by the SpringResourceAccessor
-                        } else {
-                            Scope.getCurrentScope().getLog(getClass()).info("Configured classpath location " + url.toString() + " does not exist");
-                        }
+                    } catch (FileNotFoundException e) {
+                        //classloaders often have invalid paths specified on purpose. Just log them as fine level.
+                        Scope.getCurrentScope().getLog(getClass()).fine("Classloader URL " + url.toExternalForm() + " does not exist", e);
                     } catch (Throwable e) {
-                        Scope.getCurrentScope().getLog(getClass()).warning("Cannot create filesystem for url " + url.toExternalForm() + ": " + e.getMessage(), e);
+                        Scope.getCurrentScope().getLog(getClass()).warning("Cannot handle classloader url " + url.toExternalForm() + ": " + e.getMessage()+". Operations that need to list files from this location may not work as expected", e);
                     }
                 }
             }
@@ -89,283 +89,75 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor implem
 
         final ClassLoader parent = classLoader.getParent();
         if (parent != null) {
-            loadRootPaths(parent);
-        }
-
-    }
-
-    private void addDescription(URL url) {
-        try {
-            this.description.add(Paths.get(url.toURI()).toString());
-        } catch (Throwable e) {
-            this.description.add(url.toExternalForm());
+            configureAdditionalResourceAccessors(parent);
         }
     }
+//
+//    private void addDescription(URL url) {
+//        try {
+//            this.description.add(Paths.get(url.toURI()).toString());
+//        } catch (Throwable e) {
+//            this.description.add(url.toExternalForm());
+//        }
+//    }
 
     @Override
-    @java.lang.SuppressWarnings("squid:S2095")
-    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
+    public List<Resource> search(String path, boolean recursive) throws IOException {
         init();
 
-        InputStreamList returnList = new InputStreamList();
-
-        streamPath = getFinalPath(relativeTo, streamPath);
-
-        //sometimes the classloader returns duplicate copies of the same url
-        Set<String> seenUrls = new HashSet<>();
-
-        Enumeration<URL> resources = classLoader.getResources(streamPath);
-        while (resources.hasMoreElements()) {
-            URL url = resources.nextElement();
-
-            if (seenUrls.add(url.toExternalForm())) {
-                try {
-                    returnList.add(url.toURI(), url.openStream());
-                } catch (URISyntaxException e) {
-                    Scope.getCurrentScope().getLog(getClass()).severe(e.getMessage(), e);
-                }
-            }
-        }
-
-        return returnList;
-    }
-
-    /**
-     * Generates a final path to <code>streamPath</code> relative to <code>relatoveTo</code>.
-     * If the last part of relativeTo contains a dot character (`.`)
-     * this part is considered to be a file name, if it does not, it is
-     * considered to be a directory.
-     * i.e.<br>
-     * <pre>
-     * changelog/some.sql   -> some.sql is considered to be a file
-     * changelog/some_sql   -> some_sql is considered to be a directory
-     * </pre>
-     *
-     * @param relativeTo starting point of the path resolution (may be null)
-     * @param streamPath a path to a resource relative to relativeTo must not be null
-     * @return a canonicalized absolute path to a resource
-     */
-    protected String getFinalPath(String relativeTo, String streamPath) {
-        streamPath = streamPath.replace("\\", "/");
-        streamPath = streamPath.replaceFirst("^classpath\\*?:", "");
-
-        if (relativeTo != null) {
-            relativeTo = relativeTo.replace("\\", "/");
-            relativeTo = relativeTo.replaceFirst("^classpath\\*?:", "");
-            relativeTo = relativeTo.replaceAll("//+", "/");
-            //
-            // If this is a simple file name then set the
-            // relativeTo value as if it is a root path
-            //
-            if (!relativeTo.contains("/") && relativeTo.contains(".")) {
-                relativeTo = "/";
-            }
-
-            //
-            // If this is not a simple file name and the last component
-            // of the path contains a '.' remove the last component
-            //
-            if (!relativeTo.endsWith("/")) {
-                String lastPortion = relativeTo.replaceFirst(".+/", "");
-                if (lastPortion.contains(".")) {
-                    relativeTo = relativeTo.replaceFirst("/[^/]+?$", "");
-                }
-            }
-
-            streamPath = relativeTo + "/" + streamPath;
-        }
-
-        streamPath = streamPath.replaceAll("//+", "/");
-        streamPath = streamPath.replaceFirst("^/", "");
-
-        return DatabaseChangeLog.normalizePath(streamPath);
-    }
-
-    @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        init();
-
-        String finalPath = getFinalPath(relativeTo, path);
-
-        final SortedSet<String> returnList = listFromClassLoader(finalPath, recursive, includeFiles, includeDirectories);
-        returnList.addAll(listFromRootPaths(finalPath, recursive, includeFiles, includeDirectories));
-
-        return returnList;
-    }
-
-    /**
-     * Called by {@link #list(String, String, boolean, boolean, boolean)} to find files in {@link #rootPaths}.
-     */
-    protected SortedSet<String> listFromRootPaths(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) {
-        SortedSet<String> returnSet = new TreeSet<>();
-
-        SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                if (includeFiles && attrs.isRegularFile()) {
-                    addToReturnList(file);
-                }
-                if (includeDirectories && attrs.isDirectory()) {
-                    addToReturnList(file);
-                }
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                if (includeDirectories) {
-                    addToReturnList(dir);
-                }
-                return FileVisitResult.CONTINUE;
-            }
-
-            protected void addToReturnList(Path file) {
-                if (!file.toString().equals(path)) {
-                    returnSet.add(file.toString()
-                            .replaceFirst("^/", "")
-                            .replaceFirst("/$", "")
-                            .replaceAll("//+", "/")
-                    );
-                }
-            }
-        };
-
-        for (FileSystem fileSystem : rootPaths) {
-            int maxDepth = recursive ? Integer.MAX_VALUE : 1;
-            try {
-                Files.walkFileTree(fileSystem.getPath(path), Collections.singleton(FileVisitOption.FOLLOW_LINKS), maxDepth, fileVisitor);
-            } catch (NoSuchFileException e) {
-                //that is OK
-            } catch (IOException e) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Cannot walk filesystem: " + e.getMessage(), e);
-            }
-        }
-
-        return returnSet;
-    }
-
-    /**
-     * Called by {@link #list(String, String, boolean, boolean, boolean)} to find files in {@link #classLoader}.
-     */
-    protected SortedSet<String> listFromClassLoader(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) {
-        final SortedSet<String> returnSet = new TreeSet<>();
+        final LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
+        PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
 
         final Enumeration<URL> resources;
         try {
             resources = classLoader.getResources(path);
         } catch (IOException e) {
-            Scope.getCurrentScope().getLog(getClass()).severe("Cannot list resources in path " + path + ": " + e.getMessage(), e);
-            return returnSet;
+            throw new IOException("Cannot list resources in path " + path + ": " + e.getMessage(), e);
         }
 
         while (resources.hasMoreElements()) {
             final URL url = resources.nextElement();
-            final String urlExternalForm = url.toExternalForm();
 
-            try {
-                if (urlExternalForm.startsWith("jar:file:") && urlExternalForm.contains("!")) {
-                    //We can search the jar directly
-                    String jarPath = url.getPath();
-                    jarPath = jarPath.substring(5, jarPath.indexOf("!"));
-                    try (JarFile jar = new JarFile(URLDecoder.decode(jarPath, StandardCharsets.UTF_8.name()))) {
-                        String comparePath = path;
-                        if (comparePath.startsWith("/")) {
-                            comparePath = "/" + comparePath;
-                        }
-                        Enumeration<JarEntry> entries = jar.entries();
-                        while (entries.hasMoreElements()) {
-                            JarEntry entry = entries.nextElement();
-                            String name = entry.getName();
-                            if (name.startsWith(comparePath) && !comparePath.equals(name)) {
-                                if (entry.isDirectory()) {
-                                    if (!includeDirectories) {
-                                        continue;
-                                    }
+            String urlExternalForm = url.toExternalForm();
+            urlExternalForm = urlExternalForm.replaceFirst(Pattern.quote(path) + "/?$", "");
 
-                                    if (recursive || !name.substring(comparePath.length()).contains("/")) {
-                                        returnSet.add(name);
-                                    }
-                                } else {
-                                    if (includeFiles) {
-                                        if (recursive || !name.substring(comparePath.length()).contains("/")) {
-                                            returnSet.add(name);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    //fall back to seeing if the stream lists sub-directories
-                    final InputStream inputStream = url.openStream();
-
-                    final String fileList = StreamUtil.readStreamAsString(inputStream);
-                    if (!fileList.isEmpty()) {
-                        for (String childName : fileList.split("\n")) {
-                            String childPath = (path + "/" + childName).replaceAll("//+", "/");
-
-                            if (isDirectory(childPath)) {
-                                if (includeDirectories) {
-                                    returnSet.add(childPath);
-                                }
-                                if (recursive) {
-                                    returnSet.addAll(listFromClassLoader(childPath, recursive, includeFiles, includeDirectories));
-                                }
-                            } else {
-                                if (includeFiles) {
-                                    returnSet.add(childPath);
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                Scope.getCurrentScope().getLog(getClass()).severe("Cannot list resources in " + urlExternalForm + ": " + e.getMessage(), e);
+            try (ResourceAccessor resourceAccessor = pathHandlerFactory.getResourceAccessor(urlExternalForm)) {
+                returnList.addAll(resourceAccessor.search(path, recursive));
+            } catch (Exception e) {
+                throw new IOException(e.getMessage(), e);
             }
         }
-        return returnSet;
+
+        returnList.addAll(additionalResourceAccessors.search(path, recursive));
+
+
+        return new ArrayList<>(returnList);
     }
 
-    /**
-     * Used by {@link #listFromClassLoader(String, boolean, boolean, boolean)} to determine if a path is a directory or not.
-     */
-    protected boolean isDirectory(String path) {
+    @Override
+    public List<Resource> getAll(String path) throws IOException {
+        //using a hash because sometimes the same resource gets included multiple times.
+        LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
+
+        path = path.replace("\\", "/").replaceFirst("^/", "");
+
+        Enumeration<URL> all = classLoader.getResources(path);
         try {
-            final Enumeration<URL> resources = classLoader.getResources(path);
-            while (resources.hasMoreElements()) {
-                final URL url = resources.nextElement();
-
-                final File file = new File(url.toURI());
-                if (file.exists() && file.isDirectory()) {
-                    return true;
+            while (all.hasMoreElements()) {
+                URI uri = all.nextElement().toURI();
+                if (uri.getScheme().equals("file")) {
+                    returnList.add(new PathResource(path, Paths.get(uri)));
+                } else {
+                    returnList.add(new URIResource(path, uri));
                 }
             }
-        } catch (Exception e) {
-            //not a url we can handle
+        } catch (URISyntaxException e) {
+            throw new IOException(e.getMessage(), e);
         }
 
-        //fallback logic depends on files having an extension and directories not
-        String lastPortion = path.replaceFirst(".*/", "");
-        return !lastPortion.contains(".");
-    }
-
-    @Override
-    public SortedSet<String> describeLocations() {
-        init();
-
-        return description;
-    }
-
-    @Override
-    public void close() throws Exception {
-        if (rootPaths != null) {
-            for (final FileSystem rootPath : rootPaths) {
-                try {
-                    rootPath.close();
-                } catch (final Exception e) {
-                    Scope.getCurrentScope().getLog(getClass()).fine("Cannot close path " + e.getMessage(), e);
-                }
-            }
+        if (returnList.size() == 0) {
+            return null;
         }
+        return new ArrayList<>(returnList);
     }
 }

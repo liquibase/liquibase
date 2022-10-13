@@ -352,6 +352,27 @@
         </customChange>
 
     </changeSet>
+    <changeSet id="59" author="mallod">
+        <comment>
+            Test table to be used Rename Column testing - GitHub issue 2925
+        </comment>
+        <createTable tableName="test_person">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(50)"/>
+            <column name="lastname" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city" type="varchar(30)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="60" author="mallod">
+        <comment>
+            Test to make sure Rename Column testing fix for GitHub issue 2925 works as expected
+        </comment>
+        <renameColumn tableName="test_person" oldColumnName="city" newColumnName="cityName" />
+    </changeSet>
 
     <!--<changeSet id="60" author="nvoxland">-->
         <!--<executeCommand executable="getmac" os="Windows XP">-->
