@@ -56,7 +56,7 @@ public class FileUtil {
         if (path == null) {
             return false;
         }
-        if (path.matches("^\\w\\w+:.*")) {
+        if (! path.toLowerCase().startsWith("file:") && path.matches("^\\w\\w+:.*")) {
             return true;
         }
         return new File(path).isAbsolute();
