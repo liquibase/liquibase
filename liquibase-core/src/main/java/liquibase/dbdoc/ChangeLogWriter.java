@@ -1,7 +1,6 @@
 package liquibase.dbdoc;
 
 import liquibase.GlobalConfiguration;
-import liquibase.resource.OpenOptions;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
@@ -21,7 +20,7 @@ public class ChangeLogWriter {
         String changeLogOutFile = changeLog.replace(":", "_");
         Resource xmlFile = outputDir.resolve(changeLogOutFile.toLowerCase() + ".html");
 
-        try (BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(xmlFile.openOutputStream(new OpenOptions()),
+        try (BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(xmlFile.openOutputStream(true),
                 GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()))) {
             Resource stylesheet = resourceAccessor.get(physicalFilePath);
             if (stylesheet == null) {
