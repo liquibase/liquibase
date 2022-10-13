@@ -1,5 +1,6 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.resource.PathResource;
 import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
@@ -8,6 +9,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -20,7 +23,7 @@ public class AbstractLiquibaseChangeLogMojoTest {
         //GIVEN
         AbstractLiquibaseChangeLogMojo mojo = new LiquibaseChangeLogMojoTest();
         mojo.project = mock(MavenProject.class);
-        String userDir = System.getProperty("user.dir");
+        String userDir = Paths.get(System.getProperty("user.dir")).toString();
         when(mojo.project.getBasedir()).thenReturn(new File(userDir));
         mojo.changeLogDirectory = userDir;
         mojo.searchPath = null;
@@ -29,7 +32,7 @@ public class AbstractLiquibaseChangeLogMojoTest {
         //THEN
         List<String> locations = changeLogAccessor.describeLocations();
         Assert.assertTrue(locations.size() == 1);
-        Assert.assertEquals(mojo.changeLogDirectory, locations.get(0));
+        Assert.assertEquals(mojo.changeLogDirectory, Paths.get(locations.get(0)).toString());
     }
 
     @Test
@@ -39,7 +42,7 @@ public class AbstractLiquibaseChangeLogMojoTest {
             //GIVEN
             AbstractLiquibaseChangeLogMojo mojo = new LiquibaseChangeLogMojoTest();
             mojo.project = mock(MavenProject.class);
-            String userDir = System.getProperty("user.dir");
+            String userDir = Paths.get(System.getProperty("user.dir")).toString();
             when(mojo.project.getBasedir()).thenReturn(new File(userDir));
             mojo.changeLogDirectory = userDir;
             mojo.searchPath = userDir;
