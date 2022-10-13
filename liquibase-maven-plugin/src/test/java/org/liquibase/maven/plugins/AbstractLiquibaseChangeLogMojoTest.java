@@ -31,7 +31,7 @@ public class AbstractLiquibaseChangeLogMojoTest {
         ResourceAccessor changeLogAccessor = mojo.getResourceAccessor(mock(ClassLoader.class));
         //THEN
         List<String> locations = changeLogAccessor.describeLocations();
-        String dirLocation = locations.get(0).replace("git ", "/");
+        String dirLocation = locations.get(0).replace("\\", "/");
         Assert.assertTrue(locations.size() == 1);
         Assert.assertEquals(mojo.changeLogDirectory, dirLocation);
     }
