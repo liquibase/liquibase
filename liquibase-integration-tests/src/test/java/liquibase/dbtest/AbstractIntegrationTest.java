@@ -298,12 +298,6 @@ public abstract class AbstractIntegrationTest {
 
         liquibase = createLiquibase(emptyRollbackSqlChangeLog);
         liquibase.rollback(new Date(0), this.contexts);
-
-        liquibase = createLiquibase(emptyRollbackSqlChangeLog);
-        liquibase.update(this.contexts);
-
-        liquibase = createLiquibase(emptyRollbackSqlChangeLog);
-        liquibase.rollback(new Date(0), this.contexts);
     }
 
     @Test
