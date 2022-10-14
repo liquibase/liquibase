@@ -258,10 +258,7 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
         /* At this point, we know that expr at least has the form of an identifier. If it is a function, it must
          * be in the list of database functions.
          */
-        if (database.isFunction(expr))
-            return true;
-        else
-            return false;
+        return database.isFunction(expr);
     }
 }
 
