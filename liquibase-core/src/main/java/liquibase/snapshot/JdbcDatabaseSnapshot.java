@@ -75,7 +75,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         }
 
         public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException, SQLException {
-            List<CachedRow> indexes = getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
+
+            return getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
                 public boolean isBulkFetchMode;
 
@@ -256,11 +257,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
 
                         // Iterate through all the candidate tables and try to find the index.
-                        for (String tableName : tables) {
+                        for (String tableName1 : tables) {
                             ResultSet rs = databaseMetaData.getIndexInfo(
                                     ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema),
                                     ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema),
-                                    tableName,
+                                    tableName1,
                                     false,
                                     true);
                             List<CachedRow> rows = extract(rs, (database instanceof InformixDatabase));
@@ -285,8 +286,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return false;
                 }
             });
-
-            return indexes;
         }
 
         protected void warnAboutDbaRecycleBin() {
