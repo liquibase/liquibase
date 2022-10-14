@@ -362,26 +362,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         }
                         Scope.getCurrentScope().getLog(getClass()).fine("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
                         Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
-                        Statement statement = null;
-                        ResultSet columnSelectRS = null;
 
-                        try {
-                            statement = underlyingConnection.createStatement();
-                            columnSelectRS = statement.executeQuery(selectStatement);
+                        try (Statement statement = underlyingConnection.createStatement(); ResultSet columnSelectRS = statement.executeQuery(selectStatement)) {
                             if (columnSelectRS.getMetaData().isAutoIncrement(1)) {
                                 column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
                             } else {
                                 column.setAutoIncrementInformation(null);
-                            }
-                        } finally {
-                            try {
-                                if (statement != null) {
-                                    statement.close();
-                                }
-                            } catch (SQLException ignore) {
-                            }
-                            if (columnSelectRS != null) {
-                                columnSelectRS.close();
                             }
                         }
                     }

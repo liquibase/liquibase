@@ -264,9 +264,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public SqlStatement[] generateStatements(Database database) {
         boolean databaseSupportsBatchUpdates = supportsBatchUpdates(database);
 
-        CSVReader reader = null;
-        try {
-            reader = getCSVReader();
+        try (CSVReader reader = getCSVReader()) {
 
             if (reader == null) {
                 throw new UnexpectedLiquibaseException("Unable to read file " + this.getFile());
@@ -488,15 +486,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             } else {
                 throw ule;
             }
-        } finally {
-            if (null != reader) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    // Do nothing
-                }
-            }
         }
+        // Do nothing
     }
 
     /**
