@@ -37,10 +37,6 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
         if (path == null) {
             return returnList;
         }
-        if (FileUtil.isAbsolute(path)) {
-            log.fine("Path " + path + " in " + getRootPath() + " does not exist");
-            return returnList;
-        }
         Path finalPath = getRootPath().resolve(path);
         if (Files.exists(finalPath)) {
             returnList.add(createResource(finalPath, path));
@@ -53,7 +49,12 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
 
     private String standardizePath(String path) {
         try {
-            return new File(path).toPath().normalize().toString().replace("\\", "/").replaceFirst("^/", "");
+            String rootPath = getRootPath().toString();
+            String result = new File(path).toPath().normalize().toString().replace("\\", "/").replaceFirst("^/", "");
+            if (rootPath.equals("/") || rootPath.equals("\\")) {
+                return result;
+            }
+            return result.replaceFirst("^\\w:/","");
         } catch (InvalidPathException e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Failed to standardize path " + path, e);
             return path;
