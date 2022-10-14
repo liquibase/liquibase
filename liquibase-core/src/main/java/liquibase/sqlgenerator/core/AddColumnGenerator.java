@@ -59,7 +59,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         }
         validationErrors.checkRequiredField("tableName", statement.getTableName());
 
-        if (statement.isPrimaryKey() && ((database instanceof H2Database) || (database instanceof AbstractDb2Database) ||
+        if (statement.isPrimaryKey() && ((database instanceof AbstractDb2Database) ||
                 (database instanceof DerbyDatabase) || (database instanceof SQLiteDatabase))) {
             validationErrors.addError("Cannot add a primary key column");
         }
