@@ -121,6 +121,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern labelsPattern = Pattern.compile(".*labels:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern runInTransactionPattern = Pattern.compile(".*runInTransaction:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern dbmsPattern = Pattern.compile(".*dbms:([^,][\\w!,]+).*", Pattern.CASE_INSENSITIVE);
+            Pattern ignorePattern = Pattern.compile(".*ignore:(\\w*).*", Pattern.CASE_INSENSITIVE);
             Pattern failOnErrorPattern = Pattern.compile(".*failOnError:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onFailPattern = Pattern.compile(".*onFail:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onErrorPattern = Pattern.compile(".*onError:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -278,6 +279,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     Matcher labelsPatternMatcher = labelsPattern.matcher(line);
                     Matcher runInTransactionPatternMatcher = runInTransactionPattern.matcher(line);
                     Matcher dbmsPatternMatcher = dbmsPattern.matcher(line);
+                    Matcher ignorePatternMatcher = ignorePattern.matcher(line);
                     Matcher failOnErrorPatternMatcher = failOnErrorPattern.matcher(line);
 
                     boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, true);
@@ -322,6 +324,11 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         dbms = changeLogParameters.expandExpressions(dbms, changeLog);
                     }
 
+                    String ignore = parseString(ignorePatternMatcher);
+                    if (ignore != null) {
+                        ignore = changeLogParameters.expandExpressions(ignore, changeLog);
+                    }
+
                     //
                     // Make sure that this line matches the --changeset <author>:<id> with no spaces before ID
                     //
@@ -349,6 +356,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     changeSet =
                        new ChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange, logicalFilePath, context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
                     changeSet.setLabels(new Labels(labels));
+                    changeSet.setIgnore(Boolean.parseBoolean(ignore));
                     changeSet.setFailOnError(failOnError);
                     changeLog.addChangeSet(changeSet);
 
@@ -481,7 +489,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         Matcher authorMatcher = rollbackChangeSetAuthorPattern.matcher(rollbackString);
                         Matcher idMatcher = rollbackChangeSetIdPattern.matcher(rollbackString);
                         Matcher pathMatcher = rollbackChangeSetPathPattern.matcher(rollbackString);
-                        
+
                         String changeSetAuthor = StringUtil.trimToNull(parseString(authorMatcher));
                         String changeSetId = StringUtil.trimToNull(parseString(idMatcher));
                         String changeSetPath = StringUtil.trimToNull(parseString(pathMatcher));
