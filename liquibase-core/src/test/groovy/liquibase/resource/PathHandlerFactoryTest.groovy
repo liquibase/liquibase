@@ -52,10 +52,10 @@ class PathHandlerFactoryTest extends Specification {
         def pathHandlerFactory = Scope.currentScope.getSingleton(PathHandlerFactory)
 
         then:
-        pathHandlerFactory.openResourceOutputStream(path, false) == null //when createIfNotExists is false
+        pathHandlerFactory.openResourceOutputStream(path, new OpenOptions().setCreateIfNeeded(false)) == null //when createIfNotExists is false
 
         when:
-        def stream = pathHandlerFactory.openResourceOutputStream(path, true) //createIfNotExists is true
+        def stream = pathHandlerFactory.openResourceOutputStream(path, new OpenOptions().setCreateIfNeeded(true)) //createIfNotExists is true
         stream.withWriter {
             it.write("test")
         }
@@ -66,7 +66,7 @@ class PathHandlerFactoryTest extends Specification {
 
         when:
         //can update file
-        stream = pathHandlerFactory.openResourceOutputStream(path, true)
+        stream = pathHandlerFactory.openResourceOutputStream(path, new OpenOptions())
         stream.withWriter {
             it.write("test 2")
         }

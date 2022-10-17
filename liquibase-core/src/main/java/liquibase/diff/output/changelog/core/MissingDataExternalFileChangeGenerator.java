@@ -10,6 +10,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.resource.OpenOptions;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.servicelocator.LiquibaseService;
@@ -84,7 +85,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
 
                 String[] dataTypes = new String[0];
                 try (
-                        OutputStream fileOutputStream = externalFileResource.openOutputStream(true);
+                        OutputStream fileOutputStream = externalFileResource.openOutputStream(new OpenOptions());
                         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
                                 fileOutputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
                         CSVWriter outputFile = new CSVWriter(new BufferedWriter(outputStreamWriter));
