@@ -69,4 +69,10 @@ class ZipResourceAccessorTest extends Specification {
         ]
     }
 
+    def describeLocations() {
+        expect:
+        simpleTestAccessor.describeLocations().size() == 1
+        simpleTestAccessor.describeLocations()[0].replace("\\", "/").endsWith("target/test-classes/simple-files.jar")
+    }
+
 }
