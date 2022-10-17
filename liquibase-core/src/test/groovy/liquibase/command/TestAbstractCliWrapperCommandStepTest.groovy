@@ -21,14 +21,14 @@ class TestAbstractCliWrapperCommandStepTest extends Specification {
 
         where:
         commandName | passedArguments                                     | legacyCommandArguments   | positionalArgument | expected
-        "update"    | null                                                | null                     | null               | "update"
-        "update"    | ["changelogFile": "x"]                              | null                     | null               | "--changelogFile, x, update"
-        "update"    | ["changelogFile": "x"]                              | ["changelogFile"]        | null               | "update, --changelogFile, x"
-        "update"    | ["changelogFile": "x", "url": "y"]                  | null                     | null               | "--changelogFile, x, --url, y, update"
-        "update"    | ["changelogFile": "x", "url": "y"]                  | ["changelogFile"]        | null               | "--url, y, update, --changelogFile, x"
-        "update"    | ["changelogFile": "x", "url": "y"]                  | ["changelogFile", "url"] | null               | "update, --changelogFile, x, --url, y"
-        "update"    | ["changelogFile": "x", "url": "y"]                  | null                     | "url"              | "--changelogFile, x, update, y"
-        "update"    | ["changelogFile": "x", "url": "y", "password": "z"] | ["password"]             | "url"              | "--changelogFile, x, update, --password, z, y"
+        "update"    | null                                                | null                     | null               | "--rollbackOnError, false, update"
+        "update"    | ["changelogFile": "x"]                              | null                     | null               | "--changelogFile, x, --rollbackOnError, false, update"
+        "update"    | ["changelogFile": "x"]                              | ["changelogFile"]        | null               | "--rollbackOnError, false, update, --changelogFile, x"
+        "update"    | ["changelogFile": "x", "url": "y"]                  | null                     | null               | "--changelogFile, x, --rollbackOnError, false, --url, y, update"
+        "update"    | ["changelogFile": "x", "url": "y"]                  | ["changelogFile"]        | null               | "--rollbackOnError, false, --url, y, update, --changelogFile, x"
+        "update"    | ["changelogFile": "x", "url": "y"]                  | ["changelogFile", "url"] | null               | "--rollbackOnError, false, update, --changelogFile, x, --url, y"
+        "update"    | ["changelogFile": "x", "url": "y"]                  | null                     | "url"              | "--changelogFile, x, --rollbackOnError, false, update, y"
+        "update"    | ["changelogFile": "x", "url": "y", "password": "z"] | ["password"]             | "url"              | "--changelogFile, x, --rollbackOnError, false, update, --password, z, y"
     }
 
     @Unroll
