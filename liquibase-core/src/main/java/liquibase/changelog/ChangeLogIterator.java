@@ -123,10 +123,9 @@ public class ChangeLogIterator {
                     }
                 }
             });
+        } catch (MigrationFailedException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof MigrationFailedException) {
-                throw (MigrationFailedException) e;
-            }
             throw new LiquibaseException(e);
         } finally {
             databaseChangeLog.setRuntimeEnvironment(null);

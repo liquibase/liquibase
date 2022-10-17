@@ -8,10 +8,13 @@ import java.util.List;
 public class MigrationFailedException extends LiquibaseException {
 
     private static final long serialVersionUID = 1L;
-    private ChangeSet failedChangeSet;
-    private List<ChangeSet> deployedChangeSets;
+    private final ChangeSet failedChangeSet;
+    private final List<ChangeSet> deployedChangeSets;
 
-    public MigrationFailedException() {}
+    public MigrationFailedException() {
+        failedChangeSet = null;
+        deployedChangeSets = null;
+    }
 
     public MigrationFailedException(ChangeSet failedChangeSet, String message) {
         super(message);

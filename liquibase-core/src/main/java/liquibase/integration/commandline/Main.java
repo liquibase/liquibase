@@ -1830,22 +1830,7 @@ public class Main {
 
             try {
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
-                    try {
-                        liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
-                    } catch (MigrationFailedException e) {
-                        if ((rollbackOnError == null) || !rollbackOnError) {
-                            throw e;
-                        }
-                        LicenseServiceUtils.checkProLicenseAndThrowException(COMMANDS.UPDATE, ROLLBACK_ON_ERROR.getName());
-                        final Map<String, Object> argsMap = new HashMap<>();
-                        argsMap.put("changeLogFile", changeLogFile);
-                        argsMap.put("database", database);
-                        argsMap.put("liquibase", liquibase);
-                        argsMap.put("migrationFailedException", e);
-                        argsMap.put("rollbackOnError", rollbackOnError);
-                        final CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackChangesetsOnError", argsMap);
-                        liquibaseCommand.execute();
-                    }
+                    executeUpdateCommand(database, liquibase);
                 } else if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)) {
@@ -1993,6 +1978,25 @@ public class Main {
                 Scope.getCurrentScope().getLog(getClass()).warning(
                     coreBundle.getString("problem.closing.connection"), e);
             }
+        }
+    }
+
+    private void executeUpdateCommand(Database database, Liquibase liquibase) throws LiquibaseException {
+        try {
+            liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+        } catch (MigrationFailedException e) {
+            if ((rollbackOnError == null) || Boolean.FALSE.equals(rollbackOnError)) {
+                throw e;
+            }
+            LicenseServiceUtils.checkProLicenseAndThrowException(COMMANDS.UPDATE, ROLLBACK_ON_ERROR.getName());
+            final Map<String, Object> argsMap = new HashMap<>();
+            argsMap.put("changeLogFile", changeLogFile);
+            argsMap.put("database", database);
+            argsMap.put("liquibase", liquibase);
+            argsMap.put("migrationFailedException", e);
+            argsMap.put("rollbackOnError", rollbackOnError);
+            final CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, "internalRollbackChangesetsOnError", argsMap);
+            liquibaseCommand.execute();
         }
     }
 
