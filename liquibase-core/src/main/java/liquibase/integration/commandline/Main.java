@@ -47,6 +47,7 @@ import java.util.jar.JarFile;
 import java.util.logging.*;
 
 import static java.util.ResourceBundle.getBundle;
+import static liquibase.command.core.UpdateCommandStep.ROLLBACK_ON_ERROR;
 
 /**
  * Class for executing Liquibase via the command line.
@@ -1832,6 +1833,10 @@ public class Main {
                     try {
                         liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                     } catch (MigrationFailedException e) {
+                        if ((rollbackOnError == null) || !rollbackOnError) {
+                            throw e;
+                        }
+                        LicenseServiceUtils.checkProLicenseAndThrowException(COMMANDS.UPDATE, ROLLBACK_ON_ERROR.getName());
                         final Map<String, Object> argsMap = new HashMap<>();
                         argsMap.put("changeLogFile", changeLogFile);
                         argsMap.put("database", database);
