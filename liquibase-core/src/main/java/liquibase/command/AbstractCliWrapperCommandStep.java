@@ -1,17 +1,11 @@
 package liquibase.command;
 
-import liquibase.Scope;
 import liquibase.exception.CommandExecutionException;
-import liquibase.exception.CommandValidationException;
 import liquibase.integration.commandline.Main;
-import liquibase.license.LicenseServiceUtils;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.*;
-
-import static liquibase.command.core.UpdateCommandStep.ROLLBACK_ON_ERROR;
-
 /**
  * Convenience base class for {@link CommandStep}s that simply wrap calls to {@link liquibase.integration.commandline.Main}
  *
@@ -130,14 +124,5 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
         }
 
         return returnArgs.toArray(new String[0]);
-    }
-
-    @Override
-    public void validate(CommandScope commandScope) throws CommandValidationException {
-        super.validate(commandScope);
-        final boolean rollbackOnErrorArgumentIsSet = !commandScope.getConfiguredValue(ROLLBACK_ON_ERROR).wasDefaultValueUsed();
-        if (rollbackOnErrorArgumentIsSet) {
-            LicenseServiceUtils.checkProLicenseAndThrowException(commandScope.getCommand().getName(), ROLLBACK_ON_ERROR.getName());
-        }
     }
 }
