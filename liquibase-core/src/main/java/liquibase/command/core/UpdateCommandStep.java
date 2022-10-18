@@ -56,7 +56,7 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
         ROLLBACK_ON_ERROR = builder.argument("rollbackOnError", Boolean.class)
                 .defaultValue(false)
                 .description("If set to true, and any changeset in a deployment fails, the update operation stops, and liquibase attempts to rollback " +
-                        "all changesets just deployed. A changeset marked “fail-on-error=false” does not trigger as an error, and so no rollback will " +
+                        "all changesets just deployed. A changeset marked 'fail-on-error=false' does not trigger as an error, and so no rollback will " +
                         "occur. Additionally, if a changeset is not auto-rollback compliant or does not have a rollback script, then no rollback-on-error " +
                         "will occur for any changeset.")
                 .build();
