@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -16,7 +17,17 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
 
     @Override
     public boolean supports(RenameColumnStatement statement, Database database) {
-        return !(database instanceof SQLiteDatabase);
+        if(database instanceof  SQLiteDatabase) {
+            try {
+                if(database.getDatabaseMajorVersion() <= 3 && database.getDatabaseMinorVersion() < 25) {
+                    return false;
+                }
+            }
+            catch (DatabaseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return true;
     }
 
     @Override
