@@ -22,16 +22,19 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assume.assumeNotNull;
 
 public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
-    String dependenciesChangeLog = null;
+    private String dependenciesChangeLog = null;
+    private String blobChangeLog = null;
 
     public PostgreSQLIntegrationTest() throws Exception {
         super("pgsql", DatabaseFactory.getInstance().getDatabase("postgresql"));
         dependenciesChangeLog = "changelogs/pgsql/complete/testFkPkDependencies.xml";
+        blobChangeLog = "changelogs/pgsql/complete/testBlob.changelog.xml";
     }
 
     /**
@@ -67,6 +70,25 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
                           .findFirst()
                           .orElse(null);
             Assert.assertNull(addPrimaryKeyChangeSet);
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
+    }
+
+    @Test
+    public void testBlobTypesChangeLog() throws Exception {
+        assumeNotNull(this.getDatabase());
+        Liquibase liquibase = createLiquibase(this.blobChangeLog);
+        clearDatabase();
+        try {
+            liquibase.update();
+            List<Map<String, ?>>  data = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                    .queryForList(
+                            new RawSqlStatement("SELECT pg_column_size(content_bytea) as BYTEASIZE, pg_column_size(lo_get(content_oid)) as OIDSIZE FROM  public.blobtest"));
+            Assert.assertNotNull(data.get(0));
+            Assert.assertTrue(((Integer)data.get(0).get("BYTEASIZE")) > 0);
+            Assert.assertEquals(data.get(0).get("BYTEASIZE"), data.get(0).get("OIDSIZE"));
         } catch (ValidationFailedException e) {
             e.printDescriptiveError(System.out);
             throw e;
