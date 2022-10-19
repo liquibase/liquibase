@@ -1,11 +1,13 @@
 package liquibase.command;
 
+import liquibase.Scope;
 import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.*;
+
 /**
  * Convenience base class for {@link CommandStep}s that simply wrap calls to {@link liquibase.integration.commandline.Main}
  *
