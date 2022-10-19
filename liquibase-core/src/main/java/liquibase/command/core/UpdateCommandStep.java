@@ -3,6 +3,8 @@ package liquibase.command.core;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.exception.CommandExecutionException;
+import liquibase.exception.CommandValidationException;
+import liquibase.license.LicenseServiceUtils;
 
 public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
 
@@ -83,5 +85,14 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
     @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
         return collectArguments(commandScope, null, null);
+    }
+
+    @Override
+    public void validate(CommandScope commandScope) throws CommandValidationException {
+        super.validate(commandScope);
+        final boolean rollbackOnErrorArgumentIsSet = !commandScope.getConfiguredValue(ROLLBACK_ON_ERROR).wasDefaultValueUsed();
+        if (rollbackOnErrorArgumentIsSet) {
+            LicenseServiceUtils.checkProLicenseAndThrowException(commandScope.getCommand().getName(), ROLLBACK_ON_ERROR.getName());
+        }
     }
 }
