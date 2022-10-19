@@ -54,16 +54,17 @@
                     <groupId>commons-beanutils</groupId>
                     <artifactId>commons-beanutils</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-text</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-text</artifactId>
-            <version>1.10.0</version>
-        </dependency>
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <!--TODO: This is overriding the commons-text dependency in opencsv. Once opencsv 5.7.1 is released we can remove this entry. See: https://security.snyk.io/vuln/SNYK-JAVA-ORGAPACHECOMMONS-3043138-->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>1.10.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
