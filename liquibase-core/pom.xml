@@ -119,7 +119,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
+        <!--TODO: This is overriding the commons-text dependency in opencsv. Once opencsv 5.7.1 is released we can remove this entry and the exclusion. See: https://security.snyk.io/vuln/SNYK-JAVA-ORGAPACHECOMMONS-3043138-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
