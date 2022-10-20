@@ -17,7 +17,7 @@ liquibase:
         altTablespace: liquibase2
         keepRunning: true
 
-      test: h2,hsqldb,sqlite
+      test: h2,hsqldb,sqlite,firebird
 
       cockroachdb:
         version: latest-v21.2
@@ -79,4 +79,8 @@ liquibase:
 
       sqlite:
         url: "jdbc:sqlite::memory:"
+
+      firebird:
+        imageName: jacobalberty/firebird
+        version: 4.0
 
