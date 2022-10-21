@@ -7,7 +7,6 @@ import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.dbdoc.*;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.OpenOptions;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -177,7 +176,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
             if (inputStream == null) {
                 throw new IOException("Can not find " + fileToCopy);
             }
-            outputStream = rootOutputDir.resolve(fileToCopy.replaceFirst(".*\\/", "")).openOutputStream(new OpenOptions());
+            outputStream = rootOutputDir.resolve(fileToCopy.replaceFirst(".*\\/", "")).openOutputStream(true);
             StreamUtil.copy(inputStream, outputStream);
         } finally {
             if (outputStream != null) {

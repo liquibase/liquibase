@@ -4,12 +4,7 @@ import liquibase.Scope;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 public class PathResource extends AbstractResource {
@@ -60,9 +55,9 @@ public class PathResource extends AbstractResource {
     }
 
     @Override
-    public OutputStream openOutputStream(OpenOptions openOptions) throws IOException {
+    public OutputStream openOutputStream(boolean createIfNeeded) throws IOException {
         if (!exists()) {
-            if (openOptions.isCreateIfNeeded()) {
+            if (createIfNeeded) {
                 Path parent = path.getParent();
                 if (parent != null) {
                     boolean mkdirs = parent.toFile().mkdirs();
@@ -78,19 +73,7 @@ public class PathResource extends AbstractResource {
         if (Files.isDirectory(this.path)) {
             throw new FileNotFoundException(this.getPath() + " is a directory");
         } else {
-            List<StandardOpenOption> options = new ArrayList<>();
-            if (openOptions.isCreateIfNeeded()) {
-                options.add(StandardOpenOption.CREATE);
-            }
-
-            if (openOptions.isTruncate()) {
-                options.addAll(Arrays.asList(StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE));
-            } else {
-                options.add(StandardOpenOption.APPEND);
-            }
-
-            return Files.newOutputStream(this.path, options.toArray(new OpenOption[0]));
-
+            return Files.newOutputStream(this.path);
         }
     }
 }
