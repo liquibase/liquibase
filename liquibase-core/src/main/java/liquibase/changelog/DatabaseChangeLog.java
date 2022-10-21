@@ -754,7 +754,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             this.getPreconditions().addNestedPrecondition(preconditions);
         }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
-            changeSet.setRunWith(includeRunWith);
+            if (changeSet.getRunWith() == null) {
+                changeSet.setRunWith(includeRunWith);
+            }
             addChangeSet(changeSet);
         }
 
