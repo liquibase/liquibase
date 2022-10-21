@@ -1121,6 +1121,9 @@ public abstract class AbstractIntegrationTest {
 
         Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
         conn.createStatement().execute("update DATABASECHANGELOG set md5sum = '1:xxx'");
+        if (!conn.getAutoCommit()) {
+            conn.commit();;
+        }
 
         liquibase.getDatabase().getRanChangeSetList();
         liquibase.update(contexts);
