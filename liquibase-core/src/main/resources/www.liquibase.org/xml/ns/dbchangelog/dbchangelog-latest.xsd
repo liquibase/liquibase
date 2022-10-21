@@ -218,7 +218,7 @@
                     <xsd:element ref="include" minOccurs="0" maxOccurs="unbounded"/>
                     <xsd:element ref="includeAll" minOccurs="0" maxOccurs="unbounded"/>
 
-                    <xsd:element name="modifyChangeSets" maxOccurs="unbounded">
+                    <xsd:element name="modifyChangeSets" minOccurs="0" maxOccurs="unbounded">
                         <xsd:complexType>
                             <xsd:choice>
                                 <xsd:element ref="include" minOccurs="0" maxOccurs="unbounded" />
