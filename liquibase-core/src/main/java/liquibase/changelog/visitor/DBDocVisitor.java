@@ -5,6 +5,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.dbdoc.*;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.OpenOptions;
@@ -150,7 +151,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         for (Column column : snapshot.get(Column.class)) {
-            if (database.isLiquibaseObject(column.getRelation())) {
+            if (shouldNotWriteColumnHtml(column)) {
                 continue;
             }
             columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
@@ -168,6 +169,11 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
         recentChangesWriter.writeHTML("index", recentChanges, null, rootChangeLogName);
 
+    }
+
+    private boolean shouldNotWriteColumnHtml(Column column) {
+        return database.isLiquibaseObject(column.getRelation()) ||
+            (database instanceof OracleDatabase && Boolean.TRUE.equals(column.getComputed()));
     }
 
     private void copyFile(String fileToCopy, Resource rootOutputDir) throws IOException {
