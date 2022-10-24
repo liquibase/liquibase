@@ -13,7 +13,11 @@
     </changeSet>
 
     <changeSet id="2" author="jesser">
-        <loadData tableName="products" file="changelogs/common/batchInsert.csv"/>
+        <loadData tableName="products" file="changelogs/common/batchInsert.csv">
+            <column name="id" />
+            <column name="name" />
+            <column name="price" />
+        </loadData>
     </changeSet>
 
     <changeSet id="verify_rownum" author="abuschka">
