@@ -47,10 +47,10 @@ public class DiffToChangeLogTest {
             assertThat("There should be some types", orderedOutputTypes, hasSize(greaterThan(5)));
         }
         List<Class<? extends DatabaseObject>> unexpectedOrderedOutputTypes = obj.getOrderedOutputTypes(UnexpectedObjectChangeGenerator.class);
-        assertThat("There should be some types", unexpectedOrderedOutputTypes, hasSize(7));
+        assertThat("There should be some types", unexpectedOrderedOutputTypes, hasSize(9));
         List<Class<? extends DatabaseObject>> missingOrderedOutputTypes = obj.getOrderedOutputTypes(MissingObjectChangeGenerator.class);
-        assertThat("There should be some types", missingOrderedOutputTypes, hasSize(6));
+        assertThat("There should be some types", missingOrderedOutputTypes, hasSize(9));
         List<Class<? extends DatabaseObject>> changedOrderedOutputTypes = obj.getOrderedOutputTypes(ChangedObjectChangeGenerator.class);
-        assertThat("There should be some types", changedOrderedOutputTypes, hasSize(6));
+        assertThat("There should be some types", changedOrderedOutputTypes, hasSize(9));
     }
 }
