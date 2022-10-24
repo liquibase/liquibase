@@ -5,8 +5,7 @@ import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.*;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
@@ -30,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -268,7 +268,10 @@ public class CreateViewChange extends AbstractChange {
                     .setFullDefinition(fullDefinition));
         }
 
-        if ((database instanceof OracleDatabase) && (StringUtil.trimToNull(remarks) != null)) {
+        List<Class<?>> databaseSupportsViewComments = Arrays.asList(OracleDatabase.class, PostgresDatabase.class);
+        boolean supportsViewComments = databaseSupportsViewComments.stream().anyMatch(clazz -> clazz.isInstance(database));
+
+        if (supportsViewComments && (StringUtil.trimToNull(remarks) != null)) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, viewName, remarks);
             if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                 statements.add(remarksStatement);
