@@ -17,12 +17,12 @@ public class ColumnSnapshotGeneratorOracle extends ColumnSnapshotGenerator {
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         int priority = super.getPriority(objectType, database);
         if (priority < 0) {
-             return priority;
-         }
-         if (database instanceof OracleDatabase) {
-             return PRIORITY_DATABASE;
-         }
-         return PRIORITY_NONE;
+            return priority;
+        }
+        if (database instanceof OracleDatabase) {
+            return PRIORITY_DATABASE;
+        }
+        return PRIORITY_NONE;
     }
 
     @Override
