@@ -159,7 +159,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     }
 
     @Override
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
 //        List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
 //        resourceAccessors.add(new MavenResourceAccessor(cl));
 //        resourceAccessors.add(new DirectoryResourceAccessor(project.getBasedir()));

@@ -1,33 +1,15 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Scope;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.InputStreamList;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.project.MavenProject;
-import liquibase.resource.Resource;
-import liquibase.resource.*;
+import liquibase.resource.DirectoryResourceAccessor;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-
-import static sun.awt.FontConfiguration.verbose;
 
 /**
  * Extension of {@link liquibase.resource.ClassLoaderResourceAccessor} for Maven which will use a default or user specified {@link ClassLoader} to load files/resources.
