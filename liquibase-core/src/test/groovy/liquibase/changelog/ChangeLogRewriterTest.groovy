@@ -2,7 +2,7 @@ package liquibase.changelog
 
 import liquibase.parser.ChangeLogParser
 import liquibase.parser.ChangeLogParserFactory
-import liquibase.resource.FileSystemResourceAccessor
+import liquibase.resource.DirectoryResourceAccessor
 import liquibase.resource.ResourceAccessor
 import liquibase.util.FileUtil
 import spock.lang.Specification
@@ -43,7 +43,7 @@ class ChangeLogRewriterTest extends Specification {
         //
         // Make sure we can parse the file
         //
-        ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(Paths.get("target/test-classes").toAbsolutePath().toFile())
+        ResourceAccessor resourceAccessor = new DirectoryResourceAccessor(Paths.get("target/test-classes").toAbsolutePath().toFile())
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(outputFile.getName(), resourceAccessor)
         DatabaseChangeLog newChangeLog = parser.parse(outputFile.getName(), new ChangeLogParameters(), resourceAccessor)
 
@@ -93,7 +93,7 @@ class ChangeLogRewriterTest extends Specification {
         //
         // Make sure we can parse the file
         //
-        ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(Paths.get("target/test-classes").toAbsolutePath().toFile())
+        ResourceAccessor resourceAccessor = new DirectoryResourceAccessor(Paths.get("target/test-classes").toAbsolutePath().toFile())
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(outputFile.getName(), resourceAccessor)
         changeLog = parser.parse(outputFile.getName(), new ChangeLogParameters(), resourceAccessor)
 
@@ -125,7 +125,7 @@ class ChangeLogRewriterTest extends Specification {
         //
         // Parse the file to grab the changeLogId
         //
-        ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(Paths.get("target/test-classes").toAbsolutePath().toFile())
+        ResourceAccessor resourceAccessor = new DirectoryResourceAccessor(Paths.get("target/test-classes").toAbsolutePath().toFile())
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(outputFile.getName(), resourceAccessor)
         DatabaseChangeLog changeLog = parser.parse(outputFile.getName(), new ChangeLogParameters(), resourceAccessor)
         String changeLogId = changeLog.getChangeLogId()

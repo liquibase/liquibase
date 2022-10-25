@@ -12,8 +12,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.SearchPathResourceAccessor;
 import liquibase.util.FileUtil;
@@ -883,13 +882,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     private static InputStream handlePropertyFileInputStream(String propertyFile) throws MojoFailureException {
-        InputStream is;
         try {
-            is = Scope.getCurrentScope().getResourceAccessor().openStream(null, propertyFile);
+            return Scope.getCurrentScope().getResourceAccessor().getExisting(propertyFile).openInputStream();
         } catch (IOException e) {
             throw new MojoFailureException("Failed to resolve the properties file.", e);
         }
-        return is;
     }
 
     protected ClassLoader getMavenArtifactClassLoader() throws MojoExecutionException {
@@ -925,9 +922,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
+    @SuppressWarnings("java:S2095")
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
         ResourceAccessor mFO = new MavenResourceAccessor(cl);
-        ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir());
+        ResourceAccessor fsFO = new DirectoryResourceAccessor(project.getBasedir());
         return new SearchPathResourceAccessor(searchPath, mFO, fsFO);
     }
 

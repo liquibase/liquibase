@@ -10,7 +10,6 @@ import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
-import org.apache.commons.lang3.StringUtils;
 
 public class DatabaseUtils {
     /**
@@ -49,7 +48,7 @@ public class DatabaseUtils {
                         finalSearchPath = defaultSchemaName;
                     }
 
-                    if (StringUtils.isNotBlank(searchPath)) {
+                    if (StringUtil.isNotEmpty(searchPath)) {
                         //If existing search path entries are not quoted, quote them. Some databases do not show them as quoted even though they need to be (like $user or case sensitive schemas)
                         finalSearchPath += ", " + StringUtil.join(StringUtil.splitAndTrim(searchPath, ","), ",", (StringUtil.StringUtilFormatter<String>) obj -> {
                             if (obj.startsWith("\"")) {
@@ -76,9 +75,11 @@ public class DatabaseUtils {
                 }
                 executor.execute(new RawSqlStatement("USE " + schema));
             } else if (database instanceof MSSQLDatabase) {
-                executor.execute(new RawSqlStatement("USE " + defaultCatalogName));
+                    defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+                    if (defaultCatalogName != null) {
+                        executor.execute(new RawSqlStatement(String.format("USE %s", defaultCatalogName)));
+                    }
             }
-
         }
     }
 

@@ -165,6 +165,7 @@ public abstract class BaseLiquibaseTask extends Task {
      * @param classLoader The ClassLoader to use in the ResourceAccessor. It is preferable that it is an AntClassLoader.
      * @return A ResourceAccessor.
      */
+    @SuppressWarnings("java:S2095")
     private ResourceAccessor createResourceAccessor(AntClassLoader classLoader) {
         return new SearchPathResourceAccessor(getSearchPath(),
                 new AntResourceAccessor(classLoader, getChangeLogDirectory()),
