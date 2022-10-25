@@ -9,6 +9,10 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.project.MavenProject;
 import liquibase.resource.Resource;
+import liquibase.resource.*;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 
 import static sun.awt.FontConfiguration.verbose;
@@ -29,15 +34,15 @@ import static sun.awt.FontConfiguration.verbose;
  */
 public class MavenResourceAccessor extends CompositeResourceAccessor {
 
-    public MavenResourceAccessor(MavenProject project) throws DependencyResolutionRequiredException {
+    public MavenResourceAccessor(MavenProject project) throws DependencyResolutionRequiredException, IOException {
         for (String element : project.getCompileClasspathElements()) {
-            this.addResourceAccessor(new FileSystemResourceAccessor(new File(element)));
+            this.addResourceAccessor(new DirectoryResourceAccessor(new File(element)));
         }
 
         Set<Artifact> dependencies = project.getArtifacts();
         if (dependencies != null) {
             for (Artifact artifact : dependencies) {
-                this.addResourceAccessor(new FileSystemResourceAccessor(artifact.getFile()));
+                this.addResourceAccessor(new DirectoryResourceAccessor(artifact.getFile()));
             }
         } else {
             Scope.getCurrentScope().getLog(getClass()).fine("No artifacts for the Maven project to add to the searchPath");
@@ -50,13 +55,13 @@ public class MavenResourceAccessor extends CompositeResourceAccessor {
         // to replace any placeholders in the resource files.
         File projectArtifactFile = project.getArtifact().getFile();
         if (projectArtifactFile == null) {
-            this.addResourceAccessor(new FileSystemResourceAccessor(new File(project.getBuild().getOutputDirectory())));
+            this.addResourceAccessor(new DirectoryResourceAccessor(new File(project.getBuild().getOutputDirectory())));
         } else {
-            this.addResourceAccessor(new FileSystemResourceAccessor(projectArtifactFile));
+            this.addResourceAccessor(new DirectoryResourceAccessor(projectArtifactFile));
         }
 
 //TODO        if (includeTestOutputDirectory) {
-            this.addResourceAccessor(new FileSystemResourceAccessor(new File(project.getBuild().getTestOutputDirectory())));
+            this.addResourceAccessor(new DirectoryResourceAccessor(new File(project.getBuild().getTestOutputDirectory())));
 //        }
     }
 
