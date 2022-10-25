@@ -3,6 +3,8 @@ package liquibase.dbtest.hsqldb;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
+import liquibase.util.SystemUtil;
+import org.junit.Assume;
 
 import java.sql.SQLSyntaxErrorException;
 
@@ -17,6 +19,7 @@ public class HsqlIntegrationTest extends AbstractIntegrationTest {
 
     @Override
     public void setUp() throws Exception {
+        Assume.assumeTrue(SystemUtil.getJavaMajorVersion() >= 11) ; // Since HSQLDB 2.7.1 it requires java 11
         super.setUp();
         try {
             // Create schemas for tests testRerunDiffChangeLogAltSchema
