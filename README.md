@@ -25,7 +25,7 @@ Try [Liquibase Hub](https://hub.liquibase.com/) to get real-time information abo
 Liquibase system requirements can be found on the [Download Liquibase](https://www.liquibase.com/download) page.
 
 ### An H2 in-memory database example for CLI
-1. [Download and run the appropriate installer](https://www.liquibase.org/download). 
+1. [Download and run the appropriate installer](https://www.liquibase.com/download). 
 2. Make sure to add Liquibase to your PATH.
 3. Copy the included `examples` directory to the needed location.
 4. Open your CLI and navigate to your `examples/sql` or `examples/xml` directory.
