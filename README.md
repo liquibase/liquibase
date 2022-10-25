@@ -8,11 +8,11 @@ Liquibase helps millions of teams track, version, and deploy database schema cha
 - Easily rollback changes
 - Collaborate with tools you already use
 
-This repository contains the main source code for Liquibase. For more information about the product, see [the main project website](https://www.liquibase.org/).
+This repository contains the main source code for Liquibase Open Source. For more information about the product, see [the main project website](https://www.liquibase.com/).
 
 ## Liquibase Automation and Integrations
 
-Liquibase Core has built-in support for a variety of databases. Databases that are not part of Liquibase Core require extensions that you can download for free. For a full list of supported databases, see [Liquibase Database Tutorials](https://docs.liquibase.com/install/tutorials/home.html).
+Liquibase Open Source has built-in support for a variety of databases. Databases that are not part of Liquibase Open Source require extensions that you can download for free. For a full list of supported databases, see [Liquibase Database Tutorials](https://docs.liquibase.com/install/tutorials/home.html).
 
 Liquibase can be integrated with Maven, Ant, Gradle, Spring Boot, and other CI/CD tools. For a full list, see [Liquibase Tools & Integrations](https://docs.liquibase.com/tools-integrations/home.html). You can use Liquibase GitHub Actions, Liquibase and Jenkins with Spinnaker, and many different [workflows](https://docs.liquibase.com/workflows/home.html).
 
@@ -22,7 +22,7 @@ Try [Liquibase Hub](https://hub.liquibase.com/) to get real-time information abo
 ## Install and Run Liquibase
 
 ### System Requirements
-Liquibase system requirements can be found on the [Download Liquibase](https://www.liquibase.org/download) page.
+Liquibase system requirements can be found on the [Download Liquibase](https://www.liquibase.com/download) page.
 
 ### An H2 in-memory database example for CLI
 1. [Download and run the appropriate installer](https://www.liquibase.org/download). 
@@ -63,9 +63,9 @@ Earn points for your achievements and contributions, collect and show off your b
 
 ## License
 
-Liquibase is [licensed under the Apache 2.0 License](https://github.com/liquibase/liquibase/blob/master/LICENSE.txt).
+Liquibase Open Source is [licensed under the Apache 2.0 License](https://github.com/liquibase/liquibase/blob/master/LICENSE.txt).
 
-[Liquibase Pro](https://www.liquibase.com/products/pro), [Liquibase Business](https://www.liquibase.com/products/business), and [Liquibase Enterprise](https://www.liquibase.com/products/enterprise), with additional features and support, is commercially licensed.
+[Liquibase Pro](https://www.liquibase.com/products/pro), and [Liquibase Enterprise](https://www.liquibase.com/products/enterprise), with additional features and support, is commercially licensed.
 
 LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.com/company)
 
