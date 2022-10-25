@@ -12,9 +12,9 @@ This repository contains the main source code for Liquibase Open Source. For mor
 
 ## Liquibase Automation and Integrations
 
-Liquibase Open Source has built-in support for a variety of databases. Databases that are not part of Liquibase Open Source require extensions that you can download for free. For a full list of supported databases, see [Liquibase Database Tutorials](https://docs.liquibase.com/install/tutorials/home.html).
+Liquibase Open Source has built-in support for a variety of databases. Databases that are not part of Liquibase Open Source require extensions that you can download for free. Here is the full list of [supported databases](https://www.liquibase.com/supported-databases).
 
-Liquibase can be integrated with Maven, Ant, Gradle, Spring Boot, and other CI/CD tools. For a full list, see [Liquibase Tools & Integrations](https://docs.liquibase.com/tools-integrations/home.html). You can use Liquibase GitHub Actions, Liquibase and Jenkins with Spinnaker, and many different [workflows](https://docs.liquibase.com/workflows/home.html).
+Liquibase can be integrated with Maven, Ant, Gradle, Spring Boot, and other CI/CD tools. For a full list, see [Liquibase Tools & Integrations](https://docs.liquibase.com/tools-integrations/home.html). You can use Liquibase with [GitHub Actions](https://github.com/liquibase/liquibase-github-action-example), [Spinnaker](https://github.com/liquibase/liquibase-spinnaker-plugin), and many different [workflows](https://docs.liquibase.com/workflows/home.html).
 
 ## Real-time monitoring and visibility
 Try [Liquibase Hub](https://hub.liquibase.com/) to get real-time information about your deployments, an overview of recent commands for the specific database you’re working on, and a place for your team collaboration.
