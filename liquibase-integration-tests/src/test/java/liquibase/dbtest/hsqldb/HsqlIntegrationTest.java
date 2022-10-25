@@ -13,7 +13,7 @@ public class HsqlIntegrationTest extends AbstractIntegrationTest {
     public static final String OBJECT_ALREADY_EXISTS = "42504";
 
     public HsqlIntegrationTest() throws Exception {
-        super("hsqldb", DatabaseFactory.getInstance().getDatabase("hsqldb"));
+        super("hsqldb", DatabaseFactory.getInstance().getDatabase(SystemUtil.getJavaMajorVersion() >= 11 ? "hsqldb": "none"));
     }
 
 
