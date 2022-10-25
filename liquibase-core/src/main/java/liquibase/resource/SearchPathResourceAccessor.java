@@ -25,7 +25,7 @@ public class SearchPathResourceAccessor extends CompositeResourceAccessor {
      * Creates itself with the given searchPath value.
      * If any of the paths in {@link GlobalConfiguration#SEARCH_PATH} are invalid, an error is logged but no exception is thrown from this method.
      *
-     * @param defaultAccessors Only uses these asccessors if searchPath is null.
+     * @param defaultAccessors Only uses these accessors if searchPath is null.
      */
     public SearchPathResourceAccessor(String searchPath, ResourceAccessor... defaultAccessors) {
 
@@ -51,5 +51,13 @@ public class SearchPathResourceAccessor extends CompositeResourceAccessor {
             logMessage += "  - " + location + System.lineSeparator();
         }
         log.fine(logMessage.trim());
+    }
+
+    /**
+     * Adds the given root as a new resource accessor, using {@link PathHandlerFactory} to find the right {@link PathHandler}.
+     */
+    public SearchPathResourceAccessor addResourceAccessor(String root) throws IOException {
+        final PathHandlerFactory parserFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+        return (SearchPathResourceAccessor) super.addResourceAccessor(parserFactory.getResourceAccessor(root));
     }
 }

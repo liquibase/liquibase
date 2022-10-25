@@ -1,10 +1,10 @@
 package liquibase.dbdoc;
 
-import java.io.File;
+import liquibase.resource.Resource;
 
 public class ChangeLogListWriter extends HTMLListWriter {
 
-    public ChangeLogListWriter(File outputDir) {
+    public ChangeLogListWriter(Resource outputDir) {
         super("All Change Logs", "changelogs.html", "changelogs", outputDir);
     }
 

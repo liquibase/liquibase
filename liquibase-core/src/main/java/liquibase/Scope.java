@@ -76,8 +76,8 @@ public class Scope {
             scopeManager.setCurrentScope(rootScope);
 
             rootScope.values.put(Attr.logService.name(), new JavaLogService());
-            rootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
             rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
+            rootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
 
             rootScope.values.put(Attr.ui.name(), new ConsoleUIService());
             rootScope.getSingleton(LiquibaseConfiguration.class).init(rootScope);
@@ -262,7 +262,7 @@ public class Scope {
     }
 
 
-    public <T> T get(Enum key, Class<T> type) {
+    public synchronized <T> T get(Enum key, Class<T> type) {
         return get(key.name(), type);
     }
 
@@ -288,7 +288,7 @@ public class Scope {
      * If the value is not defined, the passed defaultValue is returned.
      * The value is converted to the given type if necessary using {@link liquibase.util.ObjectUtil#convert(Object, Class)}.
      */
-    public <T> T get(String key, T defaultValue) {
+    public synchronized <T> T get(String key, T defaultValue) {
         Class type;
         if (defaultValue == null) {
             type = Object.class;
@@ -307,7 +307,7 @@ public class Scope {
      * Looks up the singleton object of the given type. If the singleton has not been created yet, it will be instantiated.
      * The singleton is a singleton based on the root scope and the same object will be returned for all child scopes of the root.
      */
-    public <T extends SingletonObject> T getSingleton(Class<T> type) {
+    public synchronized <T extends SingletonObject> T getSingleton(Class<T> type) {
         if (getParent() != null) {
             return getParent().getSingleton(type);
         }

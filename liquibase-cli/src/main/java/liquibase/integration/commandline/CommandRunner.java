@@ -1,10 +1,12 @@
 package liquibase.integration.commandline;
 
+import liquibase.Scope;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.CommonArgumentNames;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.MissingRequiredArgumentException;
+import liquibase.resource.PathHandlerFactory;
 import liquibase.util.StringUtil;
 import picocli.CommandLine;
 
@@ -39,12 +41,13 @@ class CommandRunner implements Callable<CommandResults> {
         }
 
         final CommandScope commandScope = new CommandScope(commandName);
-        final File outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentValue();
+        final String outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentValue();
         OutputStream outputStream = null;
 
         try {
             if (outputFile != null) {
-                outputStream = new FileOutputStream(outputFile);
+                final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+                outputStream = pathHandlerFactory.openResourceOutputStream(outputFile, true);
                 commandScope.setOutput(outputStream);
             }
 

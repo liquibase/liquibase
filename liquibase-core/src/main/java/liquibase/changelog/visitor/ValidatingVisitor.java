@@ -7,6 +7,8 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.DatabaseList;
 import liquibase.exception.*;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
@@ -96,6 +98,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         RanChangeSet ranChangeSet = findChangeSet(changeSet);
         boolean ran = ranChangeSet != null;
+        Set<String> dbmsSet = changeSet.getDbmsSet();
+        if(dbmsSet != null) {
+            DatabaseList.validateDefinitions(changeSet.getDbmsSet(), validationErrors);
+        }
         changeSet.setStoredCheckSum(ran?ranChangeSet.getLastCheckSum():null);
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
         for (Change change : changeSet.getChanges()) {

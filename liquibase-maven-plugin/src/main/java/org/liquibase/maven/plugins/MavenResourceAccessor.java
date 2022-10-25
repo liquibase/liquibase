@@ -8,6 +8,7 @@ import liquibase.resource.InputStreamList;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.project.MavenProject;
+import liquibase.resource.Resource;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.List;
 import java.util.SortedSet;
 
 import static sun.awt.FontConfiguration.verbose;
@@ -58,13 +60,4 @@ public class MavenResourceAccessor extends CompositeResourceAccessor {
 //        }
     }
 
-    @Override
-    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-        return super.openStreams(relativeTo, streamPath);
-    }
-
-    @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        return super.list(relativeTo, path, recursive, includeFiles, includeDirectories);
-    }
 }
