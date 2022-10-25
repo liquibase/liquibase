@@ -19,7 +19,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -133,7 +133,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -255,7 +255,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -393,7 +393,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -523,7 +523,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -669,7 +669,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -767,7 +767,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -881,7 +881,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -931,7 +931,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -1069,7 +1069,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -1271,7 +1271,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -1401,7 +1401,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -1523,7 +1523,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -1669,7 +1669,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -1815,7 +1815,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -1953,7 +1953,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -2115,7 +2115,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -2221,7 +2221,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -2311,7 +2311,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -2417,7 +2417,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -2523,7 +2523,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -2629,7 +2629,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -2767,7 +2767,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -2921,7 +2921,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -2987,7 +2987,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -3093,7 +3093,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -3247,7 +3247,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -3401,7 +3401,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -3571,7 +3571,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -3741,7 +3741,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -3895,7 +3895,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -4065,7 +4065,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -4195,7 +4195,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -4301,7 +4301,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -4431,7 +4431,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -4553,7 +4553,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -4659,7 +4659,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -4765,7 +4765,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -4887,7 +4887,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -5025,7 +5025,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -5171,7 +5171,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -5333,7 +5333,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -5487,7 +5487,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -5625,7 +5625,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -5771,7 +5771,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
@@ -5933,7 +5933,7 @@
 <aggregator>false</aggregator>
 <requiresOnline>false</requiresOnline>
 <inheritedByDefault>true</inheritedByDefault>
-<implementation>org.liquibase.maven.plugins.LiquibaseCommandMojo</implementation>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
 <language>java</language>
 <instantiationStrategy>per-lookup</instantiationStrategy>
 <executionStrategy>once-per-session</executionStrategy>
