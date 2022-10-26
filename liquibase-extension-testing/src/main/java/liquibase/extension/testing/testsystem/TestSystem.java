@@ -9,6 +9,7 @@ import liquibase.plugin.Plugin;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtil;
+import liquibase.util.SystemUtil;
 import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -69,6 +70,10 @@ public abstract class TestSystem implements TestRule, Plugin {
         if (StringUtil.isNotEmpty(skippedTestSystems)) {
             List<String> skippedTestSystemsList = CollectionUtil.createIfNull(StringUtil.splitAndTrim(skippedTestSystems, ","));
             returnList = returnList.stream().filter(ts -> !skippedTestSystemsList.contains(ts)).collect(Collectors.toList());
+        }
+
+        if (SystemUtil.getJavaMajorVersion() < 11) {
+            returnList = returnList.stream().filter(ts -> !"hsqldb".equals(ts)).collect(Collectors.toList());
         }
         return returnList;
     }
