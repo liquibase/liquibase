@@ -152,7 +152,13 @@ public abstract class DatabaseTestSystem extends TestSystem {
 
             if (driverJar == null) {
                 Scope.getCurrentScope().getLog(getClass()).fine("Using driver from standard classloader");
-                driver = DriverManager.getDriver(url);
+                try {
+                    driver = DriverManager.getDriver(url);
+                } catch (SQLException e) {
+                    Scope.getCurrentScope().getLog(getClass()).fine(String.format("Error '%s' while loading driver for url '%s', last try.", e.getMessage(), url));
+                    String driverClass = DatabaseFactory.getInstance().findDefaultDriver(url);
+                    return (Driver) Class.forName(driverClass).newInstance();
+                }
             } else {
                 Scope.getCurrentScope().getLog(getClass()).fine("Using driver from " + driverJar);
                 Path driverPath = DownloadUtil.downloadMavenArtifact(driverJar);
@@ -175,8 +181,6 @@ public abstract class DatabaseTestSystem extends TestSystem {
                 driver = (Driver) Class.forName(driverClass.getClass().getName(), true, isolatedClassloader).newInstance();
             }
             return driver;
-        } catch (SQLException e) {
-            throw e;
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
