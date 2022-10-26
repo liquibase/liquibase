@@ -110,7 +110,7 @@
 				<include>com.ibm.db2:jcc:jar:</include>
 				<include>org.firebirdsql.jdbc:jaybird:</include>
                 <include>net.snowflake:snowflake-jdbc:</include>
-
+				<include>org.apache.commons:commons-text:</include> <!-- TODO: Remove once opencsv has a new release and updates commons-text to a version >= 1.10.0 -->
                 <include>javax.resource:connector-api:</include>
 
 				<!-- CANNOT SHIP FOR LICENSE REASONS -->

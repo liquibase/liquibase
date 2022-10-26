@@ -93,14 +93,15 @@ class DirectoryResourceAccessorTest extends Specification {
         simpleTestAccessor.getAll(path)*.getPath() == expected
 
         where:
-        path                                                         | expected
-        "liquibase/resource/DirectoryResourceAccessorTest.class"     | ["liquibase/resource/DirectoryResourceAccessorTest.class"]
-        "/liquibase/resource/DirectoryResourceAccessorTest.class"    | ["liquibase/resource/DirectoryResourceAccessorTest.class"]
-        "liquibase\\resource\\DirectoryResourceAccessorTest.class"   | ["liquibase/resource/DirectoryResourceAccessorTest.class"]
-        "\\liquibase\\resource\\DirectoryResourceAccessorTest.class" | ["liquibase/resource/DirectoryResourceAccessorTest.class"]
-        "com/example/file with space.txt"                            | ["com/example/file with space.txt"]
-        "com\\example\\file with space.txt"                          | ["com/example/file with space.txt"]
-        "com/example/file with space.txt"                            | ["com/example/file with space.txt"]
+        path                                                           | expected
+        "liquibase/resource/DirectoryResourceAccessorTest.class"       | ["liquibase/resource/DirectoryResourceAccessorTest.class"]
+        "/liquibase/resource/DirectoryResourceAccessorTest.class"      | ["liquibase/resource/DirectoryResourceAccessorTest.class"]
+        "liquibase\\resource\\DirectoryResourceAccessorTest.class"     | ["liquibase/resource/DirectoryResourceAccessorTest.class"]
+        "\\liquibase\\resource\\DirectoryResourceAccessorTest.class"   | ["liquibase/resource/DirectoryResourceAccessorTest.class"]
+        "com/example/file with space.txt"                              | ["com/example/file with space.txt"]
+        "com\\example\\file with space.txt"                            | ["com/example/file with space.txt"]
+        "com/example/file with space.txt"                              | ["com/example/file with space.txt"]
+        "c:\\liquibase\\resource\\DirectoryResourceAccessorTest.class" | ["liquibase/resource/DirectoryResourceAccessorTest.class"]
     }
 
     def "getAll returns empty if nothing matches"() {
