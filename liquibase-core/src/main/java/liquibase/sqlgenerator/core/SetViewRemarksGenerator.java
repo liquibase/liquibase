@@ -8,7 +8,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetViewRemarksStatement;
 import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.util.StringUtil;
 
 public class SetViewRemarksGenerator extends AbstractSqlGenerator<SetViewRemarksStatement> {
@@ -42,6 +42,6 @@ public class SetViewRemarksGenerator extends AbstractSqlGenerator<SetViewRemarks
     }
 
     protected Relation getAffectedTable(SetViewRemarksStatement statement) {
-        return new Table().setName(statement.getViewName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+        return new View().setName(statement.getViewName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }
