@@ -15,7 +15,6 @@ liquibase.diff.output.changelog.core.MissingSequenceChangeGenerator
 liquibase.diff.output.changelog.core.MissingTableChangeGenerator
 liquibase.diff.output.changelog.core.MissingUniqueConstraintChangeGenerator
 liquibase.diff.output.changelog.core.MissingViewChangeGenerator
-liquibase.diff.output.changelog.core.MissingViewColumnRemarkChangeGenerator
 liquibase.diff.output.changelog.core.UnexpectedColumnChangeGenerator
 liquibase.diff.output.changelog.core.UnexpectedForeignKeyChangeGenerator
 liquibase.diff.output.changelog.core.UnexpectedIndexChangeGenerator

@@ -75,11 +75,14 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         postgres.getConnection().setAutoCommit(false)
         def changelogfile = StringUtil.randomIdentifer(10) + ".sql"
         def viewName = StringUtil.randomIdentifer(10)
+        def columnName = StringUtil.randomIdentifer(10)
         def viewComment = "some insightful comment"
+        def columnComment = "some comment relating to this column"
         def sql = """
 CREATE VIEW $viewName AS
-    SELECT * FROM information_schema.tables;
+    SELECT 'something important' as $columnName;
 COMMENT ON VIEW $viewName IS '$viewComment';
+COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
 """
         postgres.executeSql(sql)
         postgres.getConnection().commit()
@@ -104,6 +107,7 @@ COMMENT ON VIEW $viewName IS '$viewComment';
         def generatedChangelog = new File(changelogfile)
         def generatedChangelogContents = FileUtil.getContents(generatedChangelog)
         generatedChangelogContents.contains(viewComment)
+        generatedChangelogContents.contains(columnComment)
 
         cleanup:
         try {
