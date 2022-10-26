@@ -18,13 +18,13 @@ public class MavenResourceAccessor extends CompositeResourceAccessor {
 
     public MavenResourceAccessor(MavenProject project) throws DependencyResolutionRequiredException, IOException {
         for (String element : project.getCompileClasspathElements()) {
-            this.addResourceAccessor(new DirectoryResourceAccessor(new File(element)));
+            //this.addResourceAccessor(new DirectoryResourceAccessor(new File(element)));
         }
 
         Set<Artifact> dependencies = project.getArtifacts();
         if (dependencies != null) {
             for (Artifact artifact : dependencies) {
-                this.addResourceAccessor(new DirectoryResourceAccessor(artifact.getFile()));
+                //this.addResourceAccessor(new DirectoryResourceAccessor(artifact.getFile()));
             }
         } else {
             Scope.getCurrentScope().getLog(getClass()).fine("No artifacts for the Maven project to add to the searchPath");
@@ -39,7 +39,7 @@ public class MavenResourceAccessor extends CompositeResourceAccessor {
         if (projectArtifactFile == null) {
             this.addResourceAccessor(new DirectoryResourceAccessor(new File(project.getBuild().getOutputDirectory())));
         } else {
-            this.addResourceAccessor(new DirectoryResourceAccessor(projectArtifactFile));
+            //this.addResourceAccessor(new DirectoryResourceAccessor(projectArtifactFile));
         }
 
 //TODO        if (includeTestOutputDirectory) {
