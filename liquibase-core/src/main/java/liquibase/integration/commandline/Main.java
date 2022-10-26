@@ -132,6 +132,7 @@ public class Main {
     protected String sqlFile;
     protected String delimiter;
     protected String rollbackScript;
+    protected Boolean rollbackOnError;
 
     private static int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
             204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
@@ -1826,7 +1827,18 @@ public class Main {
 
             try {
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
-                    liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    try {
+                        liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    } catch (LiquibaseException e) {
+                        if (rollbackOnError) {
+                            CommandScope commandScope = new CommandScope("internalRollbackOnError");
+                            commandScope.addArgumentValue("database", database);
+                            commandScope.addArgumentValue("exception", e);
+                            commandScope.execute();
+                        } else {
+                            throw e;
+                        }
+                    }
                 } else if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)) {
