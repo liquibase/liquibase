@@ -148,17 +148,9 @@ public abstract class DatabaseTestSystem extends TestSystem {
         try {
             Scope.getCurrentScope().getLog(getClass()).fine("Loading driver for " + url);
             String driverJar = getDriverJar();
-            Driver driver;
 
             if (driverJar == null) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Using driver from standard classloader");
-                try {
-                    driver = DriverManager.getDriver(url);
-                } catch (SQLException e) {
-                    Scope.getCurrentScope().getLog(getClass()).fine(String.format("Error '%s' while loading driver for url '%s', last try.", e.getMessage(), url));
-                    String driverClass = DatabaseFactory.getInstance().findDefaultDriver(url);
-                    return (Driver) Class.forName(driverClass).newInstance();
-                }
+                return this.getDriverFromUrl(url);
             } else {
                 Scope.getCurrentScope().getLog(getClass()).fine("Using driver from " + driverJar);
                 Path driverPath = DownloadUtil.downloadMavenArtifact(driverJar);
@@ -178,11 +170,21 @@ public abstract class DatabaseTestSystem extends TestSystem {
                 final Method getDriverMethod = isolatedDriverManager.getMethod("getDriver", String.class);
 
                 final Driver driverClass = (Driver) getDriverMethod.invoke(null, url);
-                driver = (Driver) Class.forName(driverClass.getClass().getName(), true, isolatedClassloader).newInstance();
+                return (Driver) Class.forName(driverClass.getClass().getName(), true, isolatedClassloader).newInstance();
             }
-            return driver;
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    private Driver getDriverFromUrl(String url) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        Scope.getCurrentScope().getLog(getClass()).fine("Using driver from standard classloader");
+        try {
+            return DriverManager.getDriver(url);
+        } catch (SQLException e) {
+            Scope.getCurrentScope().getLog(getClass()).fine(String.format("Error '%s' while loading driver for url '%s', last try.", e.getMessage(), url));
+            String driverClass = DatabaseFactory.getInstance().findDefaultDriver(url);
+            return (Driver) Class.forName(driverClass).newInstance();
         }
     }
 
