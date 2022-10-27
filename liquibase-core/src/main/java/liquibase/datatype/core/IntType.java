@@ -15,7 +15,7 @@ import java.util.Locale;
 /**
  * Represents a signed integer number using 32 bits of storage.
  */
-@DataTypeInfo(name = "int", aliases = { "integer", "java.sql.Types.INTEGER", "java.lang.Integer", "serial", "int4", "serial4" }, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "int", aliases = {"integer", "java.sql.Types.INTEGER", "java.lang.Integer", "serial", "int4", "serial4"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class IntType extends LiquibaseDataType {
 
     private boolean autoIncrement;
@@ -63,7 +63,7 @@ public class IntType extends LiquibaseDataType {
             return type;
         }
         if ((database instanceof HsqlDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
-            InformixDatabase)) {
+                InformixDatabase) || (database instanceof SybaseDatabase)) {
             return new DatabaseDataType("INT");
         }
         if (database instanceof SQLiteDatabase) {
@@ -72,6 +72,7 @@ public class IntType extends LiquibaseDataType {
         if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("INTEGER");
         }
+
         return super.toDatabaseDataType(database);
     }
 
