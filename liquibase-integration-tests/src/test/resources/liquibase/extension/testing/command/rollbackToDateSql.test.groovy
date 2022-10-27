@@ -48,11 +48,11 @@ Optional Args:
                 username:   { it.username },
                 password:   { it.password },
                 date         : "2021-03-25T09:00:00",
-                changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.changelog.xml",
         ]
 
         setup {
-            runChangelog "changelogs/hsqldb/complete/rollback.changelog.xml"
+            runChangelog "changelogs/h2/complete/rollback.changelog.xml"
         }
 
         expectedResults = [
@@ -66,12 +66,12 @@ Optional Args:
                 username:   { it.username },
                 password:   { it.password },
                 date         : "2021-03-25T09:00:00",
-                changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.changelog.xml",
         ]
 
         setup {
             cleanResources("target/test-classes/rollbackToDate.sql")
-            runChangelog "changelogs/hsqldb/complete/rollback.changelog.xml"
+            runChangelog "changelogs/h2/complete/rollback.changelog.xml"
         }
 
         outputFile = new File("target/test-classes/rollbackToDate.sql")
@@ -98,7 +98,7 @@ Optional Args:
 
     run "Run without a date should throw an exception",  {
         arguments = [
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
         ]
         expectedException = CommandValidationException.class
     }
@@ -113,7 +113,7 @@ Optional Args:
     run "Run without a URL should throw an exception",  {
         arguments = [
                 url          : "",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
                 date         : "2021-03-25T09:00:00"
         ]
         expectedException = CommandValidationException.class
