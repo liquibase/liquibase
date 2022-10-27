@@ -41,9 +41,6 @@ public class BigIntType extends LiquibaseDataType {
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER", 38, 0);
         }
-        if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
-            return new DatabaseDataType("BIGINT");
-        }
         if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("bigint"));
         }
@@ -53,7 +50,8 @@ public class BigIntType extends LiquibaseDataType {
             return type;
         }
         if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof
-                HsqlDatabase) || (database instanceof FirebirdDatabase)) {
+                HsqlDatabase) || (database instanceof FirebirdDatabase) || (database instanceof SybaseDatabase)
+                || (database instanceof SybaseASADatabase)) {
             return new DatabaseDataType("BIGINT");
         }
         if (database instanceof PostgresDatabase) {

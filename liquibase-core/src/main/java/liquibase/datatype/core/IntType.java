@@ -66,10 +66,7 @@ public class IntType extends LiquibaseDataType {
                 InformixDatabase) || (database instanceof SybaseDatabase)) {
             return new DatabaseDataType("INT");
         }
-        if (database instanceof SQLiteDatabase) {
-            return new DatabaseDataType("INTEGER");
-        }
-        if (database instanceof SybaseASADatabase) {
+        if ((database instanceof SQLiteDatabase) || (database instanceof SybaseASADatabase)) {
             return new DatabaseDataType("INTEGER");
         }
 
