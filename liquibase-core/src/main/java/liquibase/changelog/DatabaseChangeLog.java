@@ -360,8 +360,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             setObjectQuotingStrategy(ObjectQuotingStrategy.valueOf(nodeObjectQuotingStrategy));
         }
         for (ParsedNode childNode : parsedNode.getChildren()) {
-            this.includeRunWith = null;
-            handleChildNode(childNode, resourceAccessor);
+            handleChildNode(childNode, resourceAccessor, new HashMap<>());
         }
     }
 
@@ -386,7 +385,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-    protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor)
+            throws ParsedNodeException, SetupException {
+        handleChildNode(node, resourceAccessor, new HashMap<>());
+    }
+
+    protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor, Map<String, Object> nodeScratch)
+            throws ParsedNodeException, SetupException {
         expandExpressions(node);
         String nodeName = node.getName();
         switch (nodeName) {
@@ -396,10 +401,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
                 break;
             case "modifyChangeSets":
-                this.includeRunWith = (String)node.getChildValue(null, "runWith");
+                ModifyChangeSets modifyChangeSets = new ModifyChangeSets((String)node.getChildValue(null, "runWith"));
+                nodeScratch = new HashMap<>();
+                nodeScratch.put("modifyChangeSets", modifyChangeSets);
                 for (ParsedNode modifyChildNode : node.getChildren()) {
-                    handleChildNode(modifyChildNode, resourceAccessor);
+                    handleChildNode(modifyChildNode, resourceAccessor, nodeScratch);
                 }
+                nodeScratch.remove("modifyChangeSets");
                 break;
             case "include": {
                 String path = node.getChildValue(null, "file", String.class);
@@ -420,7 +428,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                             includeContextFilter,
                             labels,
                             ignore,
-                            OnUnknownFileFormat.FAIL);
+                            OnUnknownFileFormat.FAIL,
+                            (ModifyChangeSets)nodeScratch.get("modifyChangeSets"));
                 } catch (LiquibaseException e) {
                     throw new SetupException(e);
                 }
@@ -471,7 +480,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         resourceAccessor,
                         includeContextFilter,
                         labels,
-                        ignore);
+                        ignore,
+                        (ModifyChangeSets)nodeScratch.get("modifyChangeSets"));
                 break;
             }
             case "preConditions": {
@@ -583,7 +593,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 labels,
                 ignore);
     }
-
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
                            IncludeAllFilter resourceFilter,
@@ -593,6 +602,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ContextExpression includeContextFilter,
                            Labels labels,
                            boolean ignore)
+            throws SetupException {
+        includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
+                   resourceAccessor, includeContextFilter, labels, ignore, new ModifyChangeSets(null));
+    }
+
+    public void includeAll(String pathName,
+                           boolean isRelativeToChangelogFile,
+                           IncludeAllFilter resourceFilter,
+                           boolean errorIfMissingOrEmpty,
+                           Comparator<String> resourceComparator,
+                           ResourceAccessor resourceAccessor,
+                           ContextExpression includeContextFilter,
+                           Labels labels,
+                           boolean ignore,
+                           ModifyChangeSets modifyChangeSets)
             throws SetupException {
         try {
             if (pathName == null) {
@@ -643,7 +667,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
             for (Resource resource : resources) {
                 Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
-                include(resource.getPath(), false, resourceAccessor, includeContextFilter, labels, ignore, OnUnknownFileFormat.WARN);
+                include(resource.getPath(), false, resourceAccessor, includeContextFilter,
+                        labels, ignore, OnUnknownFileFormat.WARN, modifyChangeSets);
             }
         } catch (Exception e) {
             throw new SetupException(e);
@@ -697,6 +722,18 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            Labels labels,
                            Boolean ignore,
                            OnUnknownFileFormat onUnknownFileFormat)
+            throws LiquibaseException {
+        return include(fileName, isRelativePath, resourceAccessor, includeContextFilter, labels, ignore, onUnknownFileFormat, new ModifyChangeSets(null));
+    }
+
+    public boolean include(String fileName,
+                           boolean isRelativePath,
+                           ResourceAccessor resourceAccessor,
+                           ContextExpression includeContextFilter,
+                           Labels labels,
+                           Boolean ignore,
+                           OnUnknownFileFormat onUnknownFileFormat,
+                           ModifyChangeSets modifyChangeSets)
             throws LiquibaseException {
         if (".svn".equalsIgnoreCase(fileName) || "cvs".equalsIgnoreCase(fileName)) {
             return false;
@@ -755,7 +792,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
             if (changeSet.getRunWith() == null) {
-                changeSet.setRunWith(includeRunWith);
+                changeSet.setRunWith(modifyChangeSets != null ? modifyChangeSets.getRunWith() : null);
             }
             addChangeSet(changeSet);
         }
@@ -796,6 +833,29 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public void clearCheckSums() {
         for (ChangeSet changeSet : getChangeSets()) {
             changeSet.clearCheckSum();
+        }
+    }
+
+    /**
+     *
+     * Container class to handle the modifyChangeSets tag.
+     * Other attributes may be added later
+     *
+     */
+    private static class ModifyChangeSets {
+        private final String runWith;
+
+        /**
+         *
+         * @param  runWith                The native executor to execute all included change sets with. Can be null
+         *
+         */
+        public ModifyChangeSets(String runWith) {
+            this.runWith = runWith;
+        }
+
+        public String getRunWith() {
+            return runWith;
         }
     }
 
