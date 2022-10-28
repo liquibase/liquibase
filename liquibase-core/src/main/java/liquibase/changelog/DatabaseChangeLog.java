@@ -46,7 +46,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private String physicalFilePath;
     private String logicalFilePath;
     private String changeLogId;
-    private String includeRunWith;
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     private List<ChangeSet> changeSets = new ArrayList<>();
