@@ -1,14 +1,14 @@
 # Liquibase [![Build and Test](https://github.com/liquibase/liquibase/actions/workflows/build.yml/badge.svg)](https://github.com/liquibase/liquibase/actions/workflows/build.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=liquibase&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=liquibase)
 <p align="center"><img src="https://github.com/liquibase/liquibase/blob/master/Liquibase.png" width="30%" height="30%"></p>
 
-Liquibase helps millions of teams track, version, and deploy database schema changes. It will help you to:
+Liquibase helps millions of developers track, version, and deploy database schema changes. It will help you to:
 - Control database schema changes for specific versions
 - Eliminate errors and delays when releasing databases
 - Automatically order scripts for deployment
 - Easily rollback changes
 - Collaborate with tools you already use
 
-This repository contains the main source code for Liquibase Open Source. For more information about the product, see [the main project website](https://www.liquibase.com/).
+This repository contains the main source code for Liquibase Open Source. For more information about the product, see the [Liquibase website](https://www.liquibase.com/).
 
 ## Liquibase Automation and Integrations
 
@@ -65,7 +65,7 @@ Earn points for your achievements and contributions, collect and show off your b
 
 Liquibase Open Source is [licensed under the Apache 2.0 License](https://github.com/liquibase/liquibase/blob/master/LICENSE.txt).
 
-[Liquibase Pro](https://www.liquibase.com/products/pro), and [Liquibase Enterprise](https://www.liquibase.com/products/enterprise), with additional features and support, is commercially licensed.
+[Liquibase Pro](https://www.liquibase.com/products/pro) and [Liquibase Enterprise](https://www.liquibase.com/products/enterprise), with additional features and support, are commercially licensed.
 
 LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.com/company)
 
@@ -73,7 +73,7 @@ LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.co
 
 [Liquibase Forum](https://forum.liquibase.org/) 
 
-[Liquibase Blog](https://www.liquibase.org/blog)
+[Liquibase Blog](https://www.liquibase.com/blog)
 
 [Get Support & Advanced Features](https://liquibase.com/pricing)
 
