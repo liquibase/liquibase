@@ -1,6 +1,24 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.17.1 (2022.10.21)
+
+## Fixes
+* fix: Use default localhost finder for MacOs - fix #2098 by @grzi in https://github.com/liquibase/liquibase/pull/2134
+* Allow renameColumn on newer SQLite versions by @MalloD12 in https://github.com/liquibase/liquibase/pull/3264
+* Implement logic to validate dbms set at changeset and stored procedure levels by @MalloD12 in https://github.com/liquibase/liquibase/pull/3291
+* Fixed URIResource.resolveSibling by @nvoxland in https://github.com/liquibase/liquibase/pull/3354
+* Use liquibase StringUtil not lang3.StringUtils by @nvoxland in https://github.com/liquibase/liquibase/pull/3338
+* Handle absolute path in getAll method by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3369
+
+## Dependency Updates
+* Bump ojdbc8 from 21.6.0.0.1 to 21.7.0.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3223
+* Bump maven-shade-plugin from 3.3.0 to 3.4.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3276
+* Bump slf4j-jdk14 from 2.0.2 to 2.0.3 by @dependabot in https://github.com/liquibase/liquibase/pull/3321
+* Upgrade snakeyaml maven reference from 1.32 to 1.33 by @nvoxland in https://github.com/liquibase/liquibase/pull/3359
+* Upgrade commons text transitive dependency by @abrackx in https://github.com/liquibase/liquibase/pull/3384
+
+
 Changes in version 4.17.0 (2022.10.05)
 
 ## Notable Changes
