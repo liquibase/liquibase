@@ -42,7 +42,7 @@ class SpringResource extends liquibase.resource.AbstractResource {
     @Override
     public liquibase.resource.Resource resolveSibling(String other) {
         try {
-            UrlResource otherResource = new UrlResource(this.resource.createRelative(other).getURL());
+            Resource otherResource = this.resource.createRelative(other);
 
             return new SpringResource(resolveSiblingPath(other), otherResource.getURI(), otherResource);
         } catch (IOException e) {
