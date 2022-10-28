@@ -72,7 +72,7 @@ public abstract class TestSystem implements TestRule, Plugin {
             returnList = returnList.stream().filter(ts -> !skippedTestSystemsList.contains(ts)).collect(Collectors.toList());
         }
 
-        if (SystemUtil.getJavaMajorVersion() < 11) {
+        if (!SystemUtil.isAtLeastJava11()) {
             returnList = returnList.stream().filter(ts -> !"hsqldb".equals(ts)).collect(Collectors.toList());
         }
         return returnList;

@@ -13,13 +13,13 @@ public class HsqlIntegrationTest extends AbstractIntegrationTest {
     public static final String OBJECT_ALREADY_EXISTS = "42504";
 
     public HsqlIntegrationTest() throws Exception {
-        super("hsqldb", DatabaseFactory.getInstance().getDatabase(SystemUtil.getJavaMajorVersion() >= 11 ? "hsqldb": "none"));
+        super("hsqldb", DatabaseFactory.getInstance().getDatabase(SystemUtil.isAtLeastJava11() ? "hsqldb": "none"));
     }
 
 
     @Override
     public void setUp() throws Exception {
-        Assume.assumeTrue(SystemUtil.getJavaMajorVersion() >= 11) ; // Since HSQLDB 2.7.1 it requires java 11
+        Assume.assumeTrue(SystemUtil.isAtLeastJava11()) ; // Since HSQLDB 2.7.1 it requires java 11
         super.setUp();
         try {
             // Create schemas for tests testRerunDiffChangeLogAltSchema
