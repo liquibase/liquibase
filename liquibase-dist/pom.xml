@@ -17,12 +17,12 @@
 
 		<h2.version>2.1.214</h2.version>
 		<hsqldb.version>2.5.2</hsqldb.version>
-		<postgresql.version>42.4.1</postgresql.version>
-		<mssql.version>10.2.1.jre8</mssql.version>
+		<postgresql.version>42.5.0</postgresql.version>
+		<mssql.version>11.2.1.jre8</mssql.version>
 		<mysql.version>8.0.21</mysql.version>
-		<mariadb.version>3.0.7</mariadb.version>
-		<oracle.version>21.6.0.0.1</oracle.version>
-		<sqlite.version>3.39.2.0</sqlite.version>
+		<mariadb.version>3.0.8</mariadb.version>
+		<oracle.version>21.7.0.0</oracle.version>
+		<sqlite.version>3.39.3.0</sqlite.version>
 		<db2.version>11.5.7.0</db2.version>
 		<firebird.version>4.0.6.java8</firebird.version>
 
@@ -77,7 +77,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.13.21</version>
+            <version>3.13.22</version>
         </dependency>
 
         <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
@@ -134,13 +134,13 @@
 		<dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-core</artifactId>
-            <version>4.0.0</version>
+            <version>4.0.1</version>
             <optional>true</optional>
 		</dependency>
 		<dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.0</version>
+            <version>4.0.1</version>
             <optional>true</optional>
 		</dependency>
 	</dependencies>
@@ -159,7 +159,7 @@
 		    <plugin>
                 <groupId>org.liquibase.ext</groupId>
                 <artifactId>liquibase-sdk-maven-plugin</artifactId>
-                <version>0.9.1</version>
+                <version>0.10.18</version>
             </plugin>
 
 			<plugin>
@@ -175,7 +175,7 @@
 			<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.4.0</version>
 				<dependencies>
 					<dependency>
                         <groupId>com.github.marcosemiao.maven.plugins.shade.resource</groupId>
@@ -230,6 +230,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.4.2</version>
 				<configuration>
+                    <tarLongFileMode>posix</tarLongFileMode>
                     <finalName>liquibase-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                     <attach>false</attach>

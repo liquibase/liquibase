@@ -6,7 +6,7 @@ import liquibase.changelog.DatabaseChangeLog
 import liquibase.exception.DatabaseException
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.CompositeResourceAccessor
-import liquibase.resource.FileSystemResourceAccessor
+import liquibase.resource.DirectoryResourceAccessor
 import liquibase.resource.ResourceAccessor
 import liquibase.test.JUnitResourceAccessor
 import spock.lang.Ignore
@@ -105,7 +105,7 @@ class ExecutablePreparedStatementTest extends Specification {
 	private ResourceAccessor createResourceAccessor() {
 		ResourceAccessor resourceAccessor = new CompositeResourceAccessor(
 				new JUnitResourceAccessor(),
-				new FileSystemResourceAccessor(),
+				new DirectoryResourceAccessor(),
                 new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader()))
 
         return resourceAccessor

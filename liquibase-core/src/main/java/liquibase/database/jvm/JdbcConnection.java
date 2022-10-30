@@ -482,7 +482,7 @@ public class JdbcConnection implements DatabaseConnection {
     @Override
     public void rollback() throws DatabaseException {
         try {
-            if (!con.getAutoCommit() && !con.isClosed()) {
+            if (!con.isClosed() && !con.getAutoCommit()) {
                 con.rollback();
             }
         } catch (SQLException e) {

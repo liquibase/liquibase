@@ -1,12 +1,17 @@
 package liquibase.integration.ant;
 
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.Scope;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
+import liquibase.resource.ZipResourceAccessor;
 import liquibase.util.StringUtil;
 import org.apache.tools.ant.AntClassLoader;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.nio.file.Paths;
 
-public class AntResourceAccessor extends FileSystemResourceAccessor {
+public class AntResourceAccessor extends CompositeResourceAccessor {
 
     public AntResourceAccessor(AntClassLoader classLoader, String changeLogDirectory) {
 
@@ -15,18 +20,41 @@ public class AntResourceAccessor extends FileSystemResourceAccessor {
         }
 
         if (changeLogDirectory == null) {
-            this.addRootPath(new File("").getAbsoluteFile().toPath());
-            this.addRootPath(new File("/").getAbsoluteFile().toPath());
+            try {
+                this.addResourceAccessor(new DirectoryResourceAccessor(Paths.get(".").toAbsolutePath()));
+            } catch (FileNotFoundException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine(e.getMessage(), e);
+            }
+
+            try {
+                this.addResourceAccessor(new DirectoryResourceAccessor(Paths.get("/").toAbsolutePath()));
+            } catch (FileNotFoundException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine(e.getMessage(), e);
+            }
+
         } else {
-            this.addRootPath(new File(changeLogDirectory).getAbsoluteFile().toPath());
+            try {
+                this.addResourceAccessor(new DirectoryResourceAccessor(new File(changeLogDirectory).toPath().toAbsolutePath()));
+            } catch (FileNotFoundException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine(e.getMessage(), e);
+            }
+
         }
 
         final String classpath = StringUtil.trimToNull(classLoader.getClasspath());
         if (classpath != null) {
             for (String path : classpath.split(System.getProperty("path.separator"))) {
-                this.addRootPath(new File(path).toPath());
+                try {
+                    String lowercasePath = path.toLowerCase();
+                    if (lowercasePath.endsWith(".jar") || lowercasePath.endsWith(".zip")) {
+                        this.addResourceAccessor(new ZipResourceAccessor(Paths.get(path).toAbsolutePath()));
+                    } else {
+                        this.addResourceAccessor(new DirectoryResourceAccessor(Paths.get(path).toAbsolutePath()));
+                    }
+                } catch (FileNotFoundException e) {
+                    Scope.getCurrentScope().getLog(getClass()).fine(e.getMessage(), e);
+                }
             }
         }
     }
-
 }

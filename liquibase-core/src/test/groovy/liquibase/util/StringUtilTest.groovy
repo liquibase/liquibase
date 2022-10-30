@@ -5,6 +5,7 @@ import org.hamcrest.Matchers
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import static spock.util.matcher.HamcrestSupport.expect
 import static spock.util.matcher.HamcrestSupport.that
 
 class StringUtilTest extends Specification {
@@ -116,6 +117,18 @@ class StringUtilTest extends Specification {
         [key1: "a", key2: "b"]            | "key1=a, key2=b"         | ", "
         [key1: "a", key2: "b"]            | "key1=aXkey2=b"          | "X"
         [key1: "a", key2: "b", key3: "c"] | "key1=a, key2=b, key3=c" | ", "
+    }
+
+    def "to lower without whitespaces"() {
+        expect:
+        StringUtil.toLowerWithoutWhitespaces(string) == expected
+
+        where:
+        string                | expected
+        "First Value"         | "firstvalue"
+        "secondValue"         | "secondvalue"
+        "   Third Value   \n" | "thirdvalue"
+        null                  | null
     }
 
     @Unroll
