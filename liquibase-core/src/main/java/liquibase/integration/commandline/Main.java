@@ -4,6 +4,7 @@ import liquibase.*;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
@@ -1653,7 +1654,8 @@ public class Main {
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                     liquibase.getDatabase(), liquibase.getResourceAccessor(),
                     changeExecListenerClass, changeExecListenerPropertiesFile);
-            liquibase.setChangeExecListener(listener);
+            DefaultChangeExecListener defaultChangeExecListener = new DefaultChangeExecListener(listener);
+            liquibase.setChangeExecListener(defaultChangeExecListener);
 
             if (database != null) {
                 database.setCurrentDateTimeFunction(currentDateTimeFunction);
@@ -1834,6 +1836,7 @@ public class Main {
                             CommandScope commandScope = new CommandScope("internalRollbackOnError");
                             commandScope.addArgumentValue("database", database);
                             commandScope.addArgumentValue("exception", e);
+                            commandScope.addArgumentValue("listener", defaultChangeExecListener);
                             commandScope.execute();
                         } else {
                             throw e;
