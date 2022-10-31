@@ -8,134 +8,94 @@ import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.precondition.core.PreconditionContainer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A wrapper ChangeExecListener who keeps track of deployed and failed ChangeSets,
+ * while also delegating listener actions to any other ChangeExecListener included
+ * when the object is constructed.
+ */
 public class DefaultChangeExecListener implements ChangeExecListener {
     List<ChangeExecListener> listeners;
-    List<ChangeSet> deployedChangeSets = new ArrayList<>();
+    List<ChangeSet> deployedChangeSets = new LinkedList<>();
+    List<ChangeSet> failedChangeSets = new LinkedList<>();
 
     public DefaultChangeExecListener(ChangeExecListener... listeners) {
-        this.listeners = Arrays.stream(listeners).filter(Objects::nonNull).collect(Collectors.toList());
+        this.listeners = Arrays.stream(listeners)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Called just before a given changeset is run.
-     *
-     * @param changeSet         that will be run
-     * @param databaseChangeLog parent changelog
-     * @param database          the database the change will be run against
-     * @param runStatus         of the current change from the database
-     */
     @Override
     public void willRun(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, ChangeSet.RunStatus runStatus) {
         listeners.forEach(listener -> listener.willRun(changeSet, databaseChangeLog, database, runStatus));
     }
 
-    /**
-     * Called after the given changeset is run.
-     *
-     * @param changeSet         changeSet that was run
-     * @param databaseChangeLog the parent changelog
-     * @param database          the database the change was run against
-     * @param execType          is the result
-     */
     @Override
     public void ran(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, ChangeSet.ExecType execType) {
         deployedChangeSets.add(changeSet);
         listeners.forEach(listener -> listener.ran(changeSet, databaseChangeLog, database, execType));
     }
 
-    /**
-     * Called before a change is rolled back.
-     *
-     * @param changeSet         changeSet that was rolled back
-     * @param databaseChangeLog parent change log
-     * @param database          the database the rollback was executed on.
-     */
     @Override
     public void willRollback(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         listeners.forEach(listener -> listener.willRollback(changeSet, databaseChangeLog, database));
     }
 
-    /**
-     * Called after a change is rolled back.
-     *
-     * @param changeSet         changeSet that was rolled back
-     * @param databaseChangeLog parent change log
-     * @param database          the database the rollback was executed on.
-     */
     @Override
     public void rolledBack(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         listeners.forEach(listener -> listener.rolledBack(changeSet, databaseChangeLog, database));
     }
 
-    /**
-     * @param error
-     * @param onFail
-     */
     @Override
     public void preconditionFailed(PreconditionFailedException error, PreconditionContainer.FailOption onFail) {
         listeners.forEach(listener -> listener.preconditionFailed(error, onFail));
     }
 
-    /**
-     * @param error
-     * @param onError
-     */
     @Override
     public void preconditionErrored(PreconditionErrorException error, PreconditionContainer.ErrorOption onError) {
         listeners.forEach(listener -> listener.preconditionErrored(error, onError));
     }
 
-    /**
-     * @param change
-     * @param changeSet
-     * @param changeLog
-     * @param database
-     */
     @Override
     public void willRun(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database) {
         listeners.stream().filter(Objects::nonNull).forEach(listener -> listener.willRun(change, changeSet, changeLog, database));
     }
 
-    /**
-     * @param change
-     * @param changeSet
-     * @param changeLog
-     * @param database
-     */
     @Override
     public void ran(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database) {
         listeners.forEach(listener -> listener.ran(change, changeSet, changeLog, database));
     }
 
-    /**
-     * @param changeSet
-     * @param databaseChangeLog
-     * @param database
-     * @param exception
-     */
     @Override
     public void runFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception) {
+        failedChangeSets.add(changeSet);
         listeners.forEach(listener -> listener.runFailed(changeSet, databaseChangeLog, database, exception));
     }
 
-    /**
-     * @param changeSet
-     * @param databaseChangeLog
-     * @param database
-     * @param exception
-     */
     @Override
     public void rollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception) {
         listeners.forEach(listener -> listener.rollbackFailed(changeSet, databaseChangeLog, database, exception));
     }
 
+    /**
+     * Get the list of ChangeSets that have been deployed in a during a given Liquibase command.
+     * For example: if you ran update with three ChangeSets in total and the third ChangeSet failed,
+     * this list will contain the first two ChangeSets that were executed without exception.
+     *
+     * @return the list of ChangeSets deployed during a command.
+     */
     public List<ChangeSet> getDeployedChangeSets() {
         return deployedChangeSets;
+    }
+
+    /**
+     * Gets list of failed ChangeSets encountered during a given Liquibase command
+     *
+     * @return the list of ChangeSets which have failed to deploy.
+     */
+    public List<ChangeSet> getFailedChangeSets() {
+        return failedChangeSets;
     }
 }
