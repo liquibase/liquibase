@@ -233,7 +233,6 @@ public class Liquibase implements AutoCloseable {
      */
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
-            ChangeLogHistoryServiceFactory.getInstance().resetAll();
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             lockService.waitForLock();
 
