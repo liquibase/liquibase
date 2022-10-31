@@ -2,17 +2,15 @@ package liquibase.dbdoc;
 
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
-import liquibase.resource.OpenOptions;
 import liquibase.resource.Resource;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +27,7 @@ public abstract class HTMLWriter {
     protected abstract void writeCustomHTML(Writer fileWriter, Object object, List<Change> changes, Database database) throws IOException;
 
     private Writer createFileWriter(Object object) throws IOException {
-        return new OutputStreamWriter(outputDir.resolve(DBDocUtil.toFileName(object.toString().toLowerCase()) + ".html").openOutputStream(new OpenOptions()));
+        return new OutputStreamWriter(outputDir.resolve(DBDocUtil.toFileName(object.toString().toLowerCase()) + ".html").openOutputStream(true));
     }
 
     public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog) throws IOException, DatabaseHistoryException, DatabaseException {
