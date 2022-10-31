@@ -21,7 +21,7 @@ Optional Args:
                 changelogFile: "simple.changelog.with.id-test.xml",
         ]
         setup {
-            createTempResource "changelogs/hsqldb/complete/simple.changelog.xml", "simple.changelog.with.id-test.xml"
+            createTempResource "changelogs/h2/complete/simple.changelog.xml", "simple.changelog.with.id-test.xml"
             modifyChangeLogId "simple.changelog.with.id-test.xml", MockHubService.alreadyRegisteredUUID.toString()
         }
         expectedResults = [
@@ -38,7 +38,7 @@ Optional Args:
 
     run "Run against a changeLogFile with no changeLogId should throw an exception",  {
         arguments = [
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml",
         ]
         expectedException = CommandExecutionException.class
     }
@@ -48,7 +48,7 @@ Optional Args:
                 changelogFile: "simple.changelog.xml"
         ]
         setup {
-            createTempResource "changelogs/hsqldb/complete/simple.changelog.xml", "simple.changelog.xml"
+            createTempResource "changelogs/h2/complete/simple.changelog.xml", "simple.changelog.xml"
             modifyChangeLogId "simple.changelog.xml", UUID.randomUUID().toString()
         }
         expectedUI = "has a changelog ID but was not found in Hub"

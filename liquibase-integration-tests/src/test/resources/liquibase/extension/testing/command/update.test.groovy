@@ -43,7 +43,7 @@ Optional Args:
                 url:        { it.url },
                 username:   { it.username },
                 password:   { it.password },
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
         ]
 
         expectedResults = [
@@ -66,10 +66,10 @@ Optional Args:
     run "Run with a URL that has credentials", {
         arguments = [
                 url:        { it.url + "?user=sa&password=\"\"" },
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
         ]
         expectedException = CommandExecutionException.class
-        expectedExceptionMessage = "Connection could not be created to jdbc:hsqldb:mem:lbcat?user=*****&password=*****"
+        expectedExceptionMessage = Pattern.compile(".*Connection could not be created to jdbc:h2:mem:lbcat;DB_CLOSE_DELAY=-1\\?user=.*")
     }
 
     run "Run without a changeLogFile throws an exception", {

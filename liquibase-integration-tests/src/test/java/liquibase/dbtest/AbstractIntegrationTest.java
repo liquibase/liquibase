@@ -94,7 +94,9 @@ public abstract class AbstractIntegrationTest {
     private String defaultSchemaName;
 
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
-        this.testSystem = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem(dbms.getShortName());
+        if (dbms != null) {
+            this.testSystem = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem(dbms.getShortName());
+        }
 
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
