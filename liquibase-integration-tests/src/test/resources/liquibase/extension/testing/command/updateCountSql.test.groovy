@@ -46,7 +46,7 @@ Optional Args:
                 username: { it.username },
                 password: { it.password },
                 count        : 1,
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml",
         ]
 
         expectedResults = [
@@ -60,7 +60,7 @@ Optional Args:
                 username: { it.username },
                 password: { it.password },
                 count        : 1,
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml",
         ]
 
         setup {
@@ -99,7 +99,7 @@ Optional Args:
 
     run "Run without count throws an exception", {
         arguments = [
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
         ]
         expectedException = CommandValidationException.class
     }

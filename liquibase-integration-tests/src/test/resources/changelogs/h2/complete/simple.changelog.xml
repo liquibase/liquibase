@@ -250,7 +250,9 @@
 
     <changeSet id="30" author="nvoxland">
         <createTable tableName="pkTest">
-            <column name="id" type="int"/>
+            <column name="id" type="int">
+                <constraints nullable="false" />
+            </column>
             <column name="value" type="varchar(50)"/>
         </createTable>
     </changeSet>
