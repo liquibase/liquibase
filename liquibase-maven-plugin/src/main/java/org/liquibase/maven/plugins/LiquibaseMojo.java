@@ -1,15 +1,10 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Scope;
-import liquibase.command.CommandDefinition;
-import liquibase.command.CommandFactory;
-import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.configuration.AbstractMapConfigurationValueProvider;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
-import liquibase.util.StringUtil;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecution;
@@ -20,11 +15,7 @@ import org.codehaus.plexus.component.MapOrientedComponent;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.repository.ComponentRequirement;
 
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -77,23 +68,12 @@ public class LiquibaseMojo extends AbstractMojo implements MapOrientedComponent 
         LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
         MojoConfigurationValueProvider mojoConfigurationValueProvider = null;
         try {
-            CommandScope commandScope = new CommandScope(goal);
-
             mojoConfigurationValueProvider = new MojoConfigurationValueProvider(configuration);
             liquibaseConfiguration.registerProvider(mojoConfigurationValueProvider);
-            /*
-            CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
-            CommandDefinition commandDef = commandFactory.getCommandDefinition(goal);
-            for (String argName : commandDef.getArguments().keySet()) {
-                Object value = configuration.get(argName);
-                if (value != null) {
-                    commandScope.addArgumentValue(argName, value);
-                }
-            }
-            */
 
             Map<String, Object> scopeValues = new HashMap<>();
             scopeValues.put(Scope.Attr.resourceAccessor.name(), new MavenResourceAccessor(project));
+            CommandScope commandScope = new CommandScope(goal);
             Scope.child(scopeValues, () -> {
                 commandScope.execute();
             });
@@ -113,9 +93,32 @@ public class LiquibaseMojo extends AbstractMojo implements MapOrientedComponent 
         MojoConfigurationValueProvider(Map<String, Object> configurationMap) {
             this.configurationMap = configurationMap;
         }
+
         @Override
         protected Map<?, ?> getMap() {
             return configurationMap;
+        }
+
+        /**
+         *
+         * This override of keyMatches allows the global arguments
+         * to be specified as either "liquibase.arg" or "arg"
+         *
+         * @param   wantedKey the configuration key requested
+         * @param   storedKey the key stored in the map
+         * @return  boolean
+         *
+         */
+        @Override
+        protected boolean keyMatches(String wantedKey, String storedKey) {
+            if (super.keyMatches(wantedKey, storedKey)) {
+                return true;
+            }
+            if (wantedKey.startsWith("liquibase.command.")) {
+                return super.keyMatches(wantedKey.replaceFirst("^liquibase\\.command\\.", ""), storedKey);
+            }
+
+            return super.keyMatches(wantedKey.replaceFirst("^liquibase\\.", ""), storedKey);
         }
 
         @Override
