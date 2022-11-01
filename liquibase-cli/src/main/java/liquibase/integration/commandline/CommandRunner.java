@@ -6,7 +6,6 @@ import liquibase.command.CommandScope;
 import liquibase.command.CommonArgumentNames;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.MissingRequiredArgumentException;
-import liquibase.resource.OpenOptions;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.util.StringUtil;
 import picocli.CommandLine;
@@ -48,7 +47,7 @@ class CommandRunner implements Callable<CommandResults> {
         try {
             if (outputFile != null) {
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-                outputStream = pathHandlerFactory.openResourceOutputStream(outputFile, new OpenOptions());
+                outputStream = pathHandlerFactory.openResourceOutputStream(outputFile, true);
                 commandScope.setOutput(outputStream);
             }
 
