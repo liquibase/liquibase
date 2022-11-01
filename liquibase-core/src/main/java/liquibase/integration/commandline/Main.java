@@ -1837,6 +1837,7 @@ public class Main {
                             commandScope.addArgumentValue("database", database);
                             commandScope.addArgumentValue("exception", e);
                             commandScope.addArgumentValue("listener", defaultChangeExecListener);
+                            commandScope.addArgumentValue("rollbackOnError", rollbackOnError);
                             commandScope.execute();
                         } else {
                             throw e;
