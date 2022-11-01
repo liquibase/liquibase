@@ -60,7 +60,7 @@ public class DefaultChangeExecListener implements ChangeExecListener {
 
     @Override
     public void willRun(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database) {
-        listeners.stream().filter(Objects::nonNull).forEach(listener -> listener.willRun(change, changeSet, changeLog, database));
+        listeners.forEach(listener -> listener.willRun(change, changeSet, changeLog, database));
     }
 
     @Override
