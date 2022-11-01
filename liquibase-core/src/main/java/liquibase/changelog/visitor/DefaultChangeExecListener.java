@@ -80,7 +80,7 @@ public class DefaultChangeExecListener implements ChangeExecListener {
     }
 
     /**
-     * Get the list of ChangeSets that have been deployed in a during a given Liquibase command.
+     * Get the list of ChangeSets that have been deployed during a given Liquibase command.
      * For example: if you ran update with three ChangeSets in total and the third ChangeSet failed,
      * this list will contain the first two ChangeSets that were executed without exception.
      *
@@ -91,7 +91,7 @@ public class DefaultChangeExecListener implements ChangeExecListener {
     }
 
     /**
-     * Gets list of failed ChangeSets encountered during a given Liquibase command
+     * Gets list of failed ChangeSets encountered during a given Liquibase command.
      *
      * @return the list of ChangeSets which have failed to deploy.
      */
