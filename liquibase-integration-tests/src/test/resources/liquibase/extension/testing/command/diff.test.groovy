@@ -292,7 +292,7 @@ Changed Column(s): NONE
                 Pattern.compile(".*Missing Table.s.*SECONDARYTABLE.*Unexpected Table.s.*PRIMARYTABLE.*Changed Table.s.*NONE", PATTERN_FLAGS),
                 Pattern.compile(".*Missing Column.s.*SECONDARYTABLE.ID.*SHAREDTABLE.NAME.*", PATTERN_FLAGS),
                 Pattern.compile(".*Unexpected Column.s.*PRIMARYTABLE.ID.*SHAREDTABLE.ID.*Changed Column.s.*", PATTERN_FLAGS),
-                Pattern.compile(".*SHAREDTABLE.SHARED.*type changed from .VARCHAR.3.*to .VARCHAR.255.*", PATTERN_FLAGS)
+                Pattern.compile(".*SHAREDTABLE.SHARED.*type changed from .CHARACTER VARYING.3.*to .CHARACTER VARYING.255.*", PATTERN_FLAGS)
         ]
     }
 

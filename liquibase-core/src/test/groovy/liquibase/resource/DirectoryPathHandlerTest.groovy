@@ -1,10 +1,6 @@
 package liquibase.resource
 
 import liquibase.util.StreamUtil
-import liquibase.util.StringUtil
-import org.hsqldb.types.Charset
-import spock.lang.IgnoreIf
-import spock.lang.Requires
 import spock.lang.Specification
 import spock.lang.Unroll
 
