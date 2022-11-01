@@ -60,7 +60,7 @@ public class LiquibaseCommandLine {
     private Level configuredLogLevel;
 
     private final CommandLine commandLine;
-    private Handler fileHandler;
+    private FileHandler fileHandler;
 
     private final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
@@ -89,6 +89,7 @@ public class LiquibaseCommandLine {
     private void cleanup() {
         if (fileHandler != null) {
             fileHandler.flush();
+            fileHandler.close();
         }
     }
 
@@ -352,9 +353,9 @@ public class LiquibaseCommandLine {
                     int response = commandLine.execute(finalArgs);
 
                     if (!wasHelpOrVersionRequested()) {
-                        final ConfiguredValue<String> logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentConfiguredValue();
+                        final ConfiguredValue<File> logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentConfiguredValue();
                         if (logFile.found()) {
-                            Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue());
+                            Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue().getAbsolutePath());
                         }
 
                         final ConfiguredValue<String> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
@@ -397,7 +398,7 @@ public class LiquibaseCommandLine {
                 return;
             }
 
-            if (SystemUtil.getJavaMajorVersion() < 11) {
+            if (!SystemUtil.isAtLeastJava11()) {
                 Scope.getCurrentScope().getUI().sendMessage("Performance monitoring requires Java 11 or greater. Version " + SystemUtil.getJavaVersion() + " is not supported.");
                 return;
             }
@@ -610,7 +611,7 @@ public class LiquibaseCommandLine {
     protected Map<String, Object> configureLogging() throws IOException {
         Map<String, Object> returnMap = new HashMap<>();
         final ConfiguredValue<Level> currentConfiguredValue = LiquibaseCommandLineConfiguration.LOG_LEVEL.getCurrentConfiguredValue();
-        final String logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue();
+        final File logFile = LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue();
 
         Level logLevel = Level.OFF;
         if (!currentConfiguredValue.wasDefaultValueUsed()) {
@@ -629,7 +630,7 @@ public class LiquibaseCommandLine {
         return returnMap;
     }
 
-    private void configureLogging(Level logLevel, String logFile) throws IOException {
+    private void configureLogging(Level logLevel, File logFile) throws IOException {
         configuredLogLevel = logLevel;
 
         final JavaLogService logService = (JavaLogService) Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
@@ -643,9 +644,8 @@ public class LiquibaseCommandLine {
 
         if (logFile != null) {
             if (fileHandler == null) {
-                final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-                OutputStream outputStream = pathHandlerFactory.openResourceOutputStream(logFile, new OpenOptions().setAppend(true));
-                fileHandler = new StreamHandler(outputStream, new SimpleFormatter());
+                fileHandler = new FileHandler(logFile.getAbsolutePath(), true);
+                fileHandler.setFormatter(new SimpleFormatter());
                 rootLogger.addHandler(fileHandler);
             }
 

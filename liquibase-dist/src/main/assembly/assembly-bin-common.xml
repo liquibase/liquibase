@@ -110,7 +110,6 @@
 				<include>com.ibm.db2:jcc:jar:</include>
 				<include>org.firebirdsql.jdbc:jaybird:</include>
                 <include>net.snowflake:snowflake-jdbc:</include>
-
                 <include>javax.resource:connector-api:</include>
 
 				<!-- CANNOT SHIP FOR LICENSE REASONS -->
