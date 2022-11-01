@@ -398,7 +398,7 @@ public class LiquibaseCommandLine {
                 return;
             }
 
-            if (SystemUtil.getJavaMajorVersion() < 11) {
+            if (!SystemUtil.isAtLeastJava11()) {
                 Scope.getCurrentScope().getUI().sendMessage("Performance monitoring requires Java 11 or greater. Version " + SystemUtil.getJavaVersion() + " is not supported.");
                 return;
             }
