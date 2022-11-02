@@ -45,7 +45,7 @@ Optional Args:
                 username:   { it.username },
                 password:   { it.password },
                 tag          : "version_2.0",
-                changelogFile: "changelogs/hsqldb/complete/simple.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/simple.tag.changelog.xml",
         ]
 
         expectedResults = [
@@ -59,7 +59,7 @@ Optional Args:
                 username:   { it.username },
                 password:   { it.password },
                 tag          : "version_2.0",
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
         ]
 
         setup {
@@ -83,7 +83,7 @@ Optional Args:
     run "Run without a tag throws an exception", {
         arguments = [
                 url          : "",
-                changelogFile: "changelogs/hsqldb/complete/simple.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/simple.tag.changelog.xml",
         ]
         expectedException = CommandValidationException.class
     }
@@ -100,7 +100,7 @@ Optional Args:
         arguments = [
                 url          : "",
                 tag          : "version_2.0",
-                changelogFile: "changelogs/hsqldb/complete/simple.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/simple.tag.changelog.xml",
         ]
         expectedException = CommandValidationException.class
     }

@@ -43,7 +43,7 @@ Optional Args:
                 url : { it.url },
                 username: { it.username },
                 password: { it.password },
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
         setup {
@@ -85,7 +85,7 @@ Optional Args:
                 url : { it.url },
                 username: { it.username },
                 password: { it.password },
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
         setup {
@@ -135,7 +135,7 @@ Optional Args:
     run "Run without URL should throw an exception",  {
         arguments = [
                 url: "",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
         expectedException = CommandValidationException.class
