@@ -19,6 +19,8 @@ import liquibase.util.StringUtil;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Enumeration;
@@ -240,7 +242,7 @@ abstract class GenericServletListener {
             ResourceAccessor threadClFO = new ClassLoaderResourceAccessor(contextClassLoader);
 
             ResourceAccessor clFO = new ClassLoaderResourceAccessor();
-            ResourceAccessor fsFO = new FileSystemResourceAccessor();
+            ResourceAccessor fsFO = new DirectoryResourceAccessor(new File("."));
 
 
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
@@ -260,6 +262,8 @@ abstract class GenericServletListener {
             if (database instanceof DerbyDatabase) {
                 ((DerbyDatabase) database).setShutdownEmbeddedDerby(false);
             }
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
         } finally {
             if (liquibase != null) {
                 liquibase.close();

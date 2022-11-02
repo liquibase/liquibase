@@ -17,6 +17,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.io.EmptyLineAndCommentSkippingInputStream;
 import liquibase.logging.Logger;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
@@ -31,10 +32,7 @@ import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
-import liquibase.util.BooleanUtil;
-import liquibase.util.ObjectUtil;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
+import liquibase.util.*;
 import liquibase.util.csv.CSVReader;
 
 import java.io.IOException;
@@ -712,12 +710,17 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         if (resourceAccessor == null) {
             throw new UnexpectedLiquibaseException("No file resourceAccessor specified for " + getFile());
         }
-        String relativeTo = getRelativeTo();
-        InputStream stream = resourceAccessor.openStream(relativeTo, file);
-        if (stream == null) {
+
+        Resource resource;
+        if (getRelativeTo() == null) {
+            resource = resourceAccessor.get(file);
+        } else {
+            resource = resourceAccessor.get(getRelativeTo()).resolveSibling(file);
+        }
+        if (!resource.exists()) {
             return null;
         }
-        Reader streamReader = StreamUtil.readStreamWithReader(stream, getEncoding());
+        Reader streamReader = StreamUtil.readStreamWithReader(resource.openInputStream(), getEncoding());
 
         char quotchar;
         if (StringUtil.trimToEmpty(this.quotchar).isEmpty()) {
@@ -787,12 +790,15 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
-            stream = Scope.getCurrentScope().getResourceAccessor().openStream(getRelativeTo(), file);
-            if (stream == null) {
-                throw new UnexpectedLiquibaseException(String.format(
-                        coreBundle.getString("file.not.found"), file));
+            ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+            Resource resource;
+            if (getRelativeTo() == null) {
+                resource = resourceAccessor.getExisting(file);
+            } else {
+                resource = resourceAccessor.get(getRelativeTo()).resolveSibling(file);
             }
-            stream = new EmptyLineAndCommentSkippingInputStream(stream, commentLineStartsWith);
+
+            stream = new EmptyLineAndCommentSkippingInputStream(resource.openInputStream(), commentLineStartsWith);
             return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true));
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);

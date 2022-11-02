@@ -4,7 +4,7 @@ import liquibase.Scope;
 import liquibase.integration.cdi.annotations.Liquibase;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
 import liquibase.logging.Logger;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
@@ -54,8 +54,8 @@ public class SchemesCDIConfigBuilder {
     /**
      * API method.
      */
-    public ResourceAccessor createResourceAccessor() {
-        return new FileSystemResourceAccessor(new File(ROOT_PATH));
+    public ResourceAccessor createResourceAccessor() throws IOException {
+        return new DirectoryResourceAccessor(new File(ROOT_PATH));
     }
 
     /**
