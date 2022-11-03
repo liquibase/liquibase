@@ -428,6 +428,11 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 PreconditionContainer pc = new PreconditionContainer();
                                 pc.setOnFail(StringUtil.trimToNull(parseString(onFailMatcher)));
                                 pc.setOnError(StringUtil.trimToNull(parseString(onErrorMatcher)));
+
+                                if (onSqlOutputMatcher.matches() && onUpdateSqlMatcher.matches()) {
+                                    throw new IllegalArgumentException("Please modify the changelog to have preconditions set with either " +
+                                            "'onUpdateSql' or 'onSqlOutput', and not with both.");
+                                }
                                 if (onSqlOutputMatcher.matches()) {
                                     pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onSqlOutputMatcher)));
                                 } else {
