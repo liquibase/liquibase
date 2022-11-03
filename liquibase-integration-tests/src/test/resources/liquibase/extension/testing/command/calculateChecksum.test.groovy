@@ -35,8 +35,8 @@ Optional Args:
                 url              : { it.altUrl },
                 username         : { it.altUsername },
                 password         : { it.altPassword },
-                changesetIdentifier: "changelogs/hsqldb/complete/rollback.tag.changelog.xml::1::nvoxland",
-                changelogFile    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changesetIdentifier: "changelogs/h2/complete/rollback.tag.changelog.xml::1::nvoxland",
+                changelogFile    : "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
         expectedResults = [
@@ -46,7 +46,7 @@ Optional Args:
 
     run "Run without changelogFile should throw an exception",  {
         arguments = [
-                changesetIdentifier: "changelogs/hsqldb/complete/rollback.tag.changelog.xml::1::nvoxland",
+                changesetIdentifier: "changelogs/h2/complete/rollback.tag.changelog.xml::1::nvoxland",
         ]
 
         expectedException = CommandValidationException.class
@@ -54,7 +54,7 @@ Optional Args:
 
     run "Run without changesetIdentifier should throw an exception",  {
         arguments = [
-                changelogFile    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changelogFile    : "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
         expectedException = CommandValidationException.class
@@ -63,7 +63,7 @@ Optional Args:
     run "Run without URL should throw an exception",  {
         arguments = [
                 url: "",
-                changelogFile    : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changelogFile    : "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
         expectedException = CommandValidationException.class
