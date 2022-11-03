@@ -428,8 +428,11 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 PreconditionContainer pc = new PreconditionContainer();
                                 pc.setOnFail(StringUtil.trimToNull(parseString(onFailMatcher)));
                                 pc.setOnError(StringUtil.trimToNull(parseString(onErrorMatcher)));
-                                pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onUpdateSqlMatcher)));
-                                pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onSqlOutputMatcher)));
+                                if (onSqlOutputMatcher.matches()) {
+                                    pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onSqlOutputMatcher)));
+                                } else {
+                                    pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onUpdateSqlMatcher)));
+                                }
                                 changeSet.setPreconditions(pc);
                             }
                         } else if (altPreconditionsOneDashMatcher.matches()) {
