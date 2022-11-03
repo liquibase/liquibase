@@ -125,6 +125,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern onFailPattern = Pattern.compile(".*onFail:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onErrorPattern = Pattern.compile(".*onError:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onUpdateSqlPattern = Pattern.compile(".*onUpdateSQL:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern onSqlOutputPattern = Pattern.compile(".*onSqlOutput:(\\w+).*", Pattern.CASE_INSENSITIVE);
 
             Pattern rollbackChangeSetIdPattern = Pattern.compile(".*changeSetId:(\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackChangeSetAuthorPattern = Pattern.compile(".*changesetAuthor:(\\S+).*", Pattern.CASE_INSENSITIVE);
@@ -422,11 +423,13 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 Matcher onFailMatcher = onFailPattern.matcher(body);
                                 Matcher onErrorMatcher = onErrorPattern.matcher(body);
                                 Matcher onUpdateSqlMatcher = onUpdateSqlPattern.matcher(body);
+                                Matcher onSqlOutputMatcher = onSqlOutputPattern.matcher(body);
 
                                 PreconditionContainer pc = new PreconditionContainer();
                                 pc.setOnFail(StringUtil.trimToNull(parseString(onFailMatcher)));
                                 pc.setOnError(StringUtil.trimToNull(parseString(onErrorMatcher)));
                                 pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onUpdateSqlMatcher)));
+                                pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onSqlOutputMatcher)));
                                 changeSet.setPreconditions(pc);
                             }
                         } else if (altPreconditionsOneDashMatcher.matches()) {
