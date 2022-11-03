@@ -10,6 +10,7 @@ import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
+import liquibase.util.SystemUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -270,6 +271,9 @@ public class DatabaseFactory {
         Driver driverObject;
         try {
             driverObject = (Driver) Class.forName(driverClass, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+        } catch (java.lang.UnsupportedClassVersionError e) {
+            throw new UnexpectedLiquibaseException(String.format("Your database driver %s is not compatible with Java version %s. " +
+                    "You will need to either upgrade your Java version or install a different driver jar file.", driverClass, SystemUtil.getJavaVersion()), e);
         } catch (Exception e) {
             throw new RuntimeException("Cannot find database driver: " + e.getMessage());
         }
