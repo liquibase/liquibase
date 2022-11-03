@@ -1,6 +1,7 @@
 package liquibase.dbdoc;
 
 import liquibase.GlobalConfiguration;
+import liquibase.resource.OpenOptions;
 import liquibase.resource.Resource;
 import liquibase.util.StringUtil;
 
@@ -21,7 +22,7 @@ public class HTMLListWriter {
     }
 
     public void writeHTML(SortedSet objects) throws IOException {
-        Writer fileWriter = new OutputStreamWriter(outputDir.resolve(filename).openOutputStream(true), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+        Writer fileWriter = new OutputStreamWriter(outputDir.resolve(filename).openOutputStream(new OpenOptions()), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
 
         try {
             fileWriter.append("<HTML>\n" + "<HEAD><meta charset=\"utf-8\"/>\n" + "<TITLE>\n");
