@@ -17,9 +17,10 @@ import java.util.stream.Collectors;
  * when the object is constructed.
  */
 public class DefaultChangeExecListener implements ChangeExecListener {
-    List<ChangeExecListener> listeners;
-    List<ChangeSet> deployedChangeSets = new LinkedList<>();
-    List<ChangeSet> failedChangeSets = new LinkedList<>();
+    private final List<ChangeExecListener> listeners;
+    private final List<ChangeSet> deployedChangeSets = new LinkedList<>();
+    private final List<ChangeSet> failedChangeSets = new LinkedList<>();
+    private final Map<ChangeSet, List<Change>> deployedChangesPerChangeSet = new HashMap<>();
 
     public DefaultChangeExecListener(ChangeExecListener... listeners) {
         this.listeners = Arrays.stream(listeners)
@@ -65,6 +66,7 @@ public class DefaultChangeExecListener implements ChangeExecListener {
 
     @Override
     public void ran(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database) {
+        deployedChangesPerChangeSet.computeIfAbsent(changeSet, val -> new LinkedList<>()).add(change);
         listeners.forEach(listener -> listener.ran(change, changeSet, changeLog, database));
     }
 
@@ -97,5 +99,16 @@ public class DefaultChangeExecListener implements ChangeExecListener {
      */
     public List<ChangeSet> getFailedChangeSets() {
         return failedChangeSets;
+    }
+
+    /**
+     * Gets list of Changes deployed during the current ChangeSet execution. This list is dynamic and will update depending on where in the lifecycle this is being called.
+     *
+     * @param changeSet the ChangeSet to find deployed changes from.
+     * @return the list of Changes which have deployed from the given ChangeSet. List will be empty if changes have not deployed from requested ChangeSet.
+     */
+    public List<Change> getDeployedChanges(ChangeSet changeSet) {
+        List<Change> changesDeployed = deployedChangesPerChangeSet.get(changeSet);
+        return changesDeployed != null ? changesDeployed : new LinkedList<>();
     }
 }
