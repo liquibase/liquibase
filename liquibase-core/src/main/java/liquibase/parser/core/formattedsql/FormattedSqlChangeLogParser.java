@@ -122,9 +122,12 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern runInTransactionPattern = Pattern.compile(".*runInTransaction:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern dbmsPattern = Pattern.compile(".*dbms:([^,][\\w!,]+).*", Pattern.CASE_INSENSITIVE);
             Pattern failOnErrorPattern = Pattern.compile(".*failOnError:(\\w+).*", Pattern.CASE_INSENSITIVE);
+
             Pattern onFailPattern = Pattern.compile(".*onFail:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onErrorPattern = Pattern.compile(".*onError:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onUpdateSqlPattern = Pattern.compile(".*onUpdateSQL:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern onFailMessagePattern = Pattern.compile(".*onFailMessage:((?:\\\\\\s|\\S)+).*", Pattern.CASE_INSENSITIVE); // allows escaped spaces
+            Pattern onErrorMessagePattern = Pattern.compile(".*onErrorMessage:((?:\\\\\\s|\\S)+).*", Pattern.CASE_INSENSITIVE); // allows escaped spaces
 
             Pattern rollbackChangeSetIdPattern = Pattern.compile(".*changeSetId:(\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackChangeSetAuthorPattern = Pattern.compile(".*changesetAuthor:(\\S+).*", Pattern.CASE_INSENSITIVE);
@@ -422,11 +425,19 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 Matcher onFailMatcher = onFailPattern.matcher(body);
                                 Matcher onErrorMatcher = onErrorPattern.matcher(body);
                                 Matcher onUpdateSqlMatcher = onUpdateSqlPattern.matcher(body);
+                                Matcher onFailMessageMatcher = onFailMessagePattern.matcher(body);
+                                Matcher onErrorMessageMatcher = onErrorMessagePattern.matcher(body);
 
                                 PreconditionContainer pc = new PreconditionContainer();
                                 pc.setOnFail(StringUtil.trimToNull(parseString(onFailMatcher)));
                                 pc.setOnError(StringUtil.trimToNull(parseString(onErrorMatcher)));
                                 pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onUpdateSqlMatcher)));
+                                String onFailMessage = StringUtil.trimToNull(parseString(onFailMessageMatcher));
+                                if (onFailMessage != null)
+                                    pc.setOnFailMessage(onFailMessage.replaceAll("\\\\(\\s)", "$1"));
+                                String onErrorMessage = StringUtil.trimToNull(parseString(onErrorMessageMatcher));
+                                if (onErrorMessage != null)
+                                    pc.setOnErrorMessage(onErrorMessage.replaceAll("\\\\(\\s)", "$1"));
                                 changeSet.setPreconditions(pc);
                             }
                         } else if (altPreconditionsOneDashMatcher.matches()) {
