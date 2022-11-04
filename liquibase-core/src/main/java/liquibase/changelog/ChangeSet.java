@@ -303,6 +303,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return runWith;
     }
 
+    public void setRunWith(String runWith) {
+        this.runWith = runWith;
+    }
+
     public void clearCheckSum() {
         this.checkSum = null;
     }
