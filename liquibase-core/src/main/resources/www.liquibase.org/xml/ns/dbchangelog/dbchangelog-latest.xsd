@@ -81,6 +81,36 @@
             <xsd:enumeration value="QUOTE_ONLY_RESERVED_WORDS"/>
         </xsd:restriction>
     </xsd:simpleType>
+    <!-- include -->
+    <xsd:element name="include">
+        <xsd:complexType>
+            <xsd:attribute name="id" type="xsd:string"/>
+            <xsd:attribute name="author" type="xsd:string"/>
+            <xsd:attribute name="file" type="xsd:string" use="required"/>
+            <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
+            <xsd:attribute name="context" type="xsd:string"/>
+            <xsd:attribute name="contextFilter" type="xsd:string"/>
+            <xsd:attribute name="labels" type="xsd:string"/>
+            <xsd:attribute name="ignore" type="xsd:string"/>
+            <xsd:attribute name="created" type="xsd:string"/>
+            <xsd:anyAttribute namespace="##other" processContents="lax"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- includeAll -->
+    <xsd:element name="includeAll">
+        <xsd:complexType>
+            <xsd:attribute name="path" type="xsd:string" use="required"/>
+            <xsd:attribute name="errorIfMissingOrEmpty" type="booleanExp" default="true"/>
+            <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
+            <xsd:attribute name="resourceComparator" type="xsd:string"/>
+            <xsd:attribute name="filter" type="xsd:string"/>
+            <xsd:attribute name="context" type="xsd:string"/>
+            <xsd:attribute name="labels" type="xsd:string"/>
+            <xsd:attribute name="contextFilter" type="xsd:string"/>
+            <xsd:anyAttribute namespace="##other" processContents="lax"/>
+        </xsd:complexType>
+    </xsd:element>
 
     <!-- This is the main (root) part of the xsd -->
     <xsd:element name="databaseChangeLog">
@@ -117,6 +147,7 @@
                                        type="onChangeLogPreconditionOnSqlOutput"/>
                     </xsd:complexType>
                 </xsd:element>
+
 
                 <xsd:choice minOccurs="0" maxOccurs="unbounded">
                     <xsd:element name="changeSet" minOccurs="0" maxOccurs="unbounded">
@@ -183,32 +214,17 @@
                         </xsd:complexType>
                     </xsd:element>
 
-                    <!-- include -->
-                    <xsd:element name="include" minOccurs="0" maxOccurs="unbounded">
+
+                    <xsd:element ref="include" minOccurs="0" maxOccurs="unbounded"/>
+                    <xsd:element ref="includeAll" minOccurs="0" maxOccurs="unbounded"/>
+
+                    <xsd:element name="modifyChangeSets" minOccurs="0" maxOccurs="unbounded">
                         <xsd:complexType>
-                            <xsd:attribute name="id" type="xsd:string"/>
-                            <xsd:attribute name="author" type="xsd:string"/>
-                            <xsd:attribute name="file" type="xsd:string" use="required"/>
-                            <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
-                            <xsd:attribute name="context" type="xsd:string"/>
-                            <xsd:attribute name="contextFilter" type="xsd:string"/>
-                            <xsd:attribute name="labels" type="xsd:string"/>
-                            <xsd:attribute name="ignore" type="xsd:string"/>
-                            <xsd:attribute name="created" type="xsd:string"/>
-                            <xsd:anyAttribute namespace="##other" processContents="lax"/>
-                        </xsd:complexType>
-                    </xsd:element>
-                    <xsd:element name="includeAll" minOccurs="0" maxOccurs="unbounded">
-                        <xsd:complexType>
-                            <xsd:attribute name="path" type="xsd:string" use="required"/>
-                            <xsd:attribute name="errorIfMissingOrEmpty" type="booleanExp" default="true"/>
-                            <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
-                            <xsd:attribute name="resourceComparator" type="xsd:string"/>
-                            <xsd:attribute name="filter" type="xsd:string"/>
-                            <xsd:attribute name="context" type="xsd:string"/>
-                            <xsd:attribute name="labels" type="xsd:string"/>
-                            <xsd:attribute name="contextFilter" type="xsd:string"/>
-                            <xsd:anyAttribute namespace="##other" processContents="lax"/>
+                            <xsd:choice>
+                                <xsd:element ref="include" minOccurs="0" maxOccurs="unbounded" />
+                                <xsd:element ref="includeAll" minOccurs="0" maxOccurs="unbounded"/>
+                            </xsd:choice>
+                            <xsd:attribute name="runWith" type="xsd:string" />
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>

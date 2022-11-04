@@ -86,4 +86,23 @@ Optional Args:
         ]
         expectedException = CommandValidationException.class
     }
+
+    run "Should use LoggingChangeExecListener", {
+        arguments = [
+                url                    : { it.url },
+                username               : { it.username },
+                password               : { it.password },
+                changelogFile          : 'changelogs/h2/complete/simple.changelog.xml',
+                changeExecListenerClass: 'liquibase.changelog.visitor.LoggingChangeExecListener',
+        ]
+
+        expectedResults = [
+                statusCode: 0
+        ]
+
+        expectedLogs = [
+                'EVENT: willRun fired',
+                'EVENT: ran fired',
+        ]
+    }
 }
