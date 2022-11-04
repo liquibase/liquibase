@@ -1,13 +1,20 @@
 package liquibase.extension.testing.testsystem;
 
 import liquibase.Scope;
-import liquibase.configuration.ConfigurationValueConverter;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.change.Change;
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
 import liquibase.extension.testing.util.DownloadUtil;
 import liquibase.logging.Logger;
+import liquibase.statement.SqlStatement;
 import liquibase.util.CollectionUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
@@ -141,11 +148,9 @@ public abstract class DatabaseTestSystem extends TestSystem {
         try {
             Scope.getCurrentScope().getLog(getClass()).fine("Loading driver for " + url);
             String driverJar = getDriverJar();
-            Driver driver;
 
             if (driverJar == null) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Using driver from standard classloader");
-                driver = DriverManager.getDriver(url);
+                return this.getDriverFromUrl(url);
             } else {
                 Scope.getCurrentScope().getLog(getClass()).fine("Using driver from " + driverJar);
                 Path driverPath = DownloadUtil.downloadMavenArtifact(driverJar);
@@ -165,13 +170,21 @@ public abstract class DatabaseTestSystem extends TestSystem {
                 final Method getDriverMethod = isolatedDriverManager.getMethod("getDriver", String.class);
 
                 final Driver driverClass = (Driver) getDriverMethod.invoke(null, url);
-                driver = (Driver) Class.forName(driverClass.getClass().getName(), true, isolatedClassloader).newInstance();
+                return (Driver) Class.forName(driverClass.getClass().getName(), true, isolatedClassloader).newInstance();
             }
-            return driver;
-        } catch (SQLException e) {
-            throw e;
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    private Driver getDriverFromUrl(String url) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        Scope.getCurrentScope().getLog(getClass()).fine("Using driver from standard classloader");
+        try {
+            return DriverManager.getDriver(url);
+        } catch (SQLException e) {
+            Scope.getCurrentScope().getLog(getClass()).fine(String.format("Error '%s' while loading driver for url '%s', last try.", e.getMessage(), url));
+            String driverClass = DatabaseFactory.getInstance().findDefaultDriver(url);
+            return (Driver) Class.forName(driverClass).newInstance();
         }
     }
 
@@ -320,4 +333,28 @@ public abstract class DatabaseTestSystem extends TestSystem {
         }
     }
 
+    public void execute(SqlStatement sqlStatement) throws SQLException, DatabaseException {
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabaseFromFactory()).execute(sqlStatement);
+    }
+
+    public Database getDatabaseFromFactory() throws SQLException, DatabaseException {
+        DatabaseConnection connection = new JdbcConnection(getConnection());
+        return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+    }
+
+    public void execute(Change change) throws SQLException, DatabaseException {
+        Database database = getDatabaseFromFactory();
+        SqlStatement[] statements = change.generateStatements(database);
+        for (SqlStatement statement : statements) {
+            execute(statement);
+        }
+    }
+
+    public void executeInverses(Change change) throws SQLException, DatabaseException, RollbackImpossibleException {
+        Database database = getDatabaseFromFactory();
+        SqlStatement[] statements = change.generateRollbackStatements(database);
+        for (SqlStatement statement : statements) {
+            execute(statement);
+        }
+    }
 }
