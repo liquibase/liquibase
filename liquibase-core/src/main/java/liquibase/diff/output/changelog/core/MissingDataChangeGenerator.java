@@ -101,7 +101,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                         }
                         column.setValueComputed(new DatabaseFunction("UNSUPPORTED FOR DIFF: BINARY DATA"));
                     } else { // fall back to simple string
-                        column.setValue(value.toString().replace("\\", "\\\\"));
+                        column.setValue(value.toString());
                     }
 
                     change.addColumn(column);

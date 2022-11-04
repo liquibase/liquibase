@@ -28,7 +28,7 @@ public class UpToTagChangeSetFilter implements ChangeSetFilter {
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         if (seenTag) {
-            return new ChangeSetFilterResult(false, "Change set is after tag '" + this.tag + "'", this.getClass());
+            return new ChangeSetFilterResult(false, "Changeset is after tag '" + this.tag + "'", this.getClass());
         }
 
         String tag = null;
@@ -42,6 +42,6 @@ public class UpToTagChangeSetFilter implements ChangeSetFilter {
             seenTag = true;
         }
 
-        return new ChangeSetFilterResult(true, "Change set is at or before tag '" + this.tag + "'", this.getClass());
+        return new ChangeSetFilterResult(true, "Changeset is at or before tag '" + this.tag + "'", this.getClass());
     }
 }

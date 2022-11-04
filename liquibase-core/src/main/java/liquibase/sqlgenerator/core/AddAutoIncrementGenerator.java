@@ -22,6 +22,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     @Override
     public boolean supports(AddAutoIncrementStatement statement, Database database) {
         return (database.supportsAutoIncrement()
+                && !(database instanceof Db2zDatabase)
                 && !(database instanceof DerbyDatabase)
                 && !(database instanceof MSSQLDatabase)
                 && !(database instanceof HsqlDatabase)

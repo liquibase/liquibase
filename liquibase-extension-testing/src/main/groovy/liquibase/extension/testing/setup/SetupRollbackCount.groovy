@@ -6,10 +6,10 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
-import liquibase.extension.testing.TestDatabaseConnections
-import liquibase.integration.commandline.CommandLineResourceAccessor
+
+import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.CompositeResourceAccessor
-import liquibase.resource.FileSystemResourceAccessor
+import liquibase.resource.DirectoryResourceAccessor
 
 import java.nio.file.Paths
 
@@ -24,8 +24,8 @@ class SetupRollbackCount extends TestSetup {
     }
 
     @Override
-    void setup(TestDatabaseConnections.ConnectionStatus connectionStatus) throws Exception {
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connectionStatus.connection))
+    void setup(TestSetupEnvironment testSetupEnvironment) throws Exception {
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(testSetupEnvironment.connection))
 
         final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
         changeLogService.init()
@@ -33,8 +33,8 @@ class SetupRollbackCount extends TestSetup {
 
         changeLogService.reset()
         CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(
-                new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
-                new CommandLineResourceAccessor(getClass().getClassLoader())
+                new DirectoryResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
+                new ClassLoaderResourceAccessor(getClass().getClassLoader())
         )
         Liquibase liquibase = new Liquibase(this.changeLog, fileOpener, database)
         liquibase.rollback(count, null)

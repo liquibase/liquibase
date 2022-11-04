@@ -2,24 +2,24 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubConfiguration;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
+import liquibase.resource.*;
 import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A Liquibase MOJO that requires the user to provide a DatabaseChangeLogFile to be able
@@ -57,14 +57,23 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     protected String contexts;
 
     /**
-     * Specifies which Liquibase labels Liquibase will execute, which can be separated by a commaif multiple labels
-      are required or you need to designate a more complex expression.
-   * If a label is not specified, then ALL labels will be executed.
+     * Deprecated version of labelFilter
      *
      * @parameter property="liquibase.labels" default-value=""
+     * @deprecated
      */
     @PropertyElement
     protected String labels;
+
+    /**
+     * Specifies which Liquibase labels Liquibase will execute, which can be separated by a comma if multiple labels
+     are required or you need to designate a more complex expression.
+     * If a label is not specified, then ALL labels will be executed.
+     *
+     * @parameter property="liquibase.labelFilter" default-value=""
+     */
+    @PropertyElement
+    protected String labelFilter;
 
     /**
      *
@@ -94,6 +103,16 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      */
     @PropertyElement(key = "liquibase.hub.mode")
     protected String hubMode;
+
+
+    /**
+     * How to handle multiple files being found in the search path that have duplicate paths.
+     * Options are WARN (log warning and choose one at random) or ERROR (fail current operation)
+     *
+     * @parameter property="liquibase.duplicateFileMode" default-value="ERROR"
+     */
+    @PropertyElement
+    protected String duplicateFileMode;
 
     @Override
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
@@ -125,6 +144,9 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         if (StringUtil.isNotEmpty(hubMode)) {
             DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_MODE.getKey(), hubMode);
         }
+        if (StringUtil.isNotEmpty(duplicateFileMode)) {
+            DeprecatedConfigurationValueProvider.setData(GlobalConfiguration.DUPLICATE_FILE_MODE.getKey(), GlobalConfiguration.DuplicateFileMode.valueOf(duplicateFileMode.toUpperCase(Locale.ROOT)));
+        }
     }
 
     @Override
@@ -133,22 +155,22 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         getLog().info(indent + "changeLogDirectory: " + changeLogDirectory);
         getLog().info(indent + "changeLogFile: " + changeLogFile);
         getLog().info(indent + "context(s): " + contexts);
-        getLog().info(indent + "label(s): " + labels);
+        getLog().info(indent + "label(s): " + getLabelFilter());
     }
 
     @Override
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
         List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
         resourceAccessors.add(new MavenResourceAccessor(cl));
-        resourceAccessors.add(new FileSystemResourceAccessor(project.getBasedir()));
+        resourceAccessors.add(new DirectoryResourceAccessor(project.getBasedir()));
         resourceAccessors.add(new ClassLoaderResourceAccessor(getClass().getClassLoader()));
 
         if (changeLogDirectory != null) {
             calculateChangeLogDirectoryAbsolutePath();
-            resourceAccessors.add(new FileSystemResourceAccessor(new File(changeLogDirectory)));
+            resourceAccessors.add(new DirectoryResourceAccessor(new File(changeLogDirectory)));
         }
 
-        return new CompositeResourceAccessor(resourceAccessors);
+        return new SearchPathResourceAccessor(searchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 
     @Override
@@ -170,5 +192,12 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
                 changeLogDirectory = project.getBasedir().getAbsolutePath().replace('\\', '/') + "/" + changeLogDirectory;
             }
         }
+    }
+
+    public String getLabelFilter() {
+        if (labelFilter == null) {
+            return labels;
+        }
+        return labelFilter;
     }
 }

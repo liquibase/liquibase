@@ -30,7 +30,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
 
     /**
      *
-     * The change set ID to rollback
+     * The changeset ID to rollback
      *
      * @parameter property="liquibase.changeSetId"
      *
@@ -85,9 +85,9 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
     @Override
     protected void printSettings(String indent) {
       super.printSettings(indent);
-        getLog().info(indent + "Change Set ID:     " + changeSetId);
-        getLog().info(indent + "Change Set Author: " + changeSetAuthor);
-        getLog().info(indent + "Change Set Path:   " + changeSetPath);
+        getLog().info(indent + "Changeset ID:     " + changeSetId);
+        getLog().info(indent + "Changeset Author: " + changeSetAuthor);
+        getLog().info(indent + "Changeset Path:   " + changeSetPath);
         getLog().info(indent + "Rollback script:   " + rollbackScript);
     }
 
@@ -105,12 +105,6 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         //
         // Check the Pro license
         //
-        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
-        if (! hasProLicense) {
-            throw new LiquibaseException(
-               "The command 'rollbackOneChangeSetSQL' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com." +
-                       "Add liquibase.pro.licenseKey as a Maven property or add liquibase.pro.licenseKey=<yourKey> into your defaults file.");
-        }
         Database database = liquibase.getDatabase();
         CommandScope liquibaseCommand = new CommandScope("internalRollbackOneChangeSetSQL");
 
@@ -172,6 +166,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         argsMap.put("changeSetId", this.changeSetId);
         argsMap.put("changeSetAuthor", this.changeSetAuthor);
         argsMap.put("changeSetPath", this.changeSetPath);
+        argsMap.put("rollbackScript", this.rollbackScript);
         return argsMap;
     }
 }

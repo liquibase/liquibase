@@ -91,7 +91,7 @@ public class HubUpdater {
      * @param changeLogFile     Path to DatabaseChangelog for this operation
      * @param contexts          Contexts to use for filtering
      * @param labelExpression   Labels to use for filtering
-     * @param changeLogIterator Iterator to use for going through change sets
+     * @param changeLogIterator Iterator to use for going through changesets
      * @return Operation        Valid Operation object or null
      * @throws LiquibaseHubException Thrown by HubService
      * @throws DatabaseException     Thrown by Liquibase core
@@ -435,7 +435,7 @@ public class HubUpdater {
         String input = Scope.getCurrentScope().getUI().prompt(promptString, "S", (input1, returnType) -> {
             input1 = input1.trim().toLowerCase();
             if (!(input1.equals("s") || input1.equals("n") || input1.contains("@"))) {
-                throw new IllegalArgumentException("Invalid input '" + input1 + "'");
+                throw new IllegalArgumentException(String.format("Invalid value: '%s'", input1));
             }
             return input1;
         }, String.class);
@@ -444,6 +444,9 @@ public class HubUpdater {
         // Re-lock before proceeding
         //
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+
+        // Reset the lockService in case other JVM instances have done things to the lock table since we had last locked it
+        lockService.reset();
         lockService.waitForLock();
 
         String defaultsFilePath = Scope.getCurrentScope().get("defaultsFile", String.class);

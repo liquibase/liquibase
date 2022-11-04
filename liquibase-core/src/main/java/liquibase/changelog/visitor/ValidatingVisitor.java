@@ -7,6 +7,8 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.DatabaseList;
 import liquibase.exception.*;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
@@ -31,6 +33,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private Map<String, RanChangeSet> ranIndex;
     private Database database;
 
+    //
+    // Added for test
+    //
+    public ValidatingVisitor() {
+    }
+
     public ValidatingVisitor(List<RanChangeSet> ranChangeSets) {
         ranIndex = new HashMap<>();
         for(RanChangeSet changeSet:ranChangeSets) {
@@ -45,7 +53,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             if (preconditions == null) {
                 return;
             }
-            preconditions.check(database, changeLog, null, null);
+            final ValidationErrors foundErrors = preconditions.validate(database);
+            if (foundErrors.hasErrors()) {
+                this.validationErrors.addAll(foundErrors);
+            } else {
+                preconditions.check(database, changeLog, null, null);
+            }
         } catch (PreconditionFailedException e) {
             Scope.getCurrentScope().getLog(getClass()).fine("Precondition Failed: "+e.getMessage(), e);
             failedPreconditions.addAll(e.getFailedPreconditions());
@@ -85,6 +98,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         RanChangeSet ranChangeSet = findChangeSet(changeSet);
         boolean ran = ranChangeSet != null;
+        Set<String> dbmsSet = changeSet.getDbmsSet();
+        if(dbmsSet != null) {
+            DatabaseList.validateDefinitions(changeSet.getDbmsSet(), validationErrors);
+        }
         changeSet.setStoredCheckSum(ran?ranChangeSet.getLastCheckSum():null);
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
         for (Change change : changeSet.getChanges()) {
@@ -104,13 +121,13 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                         if (foundErrors.hasErrors() && (changeSet.getOnValidationFail().equals
                                 (ChangeSet.ValidationFailOption.MARK_RAN))) {
                             Scope.getCurrentScope().getLog(getClass()).info(
-                                    "Skipping change set " + changeSet + " due to validation error(s): " +
+                                    "Skipping changeset " + changeSet + " due to validation error(s): " +
                                             StringUtil.join(foundErrors.getErrorMessages(), ", "));
                             changeSet.setValidationFailed(true);
                         } else {
                             if (!foundErrors.getWarningMessages().isEmpty())
                                 Scope.getCurrentScope().getLog(getClass()).warning(
-                                        "Change set " + changeSet + ": " +
+                                        "Changeset " + changeSet + ": " +
                                                 StringUtil.join(foundErrors.getWarningMessages(), ", "));
                             validationErrors.addAll(foundErrors, changeSet);
                         }

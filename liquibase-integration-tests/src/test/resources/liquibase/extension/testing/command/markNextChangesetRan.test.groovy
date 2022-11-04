@@ -10,6 +10,7 @@ Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -31,7 +32,7 @@ Optional Args:
                 url      : { it.url },
                 username : { it.username },
                 password : { it.password },
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
         ]
 
         expectedResults = [

@@ -15,7 +15,7 @@ public class ContextChangeSetFilterTest {
     private static final class TestSqlVisitor extends AbstractSqlVisitor {
 
         public TestSqlVisitor(final String... contexts) {
-            setContexts(new ContextExpression(contexts));
+            setContextFilter(new ContextExpression(contexts));
         }
 
         @Override

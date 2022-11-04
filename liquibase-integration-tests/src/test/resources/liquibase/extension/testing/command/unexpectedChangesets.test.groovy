@@ -10,7 +10,7 @@ Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog
   url (String) The JDBC database connection URL
-  verbose (String) Verbose flag
+    OBFUSCATED
 Optional Args:
   contexts (String) Changeset contexts to match
     Default: null
@@ -27,6 +27,8 @@ Optional Args:
     OBFUSCATED
   username (String) Username to use to connect to the database
     Default: null
+  verbose (Boolean) Verbose flag
+    Default: null
 """
 
     run "Happy path", {
@@ -35,11 +37,11 @@ Optional Args:
                 username:   { it.username },
                 password:   { it.password },
                 verbose      : "true",
-                changelogFile: "changelogs/hsqldb/complete/unexpected.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/unexpected.tag.changelog.xml",
         ]
 
         setup {
-            syncChangelog "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+            syncChangelog "changelogs/h2/complete/rollback.tag.changelog.xml"
         }
 
         expectedResults = [

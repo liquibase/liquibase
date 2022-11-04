@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -170,7 +171,21 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     JdbcUtil.closeStatement(statement);
                 }
 
-
+                if (GlobalConfiguration.DDL_LOCK_TIMEOUT.getCurrentValue() != null) {
+                    int timeoutValue = GlobalConfiguration.DDL_LOCK_TIMEOUT.getCurrentValue();
+                    Scope.getCurrentScope().getLog(getClass()).fine("Setting DDL_LOCK_TIMEOUT value to " + timeoutValue);
+                    String sql = "ALTER SESSION SET DDL_LOCK_TIMEOUT=" + timeoutValue;
+                    PreparedStatement ddlLockTimeoutStatement = null;
+                    try {
+                        ddlLockTimeoutStatement = sqlConn.prepareStatement(sql);
+                        ddlLockTimeoutStatement.execute();
+                    } catch (SQLException sqle) {
+                        Scope.getCurrentScope().getUI().sendErrorMessage("Unable to set the DDL_LOCK_TIMEOUT_VALUE: " + sqle.getMessage(), sqle);
+                        Scope.getCurrentScope().getLog(getClass()).warning("Unable to set the DDL_LOCK_TIMEOUT_VALUE: " + sqle.getMessage(), sqle);
+                    } finally {
+                        JdbcUtil.closeStatement(ddlLockTimeoutStatement);
+                    }
+                }
             }
         }
         super.setConnection(conn);
@@ -307,7 +322,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultCatalogName() {//NOPMD
-        return (super.getDefaultCatalogName() == null) ? null : super.getDefaultCatalogName().toUpperCase(Locale.US);
+        String defaultCatalogName = super.getDefaultCatalogName();
+        if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
+            return defaultCatalogName;
+        }
+        return (defaultCatalogName == null) ? null : defaultCatalogName.toUpperCase(Locale.US);
     }
 
     /**

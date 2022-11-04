@@ -22,10 +22,8 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
     public static final String[] COMMAND_NAME = {"internalGenerateChangelog"};
 
     private static final String INFO_MESSAGE =
-            "When generating formatted SQL changelogs, it is important to decide if batched statements\n" +
-            "should be split or not.  For storedlogic objects, the default behavior is 'splitStatements:false'\n." +
-            "All other objects default to 'splitStatements:true'.  See https://docs.liquibase.org for additional information.";
-
+            "BEST PRACTICE: When generating formatted SQL changelogs, always check if the 'splitStatements' attribute" + System.lineSeparator() +
+            "works for your environment. See https://docs.liquibase.com/commands/generatechangelog.html for more information. ";
 
     public static final CommandArgumentDefinition<String> AUTHOR_ARG;
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;
@@ -62,6 +60,7 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
         }
 
         final Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
+        referenceDatabase.setOutputDefaultSchema(commandScope.getArgumentValue(DIFF_OUTPUT_CONTROL_ARG).getIncludeSchema());
 
         InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
 
@@ -89,7 +88,7 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
 
             }
             if (StringUtil.trimToNull(changeLogFile) != null) {
-                Scope.getCurrentScope().getUI().sendMessage("Generated changelog written to " + new File(changeLogFile).getAbsolutePath());
+                Scope.getCurrentScope().getUI().sendMessage("Generated changelog written to " + changeLogFile);
             }
         } finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);

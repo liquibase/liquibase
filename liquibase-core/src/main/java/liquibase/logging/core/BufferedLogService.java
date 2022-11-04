@@ -26,7 +26,7 @@ public class BufferedLogService extends AbstractLogService {
 
     @Override
     public Logger getLog(Class clazz) {
-        return new BufferedLogger(clazz, this, this.filter);
+        return new BufferedLogger(clazz, this);
     }
 
 

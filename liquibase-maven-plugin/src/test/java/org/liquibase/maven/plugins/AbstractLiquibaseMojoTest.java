@@ -2,8 +2,6 @@
 // Copyright: Copyright(c) 2008 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;

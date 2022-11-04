@@ -1,5 +1,6 @@
 package liquibase.configuration.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandDefinition;
 import liquibase.command.CommandFactory;
@@ -46,6 +47,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
 
     @Override
     public void validate(CommandScope commandScope) throws IllegalArgumentException {
+        boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
         SortedSet<String> invalidKeys = new TreeSet<>();
         for (Map.Entry<Object, Object> entry : this.properties.entrySet()) {
             String key = (String) entry.getKey();
@@ -57,7 +59,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
             }
 
             final String genericCommandPrefix = "liquibase.command.";
-            final String targettedCommandPrefix = "liquibase.command." + StringUtil.join(commandScope.getCommand().getName(), ".") + ".";
+            final String targetedCommandPrefix = "liquibase.command." + StringUtil.join(commandScope.getCommand().getName(), ".") + ".";
             if (!key.contains(".")) {
                 if (commandScope.getCommand().getArgument(key) == null) {
                         if(!key.startsWith("liquibase")) {
@@ -67,8 +69,8 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
                         invalidKeys.add(" - '" + originalKey + "'");
                     }
                 }
-            } else if (key.startsWith(targettedCommandPrefix)) {
-                String keyAsArg = key.replace(targettedCommandPrefix, "");
+            } else if (key.startsWith(targetedCommandPrefix)) {
+                String keyAsArg = key.replace(targetedCommandPrefix, "");
                 if (commandScope.getCommand().getArgument(keyAsArg) == null) {
                     invalidKeys.add(" - '" + originalKey + "'");
                 }
@@ -93,11 +95,12 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
         }
 
         if (invalidKeys.size() > 0) {
-            if (this.properties.getProperty("strict", "false").equalsIgnoreCase("true")) {
-                throw new IllegalArgumentException("Strict check failed due to undefined key(s) for '" + StringUtil.join(commandScope.getCommand().getName(), " ")
-                        + "' command in " + StringUtil.lowerCaseFirst(sourceDescription) + "':\n"
-                        + StringUtil.join(invalidKeys, "\n")
-                        + "\nTo define keys that could apply to any command, prefix it with 'liquibase.command.'\nTo disable strict checking, remove 'strict' from the file.");
+            if (strict) {
+                String message = "Strict check failed due to undefined key(s) for '" + StringUtil.join(commandScope.getCommand().getName(), " ")
+                    + "' command in " + StringUtil.lowerCaseFirst(sourceDescription) + "':\n"
+                    + StringUtil.join(invalidKeys, "\n")
+                    + "\nTo define keys that could apply to any command, prefix it with 'liquibase.command.'\nTo disable strict checking, remove 'strict' from the file.";
+                throw new IllegalArgumentException(message);
             } else {
                 Scope.getCurrentScope().getLog(getClass()).warning("Potentially ignored key(s) in " + StringUtil.lowerCaseFirst(sourceDescription) + "\n" + StringUtil.join(invalidKeys, "\n"));
             }

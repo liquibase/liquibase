@@ -173,7 +173,14 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof FirebirdDatabase) {
             return "SELECT TRIM(RDB$GENERATOR_NAME) AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0";
         } else if (database instanceof H2Database) {
-            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
+            try {
+                if (database.getDatabaseMajorVersion() <= 1) {
+                    return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
+                }
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine h2 version in order to generate sequence snapshot query");
+            }
+            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
         } else if (database instanceof HsqlDatabase) {
             return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
         } else if (database instanceof InformixDatabase) {
@@ -187,6 +194,10 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
              * 12cR1: http://docs.oracle.com/database/121/SQLRF/statements_6017.htm
              * 11gR2: http://docs.oracle.com/cd/E11882_01/server.112/e41084/statements_6015.htm
              */
+            String catalogName = schema.getCatalogName();
+            if (catalogName == null || catalogName.isEmpty()) {
+                catalogName = database.getDefaultCatalogName();
+            }
             return "SELECT sequence_name, \n" +
                     "CASE WHEN increment_by > 0 \n" +
                     "     THEN CASE WHEN min_value=1 THEN NULL ELSE min_value END\n" +
@@ -201,7 +212,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "CASE WHEN order_flag = 'N' THEN NULL ELSE order_flag END AS is_ordered, \n" +
                     "LAST_NUMBER as START_VALUE, \n" +
                     "CASE WHEN cache_size = 20 THEN NULL ELSE cache_size END AS cache_size \n" +
-                    "FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getCatalogName() + "'";
+                    "FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + catalogName + "'";
         } else if (database instanceof PostgresDatabase) {
             int version = 9;
             try {
@@ -271,9 +282,11 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "FROM SYS.SYSSEQUENCE s " +
                     "JOIN SYS.SYSUSER u ON s.OWNER = u.USER_ID "+
                     "WHERE u.USER_NAME = '" + schema.getName() + "'";
-        	} else {
+        } else if (database.getClass().getName().contains("MaxDB")) { //have to check classname as this is currently an extension
+			return "SELECT SEQUENCE_NAME, MIN_VALUE, MAX_VALUE, INCREMENT_BY, CYCLE_FLAG AS WILL_CYCLE " +
+				   "FROM sequences WHERE SCHEMANAME = '" + schema.getName() + "'";
+		} else {
             throw new UnexpectedLiquibaseException("Don't know how to query for sequences on " + database);
-        }
-
+		}
     }
 }

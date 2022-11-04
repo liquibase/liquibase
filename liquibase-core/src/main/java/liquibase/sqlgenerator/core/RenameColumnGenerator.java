@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -16,7 +17,17 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
 
     @Override
     public boolean supports(RenameColumnStatement statement, Database database) {
-        return !(database instanceof SQLiteDatabase);
+        if(database instanceof  SQLiteDatabase) {
+            try {
+                if(database.getDatabaseMajorVersion() <= 3 && database.getDatabaseMinorVersion() < 25) {
+                    return false;
+                }
+            }
+            catch (DatabaseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return true;
     }
 
     @Override
@@ -38,7 +49,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         String sql;
         if (database instanceof MSSQLDatabase) {
         	// do no escape the new column name. Otherwise it produce "exec sp_rename '[dbo].[person].[usernae]', '[username]'"
-            sql = "exec sp_rename '" + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + "', '" + statement.getNewColumnName() + "'";
+            sql = "exec sp_rename '" + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + "', '" + statement.getNewColumnName() + "', 'COLUMN'";
         } else if (database instanceof MySQLDatabase) {
             sql ="ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " CHANGE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database);
         } else if (database instanceof SybaseDatabase) {

@@ -3,18 +3,15 @@ package liquibase.sdk.supplier.resource;
 import liquibase.Scope;
 import liquibase.change.ChangeFactory;
 import liquibase.change.core.CreateProcedureChange;
-import liquibase.GlobalConfiguration;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.resource.AbstractResourceAccessor;
-import liquibase.resource.InputStreamList;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
+import liquibase.sdk.resource.MockResource;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Collections;
+import java.util.List;
 
 public class ResourceSupplier {
 
@@ -33,34 +30,36 @@ public class ResourceSupplier {
     private static class SimpleResourceAccessor extends AbstractResourceAccessor{
 
         @Override
-        public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-            InputStream stream = null;
-            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-            if (streamPath.toLowerCase().endsWith("csv")) {
-                stream = new ByteArrayInputStream(USERS_CSV.getBytes(encoding));
-            } else if (streamPath.toLowerCase().endsWith("my-logic.sql")) {
-                stream = new ByteArrayInputStream(((String) Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(
-                        new CreateProcedureChange()).getParameters().get("procedureBody").getExampleValue(
-                        new HsqlDatabase())).getBytes(encoding)
-                );
-            } else if (streamPath.toLowerCase().endsWith("sql")) {
-                stream = new ByteArrayInputStream(EXAMPLE_SQL_COMMAND.getBytes(encoding));
-            } else {
-                throw new RuntimeException("Unknown resource type: "+ streamPath);
-            }
-            InputStreamList list = new InputStreamList();
-            list.add(null, stream);
-            return list;
+        public void close() throws Exception {
+
         }
 
         @Override
-        public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        public List<Resource> getAll(String path) throws IOException {
+            Resource resource;
+            if (path.toLowerCase().endsWith("csv")) {
+                resource = new MockResource(path, USERS_CSV);
+            } else if (path.toLowerCase().endsWith("my-logic.sql")) {
+                resource = new MockResource(path, (String) Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(
+                        new CreateProcedureChange()).getParameters().get("procedureBody").getExampleValue(
+                        new HsqlDatabase()));
+            } else if (path.toLowerCase().endsWith("sql")) {
+                resource = new MockResource(path, EXAMPLE_SQL_COMMAND);
+            } else {
+                throw new RuntimeException("Unknown resource type: "+ path);
+            }
+
+            return Collections.singletonList(resource);
+        }
+
+        @Override
+        public List<Resource> search(String path, boolean recursive) throws IOException {
             return null;
         }
 
         @Override
-        public SortedSet<String> describeLocations() {
-            return new TreeSet<>(Arrays.asList("Logic in ResourceSupplier.java"));
+        public List<String> describeLocations() {
+            return Collections.singletonList("Logic in ResourceSupplier.java");
         }
     }
 }

@@ -11,6 +11,7 @@ Required Args:
   changelogFile (String) The root changelog
   count (Integer) The number of changes in the changelog to deploy
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changeExecListenerClass (String) Fully-qualified class which specifies a ChangeExecListener
     Default: null
@@ -26,7 +27,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labels (String) Changeset labels to match
+  labelFilter (String) Changeset labels to match
     Default: null
   password (String) Password to use to connect to the database
     Default: null
@@ -41,7 +42,7 @@ Optional Args:
                 username: { it.username },
                 password: { it.password },
                 count        : 1,
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml",
         ]
 
         expectedResults = [
@@ -67,7 +68,7 @@ Optional Args:
 
     run "Run without count throws an exception", {
         arguments = [
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
         ]
         expectedException = CommandValidationException.class
     }

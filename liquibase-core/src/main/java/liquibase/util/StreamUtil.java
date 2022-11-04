@@ -38,7 +38,7 @@ public abstract class StreamUtil {
     }
 
     /**
-     * Calls {@link #readStreamAsString(InputStream, String)} with {@link Scope#getFileEncoding()} as the encoding
+     * Calls {@link #readStreamAsString(InputStream, String)} with {@link GlobalConfiguration#FILE_ENCODING} as the encoding
      */
     public static String readStreamAsString(InputStream stream) throws IOException {
         return readStreamAsString(stream, null);
@@ -46,7 +46,7 @@ public abstract class StreamUtil {
 
     /**
      * Returns the given stream as a string using the given encoding.
-     * If encoding is null, use {@link Scope#getFileEncoding()}
+     * If encoding is null, use {@link GlobalConfiguration#FILE_ENCODING}
      */
     public static String readStreamAsString(InputStream stream, String encoding) throws IOException {
         StringBuilder result = new StringBuilder();
@@ -80,17 +80,16 @@ public abstract class StreamUtil {
             }
         }
 
-        return new InputStreamReader(encodingAwareStream, ObjectUtil.defaultIfNull(encoding, Scope.getCurrentScope().getFileEncoding().toString()));
+        return new InputStreamReader(encodingAwareStream, ObjectUtil.defaultIfNull(encoding == null ? null : Charset.forName(encoding), GlobalConfiguration.FILE_ENCODING.getCurrentValue()));
     }
 
     /**
      * @deprecated use {@link ResourceAccessor#openStream(String, String)}
      */
     public static InputStream openStream(String path, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
-        String relativeTo = null;
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            relativeTo = changeSet.getChangeLog().getPhysicalFilePath();
+            path = resourceAccessor.get(changeSet.getChangeLog().getPhysicalFilePath()).resolveSibling(path).getPath();
         }
-        return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
+        return resourceAccessor.getExisting(path).openInputStream();
     }
 }

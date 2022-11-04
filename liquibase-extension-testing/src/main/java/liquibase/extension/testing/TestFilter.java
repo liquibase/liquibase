@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TestFilter {
 
@@ -47,13 +49,13 @@ public class TestFilter {
         includeString = System.getProperty(includeKey, includeString);
         excludeString = System.getProperty(excludeKey, excludeString);
 
-        if (StringUtil.isNotEmpty(includeString) && StringUtil.isNotEmpty(excludeString)) {
+        if (StringUtil.isNotEmpty(includeString) || StringUtil.isNotEmpty(excludeString)) {
             System.out.println("Integration test filtering: ");
             System.out.println("    " + includeKey + ": " + includeString);
             System.out.println("    " + excludeKey + ": " + excludeString);
         } else {
             //hard code default until we support more
-            includeString = "db:hsqldb";
+            includeString = "db:h2";
         }
 
         instance = new TestFilter(includeString, excludeString);
@@ -73,12 +75,24 @@ public class TestFilter {
         if (input == null || input.equals("")) {
             return;
         }
-        for (String inputPart : input.split("\\s*,\\s*")) {
-            String[] keyValue = inputPart.split("\\s*:\\s*");
-            if (keyValue.length != 2) {
-                Assert.fail("Cannot parse " + desc + " " + inputPart);
+        // This is the start of a string that comes from Intellij Idea if you copy the test definition from the run window.
+        if (input.startsWith("java:test://")) {
+            Pattern p = Pattern.compile("(db:)(?<db>[a-z]*),(command:)(?<command>[a-zA-Z]*)} (?<def>.*)");
+            Matcher matcher = p.matcher(input);
+            if (!matcher.find()) {
+                Assert.fail("Cannot parse " + desc);
             }
-            output.put(keyValue[0], keyValue[1]);
+            output.put("db", matcher.group("db"));
+            output.put("command", matcher.group("command"));
+            output.put("def", matcher.group("def"));
+        } else {
+            for (String inputPart : input.split("\\s*,\\s*")) {
+                String[] keyValue = inputPart.split("\\s*:\\s*");
+                if (keyValue.length != 2) {
+                    Assert.fail("Cannot parse " + desc + " " + inputPart);
+                }
+                output.put(keyValue[0], keyValue[1]);
+            }
         }
     }
 

@@ -14,6 +14,7 @@ Required Args:
   changelogFile (String) The root changelog file
   tag (String) Tag ID to execute changelogSync to
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   contexts (String) Changeset contexts to match
     Default: null
@@ -25,7 +26,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labels (String) Changeset labels to match
+  labelFilter (String) Changeset labels to match
     Default: null
   password (String) The database password
     Default: null
@@ -40,7 +41,7 @@ Optional Args:
                 username:   { it.username },
                 password:   { it.password },
                 tag          : "version_2.0",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
 
@@ -88,7 +89,7 @@ Optional Args:
 
     run "Run without a tag should throw an exception",  {
         arguments = [
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
                 tag          : ""
         ]
         expectedException = CommandValidationException.class
@@ -104,7 +105,7 @@ Optional Args:
     run "Run without a URL should throw an exception",  {
         arguments = [
                 url          : "",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
                 tag          : "version_2.0"
         ]
         expectedException = CommandValidationException.class

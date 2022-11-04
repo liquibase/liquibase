@@ -2,7 +2,6 @@ package liquibase.extension.testing.command
 
 import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
-import liquibase.extension.testing.setup.SetupCreateTempResources
 import liquibase.hub.core.MockHubService
 
 import java.util.regex.Pattern
@@ -23,15 +22,42 @@ Optional Args:
     run "Happy path", {
         arguments = [
                 hubProjectName   : "Project 1",
-                changelogFile: "changelogs/hsqldb/complete/registered-changelog-test.xml",
+                changelogFile: "changelogs/h2/complete/registered-changelog-test.xml",
         ]
         setup {
-            createTempResource "changelogs/hsqldb/complete/rollback.changelog.xml", "changelogs/hsqldb/complete/registered-changelog-test.xml"
+            createTempResource "changelogs/h2/complete/rollback.changelog.xml", "changelogs/h2/complete/registered-changelog-test.xml"
         }
         expectedResults = [
                 statusCode   : 0,
                 registeredChangeLogId  : { MockHubService.randomUUID.toString() }
         ]
+    }
+
+    run "Happy path, supply hub project name when prompted interactively", {
+        arguments = [
+                changelogFile: "changelogs/h2/complete/registered-changelog-test.xml",
+        ]
+        setup {
+            createTempResource "changelogs/h2/complete/rollback.changelog.xml", "changelogs/h2/complete/registered-changelog-test.xml"
+        }
+        testUI = new CommandTests.TestUIWithAnswers(["c", "project name here"] as String[])
+        expectedUI = "Please enter your Project name and press [enter]"
+        expectedResults = [
+                statusCode   : 0,
+                registeredChangeLogId  : { MockHubService.randomUUID.toString() }
+        ]
+    }
+
+    run "Name is too long", {
+        arguments = [
+                hubProjectName   : "String longer than 255 characters qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+                changelogFile: "changelogs/h2/complete/registered-changelog-test.xml",
+        ]
+        setup {
+            createTempResource "changelogs/h2/complete/rollback.changelog.xml", "changelogs/h2/complete/registered-changelog-test.xml"
+        }
+        expectedException = CommandExecutionException.class
+        expectedExceptionMessage = "The project name you gave is longer than 255 characters"
     }
 
     run "Run with already-registered changelog throws an exception", {
@@ -40,9 +66,9 @@ Optional Args:
         ]
 
         setup {
-            copyResource "changelogs/hsqldb/complete/simple.changelog.xml", "simple.changelog.with.id.xml"
+            copyResource "changelogs/h2/complete/simple.changelog.xml", "simple.changelog.with.id.xml"
             modifyChangeLogId "simple.changelog.with.id.xml", MockHubService.alreadyRegisteredUUID.toString()
-            runChangelog "changelogs/hsqldb/complete/simple.changelog.xml"
+            runChangelog "changelogs/h2/complete/simple.changelog.xml"
         }
         expectedException = CommandExecutionException.class
         expectedExceptionMessage = Pattern.compile(".*is already registered with changeLogId*", Pattern.MULTILINE | Pattern.DOTALL)

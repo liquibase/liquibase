@@ -2,6 +2,7 @@ package liquibase.extension.testing.command
 
 import liquibase.AbstractExtensibleObject
 import liquibase.CatalogAndSchema
+import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.changelog.ChangeLogHistoryService
@@ -18,21 +19,26 @@ import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
-import liquibase.extension.testing.TestDatabaseConnections
 import liquibase.extension.testing.TestFilter
 import liquibase.extension.testing.setup.*
+import liquibase.extension.testing.setup.SetupCleanResources.CleanupMode
+import liquibase.extension.testing.testsystem.DatabaseTestSystem
+import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
 import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.resource.InputStreamList
+import liquibase.resource.PathHandlerFactory
+import liquibase.resource.Resource
 import liquibase.resource.ResourceAccessor
+import liquibase.resource.SearchPathResourceAccessor
 import liquibase.ui.ConsoleUIService
 import liquibase.ui.InputHandler
 import liquibase.ui.UIService
 import liquibase.util.FileUtil
+import liquibase.util.StreamUtil
 import liquibase.util.StringUtil
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.Assert
@@ -43,6 +49,7 @@ import spock.lang.Unroll
 
 import java.util.logging.Level
 import java.util.regex.Pattern
+import java.util.stream.Collectors
 
 class CommandTests extends Specification {
 
@@ -50,7 +57,10 @@ class CommandTests extends Specification {
 
     public static final PATTERN_FLAGS = Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE
 
+    public static String NOT_NULL = "not_null"
+
     private ConfigurationValueProvider propertiesProvider
+    private ConfigurationValueProvider searchPathPropertiesProvider
 
     def setup() {
         def properties = new Properties()
@@ -89,6 +99,9 @@ class CommandTests extends Specification {
 
     def cleanup() {
         Scope.currentScope.getSingleton(LiquibaseConfiguration).unregisterProvider(propertiesProvider)
+        if (searchPathPropertiesProvider != null) {
+            Scope.currentScope.getSingleton(LiquibaseConfiguration).unregisterProvider(searchPathPropertiesProvider)
+        }
     }
 
     @Unroll("#featureName: #commandTestDefinition.testFile.name")
@@ -104,6 +117,13 @@ class CommandTests extends Specification {
         for (def runTest : commandTestDefinition.runTests) {
             for (def arg : runTest.arguments.keySet()) {
                 assert commandDefinition.arguments.containsKey(arg): "Unknown argument '${arg}' in run ${runTest.description}"
+            }
+        }
+
+        def liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration)
+        for (def runTest : commandTestDefinition.runTests) {
+            for (def arg : runTest.globalArguments.keySet()) {
+                assert liquibaseConfiguration.getRegisteredDefinition(arg) != null: "Unknown global argument '${arg}' in run ${runTest.description}"
             }
         }
 
@@ -182,11 +202,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     def "run"() {
         setup:
         Main.runningFromNewCli = true
-        Assume.assumeTrue("Skipping test: " + permutation.connectionStatus.errorMessage, permutation.connectionStatus.connection != null)
+        Assume.assumeTrue("Skipping test: " + permutation.testSetupEnvironment.errorMessage, permutation.testSetupEnvironment.connection != null)
 
         def testDef = permutation.definition
 
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.connectionStatus.connection))
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.testSetupEnvironment.connection))
 
         //clean regular database
         String defaultSchemaName = database.getDefaultSchemaName()
@@ -196,8 +216,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         //clean alt database
         Database altDatabase = null
-        if (permutation.connectionStatus.altConnection != null) {
-            altDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.connectionStatus.altConnection))
+        if (permutation.testSetupEnvironment.altConnection != null) {
+            altDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.testSetupEnvironment.altConnection))
             String altDefaultSchemaName = altDatabase.getDefaultSchemaName()
             CatalogAndSchema[] altCatalogAndSchemas = new CatalogAndSchema[1]
             altCatalogAndSchemas[0] = new CatalogAndSchema(null, altDefaultSchemaName)
@@ -219,14 +239,14 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         def runScope = new RunSettings(
                 database: database,
-                url: permutation.connectionStatus.url,
-                username: permutation.connectionStatus.username,
-                password: permutation.connectionStatus.password,
+                url: permutation.testSetupEnvironment.url,
+                username: permutation.testSetupEnvironment.username,
+                password: permutation.testSetupEnvironment.password,
 
                 altDatabase: altDatabase,
-                altUrl: permutation.connectionStatus.altUrl,
-                altUsername: permutation.connectionStatus.altUsername,
-                altPassword: permutation.connectionStatus.altPassword,
+                altUrl: permutation.testSetupEnvironment.altUrl,
+                altUsername: permutation.testSetupEnvironment.altUsername,
+                altPassword: permutation.testSetupEnvironment.altPassword,
         )
 
         def uiOutputWriter = new StringWriter()
@@ -242,7 +262,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         if (testDef.setup != null) {
             for (def setup : testDef.setup) {
-                setup.setup(permutation.connectionStatus)
+                setup.setup(permutation.testSetupEnvironment)
             }
         }
 
@@ -263,17 +283,52 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
         }
 
-        Exception savedException = null
-        def results = Scope.child([
+        def resourceAccessor = Scope.getCurrentScope().getResourceAccessor()
+
+        if (testDef.searchPath != null) {
+            def config = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
+
+            searchPathPropertiesProvider = new AbstractMapConfigurationValueProvider() {
+                @Override
+                protected Map<?, ?> getMap() {
+                    return Collections.singletonMap(GlobalConfiguration.SEARCH_PATH.getKey(), testDef.searchPath)
+                }
+
+                @Override
+                protected String getSourceDescription() {
+                    return "command tests search path override"
+                }
+
+                @Override
+                int getPrecedence() {
+                    return 1
+                }
+            }
+
+            config.registerProvider(searchPathPropertiesProvider)
+            resourceAccessor = new SearchPathResourceAccessor(testDef.searchPath)
+        }
+
+        def scopeSettings = [
                 (LiquibaseCommandLineConfiguration.LOG_LEVEL.getKey()): Level.INFO,
                 ("liquibase.plugin." + HubService.name)               : MockHubService,
                 (Scope.Attr.resourceAccessor.name())                  : testDef.resourceAccessor ?
-                                                                            testDef.resourceAccessor : Scope.getCurrentScope().getResourceAccessor(),
+                                                                            testDef.resourceAccessor : resourceAccessor,
                 (Scope.Attr.ui.name())                                : testDef.testUI ? testDef.testUI.initialize(uiOutputWriter, uiErrorWriter) :
                                                                                          new TestUI(uiOutputWriter, uiErrorWriter),
                 (Scope.Attr.logService.name())                        : logService
-        ], {
+        ]
+
+        if (testDef.globalArguments != null) {
+            scopeSettings.putAll(testDef.globalArguments)
+        }
+
+        Exception savedException = null
+        def results = Scope.child(scopeSettings, {
             try {
+                if (testDef.commandTestDefinition.beforeMethodInvocation != null) {
+                    testDef.commandTestDefinition.beforeMethodInvocation.call()
+                }
                 def returnValue = commandScope.execute()
                 assert testDef.expectedException == null : "An exception was expected but the command completed successfully"
                 return returnValue
@@ -281,6 +336,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             catch (Exception e) {
                 savedException = e
                 if (testDef.expectedException == null) {
+                    if (testDef.setup != null) {
+                        for (def setup : testDef.setup) {
+                            setup.cleanup()
+                        }
+                    }
                     throw e
                 } else {
                     assert e.class == testDef.expectedException
@@ -288,6 +348,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                         checkOutput("Exception message", e.getMessage(), Collections.singletonList(testDef.expectedExceptionMessage))
                     }
                     return
+                }
+            } finally {
+                if (testDef.commandTestDefinition.afterMethodInvocation != null) {
+                    testDef.commandTestDefinition.afterMethodInvocation.call()
                 }
             }
         } as Scope.ScopedRunnerWithReturn<CommandResults>)
@@ -300,39 +364,112 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         //
         // Check to see if there was supposed to be an exception
         //
-
         if (testDef.expectedResults.size() > 0 && (results == null || results.getResults().isEmpty())) {
-            throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command)
+            String logString = logService.getLogAsString(Level.FINE)
+            throw new RuntimeException("Results were expected but none were found for " + testDef.commandTestDefinition.command + "\n" + logString)
         }
 
         then:
-        checkOutput("Command Output", outputStream.toString(), testDef.expectedOutput)
-        checkOutput("UI Output", uiOutputWriter.toString(), testDef.expectedUI)
-        checkOutput("UI Error Output", uiErrorWriter.toString(), testDef.expectedUIErrors)
-        checkOutput("Log Messages", logService.getLogAsString(Level.FINE), testDef.expectedLogs)
+            try {
+                checkOutput("Command Output", outputStream.toString(), testDef.expectedOutput)
+                checkOutput("UI Output", uiOutputWriter.toString(), testDef.expectedUI)
+                checkOutput("UI Error Output", uiErrorWriter.toString(), testDef.expectedUIErrors)
+                checkOutput("Log Messages", logService.getLogAsString(Level.FINE), testDef.expectedLogs)
 
-        checkFileContent(testDef.expectedFileContent, "Command File Content")
-        checkDatabaseContent(testDef.expectedDatabaseContent, database, "Database snapshot content")
+                checkFileContent(testDef.expectedFileContent, "Command File Content")
+                checkDatabaseContent(testDef.expectedDatabaseContent, database, "Database snapshot content")
 
-        if (!testDef.expectedResults.isEmpty()) {
-            for (def returnedResult : results.getResults().entrySet()) {
-                def expectedResult = testDef.expectedResults.get(returnedResult.getKey())
-                def expectedValue = expectedResult instanceof Closure ? expectedResult.call() : String.valueOf(expectedResult)
-                def seenValue = String.valueOf(returnedResult.getValue())
+                if (!testDef.expectedResults.isEmpty()) {
+                    for (def returnedResult : results.getResults().entrySet()) {
+                        def expectedResult = testDef.expectedResults.get(returnedResult.getKey())
+                        def expectedValue = expectedResult instanceof Closure ? expectedResult.call() : String.valueOf(expectedResult)
+                        def seenValue = String.valueOf(returnedResult.getValue())
 
-                assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
-                assert seenValue == expectedValue
+                        assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
+                        if (expectedValue instanceof Closure) {
+                            assert expectedValue.call(returnedResult)
+                        } else if (expectedValue == NOT_NULL) {
+                            assert seenValue != null: "The result is null"
+                        } else {
+                            assert seenValue == expectedValue
+                        }
+                    }
+                }
+                if (testDef.expectFileToExist != null) {
+                    assert testDef.expectFileToExist.exists(): "File '${testDef.expectFileToExist.getAbsolutePath()}' should exist"
+                }
+                if (testDef.expectFileToNotExist != null) {
+                    assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getAbsolutePath()}' should not exist"
+                }
+                if (testDef.expectations != null) {
+                    testDef.expectations.call()
+                }
+            } finally {
+                if (testDef.setup != null) {
+                    for (def setup : testDef.setup) {
+                        setup.cleanup()
+                    }
+                }
+            }
+
+
+            where:
+            permutation << getAllRunTestPermutations()
+    }
+
+    /**
+     *
+     * Compare the contents of two files, optionally filtering out
+     * lines that contain a specified string.
+     *
+     * @param   f1                           The baseline file
+     * @param   f2                           The new output file
+     * @param   filter                       The filter string (can be NULL)
+     * @return  OutputCheck                  Closure to be used at test run execution
+     *
+     */
+    static OutputCheck assertFilesEqual(File f1, File f2, String... filters) {
+        return new OutputCheck() {
+            private String baselineContents
+            private String actualContents
+            @Override
+            def check(String actual) throws AssertionError {
+                List<String> lines1 = f1.readLines()
+                if (filters) {
+                    lines1 = lines1.findAll({ line ->
+                        filters.every() { filter ->
+                            ! line.contains(filter)
+                        }
+                    })
+                }
+                String contents1 = StringUtil.join(lines1, "\n")
+                this.baselineContents = contents1
+
+                List<String> lines2 = f2.readLines()
+                if (filters) {
+                    lines2 = lines2.findAll({ line ->
+                        filters.every() { filter ->
+                            ! line.contains(filter)
+                        }
+                    })
+                }
+                String contents2 = StringUtil.join(lines2, "\n")
+                this.actualContents = contents2
+
+                assert lines1.size() == lines2.size()
+                assert contents1 == contents2
+            }
+
+            @Override
+            String getExpected() {
+                return this.baselineContents
+            }
+
+            @Override
+            String getCheckedOutput() {
+                return this.actualContents
             }
         }
-        if (testDef.expectFileToExist != null) {
-            assert testDef.expectFileToExist.exists(): "File '${testDef.expectFileToExist.getAbsolutePath()}' should exist"
-        }
-        if (testDef.expectFileToNotExist != null) {
-            assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getAbsolutePath()}' should not exist"
-        }
-
-        where:
-        permutation << getAllRunTestPermutations()
     }
 
     static OutputCheck assertNotContains(String substring) {
@@ -341,11 +478,23 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
     static OutputCheck assertNotContains(String substring, boolean caseInsensitive) {
         return new OutputCheck() {
+            private String actualContents
             @Override
             def check(String actual) throws AssertionError {
                 actual = (caseInsensitive && actual != null ? actual.toLowerCase() : actual)
+                this.actualContents = actual
                 substring = (caseInsensitive && substring != null ? substring.toLowerCase() : substring)
                 assert !actual.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))): "$actual does not contain: '$substring'"
+            }
+
+            @Override
+            String getExpected() {
+                return substring
+            }
+
+            @Override
+            String getCheckedOutput() {
+                return this.actualContents
             }
         }
     }
@@ -355,10 +504,19 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     static OutputCheck assertContains(String substring, final Integer occurrences) {
+        return assertContains(substring, occurrences, false)
+    }
+
+    static OutputCheck assertContains(String substring, final Integer occurrences, final Boolean removeWhitespaceFromExpected) {
         return new OutputCheck() {
+            private String actualContents
             @Override
             def check(String actual) throws AssertionError {
+                this.actualContents = actual
                 String edited = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(substring))
+                if (Boolean.TRUE == removeWhitespaceFromExpected) {
+                    edited = edited.replaceAll(/\s+/," ")
+                }
                 if (occurrences == null) {
                     boolean b = actual.contains(edited)
                     assert b: "$actual does not contain: '$substring'"
@@ -366,6 +524,16 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     int count = (actual.split(Pattern.quote(edited), -1).length) - 1
                     assert count == occurrences: "$actual does not contain '$substring' $occurrences times.  It appears $count times"
                 }
+            }
+
+            @Override
+            String getExpected() {
+                return substring
+            }
+
+            @Override
+            String getCheckedOutput() {
+                return this.actualContents
             }
         }
     }
@@ -408,10 +576,23 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     static void checkFileContent(Map<String, ?> expectedFileContent, String outputDescription) {
-        for (def check : expectedFileContent) {
+        expectedFileContent.each { def check ->
             String path = check.key
             List<Object> checks = check.value
-            String contents = FileUtil.getContents(new File(path))
+            File f = new File(path)
+            String contents
+            if (f.exists()) {
+                contents = FileUtil.getContents(f)
+            } else {
+                final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class)
+                def resource = pathHandlerFactory.getResource(path)
+                if (resource.exists()) {
+                    contents = StreamUtil.readStreamAsString(resource.openInputStream())
+                } else {
+                    contents = null
+                }
+            }
+
             contents = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(contents))
             contents = contents.replaceAll(/\s+/, " ")
             checkOutput(outputDescription, contents, checks)
@@ -435,8 +616,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                         throw new ComparisonFailure("$outputDescription does not contain expected", expectedOutputCheck, fullOutput)
                     }
                 } else if (expectedOutputCheck instanceof Pattern) {
-                    String patternString = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(((Pattern) expectedOutputCheck).pattern()))
-                    //expectedOutputCheck = Pattern.compile(patternString, Pattern.MULTILINE | Pattern.DOTALL)
                     def matcher = expectedOutputCheck.matcher(fullOutput)
                     assert matcher.groupCount() == 0: "Unescaped parentheses in regexp /$expectedOutputCheck/"
                     assert matcher.find(): "$outputDescription\n$fullOutput\n\nDoes not match regexp\n\n/$expectedOutputCheck/"
@@ -444,7 +623,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     try {
                         ((OutputCheck) expectedOutputCheck).check(fullOutput)
                     } catch (AssertionError e) {
-                        Assert.fail("$fullOutput : ${e.getMessage()}")
+                        throw new ComparisonFailure(e.getMessage(), expectedOutputCheck.expected, expectedOutputCheck.checkedOutput)
                     }
                 } else {
                     Assert.fail "Unknown $outputDescription check type: ${expectedOutputCheck.class.name}"
@@ -507,10 +686,29 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                         continue
                     }
 
-                    permutation.connectionStatus = TestDatabaseConnections.getInstance().getConnection(database.shortName)
-                    returnList.add(permutation)
+
+                    def system = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem(database.shortName)
+                    if (system.shouldTest()) {
+                        system.start()
+                        permutation.testSetupEnvironment = new TestSetupEnvironment(system, null)
+                        returnList.add(permutation)
+                    }
                 }
             }
+        }
+
+        def descriptions =
+                returnList.stream()
+                        .map({ rtp -> rtp.definition.commandTestDefinition.joinedCommand + ": '" + rtp.definition.description + "'" })
+                        .collect(Collectors.toList())
+
+        def duplicateDescriptions =
+                descriptions.stream()
+                        .filter({ d -> Collections.frequency(descriptions, d) > 1 })
+                        .distinct().collect(Collectors.toList())
+
+        if (!duplicateDescriptions.isEmpty()) {
+            throw new Exception("There are duplicate command test definitions with the same description: " + StringUtil.join(duplicateDescriptions, "; "))
         }
 
         return returnList
@@ -544,6 +742,18 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         List<RunTestDefinition> runTests = new ArrayList<>()
 
         String signature
+        /**
+         * An optional method that will be called after the execution of each run command. This is executed within
+         * the same scope as the command that is run for the test. This method will always be called, regardless of
+         * exceptions thrown from within the test.
+         */
+        Closure<Void> afterMethodInvocation
+        /**
+         * An optional method that will be called before the execution of each run command. This is executed within
+         * the same scope as the command that is run for the test. Exceptions thrown from this method will cause the
+         * test to fail.
+         */
+        Closure<Void> beforeMethodInvocation
 
         void run(@DelegatesTo(RunTestDefinition) Closure testClosure) {
             run(null, testClosure)
@@ -586,12 +796,17 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          */
         private String description
 
+        private Map<String, ?> globalArguments = new HashMap<>()
+
+        private String searchPath
+
         /**
          * Arguments to command as key/value pairs
          */
         private Map<String, ?> arguments = new HashMap<>()
         private Map<String, ?> expectedFileContent = new HashMap<>()
         private Map<String, Object> expectedDatabaseContent = new HashMap<>()
+        private Closure<Void> expectations = null;
 
         private List<TestSetup> setup
 
@@ -650,8 +865,20 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.arguments = args
         }
 
+        def setGlobalArguments(Map<String, Object> args) {
+            this.globalArguments = args
+        }
+
+        def setSearchPath(String searchPath) {
+            this.searchPath = searchPath
+        }
+
         def setExpectedFileContent(Map<String, Object> content) {
             this.expectedFileContent = content
+        }
+
+        def setExpectations(Closure<Void> expectations) {
+            this.expectations = expectations;
         }
 
         def setExpectedDatabaseContent(Map<String, Object> content) {
@@ -762,13 +989,14 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     private static class RunTestPermutation {
         RunTestDefinition definition
         String databaseName
-        TestDatabaseConnections.ConnectionStatus connectionStatus
+        TestSetupEnvironment testSetupEnvironment
 
         boolean shouldRun() {
             def filter = TestFilter.getInstance()
 
             return filter.shouldRun(TestFilter.DB, databaseName) &&
-                    filter.shouldRun("command", definition.commandTestDefinition.joinedCommand)
+                    filter.shouldRun("command", definition.commandTestDefinition.joinedCommand) &&
+                    filter.shouldRun("def", definition.description)
         }
     }
 
@@ -830,8 +1058,37 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupRunChangelog(changeLogPath, labels))
         }
 
+        /**
+         * Run a changelog with labels
+         */
+        void runChangelog(String changeLogPath, String labels, String searchPath) {
+            this.setups.add(new SetupRunChangelog(changeLogPath, labels, searchPath))
+        }
+
+        /*
+         * Create files and directories
+         */
         void createTempResource(String originalFile, String newFile) {
             this.setups.add(new SetupCreateTempResources(originalFile, newFile))
+        }
+
+        void createTempResource(String originalFile, String newFile, String baseDir) {
+            this.setups.add(new SetupCreateTempResources(originalFile, newFile, baseDir))
+        }
+
+        void registerValueProvider(Closure<ConfigurationValueProvider> configurationValueProvider) {
+            this.setups.add(new SetupConfigurationValueProvider(configurationValueProvider))
+        }
+
+        /**
+         * @param fileLastModifiedDate if not null, the newly created file's last modified date will be set to this value
+         */
+        void createTempResource(String originalFile, String newFile, String baseDir, Date fileLastModifiedDate) {
+            this.setups.add(new SetupCreateTempResources(originalFile, newFile, baseDir, fileLastModifiedDate))
+        }
+
+        void createTempDirectoryResource(String directory) {
+            this.setups.add(new SetupCreateDirectoryResources(directory))
         }
 
         /**
@@ -843,10 +1100,19 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          *
          */
         void copyResource(String originalFile, String newFile) {
+            copyResource(originalFile, newFile, true)
+        }
+
+        void copyResource(String originalFile, String newFile, boolean writeInTargetTestClasses) {
             URL url = Thread.currentThread().getContextClassLoader().getResource(originalFile)
             File f = new File(url.toURI())
             String contents = FileUtil.getContents(f)
-            File outputFile = new File("target/test-classes", newFile)
+            File outputFile
+            if (writeInTargetTestClasses) {
+                outputFile = new File("target/test-classes", newFile)
+            } else {
+                outputFile = new File(newFile)
+            }
             FileUtil.write(contents, outputFile)
             println "Copied file " + originalFile + " to file " + newFile
         }
@@ -859,11 +1125,34 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          *
          * Delete the specified resources
          *
-         * @param fileToDeletes
+         * @param filesToDelete
          *
          */
         void cleanResources(String... filesToDelete) {
             this.setups.add(new SetupCleanResources(filesToDelete))
+        }
+
+        /**
+         *
+         * Delete the specified resources after the test using a FilenameFilter
+         *
+         * @param filter
+         * @param resourceDirectory
+         *
+         */
+        void cleanResourcesAfter(FilenameFilter filter, File resourceDirectory) {
+            this.setups.add(new SetupCleanResources(CleanupMode.CLEAN_ON_CLEANUP, filter, resourceDirectory))
+        }
+
+        /**
+         *
+         * Delete the specified resources at possibly setup and cleanup
+         *
+         * @param filesToDelete
+         *
+         */
+        void cleanResources(CleanupMode cleanOnSetup, String... filesToDelete) {
+            this.setups.add(new SetupCleanResources(cleanOnSetup, filesToDelete))
         }
 
         /**
@@ -877,7 +1166,17 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupRollbackCount(count, changeLogPath))
         }
 
+        void modifyProperties(File propsFile, String key, String value) {
+            this.setups.add(new SetupModifyProperties(propsFile, key, value))
+        }
 
+        void modifyTextFile(File textFile, String originalString, String newString) {
+            this.setups.add(new SetupModifyTextFile(textFile, originalString, newString))
+        }
+
+        void modifyDbCredentials(File textFile) {
+            this.setups.add(new SetupModifyDbCredentials(textFile))
+        }
         private void validate() throws IllegalArgumentException {
 
         }
@@ -902,6 +1201,15 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
     interface OutputCheck {
         def check(String actual) throws AssertionError
+        /**
+         * @return the expected value from this output check
+         */
+        String getExpected()
+
+        /**
+         * @return the baseline contents from this output check
+         */
+        String getCheckedOutput()
     }
 
     interface FileContentCheck {
@@ -914,13 +1222,25 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     // to locate files that they write and then try to read
     //
     static class ClassLoaderResourceAccessorForTest extends ClassLoaderResourceAccessor {
+
         @Override
-        public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-            InputStreamList list = super.openStreams(relativeTo, streamPath)
+        List<Resource> getAll(String path) throws IOException {
+            def list = super.getAll(path)
+            if (list != null && !list.isEmpty()) {
+                return list;
+            }
+
+            return super.getAll(new File(path).getName())
+        }
+
+        @Override
+        List<Resource> search(String path, boolean recursive) throws IOException {
+            def list = super.search(path, recursive)
             if (list != null && ! list.isEmpty()) {
                 return list
             }
-            return super.openStreams(relativeTo, new File(streamPath).getName())
+
+            return super.search(new File(path).getName(), recursive)
         }
     }
 
@@ -964,7 +1284,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private int count
 
         CannedConsoleWrapper(String[] answers) {
-            super(null)
+            super(null, false)
             this.answers = answers
         }
 
@@ -1036,6 +1356,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         @Override
         def <T> T prompt(String prompt, T valueIfNoEntry, InputHandler<T> inputHandler, Class<T> type) {
+            this.sendMessage(prompt + ": ");
             return valueIfNoEntry
         }
 

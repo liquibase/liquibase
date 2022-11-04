@@ -3,7 +3,7 @@
 <databaseChangeLog
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-				xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+				xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <preConditions>
         <dbms type="sqlite"/>
         <sqlCheck expectedResult="1">select 1</sqlCheck>
@@ -42,7 +42,7 @@
         <!--<comment>Fix misspelled "username" column</comment>-->
         <!--<renameColumn tableName="person" oldColumnName="usernae" newColumnName="username" columnDataType="varchar(8)"/>-->
     <!--</changeSet>-->
-    <changeSet id="5" author="nvoxland" context="test">
+    <changeSet id="5" author="nvoxland" contextFilter="test">
         <insert tableName="person">
             <column name="firstname" value="John"/>
             <column name="lastname" value="Doe"/>
@@ -73,7 +73,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="7" author="bjohnson" context="test">
+    <changeSet id="7" author="bjohnson" contextFilter="test">
         <insert tableName="employee">
             <column name="name" value="ACME Corp"/>
         </insert>
@@ -84,7 +84,7 @@
     <changeSet id="7a" author="nvoxland">
         <addColumn tableName="employee">
             <column name="company_id" type="int">
-                <constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>
+<!--                <constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>-->
             </column>
         </addColumn>
     </changeSet>
@@ -339,10 +339,39 @@
         </customChange>
     </changeSet>
     <changeSet id="57" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>
+                <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="tableName" value="person"/>
+            <param name="columnName" value="employer_id"/>
+            <param name="newValue" value="3"/>
+        </customChange>
+
     </changeSet>
     <changeSet id="58" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
+                <customChange class="liquibase.change.custom.ExampleCustomTaskChange">
+            <param name="helloTo" value="world"/>
+        </customChange>
+
+    </changeSet>
+    <changeSet id="59" author="mallod">
+        <comment>
+            Test table to be used Rename Column testing - GitHub issue 2925
+        </comment>
+        <createTable tableName="test_person">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(50)"/>
+            <column name="lastname" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city" type="varchar(30)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="60" author="mallod">
+        <comment>
+            Test to make sure Rename Column testing fix for GitHub issue 2925 works as expected
+        </comment>
+        <renameColumn tableName="test_person" oldColumnName="city" newColumnName="cityName" />
     </changeSet>
 
     <!--<changeSet id="60" author="nvoxland">-->

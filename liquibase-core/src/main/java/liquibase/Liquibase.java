@@ -33,7 +33,10 @@ import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.core.CompositeLogService;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
+import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.InputStreamList;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -49,10 +52,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Writer;
+import java.io.*;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Supplier;
@@ -179,7 +179,19 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Convience method for {@link #update(Contexts)} that constructs the Context object from the passed string.
+     * Convenience method for {@link #update(Contexts)} that runs in "no context mode".
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+     */
+    public void update() throws LiquibaseException {
+        this.update(new Contexts());
+    }
+
+    /**
+     * Convenience method for {@link #update(Contexts)} that constructs the Context object from the passed string.
+     * To run in "no context mode", pass a null or empty "".
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      */
     public void update(String contexts) throws LiquibaseException {
         this.update(new Contexts(contexts));
@@ -188,17 +200,28 @@ public class Liquibase implements AutoCloseable {
     /**
      * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to date according to
      * the configured changelog file. To run in "no context mode", pass a null or empty context object.
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
      */
     public void update(Contexts contexts) throws LiquibaseException {
         update(contexts, new LabelExpression());
     }
 
+    /**
+     * Liquibase update
+     *
+     * @param contexts
+     * @param labelExpression
+     * @throws LiquibaseException
+     *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
+     */
     public void update(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         update(contexts, labelExpression, true);
     }
 
     /**
-     *
      * Liquibase update
      *
      * @param   contexts
@@ -206,6 +229,8 @@ public class Liquibase implements AutoCloseable {
      * @param   checkLiquibaseTables
      * @throws  LiquibaseException
      *
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/contexts.html" target="_top">contexts</a> in documentation
+     * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
      */
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
@@ -226,7 +251,8 @@ public class Liquibase implements AutoCloseable {
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
                 }
 
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+                ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+                changelogService.generateDeploymentId();
 
                 changeLog.validate(database, contexts, labelExpression);
 
@@ -309,7 +335,7 @@ public class Liquibase implements AutoCloseable {
         if (hubUpdater.hubIsNotAvailable(changeLogId)) {
             if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) && changeLogId == null) {
                 String message =
-                    "The API key '" + HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue() + "' was found, but no changelog ID exists.\n" +
+                    "An API key was configured, but no changelog ID exists.\n" +
                     "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
                     "Learn more at https://hub.liquibase.com.";
                 Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
@@ -364,8 +390,21 @@ public class Liquibase implements AutoCloseable {
 
 
     public DatabaseChangeLog getDatabaseChangeLog() throws LiquibaseException {
+        return getDatabaseChangeLog(false);
+    }
+
+    /**
+     * @param shouldWarnOnMismatchedXsdVersion When set to true, a warning will be printed to the console if the XSD
+     *                                         version used does not match the version of Liquibase. If "latest" is used
+     *                                         as the XSD version, no warning is printed. If the changelog is not xml
+     *                                         format, no warning is printed.
+     */
+    private DatabaseChangeLog getDatabaseChangeLog(boolean shouldWarnOnMismatchedXsdVersion) throws LiquibaseException {
         if (databaseChangeLog == null && changeLogFile != null) {
             ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
+            if (parser instanceof XMLChangeLogSAXParser) {
+                ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(shouldWarnOnMismatchedXsdVersion);
+            }
             databaseChangeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
         }
 
@@ -498,7 +537,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(changeLog,
                             new ShouldRunChangeSetFilter(database),
@@ -615,7 +654,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(changeLog,
@@ -694,7 +733,7 @@ public class Liquibase implements AutoCloseable {
                 /* We have no other choice than to save the current Executer here. */
                 @SuppressWarnings("squid:S1941")
                 Executor oldTemplate = getAndReplaceJdbcExecutor(output);
-                outputHeader("Update " + changesToApply + " Change Sets Database Script");
+                outputHeader("Update " + changesToApply + " Changesets Database Script");
 
                 update(changesToApply, contexts, labelExpression);
 
@@ -757,7 +796,7 @@ public class Liquibase implements AutoCloseable {
         if (connection != null) {
             executor.comment("Against: " + connection.getConnectionUserName() + "@" + connection.getURL());
         }
-        executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersion());
+        executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersionInfo());
         executor.comment("*********************************************************************" +
                 StreamUtil.getLineSeparator()
         );
@@ -871,7 +910,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(database.getRanChangeSetList(), changeLog,
                             new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
@@ -972,13 +1011,14 @@ public class Liquibase implements AutoCloseable {
     protected void executeRollbackScript(String rollbackScript, List<ChangeSet> changeSets, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         String rollbackScriptContents;
-        try (InputStreamList streams = resourceAccessor.openStreams(null, rollbackScript)) {
-            if ((streams == null) || streams.isEmpty()) {
+        try {
+            Resource resource = resourceAccessor.get(rollbackScript);
+            if (resource == null) {
                 throw new LiquibaseException("WARNING: The rollback script '" + rollbackScript + "' was not located.  Please check your parameters. No rollback was performed");
-            } else if (streams.size() > 1) {
-                throw new LiquibaseException("Found multiple rollbackScripts named " + rollbackScript);
             }
-            rollbackScriptContents = StreamUtil.readStreamAsString(streams.iterator().next());
+            try (InputStream stream = resource.openInputStream()) {
+                rollbackScriptContents = StreamUtil.readStreamAsString(stream);
+            }
         } catch (IOException e) {
             throw new LiquibaseException("Error reading rollbackScript " + executor + ": " + e.getMessage());
         }
@@ -1145,7 +1185,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
@@ -1313,7 +1353,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                     ChangeLogIterator listLogIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
@@ -1471,7 +1511,7 @@ public class Liquibase implements AutoCloseable {
 
                     //
                     // Create an iterator which will be used with a ListVisitor
-                    // to grab the list of change sets for the update
+                    // to grab the list of changesets for the update
                     //
                     ChangeLogIterator listLogIterator = buildChangeLogIterator(tag, changeLog, contexts, labelExpression);
 
@@ -1942,12 +1982,13 @@ public class Liquibase implements AutoCloseable {
                 + "@" + getDatabase().getConnection().getURL());
         if (locks.length == 0) {
             out.println(" - No locks");
+            return;
         }
         for (DatabaseChangeLogLock lock : locks) {
             out.println(" - " + lock.getLockedBy() + " at " +
                     DateFormat.getDateTimeInstance().format(lock.getLockGranted()));
         }
-
+        out.println("NOTE:  The lock time displayed is based on the database's configured time");
     }
 
     public void forceReleaseLocks() throws LiquibaseException {
@@ -2060,7 +2101,7 @@ public class Liquibase implements AutoCloseable {
                 out.append(StreamUtil.getLineSeparator());
             } else {
                 out.append(String.valueOf(unrunChangeSets.size()));
-                out.append(" change sets have not been applied to ");
+                out.append(" changesets have not been applied to ");
                 out.append(getDatabase().getConnection().getConnectionUserName());
                 out.append("@");
                 out.append(getDatabase().getConnection().getURL());
@@ -2253,7 +2294,9 @@ public class Liquibase implements AutoCloseable {
                     DBDocVisitor visitor = new DBDocVisitor(database);
                     logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
-                    visitor.writeHTML(new File(outputDirectory), resourceAccessor);
+                    final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+                    Resource resource = pathHandlerFactory.getResource(outputDirectory);
+                    visitor.writeHTML(resource, resourceAccessor);
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 } finally {
@@ -2277,7 +2320,7 @@ public class Liquibase implements AutoCloseable {
      */
     public void validate() throws LiquibaseException {
 
-        DatabaseChangeLog changeLog = getDatabaseChangeLog();
+        DatabaseChangeLog changeLog = getDatabaseChangeLog(true);
         changeLog.validate(database);
     }
 

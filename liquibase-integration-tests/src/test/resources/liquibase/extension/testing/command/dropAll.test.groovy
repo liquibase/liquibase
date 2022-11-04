@@ -12,6 +12,7 @@ Short Description: Drop all database objects owned by the user
 Long Description: NOT SET
 Required Args:
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   changelogFile (String) The root changelog
     Default: null
@@ -80,7 +81,7 @@ Optional Args:
                 url       : { it.url },
                 username  : { it.username },
                 password  : { it.password },
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
         ]
         setup {
             database = [

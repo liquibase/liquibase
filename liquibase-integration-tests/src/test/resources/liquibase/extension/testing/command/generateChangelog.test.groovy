@@ -4,6 +4,7 @@ import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
 import liquibase.exception.CommandValidationException
+import liquibase.extension.testing.setup.SetupCleanResources
 
 CommandTests.define {
     command = ["generateChangelog"]
@@ -13,6 +14,7 @@ Long Description: Writes Change Log XML to copy the current state of the databas
 Required Args:
   changelogFile (String) File to write changelog to
   url (String) The JDBC database connection URL
+    OBFUSCATED
 Optional Args:
   dataOutputDirectory (String) Directory to write table data to
     Default: null
@@ -51,7 +53,7 @@ Optional Args:
             changelogFile: "target/test-classes/changelog-test.xml"
         ]
         setup {
-            cleanResources("changelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "changelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -81,6 +83,51 @@ Optional Args:
         }
         expectedFileContent = [
                 "target/test-classes/changelog-test.xml" : [CommandTests.assertContains("<changeSet ", 3)]
+        ]
+        expectedResults = [
+                statusCode   : 0
+        ]
+    }
+
+    run "Filtering with includeObjects", {
+        arguments = [
+            url     : { it.url },
+            username: { it.username },
+            password: { it.password },
+            changelogFile: "target/test-classes/changelog-test.xml",
+            includeObjects: "table:FIRSTTABLE"
+        ]
+        setup {
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "changelog-test.xml")
+            database = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new TagDatabaseChange(
+                            tag: "version_2.0"
+                    ),
+                    new CreateTableChange(
+                            tableName: "liquibaseRunInfo",
+                            columns: [
+                                    ColumnConfig.fromName("timesRan")
+                                            .setType("INT")
+                            ]
+                    ),
+            ]
+        }
+        expectedFileContent = [
+                "target/test-classes/changelog-test.xml" : [CommandTests.assertContains("<changeSet ", 1)]
         ]
         expectedResults = [
                 statusCode   : 0

@@ -1,6 +1,8 @@
 package liquibase.configuration.core
 
+import liquibase.Scope
 import liquibase.command.CommandScope
+import liquibase.configuration.LiquibaseConfiguration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -56,11 +58,19 @@ long.multiWord: Long MultiWord
     def "validate valid values"() {
         when:
         def provider = new DefaultsFileValueProvider([
-                (key) : "test value",
-                strict: String.valueOf(strict)
+                (key) : "test value"
         ] as Properties)
 
-        provider.validate(new CommandScope("update"))
+        //
+        // Set the strict setting in the Scope for this test
+        //
+        LiquibaseConfiguration configuration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
+        configuration.registerProvider(new ScopeValueProvider())
+
+        Map<String, String> scopeValues = ["liquibase.strict":strict] as Map<String, String>
+        Scope.getCurrentScope().child(scopeValues, (Scope.ScopedRunner) { ->
+            provider.validate(new CommandScope("update"))
+        })
 
         then:
         noExceptionThrown()
@@ -88,11 +98,19 @@ long.multiWord: Long MultiWord
     def "validate invalid values"() {
         when:
         def provider = new DefaultsFileValueProvider([
-                (key) : "test value",
-                strict: "true",
+                (key) : "test value"
         ] as Properties)
 
-        provider.validate(new CommandScope("update"))
+        //
+        // Set the strict setting in the Scope for this test
+        //
+        LiquibaseConfiguration configuration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
+        configuration.registerProvider(new ScopeValueProvider())
+
+        Map<String, String> scopeValues = ["liquibase.strict":"true"]
+        Scope.getCurrentScope().child(scopeValues, (Scope.ScopedRunner) { ->
+            provider.validate(new CommandScope("update"))
+        })
 
         then:
         def e = thrown(IllegalArgumentException)

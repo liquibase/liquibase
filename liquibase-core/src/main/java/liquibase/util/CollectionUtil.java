@@ -78,7 +78,7 @@ public class CollectionUtil {
     }
 
     /**
-     * Returns a new empty set if the passed array is null.
+     * Returns a new empty set if the passed set is null.
      */
     public static <T> Set<T> createIfNull(Set<T> currentValue) {
         if (currentValue == null) {
@@ -86,6 +86,47 @@ public class CollectionUtil {
         } else {
             return currentValue;
         }
+    }
+
+    /**
+     * Returns a new empty map if the passed map is null.
+     */
+    public static <T, E> Map<T, E> createIfNull(Map<T, E> currentValue) {
+        if (currentValue == null) {
+            return new HashMap<>();
+        } else {
+            return currentValue;
+        }
+    }
+
+    /**
+     * Converts a set of nested maps (like from yaml/json) into a flat map with dot-separated properties
+     */
+    public static Map<String, Object> flatten(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        return flatten(null, map);
+
+    }
+
+    private static Map<String, Object> flatten(String prefix, Map<String, Object> map) {
+        Map<String, Object> outMap = new HashMap<>();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String propertyName = entry.getKey();
+            if (prefix != null) {
+                propertyName = prefix + "." + propertyName;
+            }
+
+            if (entry.getValue() instanceof Map) {
+                outMap.putAll(flatten(propertyName, (Map<String, Object>) entry.getValue()));
+            } else {
+                outMap.put(propertyName, entry.getValue());
+            }
+        }
+
+        return outMap;
     }
 
 }

@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <preConditions>
             <dbms type="postgresql"/>
@@ -42,7 +42,7 @@
         <comment>Fix misspelled "username" column</comment>
         <renameColumn tableName="person" oldColumnName="usernae" newColumnName="username"/>
     </changeSet>
-    <changeSet id="5" author="nvoxland" context="test">
+    <changeSet id="5" author="nvoxland" contextFilter="test">
         <insert tableName="person">
             <column name="id" value="1"/>
             <column name="firstname" value="John"/>
@@ -76,7 +76,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="7" author="bjohnson" context="test">
+    <changeSet id="7" author="bjohnson" contextFilter="test">
         <insert tableName="employee">
             <column name="id" value="1"/>
             <column name="name" value="ACME Corp"/>
@@ -122,10 +122,14 @@
 
     <changeSet id="12" author="nvoxland">
         <createIndex indexName="idx_company_name" tableName="company">
-            <column name="name"/>
+            <column name="name" />
         </createIndex>
         <createIndex indexName="idx_person_lastname" tableName="person">
             <column name="lastname"/>
+        </createIndex>
+        <createIndex indexName="idx_person_firstname_lastname" tableName="person">
+            <column name="lastname" descending="true"/>
+            <column name="firstname"/>
         </createIndex>
     </changeSet>
 
@@ -366,7 +370,7 @@
         <addAutoIncrement tableName="cp1_table" columnName="id" columnDataType="int"/>
     </changeSet>
     <!--
-      Change sets to test  https://github.com/liquibase/liquibase/issues/1212.
+      Changesets to test  https://github.com/liquibase/liquibase/issues/1212.
       To test this, we'll need 3 things:
       0. Postgresql >= 10
       1. A parent table to reference.
@@ -417,6 +421,15 @@
                                  referencedTableName="partition_parent"
                                  referencedColumnNames="id"/>
     </changeSet>
+
+    <changeSet author="author" id="initially deferred PK">
+        <createTable tableName="deferred_pk">
+            <column name="id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="abc_PK" deferrable="true" initiallyDeferred="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 
     <changeSet id="cluster-pk-check" author="nvoxland">
         <createTable tableName="cluster_table">

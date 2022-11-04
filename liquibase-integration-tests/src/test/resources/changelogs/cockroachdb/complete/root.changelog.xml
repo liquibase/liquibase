@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <preConditions>
             <dbms type="cockroachdb"/>
@@ -42,7 +42,7 @@
         <comment>Fix misspelled "username" column</comment>
         <renameColumn tableName="person" oldColumnName="usernae" newColumnName="username"/>
     </changeSet>
-    <changeSet id="5" author="nvoxland" context="test">
+    <changeSet id="5" author="nvoxland" contextFilter="test">
         <insert tableName="person">
             <column name="id" value="1"/>
             <column name="firstname" value="John"/>
@@ -76,7 +76,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="7" author="bjohnson" context="test">
+    <changeSet id="7" author="bjohnson" contextFilter="test">
         <insert tableName="employee">
             <column name="id" value="1"/>
             <column name="name" value="ACME Corp"/>
@@ -89,9 +89,15 @@
     <changeSet id="7a" author="nvoxland">
         <addColumn tableName="employee">
             <column name="company_id" type="int">
-                <constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>
+                <constraints nullable="true"/>
             </column>
         </addColumn>
+        <createIndex tableName="employee" indexName="idx_employee_company">
+            <column name="company_id"/>
+        </createIndex>
+        <addForeignKeyConstraint baseTableName="employee" baseColumnNames="company_id" constraintName="fk_employee_company"
+                                 referencedTableName="employee"
+                                 referencedColumnNames="id"/>
     </changeSet>
     <changeSet id="8" author="bjohnson">
         <dropNotNullConstraint tableName="employee" columnName="name"/>
@@ -315,10 +321,18 @@
         </customChange>
     </changeSet>
     <changeSet id="57" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>
+                <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="tableName" value="person"/>
+            <param name="columnName" value="employer_id"/>
+            <param name="newValue" value="3"/>
+        </customChange>
+
     </changeSet>
     <changeSet id="58" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
+                <customChange class="liquibase.change.custom.ExampleCustomTaskChange">
+            <param name="helloTo" value="world"/>
+        </customChange>
+
     </changeSet>
 
     <changeSet id="60" author="nvoxland">
