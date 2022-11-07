@@ -155,10 +155,38 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
             liquibase.rollback(1, context);
             queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                     .queryForList(new RawSqlStatement(String.format("select * from %s", tableName)));
-            Assert.assertEquals(2, queryResult.size());
+            Assert.assertEquals("Rollbacking for " + insertedValue, 2, queryResult.size());
             Assert.assertEquals(insertedValue.toString(), queryResult.get(1).get(colName));
             insertedValue++;
         }
+    }
+
+    @Test
+    public void testRollbackWithoutContext() throws Exception {
+        Integer insertedValue = 5;
+        String colName = "COL1";
+        String tableName = "tmp_tbl";
+
+        clearDatabase();
+
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(new RawSqlStatement(String.format("CREATE TABLE %s (%s varchar(50))", tableName, colName)));
+
+        Liquibase liquibase = createLiquibase("changelogs/h2/complete/rollback.sql.changelog.xml");
+        liquibase.update();
+
+        List<Map<String, ?>> queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .queryForList(new RawSqlStatement(String.format("select * from %s", tableName)));
+
+        Assert.assertEquals(1, queryResult.size());
+        Assert.assertEquals(insertedValue.toString(), queryResult.get(0).get(colName));
+        insertedValue++;
+
+        liquibase.rollback(1, null);
+        queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .queryForList(new RawSqlStatement(String.format("select * from %s", tableName)));
+        Assert.assertEquals("Rollbacking for " + insertedValue, 2, queryResult.size());
+        Assert.assertEquals(insertedValue.toString(), queryResult.get(1).get(colName));
     }
 
     @Override
