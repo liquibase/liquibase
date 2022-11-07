@@ -206,7 +206,7 @@ public class ExecutablePreparedStatementBaseTest {
     @Test
     public void testAttachParams_ValueComputed() throws DatabaseException, SQLException {
 
-        doReturn(valueComputed).when(columnConfig1Mock).getValueComputed();
+        doReturn(valueComputed).when(columnConfig1Mock).getValueObject();
 
         doNothing().when(executablePreparedStatementBase).applyColumnParameter(any(), anyInt(), any());
 
