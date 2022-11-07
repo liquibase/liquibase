@@ -202,18 +202,36 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         returnList.addAll(executeAndExtract(sql, database));
 
                     } else if (database instanceof Db2zDatabase) {
-                        String sql = "SELECT i.CREATOR AS TABLE_SCHEM, " +
-                                "i.TBNAME AS TABLE_NAME, " +
-                                "i.NAME AS INDEX_NAME, " +
-                                "3 AS TYPE, " +
-                                "k.COLNAME AS COLUMN_NAME, " +
-                                "k.COLSEQ AS ORDINAL_POSITION, " +
-                                "CASE UNIQUERULE WHEN 'D' then 1 else 0 end as NON_UNIQUE, " +
-                                "k.ORDERING AS ORDER, " +
-                                "i.CREATOR AS INDEX_QUALIFIER " +
-                                "FROM SYSIBM.SYSKEYS k " +
-                                "JOIN SYSIBM.SYSINDEXES i ON k.IXNAME = i.NAME " +
-                                "WHERE  i.CREATOR = '" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
+                        String sql;
+                        // Only starting from v12 at DB on Z OS IMPLICIT column was added at SYSINDEXES
+                        if (12 >= database.getDatabaseMajorVersion()) {
+                            sql = "SELECT i.CREATOR AS TABLE_SCHEM, " +
+                                    "i.TBNAME AS TABLE_NAME, " +
+                                    "i.NAME AS INDEX_NAME, " +
+                                    "3 AS TYPE, " +
+                                    "k.COLNAME AS COLUMN_NAME, " +
+                                    "k.COLSEQ AS ORDINAL_POSITION, " +
+                                    "CASE UNIQUERULE WHEN 'D' then 1 else 0 end as NON_UNIQUE, " +
+                                    "k.ORDERING AS ORDER, " +
+                                    "i.CREATOR AS INDEX_QUALIFIER, " +
+                                    "i.IMPLICIT AS INDEX_IMPLICIT " +
+                                    "FROM SYSIBM.SYSKEYS k " +
+                                    "JOIN SYSIBM.SYSINDEXES i ON k.IXNAME = i.NAME " +
+                                    "WHERE  i.CREATOR = '" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
+                        } else {
+                            sql = "SELECT i.CREATOR AS TABLE_SCHEM, " +
+                                    "i.TBNAME AS TABLE_NAME, " +
+                                    "i.NAME AS INDEX_NAME, " +
+                                    "3 AS TYPE, " +
+                                    "k.COLNAME AS COLUMN_NAME, " +
+                                    "k.COLSEQ AS ORDINAL_POSITION, " +
+                                    "CASE UNIQUERULE WHEN 'D' then 1 else 0 end as NON_UNIQUE, " +
+                                    "k.ORDERING AS ORDER, " +
+                                    "i.CREATOR AS INDEX_QUALIFIER " +
+                                    "FROM SYSIBM.SYSKEYS k " +
+                                    "JOIN SYSIBM.SYSINDEXES i ON k.IXNAME = i.NAME " +
+                                    "WHERE  i.CREATOR = '" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
+                        }
                         if (!bulkFetch && tableName != null) {
                             sql += " AND i.TBNAME='" + database.escapeStringForDatabase(tableName) + "'";
                         }

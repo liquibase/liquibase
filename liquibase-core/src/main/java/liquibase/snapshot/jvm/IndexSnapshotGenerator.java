@@ -168,6 +168,12 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         continue;
                     }
 
+                    if (database instanceof Db2zDatabase
+                            && 12 >= database.getDatabaseMajorVersion()
+                            && "Y".equals(row.getString("INDEX_IMPLICIT"))) {
+                        continue;
+                    }
+
                     Index index = foundIndexes.get(indexName);
                     if (index == null) {
                         index = new Index();
