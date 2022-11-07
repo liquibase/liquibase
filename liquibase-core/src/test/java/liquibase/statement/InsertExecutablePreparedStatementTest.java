@@ -3,7 +3,7 @@ package liquibase.statement;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
-import com.ibm.db2.cmx.PushDownError;
+import java.sql.SQLException;
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -12,14 +12,13 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.resource.ResourceAccessor;
-import org.assertj.core.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static java.util.Arrays.asList;
+import java.util.Arrays;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.*;
 
@@ -61,7 +60,7 @@ public class InsertExecutablePreparedStatementTest {
     }
 
     @Test
-    public void testExecute() throws DatabaseException, PushDownError.SQLException {
+    public void testExecute() throws DatabaseException, SQLException {
 
         ColumnConfig columnConfig1 = new ColumnConfig();
         columnConfig1.setName("column1");
@@ -96,7 +95,6 @@ public class InsertExecutablePreparedStatementTest {
         verify(ps).setString(3, "value3");
         verify(ps).setString(4, "value4");
         verify(ps).execute();
-        verify(ps).close();
         verifyNoMoreInteractions(ps);
     }
 
@@ -136,7 +134,6 @@ public class InsertExecutablePreparedStatementTest {
         verify(ps).setString(2, "value3");
         verify(ps).setString(3, "value4");
         verify(ps).execute();
-        verify(ps).close();
         verifyNoMoreInteractions(ps);
     }
 
@@ -171,11 +168,10 @@ public class InsertExecutablePreparedStatementTest {
         insertExecutablePreparedStatement.execute(preparedStatementFactory);
 
         verify(connection).prepareStatement(
-                "INSERT INTO catalogName.schemaName.tableName(column2, column3, column4) VALUES(?, (select * from abc where x=y), ?)");
+                "INSERT INTO catalogName.schemaName.tableName(column2, column3, column4) VALUES(?, select * from abc where x=y, ?)");
         verify(ps).setString(1, "value2");
         verify(ps).setString(2, "value4");
         verify(ps).execute();
-        verify(ps).close();
         verifyNoMoreInteractions(ps);
     }
 
@@ -187,13 +183,13 @@ public class InsertExecutablePreparedStatementTest {
                 null,
                 null,
                 "DATABASECHANGELOG",
-                new ArrayList<ColumnConfig>(asList(
+                Arrays.asList(
                         new ColumnConfig()
                                 .setName("MD5SUM")
                                 .setValue("7:e27bf9c0c2313160ef960a15d44ced47"),
                         new ColumnConfig()
                                 .setName("DATEEXECUTED")
-                                .setValueDate("GETDATE()"))),
+                                .setValueDate("GETDATE()")),
                 changeSet,
                 resourceAccessor);
 

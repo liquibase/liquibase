@@ -1168,4 +1168,22 @@
         </preConditions>
     </changeSet>
 
+    <changeSet id="relative import" author="mallod">
+        <createTable tableName="my_table">
+            <column name="test_col" type="int"/>
+            <column name="other_col" type="varchar(100)"/>
+        </createTable>
+        <loadData tableName="my_table"
+                  file="computedValueData.csv"
+                  relativeToChangelogFile="true">
+            <column name="test_col" type="COMPUTED"/>
+        </loadData>
+        <insert tableName="my_table">
+            <column name="test_col" valueComputed="1 + 1"/>
+        </insert>
+        <update tableName="my_table">
+            <column name="test_col" valueComputed="2 + 2"/>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

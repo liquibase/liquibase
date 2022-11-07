@@ -71,13 +71,13 @@ public class ExecutablePreparedStatementBaseTest {
     private Time valueDateTime = new Time(new Date().getTime());
     private Date valueDateDate = new Date();
     private String valueBlobFile = "valueBlobFile";
-    private ExecutablePreparedStatementBase.LOBContent<InputStream> blobContentLenghtInteger = new ExecutablePreparedStatementBase.LOBContent(inputStreamMock, Integer.MAX_VALUE - 1);
+    private ExecutablePreparedStatementBase.LOBContent<InputStream> blobContentLengthInteger = new ExecutablePreparedStatementBase.LOBContent(inputStreamMock, Integer.MAX_VALUE - 1);
     private ExecutablePreparedStatementBase.LOBContent<InputStream> blobContentLengthLong = new ExecutablePreparedStatementBase.LOBContent(inputStreamMock, Long.MAX_VALUE);
     private IOException ioException = new IOException(valueBlobFile);
     private String valueClobFile = "valueClobFile";
     private String encoding = StandardCharsets.UTF_8.displayName();
     private Reader reader = new InputStreamReader(new ByteArrayInputStream(new byte[]{}));
-    private ExecutablePreparedStatementBase.LOBContent<Reader> clobContentLenghtInteger = new ExecutablePreparedStatementBase.LOBContent(reader, Integer.MAX_VALUE - 1);
+    private ExecutablePreparedStatementBase.LOBContent<Reader> clobContentLengthInteger = new ExecutablePreparedStatementBase.LOBContent(reader, Integer.MAX_VALUE - 1);
     private ExecutablePreparedStatementBase.LOBContent<Reader> clobContentLengthLong = new ExecutablePreparedStatementBase.LOBContent(reader, Long.MAX_VALUE);
     private DatabaseFunction valueComputed = new DatabaseFunction("select * from some_table");
     private Object valueComputedObject = new Object();
@@ -378,15 +378,15 @@ public class ExecutablePreparedStatementBaseTest {
     }
 
     @Test
-    public void testApplyColumnParameter_valueBlobFileLenghtInteger() throws LiquibaseException, SQLException, IOException {
+    public void testApplyColumnParameter_valueBlobFileLengthInteger() throws LiquibaseException, SQLException, IOException {
 
         doReturn(valueBlobFile).when(columnConfig1Mock).getValueBlobFile();
 
-        doReturn(blobContentLenghtInteger).when(executablePreparedStatementBase).toBinaryStream(any());
+        doReturn(blobContentLengthInteger).when(executablePreparedStatementBase).toBinaryStream(any());
 
         executablePreparedStatementBase.applyColumnParameter(preparedStatementMock, position, columnConfig1Mock);
 
-        verify(preparedStatementMock).setBinaryStream(position, blobContentLenghtInteger.getContent(), (int) blobContentLenghtInteger.getLength());
+        verify(preparedStatementMock).setBinaryStream(position, blobContentLengthInteger.getContent(), (int) blobContentLengthInteger.getLength());
     }
 
     @Test
@@ -398,7 +398,7 @@ public class ExecutablePreparedStatementBaseTest {
 
         executablePreparedStatementBase.applyColumnParameter(preparedStatementMock, position, columnConfig1Mock);
 
-        verify(preparedStatementMock).setBinaryStream(position, blobContentLenghtInteger.getContent(), blobContentLengthLong.getLength());
+        verify(preparedStatementMock).setBinaryStream(position, blobContentLengthInteger.getContent(), blobContentLengthLong.getLength());
     }
 
     @Test
@@ -424,11 +424,11 @@ public class ExecutablePreparedStatementBaseTest {
         doReturn(valueClobFile).when(columnConfig1Mock).getValueClobFile();
         doReturn(valueClobFile).when(columnConfig1Mock).getEncoding();
 
-        doReturn(clobContentLenghtInteger).when(executablePreparedStatementBase).toCharacterStream(any(), any());
+        doReturn(clobContentLengthInteger).when(executablePreparedStatementBase).toCharacterStream(any(), any());
 
         executablePreparedStatementBase.applyColumnParameter(preparedStatementMock, position, columnConfig1Mock);
 
-        verify(preparedStatementMock).setCharacterStream(position, clobContentLenghtInteger.getContent(), (int) clobContentLenghtInteger.getLength());
+        verify(preparedStatementMock).setCharacterStream(position, clobContentLengthInteger.getContent(), (int) clobContentLengthInteger.getLength());
     }
 
     @Test
@@ -441,7 +441,7 @@ public class ExecutablePreparedStatementBaseTest {
 
         executablePreparedStatementBase.applyColumnParameter(preparedStatementMock, position, columnConfig1Mock);
 
-        verify(preparedStatementMock).setCharacterStream(position, clobContentLenghtInteger.getContent(), clobContentLengthLong.getLength());
+        verify(preparedStatementMock).setCharacterStream(position, clobContentLengthInteger.getContent(), clobContentLengthLong.getLength());
     }
 
     @Test

@@ -185,7 +185,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         int i = 1;  // index starts from 1
         for (ColumnConfig col : cols) {
             LOG.fine("Applying column parameter = " + i + " for column " + col.getName());
-            if (col.getValueComputed() != null) {
+            if (col.getValueObject() instanceof DatabaseFunction) {
                 // It's impossible to add a 'db function' to a prepared statement. Adding functions should be handled while building the SQL statement.
                 LOG.fine("Skipping column parameter for " + col.getName() + ", cannot add functions to prepared statements.");
             } else {
@@ -281,9 +281,9 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             try {
                 LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
                 if (lob.length <= Integer.MAX_VALUE) {
-                    stmt.setBlob(i, lob.content, (int) lob.length);
+                    stmt.setBinaryStream(i, lob.content, (int) lob.length);
                 } else {
-                    stmt.setBlob(i, lob.content, lob.length);
+                    stmt.setBinaryStream(i, lob.content, lob.length);
                 }
             } catch (IOException | LiquibaseException e) {
                 throw new DatabaseException(e.getMessage(), e); // wrap

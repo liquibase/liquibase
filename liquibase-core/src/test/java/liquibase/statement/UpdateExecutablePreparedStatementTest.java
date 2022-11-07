@@ -25,8 +25,7 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateExecutablePreparedStatementTest {
@@ -180,7 +179,6 @@ public class UpdateExecutablePreparedStatementTest {
         verify(ps).setString(3, "value3");
         verify(ps).setString(4, "value4");
         verify(ps).execute();
-        verify(ps).close();
         verifyNoMoreInteractions(ps);
     }
 
@@ -247,13 +245,12 @@ public class UpdateExecutablePreparedStatementTest {
                 "UPDATE catalogName.tableName " +
                         "SET column1 = ?, " +
                         "column2 = ?, " +
-                        "column3 = (select * from abc where x=y), " +
+                        "column3 = select * from abc where x=y, " +
                         "column4 = ?");
         verify(ps).setString(1, "value1");
         verify(ps).setString(2, "value2");
         verify(ps).setString(3, "value4");
         verify(ps).execute();
-        verify(ps).close();
         verifyNoMoreInteractions(ps);
     }
 }
