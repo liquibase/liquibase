@@ -1,6 +1,9 @@
 package liquibase.database;
 
+import java.sql.Driver;
+import java.util.Properties;
 import liquibase.exception.DatabaseException;
+import liquibase.servicelocator.PrioritizedService;
 
 /**
  * A liquibase abstraction over the normal Connection that is available in
@@ -8,21 +11,37 @@ import liquibase.exception.DatabaseException;
  * connection.
  * 
  */
-public interface DatabaseConnection {
+public interface DatabaseConnection extends PrioritizedService, AutoCloseable {
 
-    public void close() throws DatabaseException;
+    void open(String url, Driver driverObject, Properties driverProperties)
+            throws DatabaseException;
 
-    public void commit() throws DatabaseException;
+    /**
+     * Default implementation for compatibility with a URL.
+     * Method is used when a Connection is opened based on an identified driverObject from url.
+     * Can be overridden in DatabaseConnection implementations with a higher priority to check against a given url.
+     *
+     * @param url the url connection string
+     * @return true if URL is supported
+     */
+    default boolean supports(String url) {
+        return true;
+    }
 
-    public boolean getAutoCommit() throws DatabaseException;
+    @Override
+    void close() throws DatabaseException;
 
-    public String getCatalog() throws DatabaseException;
+    void commit() throws DatabaseException;
 
-    public String nativeSQL(String sql) throws DatabaseException;
+    boolean getAutoCommit() throws DatabaseException;
 
-    public void rollback() throws DatabaseException;
+    String getCatalog() throws DatabaseException;
 
-    public void setAutoCommit(boolean autoCommit) throws DatabaseException;
+    String nativeSQL(String sql) throws DatabaseException;
+
+    void rollback() throws DatabaseException;
+
+    void setAutoCommit(boolean autoCommit) throws DatabaseException;
 
     String getDatabaseProductName() throws DatabaseException;
 

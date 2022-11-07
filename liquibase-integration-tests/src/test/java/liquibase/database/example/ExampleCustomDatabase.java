@@ -3,8 +3,6 @@ package liquibase.database.example;
 import liquibase.Scope;
 import liquibase.database.core.H2Database;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 
 public class ExampleCustomDatabase extends H2Database {
 
@@ -15,7 +13,7 @@ public class ExampleCustomDatabase extends H2Database {
 
     @Override
     public void tag(String tagString) throws DatabaseException {
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Custom tagging");
+        Scope.getCurrentScope().getLog(getClass()).info("Custom tagging");
         super.tag(tagString);
     }
 }

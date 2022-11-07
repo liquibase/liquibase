@@ -2,14 +2,12 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.InternalDatabase;
-import liquibase.database.ObjectQuotingStrategy;
+import liquibase.changelog.*;
+import liquibase.database.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.ValidationErrors;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.sql.visitor.SqlVisitor;
@@ -45,6 +43,8 @@ public class MockDatabase implements Database, InternalDatabase {
     private String defaultCatalogName;
     private String defaultSchemaName;
     private boolean caseSensitive;
+    private DatabaseConnection connection = new MockDatabaseConnection();
+    private String currentDateTimeFunction = "DATETIME()";
 
 
     @Override
@@ -112,11 +112,12 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public DatabaseConnection getConnection() {
-        return null;
+        return connection;
     }
 
     @Override
     public void setConnection(final DatabaseConnection conn) {
+        this.connection = (DatabaseConnection) conn;
     }
 
     public void setConnection(final Connection conn) {
@@ -256,22 +257,27 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public String getCurrentDateTimeFunction() {
-        return "DATETIME()";
+        return currentDateTimeFunction;
     }
 
     @Override
     public void setCurrentDateTimeFunction(final String function) {
+        this.currentDateTimeFunction = function;
     }
 
     @Override
     public String getLineComment() {
-        return null;
+        return "--";
     }
 
     @Override
-    public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy) {
-        return (("AUTO_INCREMENT_CLAUSE" + startWith) != null) ? (" " + startWith) : ((("" + incrementBy) != null) ?
-            (" " + incrementBy) : "");
+    public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy, final String generationType, final Boolean defaultOnNull) {
+        if (startWith != null) {
+            return " " + startWith;
+        }
+        else {
+            return " " + incrementBy;
+        }
     }
 
     public SqlStatement getCommitSQL() {
@@ -461,31 +467,34 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet) {
+    public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
         return null;
     }
 
     @Override
-    public RanChangeSet getRanChangeSet(final ChangeSet changeSet) {
-        return null;
+    public RanChangeSet getRanChangeSet(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
+        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanChangeSet(changeSet);
+
     }
 
     @Override
-    public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) {
+    public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
+        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).setExecType(changeSet, execType);
     }
 
     @Override
-    public List<RanChangeSet> getRanChangeSetList() {
-        return null;
+    public List<RanChangeSet> getRanChangeSetList() throws DatabaseException {
+        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanChangeSets();
     }
 
     @Override
-    public Date getRanDate(final ChangeSet changeSet) {
-        return null;
+    public Date getRanDate(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
+        return getRanChangeSet(changeSet).getDateExecuted();
     }
 
     @Override
-    public void removeRanStatus(final ChangeSet changeSet) {
+    public void removeRanStatus(final ChangeSet changeSet) throws DatabaseException {
+        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).removeFromHistory(changeSet);
     }
 
     @Override

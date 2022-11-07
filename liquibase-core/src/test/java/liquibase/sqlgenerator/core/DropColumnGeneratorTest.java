@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
@@ -9,6 +10,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertTrue;
 
 public class DropColumnGeneratorTest extends AbstractSqlGeneratorTest<DropColumnStatement> {
 
@@ -32,7 +37,35 @@ public class DropColumnGeneratorTest extends AbstractSqlGeneratorTest<DropColumn
         Sql[] sql = generatorUnderTest.generateSql(drop, new MySQLDatabase(), new MockSqlGeneratorChain());
         Assert.assertEquals(1, sql.length);
         Assert.assertEquals("ALTER TABLE TEST_TABLE DROP col1, DROP col2", sql[0].toSql());
-        Assert.assertEquals("[DEFAULT, TEST_TABLE, TEST_TABLE.col1, TEST_TABLE.col2]", String.valueOf(sql[0].getAffectedDatabaseObjects()));
+
+        List<String> actualNames = sql[0].getAffectedDatabaseObjects().stream().map(o -> o.toString()).collect(Collectors.toList());
+        List<String> expectedNames = Arrays.asList(new String[]{"TEST_TABLE.col1", "TEST_TABLE.col2", "TEST_TABLE", "DEFAULT"});
+        assertTrue(actualNames.containsAll(expectedNames));
+        assertTrue(expectedNames.containsAll(actualNames));
+    }
+
+    @Test
+    public void testDropMultipleColumnsMSSQL() {
+        DropColumnStatement drop = new DropColumnStatement(Arrays.asList(new DropColumnStatement(null, null, "TEST_TABLE", "col1"), new DropColumnStatement(null, null, "TEST_TABLE", "col2")));
+
+        Assert.assertFalse(generatorUnderTest.validate(drop, new MSSQLDatabase(), new MockSqlGeneratorChain()).hasErrors());
+        Sql[] sql = generatorUnderTest.generateSql(drop, new MSSQLDatabase(), new MockSqlGeneratorChain());
+        Assert.assertEquals(4, sql.length);
+        Assert.assertTrue(sql[0].toSql().contains("TEST_TABLE") && sql[0].toSql().contains("col1"));
+        Assert.assertEquals("ALTER TABLE TEST_TABLE DROP COLUMN col1", sql[1].toSql());
+        Assert.assertTrue(sql[2].toSql().contains("TEST_TABLE") && sql[2].toSql().contains("col2"));
+        Assert.assertEquals("ALTER TABLE TEST_TABLE DROP COLUMN col2", sql[3].toSql());
+    }
+
+    @Test
+    public void testDropSimpleColumnsMSSQL() {
+        DropColumnStatement drop = new DropColumnStatement(Arrays.asList(new DropColumnStatement(null, null, "TEST_TABLE", "col1")));
+
+        Assert.assertFalse(generatorUnderTest.validate(drop, new MSSQLDatabase(), new MockSqlGeneratorChain()).hasErrors());
+        Sql[] sql = generatorUnderTest.generateSql(drop, new MSSQLDatabase(), new MockSqlGeneratorChain());
+        Assert.assertEquals(2, sql.length);
+        Assert.assertTrue(sql[0].toSql().contains("TEST_TABLE") && sql[0].toSql().contains("col1"));
+        Assert.assertEquals("ALTER TABLE TEST_TABLE DROP COLUMN col1", sql[1].toSql());
     }
 
 ////    @Test

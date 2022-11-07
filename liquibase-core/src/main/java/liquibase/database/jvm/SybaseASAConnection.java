@@ -1,6 +1,7 @@
 package liquibase.database.jvm;
 
 import liquibase.exception.DatabaseException;
+import liquibase.servicelocator.LiquibaseService;
 
 import java.sql.Connection;
 
@@ -11,7 +12,10 @@ import java.sql.Connection;
  * @author <a href="mailto:andreas.pohl@mateurope.com">Andreas Pohl</a>
  *
  */
+@LiquibaseService(skip=true)
 public class SybaseASAConnection extends JdbcConnection {
+
+	public SybaseASAConnection() {}
 
 	public SybaseASAConnection(Connection connection) {
 		super(connection);

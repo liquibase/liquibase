@@ -1,5 +1,6 @@
 package liquibase.structure.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
@@ -7,7 +8,7 @@ public class Data extends AbstractDatabaseObject {
 
     @Override
     public boolean snapshotByDefault() {
-        return false;
+        return GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getCurrentValue();
     }
 
     public Table getTable() {

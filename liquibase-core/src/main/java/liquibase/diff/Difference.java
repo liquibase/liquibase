@@ -1,6 +1,9 @@
 package liquibase.diff;
 
-public class Difference implements Comparable {
+import liquibase.serializer.AbstractLiquibaseSerializable;
+import liquibase.serializer.LiquibaseSerializable;
+
+public class Difference extends AbstractLiquibaseSerializable implements Comparable, LiquibaseSerializable {
     private String message;
     private String field;
     private Object referenceValue;
@@ -18,6 +21,16 @@ public class Difference implements Comparable {
         this.field = field;
         this.referenceValue = referenceValue;
         this.comparedValue = comparedValue;
+    }
+
+    @Override
+    public String getSerializedObjectName() {
+        return "difference";
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return null;
     }
 
     public String getMessage() {

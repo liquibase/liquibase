@@ -24,28 +24,20 @@ class ServiceLocatorTest extends Specification {
 
     }
 
-    def "getClasses"() throws Exception {
-        expect:
-
-        Scope.child(Scope.Attr.resourceAccessor, resourceAccessor, {
-            Class[] classes = Scope.getCurrentScope().getServiceLocator().findClasses(ChangeLogParser.class);
-            assertTrue(classes.length > 0);
-        });
-    }
-
-
-    def "findClass"() throws Exception {
+    def "findInstance"() throws Exception {
         expect:
 
         Scope.child(Scope.Attr.resourceAccessor, resourceAccessor, {
 
-            Class[] classes = Scope.getCurrentScope().getServiceLocator().findClasses(Database.class);
-            for (Class clazz : classes) {
+            List databases = Scope.getCurrentScope().getServiceLocator().findInstances(Database.class);
+            for (def database : databases) {
+                def clazz = database.class
+
                 assertFalse(clazz.getName() + " is abstract", Modifier.isAbstract(clazz.getModifiers()));
                 assertFalse(clazz.getName() + " is an interface", Modifier.isInterface(clazz.getModifiers()));
                 assertNotNull(clazz.getConstructors());
             }
-            assertTrue(classes.length > 0);
+            assertTrue(databases.size() > 0);
         });
     }
 

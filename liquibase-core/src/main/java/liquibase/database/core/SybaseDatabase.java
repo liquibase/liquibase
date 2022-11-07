@@ -7,7 +7,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -236,7 +235,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 	public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = schema.customize(this);
         GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName);
-        Executor executor = ExecutorService.getInstance().getExecutor(this);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this);
         @SuppressWarnings("unchecked")
         List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);
         StringBuilder definition = new StringBuilder();
@@ -259,7 +258,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
             return getConnection().getDatabaseMajorVersion();
         } catch (UnsupportedOperationException e) {
         	Scope.getCurrentScope().getLog(getClass())
-        		.warning(LogType.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+        		.warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }
@@ -278,7 +277,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
             return getConnection().getDatabaseMinorVersion();
         } catch (UnsupportedOperationException e) {
         	Scope.getCurrentScope().getLog(getClass())
-    			.warning(LogType.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+    			.warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }

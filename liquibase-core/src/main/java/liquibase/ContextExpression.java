@@ -1,11 +1,9 @@
 package liquibase;
 
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.ExpressionMatcher;
 import liquibase.util.StringUtil;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Encapsulates logic for evaluating if a set of runtime contexts matches a context expression string.
@@ -89,65 +87,7 @@ public class ContextExpression {
     }
 
     private boolean matches(String expression, Contexts runtimeContexts) {
-        if (runtimeContexts.isEmpty()) {
-            return true;
-        }
-
-        if (":TRUE".equals(expression.trim())) {
-            return true;
-        }
-        if (":FALSE".equals(expression.trim())) {
-            return false;
-        }
-
-        while (expression.contains("(")) {
-            Pattern pattern = Pattern.compile("(.*?)\\((.*?)\\)(.*)");
-            Matcher matcher = pattern.matcher(expression);
-            if (!matcher.matches()) {
-                throw new UnexpectedLiquibaseException("Cannot parse context pattern "+expression);
-            }
-            String parenExpression = matcher.group(2);
-
-            parenExpression = ":"+String.valueOf(matches(parenExpression, runtimeContexts)).toUpperCase();
-
-            expression = matcher.group(1)+" "+parenExpression+" "+matcher.group(3);
-        }
-
-        String[] orSplit = expression.split("\\s+or\\s+");
-        if (orSplit.length > 1) {
-            for (String split : orSplit) {
-                if (matches(split, runtimeContexts)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        String[] andSplit = expression.split("\\s+and\\s+");
-        if (andSplit.length > 1) {
-            for (String split : andSplit) {
-                if (!matches(split, runtimeContexts)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-
-        boolean notExpression = false;
-        if (expression.startsWith("!")) {
-            notExpression = true;
-            expression = expression.substring(1);
-        }
-
-        for (String context : runtimeContexts.getContexts()) {
-            if (context.equalsIgnoreCase(expression)) {
-                return !notExpression;
-            }
-        }
-        return notExpression;
-
-
+        return ExpressionMatcher.matches(expression, runtimeContexts.getContexts());
     }
 
     public boolean isEmpty() {

@@ -1,10 +1,13 @@
+liquibase.database.core.CockroachDatabase
 liquibase.database.core.DB2Database
 liquibase.database.core.Db2zDatabase
 liquibase.database.core.DerbyDatabase
+liquibase.database.core.EnterpriseDBDatabase
 liquibase.database.core.FirebirdDatabase
 liquibase.database.core.H2Database
 liquibase.database.core.HsqlDatabase
 liquibase.database.core.InformixDatabase
+liquibase.database.core.Ingres9Database
 liquibase.database.core.MSSQLDatabase
 liquibase.database.core.MariaDBDatabase
 liquibase.database.core.MockDatabase

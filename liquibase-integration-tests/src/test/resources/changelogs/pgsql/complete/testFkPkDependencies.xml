@@ -1,0 +1,755 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="64" author="wesley">
+        <sqlFile path="changelogs/pgsql/complete/setupTypes.sql" splitStatements="false" endDelimiter=""/>
+    </changeSet>
+
+    <changeSet author="Steve (generated)" id="1631721131065-1">
+        <createTable tableName="customer">
+            <column autoIncrement="true" name="customer_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="customer_pkey"/>
+            </column>
+            <column name="store_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="TEXT"/>
+            <column name="address_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="true" name="activebool" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_DATE" name="create_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="active" type="INTEGER"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-3">
+        <createTable tableName="actor">
+            <column autoIncrement="true" name="actor_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="actor_pkey"/>
+            </column>
+            <column name="first_name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-5">
+        <createTable tableName="category">
+            <column autoIncrement="true" name="category_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="category_pkey"/>
+            </column>
+            <column name="name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-8">
+        <createTable tableName="film_actor">
+            <column name="actor_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="film_actor_pkey"/>
+            </column>
+            <column name="film_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="film_actor_pkey"/>
+            </column>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-9">
+        <createTable tableName="film_category">
+            <column name="film_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="film_category_pkey"/>
+            </column>
+            <column name="category_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="film_category_pkey"/>
+            </column>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-10">
+        <createTable tableName="address">
+            <column autoIncrement="true" name="address_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="address_pkey"/>
+            </column>
+            <column name="address" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address2" type="TEXT"/>
+            <column name="district" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="postal_code" type="TEXT"/>
+            <column name="phone" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-12">
+        <createTable tableName="city">
+            <column autoIncrement="true" name="city_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="city_pkey"/>
+            </column>
+            <column name="city" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-14">
+        <createTable tableName="country">
+            <column autoIncrement="true" name="country_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="country_pkey"/>
+            </column>
+            <column name="country" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-16">
+        <createTable tableName="inventory">
+            <column autoIncrement="true" name="inventory_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="inventory_pkey"/>
+            </column>
+            <column name="film_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="store_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-18">
+        <createTable tableName="language">
+            <column autoIncrement="true" name="language_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="language_pkey"/>
+            </column>
+            <column name="name" type="CHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-20">
+        <createTable tableName="payment">
+            <column autoIncrement="true" name="payment_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="staff_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rental_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="numeric(5, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-22">
+        <createTable tableName="rental">
+            <column autoIncrement="true" name="rental_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="rental_pkey"/>
+            </column>
+            <column name="rental_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="inventory_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="return_date" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="staff_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-24">
+        <createTable tableName="staff">
+            <column autoIncrement="true" name="staff_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="staff_pkey"/>
+            </column>
+            <column name="first_name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="TEXT"/>
+            <column name="store_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueBoolean="true" name="active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="username" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="TEXT"/>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="picture" type="BYTEA"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-26">
+        <createTable tableName="store">
+            <column autoIncrement="true" name="store_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="store_pkey"/>
+            </column>
+            <column name="manager_staff_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-39">
+        <createTable tableName="film">
+            <column autoIncrement="true" name="film_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="film_pkey"/>
+            </column>
+            <column name="title" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="release_year" type="YEAR"/>
+            <column name="language_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="original_language_id" type="INTEGER"/>
+            <column defaultValueNumeric="3" name="rental_duration" type="SMALLINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="4.99" name="rental_rate" type="numeric(4, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="length" type="SMALLINT"/>
+            <column defaultValueNumeric="19.99" name="replacement_cost" type="numeric(5, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="MPAA_RATING"/>
+            <column defaultValueComputed="now()" name="last_update" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="special_features" type="TEXT[]"/>
+            <column name="fulltext" type="TSVECTOR">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-29">
+        <createView fullDefinition="false" viewName="customer_list">SELECT cu.customer_id AS id,
+    ((cu.first_name || ' '::text) || cu.last_name) AS name,
+    a.address,
+    a.postal_code AS "zip code",
+    a.phone,
+    city.city,
+    country.country,
+        CASE
+            WHEN cu.activebool THEN 'active'::text
+            ELSE ''::text
+        END AS notes,
+    cu.store_id AS sid
+   FROM (((customer cu
+     JOIN address a ON ((cu.address_id = a.address_id)))
+     JOIN city ON ((a.city_id = city.city_id)))
+     JOIN country ON ((city.country_id = country.country_id)));</createView>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-30">
+        <createIndex indexName="idx_fk_address_id" tableName="customer">
+            <column name="address_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-31">
+        <createIndex indexName="idx_fk_store_id" tableName="customer">
+            <column name="store_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-32">
+        <createIndex indexName="idx_last_name" tableName="customer">
+            <column name="last_name"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-33">
+        <addForeignKeyConstraint baseColumnNames="address_id" baseTableName="customer" constraintName="customer_address_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="address_id" referencedTableName="address" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-34">
+        <addForeignKeyConstraint baseColumnNames="store_id" baseTableName="customer" constraintName="customer_store_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="store_id" referencedTableName="store" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-35">
+        <addForeignKeyConstraint baseColumnNames="customer_id" baseTableName="rental" constraintName="rental_customer_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="customer_id" referencedTableName="customer" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-36">
+        <createIndex indexName="idx_actor_last_name" tableName="actor">
+            <column name="last_name"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-37">
+        <addForeignKeyConstraint baseColumnNames="actor_id" baseTableName="film_actor" constraintName="film_actor_actor_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="actor_id" referencedTableName="actor" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-38">
+        <addForeignKeyConstraint baseColumnNames="category_id" baseTableName="film_category" constraintName="film_category_category_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="category_id" referencedTableName="category" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-40">
+        <createView fullDefinition="false" viewName="film_list">SELECT film.film_id AS fid,
+    film.title,
+    film.description,
+    category.name AS category,
+    film.rental_rate AS price,
+    film.length,
+    film.rating
+   FROM ((((category
+     LEFT JOIN film_category ON ((category.category_id = film_category.category_id)))
+     LEFT JOIN film ON ((film_category.film_id = film.film_id)))
+     JOIN film_actor ON ((film.film_id = film_actor.film_id)))
+     JOIN actor ON ((film_actor.actor_id = actor.actor_id)))
+  GROUP BY film.film_id, film.title, film.description, category.name, film.rental_rate, film.length, film.rating;</createView>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-41">
+        <createView fullDefinition="false" viewName="nicer_but_slower_film_list">SELECT film.film_id AS fid,
+    film.title,
+    film.description,
+    category.name AS category,
+    film.rental_rate AS price,
+    film.length,
+    film.rating
+   FROM ((((category
+     LEFT JOIN film_category ON ((category.category_id = film_category.category_id)))
+     LEFT JOIN film ON ((film_category.film_id = film.film_id)))
+     JOIN film_actor ON ((film.film_id = film_actor.film_id)))
+     JOIN actor ON ((film_actor.actor_id = actor.actor_id)))
+  GROUP BY film.film_id, film.title, film.description, category.name, film.rental_rate, film.length, film.rating;</createView>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-46">
+        <addForeignKeyConstraint baseColumnNames="film_id" baseTableName="film_category" constraintName="film_category_film_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="film_id" referencedTableName="film" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-47">
+        <createView fullDefinition="false" viewName="sales_by_store">SELECT ((c.city || ','::text) || cy.country) AS store,
+    ((m.first_name || ' '::text) || m.last_name) AS manager,
+    sum(p.amount) AS total_sales
+   FROM (((((((payment p
+     JOIN rental r ON ((p.rental_id = r.rental_id)))
+     JOIN inventory i ON ((r.inventory_id = i.inventory_id)))
+     JOIN store s ON ((i.store_id = s.store_id)))
+     JOIN address a ON ((s.address_id = a.address_id)))
+     JOIN city c ON ((a.city_id = c.city_id)))
+     JOIN country cy ON ((c.country_id = cy.country_id)))
+     JOIN staff m ON ((s.manager_staff_id = m.staff_id)))
+  GROUP BY cy.country, c.city, s.store_id, m.first_name, m.last_name
+  ORDER BY cy.country, c.city;</createView>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-48">
+        <createView fullDefinition="false" viewName="staff_list">SELECT s.staff_id AS id,
+    ((s.first_name || ' '::text) || s.last_name) AS name,
+    a.address,
+    a.postal_code AS "zip code",
+    a.phone,
+    city.city,
+    country.country,
+    s.store_id AS sid
+   FROM (((staff s
+     JOIN address a ON ((s.address_id = a.address_id)))
+     JOIN city ON ((a.city_id = city.city_id)))
+     JOIN country ON ((city.country_id = country.country_id)));</createView>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-49">
+        <createIndex indexName="idx_fk_city_id" tableName="address">
+            <column name="city_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-50">
+        <addForeignKeyConstraint baseColumnNames="city_id" baseTableName="address" constraintName="address_city_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="city_id" referencedTableName="city" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-51">
+        <addForeignKeyConstraint baseColumnNames="address_id" baseTableName="staff" constraintName="staff_address_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="address_id" referencedTableName="address" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-52">
+        <addForeignKeyConstraint baseColumnNames="address_id" baseTableName="store" constraintName="store_address_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="address_id" referencedTableName="address" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-53">
+        <createIndex indexName="idx_fk_country_id" tableName="city">
+            <column name="country_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-54">
+        <addForeignKeyConstraint baseColumnNames="country_id" baseTableName="city" constraintName="city_country_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="country_id" referencedTableName="country" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-55">
+        <createIndex indexName="idx_store_id_film_id" tableName="inventory">
+            <column name="store_id"/>
+            <column name="film_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-56">
+        <addForeignKeyConstraint baseColumnNames="film_id" baseTableName="inventory" constraintName="inventory_film_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="film_id" referencedTableName="film" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-57">
+        <addForeignKeyConstraint baseColumnNames="store_id" baseTableName="inventory" constraintName="inventory_store_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="store_id" referencedTableName="store" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-58">
+        <addForeignKeyConstraint baseColumnNames="inventory_id" baseTableName="rental" constraintName="rental_inventory_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="inventory_id" referencedTableName="inventory" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-59">
+        <addForeignKeyConstraint baseColumnNames="language_id" baseTableName="film" constraintName="film_language_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="language_id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-60">
+        <addForeignKeyConstraint baseColumnNames="original_language_id" baseTableName="film" constraintName="film_original_language_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="language_id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-61">
+        <createTable tableName="payment_p2020_01">
+            <column autoIncrement="true" name="payment_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="staff_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rental_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="numeric(5, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-62">
+        <createTable tableName="payment_p2020_02">
+            <column autoIncrement="true" name="payment_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="staff_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rental_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="numeric(5, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-63">
+        <createTable tableName="payment_p2020_03">
+            <column autoIncrement="true" name="payment_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="staff_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rental_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="numeric(5, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-64">
+        <createTable tableName="payment_p2020_04">
+            <column autoIncrement="true" name="payment_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="staff_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rental_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="numeric(5, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-65">
+        <createTable tableName="payment_p2020_05">
+            <column autoIncrement="true" name="payment_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="staff_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rental_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="numeric(5, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-66">
+        <createTable tableName="payment_p2020_06">
+            <column autoIncrement="true" name="payment_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="staff_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rental_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="numeric(5, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-67">
+        <createIndex indexName="idx_fk_customer_id" tableName="payment">
+            <column name="customer_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-68">
+        <createIndex indexName="idx_fk_staff_id" tableName="payment">
+            <column name="staff_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-69">
+        <createIndex indexName="idx_fk_inventory_id" tableName="rental">
+            <column name="inventory_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-70">
+        <createIndex indexName="idx_unq_rental_rental_date_inventory_id_customer_id" tableName="rental" unique="true">
+            <column name="rental_date"/>
+            <column name="inventory_id"/>
+            <column name="customer_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-71">
+        <addForeignKeyConstraint baseColumnNames="rental_id" baseTableName="payment_p2020_01" constraintName="payment_p2020_01_rental_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="rental_id" referencedTableName="rental" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-72">
+        <addForeignKeyConstraint baseColumnNames="rental_id" baseTableName="payment_p2020_02" constraintName="payment_p2020_02_rental_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="rental_id" referencedTableName="rental" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-73">
+        <addForeignKeyConstraint baseColumnNames="rental_id" baseTableName="payment_p2020_03" constraintName="payment_p2020_03_rental_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="rental_id" referencedTableName="rental" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-74">
+        <addForeignKeyConstraint baseColumnNames="rental_id" baseTableName="payment_p2020_04" constraintName="payment_p2020_04_rental_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="rental_id" referencedTableName="rental" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-75">
+        <addForeignKeyConstraint baseColumnNames="rental_id" baseTableName="payment_p2020_05" constraintName="payment_p2020_05_rental_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="rental_id" referencedTableName="rental" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-76">
+        <addForeignKeyConstraint baseColumnNames="rental_id" baseTableName="payment_p2020_06" constraintName="payment_p2020_06_rental_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="rental_id" referencedTableName="rental" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-77">
+        <addForeignKeyConstraint baseColumnNames="staff_id" baseTableName="rental" constraintName="rental_staff_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE" referencedColumnNames="staff_id" referencedTableName="staff" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-78">
+        <addForeignKeyConstraint baseColumnNames="staff_id" baseTableName="payment_p2020_01" constraintName="payment_p2020_01_staff_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="staff_id" referencedTableName="staff" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-79">
+        <addForeignKeyConstraint baseColumnNames="staff_id" baseTableName="payment_p2020_02" constraintName="payment_p2020_02_staff_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="staff_id" referencedTableName="staff" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-80">
+        <addForeignKeyConstraint baseColumnNames="staff_id" baseTableName="payment_p2020_03" constraintName="payment_p2020_03_staff_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="staff_id" referencedTableName="staff" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-81">
+        <addForeignKeyConstraint baseColumnNames="staff_id" baseTableName="payment_p2020_04" constraintName="payment_p2020_04_staff_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="staff_id" referencedTableName="staff" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-82">
+        <addForeignKeyConstraint baseColumnNames="staff_id" baseTableName="payment_p2020_05" constraintName="payment_p2020_05_staff_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="staff_id" referencedTableName="staff" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-83">
+        <addForeignKeyConstraint baseColumnNames="staff_id" baseTableName="payment_p2020_06" constraintName="payment_p2020_06_staff_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="staff_id" referencedTableName="staff" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-84">
+        <addForeignKeyConstraint baseColumnNames="store_id" baseTableName="staff" constraintName="staff_store_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="store_id" referencedTableName="store" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-85">
+        <createIndex indexName="idx_unq_manager_staff_id" tableName="store" unique="true">
+            <column name="manager_staff_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-86">
+        <addForeignKeyConstraint baseColumnNames="customer_id" baseTableName="payment_p2020_01" constraintName="payment_p2020_01_customer_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="customer_id" referencedTableName="customer" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-87">
+        <addForeignKeyConstraint baseColumnNames="customer_id" baseTableName="payment_p2020_02" constraintName="payment_p2020_02_customer_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="customer_id" referencedTableName="customer" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-88">
+        <addForeignKeyConstraint baseColumnNames="customer_id" baseTableName="payment_p2020_03" constraintName="payment_p2020_03_customer_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="customer_id" referencedTableName="customer" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-89">
+        <addForeignKeyConstraint baseColumnNames="customer_id" baseTableName="payment_p2020_04" constraintName="payment_p2020_04_customer_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="customer_id" referencedTableName="customer" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-90">
+        <addForeignKeyConstraint baseColumnNames="customer_id" baseTableName="payment_p2020_05" constraintName="payment_p2020_05_customer_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="customer_id" referencedTableName="customer" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-91">
+        <addForeignKeyConstraint baseColumnNames="customer_id" baseTableName="payment_p2020_06" constraintName="payment_p2020_06_customer_id_fkey" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="customer_id" referencedTableName="customer" validate="true"/>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-92">
+        <createIndex indexName="film_fulltext_idx" tableName="film">
+            <column name="fulltext"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-93">
+        <createIndex indexName="idx_fk_language_id" tableName="film">
+            <column name="language_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-94">
+        <createIndex indexName="idx_fk_original_language_id" tableName="film">
+            <column name="original_language_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-95">
+        <createIndex indexName="idx_title" tableName="film">
+            <column name="title"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-96">
+        <createIndex indexName="idx_fk_payment_p2020_01_staff_id" tableName="payment_p2020_01">
+            <column name="staff_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-97">
+        <createIndex indexName="payment_p2020_01_customer_id_idx" tableName="payment_p2020_01">
+            <column name="customer_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-98">
+        <createIndex indexName="idx_fk_payment_p2020_02_customer_id" tableName="payment_p2020_02">
+            <column name="customer_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-99">
+        <createIndex indexName="idx_fk_payment_p2020_02_staff_id" tableName="payment_p2020_02">
+            <column name="staff_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-100">
+        <createIndex indexName="idx_fk_payment_p2020_03_customer_id" tableName="payment_p2020_03">
+            <column name="customer_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-101">
+        <createIndex indexName="idx_fk_payment_p2020_03_staff_id" tableName="payment_p2020_03">
+            <column name="staff_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-102">
+        <createIndex indexName="idx_fk_payment_p2020_04_customer_id" tableName="payment_p2020_04">
+            <column name="customer_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-103">
+        <createIndex indexName="idx_fk_payment_p2020_04_staff_id" tableName="payment_p2020_04">
+            <column name="staff_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-104">
+        <createIndex indexName="idx_fk_payment_p2020_05_customer_id" tableName="payment_p2020_05">
+            <column name="customer_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-105">
+        <createIndex indexName="idx_fk_payment_p2020_05_staff_id" tableName="payment_p2020_05">
+            <column name="staff_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-106">
+        <createIndex indexName="idx_fk_payment_p2020_06_staff_id" tableName="payment_p2020_06">
+            <column name="staff_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Steve (generated)" id="1631721131065-107">
+        <createIndex indexName="payment_p2020_06_customer_id_idx" tableName="payment_p2020_06">
+            <column name="customer_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

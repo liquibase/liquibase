@@ -14,6 +14,7 @@ public class NumberType extends LiquibaseDataType {
 
     private boolean autoIncrement;
 
+    @Override
     public boolean isAutoIncrement() {
         return autoIncrement;
     }
@@ -37,7 +38,7 @@ public class NumberType extends LiquibaseDataType {
         } else if ((database instanceof MySQLDatabase) || (database instanceof AbstractDb2Database) || (database instanceof
             HsqlDatabase) || (database instanceof DerbyDatabase) || (database instanceof FirebirdDatabase) ||
             (database instanceof InformixDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
-            SybaseDatabase)) {
+            SybaseDatabase) || (database instanceof H2Database)) {
             return new DatabaseDataType("numeric", getParameters());
         } else if (database instanceof OracleDatabase) {
             if ((getParameters().length > 1) && "0".equals(getParameters()[0]) && "-127".equals(getParameters()[1])) {
@@ -46,8 +47,14 @@ public class NumberType extends LiquibaseDataType {
                 return new DatabaseDataType("NUMBER", getParameters());
             }
         } else if (database instanceof PostgresDatabase) {
-            if ((getParameters().length > 0) && (Integer.parseInt(getParameters()[0].toString()) > 1000)) {
-                return new DatabaseDataType("numeric");
+            if ((getParameters().length > 0)) {
+                try {
+                    if ((Integer.parseInt(getParameters()[0].toString()) > 1000)) {
+                        return new DatabaseDataType("numeric");
+                    }
+                } catch (NumberFormatException e) {
+                    return new DatabaseDataType("numeric", getParameters());
+                }
             }
             return new DatabaseDataType("numeric", getParameters());
         }

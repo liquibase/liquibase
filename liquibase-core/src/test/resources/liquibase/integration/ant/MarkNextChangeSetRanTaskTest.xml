@@ -25,15 +25,6 @@
              src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
     </target>
 
-    <target name="testMarkNextChangeSetRanLegacy">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:markNextChangeSetRan driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                        classpathref="basic-classpath" changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-    </target>
-
     <target name="testMarkNextChangeSetRan">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>

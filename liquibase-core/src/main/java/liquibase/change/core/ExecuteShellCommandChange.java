@@ -5,8 +5,7 @@ import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -14,8 +13,6 @@ import liquibase.exception.Warnings;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -23,12 +20,10 @@ import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -47,12 +42,14 @@ public class ExecuteShellCommandChange extends AbstractChange {
     protected List<String> finalCommandArray;
     private String executable;
     private List<String> os;
-    private List<String> args = new ArrayList<String>();
+    private final List<String> args = new ArrayList<>();
     private String timeout;
     private static final Pattern TIMEOUT_PATTERN = Pattern.compile("^\\s*(\\d+)\\s*([sSmMhH]?)\\s*$");
     private static final Long SECS_IN_MILLIS = 1000L;
     private static final Long MIN_IN_MILLIS = SECS_IN_MILLIS * 60;
     private static final Long HOUR_IN_MILLIS = MIN_IN_MILLIS * 60;
+
+    protected Integer maxStreamGobblerOutput = null;
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -127,14 +124,14 @@ public class ExecuteShellCommandChange extends AbstractChange {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
                 shouldRun = false;
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Not executing on os " + currentOS + " when " + os + " was " +
+                Scope.getCurrentScope().getLog(getClass()).info("Not executing on os " + currentOS + " when " + os + " was " +
                         "specified");
             }
         }
 
         // check if running under not-executed mode (logging output)
         boolean nonExecutedMode = false;
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         if (executor instanceof LoggingExecutor) {
             nonExecutedMode = true;
         }
@@ -193,8 +190,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         int returnCode = 0;
         try {
             //output both stdout and stderr data from proc to stdout of this process
-            StreamGobbler errorGobbler = new StreamGobbler(p.getErrorStream(), errorStream);
-            StreamGobbler outputGobbler = new StreamGobbler(p.getInputStream(), inputStream);
+            StreamGobbler errorGobbler = createErrorGobbler(p.getErrorStream(), errorStream);
+            StreamGobbler outputGobbler = createErrorGobbler(p.getInputStream(), inputStream);
 
             errorGobbler.start();
             outputGobbler.start();
@@ -217,17 +214,27 @@ public class ExecuteShellCommandChange extends AbstractChange {
             Thread.currentThread().interrupt();
         }
 
-        String errorStreamOut = errorStream.toString(LiquibaseConfiguration.getInstance().getConfiguration
-                (GlobalConfiguration.class).getOutputEncoding());
-        String infoStreamOut = inputStream.toString(LiquibaseConfiguration.getInstance().getConfiguration
-                (GlobalConfiguration.class).getOutputEncoding());
+        String errorStreamOut = errorStream.toString(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+        String infoStreamOut = inputStream.toString(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
 
         if (errorStreamOut != null && !errorStreamOut.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, errorStreamOut);
+            Scope.getCurrentScope().getLog(getClass()).severe(errorStreamOut);
         }
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, infoStreamOut);
+        Scope.getCurrentScope().getLog(getClass()).info(infoStreamOut);
 
         processResult(returnCode, errorStreamOut, infoStreamOut, database);
+    }
+
+    protected StreamGobbler createErrorGobbler(InputStream processStream, OutputStream outputStream) {
+        return new StreamGobbler(processStream, outputStream, Thread.currentThread());
+    }
+
+    /**
+     * Max bytes to copy from output to {@link #processResult(int, String, String, Database)}. If null, process all output.
+     * @return
+     */
+    protected Integer getMaxStreamGobblerOutput() {
+        return maxStreamGobblerOutput;
     }
 
     /**
@@ -235,12 +242,11 @@ public class ExecuteShellCommandChange extends AbstractChange {
      * <p>
      * Creates a scheduled task to destroy the process in given timeout milliseconds.
      * This killer task will be cancelled if the process returns before the timeout value.
-     *
-     * @param process
+     *  @param process
      * @param timeoutInMillis waits for specified timeoutInMillis before destroying the process.
-     *                        It will wait indefinitely if timeoutInMillis is 0.
      */
-    private int waitForOrKill(final Process process, final long timeoutInMillis) throws ExecutionException, TimeoutException {
+    @java.lang.SuppressWarnings("squid:S2142")
+    private int waitForOrKill(final Process process, final long timeoutInMillis) throws TimeoutException {
         int ret = -1;
         final AtomicBoolean timedOut = new AtomicBoolean(false);
         Timer timer = new Timer();
@@ -269,6 +275,11 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 }
             } catch (InterruptedException ignore) {
                 // check again
+                if (timedOut.get()) {
+                    timer.cancel();
+                    String timeoutStr = timeout != null ? timeout : timeoutInMillis + " ms";
+                    throw new TimeoutException("Process timed out (" + timeoutStr + ")");
+                }
             }
         }
 
@@ -316,7 +327,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
      */
     protected void processResult(int returnCode, String errorStreamOut, String infoStreamOut, Database database) {
         if (returnCode != 0) {
-            throw new RuntimeException(getCommandString() + " returned an code of " + returnCode);
+            throw new RuntimeException(getCommandString() + " returned a code of " + returnCode);
         }
     }
 
@@ -364,23 +375,27 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }
         }
     }
-    private class StreamGobbler extends Thread {
+
+    public class StreamGobbler extends Thread {
         private static final int THREAD_SLEEP_MILLIS = 100;
         private final OutputStream outputStream;
         private InputStream processStream;
+        boolean loggedTruncated = false;
+        long copiedSize = 0;
+        private final Thread parentThread;
 
-        private StreamGobbler(InputStream processStream, ByteArrayOutputStream outputStream) {
+        public StreamGobbler(InputStream processStream, OutputStream outputStream, Thread parentThread) {
             this.processStream = processStream;
             this.outputStream = outputStream;
+            this.parentThread = parentThread;
         }
 
         @Override
         public void run() {
-            try {
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(processStream);
+            try (BufferedInputStream bufferedInputStream = new BufferedInputStream(processStream)) {
                 while (processStream != null) {
                     if (bufferedInputStream.available() > 0) {
-                        StreamUtil.copy(bufferedInputStream, outputStream);
+                        copy(bufferedInputStream, outputStream);
                     }
                     try {
                         Thread.sleep(THREAD_SLEEP_MILLIS);
@@ -390,7 +405,10 @@ public class ExecuteShellCommandChange extends AbstractChange {
                     }
                 }
             } catch (IOException ioe) {
-                ioe.printStackTrace();
+                Scope.getCurrentScope().getLog(ExecuteShellCommandChange.class).warning(ioe.getMessage());
+                if (parentThread != null) {
+                    parentThread.interrupt();
+                }
             }
         }
 
@@ -399,12 +417,31 @@ public class ExecuteShellCommandChange extends AbstractChange {
             this.processStream = null;
 
             try {
-                StreamUtil.copy(procStream, outputStream);
+                copy(procStream, outputStream);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
         }
+
+        public void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+            Integer maxToCopy = getMaxStreamGobblerOutput();
+            byte[] bytes = new byte[1024];
+            int r = inputStream.read(bytes);
+            while (r > 0) {
+                if (maxToCopy != null && copiedSize > maxToCopy) {
+                    if (!loggedTruncated) {
+                        outputStream.write("...[TRUNCATED]...".getBytes());
+                        loggedTruncated = true;
+                    }
+                } else {
+                    outputStream.write(bytes, 0, r);
+                }
+                r = inputStream.read(bytes);
+                copiedSize += r;
+            }
+        }
+
 
     }
 

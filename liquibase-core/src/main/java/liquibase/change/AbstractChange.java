@@ -13,8 +13,8 @@ import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.beans.PropertyUtils;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -34,7 +34,6 @@ import java.util.*;
 public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     protected static final String NODENAME_COLUMN = "column";
-    private ResourceAccessor resourceAccessor;
 
     private ChangeSet changeSet;
 
@@ -65,7 +64,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             }
 
             Set<ChangeParameterMetaData> params = new HashSet<>();
-            for (PropertyDescriptor property : PropertyUtils.getInstance().getDescriptors(getClass())) {
+            for (PropertyDescriptor property : ObjectUtil.getDescriptors(getClass())) {
                 if (isInvalidProperty(property)) {
                     continue;
                 }
@@ -83,7 +82,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                 if ((readMethod != null) && (writeMethod != null)) {
                     DatabaseChangeProperty annotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
                     if ((annotation == null) || annotation.isChangeProperty()) {
-                        params.add(createChangeParameterMetadata(property.getDisplayName()));
+                        params.add(createChangeParameterMetadata(property, readMethod));
                     }
                 }
 
@@ -115,11 +114,8 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName) {
 
         try {
-            String displayName = parameterName.replaceAll("([A-Z])", " $1");
-            displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
-
             PropertyDescriptor property = null;
-            for (PropertyDescriptor prop : PropertyUtils.getInstance().getDescriptors(getClass())) {
+            for (PropertyDescriptor prop : ObjectUtil.getDescriptors(getClass())) {
                 if (prop.getDisplayName().equals(parameterName)) {
                     property = prop;
                     break;
@@ -133,6 +129,18 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             if (readMethod == null) {
                 readMethod = getClass().getMethod("is" + StringUtil.upperCaseFirst(property.getName()));
             }
+            return createChangeParameterMetadata(property, readMethod);
+        } catch (IntrospectionException|NoSuchMethodException|SecurityException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    private ChangeParameterMetaData createChangeParameterMetadata(PropertyDescriptor property, Method readMethod) {
+        try {
+            String parameterName = property.getDisplayName();
+            String displayName = parameterName.replaceAll("([A-Z])", " $1");
+            displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
+
             Type type = readMethod.getGenericReturnType();
 
             DatabaseChangeProperty changePropertyAnnotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
@@ -148,9 +156,9 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             String[] supportsDatabase = createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
 
             return new ChangeParameterMetaData(this, parameterName, displayName, description, examples, since,
-                type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType);
-        } catch (IntrospectionException|UnexpectedLiquibaseException|NoSuchMethodException|SecurityException e) {
-            throw new UnexpectedLiquibaseException(e);
+                type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType).withAccessors(readMethod, property.getWriteMethod());
+        } catch (UnexpectedLiquibaseException e) {
+            throw e;
         }
     }
 
@@ -390,14 +398,15 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      */
     @Override
     public ValidationErrors validate(Database database) {
-        ValidationErrors changeValidationErrors = new ValidationErrors();
+        ValidationErrors changeValidationErrors = new ValidationErrors(this);
 
         // Record an error if a parameter is not set, but that parameter is required by database.
         for (ChangeParameterMetaData param :
-            Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().values()) {
-            if (param.isRequiredFor(database) && (param.getCurrentValue(this) == null)) {
-                changeValidationErrors.addError(param.getParameterName() + " is required for " +
-                    Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " on " + database.getShortName());
+                Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().values()) {
+            if (param.isRequiredFor(database)) {
+                changeValidationErrors.checkRequiredField (
+                        param.getParameterName(), param.getCurrentValue(this)
+                        , " on " + database.getShortName());
             }
         }
 
@@ -507,18 +516,16 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     /**
      * @inheritDoc
+     * @deprecated Should get from {@link Scope}
      */
     @DatabaseChangeProperty(isChangeProperty = false)
     public ResourceAccessor getResourceAccessor() {
-        return resourceAccessor;
+        return Scope.getCurrentScope().getResourceAccessor();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setResourceAccessor(ResourceAccessor resourceAccessor) {
-        this.resourceAccessor = resourceAccessor;
+        Scope.getCurrentScope().getLog(getClass()).info("As of Liquibase 4.0, cannot set resource accessor on "+getClass().getName()+". Must add it to the Scope");
     }
 
     /**
@@ -591,7 +598,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         ChangeMetaData metaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this);
-        this.setResourceAccessor(resourceAccessor);
+
         try {
             Collection<ChangeParameterMetaData> changeParameters = metaData.getParameters().values();
 
@@ -701,7 +708,9 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                     if ((childValue == null) && (param.getSerializationType() == SerializationType.DIRECT_VALUE)) {
                         childValue = parsedNode.getValue();
                     }
-                    param.setValue(this, childValue);
+                    if(null != childValue) {
+                        param.setValue(this, childValue);
+                    }
                 }
             }
         } catch (ReflectiveOperationException e) {

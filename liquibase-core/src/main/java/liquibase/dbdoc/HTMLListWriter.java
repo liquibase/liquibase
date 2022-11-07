@@ -1,30 +1,28 @@
 package liquibase.dbdoc;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
+import liquibase.resource.OpenOptions;
+import liquibase.resource.Resource;
 import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.util.SortedSet;
 
 public class HTMLListWriter {
-    private File outputDir;
+    private Resource outputDir;
     private String directory;
     private String filename;
     private String title;
 
-    public HTMLListWriter(String title, String filename, String subdir, File outputDir) {
+    public HTMLListWriter(String title, String filename, String subdir, Resource outputDir) {
         this.title = title;
         this.outputDir = outputDir;
         this.filename = filename;
-        if (!outputDir.exists()) {
-            outputDir.mkdir();
-        }
         this.directory = subdir;
     }
 
     public void writeHTML(SortedSet objects) throws IOException {
-        Writer fileWriter = new OutputStreamWriter(new FileOutputStream(new File(outputDir, filename)), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+        Writer fileWriter = new OutputStreamWriter(outputDir.resolve(filename).openOutputStream(new OpenOptions()), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
 
         try {
             fileWriter.append("<HTML>\n" + "<HEAD><meta charset=\"utf-8\"/>\n" + "<TITLE>\n");

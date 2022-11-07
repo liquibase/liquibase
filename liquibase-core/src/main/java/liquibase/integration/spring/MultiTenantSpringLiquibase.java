@@ -5,7 +5,6 @@ package liquibase.integration.spring;
 
 import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -56,7 +55,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
     private String contexts;
 
-    private String labels;
+    private String labelFilter;
 
     private Map<String, String> parameters;
 
@@ -87,16 +86,16 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 			if((dataSource == null) && (schemas != null)) {
 				throw new LiquibaseException("When schemas are defined you should also define a base dataSource");				
 			}else if(dataSource!=null){
-				log.info(LogType.LOG, "Schema based multitenancy enabled");
+				log.info("Schema based multitenancy enabled");
 				if((schemas == null) || schemas.isEmpty()) {
-					log.warning(LogType.LOG, "Schemas not defined, using defaultSchema only");
+					log.warning("Schemas not defined, using defaultSchema only");
 					schemas = new ArrayList<>();
 					schemas.add(defaultSchema);
 				}
 				runOnAllSchemas();
 			}
 		}else {
-			log.info(LogType.LOG, "DataSources based multitenancy enabled");
+			log.info("DataSources based multitenancy enabled");
 			resolveDataSources();
 			runOnAllDataSources();
 		}
@@ -124,9 +123,9 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 			Object lookup = context.lookup(jndiUrl);
 			if(lookup instanceof DataSource) {
 				dataSources.add((DataSource) lookup);
-				log.fine(LogType.LOG, "Added a data source at " + jndiUrl);
+				log.fine("Added a data source at " + jndiUrl);
 			} else {
-				log.info(LogType.LOG, "Skipping a resource " + jndiUrl + " not compatible with DataSource.");
+				log.info("Skipping a resource " + jndiUrl + " not compatible with DataSource.");
 			}
 		}
 	}
@@ -135,10 +134,10 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		Logger log = Scope.getCurrentScope().getLog(getClass());
 
 		for(DataSource aDataSource : dataSources) {
-            log.info(LogType.LOG, "Initializing Liquibase for data source " + aDataSource);
+            log.info("Initializing Liquibase for data source " + aDataSource);
             SpringLiquibase liquibase = getSpringLiquibase(aDataSource);
 			liquibase.afterPropertiesSet();
-            log.info(LogType.LOG, "Liquibase ran for data source " + aDataSource);
+            log.info("Liquibase ran for data source " + aDataSource);
         }
 	}
 	
@@ -149,11 +148,11 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 			if("default".equals(schema)) {
 				schema = null;
 			}
-            log.info(LogType.LOG, "Initializing Liquibase for schema " + schema);
+            log.info("Initializing Liquibase for schema " + schema);
             SpringLiquibase liquibase = getSpringLiquibase(dataSource);
 			liquibase.setDefaultSchema(schema);
 			liquibase.afterPropertiesSet();
-            log.info(LogType.LOG, "Liquibase ran for schema " + schema);
+            log.info("Liquibase ran for schema " + schema);
         }
 	}
 
@@ -162,7 +161,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		liquibase.setChangeLog(changeLog);
 		liquibase.setChangeLogParameters(parameters);
 		liquibase.setContexts(contexts);
-        liquibase.setLabels(labels);
+        liquibase.setLabelFilter(labelFilter);
 		liquibase.setDropFirst(dropFirst);
 		liquibase.setClearCheckSums(clearCheckSums);
 		liquibase.setShouldRun(shouldRun);
@@ -202,15 +201,29 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		this.contexts = contexts;
 	}
 
-    public String getLabels() {
-        return labels;
-    }
+	/**
+	 * @deprecated use {@link #getLabelFilter()}
+	 */
+	public String getLabels() {
+		return getLabelFilter();
+	}
 
-    public void setLabels(String labels) {
-        this.labels = labels;
-    }
+	/**
+	 * @deprecated use {@link #setLabelFilter(String)}
+	 */
+	public void setLabels(String labels) {
+		setLabelFilter(labels);
+	}
 
-    public Map<String, String> getParameters() {
+	public String getLabelFilter() {
+		return labelFilter;
+	}
+
+	public void setLabelFilter(String labelFilter) {
+		this.labelFilter = labelFilter;
+	}
+
+	public Map<String, String> getParameters() {
 		return parameters;
 	}
 

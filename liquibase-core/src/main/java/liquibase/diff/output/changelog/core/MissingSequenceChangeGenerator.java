@@ -49,6 +49,7 @@ public class MissingSequenceChangeGenerator extends AbstractChangeGenerator impl
         change.setCacheSize(sequence.getCacheSize());
         change.setCycle(sequence.getWillCycle());
         change.setOrdered(sequence.getOrdered());
+        change.setDataType(sequence.getDataType());
 
         return new Change[] { change };
 

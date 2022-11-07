@@ -8,7 +8,6 @@ import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
-import liquibase.logging.LogType;
 
 import java.util.Date;
 import java.util.List;
@@ -41,7 +40,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         } else {
             if (foundRan.getLastCheckSum() == null) {
                 try {
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Updating NULL md5sum for " + changeSet.toString());
+                    Scope.getCurrentScope().getLog(getClass()).info("Updating NULL md5sum for " + changeSet.toString());
                     replaceChecksum(changeSet);
                 } catch (DatabaseException e) {
                     throw new DatabaseException(e);
@@ -66,15 +65,16 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         for (RanChangeSet ranChangeSet : this.getRanChangeSets()) {
             if (ranChangeSet.getLastCheckSum() == null) {
                 List<ChangeSet> changeSets = databaseChangeLog.getChangeSets(ranChangeSet);
-	            for (ChangeSet changeSet : changeSets) {
-		            if (new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() && new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted())
-		            {
-			            Scope.getCurrentScope().getLog(getClass()).fine(
-					            LogType.LOG, "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
-			            );
-			            replaceChecksum(changeSet);
-		            }
-	            }
+                for (ChangeSet changeSet : changeSets) {
+                    if ((changeSet != null) && new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() &&
+                        new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()
+                    ) {
+                        Scope.getCurrentScope().getLog(getClass()).fine(
+                                "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
+                        );
+                        replaceChecksum(changeSet);
+                    }
+                }
             }
         }
     }
@@ -97,6 +97,23 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         } else {
             return ranChange.getDateExecuted();
         }
+    }
+
+    /**
+     *
+     * Return the last deployment ID from the changesets that have been run or null
+     *
+     * @return   String
+     * @throws   DatabaseException
+     *
+     */
+     public String getLastDeploymentId() throws DatabaseException {
+         List<RanChangeSet> ranChangeSetsList = getRanChangeSets();
+         if (ranChangeSetsList == null || ranChangeSetsList.size() == 0) {
+             return null;
+         }
+         RanChangeSet lastRanChangeSet = ranChangeSetsList.get(ranChangeSetsList.size() - 1);
+         return lastRanChangeSet.getDeploymentId();
     }
 
     protected abstract void replaceChecksum(ChangeSet changeSet) throws DatabaseException;

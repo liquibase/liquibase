@@ -1,30 +1,27 @@
 package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.command.AbstractCommand;
-import liquibase.command.CommandResult;
-import liquibase.command.CommandValidationErrors;
+import liquibase.command.*;
 import liquibase.database.Database;
-import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotListener;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 
+/**
+ * @deprecated Implement commands with {@link liquibase.command.CommandStep} and call them with {@link liquibase.command.CommandFactory#getCommandDefinition(String...)}.
+ */
 public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCommandResult> {
 
     private Database database;
     private CatalogAndSchema[] schemas;
     private String serializerFormat;
     private SnapshotListener snapshotListener;
-    private Map<String, Object> snapshotMetadata;
 
     @Override
     public String getName() {
@@ -81,36 +78,18 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
         this.snapshotListener = snapshotListener;
     }
 
-    public Map<String, Object> getSnapshotMetadata() {
-        return snapshotMetadata;
-    }
-
-    public void setSnapshotMetadata(Map<String, Object> snapshotMetadata) {
-        this.snapshotMetadata = snapshotMetadata;
-    }
-
     @Override
-    protected SnapshotCommandResult run() throws Exception {
-        SnapshotControl snapshotControl = new SnapshotControl(database);
-        snapshotControl.setSnapshotListener(snapshotListener);
+    public SnapshotCommandResult run() throws Exception {
+        final CommandScope commandScope = new CommandScope("internalSnapshot");
 
-        CatalogAndSchema[] schemas = this.schemas;
-        if (schemas == null) {
-            schemas = new CatalogAndSchema[]{database.getDefaultSchema()};
-        }
+        commandScope.addArgumentValue(InternalSnapshotCommandStep.DATABASE_ARG, this.getDatabase());
+        commandScope.addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, this.schemas);
+        commandScope.addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, this.getSerializerFormat());
+        commandScope.addArgumentValue(InternalSnapshotCommandStep.SNAPSHOT_LISTENER_ARG, this.getSnapshotListener());
 
-        ObjectQuotingStrategy originalQuotingStrategy = database.getObjectQuotingStrategy();
+        final CommandResults results = commandScope.execute();
 
-        database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
-        DatabaseSnapshot snapshot;
-        try {
-            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
-        } finally {
-            database.setObjectQuotingStrategy(originalQuotingStrategy);
-        }
-
-        snapshot.setMetadata(this.getSnapshotMetadata());
-
+        DatabaseSnapshot snapshot = (DatabaseSnapshot) results.getResult("snapshot");
         return new SnapshotCommandResult(snapshot);
     }
 
@@ -138,7 +117,11 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
                 format = "txt";
             }
 
-            return SnapshotSerializerFactory.getInstance().getSerializer(format).serialize(snapshot, true);
+            return SnapshotSerializerFactory.getInstance().getSerializer(format.toLowerCase(Locale.US)).serialize(snapshot, true);
+        }
+
+        public void merge(SnapshotCommandResult resultToMerge) {
+            this.snapshot.merge(resultToMerge.snapshot);
         }
     }
 }

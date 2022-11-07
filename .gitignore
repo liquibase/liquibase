@@ -11,10 +11,13 @@ release.properties
 /.idea/workspace.xml
 /out
 /bin
-liquibase.integrationtest.local.properties
-/liquibase
+**/liquibase.integrationtest.local.properties
+**/liquibase.test.local.properties
+**/liquibase.local.properties
+**/liquibase.sdk.local.yaml
+**/liquibase.sdk.local.yml
 derby.log
-/.idea
+.idea
 *.iml
 .DS_Store
 /tmp
@@ -25,4 +28,10 @@ _issues
 /liquibase-integration-tests/liquibase
 /liquibase-integration-tests/liquibase.trace.db
 /liquibase-integration-tests/liquibase.mv.db
+/liquibase-integration-tests/diffToChangeLog_h2.log
 jacoco.exec
+**/original-pom.xml
+original-pom.xml
+**/logback-test.xml
+**/*.swp
+**/dependency-reduced-pom.xml

@@ -37,9 +37,9 @@ import java.util.List;
 @SuppressWarnings({"unchecked"})
 public class RowMapperResultSetExtractor implements ResultSetExtractor {
 
-    private final RowMapper rowMapper;
+    protected final RowMapper rowMapper;
 
-    private final int rowsExpected;
+    protected final int rowsExpected;
 
 
     /**

@@ -1,25 +1,44 @@
 package liquibase.diff.output;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
+/**
+ * This class is used by other classes to filter the set of database objects used
+ * in diff-type operations including the diff command and the generateChangeLog
+ * command.
+ *
+ * There are two basic types of filter - FilterType.INCLUDE and FilterType.EXCLUDE.
+ * In Each filter type, a filter string can be supplied. That string is a
+ * comma-separated list of subfilters. Each subfilter can either be a regular expression,
+ * or a Database object type followed by a colon and then a regular expression.
+ *
+ */
 public class StandardObjectChangeFilter implements ObjectChangeFilter {
 
-    private FilterType filterType;
+    private final FilterType filterType;
 
-    private List<Filter> filters = new ArrayList<>();
+    private final List<Filter> filters = new ArrayList<>();
+    private final static List<DatabaseObject> databaseObjects = new ArrayList<>();
     private boolean catalogOrSchemaFilter;
 
     public StandardObjectChangeFilter(FilterType type, String filter) {
         this.filterType = type;
+        if (databaseObjects.isEmpty()) {
+            ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
+            databaseObjects.addAll(serviceLocator.findInstances(DatabaseObject.class));
+        }
         parseFilter(filter);
     }
 
@@ -29,20 +48,21 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
             return;
         }
 
+        // first, split the string on commas to get the subfilters
         for (String subfilter : filter.split("\\s*,\\s*")) {
+            // each subfilter can be either "objecttype:regex" or just "regex", so split on colon to decide
             String[] split = subfilter.split(":");
             if (split.length == 1) {
                 filters.add(new Filter(null, Pattern.compile(split[0])));
             } else {
-                String className = StringUtil.upperCaseFirst(split[0]);
-                className = "liquibase.structure.core."+className;
-                try {
-                    Class<DatabaseObject> clazz = (Class<DatabaseObject>) Class.forName(className);
-                    filters.add(new Filter(clazz, Pattern.compile(split[1])));
-                    catalogOrSchemaFilter |= "Catalog".equals(className) || "Schema".equals(className);
-                } catch (ClassNotFoundException e) {
-                    throw new UnexpectedLiquibaseException(e);
+                String className = split[0];
+                Optional<DatabaseObject> databaseObject = databaseObjects.stream().filter(instance -> instance.getClass().getSimpleName().equalsIgnoreCase(className)).findAny();
+                if (databaseObject.isPresent()) {
+                    filters.add(new Filter((Class<DatabaseObject>) databaseObject.get().getClass(), Pattern.compile(split[1])));
+                } else {
+                    throw new UnexpectedLiquibaseException(className + " not found");
                 }
+                catalogOrSchemaFilter |= "Catalog".equals(className) || "Schema".equals(className);
             }
         }
     }
@@ -87,6 +107,23 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
         EXCLUDE,
     }
 
+    /**
+     * The Filter class is used internally to do the actual work. A Filter consists of
+     * an objectType and a regex Pattern.
+     *
+     * The main method is matches(), which returns true if the given DatabaseObject
+     * matches the filter, and false if it does not match the Filter.
+     *
+     * If the objectType is null, then just the Pattern is used to compare the "name" of
+     * the object whether it matches or not.
+     *
+     * If the objectType is not null, then the objectType of the Filter must be
+     * assignableFrom the given DatabaseObject, AND the "name" of the DatabaseObject
+     * must match the Pattern.
+     *
+     * The "name" of the object might be what is returned from getName(), or it might
+     * be a different 'identifier' for different objet types.
+     */
     protected static class Filter {
 
         private Class<DatabaseObject> objectType;

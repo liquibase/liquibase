@@ -1,5 +1,7 @@
 package liquibase.changelog;
 
+import liquibase.logging.Logger;
+
 /**
  * CORE-3020 No warning when included file doesn't exist (missing extension)
  *

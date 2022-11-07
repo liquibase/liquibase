@@ -12,8 +12,8 @@ import liquibase.exception.MigrationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
+import liquibase.resource.Resource;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
@@ -22,8 +22,8 @@ public class PendingSQLWriter extends HTMLWriter {
 
     private DatabaseChangeLog databaseChangeLog;
 
-    public PendingSQLWriter(File rootOutputDir, Database database, DatabaseChangeLog databaseChangeLog) {
-        super(new File(rootOutputDir, "pending"), database);
+    public PendingSQLWriter(Resource rootOutputDir, Database database, DatabaseChangeLog databaseChangeLog) {
+        super(rootOutputDir.resolve("pending"), database);
         this.databaseChangeLog = databaseChangeLog;
     }
 
@@ -35,9 +35,10 @@ public class PendingSQLWriter extends HTMLWriter {
     @Override
     protected void writeBody(Writer fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
 
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), fileWriter, database);
-        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
+        Executor oldTemplate = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+        LoggingExecutor loggingExecutor = new LoggingExecutor(oldTemplate, fileWriter, database);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("logging", database, loggingExecutor);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, loggingExecutor);
 
         try {
             if (changesToRun.isEmpty()) {
@@ -64,7 +65,7 @@ public class PendingSQLWriter extends HTMLWriter {
             }
             fileWriter.append("</pre></code>");
         } finally {
-            ExecutorService.getInstance().setExecutor(database, oldTemplate);
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
         }
     }
 

@@ -34,6 +34,13 @@ public class CachedRow {
             return ((Number) o).intValue();
         } else if (o instanceof String) {
             return Integer.valueOf((String) o);
+        } else if (o instanceof byte[]) {
+            //
+            // Added this condition after finding that Clustrix (MariadDB/MySQL)
+            // returns the size value as a byte[] that contains the ASCII values
+            // of the numbers
+            //
+            return Integer.valueOf(new String((byte[]) o));
         }
         return (Integer) o;
     }
@@ -66,5 +73,17 @@ public class CachedRow {
             return Boolean.valueOf(s);
         }
         return (Boolean) o;
+    }
+
+    /**
+     * Convert 'YES'/'NO' value to TRUE/FALSE
+     * @nullable
+     */
+    public Boolean yesNoToBoolean(String columnName) {
+        Object o = row.get(columnName);
+        if (o instanceof String && "YES".equalsIgnoreCase((String)o)) {
+            return Boolean.TRUE;
+        }
+        return getBoolean(columnName);
     }
 }

@@ -43,7 +43,7 @@ public class AddDefaultValueGeneratorPostgres extends AddDefaultValueGenerator {
         SequenceNextValueFunction sequenceFunction = (SequenceNextValueFunction) statement.getDefaultValue();
 
         String sequenceName = sequenceFunction.getValue();
-        String sequenceSchemaName = sequenceFunction.getSequenceSchemaName();
+        String sequenceSchemaName = sequenceFunction.getSchemaName();
         String sequence = database.escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
 
 

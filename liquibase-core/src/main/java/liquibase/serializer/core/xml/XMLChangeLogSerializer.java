@@ -5,14 +5,14 @@ import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
 import liquibase.parser.core.xml.LiquibaseEntityResolver;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.serializer.LiquibaseSerializable.SerializationType;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -48,6 +48,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     private Document currentChangeLogFileDOM;
 
     private static final String XML_VERSION = "1.1";
+    private final LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
 
     public XMLChangeLogSerializer() {
         try {
@@ -97,7 +98,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-        documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
+        documentBuilder.setEntityResolver(resolver);
 
         Document doc = documentBuilder.newDocument();
         doc.setXmlVersion(XML_VERSION);
@@ -111,11 +112,13 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         for (NamespaceDetails details : NamespaceDetailsFactory.getInstance().getNamespaceDetails()) {
             for (String namespace : details.getNamespaces()) {
-                if (details.supports(this, namespace)) {
+                if (details.getPriority() > 0 && details.supports(this, namespace)) {
                     String shortName = details.getShortName(namespace);
                     String url = details.getSchemaUrl(namespace);
-                    if ((shortName != null) && (url != null)) {
+                    if (shortName != null) {
                         shortNameByNamespace.put(namespace, shortName);
+                    }
+                    if (url != null) {
                         urlByNamespace.put(namespace, url);
                     }
                 }
@@ -165,7 +168,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             } else {
                 existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
 
-                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())), out);
+                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())), out);
             }
             out.flush();
         }
@@ -208,7 +211,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         } else if (value instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
                 Element mapNode = currentChangeLogFileDOM.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, qualifyName(objectName, objectNamespace, parentNamespace));
-                setValueOnNode(mapNode, objectNamespace, (String) entry.getKey(), entry.getValue(), serializationType, objectNamespace);
+                if (serializationType == SerializationType.NESTED_OBJECT) {
+                    setValueOnNode(mapNode, objectNamespace, (String) entry.getKey(), entry.getValue(), serializationType, objectNamespace);
+                } else {
+                    setValueOnNode(mapNode, objectNamespace, "name", entry.getKey(), SerializationType.NAMED_FIELD, objectNamespace);
+                    setValueOnNode(mapNode, objectNamespace, "value", entry.getValue(), serializationType, objectNamespace);
+                }
                 node.appendChild(mapNode);
             }
         } else if (value instanceof LiquibaseSerializable) {
@@ -381,13 +389,22 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 constraintsElement.setAttribute("referencedTableName", constraints.getReferencedTableName());
             }
             if (constraints.getReferencedColumnNames() != null) {
-                constraintsElement.setAttribute("referencedTableName", constraints.getReferencedColumnNames());
+                constraintsElement.setAttribute("referencedColumnNames", constraints.getReferencedColumnNames());
             }
             if (constraints.isDeferrable() != null) {
                 constraintsElement.setAttribute("deferrable", constraints.isDeferrable().toString());
             }
-            if (constraints.shouldValidate() != null) {
-                constraintsElement.setAttribute("validate", constraints.shouldValidate().toString());
+            if (constraints.getValidateNullable() != null) {
+                constraintsElement.setAttribute("validateNullable", constraints.getValidateNullable().toString());
+            }
+            if (constraints.getValidateUnique() != null) {
+                constraintsElement.setAttribute("validateUnique", constraints.getValidateUnique().toString());
+            }
+            if (constraints.getValidatePrimaryKey() != null) {
+                constraintsElement.setAttribute("validatePrimaryKey", constraints.getValidatePrimaryKey().toString());
+            }
+            if (constraints.getValidateForeignKey() != null) {
+                constraintsElement.setAttribute("validateForeignKey", constraints.getValidateForeignKey().toString());
             }
             if (constraints.isDeleteCascade() != null) {
                 constraintsElement.setAttribute("deleteCascade", constraints.isDeleteCascade().toString());
@@ -404,17 +421,23 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             if (constraints.isUnique() != null) {
                 constraintsElement.setAttribute("unique", constraints.isUnique().toString());
             }
-
             if (constraints.getUniqueConstraintName() != null) {
                 constraintsElement.setAttribute("uniqueConstraintName", constraints.getUniqueConstraintName());
             }
-
             if (constraints.getPrimaryKeyName() != null) {
                 constraintsElement.setAttribute("primaryKeyName", constraints.getPrimaryKeyName());
             }
-
             if (constraints.getPrimaryKeyTablespace() != null) {
                 constraintsElement.setAttribute("primaryKeyTablespace", constraints.getPrimaryKeyTablespace());
+            }
+            if (constraints.getNotNullConstraintName() != null) {
+                constraintsElement.setAttribute("notNullConstraintName", constraints.getNotNullConstraintName());
+            }
+            if (constraints.getReferencedTableCatalogName() != null) {
+                constraintsElement.setAttribute("referencedTableCatalogName", constraints.getReferencedTableCatalogName());
+            }
+            if (constraints.getReferencedTableSchemaName() != null) {
+                constraintsElement.setAttribute("referencedTableSchemaName", constraints.getReferencedTableSchemaName());
             }
             element.appendChild(constraintsElement);
         }
@@ -458,6 +481,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         }
         String textContent = StringUtil.trimToEmpty(XMLUtil.getTextContent(node));
+        textContent = escapeXml(textContent);
         buffer.append(">").append(textContent);
 
         boolean sawChildren = false;
@@ -489,6 +513,14 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
+    }
+
+    /**
+     * Provided as a way for sub-classes to override and be able to convert a string
+     * that might have XML reserved characters to an XML-escaped version of that string.
+     */
+    public String escapeXml(String valueToEscape) {
+        return valueToEscape;
     }
 
 }

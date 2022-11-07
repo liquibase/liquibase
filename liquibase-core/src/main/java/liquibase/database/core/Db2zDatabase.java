@@ -8,8 +8,8 @@ import liquibase.structure.core.Index;
 import liquibase.util.StringUtil;
 
 public class Db2zDatabase extends AbstractDb2Database {
-
-    public Db2zDatabase() {
+	
+	public Db2zDatabase() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         super.sequenceCurrentValueFunction = "PREVIOUS VALUE FOR %s";
@@ -32,10 +32,19 @@ public class Db2zDatabase extends AbstractDb2Database {
     }
 
     @Override
+    public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
+        return objectName;
+    }
+
+    @Override
     public boolean isSystemObject(DatabaseObject example) {
         boolean isSystemIndex = example instanceof Index && example.getName() != null && example.getName().contains("_#_");
         boolean isSystemColumn = example instanceof Column && StringUtil.startsWith(example.getName(), "DB2_GENERATED");
         return isSystemIndex || isSystemColumn || super.isSystemObject(example);
     }
 
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "DB2/z";
+    }
 }

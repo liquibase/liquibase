@@ -15,6 +15,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.core.AddColumnStatement;
+import liquibase.util.StringUtil;
 
 public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
     @Override
@@ -55,7 +56,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
             Database database) {
         String alterTable = " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
 
-        alterTable += getDefaultClause(statement, database);
+        alterTable += getDefaultClauseBeforeNotNull(statement, database);
 
         if (primaryKeyBeforeNotNull(database)) {
             if (statement.isPrimaryKey()) {
@@ -65,7 +66,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
 
         if (statement.isAutoIncrement()) {
             AutoIncrementConstraint autoIncrementConstraint = statement.getAutoIncrementConstraint();
-            alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
+            alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy(), autoIncrementConstraint.getGenerationType(), autoIncrementConstraint.getDefaultOnNull());
         }
 
         if (!statement.isNullable()) {
@@ -79,10 +80,19 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
                 alterTable += " PRIMARY KEY";
             }
         }
+
+        if (!StringUtil.isEmpty(statement.getAddBeforeColumn())) {
+            alterTable += " BEFORE " + database.escapeColumnName(statement.getSchemaName(), statement.getSchemaName(), statement.getTableName(), statement.getAddBeforeColumn()) + " ";
+        }
+
+        if (!StringUtil.isEmpty(statement.getAddAfterColumn())) {
+            alterTable += " AFTER " + database.escapeColumnName(statement.getSchemaName(), statement.getSchemaName(), statement.getTableName(), statement.getAddAfterColumn());
+        }
+
         return alterTable;
     }
 
-    private String getDefaultClause(AddColumnStatement statement, Database database) {
+    private String getDefaultClauseBeforeNotNull(AddColumnStatement statement, Database database) {
         String clause = "";
         Object defaultValue = statement.getDefaultValue();
         if (defaultValue != null) {

@@ -16,6 +16,7 @@ import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         if (columns != null) {
             for (ColumnConfig columnConfig : columns) {
-                if (columnConfig.getType() == null) {
+                if (columnConfig.getType() == null && !ObjectUtil.defaultIfNull(columnConfig.getComputed(), false)) {
                     validationErrors.addError("column 'type' is required for all columns");
                 }
                 if (columnConfig.getName() == null) {
@@ -67,10 +68,18 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             Object defaultValue = column.getDefaultValueObject();
 
-            LiquibaseDataType columnType = DataTypeFactory.getInstance().fromDescription(column.getType() + (isAutoIncrement ? "{autoIncrement:true}" : ""), database);
-            if ((constraints != null) && (constraints.isPrimaryKey() != null) && constraints.isPrimaryKey()) {
+            LiquibaseDataType columnType = null;
+            if (column.getType() != null) {
+                columnType = DataTypeFactory.getInstance().fromDescription(column.getType() + (isAutoIncrement ? "{autoIncrement:true}" : ""), database);
+                isAutoIncrement |= columnType.isAutoIncrement();
+            }
 
-                statement.addPrimaryKeyColumn(column.getName(), columnType, defaultValue, constraints.getPrimaryKeyName(), constraints.getPrimaryKeyTablespace());
+            if ((constraints != null) && (constraints.isPrimaryKey() != null) && constraints.isPrimaryKey()) {
+                statement.addPrimaryKeyColumn(column.getName(), columnType, defaultValue, constraints.getValidatePrimaryKey(),
+                        constraints.isDeferrable() != null && constraints.isDeferrable(),
+                        constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred(),
+                    constraints.getPrimaryKeyName(),constraints.getPrimaryKeyTablespace(),
+                        column.getRemarks());
 
             } else {
                 statement.addColumn(column.getName(),
@@ -82,8 +91,11 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
 
             if (constraints != null) {
-                if ((constraints.isNullable() != null) && !constraints.isNullable()) {
-                    statement.addColumnConstraint(new NotNullConstraint(column.getName()).setName(constraints.getNotNullConstraintName()));
+                if (constraints.isNullable() != null && !constraints.isNullable()) {
+                    NotNullConstraint notNullConstraint = new NotNullConstraint(column.getName())
+                            .setConstraintName(constraints.getNotNullConstraintName())
+                            .setValidateNullable(constraints.getValidateNullable() == null ? true : constraints.getValidateNullable());
+                    statement.addColumnConstraint(notNullConstraint);
                 }
 
                 if ((constraints.getReferences() != null) || ((constraints.getReferencedTableName() != null) &&
@@ -102,16 +114,21 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                     fkConstraint.setInitiallyDeferred((constraints.isInitiallyDeferred() != null) && constraints
                         .isInitiallyDeferred());
                     fkConstraint.setDeferrable((constraints.isDeferrable() != null) && constraints.isDeferrable());
+                    Boolean validate = constraints.getValidateForeignKey();
+                    if (validate!=null) {
+                        fkConstraint.setValidateForeignKey(constraints.getValidateForeignKey());
+                    }
                     statement.addColumnConstraint(fkConstraint);
                 }
 
                 if ((constraints.isUnique() != null) && constraints.isUnique()) {
-                    statement.addColumnConstraint(new UniqueConstraint(constraints.getUniqueConstraintName()).addColumns(column.getName()));
+                    statement.addColumnConstraint(new UniqueConstraint(constraints.getUniqueConstraintName(),
+                        constraints.getValidateUnique()==null?true:constraints.getValidateUnique()).addColumns(column.getName()));
                 }
             }
 
             if (isAutoIncrement) {
-                statement.addColumnConstraint(new AutoIncrementConstraint(column.getName(), column.getStartWith(), column.getIncrementBy()));
+                statement.addColumnConstraint(new AutoIncrementConstraint(column.getName(), column.getStartWith(), column.getIncrementBy(), column.getGenerationType(), column.getDefaultOnNull()));
             }
         }
 
@@ -120,7 +137,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         List<SqlStatement> statements = new ArrayList<>();
         statements.add(statement);
 
-        if (StringUtil.trimToNull(remarks) != null) {
+        if (StringUtil.trimToNull(remarks) != null && !(database instanceof MySQLDatabase)) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, tableName, remarks);
             if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                 statements.add(remarksStatement);
@@ -129,11 +146,16 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         for (ColumnConfig column : getColumns()) {
             String columnRemarks = StringUtil.trimToNull(column.getRemarks());
-            if (columnRemarks != null) {
-                SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
-                if (!(database instanceof MySQLDatabase) && SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
+            if (columnRemarks != null && !(database instanceof MySQLDatabase)) {
+                SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks, column.getType());
+                if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                     statements.add(remarksStatement);
                 }
+            }
+
+            final Boolean computed = column.getComputed();
+            if (computed != null && computed) {
+                statement.setComputed(column.getName());
             }
         }
 

@@ -18,7 +18,7 @@ public class ChangeSetFilterResult {
     }
 
     /**
-     * Was the change set accepted by the filter
+     * Was the changeset accepted by the filter
      */
     public boolean isAccepted() {
         return accepted;
@@ -32,7 +32,7 @@ public class ChangeSetFilterResult {
     }
 
     /**
-     * Returns the class of the filter that accepted or rejected this change set.
+     * Returns the class of the filter that accepted or rejected this changeset.
      */
     public Class<? extends ChangeSetFilter> getFilter() {
         return filter;

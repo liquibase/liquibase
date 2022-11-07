@@ -60,8 +60,11 @@ public class MissingIndexChangeGenerator extends AbstractChangeGenerator impleme
         }
         change.setIndexName(index.getName());
         change.setUnique(((index.isUnique() != null) && index.isUnique()) ? Boolean.TRUE : null);
-        change.setAssociatedWith(index.getAssociatedWithAsString());
         change.setClustered(((index.getClustered() != null) && index.getClustered()) ? Boolean.TRUE : null);
+
+        if (referenceDatabase.createsIndexesForForeignKeys()) {
+            change.setAssociatedWith(index.getAssociatedWithAsString());
+        }
 
         for (Column column : index.getColumns()) {
             change.addColumn(new AddColumnConfig(column));

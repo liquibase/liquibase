@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.core.H2Database;
+import liquibase.servicelocator.LiquibaseService;
 import liquibase.sqlgenerator.core.AddAutoIncrementGenerator;
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2;
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsqlH2;
@@ -23,7 +24,7 @@ public class SqlGeneratorFactoryTest {
 
     @Before
     public void setUp() {
-        statement = new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null);
+        statement = new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null, null, null);
         database = new H2Database();
         factory = SqlGeneratorFactory.getInstance();
     }
@@ -178,12 +179,13 @@ public class SqlGeneratorFactoryTest {
 
     @Test
     public void getGenerators() {
-        SortedSet<SqlGenerator> allGenerators = factory.getGenerators(statement, database);
+        SortedSet<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getGenerators(new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null, null, null), new H2Database());
 
         assertNotNull(allGenerators);
         assertEquals(1, allGenerators.size());        
     }
 
+    @LiquibaseService(skip = true)
     private class CustomAddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGeneratorHsqlH2 {
 
         @Override
