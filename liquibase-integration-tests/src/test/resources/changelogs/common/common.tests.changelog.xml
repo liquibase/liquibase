@@ -824,6 +824,11 @@
         <createSequence sequenceName="seqtestonall"/>
     </changeSet>
 
+    <changeSet id="seq-test-datatype" author="flautert" onValidationFail="MARK_RAN">
+        <comment>Database that don't support sequences datatype field will just continue on</comment>
+        <createSequence sequenceName="seqtestdatatypeonall" dataType="int"/>
+    </changeSet>
+
     <changeSet id="nvoxland" author="pending-some">
         <createTable tableName="pendingtest">
             <column name="id" type="int"/>
