@@ -10,7 +10,6 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -36,7 +35,6 @@ import static java.util.ResourceBundle.getBundle;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-    private static final Logger LOG = Scope.getCurrentScope().getLog(ExecutablePreparedStatementBase.class);
     protected static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
@@ -186,6 +184,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
      */
     protected void attachParams(List<? extends ColumnConfig> cols, PreparedStatement stmt)
             throws SQLException, DatabaseException {
+        final Logger LOG = Scope.getCurrentScope().getLog(getClass());
         int i = 1;  // index starts from 1
         for (ColumnConfig col : cols) {
             LOG.fine("Applying column parameter = " + i + " for column " + col.getName());
@@ -211,6 +210,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
      * @throws SQLException      if JDBC objects to a setting (non-existent bind number, wrong column type etc.)
      * @throws DatabaseException if an I/O error occurs during the read of LOB values
      */
+    @SuppressWarnings("squid:S3776")
     protected void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException,
             DatabaseException {
 
@@ -453,7 +453,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     @SuppressWarnings("squid:S2095")
-    protected InputStream getResourceAsStream(String valueLobFile) throws IOException, LiquibaseException {
+    protected InputStream getResourceAsStream(String valueLobFile) throws IOException {
         String fileName = getFileName(valueLobFile);
         return this.resourceAccessor.getExisting(fileName).openInputStream();
     }
