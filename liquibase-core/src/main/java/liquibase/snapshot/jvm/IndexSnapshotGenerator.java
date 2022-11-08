@@ -281,7 +281,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                         // Is this column a simple column (definition == null)
                         // or is it a computed expression (definition != null)
-                        if (definition == null) {
+                        if (definition == null || database instanceof PostgresDatabase ||  database instanceof MSSQLDatabase) {
                         String ascOrDesc;
                         if (database instanceof Db2zDatabase) {
                             ascOrDesc = row.getString("ORDER");
