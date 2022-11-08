@@ -51,7 +51,7 @@ public class BigIntType extends LiquibaseDataType {
         }
         if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof
                 HsqlDatabase) || (database instanceof FirebirdDatabase) || (database instanceof SybaseDatabase)
-                || (database instanceof SybaseASADatabase)) {
+                || (database instanceof SybaseASADatabase) || (database instanceof H2Database)) {
             return new DatabaseDataType("BIGINT");
         }
         if (database instanceof PostgresDatabase) {
@@ -68,7 +68,6 @@ public class BigIntType extends LiquibaseDataType {
                 }
             }
         }
-
         return super.toDatabaseDataType(database);
     }
 
