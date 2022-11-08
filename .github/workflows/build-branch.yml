@@ -26,7 +26,7 @@ jobs:
           server-password: TOKEN
 
       - name: Version Artifact
-        run: mvn versions:set -DnewVersion=DAT-11899-SNAPSHOT
+        run: mvn versions:set -DnewVersion=DAT-11899-SNAPSHOT -DprocessAllModules
 
       - name: Build and Package
         run: mvn -B dependency:go-offline clean package -DskipTests=true
