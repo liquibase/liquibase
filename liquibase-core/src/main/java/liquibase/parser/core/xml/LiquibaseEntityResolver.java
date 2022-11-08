@@ -16,6 +16,9 @@ import org.xml.sax.ext.EntityResolver2;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,11 +57,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         InputStream stream = null;
         URL resourceUri = getSearchClassloader().getResource(path);
         if (resourceUri == null) {
-            ResourceAccessor currentScopeResourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-            ClassLoaderResourceAccessor classLoaderResourceAccessor = new ClassLoaderResourceAccessor(getClass().getClassLoader());
-            ResourceAccessor resourceAccessor = new CompositeResourceAccessor(currentScopeResourceAccessor, classLoaderResourceAccessor);
-
-            Resource resource = resourceAccessor.get(path);
+            Resource resource = Scope.getCurrentScope().getResourceAccessor().get(path);
             if (resource.exists()) {
                 stream = resource.openInputStream();
             }
@@ -86,8 +85,11 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     }
 
+    /**
+     * Return the classloader used to look for XSD files in the classpath.
+     */
     protected ClassLoader getSearchClassloader() {
-        return Thread.currentThread().getContextClassLoader();
+        return new CombinedClassLoader();
     }
 
     /**
@@ -133,5 +135,29 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
      */
     public void setShouldWarnOnMismatchedXsdVersion(boolean shouldWarnOnMismatchedXsdVersion) {
         this.shouldWarnOnMismatchedXsdVersion = shouldWarnOnMismatchedXsdVersion;
+    }
+
+    /**
+     * Only currently implementing getResource() since that's the only method used by our logic
+     */
+    private static class CombinedClassLoader extends ClassLoader {
+
+        private final List<ClassLoader> classLoaders;
+
+        public CombinedClassLoader() {
+            this.classLoaders = Arrays.asList(Thread.currentThread().getContextClassLoader(), getClass().getClassLoader());
+        }
+
+        @Override
+        public URL getResource(String name) {
+            for (ClassLoader classLoader : classLoaders) {
+                URL resource = classLoader.getResource(name);
+                if (resource != null) {
+                    return resource;
+                }
+            }
+
+            return null;
+        }
     }
 }
