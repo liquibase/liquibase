@@ -22,8 +22,8 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-#      - name: Build and Package
-#        run: mvn -B dependency:go-offline clean package -DskipTests=true
+      - name: Build and Package
+        run: mvn -B dependency:go-offline clean package -DskipTests=true
         
       - name: Version Artifact
         run: mvn versions:set -DnewVersion=DAT-11899-SNAPSHOT
