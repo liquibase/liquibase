@@ -386,7 +386,7 @@ public class ExecutablePreparedStatementBaseTest {
 
         executablePreparedStatementBase.applyColumnParameter(preparedStatementMock, position, columnConfig1Mock);
 
-        verify(preparedStatementMock).setBinaryStream(position, blobContentLengthInteger.getContent(), (int) blobContentLengthInteger.getLength());
+        verify(preparedStatementMock).setBlob(position, blobContentLengthInteger.getContent(), (int) blobContentLengthInteger.getLength());
     }
 
     @Test
@@ -398,7 +398,7 @@ public class ExecutablePreparedStatementBaseTest {
 
         executablePreparedStatementBase.applyColumnParameter(preparedStatementMock, position, columnConfig1Mock);
 
-        verify(preparedStatementMock).setBinaryStream(position, blobContentLengthInteger.getContent(), blobContentLengthLong.getLength());
+        verify(preparedStatementMock).setBlob(position, blobContentLengthInteger.getContent(), blobContentLengthLong.getLength());
     }
 
     @Test
