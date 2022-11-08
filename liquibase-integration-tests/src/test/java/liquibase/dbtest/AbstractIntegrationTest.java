@@ -84,6 +84,8 @@ public abstract class AbstractIntegrationTest {
     Set<String> emptySchemas = new TreeSet<>();
     Logger logger;
     private final String rollbackChangeLog;
+
+    private final String emptyRollbackSqlChangeLog;
     private final String includedChangeLog;
     private final String encodingChangeLog;
     private final String externalfkInitChangeLog;
@@ -106,6 +108,7 @@ public abstract class AbstractIntegrationTest {
         this.externalfkInitChangeLog= "changelogs/common/externalfk.init.changelog.xml";
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
+        this.emptyRollbackSqlChangeLog = "changelogs/common/rollbackable.changelog.sql";
         logger = Scope.getCurrentScope().getLog(getClass());
 
         Scope.setScopeManager(new TestScopeManager());
@@ -283,6 +286,20 @@ public abstract class AbstractIntegrationTest {
         Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("jdbc", database);
         database.resetInternalState();
         return new Liquibase(changeLogFile, resourceAccessor, database);
+    }
+
+    @Test
+    public void testEmptyRollbackableSqlChangeLog() throws Exception {
+        assumeNotNull(this.getDatabase());
+
+        Liquibase liquibase = createLiquibase(emptyRollbackSqlChangeLog);
+        clearDatabase();
+
+        liquibase = createLiquibase(emptyRollbackSqlChangeLog);
+        liquibase.update(this.contexts);
+
+        liquibase = createLiquibase(emptyRollbackSqlChangeLog);
+        liquibase.rollback(new Date(0), this.contexts);
     }
 
     @Test
