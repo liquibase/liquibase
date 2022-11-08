@@ -25,14 +25,14 @@ jobs:
           server-username: USERNAME
           server-password: TOKEN
 
-      - name: Version Artifact
-        run: mvn versions:set -DnewVersion=DAT-11899-SNAPSHOT -DprocessAllModules
-
       - name: Build and Package
         run: mvn -B dependency:go-offline clean package -DskipTests=true
+
+      - name: Tag Package For Development
+        run: cp ./target/liquibase-0-SNAPSHOT.jar ./target/DAT-11899-SNAPSHOT.jar
 
       - name: Deploy Artifact
         env:
           USERNAME: liquibot
           TOKEN: ${{ secrets.BOT_TOKEN }}
-        run: mvn --batch-mode deploy
+        run: mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file -Dfile=DAT-11899-SNAPSHOT.jar
