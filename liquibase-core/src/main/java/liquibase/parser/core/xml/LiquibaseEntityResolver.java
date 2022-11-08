@@ -3,7 +3,11 @@ package liquibase.parser.core.xml;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.logging.Logger;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.InputStreamList;
 import liquibase.resource.Resource;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -50,7 +54,11 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         InputStream stream = null;
         URL resourceUri = getSearchClassloader().getResource(path);
         if (resourceUri == null) {
-            Resource resource = Scope.getCurrentScope().getResourceAccessor().get(path);
+            ResourceAccessor currentScopeResourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+            ClassLoaderResourceAccessor classLoaderResourceAccessor = new ClassLoaderResourceAccessor(getClass().getClassLoader());
+            ResourceAccessor resourceAccessor = new CompositeResourceAccessor(currentScopeResourceAccessor, classLoaderResourceAccessor);
+
+            Resource resource = resourceAccessor.get(path);
             if (resource.exists()) {
                 stream = resource.openInputStream();
             }
