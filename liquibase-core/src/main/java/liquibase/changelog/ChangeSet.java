@@ -804,7 +804,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (hasCustomRollbackChanges()) {
                 final List<SqlStatement> statements = new LinkedList<>();
                 for (Change change : rollback.getChanges()) {
-                    if (((change instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
+                    if (this.ignoreSpecificChangeTypes(change, database)) {
                         continue;
                     }
                     if (listener != null) {
@@ -831,6 +831,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 List<Change> changes = getChanges();
                 for (int i = changes.size() - 1; i >= 0; i--) {
                     Change change = changes.get(i);
+                    if (change instanceof RawSQLChange) {
+                        throw new RollbackFailedException("Liquibase does not support automatic rollback generation for raw " +
+                            "sql changes (did you mean to specify keyword \"empty\" to ignore rolling back this change?)");
+                    }
                     database.executeRollbackStatements(change, sqlVisitors);
                 }
             }
@@ -859,6 +863,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
 
+    }
+
+    private boolean ignoreSpecificChangeTypes(Change change, Database database) {
+        return ((change instanceof DbmsTargetedChange) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true))
+             || ((change instanceof RawSQLChange) && "empty".equalsIgnoreCase(((RawSQLChange)change).getSql()));
     }
 
     /**
