@@ -2,22 +2,17 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
 
-public class DropViewStatement extends AbstractSqlStatement {
-
+public class SetViewRemarksStatement extends AbstractSqlStatement {
     private String catalogName;
     private String schemaName;
     private String viewName;
-    private Boolean ifExists;
+    private String remarks;
 
-    public DropViewStatement(String catalogName, String schemaName, String viewName) {
-        this(catalogName, schemaName, viewName, null);
-    }
-
-    public DropViewStatement(String catalogName, String schemaName, String viewName, Boolean ifExists) {
+    public SetViewRemarksStatement(String catalogName, String schemaName, String viewName, String remarks) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.viewName = viewName;
-        this.ifExists = ifExists;
+        this.remarks = remarks;
     }
 
     public String getCatalogName() {
@@ -32,7 +27,7 @@ public class DropViewStatement extends AbstractSqlStatement {
         return viewName;
     }
 
-    public Boolean isIfExists() {
-        return ifExists;
+    public String getRemarks() {
+        return remarks;
     }
 }

@@ -253,8 +253,8 @@ public interface ResourceAccessor extends AutoCloseable {
         }
 
         @Override
-        public OutputStream openOutputStream(boolean createIfNeeded) throws IOException {
-            throw new UnexpectedLiquibaseException("Resource does not exist");
+        public OutputStream openOutputStream(OpenOptions openOptions) throws IOException {
+            return openOutputStream(new OpenOptions());
         }
     }
 }

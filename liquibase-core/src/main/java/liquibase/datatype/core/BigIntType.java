@@ -73,6 +73,9 @@ public class BigIntType extends LiquibaseDataType {
         if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("BIGINT");
         }
+        if (database instanceof H2Database) {
+            return new DatabaseDataType("BIGINT");
+        }
         return super.toDatabaseDataType(database);
     }
 
