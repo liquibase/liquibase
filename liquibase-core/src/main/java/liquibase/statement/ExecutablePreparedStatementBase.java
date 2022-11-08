@@ -16,8 +16,10 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
-import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.util.FilenameUtil;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StreamUtil;
@@ -58,6 +60,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     //Cache the executeWithFlags method to avoid reflection overhead
     private static Method executeWithFlagsMethod;
+
+    private Map<String, Object> snapshotScratchPad = new HashMap<>();
 
     protected ExecutablePreparedStatementBase(Database database, String catalogName, String schemaName, String
             tableName, List<? extends ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
@@ -280,6 +284,25 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             LOG.fine("value is blob = " + col.getValueBlobFile());
             try {
                 LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
+
+                if (database instanceof PostgresDatabase) {
+                    String snapshotKeyName = String.format("%s-%s-%s-%s", getCatalogName(), getSchemaName(), getTableName(), col.getName());
+                    Column snapshot = (Column) this.getScratchData(snapshotKeyName);
+                    if (snapshot == null) {
+                        snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(
+                                new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), col.getName()), database);
+                        this.setScratchData(snapshotKeyName, snapshot);
+                    }
+
+                    if (snapshot.getType().getTypeName().equalsIgnoreCase("bytea")) {
+                        if (lob.length <= Integer.MAX_VALUE) {
+                            stmt.setBinaryStream(i, lob.content, (int) lob.length);
+                        } else {
+                            stmt.setBinaryStream(i, lob.content, lob.length);
+                        }
+                        return;
+                    }
+                }
                 if (lob.length <= Integer.MAX_VALUE) {
                     stmt.setBinaryStream(i, lob.content, (int) lob.length);
                 } else {
@@ -468,6 +491,14 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     public ResourceAccessor getResourceAccessor() {
         return resourceAccessor;
+    }
+
+    private Object getScratchData(String key) {
+        return snapshotScratchPad.get(key);
+    }
+
+    private Object setScratchData(String key, Object data) {
+        return snapshotScratchPad.put(key, data);
     }
 
     protected long getContentLength(InputStream in) throws IOException {
