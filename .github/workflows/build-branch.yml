@@ -29,7 +29,7 @@ jobs:
         run: mvn -B dependency:go-offline clean package -DskipTests=true
 
       - name: Tag Package For Development
-        run: cp ./liquibase-core/target/liquibase-core-0-SNAPSHOT.jar ./target/DAT-11899-SNAPSHOT.jar
+        run: cp ./liquibase-core/target/liquibase-core-0-SNAPSHOT.jar DAT-11899-SNAPSHOT.jar
 
       - name: Deploy Artifact
         env:
