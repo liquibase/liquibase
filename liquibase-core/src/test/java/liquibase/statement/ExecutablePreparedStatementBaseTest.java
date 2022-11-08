@@ -145,19 +145,19 @@ public class ExecutablePreparedStatementBaseTest {
         try {
             executablePreparedStatementBase.execute(preparedStatementFactoryMock);
 
-            verify(executablePreparedStatementBase).generateSql(new ArrayList<>());
-
-            verify(preparedStatementFactoryMock).create(ExecutablePreparedStatementBaseMock.generateSql);
-
-            verify(executablePreparedStatementBase).attachParams(new ArrayList<>(), preparedStatementMock);
-            verify(executablePreparedStatementBase, never()).executePreparedStatement(any());
-
-            verify(closeableMock).close();
-
             fail("Should throw DatabaseException");
         } catch (DatabaseException e) {
             assertEquals(sqlException, e.getCause());
         }
+
+        verify(executablePreparedStatementBase).generateSql(new ArrayList<>());
+
+        verify(preparedStatementFactoryMock).create(ExecutablePreparedStatementBaseMock.generateSql);
+
+        verify(executablePreparedStatementBase).attachParams(new ArrayList<>(), preparedStatementMock);
+        verify(executablePreparedStatementBase, never()).executePreparedStatement(any());
+
+        verify(closeableMock).close();
     }
 
     @Test
