@@ -663,7 +663,7 @@ public class DiffToChangeLog {
                 "                   SELECT DISTINCT " +
                 "                         substring(pg_identify_object(classid, objid, 0)::text, E'(\\\\w+?)\\\\.') as referenced_schema_name, " +
                 "                         CASE classid\n" +
-                "                              WHEN 'pg_constraint'::regclass THEN (SELECT CONTYPE FROM pg_constraint WHERE oid = objid)\n" +
+                "                              WHEN 'pg_constraint'::regclass THEN (SELECT CONTYPE::text FROM pg_constraint WHERE oid = objid)\n" +
                 "                              ELSE objid::text\n" +
                 "                              END AS CONTYPE,\n" +
                 "                         CASE classid\n" +
