@@ -374,5 +374,23 @@
             <column name="after_name" type="int" afterColumn="name"/>
         </addColumn>
     </changeSet>
+    <changeSet id="Test_DataType_Table" author="nvoxland">
+        <createTable tableName="Test_DataType">
+            <column name="id" type="int"/>
+            <column name="typeColumn" type="int"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="TestIntType" author="mallod">
+        <modifyDataType tableName="Test_DataType" columnName="typeColumn" newDataType="int(20)"/>
+    </changeSet>
+    <changeSet id="TestBigIntType" author="mallod">
+        <modifyDataType tableName="Test_DataType" columnName="typeColumn" newDataType="bigint(20)"/>
+    </changeSet>
+    <changeSet id="TestSmallIntType" author="mallod">
+        <modifyDataType tableName="Test_DataType" columnName="typeColumn" newDataType="smallint(20)"/>
+    </changeSet>
+    <changeSet id="TestTinyIntType" author="mallod">
+        <modifyDataType tableName="Test_DataType" columnName="typeColumn" newDataType="tinyint(20)"/>
+    </changeSet>
 
 </databaseChangeLog>

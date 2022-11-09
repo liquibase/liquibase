@@ -25,7 +25,7 @@ public class URIResource extends AbstractResource {
 
     @Override
     public Resource resolveSibling(String other) {
-        return new URIResource(resolveSiblingPath(other), URI.create(getUri().toString().replaceFirst("/.*?$", "") + "/" + other));
+        return new URIResource(resolveSiblingPath(other), URI.create(getUri().toString().replaceFirst("/[^/]*$", "") + "/" + other));
     }
 
     @Override

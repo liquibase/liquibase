@@ -105,21 +105,37 @@ public class LiquibaseConfiguration implements SingletonObject {
         return Collections.unmodifiableSortedSet(this.configurationValueProviders);
     }
 
+    /**
+     * Convenience method for {@link #getCurrentConfiguredValue(ConfigurationValueConverter, ConfigurationValueObfuscator, ConfigurationValueProvider[], String...)}
+     * with no additional value providers.
+     */
+    public <DataType> ConfiguredValue<DataType> getCurrentConfiguredValue(ConfigurationValueConverter<DataType> converter, ConfigurationValueObfuscator<DataType> obfuscator, String... keyAndAliases) {
+        return this.getCurrentConfiguredValue(converter, obfuscator, null, keyAndAliases);
+    }
 
     /**
      * Searches for the given keys in the current providers and applies any applicable modifiers.
      *
      * @param keyAndAliases The first element should be the canonical key name, with later elements being aliases. At least one element must be provided.
+     * @param additionalValueProviders additional {@link ConfigurationValueProvider}s to use with higher priority than the ones registered in {@link LiquibaseConfiguration}. The higher the array index, the higher the priority. Can be null.
      * @return the value for the key, or null if not configured.
      */
-    public <DataType> ConfiguredValue<DataType> getCurrentConfiguredValue(ConfigurationValueConverter<DataType> converter, ConfigurationValueObfuscator<DataType> obfuscator, String... keyAndAliases) {
+    public <DataType> ConfiguredValue<DataType> getCurrentConfiguredValue(ConfigurationValueConverter<DataType> converter,
+                                                                          ConfigurationValueObfuscator<DataType> obfuscator,
+                                                                          ConfigurationValueProvider[] additionalValueProviders,
+                                                                          String... keyAndAliases) {
         if (keyAndAliases == null || keyAndAliases.length == 0) {
             throw new IllegalArgumentException("Must specify at least one key");
         }
 
         ConfiguredValue<DataType> details = new ConfiguredValue<>(keyAndAliases[0], converter, obfuscator);
 
-        for (ConfigurationValueProvider provider : configurationValueProviders) {
+        List<ConfigurationValueProvider> finalValueProviders = new ArrayList<>(configurationValueProviders);
+        if (additionalValueProviders != null) {
+            finalValueProviders.addAll(Arrays.asList(additionalValueProviders));
+        }
+
+        for (ConfigurationValueProvider provider : finalValueProviders) {
             final ProvidedValue providerValue = provider.getProvidedValue(keyAndAliases);
 
             if (providerValue != null) {

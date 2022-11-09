@@ -27,4 +27,8 @@ public class SystemUtil {
         }
         return majorVersion;
     }
+
+    public static boolean isAtLeastJava11() {
+        return getJavaMajorVersion() >= 11;
+    }
 }
