@@ -33,6 +33,6 @@ jobs:
 #        run: mvn -B clean package -DskipTests=true
 
       - name: Publish package
-        run: mvn -B -X clean deploy -DskipTests=true
+        run: mvn -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
