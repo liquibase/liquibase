@@ -1,6 +1,27 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.17.2 (2022.11.02)
+
+This is a patch release that upgrades the HSQL driver to remove a security vulnerability.
+**NOTE: The newest HSQL driver requires Java 11, so if you use HSQL and JAVA 8, you will need to upgrade your Java.**
+
+## Fixes
+No Fixes
+
+## Updates
+
+### Security Updates
+
+### JDBC Driver and Third-Party Library Updates
+* Upgrade hsqldb from 2.5.2 to 2.7.1 by @dependabot in https://github.com/liquibase/liquibase/pull/3400
+* [opencsv-upgrade] Updates opencsv to 5.7.1 by @abrackx in https://github.com/liquibase/liquibase/pull/3419
+
+### OWASP Dependency Check: Reported Vulnerabilities
+
+**Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.17.1...v4.17.2
+
+
 Changes in version 4.17.1 (2022.10.21)
 
 ## Fixes

@@ -8,6 +8,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
+import liquibase.exception.LiquibaseException
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
 import liquibase.resource.ResourceAccessor
@@ -440,6 +441,32 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
         then:
         def e = thrown(ChangeLogParseException)
         assert e
+    }
+
+    def "parse changeset with 'onSqlOutput' precondition set"() throws Exception {
+        when:
+        final String changeLogWithOnSqlOutputPrecondition = "--liquibase formatted sql\n" +
+                "--changeset test1:test1\n" +
+                "--preconditions onFail:HALT onSqlOutput:TEST\n" +
+                "--precondition-sql-check expectedResult:1 select count(*) from dual where 1=2;\n" +
+                "create table pctest2 (id number);"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOnSqlOutputPrecondition).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        assert changeLog.getPreconditions().getOnSqlOutput() == PreconditionContainer.OnSqlOutputOption.TEST
+    }
+
+    def "parse error when changeset with both 'onSqlOutput' and 'onUpdateSql' preconditions set"() throws Exception {
+        when:
+        final String changeLogWithOnSqlOutputPrecondition = "--liquibase formatted sql\n" +
+                "--changeset test1:test1\n" +
+                "--preconditions onFail:HALT onUpdateSQL:TEST onSqlOutput:TEST\n" +
+                "--precondition-sql-check expectedResult:1 select count(*) from dual where 1=2;\n" +
+                "create table pctest2 (id number);"
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithOnSqlOutputPrecondition).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        thrown(IllegalArgumentException.class)
     }
 
     def "parse changeset with one good one bad"() throws Exception {
