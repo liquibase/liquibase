@@ -28,6 +28,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 
+
 /**
  * Encapsulates the information stored in the change log XML file.
  */
