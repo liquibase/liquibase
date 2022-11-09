@@ -81,6 +81,14 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     /**
      * @return Full details on the current value for this definition.
      * Will always return a {@link ConfiguredValue},
+     */
+    public ConfiguredValue<DataType> getCurrentConfiguredValue() {
+        return getCurrentConfiguredValue(new ConfigurationValueProvider[]{});
+    }
+
+    /**
+     * @return Full details on the current value for this definition.
+     * Will always return a {@link ConfiguredValue},
      *
      * @param additionalValueProviders additional {@link ConfigurationValueProvider}s to use with higher priority than the ones registered in {@link LiquibaseConfiguration}. The higher the array index, the higher the priority.
      */
