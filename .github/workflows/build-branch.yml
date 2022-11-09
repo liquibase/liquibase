@@ -29,9 +29,9 @@ jobs:
 
       # Skip Tests for testing purposes
       - name: Build and Package
-        run: mvn -B dependency:go-offline clean package -DskipTests=true
+        run: mvn -B clean package -DskipTests=true
 
       - name: Publish package
-        run: mvn --batch-mode deploy -DskipTests=true
+        run: mvn -B deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
