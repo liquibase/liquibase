@@ -13,7 +13,7 @@
 
 	<properties>
 		<deploy.repositoryId>github</deploy.repositoryId>
-		<deploy.url>https://maven.pkg.github.com/liquibase</deploy.url>
+		<deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
 
 		<h2.version>2.1.214</h2.version>
 		<hsqldb.version>2.7.1</hsqldb.version>
