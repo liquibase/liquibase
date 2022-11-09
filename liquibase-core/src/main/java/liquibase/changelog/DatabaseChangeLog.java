@@ -641,7 +641,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 } else {
                     path = resourceAccessor.get(relativeTo).resolveSibling(pathName).getPath();
                     path = Paths.get(path).normalize().toString()
-                            .replace("\\", "");
+                            .replace("\\", "/");
                 }
 
                 path = path.replace("\\", "/");
