@@ -28,10 +28,10 @@ jobs:
         run: mvn versions:set -DnewVersion=DAT-11899-SNAPSHOT
 
       # Skip Tests for testing purposes
-      - name: Build and Package
-        run: mvn -B clean package -DskipTests=true
+#      - name: Build and Package
+#        run: mvn -B clean package -DskipTests=true
 
       - name: Publish package
-        run: mvn -B deploy -DskipTests=true
+        run: mvn -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
