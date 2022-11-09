@@ -16,6 +16,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.resource.OpenOptions;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.serializer.ChangeLogSerializer;
@@ -157,7 +158,7 @@ public class DiffToChangeLog {
                                 String toInsert = "    " + innerXml + lineSeparator;
                                 fileContents.insert(endTagIndex, toInsert);
                             }
-                            try (OutputStream outputStream = file.openOutputStream(true)) {
+                            try (OutputStream outputStream = file.openOutputStream(new OpenOptions())) {
                                 outputStream.write(fileContents.toString().getBytes());
                             }
                         }
@@ -211,7 +212,7 @@ public class DiffToChangeLog {
             Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
         }
 
-        try (OutputStream stream = file.openOutputStream(true);
+        try (OutputStream stream = file.openOutputStream(new OpenOptions());
              PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
             changeLogSerializer.write(changeSets, out);
         }

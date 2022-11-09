@@ -2,6 +2,10 @@ package liquibase.command
 
 import liquibase.Scope
 import liquibase.command.core.MockCommandStep
+import liquibase.configuration.ConfiguredValue
+import liquibase.configuration.ConfiguredValueModifier
+import liquibase.configuration.ConfiguredValueModifierFactory
+import liquibase.configuration.ProvidedValue
 import liquibase.exception.CommandValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -103,5 +107,30 @@ class CommandScopeTest extends Specification {
         then:
         def e = thrown(CommandValidationException)
         e.message == "Invalid argument 'requiredArg': missing required argument"
+    }
+
+    def "ValueModifiers are used in getArgumentValue"() {
+        when:
+        def valueModifier = new ConfiguredValueModifier<String>() {
+            @Override
+            int getOrder() {
+                return 5
+            }
+
+            @Override
+            void override(ConfiguredValue<String> object) {
+                object.override("MODIFIED!", "Mock Modifier")
+            }
+        }
+        Scope.currentScope.getSingleton(ConfiguredValueModifierFactory).register(valueModifier)
+
+        def scope = new CommandScope("mock")
+        scope.addArgumentValue(MockCommandStep.VALUE_1_ARG, "Original Value")
+
+        then:
+        scope.getArgumentValue(MockCommandStep.VALUE_1_ARG) == "MODIFIED!"
+
+        Scope.currentScope.getSingleton(ConfiguredValueModifierFactory).unregister(valueModifier)
+
     }
 }
