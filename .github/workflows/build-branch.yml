@@ -9,13 +9,16 @@ jobs:
   build:
     name: Build & Package
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v3
         with:
-          java-version: 17
+          java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
 
@@ -28,7 +31,7 @@ jobs:
       - name: Build and Package
         run: mvn -B dependency:go-offline clean package -DskipTests=true
 
-      - name: Deploy Artifact
+      - name: Publish package
         run: mvn --batch-mode deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

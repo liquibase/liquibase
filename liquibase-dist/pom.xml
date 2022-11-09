@@ -29,14 +29,6 @@
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 	</properties>
 
-	<distributionManagement>
-		<repository>
-			<id>${deploy.repositoryId}</id>
-			<name>GitHub Packages</name>
-			<url>${deploy.url}</url>
-		</repository>
-	</distributionManagement>
-
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

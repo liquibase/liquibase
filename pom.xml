@@ -72,6 +72,13 @@
         <argLine></argLine>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/liquibase/liquibase</url>
+        </repository>
+    </distributionManagement>
 
     <modules>
         <module>liquibase-core</module>
