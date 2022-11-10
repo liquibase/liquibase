@@ -24,13 +24,8 @@ jobs:
           server-id: github
 
       # Version artifact based off of branch and commit SHA.
-      # For testing purposes hardcode it
       - name: Version Artifact
-        run: mvn versions:set -DnewVersion=DAT-11899-SNAPSHOT
-
-      # Skip Tests for testing purposes
-#      - name: Build and Package
-#        run: mvn -B clean package -DskipTests=true
+        run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT"
 
       - name: Publish package
         run: mvn -B clean deploy -DskipTests=true
