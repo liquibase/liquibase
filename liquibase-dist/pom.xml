@@ -14,7 +14,6 @@
 	<properties>
 		<deploy.repositoryId>github</deploy.repositoryId>
 		<deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
-		<maven.deploy.skip>false</maven.deploy.skip>
 		<h2.version>2.1.214</h2.version>
 		<hsqldb.version>2.7.1</hsqldb.version>
 		<postgresql.version>42.5.0</postgresql.version>
