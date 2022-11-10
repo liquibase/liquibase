@@ -9,6 +9,7 @@ import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
@@ -304,8 +305,12 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 try {
                     InputStream stream = openSqlStream();
                     if (stream == null) {
-                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(path));
-                        stream = new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
+                        if (ChangeLogParserConfiguration.WARN_ON_MISSING_CHANGELOGS.getCurrentValue()) {
+                            Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(path));
+                            stream = new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
+                        } else {
+                            throw new IOException(FileUtil.getFileNotFoundMessage(path));
+                        }
                     }
                     procedureText = StreamUtil.readStreamAsString(stream, encoding);
                     if (getChangeSet() != null) {

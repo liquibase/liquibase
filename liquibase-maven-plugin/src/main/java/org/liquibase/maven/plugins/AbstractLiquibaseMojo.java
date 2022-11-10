@@ -12,6 +12,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.SearchPathResourceAccessor;
@@ -34,6 +35,7 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -839,9 +841,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         if (propertyFile != null) {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
-            try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
+            try (InputStream _is = handlePropertyFileInputStream(propertyFile)) {
+                InputStream is = _is;
                 if (is == null) {
-                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
+                    if (ChangeLogParserConfiguration.WARN_ON_MISSING_CHANGELOGS.getCurrentValue()) {
+                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(propertyFile));
+                        is = new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
+                    } else {
+                        throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
+                    }
                 }
 
                 parsePropertiesFile(is);
@@ -849,9 +857,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
-            try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
+            try (InputStream _is = handlePropertyFileInputStream(propertyFile)) {
+                InputStream is = _is;
                 if (is == null) {
-                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
+                    if (ChangeLogParserConfiguration.WARN_ON_MISSING_CHANGELOGS.getCurrentValue()) {
+                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(propertyFile));
+                        is = new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
+                    } else {
+                        throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
+                    }
                 }
 
                 LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
