@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.core.ParsedNode;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.BomAwareInputStream;
 import liquibase.util.FileUtil;
@@ -14,10 +15,8 @@ import org.xml.sax.*;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
@@ -71,8 +70,8 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     @Override
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        try (InputStream _inputStream = resourceAccessor.openStream(null, physicalChangeLogLocation)) {
-            InputStream inputStream = _inputStream;
+        try  {
+            Resource resource = resourceAccessor.get(physicalChangeLogLocation);
             SAXParser parser = saxParserFactory.newSAXParser();
             if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
                 try {
@@ -105,21 +104,22 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                 }
             });
 
-            if (inputStream == null) {
+            if (!resource.exists()) {
                 if (physicalChangeLogLocation.startsWith("WEB-INF/classes/")) {
                     // Correct physicalChangeLogLocation and try again.
                     return parseToNode(
                             physicalChangeLogLocation.replaceFirst("WEB-INF/classes/", ""),
                             changeLogParameters, resourceAccessor);
                 } else {
-                    Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
-                    inputStream = new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
+                    throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
                 }
             }
 
             XMLChangeLogSAXHandler contentHandler = new XMLChangeLogSAXHandler(physicalChangeLogLocation, resourceAccessor, changeLogParameters);
             xmlReader.setContentHandler(contentHandler);
-            xmlReader.parse(new InputSource(new BomAwareInputStream(inputStream)));
+            try (InputStream stream = resource.openInputStream()) {
+                xmlReader.parse(new InputSource(new BomAwareInputStream(stream)));
+            }
 
             return contentHandler.getDatabaseChangeLogTree();
         } catch (ChangeLogParseException e) {

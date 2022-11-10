@@ -28,7 +28,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labels (String) Changeset labels to match
+  labelFilter (String) Changeset labels to match
     Default: null
   password (String) Password to use to connect to the database
     Default: null
@@ -42,12 +42,12 @@ Optional Args:
                 url:        { it.url },
                 username:   { it.username },
                 password:   { it.password },
-                changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml"
+                changelogFile: "changelogs/h2/complete/rollback.changelog.xml"
         ]
 
         setup {
-            runChangelog "changelogs/hsqldb/complete/rollback.changelog.xml"
-            rollback 5, "changelogs/hsqldb/complete/rollback.changelog.xml"
+            runChangelog "changelogs/h2/complete/rollback.changelog.xml"
+            rollback 5, "changelogs/h2/complete/rollback.changelog.xml"
         }
         expectedResults = [
                 statusCode   : 0

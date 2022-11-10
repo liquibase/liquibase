@@ -10,15 +10,15 @@ import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.resource.Resource;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Represents a Change for custom SQL stored in a File.
@@ -26,12 +26,12 @@ import java.nio.charset.StandardCharsets;
  */
 @DatabaseChange(name = "sqlFile",
         description = "The 'sqlFile' tag allows you to specify any sql statements and have it stored external in a " +
-            "file. It is useful for complex changes that are not supported through Liquibase's automated refactoring " +
-          "tags such as stored procedures.\n" +
+                "file. It is useful for complex changes that are not supported through Liquibase's automated refactoring " +
+                "tags such as stored procedures.\n" +
                 "\n" +
                 "The sqlFile refactoring finds the file by searching in the following order:\n" +
                 "\n" +
-            "The file is searched for in the classpath. This can be manually set and by default the Liquibase " +
+                "The file is searched for in the classpath. This can be manually set and by default the Liquibase " +
                 "startup script adds the current directory when run.\n" +
                 "The file is searched for using the file attribute as a file name. This allows absolute paths to be " +
                 "used or relative paths to the working directory to be used.\n" +
@@ -62,7 +62,7 @@ public class SQLFileChange extends AbstractSQLChange {
     }
 
     @DatabaseChangeProperty(description = "The file path of the SQL file to load",
-        exampleValue = "my/path/file.sql", requiredForDatabase = "all")
+            exampleValue = "my/path/file.sql", requiredForDatabase = "all")
     public String getPath() {
         return path;
     }
@@ -115,22 +115,12 @@ public class SQLFileChange extends AbstractSQLChange {
             return null;
         }
 
-        InputStream inputStream;
-        try {
-            String relativeTo = null;
-            if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
-                relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
-            }
-            inputStream = Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
-        } catch (IOException e) {
-            throw new IOException("Unable to read file '" + path + "'", e);
+        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+        if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
+            return resourceAccessor.get(getChangeSet().getChangeLog().getPhysicalFilePath()).resolveSibling(path).openInputStream();
+        } else {
+            return resourceAccessor.getExisting(path).openInputStream();
         }
-
-        if (inputStream != null) {
-            return inputStream;
-        }
-        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(path));
-        return new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

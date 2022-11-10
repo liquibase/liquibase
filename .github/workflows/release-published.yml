@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download release assets
-        uses: robinraju/release-downloader@v1.4
+        uses: robinraju/release-downloader@v1.5
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
@@ -73,13 +73,12 @@ jobs:
           unzip liquibase-additional-*.zip
 
           ##extracts and sign poms
-          unzip -j liquibase-${version}.jar META-INF/maven/org.liquibase/liquibase-core/pom.xml
-          mv pom.xml liquibase-${version}.pom
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-${version}.pom
+          unzip -j liquibase-core-${version}.jar META-INF/maven/org.liquibase/liquibase-core/pom.xml
+          mv pom.xml liquibase-core-${version}.pom
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-core-${version}.pom
 
           unzip -j liquibase-maven-plugin-${version}.jar META-INF/maven/org.liquibase/liquibase-maven-plugin/pom.xml
           mv pom.xml liquibase-maven-plugin-${version}.pom
-          sed -i -e "s/<description>/<name>Liquibase Maven Plugin<\/name><description>/" liquibase-maven-plugin-${version}.pom   ## name didn't end up in pom. Hack it in for now
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-maven-plugin-${version}.pom
 
           unzip -j liquibase-cdi-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi/pom.xml
@@ -87,15 +86,32 @@ jobs:
           sed -i -e "s/<description>/<name>Liquibase CDI Plugin<\/name><description>/" liquibase-cdi-${version}.pom   ## name didn't end up in pom. Hack it in for now
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-${version}.pom
 
+          unzip -j liquibase-commercial-${version}.jar META-INF/maven/org.liquibase/liquibase-commercial/pom.xml
+          mv pom.xml liquibase-commercial-${version}.pom
+          sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" liquibase-commercial-${version}.pom   ## scm info not in the pom          
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-commercial-${version}.pom
+          
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
             -DrepositoryId=sonatype-nexus-staging \
-            -DpomFile=liquibase-${version}.pom \
+            -DpomFile=liquibase-core-${version}.pom \
             -DgeneratePom=false \
-            -Dfile=liquibase-${version}.jar \
-            -Dsources=liquibase-${version}-sources.jar \
-            -Djavadoc=liquibase-${version}-javadoc.jar \
-            -Dfiles=liquibase-${version}.jar.asc,liquibase-${version}-sources.jar.asc,liquibase-${version}-javadoc.jar.asc,liquibase-${version}.pom.asc \
+            -Dfile=liquibase-core-${version}.jar \
+            -Dsources=liquibase-core-${version}-sources.jar \
+            -Djavadoc=liquibase-core-${version}-javadoc.jar \
+            -Dfiles=liquibase-core-${version}.jar.asc,liquibase-core-${version}-sources.jar.asc,liquibase-core-${version}-javadoc.jar.asc,liquibase-core-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
+
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
+            -DrepositoryId=sonatype-nexus-staging \
+            -DpomFile=liquibase-commercial-${version}.pom \
+            -DgeneratePom=false \
+            -Dfile=liquibase-commercial-${version}.jar \
+            -Dsources=liquibase-commercial-${version}-sources.jar \
+            -Djavadoc=liquibase-commercial-${version}-javadoc.jar \
+            -Dfiles=liquibase-commercial-${version}.jar.asc,liquibase-commercial-${version}-sources.jar.asc,liquibase-commercial-${version}-javadoc.jar.asc,liquibase-commercial-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
             -Dclassifiers=,sources,javadoc,
 
@@ -148,3 +164,34 @@ jobs:
             -DserverId=sonatype-nexus-staging \
             -DstagingRepositoryId=$stagingRepositoryId \
             -DstagingProgressTimeoutMinutes=10
+  
+  deploy_javadocs:
+    name: Upload Javadocs
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Download release javadocs
+      uses: robinraju/release-downloader@v1.5
+      with:
+        repository: "liquibase/liquibase"
+        tag: "${{ needs.setup.outputs.tag }}"
+        filename: "liquibase-additional*.zip"
+        out-file-path: "."
+
+    - name: Unpack javadoc files and upload to s3
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.JAVADOCS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.JAVADOCS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: us-east-1
+      run: |
+        unzip -j '*.zip' '*javadoc*.jar'
+        unzip '*liquibase-cdi*.jar' -d liquibase-cdi/
+        unzip '*liquibase-commercial*.jar' -d liquibase-commercial/
+        unzip '*liquibase-core*.jar' -d liquibase-core/
+        unzip '*liquibase-maven-plugin*.jar' -d liquibase-maven-plugin/
+        rm -rf *.jar *.zip
+        aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors

@@ -21,6 +21,8 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     protected static final String COLUMN_NAME = "colToMakeUQ";
     protected static final String CONSTRAINT_NAME = "UQ_TEST";
     protected static final String TABLESPACE_NAME = "LIQUIBASE2";
+    protected static final String CATALOG_NAME = "LBCAT2";
+    protected static final String SCHEMA_NAME = "LBSCHEM2";
 
     @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
@@ -126,8 +128,8 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     @Test
     public void execute_withSchema() throws Exception {
         statementUnderTest = new AddUniqueConstraintStatement(
-                AbstractIntegrationTest.ALT_CATALOG,
-                AbstractIntegrationTest.ALT_SCHEMA,
+                CATALOG_NAME,
+                SCHEMA_NAME,
                 TABLE_NAME,
                 new ColumnConfig[]
                         {new ColumnConfig().setName(COLUMN_NAME)},

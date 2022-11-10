@@ -5,6 +5,7 @@ import org.hamcrest.Matchers
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import static spock.util.matcher.HamcrestSupport.expect
 import static spock.util.matcher.HamcrestSupport.that
 
 class StringUtilTest extends Specification {
@@ -15,7 +16,7 @@ class StringUtilTest extends Specification {
         that Arrays.asList(StringUtil.processMultiLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
 
         where:
-        stripComments | splitStatements | endDelimiter | rawString                                                                                                                                                                                              | expected
+        stripComments | splitStatements | endDelimiter | rawString                                                                                                                                                                                           | expected
         true          | true            | null         | "/**\nSome comments go here\n**/\ncreate table sqlfilerollback (id int);\n\n/**\nSome morecomments go here\n**/\ncreate table sqlfilerollback2 (id int);"                                           | ["create table sqlfilerollback (id int)", "create table sqlfilerollback2 (id int)"]
         true          | true            | null         | "/*\nThis is a test comment of MS-SQL script\n*/\n\nSelect * from Test;\nUpdate Test set field = 1"                                                                                                 | ["Select * from Test", "Update Test set field = 1"]
         true          | true            | null         | "some sql/*Some text\nmore text*/more sql"                                                                                                                                                          | ["some sqlmore sql"]
@@ -24,14 +25,22 @@ class StringUtilTest extends Specification {
         true          | true            | null         | "/*\nThis is a test comment of SQL script\n*/\n\nSelect * from Test;\nUpdate Test set field = 1"                                                                                                    | ["Select * from Test", "Update Test set field = 1"]
         true          | true            | null         | "select * from simple_select_statement;\ninsert into table ( col ) values (' value with; semicolon ');"                                                                                             | ["select * from simple_select_statement", "insert into table ( col ) values (' value with; semicolon ')"]
         true          | true            | null         | "--\n-- Create the blog table.\n--\nCREATE TABLE blog\n(\n ID NUMBER(15) NOT NULL\n)"                                                                                                               | ["CREATE TABLE blog\n(\n ID NUMBER(15) NOT NULL\n)"]
+        true          | true            | null          | "statement 1/2\n/\nstatement 2/2"                                                                                                                                                                   | ["statement 1/2", "statement 2/2"]
         true          | true            | "//"         | "drop procedure if exists my_proc//\n\ncreate procedure my_proc(i_myvar varchar)\nbegin\n  a bunch of code here\nend//"                                                                             | ["drop procedure if exists my_proc", "create procedure my_proc(i_myvar varchar)\nbegin\n  a bunch of code here\nend"]
         true          | true            | "/"          | "CREATE OR REPLACE PACKAGE emp_actions AS  -- spec\nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;"                                   | ["CREATE OR REPLACE PACKAGE emp_actions AS  \nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;"]
         true          | true            | "/"          | "CREATE OR REPLACE PACKAGE emp_actions AS  -- spec\nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;\n/\nanother statement;here\n/\n"   | ["CREATE OR REPLACE PACKAGE emp_actions AS  \nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;", "another statement;here"]
+        true          | true            | "/"          | "statement 1/2\n/\nstatement 2/2"                                                                                                                                                                   | ["statement 1/2", "statement 2/2"]
+        true          | true            | "/"          | "/* a comment here */ statement 1/2\n/\nstatement 2/2"                                                                                                                                              | ["statement 1/2", "statement 2/2"]
+        false         | true            | "/"          | "/* a comment here */ statement 1/2\n/\nstatement 2/2"                                                                                                                                              | ["/* a comment here */ statement 1/2", "statement 2/2"]
+        true          | true            | "/"          | "/\nstatement here"                                                                                                                                                                                 | ["statement here"]
         true          | true            | "\\n/"       | "CREATE OR REPLACE PACKAGE emp_actions AS  -- spec\nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;\n/\nanother statement;here\n/\n"   | ["CREATE OR REPLACE PACKAGE emp_actions AS  \nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;", "another statement;here"]
         true          | true            | "\\ngo"      | "CREATE OR REPLACE PACKAGE emp_actions AS  -- spec\nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;\nGO\nanother statement;here\nGO\n" | ["CREATE OR REPLACE PACKAGE emp_actions AS  \nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;", "another statement;here"]
         true          | true            | null         | "statement 1;\nstatement 2;\nGO\n\nstatement 3; statement 4;"                                                                                                                                       | ["statement 1", "statement 2", "statement 3", "statement 4"]
         true          | true            | "\\nGO"      | "statement 1 \nGO\nstatement 2"                                                                                                                                                                     | ["statement 1", "statement 2"]
         true          | true            | "\\nGO"      | "CREATE OR REPLACE PACKAGE emp_actions AS  -- spec\nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;\nGO\nanother statement;here\nGO\n" | ["CREATE OR REPLACE PACKAGE emp_actions AS  \nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;", "another statement;here"]
+        true          | true            | null         | "CREATE OR REPLACE PACKAGE emp_actions AS BEGIN\n statement 1;\nanother statement;here; END;"                                                                                                       | ["CREATE OR REPLACE PACKAGE emp_actions AS BEGIN\n statement 1;\nanother statement;here; END"]
+        true          | true            | null         | "CREATE OR REPLACE PACKAGE emp_actions AS BEGIN\n statement 1;\nBEGIN a nested statement;here; END; END;"                                                                                           | ["CREATE OR REPLACE PACKAGE emp_actions AS BEGIN\n statement 1;\nBEGIN a nested statement;here; END; END"]
+        true          | true            | null         | "BEGIN TRANSACTION; statement 1; end transaction;"                                                                                                                                                  | ["BEGIN TRANSACTION", "statement 1", "end transaction"]
 
     }
 
@@ -108,6 +117,18 @@ class StringUtilTest extends Specification {
         [key1: "a", key2: "b"]            | "key1=a, key2=b"         | ", "
         [key1: "a", key2: "b"]            | "key1=aXkey2=b"          | "X"
         [key1: "a", key2: "b", key3: "c"] | "key1=a, key2=b, key3=c" | ", "
+    }
+
+    def "to lower without whitespaces"() {
+        expect:
+        StringUtil.toLowerWithoutWhitespaces(string) == expected
+
+        where:
+        string                | expected
+        "First Value"         | "firstvalue"
+        "secondValue"         | "secondvalue"
+        "   Third Value   \n" | "thirdvalue"
+        null                  | null
     }
 
     @Unroll

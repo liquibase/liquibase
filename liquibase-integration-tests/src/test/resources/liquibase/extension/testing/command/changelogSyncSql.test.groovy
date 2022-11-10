@@ -25,7 +25,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labels (String) Label expression to use for filtering which changes to mark as executed
+  labelFilter (String) Label expression to use for filtering which changes to mark as executed
     Default: null
   outputDefaultCatalog (Boolean) Control whether names of objects in the default catalog are fully qualified or not. If true they are. If false, only objects outside the default catalog are fully qualified
     Default: true
@@ -43,7 +43,7 @@ Optional Args:
                 url : { it.url },
                 username: { it.username },
                 password: { it.password },
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
         setup {
@@ -85,7 +85,7 @@ Optional Args:
                 url : { it.url },
                 username: { it.username },
                 password: { it.password },
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
         setup {
@@ -135,7 +135,7 @@ Optional Args:
     run "Run without URL should throw an exception",  {
         arguments = [
                 url: "",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
         expectedException = CommandValidationException.class

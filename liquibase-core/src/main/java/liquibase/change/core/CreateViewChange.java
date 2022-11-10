@@ -5,12 +5,12 @@ import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.*;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -18,6 +18,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
+import liquibase.statement.core.SetViewRemarksStatement;
 import liquibase.structure.core.View;
 import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
@@ -30,6 +31,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -164,12 +166,13 @@ public class CreateViewChange extends AbstractChange {
         }
 
         try {
-            String path = getPath();
-            String relativeTo = null;
+            ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+
             if (ObjectUtil.defaultIfNull(getRelativeToChangelogFile(), false)) {
-                relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
+                return resourceAccessor.get(getChangeSet().getChangeLog().getPhysicalFilePath()).resolveSibling(getPath()).openInputStream();
+            } else {
+                return resourceAccessor.getExisting(getPath()).openInputStream();
             }
-            return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
             throw new IOException("<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" + path + "> -Unable to read file", e);
         }
@@ -268,8 +271,11 @@ public class CreateViewChange extends AbstractChange {
                     .setFullDefinition(fullDefinition));
         }
 
-        if ((database instanceof OracleDatabase) && (StringUtil.trimToNull(remarks) != null)) {
-            SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, viewName, remarks);
+        List<Class<?>> databaseSupportsViewComments = Arrays.asList(OracleDatabase.class, PostgresDatabase.class);
+        boolean supportsViewComments = databaseSupportsViewComments.stream().anyMatch(clazz -> clazz.isInstance(database));
+
+        if (supportsViewComments && (StringUtil.trimToNull(remarks) != null)) {
+            SetViewRemarksStatement remarksStatement = new SetViewRemarksStatement(catalogName, schemaName, viewName, remarks);
             if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                 statements.add(remarksStatement);
             }

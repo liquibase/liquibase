@@ -9,7 +9,7 @@ import liquibase.resource.ResourceAccessor;
  * Interface to implement when creating a custom change.  Actual custom changes implementations need to
  * implement CustomSqlChange or CustomTaskChange.
  * <br><br>
- * See http://www.liquibase.org/documentation/changes/custom_change.html for more information.
+ * See https://docs.liquibase.com/change-types/custom-change.html for more information.
  */
 public interface CustomChange {
 

@@ -3,9 +3,7 @@ package liquibase.parser.core.xml;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.logging.Logger;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.InputStreamList;
-import liquibase.resource.ResourceAccessor;
+import liquibase.resource.Resource;
 import liquibase.util.LiquibaseUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -13,6 +11,7 @@ import org.xml.sax.ext.EntityResolver2;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,7 +21,6 @@ import java.util.regex.Pattern;
  */
 public class LiquibaseEntityResolver implements EntityResolver2 {
 
-    private static ClassLoaderResourceAccessor fallbackResourceAccessor;
     private boolean shouldWarnOnMismatchedXsdVersion = false;
     /**
      * The warning message should only be printed once.
@@ -49,30 +47,28 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
             warnForMismatchedXsdVersion(systemId);
         }
 
-        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        InputStreamList streams = resourceAccessor.openStreams(null, path);
-        if (streams.isEmpty()) {
-            streams = getFallbackResourceAccessor().openStreams(null, path);
+        InputStream stream = null;
+        URL resourceUri = getSearchClassloader().getResource(path);
+        if (resourceUri == null) {
+            Resource resource = Scope.getCurrentScope().getResourceAccessor().get(path);
+            if (resource.exists()) {
+                stream = resource.openInputStream();
+            }
+        } else {
+            stream = resourceUri.openStream();
+        }
 
-            if (streams.isEmpty()) {
-                if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
-                    String errorMessage = "Unable to resolve xml entity " + systemId + " locally: " +
-                            GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
-                            "Set it to 'false' to allow remote lookups of xsd files.";
-                    throw new XSDLookUpException(errorMessage);
-                } else {
-                    log.fine("Unable to resolve XML entity locally. Will load from network.");
-                    return null;
-                }
+        if (stream == null) {
+            if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
+                String errorMessage = "Unable to resolve xml entity " + systemId + ". " +
+                        GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
+                        "Check for spelling or capitalization errors and missing extensions such as liquibase-commercial in your XSD definition. Or, set it to 'false' to allow remote lookups of xsd files.";
+                throw new XSDLookUpException(errorMessage);
+            } else {
+                log.fine("Unable to resolve XML entity locally. Will load from network.");
+                return null;
             }
         }
-
-        if (streams.size() == 1) {
-            log.fine("Found XML entity at " + streams.getURIs().get(0));
-        } else if (streams.size() > 1) {
-            log.warning("Found " + streams.size() + " copies of " + systemId + ". Using " + streams.getURIs().get(0));
-        }
-        InputStream stream = streams.iterator().next();
 
         org.xml.sax.InputSource source = new org.xml.sax.InputSource(stream);
         source.setPublicId(publicId);
@@ -80,6 +76,10 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
         return source;
 
+    }
+
+    protected ClassLoader getSearchClassloader() {
+        return Thread.currentThread().getContextClassLoader();
     }
 
     /**
@@ -106,17 +106,6 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).fine("Failed to compare XSD version with build version.", e);
         }
-    }
-
-    /**
-     * ResourceAccessor to use if the standard one does not have the XSD files in it.
-     * Returns a ClassLoaderResourceAccessor that checks the system classloader which should include the liquibase.jar.
-     */
-    protected ResourceAccessor getFallbackResourceAccessor() {
-        if (fallbackResourceAccessor == null) {
-            fallbackResourceAccessor = new ClassLoaderResourceAccessor();
-        }
-        return fallbackResourceAccessor;
     }
 
     @Override

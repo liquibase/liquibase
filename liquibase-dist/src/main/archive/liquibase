@@ -30,6 +30,11 @@ if [ -z "${JAVA_HOME}" ]; then
   elif [ -d "${LIQUIBASE_HOME}/.install4j/jre.bundle/Contents/Home" ]; then
     JAVA_HOME="${LIQUIBASE_HOME}/.install4j/jre.bundle/Contents/Home"
   fi
+else
+  if [ ! -x "$JAVA_HOME" ] ; then
+    echo "ERROR: The JAVA_HOME environment variable is not defined correctly, so Liquibase cannot be started. JAVA_HOME is set to \"$JAVA_HOME\" and it does not exist." >&2
+    exit 1
+  fi
 fi
 
 if [ -z "${JAVA_HOME}" ]; then
@@ -37,6 +42,7 @@ if [ -z "${JAVA_HOME}" ]; then
 
   if [ -z "${JAVA_PATH}" ]; then
     echo "Cannot find java in your path. Install java or use the JAVA_HOME environment variable"
+    exit 1
   fi
 else
     #Use path in JAVA_HOME
@@ -47,4 +53,4 @@ fi
 JAVA_OPTS="${JAVA_OPTS-}"
 
 export LIQUIBASE_HOME
-"${JAVA_PATH}" $JAVA_OPTS -jar "$LIQUIBASE_HOME/liquibase.jar" ${1+"$@"}
+"${JAVA_PATH}" $JAVA_OPTS -jar "$LIQUIBASE_HOME/internal/lib/liquibase-core.jar" ${1+"$@"}
