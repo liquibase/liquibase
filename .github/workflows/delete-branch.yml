@@ -23,6 +23,9 @@ jobs:
         # When set greater than 0, all deletable package versions except the specified number will be deleted.
         min-versions-to-keep: 0
 
-        # Can be a single package version id, or a comma separated list of package version ids.
-        # Defaults to an empty string.
-        package-version-ids: "*"
+        # If true it will delete only the pre-release versions.
+        # The number of pre-release versions to keep can be set by using `min-versions-to-keep` value with this.
+        # When `min-versions-to-keep` is 0, all pre-release versions get deleted.
+        # Defaults to false.
+        # Cannot be used with `num-old-versions-to-delete` and `ignore-versions`.
+        delete-only-pre-release-versions: "true"
