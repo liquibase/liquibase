@@ -330,7 +330,7 @@ class AbstractChangeTest extends Specification {
     }
 
     @Unroll("#featureName: #path is included as part of description for a #change")
-    void pathIsIncludedAsPartOfChangeDescription(String path, AbstractChange change) {
+    void pathIsIncludedAsPartOfChangeDescription() {
         when:
         change.setPath(path);
 
@@ -341,7 +341,7 @@ class AbstractChangeTest extends Specification {
         path | change
         "This/is/a/test/change/path" | new SQLFileChange()
         "/test"                      | new CreateViewChange()
-        "This/is/a/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/ver/long/test/change/path" | new CreateProcedureChange()
+        "This/is/a/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/ver/long/test/change/path" | new CreateProcedureChange()
     }
 
     @DatabaseChange(name = "exampleParamelessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
