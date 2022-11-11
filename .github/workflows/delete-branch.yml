@@ -2,7 +2,7 @@ name: Cleanup on Branch Delete
 
 on:
   workflow_dispatch:
-  delete:
+  push:
     branches:
       - '**DAT-**'
 jobs:
