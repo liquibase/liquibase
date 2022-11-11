@@ -340,7 +340,7 @@ class AbstractChangeTest extends Specification {
         where:
         path | change
         "This/is/a/test/change/path" | new SQLFileChange()
-        "/test"                      | new CreateViewChange()
+//        "/test"                      | new CreateViewChange()
         "This/is/a/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/ver/long/test/change/path" | new CreateProcedureChange()
     }
 
