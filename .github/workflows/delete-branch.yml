@@ -12,13 +12,13 @@ jobs:
     steps:
     - uses: actions/delete-package-versions@v3
       with:
-      # Name of the package.
-      # Defaults to an empty string.
-      # Required if `package-version-ids` input is not given.
-      package-name: "liquibase-${{ github.ref_name }}-SNAPSHOT"
+        # Name of the package.
+        # Defaults to an empty string.
+        # Required if `package-version-ids` input is not given.
+        package-name: "liquibase-${{ github.ref_name }}-SNAPSHOT"
 
-      # The number of latest versions to keep.
-      # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
-      # When set to 0, all deletable versions will be deleted.
-      # When set greater than 0, all deletable package versions except the specified number will be deleted.
-      min-versions-to-keep: 0
+        # The number of latest versions to keep.
+        # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
+        # When set to 0, all deletable versions will be deleted.
+        # When set greater than 0, all deletable package versions except the specified number will be deleted.
+        min-versions-to-keep: 0
