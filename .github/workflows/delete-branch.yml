@@ -2,9 +2,9 @@ name: Cleanup on Branch Delete
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - '**DAT-**'
+#  push:
+#    branches:
+#      - '**DAT-**'
 jobs:
   delete-package:
     name: Delete Github Package for Branch
