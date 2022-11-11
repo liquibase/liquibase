@@ -27,6 +27,7 @@ jobs:
       - name: Version Artifact
         run: mvn versions:set -DnewVersion="${{ github.ref_name }}-SNAPSHOT"
 
+      # Publish to GitHub Packages
       - name: Publish package
         run: mvn -B clean deploy -DskipTests=true
         env:
