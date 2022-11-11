@@ -49,7 +49,7 @@ public class DBDocVisitorTest {
     @Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {new PostgresDatabase(), 2},
+                {new PostgresDatabase(), 1},
                 {new OracleDatabase(), 1}
         });
     }

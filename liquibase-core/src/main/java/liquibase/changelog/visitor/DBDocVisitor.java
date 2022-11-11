@@ -173,7 +173,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
     private boolean shouldNotWriteColumnHtml(Column column) {
         return database.isLiquibaseObject(column.getRelation()) ||
-            (database instanceof OracleDatabase && Boolean.TRUE.equals(column.getComputed()));
+                Boolean.TRUE.equals(column.getComputed());
     }
 
     private void copyFile(String fileToCopy, Resource rootOutputDir) throws IOException {
