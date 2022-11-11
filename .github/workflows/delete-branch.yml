@@ -12,12 +12,12 @@ jobs:
     steps:
       # Get version id(s) based on version name
     - uses: castlabs/get-package-version-id-action@v2.0
-      id: versions
+      id: version
       with:
-        versions: "${{ github.ref_name }}-SNAPSHOT"
+        version: "${{ github.ref_name }}-SNAPSHOT"
 
     - uses: actions/delete-package-versions@v3
-      if: ${{ steps.versions.outputs.ids != '' }}
+      if: ${{ steps.version.outputs.ids != '' }}
       with:
         # Name of the package.
         # Defaults to an empty string.
