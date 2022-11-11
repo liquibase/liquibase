@@ -162,16 +162,7 @@ public class Scope {
      * Creates a new scope that is a child of this scope.
      */
     public static <ReturnType> ReturnType child(Map<String, Object> scopeValues, ScopedRunnerWithReturn<ReturnType> runner) throws Exception {
-        return child((LiquibaseListener) null, scopeValues, runner);
-    }
-
-    /**
-     * Creates a new scope that is a child of this scope.
-     */
-    public static <ReturnType> ReturnType child(Enum newValueKey, Object newValue, ScopedRunnerWithReturn<ReturnType> runner) throws Exception {
-        Map<String, Object> newMap = new HashMap<>();
-        newMap.put(newValueKey.name(), newValue);
-        return child((LiquibaseListener) null, newMap, runner);
+        return child(null, scopeValues, runner);
     }
 
     /**

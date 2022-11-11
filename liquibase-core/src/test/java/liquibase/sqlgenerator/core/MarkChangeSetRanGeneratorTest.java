@@ -14,6 +14,9 @@ import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -153,7 +156,10 @@ public class MarkChangeSetRanGeneratorTest extends AbstractSqlGeneratorTest<Mark
 
         MarkChangeSetRanStatement changeSetRanStatement = new MarkChangeSetRanStatement(changeSet, ChangeSet.ExecType.EXECUTED);
         MarkChangeSetRanGenerator changeSetRanGenerator = new MarkChangeSetRanGenerator();
-        String sql = Scope.child(Scope.Attr.resourceAccessor, resourceAccessor, () -> changeSetRanGenerator.generateSql(changeSetRanStatement, new MockDatabase(), new MockSqlGeneratorChain())[0].toSql());
+        Map<String, Object> newMap = new HashMap<>();
+        newMap.put(Scope.Attr.resourceAccessor.name(), resourceAccessor);
+
+        String sql = Scope.child(newMap, () -> changeSetRanGenerator.generateSql(changeSetRanStatement, new MockDatabase(), new MockSqlGeneratorChain())[0].toSql());
 
         final int descriptionColumnIndex = 18;
         String databaseChangeLogDescription = sql.split(",")[descriptionColumnIndex];
