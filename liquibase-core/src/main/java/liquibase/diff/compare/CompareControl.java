@@ -48,15 +48,15 @@ public class CompareControl {
             String referenceCatalogName = null;
             String referenceSchemaName = splitReferenceSchemas[i];
             if (referenceSchemaName.contains(".")) {
-                referenceCatalogName = referenceSchemaName.split(".", 2)[0];
-                referenceSchemaName = referenceSchemaName.split(".", 2)[1];
+                referenceCatalogName = referenceSchemaName.split("\\.", 2)[0];
+                referenceSchemaName = referenceSchemaName.split("\\.", 2)[1];
             }
 
             String comparisonCatalogName = null;
             String comparisonSchemaName = splitComparisonSchemas[i];
             if (comparisonSchemaName.contains(".")) {
-                comparisonCatalogName = comparisonSchemaName.split(".", 2)[0];
-                comparisonSchemaName = comparisonSchemaName.split(".", 2)[1];
+                comparisonCatalogName = comparisonSchemaName.split("\\.", 2)[0];
+                comparisonSchemaName = comparisonSchemaName.split("\\.", 2)[1];
             }
 
             CatalogAndSchema referenceSchema = new CatalogAndSchema(referenceCatalogName, referenceSchemaName);
