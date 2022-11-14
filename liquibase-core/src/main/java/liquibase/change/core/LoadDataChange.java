@@ -722,6 +722,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             return null;
         }
 
+        @SuppressWarnings("java:S2095") // SONAR want us to close the stream here, but it is only read by CSVReader outside this method.
         InputStream stream = resource.openInputStream();
         if (resource.getPath().toLowerCase().endsWith(".gz") && !(stream instanceof GZIPInputStream)) {
             stream = new GZIPInputStream(stream);
