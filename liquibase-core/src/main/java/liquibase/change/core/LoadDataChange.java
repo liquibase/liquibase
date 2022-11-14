@@ -723,7 +723,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         }
 
         InputStream stream = resource.openInputStream();
-        if (resource.getPath().toLowerCase().endsWith(".gz")) {
+        if (resource.getPath().toLowerCase().endsWith(".gz") && !(stream instanceof GZIPInputStream)) {
             stream = new GZIPInputStream(stream);
         }
         Reader streamReader = StreamUtil.readStreamWithReader(stream, getEncoding());
