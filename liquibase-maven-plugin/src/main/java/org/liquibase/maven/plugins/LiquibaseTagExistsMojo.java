@@ -6,7 +6,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.liquibase.maven.property.PropertyElement;
 
 /**
- * Checks for existence of the specified Liquibase tag in the database
+ * <p>Checks for existence of the specified Liquibase tag in the database</p>
+ * @goal tagExists
  */
 public class LiquibaseTagExistsMojo extends AbstractLiquibaseMojo {
 

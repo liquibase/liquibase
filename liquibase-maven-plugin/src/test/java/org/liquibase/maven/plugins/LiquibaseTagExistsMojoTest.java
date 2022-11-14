@@ -17,6 +17,7 @@ public class LiquibaseTagExistsMojoTest extends AbstractLiquibaseMojoTest {
 	private static final String CONFIG_FILE = "dropAll/plugin_config.xml";
 
 	private static final Map<String, Object> DEFAULT_PROPERTIES;
+	private static final String TEST_TAG_VALUE = "some_tag";
 
 	static {
 		DEFAULT_PROPERTIES = new HashMap<String, Object>();
@@ -25,12 +26,13 @@ public class LiquibaseTagExistsMojoTest extends AbstractLiquibaseMojoTest {
 		DEFAULT_PROPERTIES.put("username", "root");
 		DEFAULT_PROPERTIES.put("password", null);
 		DEFAULT_PROPERTIES.put("verbose", true);
+		DEFAULT_PROPERTIES.put("tag", TEST_TAG_VALUE);
 	}
 
 	public void testTag() throws Exception {
 		LiquibaseTagExistsMojo mojo = createLiquibaseTagExistsMojo();
 		// Clear out any settings for the property file that may be set
-		setVariableValueToObject(mojo, "tag", "some_tag");
+		setVariableValueToObject(mojo, "tag", TEST_TAG_VALUE);
 
 		Map values = getVariablesAndValuesFromObject(mojo);
 		checkValues(DEFAULT_PROPERTIES, values);
