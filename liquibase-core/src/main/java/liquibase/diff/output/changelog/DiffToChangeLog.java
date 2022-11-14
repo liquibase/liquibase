@@ -431,13 +431,11 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof Db2zDatabase) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            String db2ZosSql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
-                        @Override
-                        public String toString(String obj) {
-                            return "DSCHEMA='" + obj + "'";
-                        }
-                    }
-            ) + ")";
+            String dependencySchema = StringUtils.join(schemas, " OR ", (StringUtils.StringUtilsFormatter<String>) obj -> "DSCHEMA='" + obj + "'");
+            String aliasesSchema = StringUtils.join(schemas, " OR ", (StringUtils.StringUtilsFormatter<String>) obj -> "CREATOR='" + obj + "'");
+            String db2ZosSql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE (" + dependencySchema + ") " +
+                    "UNION " +
+                    "SELECT CREATOR AS TABSCHEMA, NAME AS TABNAME, TBCREATOR AS BSCHEMA, TBNAME AS BNAME FROM SYSIBM.SYSTABLES WHERE ( TYPE='A' AND " + aliasesSchema + ")";
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(db2ZosSql));
             for (Map<String, ?> row : rs) {
                 String tabName = StringUtils.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("TABNAME"));
