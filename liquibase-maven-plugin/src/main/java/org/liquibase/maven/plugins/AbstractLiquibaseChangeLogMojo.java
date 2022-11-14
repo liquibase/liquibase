@@ -159,23 +159,19 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     }
 
     @Override
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException, MojoFailureException {
-        List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
-        resourceAccessors.add(new MavenResourceAccessor(cl));
-        resourceAccessors.add(new DirectoryResourceAccessor(project.getBasedir()));
-        resourceAccessors.add(new ClassLoaderResourceAccessor(getClass().getClassLoader()));
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
+//        List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
+//        resourceAccessors.add(new MavenResourceAccessor(cl));
+//        resourceAccessors.add(new DirectoryResourceAccessor(project.getBasedir()));
+//        resourceAccessors.add(new ClassLoaderResourceAccessor(getClass().getClassLoader()));
 
-        String finalSearchPath = searchPath;
+//        if (changeLogDirectory != null) {
+//            calculateChangeLogDirectoryAbsolutePath();
+//            resourceAccessors.add(new DirectoryResourceAccessor(new File(changeLogDirectory)));
+//        }
 
-        if (changeLogDirectory != null) {
-            if (searchPath != null) {
-                throw new MojoFailureException("Cannot specify searchPath and changeLogDirectory at the same time");
-            }
-            calculateChangeLogDirectoryAbsolutePath();
-            finalSearchPath = changeLogDirectory;
-        }
-
-        return new SearchPathResourceAccessor(finalSearchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
+//        return new SearchPathResourceAccessor(searchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
+        return null;
     }
 
     @Override
