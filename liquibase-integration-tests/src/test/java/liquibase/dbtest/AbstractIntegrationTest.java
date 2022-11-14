@@ -976,8 +976,8 @@ public abstract class AbstractIntegrationTest {
         SnapshotGeneratorFactory tableSnapshotGenerator = SnapshotGeneratorFactory.getInstance();
         assertTrue(tableSnapshotGenerator.has(new Table().setName("hyphen_context"), database));
         assertTrue(tableSnapshotGenerator.has(new Table().setName("camel_context"), database));
-        assertTrue(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
-        assertTrue(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
+        assertFalse(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
+        assertFalse(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
     }
 
     @Test
