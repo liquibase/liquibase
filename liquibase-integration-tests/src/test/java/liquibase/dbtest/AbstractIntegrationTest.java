@@ -594,7 +594,8 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
-    public void testTagAndTagExists() throws Exception {
+    public void testTag() throws Exception {
+        //This test will validate a tag can be set successfully to the DB, plus make sure the given tag exists in the DB.
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
