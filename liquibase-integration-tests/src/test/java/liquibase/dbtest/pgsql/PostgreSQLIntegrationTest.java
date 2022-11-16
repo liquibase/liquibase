@@ -6,6 +6,7 @@ import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.AddPrimaryKeyChange;
+import liquibase.change.core.CreateIndexChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -36,11 +37,13 @@ import static org.junit.Assume.assumeNotNull;
 
 public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
-    String dependenciesChangeLog = null;
+    private String dependenciesChangeLog = null;
+    private String blobChangeLog = null;
 
     public PostgreSQLIntegrationTest() throws Exception {
         super("pgsql", DatabaseFactory.getInstance().getDatabase("postgresql"));
         dependenciesChangeLog = "changelogs/pgsql/complete/testFkPkDependencies.xml";
+        blobChangeLog = "changelogs/pgsql/complete/testBlob.changelog.xml";
     }
 
     /**
@@ -76,6 +79,25 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
                           .findFirst()
                           .orElse(null);
             Assert.assertNull(addPrimaryKeyChangeSet);
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
+    }
+
+    @Test
+    public void testBlobTypesChangeLog() throws Exception {
+        assumeNotNull(this.getDatabase());
+        Liquibase liquibase = createLiquibase(this.blobChangeLog);
+        clearDatabase();
+        try {
+            liquibase.update();
+            List<Map<String, ?>>  data = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                    .queryForList(
+                            new RawSqlStatement("SELECT pg_column_size(content_bytea) as BYTEASIZE, pg_column_size(lo_get(content_oid)) as OIDSIZE FROM  public.blobtest"));
+            Assert.assertNotNull(data.get(0));
+            Assert.assertTrue(((Integer)data.get(0).get("BYTEASIZE")) > 0);
+            Assert.assertEquals(data.get(0).get("BYTEASIZE"), data.get(0).get("OIDSIZE"));
         } catch (ValidationFailedException e) {
             e.printDescriptiveError(System.out);
             throw e;
@@ -141,6 +163,41 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
             }
         }
         Assert.assertTrue("There should be a table named \"FIRST_TABLE\"", found);
+    }
+
+    @Test
+    public void testCreateIndexUsingFunctions() throws Exception {
+        String function = "UPPER";
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(
+                        new RawSqlStatement("CREATE TABLE INDEX_TEST (ID INT, NAME VARCHAR(20))"));
+
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(
+                        new RawSqlStatement("CREATE INDEX INDEX_TEST_IDX ON INDEX_TEST(ID, " + function +"(NAME)) WHERE ID > 0"));
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
+
+        DiffToChangeLog changeLogWriter =
+                new DiffToChangeLog(diffResult,
+                        new DiffOutputControl(false, false, false, null));
+        List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
+        boolean found = false;
+        for (ChangeSet changeSet : changeSets) {
+            List<Change> changes = changeSet.getChanges();
+            for (Change change : changes) {
+                if (! (change instanceof CreateIndexChange)) {
+                    continue;
+                }
+                found = ((CreateIndexChange) change).getColumns().stream().anyMatch(c -> c.getName().toUpperCase().contains(function));
+                if (found) {
+                    break;
+                }
+            }
+            if (found) {
+                break;
+            }
+        }
+        Assert.assertTrue("There should be a sequence column starting with function \"" + function + "\"", found);
     }
 
     @Test

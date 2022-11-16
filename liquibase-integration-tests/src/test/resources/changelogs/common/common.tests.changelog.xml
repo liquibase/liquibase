@@ -195,7 +195,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="hasIndexPrecondition" author="nvoxland" dbms="oracle,mssql,mysql,h2,hsql,postgresql"> <!-- can checkConstraint with or without table name, derby doesn't work with just column names -->
+    <changeSet id="hasIndexPrecondition" author="nvoxland" dbms="oracle,mssql,mysql,h2,hsqldb,postgresql"> <!-- can checkConstraint with or without table name, derby doesn't work with just column names -->
         <preConditions>
             <indexExists indexName="idx_compoundtest"/>
             <indexExists tableName="compoundIndexTest" indexName="idx_compoundtest"/>
@@ -745,7 +745,7 @@
         <sql>insert into default_val_computed (id) values (1);</sql>
     </changeSet>
 
-    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,hsql,oracle,db2,mysql,postgresql,mssql"> <!-- not derby -->
+    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,oracle,db2,mysql,postgresql,mssql"> <!-- not derby -->
         <preConditions onFail="MARK_RAN">
             <not><dbms type="mysql"/></not> <!-- doesn't support default values as function -->
         </preConditions>
@@ -822,6 +822,11 @@
     <changeSet id="seq-test" author="nvoxland" onValidationFail="MARK_RAN">
         <comment>Database that don't support sequences will just continue on</comment>
         <createSequence sequenceName="seqtestonall"/>
+    </changeSet>
+
+    <changeSet id="seq-test-datatype" author="flautert" onValidationFail="MARK_RAN">
+        <comment>Database that don't support sequences datatype field will just continue on</comment>
+        <createSequence sequenceName="seqtestdatatypeonall" dataType="int"/>
     </changeSet>
 
     <changeSet id="nvoxland" author="pending-some">
@@ -1064,12 +1069,12 @@
     </changeSet>
 
     <changeSet id="timestamp_column_precision9" author="abuschka"
-               dbms="db2,derby,firebird,h2,hsql,informix,mssql,oracle,postgres,sqlite,asany,sybase">
+               dbms="db2,derby,firebird,h2,hsqldb,informix,mssql,oracle,postgresql,sqlite,asany,sybase">
         <comment>Test if we (and the JDBC driver) correctly support TIMESTAMP columns with a extra-large precision
             of 9 for supported DBMS.
         </comment>
         <addColumn tableName="test_timestamp_fractions">
-            <column name="timestampColumnPrec9" type="timestamp(9)"/>
+            <column name="timestampColumnPrec9" type="timestamp(6)"/>
         </addColumn>
     </changeSet>
 
@@ -1166,6 +1171,10 @@
             <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
             <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
         </preConditions>
+    </changeSet>
+
+    <changeSet id="example" author="view-if-exists" dbms="!oracle">
+        <dropView viewName="does_not_exist" ifExists="true"/>
     </changeSet>
 
 </databaseChangeLog>
