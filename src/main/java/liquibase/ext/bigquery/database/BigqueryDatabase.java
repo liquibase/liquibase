@@ -10,6 +10,9 @@ import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -87,6 +90,13 @@ public class BigqueryDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.trim().equalsIgnoreCase(conn.getDatabaseProductName().trim());
+    }
+    @Override
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectType.equals(Schema.class) || objectType.equals(Catalog.class)) {
+            return objectName;
+        }
+        return super.escapeObjectName(objectName, objectType);
     }
 
     @Override
