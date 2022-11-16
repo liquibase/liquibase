@@ -4,6 +4,7 @@ import liquibase.change.AddColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
@@ -105,8 +106,17 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
     public void testAddPrimaryKeyColumnH2() {
         AddColumnStatement columns = new AddColumnStatement(null, null, TABLE_NAME, "ID", "BIGINT", null, new PrimaryKeyConstraint());
 
-        assertFalse(generatorUnderTest.validate(columns, new H2Database(), new MockSqlGeneratorChain()).hasErrors());
-        Sql[] sql = generatorUnderTest.generateSql(columns, new H2Database(), new MockSqlGeneratorChain());
+        H2Database h2Database =  new H2Database();
+        assertFalse(generatorUnderTest.validate(columns, h2Database, new MockSqlGeneratorChain()).hasErrors());
+        assertTrue(generatorUnderTest.validate(columns, new H2Database() {
+            @Override
+            public int getDatabaseMajorVersion() throws DatabaseException {
+                return 1;
+            }
+        }, new MockSqlGeneratorChain()).hasErrors());
+
+        Sql[] sql = generatorUnderTest.generateSql(columns, h2Database, new MockSqlGeneratorChain());
+
 
         assertEquals(1, sql.length);
         assertEquals("ALTER TABLE table_name ADD ID BIGINT NOT NULL PRIMARY KEY", sql[0].toSql());
