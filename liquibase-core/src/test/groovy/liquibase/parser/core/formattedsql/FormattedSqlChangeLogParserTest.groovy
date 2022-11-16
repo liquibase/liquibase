@@ -1,6 +1,6 @@
 package liquibase.parser.core.formattedsql
 
-import liquibase.change.core.CreateTableChange
+
 import liquibase.change.core.EmptyChange
 import liquibase.change.core.RawSQLChange
 import liquibase.changelog.ChangeLogParameters
@@ -8,7 +8,6 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
-import liquibase.exception.LiquibaseException
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
 import liquibase.resource.ResourceAccessor
@@ -803,7 +802,7 @@ create table table1 (
     id int primary key
 );
 
-/* --multiline-rollback
+/* liquibase rollback
  delete from table1;
  drop table table1;
 */
@@ -838,7 +837,7 @@ create table table2 (
     id int primary key
 );
 
-/* --multiline-rollback
+/* liquibase rollback
  delete from table2;
  drop table table2;
 */

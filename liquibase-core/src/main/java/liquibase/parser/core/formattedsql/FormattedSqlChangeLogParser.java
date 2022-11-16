@@ -131,7 +131,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern rollbackChangeSetAuthorPattern = Pattern.compile(".*changesetAuthor:(\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackChangeSetPathPattern = Pattern.compile(".*changesetPath:(\\S+).*", Pattern.CASE_INSENSITIVE);
 
-            Pattern rollbackMultiLineStartPattern = Pattern.compile("\\s*\\/\\*\\s*\\-\\-[\\s]*multiline-rollback\\s*$", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackMultiLineStartPattern = Pattern.compile("\\s*\\/\\*\\s*liquibase\\s*rollback\\s*$", Pattern.CASE_INSENSITIVE);
 
             Matcher rollbackSplitStatementsPatternMatcher = null;
             boolean rollbackSplitStatements = true;
@@ -192,11 +192,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             throw new ChangeLogParseException("Unknown ignoreLines syntax");
                         }
                     }
-                } else if (altIgnoreLinesOneDashMatcher.matches()) {
-                    String message =
-                       String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--ignoreLines:<count|start>' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
-                    throw new ChangeLogParseException("\n" + message);
-                } else if (altIgnoreMatcher.matches()) {
+                } else if (altIgnoreLinesOneDashMatcher.matches() || altIgnoreMatcher.matches()) {
                     String message =
                        String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--ignoreLines:<count|start>' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
                     throw new ChangeLogParseException("\n" + message);
@@ -212,11 +208,12 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                         change.setSql(finalCurrentSql);
 
-                        if (StringUtil.trimToNull(currentRollbackSql.toString()) != null) {
-                            if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
+                        String currentRollBackSqlAsString = currentRollbackSql.toString();
+                        if (StringUtil.trimToNull(currentRollBackSqlAsString) != null) {
+                            if (currentRollBackSqlAsString.trim().toLowerCase().matches("^not required.*")) {
                                 changeSet.addRollbackChange(new EmptyChange());
-                            } else if (currentRollbackSql.toString().trim().toLowerCase().contains("changesetid")) {
-                                String rollbackString = currentRollbackSql.toString().replace("\n", "").replace("\r", "");
+                            } else if (currentRollBackSqlAsString.trim().toLowerCase().contains("changesetid")) {
+                                String rollbackString = currentRollBackSqlAsString.replace("\n", "").replace("\r", "");
                                 Matcher authorMatcher = rollbackChangeSetAuthorPattern.matcher(rollbackString);
                                 Matcher idMatcher = rollbackChangeSetIdPattern.matcher(rollbackString);
                                 Matcher pathMatcher = rollbackChangeSetPathPattern.matcher(rollbackString);
@@ -416,9 +413,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         } else if (altRollbackMatcher.matches()) {
                             String message = String.format("Unexpected formatting at line %d. Formatted SQL changelogs require known formats, such as '--rollback <rollback SQL>' and others to be recognized and run. Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html", count);
                             throw new ChangeLogParseException("\n" + message);
-                            if (rollbackMatcher.groupCount() == 1) {
-                                currentRollbackSql.append(rollbackMatcher.group(1)).append(System.lineSeparator());
-                            }
                         } else if (rollbackMultiLineStartMatcher.matches()) {
                             if (rollbackMultiLineStartMatcher.groupCount() == 0) {
                                 currentRollbackSql.append(extractMultiLineRollBackSQL(reader));
