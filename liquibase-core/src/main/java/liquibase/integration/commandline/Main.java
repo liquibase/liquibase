@@ -1962,7 +1962,11 @@ public class Main {
                     liquibase.futureRollbackSQL(getCommandArgument(), new Contexts(contexts), new LabelExpression
                             (getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(command)) {
-                    liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    try {
+                        liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    } catch (LiquibaseException updateException) {
+                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
+                    }
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
                     CommandScope historyCommand = new CommandScope("internalHistory");
                     historyCommand.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, database);
