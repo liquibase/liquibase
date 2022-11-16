@@ -1,6 +1,6 @@
 package liquibase.executor.jvm;
 
-import liquibase.util.JdbcUtils;
+import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -23,6 +23,12 @@ import java.util.Map;
  */
 @SuppressWarnings({"unchecked"})
 public class ColumnMapRowMapper implements RowMapper {
+
+    private final boolean caseSensitiveDatabase;
+
+    public ColumnMapRowMapper(boolean caseSensitiveDatabase) {
+        this.caseSensitiveDatabase = caseSensitiveDatabase;
+    }
 
     @Override
     public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -55,6 +61,9 @@ public class ColumnMapRowMapper implements RowMapper {
      * @see java.sql.ResultSetMetaData#getColumnName
      */
     protected String getColumnKey(String columnName) {
+        if (this.caseSensitiveDatabase) {
+            return columnName;
+        }
         return columnName.toUpperCase(Locale.US);
     }
 
@@ -69,7 +78,7 @@ public class ColumnMapRowMapper implements RowMapper {
      * @return the Object returned
      */
     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
-        return JdbcUtils.getResultSetValue(rs, index);
+        return JdbcUtil.getResultSetValue(rs, index);
     }
 
 }

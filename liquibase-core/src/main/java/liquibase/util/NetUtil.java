@@ -10,47 +10,52 @@ import java.util.Enumeration;
 
 public class NetUtil {
 
+    private static InetAddress localHost;
+    private static String hostName;
+
     /**
-     * Smarter way to get localhost than InetAddress.getLocalHost.  See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4665037
+     * Smarter way to get localhost than InetAddress.getLocalHost.  See https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4665037
      */
     private static InetAddress getLocalHost() throws UnknownHostException, SocketException {
-        // Windows Vista returns the IPv6 InetAddress using this method, which is not
-        // particularly useful as it has no name or useful address, just "0:0:0:0:0:0:0:1".
-        // That is why windows should be treated differently to linux/unix and use the
-        // default way of getting the localhost.
-        String osName = System.getProperty("os.name");
-        if ((osName != null) && osName.toLowerCase().contains("windows")) {
-            return InetAddress.getLocalHost();
-        }
+        if (localHost == null) {
+            InetAddress foundHost = InetAddress.getLocalHost();
 
-        InetAddress loopback = null;
-        Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
-        while (e.hasMoreElements()) {
-            NetworkInterface i = e.nextElement();
-            if (i.isUp() && !i.isPointToPoint()) {
-                Enumeration<InetAddress> ie = i.getInetAddresses();
-                while (ie.hasMoreElements()) {
-                    InetAddress lch = ie.nextElement();
-                    if (lch.isLoopbackAddress()) {
-                        loopback = lch;
-                    } else if (!lch.isLinkLocalAddress()) {
-                        return lch;
+            if (foundHost == null || foundHost.isLoopbackAddress() || foundHost.isLinkLocalAddress()) {
+                //try to find something other than localhost
+
+                Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+                while (e.hasMoreElements()) {
+                    NetworkInterface i = e.nextElement();
+                    if (i.isUp() && !i.isPointToPoint()) {
+                        Enumeration<InetAddress> ie = i.getInetAddresses();
+                        while (ie.hasMoreElements()) {
+                            InetAddress lch = ie.nextElement();
+                            if (!lch.isLoopbackAddress() && !lch.isLinkLocalAddress()) {
+                                localHost = lch;
+                                return localHost;
+                            }
+                        }
                     }
                 }
             }
+
+            localHost = foundHost;
         }
-        return loopback;
+        return localHost;
     }
 
     /**
-     * Returns Local Host IP Address
-     * @return local Host IP address
-     * @throws UnknownHostException
-     * @throws SocketException
+     * @return Machine's IP address
      */
     public static String getLocalHostAddress() throws UnknownHostException, SocketException {
         try {
-            return getLocalHost().getHostAddress();
+            InetAddress localHost = getLocalHost();
+            if(localHost != null) {
+                return localHost.getHostAddress();
+            }
+            else {
+                return "unknown";
+            }
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname", e);
             return "unknown";
@@ -58,18 +63,34 @@ public class NetUtil {
     }
 
     /**
-     * Returns Local Host Name
-     * @return local Host Name
-     * @throws UnknownHostException
-     * @throws SocketException
+     * @return Machine's host name. This method can be better to call than getting it off {@link #getLocalHost()} because sometimes the external address returned by that function does not have a useful hostname attached to it.
+     * This function will make sure a good value is returned.
      */
     public static String getLocalHostName() throws UnknownHostException, SocketException {
-        try {
-            return getLocalHost().getHostName();
-        } catch (Exception e) {
-            Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname", e);
-            return "unknown";
+        if (hostName == null ) {
+            try {
+                InetAddress localHost = getLocalHost();
+                if(localHost != null) {
+                    hostName = localHost.getHostName();
+                    if (hostName.equals(localHost.getHostAddress())) {
+                        //sometimes the external IP interface doesn't have a hostname associated with it but localhost always does
+                        InetAddress lHost = InetAddress.getLocalHost();
+                        if (lHost != null) {
+                            hostName = lHost.getHostName();
+                        }
+                    }
+                }
+                else {
+                    hostName = "unknown";
+                }
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(NetUtil.class).fine("Error getting hostname", e);
+                if (hostName == null) {
+                    hostName = "unknown";
+                }
+            }
         }
+        return hostName;
     }
 
 

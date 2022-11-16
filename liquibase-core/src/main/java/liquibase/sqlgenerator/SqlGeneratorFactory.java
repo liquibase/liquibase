@@ -82,7 +82,7 @@ public class SqlGeneratorFactory {
         return generators;
     }
 
-    public SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
+    public synchronized SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
         String databaseName = null;
         if (database == null) {
             databaseName = "NULL";
@@ -158,7 +158,7 @@ public class SqlGeneratorFactory {
 
     private boolean isTypeEqual(Type aType, Class aClass) {
         if (aType instanceof Class) {
-            return ((Class) aType).getName().equals(aClass.getName());
+            return ((Class<?>) aType).isAssignableFrom(aClass);
         }
         return aType.equals(aClass);
     }
@@ -257,7 +257,12 @@ public class SqlGeneratorFactory {
 
     public Warnings warn(SqlStatement statement, Database database) {
         //noinspection unchecked
-        return createGeneratorChain(statement, database).warn(statement, database);
+        final SqlGeneratorChain generatorChain = createGeneratorChain(statement, database);
+        if (generatorChain != null) {
+            return generatorChain.warn(statement, database);
+        }
+        return
+           new Warnings().addWarning("No generator chain created for SQL Statement associated with database " + database.getShortName());
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(SqlStatement statement, Database database) {

@@ -31,11 +31,6 @@ public class AndPrecondition extends PreconditionLogic {
     }
 
     @Override
-    public ValidationErrors validate(Database database) {
-        return new ValidationErrors();
-    }
-
-    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
         boolean allPassed = true;

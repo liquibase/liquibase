@@ -1,5 +1,6 @@
 package liquibase.logging.core;
 
+import liquibase.logging.LogMessageFilter;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 
@@ -10,9 +11,6 @@ import java.util.logging.Level;
  */
 public abstract class AbstractLogService implements LogService {
 
-    public AbstractLogService() {
-    }
-
     /**
      * Default implementation does nothing.
      */
@@ -21,4 +19,20 @@ public abstract class AbstractLogService implements LogService {
 
     }
 
+    /**
+     * @deprecated always returns null
+     */
+    @Deprecated
+    @Override
+    public LogMessageFilter getFilter() {
+        return null;
+    }
+
+    /**
+     * @deprecated does not save the filter
+     */
+    @Deprecated
+    @Override
+    public void setFilter(LogMessageFilter filter) {
+    }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
     logicalFilePath="changelogs/common/batchInsert.changeLog.xml">
 
     <changeSet id="1" author="jesser">
@@ -34,7 +34,7 @@
     </changeSet>
 
     <changeSet id="verify_strings_variant1" author="abuschka"
-               dbms="db2,derby,h2,hsqldb,informix,mariadb,mysql,oracle,postgres,sqlite,asany,sybase">
+               dbms="db2,derby,h2,hsqldb,informix,mariadb,mysql,oracle,postgresql,sqlite,asany,sybase">
         <preConditions>
             <!-- After a successful import of the sample CSV file, the number of all characters in all strings of
                  the name column should match our expectation -->

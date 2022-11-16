@@ -1,18 +1,16 @@
 package liquibase.executor;
 
-import liquibase.Scope;
-import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ExecutorService extends AbstractPluginFactory<Executor>  {
 
-    private Map<String, Executor> executors = new HashMap<>();
+    private final Map<String, Executor> executors = new ConcurrentHashMap<>();
 
     private ExecutorService() {
     }
@@ -25,7 +23,8 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
     @Override
     protected int getPriority(Executor executor, Object... args) {
         String name = (String) args[0];
-        if (name.equals(executor.getName())) {
+        Database database = (Database) args[1];
+        if (name.equals(executor.getName()) && executor.supports(database)) {
             return executor.getPriority();
         } else {
             return Plugin.PRIORITY_NOT_APPLICABLE;
@@ -34,17 +33,11 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
     }
 
     private String createKey(String executorName, Database database) {
-        String key = executorName.toLowerCase() + "#" + System.identityHashCode(database);
-        return key;
+        return executorName.toLowerCase() + "#" + System.identityHashCode(database);
     }
 
     private Executor getExecutorValue(String executorName, Database database) throws UnexpectedLiquibaseException {
-        String key = createKey(executorName, database);
-        if (executors.containsKey(key)) {
-            return executors.get(key);
-        }
-
-        final Executor plugin = getPlugin(executorName, database);
+        final Executor plugin = getPlugin(executorName.toLowerCase(), database);
         try {
             return plugin.getClass().newInstance();
         } catch (ReflectiveOperationException e) {
@@ -62,7 +55,7 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
      *
      */
     public Executor getExecutor(final String name, final Database database) {
-        Executor returnExecutor = executors.computeIfAbsent(createKey(name, database), db -> {
+        return executors.computeIfAbsent(createKey(name, database), db -> {
             try {
                 Executor executor = getExecutorValue(name, database);
                 executor.setDatabase(database);
@@ -71,7 +64,6 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
                 throw new UnexpectedLiquibaseException(e);
             }
         });
-        return returnExecutor;
     }
 
     /**

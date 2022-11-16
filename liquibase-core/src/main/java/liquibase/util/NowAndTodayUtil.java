@@ -80,12 +80,12 @@ public final class NowAndTodayUtil {
 
         if (colType == null || colType.length() == 0) {
             throw new DateParseException("Must supply non-null column type when using 'NOW' or 'TODAY' value.");
-        } else if (colType.equalsIgnoreCase("timestamp")) {
+        } else if (colType.equalsIgnoreCase("timestamp") || colType.equalsIgnoreCase("datetime")) {
             return new java.sql.Timestamp(today.getTime());
         } else if (colType.equalsIgnoreCase("time")) {
             // A little odd using TODAY format with a TIME type column, but we'll do it - will get current time...
             return new java.sql.Time(today.getTime());
-        } else if (colType.equalsIgnoreCase("date") || colType.equalsIgnoreCase("datetime")) {
+        } else if (colType.equalsIgnoreCase("date")) {
             return new java.sql.Date(today.getTime());
         } else {
             throw new DateParseException("Unrecognized colType " + colType

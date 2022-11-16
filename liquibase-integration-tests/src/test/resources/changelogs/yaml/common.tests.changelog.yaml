@@ -332,7 +332,7 @@ databaseChangeLog:
   - changeSet:
       id: hasIndexPrecondition
       author: nvoxland
-      dbms: oracle,mssql,mysql,h2,hsql,postgresql  # can checkConstraint with or without table name, derby doesn't work with just column names
+      dbms: oracle,mssql,mysql,h2,hsqldb,postgresql  # can checkConstraint with or without table name, derby doesn't work with just column names
       preConditions:
         - indexExists:
             indexName: idx_compoundtest
@@ -421,7 +421,7 @@ databaseChangeLog:
   - changeSet:
       id: contextstest-2
       author: nvoxland
-      context: context-a
+      contextFilter: context-a
       changes:
         - insert:
             tableName: contextsTest
@@ -433,7 +433,7 @@ databaseChangeLog:
   - changeSet:
       id: contextstest-3
       author: nvoxland
-      context: context-a, context-b
+      contextFilter: context-a, context-b
       changes:
         - insert:
             tableName: contextsTest
@@ -445,7 +445,7 @@ databaseChangeLog:
   - changeSet:
       id: contextstest-4
       author: nvoxland
-      context: context-b
+      contextFilter: context-b
       changes:
         - insert:
             tableName: contextsTest
@@ -457,7 +457,7 @@ databaseChangeLog:
   - changeSet:
       id: contextstest-5
       author: nvoxland
-      context: ""
+      contextFilter: ""
       changes:
         - insert:
             tableName: contextsTest
@@ -631,7 +631,7 @@ databaseChangeLog:
                   type: int
       modifySql:
         - replace:
-            context: test
+            contextFilter: test
             replace: INVALID TABLE NAME
             with: validTableName
 

@@ -91,6 +91,5 @@ public interface DatabaseObject extends Comparable, LiquibaseSerializable {
      * @return a reference to the same object
      */
     DatabaseObject setAttribute(String attribute, Object value);
-
 }
 

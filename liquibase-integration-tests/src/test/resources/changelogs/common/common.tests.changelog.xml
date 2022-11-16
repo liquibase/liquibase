@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <property name="table.name" value="paramter_table"/>
     <property file="changelogs/common/dynamic.parameters.properties"/>
@@ -76,7 +76,7 @@
             <column name="dateTimeCol" valueDate="2007-08-09T13:14:15"/>
             <column name="bigintcol" valueNumeric="2"/>
         </insert>
-        <insert tableName="dataTypeTest" dbms="!derby">
+        <insert tableName="dataTypeTest" dbms="!derby,!cockroachdb">
           <column name="id" valueNumeric="2"/>
           <column name="dateCol" valueDate="current_datetime"/>
           <column name="timeCol" valueComputed="current_datetime"/>
@@ -195,7 +195,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="hasIndexPrecondition" author="nvoxland" dbms="oracle,mssql,mysql,h2,hsql,postgresql"> <!-- can checkConstraint with or without table name, derby doesn't work with just column names -->
+    <changeSet id="hasIndexPrecondition" author="nvoxland" dbms="oracle,mssql,mysql,h2,hsqldb,postgresql"> <!-- can checkConstraint with or without table name, derby doesn't work with just column names -->
         <preConditions>
             <indexExists indexName="idx_compoundtest"/>
             <indexExists tableName="compoundIndexTest" indexName="idx_compoundtest"/>
@@ -267,22 +267,22 @@
             <column name="id" type="varchar(255)"/>
         </createTable>
     </changeSet>
-    <changeSet id="contextstest-2" author="nvoxland" context="context-a">
+    <changeSet id="contextstest-2" author="nvoxland" contextFilter="context-a">
         <insert tableName="contextsTest">
             <column name="id" value="context a"/>
         </insert>
     </changeSet>
-    <changeSet id="contextstest-3" author="nvoxland" context="context-a, context-b">
+    <changeSet id="contextstest-3" author="nvoxland" contextFilter="context-a, context-b">
         <insert tableName="contextsTest">
             <column name="id" value="a and b"/>
         </insert>
     </changeSet>
-    <changeSet id="contextstest-4" author="nvoxland" context="context-b">
+    <changeSet id="contextstest-4" author="nvoxland" contextFilter="context-b">
         <insert tableName="contextsTest">
             <column name="id" value="context b"/>
         </insert>
     </changeSet>
-    <changeSet id="contextstest-5" author="nvoxland" context="">
+    <changeSet id="contextstest-5" author="nvoxland" contextFilter="">
         <insert tableName="contextsTest">
             <column name="id" value="empty contexts"/>
         </insert>
@@ -715,10 +715,10 @@
         <createTable tableName="keepmodifysqltest">
             <column name="id" type="int"/>
         </createTable>
-        <modifySql context="test">
+        <modifySql contextFilter="test">
             <replace replace="change" with="newchange"/>
         </modifySql>
-        <modifySql context="not-context">
+        <modifySql contextFilter="not-context">
             <replace replace="keep" with="newkeep"/>
         </modifySql>
     </changeSet>
@@ -745,7 +745,7 @@
         <sql>insert into default_val_computed (id) values (1);</sql>
     </changeSet>
 
-    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,hsql,oracle,db2,mysql,postgresql,mssql"> <!-- not derby -->
+    <changeSet id="createTableWithDefault-checkConstraint" author="nvoxland" dbms="h2,oracle,db2,mysql,postgresql,mssql"> <!-- not derby -->
         <preConditions onFail="MARK_RAN">
             <not><dbms type="mysql"/></not> <!-- doesn't support default values as function -->
         </preConditions>
@@ -766,7 +766,7 @@
         <createTable tableName="INVALID TABLE NAME">
             <column name="id" type="int"/>
         </createTable>
-        <modifySql context="test">
+        <modifySql contextFilter="test">
             <replace replace="INVALID TABLE NAME" with="validTableName"/>
         </modifySql>
     </changeSet>
@@ -822,6 +822,11 @@
     <changeSet id="seq-test" author="nvoxland" onValidationFail="MARK_RAN">
         <comment>Database that don't support sequences will just continue on</comment>
         <createSequence sequenceName="seqtestonall"/>
+    </changeSet>
+
+    <changeSet id="seq-test-datatype" author="flautert" onValidationFail="MARK_RAN">
+        <comment>Database that don't support sequences datatype field will just continue on</comment>
+        <createSequence sequenceName="seqtestdatatypeonall" dataType="int"/>
     </changeSet>
 
     <changeSet id="nvoxland" author="pending-some">
@@ -1064,12 +1069,12 @@
     </changeSet>
 
     <changeSet id="timestamp_column_precision9" author="abuschka"
-               dbms="db2,derby,firebird,h2,hsql,informix,mssql,oracle,postgres,sqlite,asany,sybase">
+               dbms="db2,derby,firebird,h2,hsqldb,informix,mssql,oracle,postgresql,sqlite,asany,sybase">
         <comment>Test if we (and the JDBC driver) correctly support TIMESTAMP columns with a extra-large precision
             of 9 for supported DBMS.
         </comment>
         <addColumn tableName="test_timestamp_fractions">
-            <column name="timestampColumnPrec9" type="timestamp(9)"/>
+            <column name="timestampColumnPrec9" type="timestamp(6)"/>
         </addColumn>
     </changeSet>
 
@@ -1124,6 +1129,52 @@
         <output>Message using default target</output>
         <output target="stdout">Message using stdout target</output>
         <output target="stderr">Message using stderr target</output>
+    </changeSet>
+
+    <changeSet id="fkexists-without-table-setup" author="example">
+        <sql>
+            CREATE TABLE fkexists_table1 (
+                id INT PRIMARY KEY
+            )
+        </sql>
+        <sql>
+            CREATE TABLE fkexists_table2 (
+                id INT,
+                id2 INT,
+                CONSTRAINT fkexists_1
+                    FOREIGN KEY (id)
+                        REFERENCES fkexists_table1 (id)
+            )
+        </sql>
+        <rollback>
+            <sql>
+                DROP TABLE fkexists_table1
+            </sql>
+            <sql>
+                DROP TABLE fkexists_table2
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet author="example" id="fkexists-without-table-check">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="id2" baseTableName="fkexists_table2"
+                                 constraintName="fkexists_2"
+                                 referencedColumnNames="id" referencedTableName="fkexists_table1"/>
+    </changeSet>
+    <changeSet author="example" id="fkexists-without-table-check2">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_1"/>
+            <foreignKeyConstraintExists foreignKeyName="fkexists_2"/>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="example" author="view-if-exists" dbms="!oracle">
+        <dropView viewName="does_not_exist" ifExists="true"/>
     </changeSet>
 
 </databaseChangeLog>

@@ -1,5 +1,6 @@
 package liquibase.resource;
 
+import liquibase.Scope;
 import liquibase.util.CollectionUtil;
 
 import java.io.IOException;
@@ -7,17 +8,30 @@ import java.util.*;
 
 /**
  * A {@link liquibase.resource.ResourceAccessor} that contains multiple sub-accessors and combines the results of all of them.
+ * For the "overall" aggregate resource accessor, integrations should generally use {@link SearchPathResourceAccessor} instead of this.
  */
 public class CompositeResourceAccessor extends AbstractResourceAccessor {
 
     private List<ResourceAccessor> resourceAccessors;
 
     public CompositeResourceAccessor(ResourceAccessor... resourceAccessors) {
-        this.resourceAccessors = Arrays.asList(CollectionUtil.createIfNull(resourceAccessors));
+        this.resourceAccessors = new ArrayList<>(); //Arrays.asList(CollectionUtil.createIfNull(resourceAccessors));
+        this.resourceAccessors.addAll(Arrays.asList(resourceAccessors));
     }
 
     public CompositeResourceAccessor(Collection<ResourceAccessor> resourceAccessors) {
         this.resourceAccessors = new ArrayList<>(resourceAccessors);
+    }
+
+    @Override
+    public void close() throws Exception {
+        for (ResourceAccessor accessor : resourceAccessors) {
+            try {
+                accessor.close();
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Error closing " + accessor.getClass().getName() + ": " + e.getMessage(), e);
+            }
+        }
     }
 
     public CompositeResourceAccessor addResourceAccessor(ResourceAccessor resourceAccessor) {
@@ -26,36 +40,38 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
         return this;
     }
 
-    @Override
-    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-        InputStreamList returnList = new InputStreamList();
-        for (ResourceAccessor accessor : resourceAccessors) {
-            returnList.addAll(accessor.openStreams(relativeTo, streamPath));
-        }
-        return returnList;
+    public void removeResourceAccessor(ResourceAccessor resourceAccessor) {
+        this.resourceAccessors.remove(resourceAccessor);
     }
 
     @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        SortedSet<String> returnSet = new TreeSet<>();
+    public List<Resource> search(String path, boolean recursive) throws IOException {
+        LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            final SortedSet<String> list = accessor.list(relativeTo, path, recursive, includeFiles, includeDirectories);
-            if (list != null) {
-                returnSet.addAll(list);
-            }
+            returnList.addAll(CollectionUtil.createIfNull(accessor.search(path, recursive)));
         }
 
-        return returnSet;
+        return new ArrayList<>(returnList);
     }
 
     @Override
-    public SortedSet<String> describeLocations() {
-        SortedSet<String> returnSet = new TreeSet<>();
-
+    public List<Resource> getAll(String path) throws IOException {
+        LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            returnSet.addAll(accessor.describeLocations());
+            returnList.addAll(CollectionUtil.createIfNull(accessor.getAll(path)));
         }
 
-        return returnSet;
+        return new ArrayList<>(returnList);
+    }
+
+    @Override
+    public List<String> describeLocations() {
+        LinkedHashSet<String> returnSet = new LinkedHashSet<>();
+
+        for (ResourceAccessor accessor : resourceAccessors) {
+            returnSet.addAll(CollectionUtil.createIfNull(accessor.describeLocations()));
+        }
+
+        return new ArrayList<>(returnSet);
     }
 }

@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -19,6 +20,7 @@ public class IntType extends LiquibaseDataType {
 
     private boolean autoIncrement;
 
+    @Override
     public boolean isAutoIncrement() {
         return autoIncrement;
     }
@@ -36,18 +38,17 @@ public class IntType extends LiquibaseDataType {
         if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || database instanceof OracleDatabase) {
             return new DatabaseDataType("INTEGER");
         }
+
         if (database instanceof PostgresDatabase) {
             if (isAutoIncrement()) {
-                int majorVersion = 9;
-                try {
-                    majorVersion = database.getDatabaseMajorVersion();
-                } catch (DatabaseException e) {
-                    // ignore
-                }
-                if (majorVersion < 10) {
+                if (((PostgresDatabase) database).useSerialDatatypes()) {
                     return new DatabaseDataType("SERIAL");
                 } else {
-                    return new DatabaseDataType("INTEGER");
+                    if (GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue() || this.getRawDefinition() == null) {
+                        return new DatabaseDataType("INTEGER");
+                    } else {
+                        return new DatabaseDataType(this.getRawDefinition());
+                    }
                 }
             } else {
                 return new DatabaseDataType("INTEGER");
@@ -70,6 +71,19 @@ public class IntType extends LiquibaseDataType {
         }
         if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("INTEGER");
+        }
+        String rawDefinitionDataType = getRawDefinition().toLowerCase();
+        if (database instanceof H2Database && rawDefinitionDataType.matches("int\\([1-9]?[0-9]\\)")) {
+            int intParameter = Integer.valueOf(getParameters()[0].toString());
+            if(intParameter >= 1 && intParameter <= 3) {
+                return new DatabaseDataType("TINYINT");
+            } else if (intParameter > 3 && intParameter <= 5) {
+                return new DatabaseDataType("SMALLINT");
+            } else if (intParameter > 5 && intParameter <= 10) {
+                return new DatabaseDataType("INTEGER");
+            } else if (intParameter > 10) {
+                return new DatabaseDataType("BIGINT");
+            }
         }
         return super.toDatabaseDataType(database);
     }

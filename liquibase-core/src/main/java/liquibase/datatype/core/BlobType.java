@@ -20,6 +20,9 @@ public class BlobType extends LiquibaseDataType {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
 
         if ((database instanceof H2Database) || (database instanceof HsqlDatabase)) {
+            if (originalDefinition.toLowerCase(Locale.US).contains("large object")) {
+                return new DatabaseDataType("BINARY LARGE OBJECT");
+            }
             if (originalDefinition.toLowerCase(Locale.US).startsWith("varbinary") || originalDefinition.startsWith("java.sql.Types.VARBINARY")) {
                 return new DatabaseDataType("VARBINARY", getParameters());
             } else if (originalDefinition.toLowerCase(Locale.US).startsWith("longvarbinary") || originalDefinition.startsWith("java.sql.Types.LONGVARBINARY")) {

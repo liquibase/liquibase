@@ -17,7 +17,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
 
     @Override
     public boolean supports(ModifyDataTypeStatement statement, Database database) {
-        if (database instanceof SQLiteDatabase) {
+        if (database instanceof SQLiteDatabase || database instanceof Db2zDatabase) {
             return false;
         }
         return super.supports(statement, database);
@@ -27,9 +27,8 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Warnings warnings = super.warn(modifyDataTypeStatement, database, sqlGeneratorChain);
 
-        if ((database instanceof MySQLDatabase) && !modifyDataTypeStatement.getNewDataType().toLowerCase().contains
-            ("varchar")) {
-            warnings.addWarning("modifyDataType will lose primary key/autoincrement/not null settings for mysql.  Use <sql> and re-specify all configuration if this is the case");
+        if (database instanceof MySQLDatabase) {
+            ((MySQLDatabase) database).warnAboutAlterColumn("modifyDataType", warnings);
         }
 
         return warnings;

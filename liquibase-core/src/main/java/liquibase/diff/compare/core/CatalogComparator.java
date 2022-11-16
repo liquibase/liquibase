@@ -1,7 +1,7 @@
 package liquibase.diff.compare.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -38,7 +38,7 @@ public class CatalogComparator extends CommonCatalogSchemaComparator {
         }
 
         // the flag will be set true in multi catalog environments
-        boolean shouldIncludeCatalog = LiquibaseConfiguration.getInstance().shouldIncludeCatalogInSpecification();
+        boolean shouldIncludeCatalog = GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION.getCurrentValue();
         String object1Name;
         if (!shouldIncludeCatalog && ((Catalog) databaseObject1).isDefault()) {
             object1Name = null;

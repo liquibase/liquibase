@@ -2,7 +2,6 @@ package liquibase.datatype
 
 import liquibase.database.core.*
 import liquibase.datatype.core.*
-import liquibase.database.core.MockDatabase
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -131,7 +130,7 @@ class DataTypeFactoryTest extends Specification {
         "[time](6)"                                    | new MSSQLDatabase()    | "time(6)"                                      | TimeType      | false
         "time(7)"                                      | new MSSQLDatabase()    | "time"                                         | TimeType      | false
         "[time](7)"                                    | new MSSQLDatabase()    | "time"                                         | TimeType      | false
-        "timestamp"                                    | new MSSQLDatabase()    | "datetime"                                     | TimestampType | false
+        "timestamp"                                    | new MSSQLDatabase()    | "datetime2"                                    | TimestampType | false
         "tinyint"                                      | new MSSQLDatabase()    | "tinyint"                                      | TinyIntType   | false
         "[tinyint]"                                    | new MSSQLDatabase()    | "tinyint"                                      | TinyIntType   | false
         "uniqueidentifier"                             | new MSSQLDatabase()    | "uniqueidentifier"                             | UUIDType      | false
@@ -242,8 +241,8 @@ class DataTypeFactoryTest extends Specification {
         "BINARY(16)"                                   | new H2Database()       | "BINARY(16)"                                   | BlobType      | false
         "timestamp"                                    | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6)"                                 | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false
-        "TIMESTAMP WITH TIMEZONE"                      | new H2Database()       | "TIMESTAMP WITH TIME ZONE"                      | TimestampType | false
-        "TIMESTAMP(6) WITH TIMEZONE"                   | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                   | TimestampType | false
+        "TIMESTAMP WITH TIMEZONE"                      | new H2Database()       | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
+        "TIMESTAMP(6) WITH TIMEZONE"                   | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
         "timestamp without timezone"                   | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6) without timezone"                | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false
         "timestamptz"                                  | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
@@ -252,8 +251,9 @@ class DataTypeFactoryTest extends Specification {
         "java.sql.Timestamp(6)"                        | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false
         "java.sql.Types.TIMESTAMP"                     | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
         "java.sql.Types.TIMESTAMP(6)"                  | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false
-        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new H2Database()       | "TIMESTAMP WITH TIME ZONE"                      | TimestampType | false
-        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                   | TimestampType | false
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new H2Database()       | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
+        "\${invalidParam}"                             | new H2Database()       | "\${INVALIDPARAM}"                             | UnknownType   | false
     }
 
     @Unroll("#featureName: #object for #database")

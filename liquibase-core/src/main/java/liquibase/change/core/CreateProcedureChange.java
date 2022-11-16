@@ -1,19 +1,15 @@
 package liquibase.change.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.ChangeSet;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
-import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.util.FileUtil;
@@ -180,6 +176,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         ValidationErrors validate = new ValidationErrors();
 
         validate.checkDisallowedField("catalogName", this.getCatalogName(), database, MSSQLDatabase.class);
+        if(getDbms() != null) {
+            DatabaseList.validateDefinitions(getDbms(), validate);
+        }
 
         if ((StringUtil.trimToNull(getProcedureText()) != null) && (StringUtil.trimToNull(getPath()) != null)) {
             validate.addError(
@@ -196,7 +195,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
 
         if ((this.getReplaceIfExists() != null) && (DatabaseList.definitionMatches(getDbms(), database, true))) {
-            if (database instanceof MSSQLDatabase) {
+            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase) {
                 if (this.getReplaceIfExists() && (this.getProcedureName() == null)) {
                     validate.addError("procedureName is required if replaceIfExists = true");
                 }
@@ -213,13 +212,15 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
 
         try {
+            ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+
             String path = getPath();
-            String relativeTo = null;
             final Boolean isRelative = isRelativeToChangelogFile();
             if (isRelative != null && isRelative) {
-                relativeTo = getChangeSet().getFilePath();
+                return resourceAccessor.get(getChangeSet().getChangeLog().getPhysicalFilePath()).resolveSibling(path).openInputStream();
+            } else {
+                return resourceAccessor.getExisting(path).openInputStream();
             }
-            return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
             throw new IOException(
                 "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +
@@ -254,8 +255,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 procedureText = "";
             }
 
-            String encoding =
-                LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
             if (procedureText != null) {
                 try {
                     stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
@@ -320,6 +320,16 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return generateStatements(procedureText, endDelimiter, database);
     }
 
+    @Override
+    protected Change[] createInverses() {
+        DropProcedureChange dropProcedureChange = new DropProcedureChange();
+        dropProcedureChange.setProcedureName(getProcedureName());
+        dropProcedureChange.setSchemaName(getSchemaName());
+        dropProcedureChange.setCatalogName(getCatalogName());
+
+        return new Change[] { dropProcedureChange };
+    }
+
     protected SqlStatement[] generateStatements(String logicText, String endDelimiter, Database database) {
         CreateProcedureStatement statement =
             new CreateProcedureStatement(
@@ -350,6 +360,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    @SuppressWarnings("java:S2095")
     @Override
     protected Map<String, Object> createExampleValueMetaData(
         String parameterName, DatabaseChangeProperty changePropertyAnnotation) {

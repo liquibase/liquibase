@@ -8,6 +8,8 @@ import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.UpdateExecutablePreparedStatement;
 import liquibase.statement.core.UpdateStatement;
@@ -66,6 +68,14 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
             if ((database instanceof OracleDatabase) && (column.getType() != null) && "CLOB".equalsIgnoreCase(column
                 .getType()) && (column.getValue() != null) && (column.getValue().length() >= 4000)) {
                 needsPreparedStatement = true;
+            }
+
+            final Object valueObject = column.getValueObject();
+            if (valueObject instanceof SequenceNextValueFunction) {
+                ((SequenceNextValueFunction) valueObject).setSchemaName(this.getSchemaName());
+            }
+            if (valueObject instanceof SequenceCurrentValueFunction) {
+                ((SequenceCurrentValueFunction) valueObject).setSchemaName(this.getSchemaName());
             }
         }
 

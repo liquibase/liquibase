@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.ContextExpression;
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -24,11 +23,9 @@ import liquibase.util.StringUtil;
 
 public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSetRanStatement> {
 
-    public static final String AND = " AND ";
-    public static final String OPEN_BRACKET = "(";
-    public static final String CLOSE_BRACKET = ")";
-    public static final String WHITESPACE = " ";
-    public static final String COMMA = ",";
+    private static final String COMMENTS = "COMMENTS";
+    private static final String CONTEXTS = "CONTEXTS";
+    private static final String LABELS = "LABELS";
 
     @Override
     public ValidationErrors validate(MarkChangeSetRanStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
@@ -69,6 +66,9 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addNewColumnValue("EXECTYPE", statement.getExecType().value)
                         .addNewColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId())
+                        .addNewColumnValue(COMMENTS, getCommentsColumn(changeSet))
+                        .addNewColumnValue(CONTEXTS, getContextsColumn(changeSet))
+                        .addNewColumnValue(LABELS, getLabelsColumn(changeSet))
                         .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
                                 "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
                                 "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
@@ -86,12 +86,10 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                             .addColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
                             .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                             .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
-                        .addColumnValue("COMMENTS", limitSize(StringUtil.trimToEmpty(changeSet.getComments())))
-                        .addColumnValue("EXECTYPE", statement.getExecType().value)
-                        .addColumnValue("CONTEXTS", ((changeSet.getContexts() == null) || changeSet.getContexts()
-                                .isEmpty()) ? null : buildFullContext(changeSet))
-                        .addColumnValue("LABELS", ((changeSet.getLabels() == null) || changeSet.getLabels().isEmpty()
-                        ) ? null : changeSet.getLabels().toString())
+                            .addColumnValue(COMMENTS, getCommentsColumn(changeSet))
+                            .addColumnValue("EXECTYPE", statement.getExecType().value)
+                            .addColumnValue(CONTEXTS, getContextsColumn(changeSet))
+                            .addColumnValue(LABELS, getLabelsColumn(changeSet))
                         .addColumnValue("LIQUIBASE", StringUtil.limitSize(LiquibaseUtil.getBuildVersion()
                                                                                             .replaceAll("SNAPSHOT", "SNP")
                                                                                             .replaceAll("beta", "b")
@@ -113,32 +111,16 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         }
     }
 
-    private String buildFullContext(ChangeSet changeSet) {
-        StringBuilder contextExpression = new StringBuilder();
-        boolean notFirstContext = false;
-        for (ContextExpression inheritableContext : changeSet.getInheritableContexts()) {
-            appendContext(contextExpression, inheritableContext.toString(), notFirstContext);
-            notFirstContext = true;
-        }
-        ContextExpression changeSetContext = changeSet.getContexts();
-        if ((changeSetContext != null) && !changeSetContext.isEmpty()) {
-            appendContext(contextExpression, changeSetContext.toString(), notFirstContext);
-        }
-        return contextExpression.toString();
+    private String getCommentsColumn(ChangeSet changeSet) {
+        return limitSize(StringUtil.trimToEmpty(changeSet.getComments()));
     }
 
-    private void appendContext(StringBuilder contextExpression, String contextToAppend, boolean notFirstContext) {
-        boolean complexExpression = contextToAppend.contains(COMMA) || contextToAppend.contains(WHITESPACE);
-        if (notFirstContext) {
-            contextExpression.append(AND);
-        }
-        if (complexExpression) {
-            contextExpression.append(OPEN_BRACKET);
-        }
-        contextExpression.append(contextToAppend);
-        if (complexExpression) {
-            contextExpression.append(CLOSE_BRACKET);
-        }
+    protected String getContextsColumn(ChangeSet changeSet) {
+        return changeSet.buildFullContext();
+    }
+
+    protected String getLabelsColumn(ChangeSet changeSet) {
+        return changeSet.buildFullLabels();
     }
 
     private String limitSize(String string) {

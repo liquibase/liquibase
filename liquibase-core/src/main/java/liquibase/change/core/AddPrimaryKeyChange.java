@@ -142,7 +142,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         if (getValidate() != null) {
             shouldValidate = getValidate();
         }
-        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
+        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), ColumnConfig.arrayFromNames(getColumnNames()), getConstraintName());
         statement.setTablespace(getTablespace());
         statement.setClustered(getClustered());
         statement.setForIndexName(getForIndexName());

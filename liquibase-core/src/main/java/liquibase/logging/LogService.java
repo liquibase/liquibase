@@ -25,5 +25,11 @@ public interface LogService extends Plugin {
      */
     void close();
 
+    LogMessageFilter getFilter();
+
+    /**
+     * Sets the filter to use for messages sent through this log service.
+     */
+    void setFilter(LogMessageFilter filter);
 
 }

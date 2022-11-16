@@ -3,15 +3,8 @@ package liquibase.logging.core;
 import liquibase.logging.Logger;
 import liquibase.serializer.LiquibaseSerializable;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
 
 public class JavaLogService extends AbstractLogService {
 
@@ -22,6 +15,7 @@ public class JavaLogService extends AbstractLogService {
 
     private Map<Class, JavaLogger> loggers = new HashMap<>();
 
+    private java.util.logging.Logger parent;
 
     @Override
     public Logger getLog(Class clazz) {
@@ -29,6 +23,9 @@ public class JavaLogService extends AbstractLogService {
         if (logger == null) {
             java.util.logging.Logger utilLogger = java.util.logging.Logger.getLogger(getLogName(clazz));
             utilLogger.setUseParentHandlers(true);
+            if (parent != null && !parent.getName().equals(utilLogger.getName())) {
+                utilLogger.setParent(parent);
+            }
             logger = new JavaLogger(utilLogger);
 
             this.loggers.put(clazz, logger);
@@ -45,6 +42,14 @@ public class JavaLogService extends AbstractLogService {
      * For example, all {@link liquibase.change.Change} classes will return a log name of "liquibase.change" no matter what class name or package name they have.
      */
     protected String getLogName(Class clazz) {
+        if (clazz == null) {
+            return "unknown";
+        }
+
+        if (clazz.getPackage() == null) {
+            return clazz.getName();
+        }
+
         final String classPackageName = clazz.getPackage().getName();
         if (classPackageName.equals("liquibase")) {
             return "liquibase";
@@ -75,4 +80,14 @@ public class JavaLogService extends AbstractLogService {
         return "liquibase";
     }
 
+    public java.util.logging.Logger getParent() {
+        return parent;
+    }
+
+    /**
+     * Explicitly control the parent logger for all {@link java.util.logging.Logger} instances created.
+     */
+    public void setParent(java.util.logging.Logger parent) {
+        this.parent = parent;
+    }
 }

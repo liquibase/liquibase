@@ -5,6 +5,17 @@ import liquibase.util.StringUtil;
 
 import java.util.*;
 
+/**
+ * Wrapper for list of labels.
+ *
+ * <p>
+ * Labels are tags that you can add to changesets to control which changeset will be executed in any migration run.
+ * Labels control whether a changeset is executed depending on runtime settings. Any string can be used for the label
+ * name, and it is case-insensitive.
+ * </p>
+ *
+ * @see <a href="https://docs.liquibase.com/concepts/advanced/labels.html" target="_top">labels</a> in documentation
+ */
 public class LabelExpression {
 
     private HashSet<String> labels = new LinkedHashSet<>();
@@ -90,22 +101,20 @@ public class LabelExpression {
      *
      * Return true if any of the LabelExpression objects match the runtime
      *
-     * @param   expressions    Expressions to match against
-     * @param   labels         Runtime labels
+     * @param   changesetLabels    Expressions to match against
+     * @param   labelExpression         Runtime labels
      * @return  boolean        True if match
      *
      */
-    public static boolean matchesAll(Collection<LabelExpression> expressions, LabelExpression labels) {
-        if (expressions == null || expressions.isEmpty()) {
+    public static boolean matchesAll(Collection<Labels> changesetLabels, LabelExpression labelExpression) {
+        if (changesetLabels == null || changesetLabels.isEmpty()) {
             return true;
         }
-        if (labels == null || labels.isEmpty()) {
+        if (labelExpression == null || labelExpression.isEmpty()) {
             return true;
         }
-        Set<String> labelStrings = labels.getLabels();
-        Labels runtimeLabels = new Labels(labelStrings);
-        for (LabelExpression expression : expressions) {
-            if (!expression.matches(runtimeLabels)) {
+        for (Labels changesetLabel : changesetLabels) {
+            if (!labelExpression.matches(changesetLabel)) {
                 return false;
             }
         }

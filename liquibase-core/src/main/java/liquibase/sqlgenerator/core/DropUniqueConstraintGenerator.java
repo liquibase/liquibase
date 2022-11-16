@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
+import liquibase.database.core.CockroachDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SQLiteDatabase;
@@ -43,6 +44,8 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
             sql = "ALTER TABLE "
                     + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
                     + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
+        } else if (database instanceof CockroachDatabase) {
+            sql = "DROP INDEX " + database.escapeConstraintName(statement.getConstraintName()) + " CASCADE";
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
         }

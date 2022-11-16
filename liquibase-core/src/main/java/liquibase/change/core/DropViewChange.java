@@ -1,11 +1,14 @@
 package liquibase.change.core;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.structure.core.View;
+import liquibase.util.ObjectUtil;
 
 /**
  * Drops an existing view.
@@ -15,7 +18,7 @@ public class DropViewChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
     private String viewName;
-
+    private Boolean ifExists;
 
     @DatabaseChangeProperty(mustEqualExisting ="view.catalog", since = "3.0")
     public String getCatalogName() {
@@ -44,10 +47,20 @@ public class DropViewChange extends AbstractChange {
         this.viewName = viewName;
     }
 
+    @DatabaseChangeProperty(supportsDatabase = ALL,
+            description = "Option to only drop the view, if it exists, and not failing, if it's not exists")
+    public Boolean isIfExists() {
+        return ifExists;
+    }
+
+    public void setIfExists(Boolean ifExists) {
+        this.ifExists = ifExists;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-                new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()),
+                new DropViewStatement(getCatalogName(), getSchemaName(), getViewName(), isIfExists()),
         };
     }
 
