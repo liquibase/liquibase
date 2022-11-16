@@ -72,6 +72,19 @@ public class IntType extends LiquibaseDataType {
         if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("INTEGER");
         }
+        String rawDefinitionDataType = getRawDefinition().toLowerCase();
+        if (database instanceof H2Database && rawDefinitionDataType.matches("int\\([1-9]?[0-9]\\)")) {
+            int intParameter = Integer.valueOf(getParameters()[0].toString());
+            if(intParameter >= 1 && intParameter <= 3) {
+                return new DatabaseDataType("TINYINT");
+            } else if (intParameter > 3 && intParameter <= 5) {
+                return new DatabaseDataType("SMALLINT");
+            } else if (intParameter > 5 && intParameter <= 10) {
+                return new DatabaseDataType("INTEGER");
+            } else if (intParameter > 10) {
+                return new DatabaseDataType("BIGINT");
+            }
+        }
         return super.toDatabaseDataType(database);
     }
 
