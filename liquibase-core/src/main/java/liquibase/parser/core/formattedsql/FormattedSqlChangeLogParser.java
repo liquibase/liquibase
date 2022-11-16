@@ -595,7 +595,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 }
                 multiLineRollbackSQL.append(line);
             }
-            throw new ChangeLogParseException("The multi line rollback end not found.");
+            throw new ChangeLogParseException("Liquibase rollback comment is not closed.");
         }
         return multiLineRollbackSQL;
     }
