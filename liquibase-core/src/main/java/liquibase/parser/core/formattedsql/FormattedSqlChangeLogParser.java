@@ -2,9 +2,9 @@ package liquibase.parser.core.formattedsql;
 
 import liquibase.Labels;
 import liquibase.Scope;
+import liquibase.change.Change;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
-import liquibase.change.Change;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -12,15 +12,11 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
-import liquibase.resource.PathHandlerFactory;
-import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Matcher;
@@ -585,12 +581,16 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     }
     private StringBuilder extractMultiLineRollBackSQL(BufferedReader reader) throws IOException, ChangeLogParseException {
         StringBuilder multiLineRollbackSQL = new StringBuilder();
-        Pattern rollbackMultiLineEndPattern = Pattern.compile("\\s*\\*\\/\\s*$", Pattern.CASE_INSENSITIVE);
+        Pattern rollbackMultiLineEndPattern = Pattern.compile(".*\\s*\\*\\/\\s*$", Pattern.CASE_INSENSITIVE);
 
         String line;
         if (reader != null) {
             while ((line = reader.readLine()) != null) {
                 if (rollbackMultiLineEndPattern.matcher(line).matches()) {
+                    String[] lastLineSplit = line.split("\\*\\/\\s*$");
+                    if (lastLineSplit.length > 0 && !StringUtil.isWhitespace(lastLineSplit[0])) {
+                        multiLineRollbackSQL.append(lastLineSplit[0]);
+                    }
                     return multiLineRollbackSQL;
                 }
                 multiLineRollbackSQL.append(line);
