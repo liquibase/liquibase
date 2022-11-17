@@ -8,7 +8,6 @@ on:
     branches:
       - 'main'
       - 'master'
-      - 'jntest'
 jobs:
   build-master:
     name: Build & Package Master
