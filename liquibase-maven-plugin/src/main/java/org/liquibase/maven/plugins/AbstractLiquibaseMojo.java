@@ -20,6 +20,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.resource.SearchPathResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -949,11 +950,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
-//        ResourceAccessor mFO = new MavenResourceAccessor(cl);
-//        ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir());
-//        return new SearchPathResourceAccessor(searchPath, mFO, fsFO);
-        return null;
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws DependencyResolutionRequiredException, IOException {
+        ResourceAccessor mFO = new MavenResourceAccessor(project);
+        ResourceAccessor fsFO = new DirectoryResourceAccessor(project.getBasedir());
+        return new SearchPathResourceAccessor(searchPath, mFO, fsFO);
     }
 
     /**

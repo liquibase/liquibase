@@ -37,26 +37,52 @@ public class LiquibaseMojo extends AbstractMojo implements MapOrientedComponent 
     public void setComponentConfiguration(Map<?, ?> config) throws ComponentConfigurationException {
         this.mojoExecution = (MojoExecution) config.get("mojoExecution");
         this.project = (MavenProject) config.get("project");
-
+        String goal = this.mojoExecution.getMojoDescriptor().getGoal();
         try {
             this.configuration = new HashMap<>();
+            reconcileProjectProperties(goal);
             for (Map.Entry<?, ?> entry : config.entrySet()) {
                 Object value = entry.getValue();
-                if (value == null) {
-                    continue;
-                }
-                if (value.getClass().getName().startsWith("org.apache")) {
+                if (value == null || value.getClass().getName().startsWith("org.apache")) {
                     continue;
                 }
                 this.configuration.put(String.valueOf(entry.getKey()), entry.getValue());
             }
 
-            Properties userProperties = ((MavenSession) config.get("session")).getUserProperties();
+            MavenSession session = (MavenSession) config.get("session");
+            Properties userProperties = session.getUserProperties();
             for (Map.Entry<Object, Object> entry : userProperties.entrySet()) {
                 this.configuration.put(String.valueOf(entry.getKey()), entry.getValue());
             }
         } catch (Exception e) {
             throw new ComponentConfigurationException(e.getMessage(), e);
+        }
+    }
+
+    //
+    // Map all properties with shortened keys to the appropriate
+    // longer form, unless the longer form of the key already exists.
+    // For example, make liquibase.changelogFile be
+    // liquibase.command.<goal>.changelogFile.
+    //
+    private void reconcileProjectProperties(String goal) {
+        Properties projectProperties = project.getProperties();
+        for (Map.Entry<Object, Object> entry : projectProperties.entrySet()) {
+            String key = String.valueOf(entry.getKey());
+            if (key.startsWith("liquibase.")) {
+                key = key.replaceAll("^liquibase\\.","");
+                key = key.replaceAll("^command\\.","");
+                String workKey = "liquibase.command." + goal + "." + key;
+
+                //
+                // If the key already exists in the complete form
+                // then do not overwrite
+                //
+                if (! projectProperties.containsKey(workKey)) {
+                    projectProperties.put(workKey, entry.getValue());
+                }
+                this.configuration.put(key, entry.getValue());
+            }
         }
     }
 
@@ -87,6 +113,9 @@ public class LiquibaseMojo extends AbstractMojo implements MapOrientedComponent 
         }
     }
 
+    //
+    // This class provides values which are on the command line or in the POM
+    //
     private static class MojoConfigurationValueProvider extends AbstractMapConfigurationValueProvider {
         private final Map<String, Object> configurationMap;
 
@@ -131,8 +160,4 @@ public class LiquibaseMojo extends AbstractMojo implements MapOrientedComponent 
             return 1;
         }
     }
-
-//    public static void setField(Object field) {
-//        System.out.println("setting");
-//    }
 }

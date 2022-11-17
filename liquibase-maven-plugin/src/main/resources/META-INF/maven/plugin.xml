@@ -660,6 +660,776 @@
 </configuration>
 </mojo>
 <mojo>
+<goal>checksBulkSet</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>autoUpdate</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Allows automatic backup and updating of liquibase.checks.conf file when new quality checks are available. Options: [on|off]</description>
+</parameter>
+<parameter>
+<name>checksSettingsFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Relative or fully qualified path to a configuration file for checks execution</description>
+</parameter>
+<parameter>
+<name>disable</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Disable all qualifying checks in the checks settings file</description>
+</parameter>
+<parameter>
+<name>enable</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Enable all qualifying checks in the checks settings file</description>
+</parameter>
+<parameter>
+<name>force</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Do not ask for confirmation when running this command</description>
+</parameter>
+<parameter>
+<name>severity</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Set the severity of all checks to the value specified</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<autoUpdate implementation="java.lang.String">${liquibase.command.checks.BulkSet.autoUpdate}</autoUpdate>
+<checksSettingsFile implementation="java.lang.String">${liquibase.command.checks.BulkSet.checksSettingsFile}</checksSettingsFile>
+<disable implementation="java.lang.Boolean">${liquibase.command.checks.BulkSet.disable}</disable>
+<enable implementation="java.lang.Boolean">${liquibase.command.checks.BulkSet.enable}</enable>
+<force implementation="java.lang.Boolean">${liquibase.command.checks.BulkSet.force}</force>
+<severity implementation="java.lang.String">${liquibase.command.checks.BulkSet.severity}</severity>
+</configuration>
+</mojo>
+<mojo>
+<goal>checksCopy</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>autoUpdate</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Allows automatic backup and updating of liquibase.checks.conf file when new quality checks are available. Options: [on|off]</description>
+</parameter>
+<parameter>
+<name>checkName</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>Name of check to configure</description>
+</parameter>
+<parameter>
+<name>checksSettingsFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Relative or fully qualified path to a configuration file for checks execution</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<autoUpdate implementation="java.lang.String">${liquibase.command.checks.Copy.autoUpdate}</autoUpdate>
+<checkName implementation="java.lang.String">${liquibase.command.checks.Copy.checkName}</checkName>
+<checksSettingsFile implementation="java.lang.String">${liquibase.command.checks.Copy.checksSettingsFile}</checksSettingsFile>
+</configuration>
+</mojo>
+<mojo>
+<goal>checksCustomize</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>autoUpdate</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Allows automatic backup and updating of liquibase.checks.conf file when new quality checks are available. Options: [on|off]</description>
+</parameter>
+<parameter>
+<name>checkName</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>Name of check to configure</description>
+</parameter>
+<parameter>
+<name>checksSettingsFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Relative or fully qualified path to a configuration file for checks execution</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<autoUpdate implementation="java.lang.String">${liquibase.command.checks.Customize.autoUpdate}</autoUpdate>
+<checkName implementation="java.lang.String">${liquibase.command.checks.Customize.checkName}</checkName>
+<checksSettingsFile implementation="java.lang.String">${liquibase.command.checks.Customize.checksSettingsFile}</checksSettingsFile>
+</configuration>
+</mojo>
+<mojo>
+<goal>checksDelete</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>autoUpdate</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Allows automatic backup and updating of liquibase.checks.conf file when new quality checks are available. Options: [on|off]</description>
+</parameter>
+<parameter>
+<name>checkName</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>Name of check to delete</description>
+</parameter>
+<parameter>
+<name>checksSettingsFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Relative or fully qualified path to a configuration file for checks execution</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<autoUpdate implementation="java.lang.String">${liquibase.command.checks.Delete.autoUpdate}</autoUpdate>
+<checkName implementation="java.lang.String">${liquibase.command.checks.Delete.checkName}</checkName>
+<checksSettingsFile implementation="java.lang.String">${liquibase.command.checks.Delete.checksSettingsFile}</checksSettingsFile>
+</configuration>
+</mojo>
+<mojo>
+<goal>checksDisable</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>autoUpdate</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Allows automatic backup and updating of liquibase.checks.conf file when new quality checks are available. Options: [on|off]</description>
+</parameter>
+<parameter>
+<name>checkName</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>Name of check to disable</description>
+</parameter>
+<parameter>
+<name>checksSettingsFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Relative or fully qualified path to a configuration file for checks execution</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<autoUpdate implementation="java.lang.String">${liquibase.command.checks.Disable.autoUpdate}</autoUpdate>
+<checkName implementation="java.lang.String">${liquibase.command.checks.Disable.checkName}</checkName>
+<checksSettingsFile implementation="java.lang.String">${liquibase.command.checks.Disable.checksSettingsFile}</checksSettingsFile>
+</configuration>
+</mojo>
+<mojo>
+<goal>checksEnable</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>autoUpdate</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Allows automatic backup and updating of liquibase.checks.conf file when new quality checks are available. Options: [on|off]</description>
+</parameter>
+<parameter>
+<name>checkName</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>Name of check to enable</description>
+</parameter>
+<parameter>
+<name>checksSettingsFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Relative or fully qualified path to a configuration file for checks execution</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<autoUpdate implementation="java.lang.String">${liquibase.command.checks.Enable.autoUpdate}</autoUpdate>
+<checkName implementation="java.lang.String">${liquibase.command.checks.Enable.checkName}</checkName>
+<checksSettingsFile implementation="java.lang.String">${liquibase.command.checks.Enable.checksSettingsFile}</checksSettingsFile>
+</configuration>
+</mojo>
+<mojo>
+<goal>checksReset</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>autoUpdate</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Allows automatic backup and updating of liquibase.checks.conf file when new quality checks are available. Options: [on|off]</description>
+</parameter>
+<parameter>
+<name>checkName</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>Name of check to reset</description>
+</parameter>
+<parameter>
+<name>checksSettingsFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Relative or fully qualified path to a configuration file for checks execution</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<autoUpdate implementation="java.lang.String">${liquibase.command.checks.Reset.autoUpdate}</autoUpdate>
+<checkName implementation="java.lang.String">${liquibase.command.checks.Reset.checkName}</checkName>
+<checksSettingsFile implementation="java.lang.String">${liquibase.command.checks.Reset.checksSettingsFile}</checksSettingsFile>
+</configuration>
+</mojo>
+<mojo>
+<goal>checksRun</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>autoUpdate</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Allows automatic backup and updating of liquibase.checks.conf file when new quality checks are available. Options: [on|off]</description>
+</parameter>
+<parameter>
+<name>cacheChangelogFileContents</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>If true, sqlFile change type contents will be cached in memory to improve performance, at the cost of higher memory usage. To reduce memory usage, set this to false.</description>
+</parameter>
+<parameter>
+<name>changelogFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Relative or fully qualified path to a Liquibase changelog file.  One of --changelog-file or --url is required.</description>
+</parameter>
+<parameter>
+<name>checkName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Comma-separated list of one or more enabled checks to run. Checks to exclude can be prefixed with the ! character. If no checks are specified, all enabled checks will run. Example: --check-name=shortname1,shortname2,!shortname3</description>
+</parameter>
+<parameter>
+<name>checkRollbacks</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Allow changeset's rollback code to be analyzed for compliance with currently enabled quality checks.</description>
+</parameter>
+<parameter>
+<name>checksIntegration</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Name of the integration that is executing checks run</description>
+</parameter>
+<parameter>
+<name>checksScope</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The Liquibase component to run checks against, which can be a comma separated list</description>
+</parameter>
+<parameter>
+<name>checksSettingsFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Relative or fully qualified path to a configuration file for checks execution</description>
+</parameter>
+<parameter>
+<name>contexts</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Changeset contexts to match</description>
+</parameter>
+<parameter>
+<name>defaultCatalogName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default catalog name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>defaultSchemaName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default schema name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>driver</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver class</description>
+</parameter>
+<parameter>
+<name>driverPropertiesFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver properties file</description>
+</parameter>
+<parameter>
+<name>format</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Option to create JSON output</description>
+</parameter>
+<parameter>
+<name>labels</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Changeset labels to match</description>
+</parameter>
+<parameter>
+<name>password</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Password to use to connect to the database</description>
+</parameter>
+<parameter>
+<name>schemas</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The schemas to check when checks-scope contains 'database'</description>
+</parameter>
+<parameter>
+<name>url</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC database connection URL.  One of --changelog-file or --url is required.</description>
+</parameter>
+<parameter>
+<name>username</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Username to use to connect to the database</description>
+</parameter>
+<parameter>
+<name>verbose</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Verbose flag with optional values of 'True' or 'False'. The default is 'False'.</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<autoUpdate implementation="java.lang.String">${liquibase.command.checks.Run.autoUpdate}</autoUpdate>
+<cacheChangelogFileContents default-value="true" implementation="java.lang.Boolean">${liquibase.command.checks.Run.cacheChangelogFileContents}</cacheChangelogFileContents>
+<changelogFile implementation="java.lang.String">${liquibase.command.checks.Run.changelogFile}</changelogFile>
+<checkName implementation="java.lang.String">${liquibase.command.checks.Run.checkName}</checkName>
+<checkRollbacks default-value="false" implementation="java.lang.Boolean">${liquibase.command.checks.Run.checkRollbacks}</checkRollbacks>
+<checksIntegration default-value="cli" implementation="java.lang.String">${liquibase.command.checks.Run.checksIntegration}</checksIntegration>
+<checksScope default-value="changelog" implementation="java.lang.String">${liquibase.command.checks.Run.checksScope}</checksScope>
+<checksSettingsFile implementation="java.lang.String">${liquibase.command.checks.Run.checksSettingsFile}</checksSettingsFile>
+<contexts implementation="java.lang.String">${liquibase.command.checks.Run.contexts}</contexts>
+<defaultCatalogName implementation="java.lang.String">${liquibase.command.checks.Run.defaultCatalogName}</defaultCatalogName>
+<defaultSchemaName implementation="java.lang.String">${liquibase.command.checks.Run.defaultSchemaName}</defaultSchemaName>
+<driver implementation="java.lang.String">${liquibase.command.checks.Run.driver}</driver>
+<driverPropertiesFile implementation="java.lang.String">${liquibase.command.checks.Run.driverPropertiesFile}</driverPropertiesFile>
+<format default-value="TXT" implementation="java.lang.String">${liquibase.command.checks.Run.format}</format>
+<labels implementation="java.lang.String">${liquibase.command.checks.Run.labels}</labels>
+<password implementation="java.lang.String">${liquibase.command.checks.Run.password}</password>
+<schemas implementation="java.lang.String">${liquibase.command.checks.Run.schemas}</schemas>
+<url implementation="java.lang.String">${liquibase.command.checks.Run.url}</url>
+<username implementation="java.lang.String">${liquibase.command.checks.Run.username}</username>
+<verbose default-value="false" implementation="java.lang.Boolean">${liquibase.command.checks.Run.verbose}</verbose>
+</configuration>
+</mojo>
+<mojo>
+<goal>checksShow</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>autoUpdate</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Allows automatic backup and updating of liquibase.checks.conf file when new quality checks are available. Options: [on|off]</description>
+</parameter>
+<parameter>
+<name>checkName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Only show the listed rules. Use rule shortnames separated with commas to list all required rules. Checks to exclude can be prefixed with the ! character. Use 'all', to select all the rules (used by default, if the parameter isn't set).</description>
+</parameter>
+<parameter>
+<name>checksIntegration</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Name of the integration that is executing checks show</description>
+</parameter>
+<parameter>
+<name>checksSettingsFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Relative or fully qualified path to a configuration file for checks execution</description>
+</parameter>
+<parameter>
+<name>showCols</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Only show the listed columns. Column options: id,checkname,type,priority,shortname,scope,enabled,severity,customization,description. Use commas to separate column names. Use 'all' to select all the columns.</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<autoUpdate implementation="java.lang.String">${liquibase.command.checks.Show.autoUpdate}</autoUpdate>
+<checkName default-value="all" implementation="java.lang.String">${liquibase.command.checks.Show.checkName}</checkName>
+<checksIntegration default-value="cli" implementation="java.lang.String">${liquibase.command.checks.Show.checksIntegration}</checksIntegration>
+<checksSettingsFile implementation="java.lang.String">${liquibase.command.checks.Show.checksSettingsFile}</checksSettingsFile>
+<showCols default-value="shortname,scope,enabled,severity,customization,description" implementation="java.lang.String">${liquibase.command.checks.Show.showCols}</showCols>
+</configuration>
+</mojo>
+<mojo>
 <goal>clearChecksums</goal>
 <description>Clears all checksums and nullifies the MD5SUM column of the DATABASECHANGELOG table so that they will be re-computed on the next database update</description>
 <requiresDependencyResolution>test</requiresDependencyResolution>
@@ -985,6 +1755,13 @@
 <description>Objects to exclude from diff</description>
 </parameter>
 <parameter>
+<name>format</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Option to create JSON output</description>
+</parameter>
+<parameter>
 <name>includeObjects</name>
 <type>java.lang.String</type>
 <required>false</required>
@@ -1049,6 +1826,7 @@
 <driver implementation="java.lang.String">${liquibase.command.diff.driver}</driver>
 <driverPropertiesFile implementation="java.lang.String">${liquibase.command.diff.driverPropertiesFile}</driverPropertiesFile>
 <excludeObjects implementation="java.lang.String">${liquibase.command.diff.excludeObjects}</excludeObjects>
+<format implementation="java.lang.String">${liquibase.command.diff.format}</format>
 <includeObjects implementation="java.lang.String">${liquibase.command.diff.includeObjects}</includeObjects>
 <password implementation="java.lang.String">${liquibase.command.diff.password}</password>
 <referencePassword implementation="java.lang.String">${liquibase.command.diff.referencePassword}</referencePassword>
@@ -1511,6 +2289,154 @@
 <sqlFile implementation="java.lang.String">${liquibase.command.executeSql.sqlFile}</sqlFile>
 <url implementation="java.lang.String">${liquibase.command.executeSql.url}</url>
 <username implementation="java.lang.String">${liquibase.command.executeSql.username}</username>
+</configuration>
+</mojo>
+<mojo>
+<goal>flow</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>flowFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The path to the configuration yaml file which contains one or more 'stages' of commands to be executed in a liquibase flow operation. Defaults to yaml file named "liquibase.flowfile.yaml" in the current working directory.</description>
+</parameter>
+<parameter>
+<name>flowFileStrictParsing</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Parse flow-file YAML to allow only Liquibase flow-file specific properties, indentations, and structure.</description>
+</parameter>
+<parameter>
+<name>flowIntegration</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Name of the integration that is executing flow</description>
+</parameter>
+<parameter>
+<name>flowShellInterpreter</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default interpreter used to execute shell commands.</description>
+</parameter>
+<parameter>
+<name>flowShellKeepTempFiles</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Do not delete temporary files created by the shell command execution</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<flowFile default-value="liquibase.flowfile.yaml" implementation="java.lang.String">${liquibase.command.flow.flowFile}</flowFile>
+<flowFileStrictParsing default-value="true" implementation="java.lang.Boolean">${liquibase.command.flow.flowFileStrictParsing}</flowFileStrictParsing>
+<flowIntegration default-value="cli" implementation="java.lang.String">${liquibase.command.flow.flowIntegration}</flowIntegration>
+<flowShellInterpreter implementation="java.lang.String">${liquibase.command.flow.flowShellInterpreter}</flowShellInterpreter>
+<flowShellKeepTempFiles default-value="false" implementation="java.lang.Boolean">${liquibase.command.flow.flowShellKeepTempFiles}</flowShellKeepTempFiles>
+</configuration>
+</mojo>
+<mojo>
+<goal>flowValidate</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>flowFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The path to the configuration yaml file which contains one or more 'stages' of commands to be executed in a liquibase flow operation. Defaults to yaml file named "liquibase.flowfile.yaml" in the current working directory.</description>
+</parameter>
+<parameter>
+<name>flowFileStrictParsing</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Parse flow-file YAML to allow only Liquibase flow-file specific properties, indentations, and structure.</description>
+</parameter>
+<parameter>
+<name>flowIntegration</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Name of the integration that is executing flow</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<flowFile default-value="liquibase.flowfile.yaml" implementation="java.lang.String">${liquibase.command.flow.Validate.flowFile}</flowFile>
+<flowFileStrictParsing default-value="true" implementation="java.lang.Boolean">${liquibase.command.flow.Validate.flowFileStrictParsing}</flowFileStrictParsing>
+<flowIntegration default-value="cli" implementation="java.lang.String">${liquibase.command.flow.Validate.flowIntegration}</flowIntegration>
 </configuration>
 </mojo>
 <mojo>
@@ -2209,6 +3135,80 @@
 <password implementation="java.lang.String">${liquibase.command.history.password}</password>
 <url implementation="java.lang.String">${liquibase.command.history.url}</url>
 <username implementation="java.lang.String">${liquibase.command.history.username}</username>
+</configuration>
+</mojo>
+<mojo>
+<goal>initCopy</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>projectCopier</name>
+<type>com.datical.liquibase.ext.copy.ProjectCopier</type>
+<required>false</required>
+<editable>true</editable>
+<description>ProjectCopier object that can be passed in</description>
+</parameter>
+<parameter>
+<name>recursive</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Recursive copy files from the source directory</description>
+</parameter>
+<parameter>
+<name>source</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Path to the directory where the project files will be created</description>
+</parameter>
+<parameter>
+<name>target</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Source directory where the project files will be copied from</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<projectCopier implementation="com.datical.liquibase.ext.copy.ProjectCopier">${liquibase.command.init.Copy.projectCopier}</projectCopier>
+<recursive default-value="false" implementation="java.lang.Boolean">${liquibase.command.init.Copy.recursive}</recursive>
+<source implementation="java.lang.String">${liquibase.command.init.Copy.source}</source>
+<target default-value="." implementation="java.lang.String">${liquibase.command.init.Copy.target}</target>
 </configuration>
 </mojo>
 <mojo>
@@ -3559,6 +4559,622 @@
 <rollbackScript implementation="java.lang.String">${liquibase.command.rollbackCountSql.rollbackScript}</rollbackScript>
 <url implementation="java.lang.String">${liquibase.command.rollbackCountSql.url}</url>
 <username implementation="java.lang.String">${liquibase.command.rollbackCountSql.username}</username>
+</configuration>
+</mojo>
+<mojo>
+<goal>rollbackOneChangeset</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>changeExecListenerClass</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Fully-qualified class which specifies a ChangeExecListener</description>
+</parameter>
+<parameter>
+<name>changeExecListenerPropertiesFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Path to a properties file for the ChangeExecListenerClass</description>
+</parameter>
+<parameter>
+<name>changelogFile</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>The root changelog</description>
+</parameter>
+<parameter>
+<name>changesetAuthor</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The author of the changeset to rollback</description>
+</parameter>
+<parameter>
+<name>changesetId</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The id of the changeset to rollback</description>
+</parameter>
+<parameter>
+<name>changesetPath</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database password</description>
+</parameter>
+<parameter>
+<name>defaultCatalogName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default catalog name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>defaultSchemaName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default schema name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>driver</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver class</description>
+</parameter>
+<parameter>
+<name>driverPropertiesFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver properties file</description>
+</parameter>
+<parameter>
+<name>force</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>A required safety flag to indicate you intend to use this feature</description>
+</parameter>
+<parameter>
+<name>password</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database password</description>
+</parameter>
+<parameter>
+<name>rollbackScript</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The path to the script to use to perform the rollback</description>
+</parameter>
+<parameter>
+<name>url</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>The JDBC target database connection URL</description>
+</parameter>
+<parameter>
+<name>username</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database username</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<changeExecListenerClass implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.changeExecListenerClass}</changeExecListenerClass>
+<changeExecListenerPropertiesFile implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.changeExecListenerPropertiesFile}</changeExecListenerPropertiesFile>
+<changelogFile implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.changelogFile}</changelogFile>
+<changesetAuthor implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.changesetAuthor}</changesetAuthor>
+<changesetId implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.changesetId}</changesetId>
+<changesetPath implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.changesetPath}</changesetPath>
+<defaultCatalogName implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.defaultCatalogName}</defaultCatalogName>
+<defaultSchemaName implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.defaultSchemaName}</defaultSchemaName>
+<driver implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.driver}</driver>
+<driverPropertiesFile implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.driverPropertiesFile}</driverPropertiesFile>
+<force default-value="false" implementation="java.lang.Boolean">${liquibase.command.rollbackOneChangeset.force}</force>
+<password implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.password}</password>
+<rollbackScript implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.rollbackScript}</rollbackScript>
+<url implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.url}</url>
+<username implementation="java.lang.String">${liquibase.command.rollbackOneChangeset.username}</username>
+</configuration>
+</mojo>
+<mojo>
+<goal>rollbackOneChangesetSql</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>changelogFile</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>The root changelog</description>
+</parameter>
+<parameter>
+<name>changesetAuthor</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The author of the changeset to rollback</description>
+</parameter>
+<parameter>
+<name>changesetId</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The id of the changeset to rollback</description>
+</parameter>
+<parameter>
+<name>changesetPath</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database password</description>
+</parameter>
+<parameter>
+<name>defaultCatalogName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default catalog name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>defaultSchemaName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default schema name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>driver</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver class</description>
+</parameter>
+<parameter>
+<name>driverPropertiesFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver properties file</description>
+</parameter>
+<parameter>
+<name>force</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Flag which indicates you intend to use this feature</description>
+</parameter>
+<parameter>
+<name>outputDefaultCatalog</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Control whether names of objects in the default catalog are fully qualified or not. If true they are. If false, only objects outside the default catalog are fully qualified</description>
+</parameter>
+<parameter>
+<name>outputDefaultSchema</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Control whether names of objects in the default schema are fully qualified or not. If true they are. If false, only objects outside the default schema are fully qualified</description>
+</parameter>
+<parameter>
+<name>password</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database password</description>
+</parameter>
+<parameter>
+<name>rollbackScript</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The path to the script to use to perform the rollback</description>
+</parameter>
+<parameter>
+<name>url</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>The JDBC target database connection URL</description>
+</parameter>
+<parameter>
+<name>username</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database username</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<changelogFile implementation="java.lang.String">${liquibase.command.rollbackOneChangesetSql.changelogFile}</changelogFile>
+<changesetAuthor implementation="java.lang.String">${liquibase.command.rollbackOneChangesetSql.changesetAuthor}</changesetAuthor>
+<changesetId implementation="java.lang.String">${liquibase.command.rollbackOneChangesetSql.changesetId}</changesetId>
+<changesetPath implementation="java.lang.String">${liquibase.command.rollbackOneChangesetSql.changesetPath}</changesetPath>
+<defaultCatalogName implementation="java.lang.String">${liquibase.command.rollbackOneChangesetSql.defaultCatalogName}</defaultCatalogName>
+<defaultSchemaName implementation="java.lang.String">${liquibase.command.rollbackOneChangesetSql.defaultSchemaName}</defaultSchemaName>
+<driver implementation="java.lang.String">${liquibase.command.rollbackOneChangesetSql.driver}</driver>
+<driverPropertiesFile implementation="java.lang.String">${liquibase.command.rollbackOneChangesetSql.driverPropertiesFile}</driverPropertiesFile>
+<force default-value="false" implementation="java.lang.Boolean">${liquibase.command.rollbackOneChangesetSql.force}</force>
+<outputDefaultCatalog default-value="true" implementation="java.lang.Boolean">${liquibase.command.rollbackOneChangesetSql.outputDefaultCatalog}</outputDefaultCatalog>
+<outputDefaultSchema default-value="true" implementation="java.lang.Boolean">${liquibase.command.rollbackOneChangesetSql.outputDefaultSchema}</outputDefaultSchema>
+<password implementation="java.lang.String">${liquibase.command.rollbackOneChangesetSql.password}</password>
+<rollbackScript implementation="java.lang.String">${liquibase.command.rollbackOneChangesetSql.rollbackScript}</rollbackScript>
+<url implementation="java.lang.String">${liquibase.command.rollbackOneChangesetSql.url}</url>
+<username implementation="java.lang.String">${liquibase.command.rollbackOneChangesetSql.username}</username>
+</configuration>
+</mojo>
+<mojo>
+<goal>rollbackOneUpdate</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>changeExecListenerClass</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Fully-qualified class which specifies a ChangeExecListener</description>
+</parameter>
+<parameter>
+<name>changeExecListenerPropertiesFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>Path to a properties file for the ChangeExecListenerClass</description>
+</parameter>
+<parameter>
+<name>changelogFile</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>The root changelog</description>
+</parameter>
+<parameter>
+<name>defaultCatalogName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default catalog name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>defaultSchemaName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default schema name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>deploymentId</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The deployment ID of the update to rollback</description>
+</parameter>
+<parameter>
+<name>driver</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver class</description>
+</parameter>
+<parameter>
+<name>driverPropertiesFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver properties file</description>
+</parameter>
+<parameter>
+<name>force</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>A required safety flag to indicate you intend to use this feature</description>
+</parameter>
+<parameter>
+<name>password</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database password</description>
+</parameter>
+<parameter>
+<name>rollbackScript</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The path to the script to use to perform the rollback</description>
+</parameter>
+<parameter>
+<name>url</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>The JDBC target database connection URL</description>
+</parameter>
+<parameter>
+<name>username</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database username</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<changeExecListenerClass implementation="java.lang.String">${liquibase.command.rollbackOneUpdate.changeExecListenerClass}</changeExecListenerClass>
+<changeExecListenerPropertiesFile implementation="java.lang.String">${liquibase.command.rollbackOneUpdate.changeExecListenerPropertiesFile}</changeExecListenerPropertiesFile>
+<changelogFile implementation="java.lang.String">${liquibase.command.rollbackOneUpdate.changelogFile}</changelogFile>
+<defaultCatalogName implementation="java.lang.String">${liquibase.command.rollbackOneUpdate.defaultCatalogName}</defaultCatalogName>
+<defaultSchemaName implementation="java.lang.String">${liquibase.command.rollbackOneUpdate.defaultSchemaName}</defaultSchemaName>
+<deploymentId implementation="java.lang.String">${liquibase.command.rollbackOneUpdate.deploymentId}</deploymentId>
+<driver implementation="java.lang.String">${liquibase.command.rollbackOneUpdate.driver}</driver>
+<driverPropertiesFile implementation="java.lang.String">${liquibase.command.rollbackOneUpdate.driverPropertiesFile}</driverPropertiesFile>
+<force default-value="false" implementation="java.lang.Boolean">${liquibase.command.rollbackOneUpdate.force}</force>
+<password implementation="java.lang.String">${liquibase.command.rollbackOneUpdate.password}</password>
+<rollbackScript implementation="java.lang.String">${liquibase.command.rollbackOneUpdate.rollbackScript}</rollbackScript>
+<url implementation="java.lang.String">${liquibase.command.rollbackOneUpdate.url}</url>
+<username implementation="java.lang.String">${liquibase.command.rollbackOneUpdate.username}</username>
+</configuration>
+</mojo>
+<mojo>
+<goal>rollbackOneUpdateSql</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>changelogFile</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>The root changelog</description>
+</parameter>
+<parameter>
+<name>defaultCatalogName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default catalog name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>defaultSchemaName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default schema name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>deploymentId</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The deployment ID of the update to rollback</description>
+</parameter>
+<parameter>
+<name>driver</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver class</description>
+</parameter>
+<parameter>
+<name>driverPropertiesFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver properties file</description>
+</parameter>
+<parameter>
+<name>force</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Flag which indicates you intend to use this feature</description>
+</parameter>
+<parameter>
+<name>outputDefaultCatalog</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Control whether names of objects in the default catalog are fully qualified or not. If true they are. If false, only objects outside the default catalog are fully qualified</description>
+</parameter>
+<parameter>
+<name>outputDefaultSchema</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>Control whether names of objects in the default schema are fully qualified or not. If true they are. If false, only objects outside the default schema are fully qualified</description>
+</parameter>
+<parameter>
+<name>password</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database password</description>
+</parameter>
+<parameter>
+<name>rollbackScript</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The path to the script to use to perform the rollback</description>
+</parameter>
+<parameter>
+<name>url</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>The JDBC target database connection URL</description>
+</parameter>
+<parameter>
+<name>username</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database username</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<changelogFile implementation="java.lang.String">${liquibase.command.rollbackOneUpdateSql.changelogFile}</changelogFile>
+<defaultCatalogName implementation="java.lang.String">${liquibase.command.rollbackOneUpdateSql.defaultCatalogName}</defaultCatalogName>
+<defaultSchemaName implementation="java.lang.String">${liquibase.command.rollbackOneUpdateSql.defaultSchemaName}</defaultSchemaName>
+<deploymentId implementation="java.lang.String">${liquibase.command.rollbackOneUpdateSql.deploymentId}</deploymentId>
+<driver implementation="java.lang.String">${liquibase.command.rollbackOneUpdateSql.driver}</driver>
+<driverPropertiesFile implementation="java.lang.String">${liquibase.command.rollbackOneUpdateSql.driverPropertiesFile}</driverPropertiesFile>
+<force default-value="false" implementation="java.lang.Boolean">${liquibase.command.rollbackOneUpdateSql.force}</force>
+<outputDefaultCatalog default-value="true" implementation="java.lang.Boolean">${liquibase.command.rollbackOneUpdateSql.outputDefaultCatalog}</outputDefaultCatalog>
+<outputDefaultSchema default-value="true" implementation="java.lang.Boolean">${liquibase.command.rollbackOneUpdateSql.outputDefaultSchema}</outputDefaultSchema>
+<password implementation="java.lang.String">${liquibase.command.rollbackOneUpdateSql.password}</password>
+<rollbackScript implementation="java.lang.String">${liquibase.command.rollbackOneUpdateSql.rollbackScript}</rollbackScript>
+<url implementation="java.lang.String">${liquibase.command.rollbackOneUpdateSql.url}</url>
+<username implementation="java.lang.String">${liquibase.command.rollbackOneUpdateSql.username}</username>
 </configuration>
 </mojo>
 <mojo>
@@ -4983,6 +6599,13 @@
 <description>Password to use to connect to the database</description>
 </parameter>
 <parameter>
+<name>rollbackOnError</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>If set to true and any changeset in a deployment fails, then the update operation stops, and liquibase attempts to rollback all changesets just deployed. A changeset marked "fail-on-error=false" does not trigger as an error, therefore rollback-on-error will not occur. Additionally, if a changeset is not auto-rollback compliant or does not have a rollback script, then no rollback-on-error will occur for any changeset.</description>
+</parameter>
+<parameter>
 <name>url</name>
 <type>java.lang.String</type>
 <required>true</required>
@@ -5011,6 +6634,7 @@
 <driverPropertiesFile implementation="java.lang.String">${liquibase.command.update.driverPropertiesFile}</driverPropertiesFile>
 <labelFilter implementation="java.lang.String">${liquibase.command.update.labelFilter}</labelFilter>
 <password implementation="java.lang.String">${liquibase.command.update.password}</password>
+<rollbackOnError default-value="false" implementation="java.lang.Boolean">${liquibase.command.update.rollbackOnError}</rollbackOnError>
 <url implementation="java.lang.String">${liquibase.command.update.url}</url>
 <username implementation="java.lang.String">${liquibase.command.update.username}</username>
 </configuration>
@@ -5321,6 +6945,258 @@
 <password implementation="java.lang.String">${liquibase.command.updateCountSql.password}</password>
 <url implementation="java.lang.String">${liquibase.command.updateCountSql.url}</url>
 <username implementation="java.lang.String">${liquibase.command.updateCountSql.username}</username>
+</configuration>
+</mojo>
+<mojo>
+<goal>updateOneChangeset</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>changesetAuthor</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>Author of the changeset to execute</description>
+</parameter>
+<parameter>
+<name>changesetId</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>Id of the changeset to execute</description>
+</parameter>
+<parameter>
+<name>changesetPath</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>Path to the changeset to execute</description>
+</parameter>
+<parameter>
+<name>defaultCatalogName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default catalog name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>defaultSchemaName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default schema name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>driver</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver class</description>
+</parameter>
+<parameter>
+<name>driverPropertiesFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver properties file</description>
+</parameter>
+<parameter>
+<name>force</name>
+<type>java.lang.Boolean</type>
+<required>false</required>
+<editable>true</editable>
+<description>A required safety flag to indicate you intend to use this feature</description>
+</parameter>
+<parameter>
+<name>password</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database password</description>
+</parameter>
+<parameter>
+<name>url</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>The JDBC target database connection URL</description>
+</parameter>
+<parameter>
+<name>username</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database username</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<changesetAuthor implementation="java.lang.String">${liquibase.command.updateOneChangeset.changesetAuthor}</changesetAuthor>
+<changesetId implementation="java.lang.String">${liquibase.command.updateOneChangeset.changesetId}</changesetId>
+<changesetPath implementation="java.lang.String">${liquibase.command.updateOneChangeset.changesetPath}</changesetPath>
+<defaultCatalogName implementation="java.lang.String">${liquibase.command.updateOneChangeset.defaultCatalogName}</defaultCatalogName>
+<defaultSchemaName implementation="java.lang.String">${liquibase.command.updateOneChangeset.defaultSchemaName}</defaultSchemaName>
+<driver implementation="java.lang.String">${liquibase.command.updateOneChangeset.driver}</driver>
+<driverPropertiesFile implementation="java.lang.String">${liquibase.command.updateOneChangeset.driverPropertiesFile}</driverPropertiesFile>
+<force default-value="false" implementation="java.lang.Boolean">${liquibase.command.updateOneChangeset.force}</force>
+<password implementation="java.lang.String">${liquibase.command.updateOneChangeset.password}</password>
+<url implementation="java.lang.String">${liquibase.command.updateOneChangeset.url}</url>
+<username implementation="java.lang.String">${liquibase.command.updateOneChangeset.username}</username>
+</configuration>
+</mojo>
+<mojo>
+<goal>updateOneChangesetSql</goal>
+<description/>
+<requiresDependencyResolution>test</requiresDependencyResolution>
+<requiresDirectInvocation>false</requiresDirectInvocation>
+<requiresProject>true</requiresProject>
+<requiresReports>false</requiresReports>
+<aggregator>false</aggregator>
+<requiresOnline>false</requiresOnline>
+<inheritedByDefault>true</inheritedByDefault>
+<implementation>org.liquibase.maven.plugins.LiquibaseMojo</implementation>
+<language>java</language>
+<instantiationStrategy>per-lookup</instantiationStrategy>
+<executionStrategy>once-per-session</executionStrategy>
+<threadSafe>false</threadSafe>
+<configurator>map-oriented</configurator>
+<parameters>
+<parameter>
+<name>mojoExecution</name>
+<type>org.apache.maven.plugin.MojoExecution</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>session</name>
+<type>org.apache.maven.execution.MavenSession</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>project</name>
+<type>org.apache.maven.project.MavenProject</type>
+<required>true</required>
+<editable>false</editable>
+</parameter>
+<parameter>
+<name>changesetAuthor</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>Author of the changeset to execute</description>
+</parameter>
+<parameter>
+<name>changesetId</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>Id of the changeset to execute</description>
+</parameter>
+<parameter>
+<name>changesetPath</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>Path to the changeset to execute</description>
+</parameter>
+<parameter>
+<name>defaultCatalogName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default catalog name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>defaultSchemaName</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The default schema name to use for the database connection</description>
+</parameter>
+<parameter>
+<name>driver</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver class</description>
+</parameter>
+<parameter>
+<name>driverPropertiesFile</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The JDBC driver properties file</description>
+</parameter>
+<parameter>
+<name>password</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database password</description>
+</parameter>
+<parameter>
+<name>url</name>
+<type>java.lang.String</type>
+<required>true</required>
+<editable>true</editable>
+<description>The JDBC target database connection URL</description>
+</parameter>
+<parameter>
+<name>username</name>
+<type>java.lang.String</type>
+<required>false</required>
+<editable>true</editable>
+<description>The target database username</description>
+</parameter>
+</parameters>
+<configuration>
+<mojoExecution default-value="${mojoExecution}" implementation="org.apache.maven.plugin.MojoExecution"/>
+<session default-value="${session}" implementation="org.apache.maven.execution.MavenSession"/>
+<project default-value="${project}" implementation="org.apache.maven.project.MavenProject"/>
+<changesetAuthor implementation="java.lang.String">${liquibase.command.updateOneChangesetSql.changesetAuthor}</changesetAuthor>
+<changesetId implementation="java.lang.String">${liquibase.command.updateOneChangesetSql.changesetId}</changesetId>
+<changesetPath implementation="java.lang.String">${liquibase.command.updateOneChangesetSql.changesetPath}</changesetPath>
+<defaultCatalogName implementation="java.lang.String">${liquibase.command.updateOneChangesetSql.defaultCatalogName}</defaultCatalogName>
+<defaultSchemaName implementation="java.lang.String">${liquibase.command.updateOneChangesetSql.defaultSchemaName}</defaultSchemaName>
+<driver implementation="java.lang.String">${liquibase.command.updateOneChangesetSql.driver}</driver>
+<driverPropertiesFile implementation="java.lang.String">${liquibase.command.updateOneChangesetSql.driverPropertiesFile}</driverPropertiesFile>
+<password implementation="java.lang.String">${liquibase.command.updateOneChangesetSql.password}</password>
+<url implementation="java.lang.String">${liquibase.command.updateOneChangesetSql.url}</url>
+<username implementation="java.lang.String">${liquibase.command.updateOneChangesetSql.username}</username>
 </configuration>
 </mojo>
 <mojo>

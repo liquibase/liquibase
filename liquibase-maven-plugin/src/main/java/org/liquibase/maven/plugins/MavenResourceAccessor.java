@@ -35,16 +35,19 @@ public class MavenResourceAccessor extends CompositeResourceAccessor {
         // run against. It is possible that the build directly could be empty, but we cannot
         // directly include the source and resources as the resources may require filtering
         // to replace any placeholders in the resource files.
-        File projectArtifactFile = project.getArtifact().getFile();
+        File projectArtifactFile = project.getArtifact() != null ? project.getArtifact().getFile() : null;
         if (projectArtifactFile == null) {
-            this.addResourceAccessor(new DirectoryResourceAccessor(new File(project.getBuild().getOutputDirectory())));
+            if (project.getBuild() != null) {
+                this.addResourceAccessor(new DirectoryResourceAccessor(new File(project.getBuild().getOutputDirectory())));
+            }
         } else {
-            //this.addResourceAccessor(new DirectoryResourceAccessor(projectArtifactFile));
+            this.addResourceAccessor(new DirectoryResourceAccessor(projectArtifactFile));
         }
 
 //TODO        if (includeTestOutputDirectory) {
+        if (project.getBuild() != null) {
             this.addResourceAccessor(new DirectoryResourceAccessor(new File(project.getBuild().getTestOutputDirectory())));
-//        }
+        }
     }
 
 }

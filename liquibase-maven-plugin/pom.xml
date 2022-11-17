@@ -87,6 +87,7 @@
                         </goals>
                         <configuration>
                             <liquibaseClassesDir>../liquibase-core/target/classes</liquibaseClassesDir>
+                            <liquibaseProClassesDir>../../liquibase-pro/pro/target/classes</liquibaseProClassesDir>
                             <outputFile>src/main/resources/META-INF/maven/plugin.xml</outputFile>
                         </configuration>
                     </execution>

@@ -11,6 +11,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubConfiguration;
 import liquibase.resource.*;
 import liquibase.util.StringUtil;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.liquibase.maven.property.PropertyElement;
@@ -160,18 +161,21 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
 
     @Override
     protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
-//        List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
-//        resourceAccessors.add(new MavenResourceAccessor(cl));
-//        resourceAccessors.add(new DirectoryResourceAccessor(project.getBasedir()));
-//        resourceAccessors.add(new ClassLoaderResourceAccessor(getClass().getClassLoader()));
+        List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
+        try {
+            resourceAccessors.add(new MavenResourceAccessor(project));
+        } catch (DependencyResolutionRequiredException drre) {
 
-//        if (changeLogDirectory != null) {
-//            calculateChangeLogDirectoryAbsolutePath();
-//            resourceAccessors.add(new DirectoryResourceAccessor(new File(changeLogDirectory)));
-//        }
+        }
+        resourceAccessors.add(new DirectoryResourceAccessor(project.getBasedir()));
+        resourceAccessors.add(new ClassLoaderResourceAccessor(getClass().getClassLoader()));
 
-//        return new SearchPathResourceAccessor(searchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
-        return null;
+        if (changeLogDirectory != null) {
+            calculateChangeLogDirectoryAbsolutePath();
+            resourceAccessors.add(new DirectoryResourceAccessor(new File(changeLogDirectory)));
+        }
+
+        return new SearchPathResourceAccessor(searchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 
     @Override
