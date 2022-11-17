@@ -161,17 +161,11 @@ public class LiquibaseConfiguration implements SingletonObject {
                     logMessage.append(StringUtil.lowerCaseFirst(providedValue.describe()));
                     Object value = providedValue.getValue();
                     if (value != null) {
-                        if (converter != null) {
-                            value = converter.convert(value);
-                        }
+                        String finalValue = String.valueOf(value);
                         if (obfuscator != null) {
-                            try {
-                                value = obfuscator.obfuscate((DataType) value);
-                            } catch (ClassCastException e) {
-                                value = "*****";
-                            }
+                            finalValue = "*****";
                         }
-                        logMessage.append(" of '").append(value).append("'");
+                        logMessage.append(" of '").append(finalValue).append("'");
                     }
                     foundFirstValue = true;
                 }
