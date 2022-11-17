@@ -10,8 +10,8 @@ import liquibase.statement.DatabaseFunction;
 
 import java.util.Locale;
 
-@DataTypeInfo(name="tinyint", aliases = "java.sql.Types.TINYINT", minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
-public class TinyIntType  extends LiquibaseDataType {
+@DataTypeInfo(name = "tinyint", aliases = "java.sql.Types.TINYINT", minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+public class TinyIntType extends LiquibaseDataType {
 
 
     private boolean autoIncrement;
@@ -31,7 +31,7 @@ public class TinyIntType  extends LiquibaseDataType {
             return new DatabaseDataType(database.escapeDataTypeName("tinyint"));
         }
         if ((database instanceof DerbyDatabase) || (database instanceof PostgresDatabase) || (database instanceof
-            FirebirdDatabase) || (database instanceof AbstractDb2Database)) {
+                FirebirdDatabase) || (database instanceof AbstractDb2Database)) {
             return new DatabaseDataType("SMALLINT");
         }
         if (database instanceof MySQLDatabase) {
@@ -40,7 +40,13 @@ public class TinyIntType  extends LiquibaseDataType {
             return type;
         }
         if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("NUMBER",3);
+            return new DatabaseDataType("NUMBER", 3);
+        }
+        if (database instanceof SybaseDatabase) {
+            return new DatabaseDataType("TINYINT");
+        }
+        if (database instanceof H2Database) {
+            return new DatabaseDataType("TINYINT");
         }
         return super.toDatabaseDataType(database);
     }
