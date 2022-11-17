@@ -25,11 +25,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service class that centralizes database specific auto increment parameters information.
+ *
+ */
 public class ColumnAutoIncrementService {
 
     private Map<String, Column.AutoIncrementInformation> autoIncrementColumns;
 
 
+    /**
+     * If the database support autoincrement columns details (as starts with and increment by), this method returns the
+     * detailed information about them.
+     * If a new database needs to be supported just add the query to method getQueryForDatabase .
+     *
+     * @param database the database connection
+     * @param snapshot snapshot data used to store cache information.
+     * @return Map with the sequence name and auto increment details
+     */
     public Map<String, Column.AutoIncrementInformation> obtainSequencesInformation(Database database, DatabaseSnapshot snapshot) {
         if (autoIncrementColumns != null) {
             return autoIncrementColumns;
