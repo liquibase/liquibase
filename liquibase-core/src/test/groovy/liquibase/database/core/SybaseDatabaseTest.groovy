@@ -61,8 +61,8 @@ public class SybaseDatabaseTest  extends Specification {
 	def testGetDatabaseVersionWhenNotImplemented() throws Exception {
         when:
 		def connection = Mock(DatabaseConnection)
-		connection.getDatabaseMajorVersion() >> { throw new UnsupportedOperationException() }
-        connection.getDatabaseMinorVersion() >> { throw new UnsupportedOperationException() }
+		connection.getDatabaseMajorVersion() >>  { -1 }
+        connection.getDatabaseMinorVersion() >>  { -1 }
 
 		SybaseDatabase database = new SybaseDatabase()
 		database.setConnection(connection)
