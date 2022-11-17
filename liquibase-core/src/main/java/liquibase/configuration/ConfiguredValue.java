@@ -79,6 +79,15 @@ public class ConfiguredValue<DataType> {
     }
 
     /**
+     * Modifies the current configured value. If a new provider is overriding the old value, use {@link #override(ProvidedValue)}.
+     * This is for changing the value outside the "provider" infrastructure.
+     */
+    public void override(Object newValue, String sourceDescription) {
+        ProvidedValue thisValue = this.getProvidedValue();
+        this.providedValues.add(0, new ProvidedValue(thisValue.getRequestedKey(), thisValue.getActualKey(), newValue, sourceDescription, thisValue.getProvider()));
+    }
+
+    /**
      * @return a full list of where the configuration value was set and/or overridden.
      */
     public List<ProvidedValue> getProvidedValues() {
