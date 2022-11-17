@@ -26,6 +26,7 @@ public class ValidatingVisitorTest {
     public void setup() {
         changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null);
         changeSet2 = new ChangeSet("2", "testAuthor", false, false, "path/changelog", null, null, null);
+
     }
 
 
@@ -126,6 +127,92 @@ public class ValidatingVisitorTest {
         handler.visit(changeSet1, new DatabaseChangeLog(), null, null);
 
         assertEquals(0, handler.getSetupExceptions().size());
+
+        assertTrue(handler.validationPassed());
+    }
+
+    @Test
+    public void visit_successfulWithSingleValidDbmsSet() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        change.setTableName("table1");
+        ColumnConfig column1 = new ColumnConfig();
+        change.addColumn(column1);
+        column1.setName("col1");
+        column1.setType("int");
+
+        ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "postgresql", null);
+        changeSet.addChange(change);
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
+        handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null);
+
+        assertTrue(handler.validationPassed());
+    }
+
+    @Test
+    public void visit_successfulWithValidListOfDbmsSet() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        change.setTableName("table1");
+        ColumnConfig column1 = new ColumnConfig();
+        change.addColumn(column1);
+        column1.setName("col1");
+        column1.setType("int");
+        ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "postgresql, mssql, h2", null);
+        changeSet.addChange(change);
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
+        handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null);
+
+        assertTrue(handler.validationPassed());
+    }
+
+    @Test
+    public void visit_unsuccessfulWithInvalidDbmsSet() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        change.setTableName("table1");
+        ColumnConfig column1 = new ColumnConfig();
+        change.addColumn(column1);
+        column1.setName("col1");
+        column1.setType("int");
+        ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "post", null);
+        changeSet.addChange(change);
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
+        handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null);
+
+        assertFalse(handler.validationPassed());
+    }
+
+    @Test
+    public void visit_successfulWithNoneSetAsDbms() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        change.setTableName("table1");
+        ColumnConfig column1 = new ColumnConfig();
+        change.addColumn(column1);
+        column1.setName("col1");
+        column1.setType("int");
+        ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "none", null);
+        changeSet.addChange(change);
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
+        handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null);
+
+        assertTrue(handler.validationPassed());
+    }
+
+    @Test
+    public void visit_successfulWithAllSetAsDbms() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        change.setTableName("table1");
+        ColumnConfig column1 = new ColumnConfig();
+        change.addColumn(column1);
+        column1.setName("col1");
+        column1.setType("int");
+        ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, "all", null);
+        changeSet.addChange(change);
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
+        handler.visit(changeSet, new DatabaseChangeLog(), new MockDatabase(), null);
 
         assertTrue(handler.validationPassed());
     }

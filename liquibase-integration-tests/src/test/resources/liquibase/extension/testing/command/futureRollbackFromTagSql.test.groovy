@@ -41,13 +41,13 @@ Optional Args:
                 username     : { it.username },
                 password     : { it.password },
                 tag          : "version_2.0",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
         ]
 
 
         setup {
-            runChangelog "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
-            rollback 5, "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+            runChangelog "changelogs/h2/complete/rollback.tag.changelog.xml"
+            rollback 5, "changelogs/h2/complete/rollback.tag.changelog.xml"
         }
 
         expectedResults = [
@@ -61,13 +61,13 @@ Optional Args:
                 username     : { it.username },
                 password     : { it.password },
                 tag          : "version_2.0",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
         ]
 
         setup {
             cleanResources("target/test-classes/futureRollbackFromTag.sql")
-            runChangelog "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
-            rollback 5, "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+            runChangelog "changelogs/h2/complete/rollback.tag.changelog.xml"
+            rollback 5, "changelogs/h2/complete/rollback.tag.changelog.xml"
         }
 
         outputFile = new File("target/test-classes/futureRollbackFromTag.sql")
@@ -100,7 +100,7 @@ Optional Args:
 
     run "Run without a tag should throw an exception",  {
         arguments = [
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
         ]
         expectedException = CommandValidationException.class
     }
@@ -108,7 +108,7 @@ Optional Args:
     run "Run without a URL should throw an exception",  {
         arguments = [
                 url          : "",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
                 tag          : "version_2.0"
         ]
         expectedException = CommandValidationException.class

@@ -46,11 +46,11 @@ Optional Args:
                 username : { it.username },
                 password : { it.password },
                 count        : 1,
-                changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml"
+                changelogFile: "changelogs/h2/complete/rollback.changelog.xml"
         ]
 
         setup {
-            runChangelog "changelogs/hsqldb/complete/rollback.changelog.xml"
+            runChangelog "changelogs/h2/complete/rollback.changelog.xml"
         }
 
         expectedDatabaseContent = [
@@ -73,7 +73,7 @@ Optional Args:
 
     run "Run without a count should throw an exception",  {
         arguments = [
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
         ]
         expectedException = CommandValidationException.class
     }
@@ -88,7 +88,7 @@ Optional Args:
     run "Run without a URL should throw an exception",  {
         arguments = [
                 url          : "",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
                 count        : 1
         ]
         expectedException = CommandValidationException.class

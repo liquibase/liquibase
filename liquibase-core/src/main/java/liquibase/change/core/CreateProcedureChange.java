@@ -176,6 +176,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         ValidationErrors validate = new ValidationErrors();
 
         validate.checkDisallowedField("catalogName", this.getCatalogName(), database, MSSQLDatabase.class);
+        if(getDbms() != null) {
+            DatabaseList.validateDefinitions(getDbms(), validate);
+        }
 
         if ((StringUtil.trimToNull(getProcedureText()) != null) && (StringUtil.trimToNull(getPath()) != null)) {
             validate.addError(
@@ -315,6 +318,16 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             }
         }
         return generateStatements(procedureText, endDelimiter, database);
+    }
+
+    @Override
+    protected Change[] createInverses() {
+        DropProcedureChange dropProcedureChange = new DropProcedureChange();
+        dropProcedureChange.setProcedureName(getProcedureName());
+        dropProcedureChange.setSchemaName(getSchemaName());
+        dropProcedureChange.setCatalogName(getCatalogName());
+
+        return new Change[] { dropProcedureChange };
     }
 
     protected SqlStatement[] generateStatements(String logicText, String endDelimiter, Database database) {

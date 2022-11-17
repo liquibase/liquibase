@@ -1,15 +1,16 @@
 package liquibase.changelog;
 
-import liquibase.Scope;
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.OpenOptions;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 
-import java.io.*;
-import java.util.SortedSet;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,7 +74,7 @@ public class ChangelogRewriter {
                 }
             }
 
-            try (OutputStream outputStream = resource.openOutputStream(true)) {
+            try (OutputStream outputStream = resource.openOutputStream(new OpenOptions())) {
                 outputStream.write(changeLogString.getBytes(encoding));
             }
 
@@ -170,7 +171,7 @@ public class ChangelogRewriter {
             //
             // Write out the file again
             //
-            try (OutputStream outputStream = resource.openOutputStream(true)) {
+            try (OutputStream outputStream = resource.openOutputStream(new OpenOptions())) {
                 outputStream.write(changeLogString.getBytes(encoding));
             }
 

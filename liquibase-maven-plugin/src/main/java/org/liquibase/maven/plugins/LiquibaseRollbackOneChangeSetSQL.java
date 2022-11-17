@@ -166,6 +166,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         argsMap.put("changeSetId", this.changeSetId);
         argsMap.put("changeSetAuthor", this.changeSetAuthor);
         argsMap.put("changeSetPath", this.changeSetPath);
+        argsMap.put("rollbackScript", this.rollbackScript);
         return argsMap;
     }
 }
