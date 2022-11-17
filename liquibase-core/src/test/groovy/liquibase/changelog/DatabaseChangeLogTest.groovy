@@ -163,6 +163,38 @@ create view sql_view as select * from sql_table;'''
         ((CreateTableChange) rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").changes[0]).tableName == "person2"
     }
 
+    def "included changelog files inside modifyChangeSets set runWith"() {
+        when:
+        def resourceAccessor =
+           new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml
+                   .replace("\${loginUser}", "otherUser")
+                   .replace("person", "person2")])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+        rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
+
+
+        def topLevel =
+                new ParsedNode(null, "databaseChangeLog")
+                    .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+        def modifyNode =
+                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql"])
+        modifyNode
+           .addChildren([include: [file: "com/example/test1.xml"]])
+           .addChildren([include: [file: "com/example/test2.xml"]])
+        topLevel.addChild(modifyNode)
+        rootChangeLog.load(topLevel, resourceAccessor)
+
+
+        then:
+
+        rootChangeLog.changeSets.size() == 3
+        ((CreateTableChange) rootChangeLog.getChangeSet("com/example/root.xml", "nvoxland", "1").changes[0]).tableName == "test_table"
+        rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getRunWith() == "psql"
+        rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getRunWith() == "psql"
+    }
+
     def "includeAll files have preconditions and changeSets loaded"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
@@ -196,6 +228,44 @@ create view sql_view as select * from sql_table;'''
         ((CreateTableChange) rootChangeLog.getChangeSet("com/example/root.xml", "nvoxland", "1").changes[0]).tableName == "test_table"
         ((CreateTableChange) rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").changes[0]).tableName == "person"
         ((CreateTableChange) rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").changes[0]).tableName == "person2"
+        ((RawSQLChange) rootChangeLog.getChangeSet("com/example/test.sql", "includeAll", "raw").changes[0]).sql == testSql
+
+        // assert reversed order
+        ((CreateTableChange) rootChangeLog.getChangeSets().get(0).changes[0]).tableName == "test_table"
+        ((CreateTableChange) rootChangeLog.getChangeSets().get(2).changes[0]).tableName == "person"
+        ((CreateTableChange) rootChangeLog.getChangeSets().get(1).changes[0]).tableName == "person2"
+        ((RawSQLChange) rootChangeLog.getChangeSets().get(3).changes[0]).sql == testSql
+    }
+
+    def "includeAll files inside modifyChangeSets set runWith"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/test1.xml": test1Xml,
+                "com/example/test2.xml": test1Xml.replace("\${loginUser}", "otherUser").replace("person", "person2"),
+                "com/example/test.sql" : testSql
+        ])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+        rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
+        def topLevel =
+                new ParsedNode(null, "databaseChangeLog")
+                        .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+        def modifyNode =
+                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql"])
+        modifyNode
+                .addChildren([includeAll: [path: "com/example", resourceComparator: "liquibase.changelog.ReversedChangeLogNamesComparator"]])
+        topLevel.addChild(modifyNode)
+        rootChangeLog.load(topLevel, resourceAccessor)
+
+        then:
+
+        rootChangeLog.changeSets.size() == 4
+        ((CreateTableChange) rootChangeLog.getChangeSet("com/example/root.xml", "nvoxland", "1").changes[0]).tableName == "test_table"
+        ((CreateTableChange) rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").changes[0]).tableName == "person"
+        ((CreateTableChange) rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").changes[0]).tableName == "person2"
+        rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getRunWith() == "psql"
+        rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getRunWith() == "psql"
         ((RawSQLChange) rootChangeLog.getChangeSet("com/example/test.sql", "includeAll", "raw").changes[0]).sql == testSql
 
         // assert reversed order
@@ -288,11 +358,11 @@ create view sql_view as select * from sql_table;'''
                 "com/example/children/file1.sql": "file 1",
                 "com/example/not/fileX.sql"          : "file X",
         ]) {
-            private callingPath;
+            private callingPath
 
             @Override
             List<Resource> search(String path, boolean recursive) throws IOException {
-                callingPath = path;
+                callingPath = path
                 return super.search(path, recursive)
             }
         }
@@ -300,7 +370,7 @@ create view sql_view as select * from sql_table;'''
         changeLogFile.includeAll("", true, { r -> r != changeLogFile.physicalFilePath}, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
 
         then:
-        resourceAccessor.callingPath == "com/example/children/"
+        resourceAccessor.callingPath == "com/example/children"
     }
 
     @Unroll("#featureName: #changeSets")
@@ -346,7 +416,7 @@ create view sql_view as select * from sql_table;'''
 
         then:
         SetupException e = thrown()
-        assert e.getMessage().startsWith("Could not find directory or directory was empty for includeAll '");
+        assert e.getMessage().startsWith("Could not find directory or directory was empty for includeAll '")
 
     }
 
