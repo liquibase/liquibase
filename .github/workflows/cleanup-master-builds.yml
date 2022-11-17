@@ -4,12 +4,10 @@ on:
   workflow_dispatch:
   release:
     types: [ published ]
-  push:
-    branches:
-      - 'DAT-11899'
+
 jobs:
   delete-package:
-    name: Delete Github Package for Branch
+    name: Delete Github Packages for Master/Main
     runs-on: ubuntu-latest
     steps:
 
