@@ -324,6 +324,7 @@ public class StandardLockService implements LockService {
 
                 hasChangeLogLock = true;
 
+                ChangeLogHistoryServiceFactory.getInstance().resetAll();
                 database.setCanCacheLiquibaseTableInfo(true);
                 return true;
             }
