@@ -1,4 +1,4 @@
-name: Build and Test Branch
+name: Build Branch SNAPSHOT
 
 on:
   workflow_dispatch:
