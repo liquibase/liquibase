@@ -2,6 +2,7 @@ package liquibase.diff.output.changelog.core;
 
 import liquibase.change.Change;
 import liquibase.change.core.CreateViewChange;
+import liquibase.change.core.SetColumnRemarksChange;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.diff.output.DiffOutputControl;
@@ -13,6 +14,12 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtil;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public class MissingViewChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
     @Override
@@ -39,16 +46,16 @@ public class MissingViewChangeGenerator extends AbstractChangeGenerator implemen
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, final Database comparisonDatabase, ChangeGeneratorChain chain) {
         View view = (View) missingObject;
 
-        CreateViewChange change = createViewChange();
-        change.setViewName(view.getName());
+        CreateViewChange createViewChange = createViewChange();
+        createViewChange.setViewName(view.getName());
         if (control.getIncludeCatalog()) {
-            change.setCatalogName(view.getSchema().getCatalogName());
+            createViewChange.setCatalogName(view.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(view.getSchema().getName());
+            createViewChange.setSchemaName(view.getSchema().getName());
         }
         if (view.getRemarks() != null) {
-            change.setRemarks(view.getRemarks());
+            createViewChange.setRemarks(view.getRemarks());
         }
         String selectQuery = view.getDefinition();
         boolean fullDefinitionOverridden = false;
@@ -57,10 +64,10 @@ public class MissingViewChangeGenerator extends AbstractChangeGenerator implemen
         } else if ((comparisonDatabase instanceof OracleDatabase) && (view.getColumns() != null) && !view.getColumns
             ().isEmpty()) {
             String viewName;
-            if ((change.getCatalogName() == null) && (change.getSchemaName() == null)) {
-                viewName = comparisonDatabase.escapeObjectName(change.getViewName(), View.class);
+            if ((createViewChange.getCatalogName() == null) && (createViewChange.getSchemaName() == null)) {
+                viewName = comparisonDatabase.escapeObjectName(createViewChange.getViewName(), View.class);
             } else {
-                viewName = comparisonDatabase.escapeViewName(change.getCatalogName(), change.getSchemaName(), change.getViewName());
+                viewName = comparisonDatabase.escapeViewName(createViewChange.getCatalogName(), createViewChange.getSchemaName(), createViewChange.getViewName());
             }
             selectQuery = "CREATE OR REPLACE FORCE VIEW "+ viewName
                     + " (" + StringUtil.join(view.getColumns(), ", ", new StringUtil.StringUtilFormatter() {
@@ -73,17 +80,34 @@ public class MissingViewChangeGenerator extends AbstractChangeGenerator implemen
                     }
                 }
             }) + ") AS "+selectQuery;
-            change.setFullDefinition(true);
+            createViewChange.setFullDefinition(true);
             fullDefinitionOverridden = true;
 
         }
-        change.setSelectQuery(selectQuery);
+        createViewChange.setSelectQuery(selectQuery);
         if (!fullDefinitionOverridden) {
-            change.setFullDefinition(view.getContainsFullDefinition());
+            createViewChange.setFullDefinition(view.getContainsFullDefinition());
         }
 
-        return new Change[] { change };
+        List<SetColumnRemarksChange> columnRemarksList = new ArrayList<>();
+        view.getColumns()
+                .stream()
+                .filter(column -> Objects.nonNull(column.getRemarks()))
+                .forEach(column -> {
+                            SetColumnRemarksChange columnRemarks = new SetColumnRemarksChange();
+                            columnRemarks.setColumnName(column.getName());
+                            columnRemarks.setColumnDataType(column.getType().getTypeName());
+                            columnRemarks.setRemarks(column.getRemarks());
+                            columnRemarks.setCatalogName(control.getIncludeCatalog() ? view.getSchema().getCatalogName() : null);
+                            columnRemarks.setSchemaName(control.getIncludeSchema() ? view.getSchema().getName() : null);
+                            columnRemarks.setTableName(column.getRelation().getName());
+                            columnRemarksList.add(columnRemarks);
+                        }
+                );
 
+        Change[] viewChange = new Change[] { createViewChange };
+        return Stream.concat(Arrays.stream(viewChange), columnRemarksList.stream())
+                .toArray(Change[]::new);
     }
 
     protected CreateViewChange createViewChange() {
