@@ -14,6 +14,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.H2Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -84,6 +85,8 @@ public abstract class AbstractIntegrationTest {
     Set<String> emptySchemas = new TreeSet<>();
     Logger logger;
     private final String rollbackChangeLog;
+
+    private final String emptyRollbackSqlChangeLog;
     private final String includedChangeLog;
     private final String encodingChangeLog;
     private final String externalfkInitChangeLog;
@@ -106,6 +109,7 @@ public abstract class AbstractIntegrationTest {
         this.externalfkInitChangeLog= "changelogs/common/externalfk.init.changelog.xml";
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
+        this.emptyRollbackSqlChangeLog = "changelogs/common/rollbackable.changelog.sql";
         logger = Scope.getCurrentScope().getLog(getClass());
 
         Scope.setScopeManager(new TestScopeManager());
@@ -283,6 +287,20 @@ public abstract class AbstractIntegrationTest {
         Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("jdbc", database);
         database.resetInternalState();
         return new Liquibase(changeLogFile, resourceAccessor, database);
+    }
+
+    @Test
+    public void testEmptyRollbackableSqlChangeLog() throws Exception {
+        assumeNotNull(this.getDatabase());
+
+        Liquibase liquibase = createLiquibase(emptyRollbackSqlChangeLog);
+        clearDatabase();
+
+        liquibase = createLiquibase(emptyRollbackSqlChangeLog);
+        liquibase.update(this.contexts);
+
+        liquibase = createLiquibase(emptyRollbackSqlChangeLog);
+        liquibase.rollback(new Date(0), this.contexts);
     }
 
     @Test
@@ -632,6 +650,10 @@ public abstract class AbstractIntegrationTest {
             }
             if (database instanceof PostgresDatabase) {
                 compareControl.addSuppressedField(Column.class, "type"); //database returns different nvarchar2 info even though they are the same
+            }
+            if (database instanceof H2Database) {
+                //original changeset 2659-Create-MyView-with-quotes in the h2 changelog uses QUOTE_ALL_OBJECTS, but generated changesets do not use that attribute so the name comes through as differnt
+                compareControl.addSuppressedField(View.class, "name");
             }
 
             DiffOutputControl diffOutputControl = new DiffOutputControl();
