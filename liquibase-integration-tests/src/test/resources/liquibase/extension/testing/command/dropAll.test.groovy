@@ -81,7 +81,7 @@ Optional Args:
                 url       : { it.url },
                 username  : { it.username },
                 password  : { it.password },
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
         ]
         setup {
             database = [
