@@ -1,7 +1,7 @@
 ##########           LIQUIBASE FLOW FILE               ##########
 ##########  learn more http://docs.liquibase.com/flow  ##########
 
-## NOTE: This example flowfile is called from the examples/liquibase.advanced.flow file
+## NOTE: This example flowfile is called from the examples/liquibase.advanced.flowfile.yaml file
 ## While it could be run on its own, this file is designed to show that flow-files can be decomposed
 ## into separate files as makes sense for your use cases.
 
