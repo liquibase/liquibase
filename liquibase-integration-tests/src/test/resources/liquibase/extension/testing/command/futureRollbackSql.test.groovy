@@ -40,12 +40,12 @@ Optional Args:
                 url:        { it.url },
                 username:   { it.username },
                 password:   { it.password },
-                changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.changelog.xml",
         ]
 
         setup {
-            runChangelog "changelogs/hsqldb/complete/rollback.changelog.xml"
-            rollback 5, "changelogs/hsqldb/complete/rollback.changelog.xml"
+            runChangelog "changelogs/h2/complete/rollback.changelog.xml"
+            rollback 5, "changelogs/h2/complete/rollback.changelog.xml"
 
         }
 
@@ -59,13 +59,13 @@ Optional Args:
             url:        { it.url },
             username:   { it.username },
             password:   { it.password },
-            changelogFile: "changelogs/hsqldb/complete/rollback.changelog.xml",
+            changelogFile: "changelogs/h2/complete/rollback.changelog.xml",
         ]
 
         setup {
             cleanResources("target/test-classes/futureRollback.sql")
-            runChangelog "changelogs/hsqldb/complete/rollback.changelog.xml"
-            rollback 5, "changelogs/hsqldb/complete/rollback.changelog.xml"
+            runChangelog "changelogs/h2/complete/rollback.changelog.xml"
+            rollback 5, "changelogs/h2/complete/rollback.changelog.xml"
 
         }
 
@@ -101,7 +101,7 @@ Optional Args:
     run "Run without a URL should throw an exception",  {
         arguments = [
                 url          : "",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
         ]
         expectedException = CommandValidationException.class
     }

@@ -3,6 +3,8 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
@@ -10,6 +12,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.IntegrationDetails;
+import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.DirectoryResourceAccessor;
@@ -576,7 +579,24 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement
     protected String sqlcmdCatalogName;
 
+    /**
+     * Specifies the fully qualified class name of the custom ChangeExecListener
+     *
+     * @parameter property="liquibase.changeExecListenerClass"
+     */
+    @PropertyElement
+    protected String changeExecListenerClass;
+
+    /**
+     * Specifies the property file for controlling the custom ChangeExecListener
+     *
+     * @parameter property="liquibase.changeExecListenerPropertiesFile"
+     */
+    @PropertyElement
+    protected String changeExecListenerPropertiesFile;
+
     protected String commandName;
+    protected DefaultChangeExecListener defaultChangeExecListener;
 
     /**
      * Get the specified license key. This first checks liquibaseLicenseKey and if no key is found, then returns
@@ -714,6 +734,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                             liquibase = createLiquibase(database);
 
                             configureChangeLogProperties();
+
+                            ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
+                                    liquibase.getDatabase(), liquibase.getResourceAccessor(),
+                                    changeExecListenerClass, changeExecListenerPropertiesFile);
+                            defaultChangeExecListener = new DefaultChangeExecListener(listener);
+                            liquibase.setChangeExecListener(defaultChangeExecListener);
 
                             getLog().debug("expressionVars = " + String.valueOf(expressionVars));
 
@@ -923,7 +949,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     @SuppressWarnings("java:S2095")
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException, MojoFailureException {
         ResourceAccessor mFO = new MavenResourceAccessor(cl);
         ResourceAccessor fsFO = new DirectoryResourceAccessor(project.getBasedir());
         return new SearchPathResourceAccessor(searchPath, mFO, fsFO);
