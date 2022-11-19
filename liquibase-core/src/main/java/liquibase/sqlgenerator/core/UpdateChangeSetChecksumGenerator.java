@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.GlobalConfiguration;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.Database;
@@ -34,11 +35,19 @@ public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<Updat
                     .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
                             "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
                             "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
-                    .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
+                    .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), getFilePathToUseInWhereClause(changeSet));
 
             return SqlGeneratorFactory.getInstance().generateSql(runStatement, database);
         } finally {
             database.setObjectQuotingStrategy(currentStrategy);
         }
+    }
+
+    private String getFilePathToUseInWhereClause(ChangeSet changeSet) {
+        String changeSetFilePath = changeSet.getFilePath();
+        if (!GlobalConfiguration.STORE_NORMALIZED_FILE_NAME_IN_DATABASECHANGELOG_TABLE.getCurrentValue()) {
+            changeSetFilePath = changeSet.getStoredFilePath();
+        }
+        return changeSetFilePath;
     }
 }

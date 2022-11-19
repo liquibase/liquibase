@@ -33,6 +33,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
 
     public static final ConfigurationDefinition<DuplicateFileMode> DUPLICATE_FILE_MODE;
+    public static final ConfigurationDefinition<Boolean> STORE_NORMALIZED_FILE_NAME_IN_DATABASECHANGELOG_TABLE;
 
     /**
      * @deprecated No longer used
@@ -209,6 +210,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         SEARCH_PATH = builder.define("searchPath", String.class)
                 .setDescription("Complete list of Location(s) to search for files such as changelog files in. Multiple paths can be specified by separating them with commas.")
+                .build();
+
+        STORE_NORMALIZED_FILE_NAME_IN_DATABASECHANGELOG_TABLE = builder.define("storeNormalizedFileNameInDatabaseChangelogTable", Boolean.class)
+                .setDescription("Should liquibase save a normalized File Name in the Database ChangeLog Table. Use to select between pre3.x and 4.x behaviour. Default true.")
+                .setDefaultValue(true)
                 .build();
     }
 
