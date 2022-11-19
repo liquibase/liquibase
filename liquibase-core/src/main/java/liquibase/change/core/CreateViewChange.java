@@ -42,7 +42,6 @@ public class CreateViewChange extends AbstractChange {
     private String viewName;
     private String selectQuery;
     private Boolean replaceIfExists;
-    private Boolean dropIfCannotReplace;
     private Boolean fullDefinition;
 
     private String path;
@@ -92,15 +91,6 @@ public class CreateViewChange extends AbstractChange {
 
     public void setReplaceIfExists(Boolean replaceIfExists) {
         this.replaceIfExists = replaceIfExists;
-    }
-
-    @DatabaseChangeProperty(description = "Drop and create the sequence, if replacing it could fail", since = "4.17")
-    public Boolean getDropIfCannotReplace() {
-        return dropIfCannotReplace;
-    }
-
-    public void setDropIfCannotReplace(Boolean dropIfCannotReplace) {
-        this.dropIfCannotReplace = dropIfCannotReplace;
     }
 
     @DatabaseChangeProperty(description = "Set to true if selectQuery is the entire view definition. False if the CREATE VIEW header should be added", since = "3.3")
@@ -241,11 +231,6 @@ public class CreateViewChange extends AbstractChange {
             replaceIfExists = true;
         }
 
-        boolean dropIfCannotReplace = false;
-        if (this.dropIfCannotReplace != null) {
-            dropIfCannotReplace = this.dropIfCannotReplace;
-        }
-
         boolean fullDefinition = false;
         if (this.fullDefinition != null) {
             fullDefinition = this.fullDefinition;
@@ -275,10 +260,10 @@ public class CreateViewChange extends AbstractChange {
 
         if (!supportsReplaceIfExistsOption(database) && replaceIfExists) {
             statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));
-            statements.add(createViewStatement(getCatalogName(), getSchemaName(), getViewName(), selectQuery, false, false)
+            statements.add(createViewStatement(getCatalogName(), getSchemaName(), getViewName(), selectQuery, false)
                     .setFullDefinition(fullDefinition));
         } else {
-            statements.add(createViewStatement(getCatalogName(), getSchemaName(), getViewName(), selectQuery, replaceIfExists, dropIfCannotReplace)
+            statements.add(createViewStatement(getCatalogName(), getSchemaName(), getViewName(), selectQuery, replaceIfExists)
                     .setFullDefinition(fullDefinition));
         }
 
@@ -292,8 +277,8 @@ public class CreateViewChange extends AbstractChange {
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
-    protected CreateViewStatement createViewStatement(String catalogName, String schemaName, String viewName, String selectQuery, boolean replaceIfExists, boolean dropIfCannotReplace) {
-        return new CreateViewStatement(catalogName, schemaName, viewName, selectQuery, replaceIfExists, dropIfCannotReplace);
+    protected CreateViewStatement createViewStatement(String catalogName, String schemaName, String viewName, String selectQuery, boolean replaceIfExists) {
+        return new CreateViewStatement(catalogName, schemaName, viewName, selectQuery, replaceIfExists);
     }
 
     @Override

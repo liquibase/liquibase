@@ -13,7 +13,7 @@ class CreateViewGeneratorTest extends Specification {
     def "creates a view from a sql"() {
         when:
         def selectQuery = "SELECT SYSDATE FROM DUAL"
-        def statement = new CreateViewStatement("PUBLIC", "schema", "my_view", selectQuery, false, false)
+        def statement = new CreateViewStatement("PUBLIC", "schema", "my_view", selectQuery, false)
         def generators = SqlGeneratorFactory.instance.getGenerators(statement, new OracleDatabase())
 
         then:
@@ -31,7 +31,7 @@ class CreateViewGeneratorTest extends Specification {
     def "creates a replace view from a sql"() {
         when:
         def selectQuery = "SELECT SYSDATE FROM DUAL"
-        def statement = new CreateViewStatement("PUBLIC", "schema", "my_view", selectQuery, true, false)
+        def statement = new CreateViewStatement("PUBLIC", "schema", "my_view", selectQuery, true)
         def generators = SqlGeneratorFactory.instance.getGenerators(statement, new OracleDatabase())
 
         then:
@@ -49,7 +49,7 @@ class CreateViewGeneratorTest extends Specification {
     def "replace is added even when a select replace is used"() {
         when:
         def selectQuery = "SELECT REPLACE('The quick brown dog', 'dog', 'fox') FROM DUAL"
-        def statement = new CreateViewStatement("PUBLIC", "schem", "my_view", selectQuery, true, false)
+        def statement = new CreateViewStatement("PUBLIC", "schem", "my_view", selectQuery, true)
         def generators = SqlGeneratorFactory.instance.getGenerators(statement, new OracleDatabase())
 
         then:
@@ -64,13 +64,13 @@ class CreateViewGeneratorTest extends Specification {
         sql[0].toString() == "CREATE OR REPLACE VIEW PUBLIC.my_view AS " + selectQuery + ";"
     }
 
-    def "creates drop view statement for Postgres when replace is true and dropIfCannotReplace propery is set"() {
+    def "creates drop view statement for Postgres when replace is true and alwaysDropInsteadOfReplace propery is set"() {
         given:
-        System.setProperty("liquibase.dropIfCannotReplace", dropIfCannotReplacePropValue)
+        System.setProperty("liquibase.alwaysDropInsteadOfReplace", alwaysDropInsteadOfReplacePropValue)
 
         when:
         def selectQuery = "SELECT SYSDATE FROM DUAL"
-        def statement = new CreateViewStatement("PUBLIC", "schema", "my_view", selectQuery, true, false)
+        def statement = new CreateViewStatement("PUBLIC", "schema", "my_view", selectQuery, true)
         def generators = SqlGeneratorFactory.instance.getGenerators(statement, database)
 
         then:
@@ -91,7 +91,7 @@ class CreateViewGeneratorTest extends Specification {
         }
 
         where:
-        database | dropIfCannotReplacePropValue | expectedNumOfSqlStatements
+        database | alwaysDropInsteadOfReplacePropValue | expectedNumOfSqlStatements
         new HsqlDatabase() | "false" | 2
         new HsqlDatabase() | "true" | 2
         new OracleDatabase() | "false" | 1

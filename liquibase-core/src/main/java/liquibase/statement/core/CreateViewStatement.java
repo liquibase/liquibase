@@ -9,16 +9,14 @@ public class CreateViewStatement extends AbstractSqlStatement {
     private String viewName;
     private String selectQuery;
     private boolean replaceIfExists;
-    private boolean dropIfCannotReplace;
     private boolean fullDefinition;
 
-    public CreateViewStatement(String catalogName, String schemaName, String viewName, String selectQuery, boolean replaceIfExists, boolean dropIfCannotReplace) {
+    public CreateViewStatement(String catalogName, String schemaName, String viewName, String selectQuery, boolean replaceIfExists) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.viewName = viewName;
         this.selectQuery = selectQuery;
         this.replaceIfExists = replaceIfExists;
-        this.dropIfCannotReplace = dropIfCannotReplace;
     }
 
     public String getCatalogName() {
@@ -39,10 +37,6 @@ public class CreateViewStatement extends AbstractSqlStatement {
 
     public boolean isReplaceIfExists() {
         return replaceIfExists;
-    }
-
-    public boolean isDropIfCannotReplace() {
-        return dropIfCannotReplace;
     }
 
     /**
