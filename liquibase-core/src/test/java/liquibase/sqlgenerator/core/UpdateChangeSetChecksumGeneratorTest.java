@@ -78,6 +78,19 @@ public class UpdateChangeSetChecksumGeneratorTest {
         verifyWhereParamsListInTheGeneratedStatement(expectedWhereParams, Boolean.FALSE);
     }
 
+    @Test
+    public void generateSqlUsesChangesetsNormalizedFilePathWhenUseNormalizedFilePathFlagIsFalseAndChangeSetStoredFilePathIsNull() {
+        List<String> expectedWhereParams = Arrays.asList(CHANGESET_SOME_ID, CHANGESET_SOME_AUTHOR, CHANGESET_NORMALIZED_FILE_PATH);
+        doReturn(null).when(mockedChangeSet).getStoredFilePath();
+        verifyWhereParamsListInTheGeneratedStatement(expectedWhereParams, Boolean.FALSE);
+    }
+
+    @Test
+    public void generateSqlUsesChangesetsNormalizedFilePathWhenUseNormalizedFilePathFlagIsFalseAndChangeSetStoredFilePathIsEmpty() {
+        List<String> expectedWhereParams = Arrays.asList(CHANGESET_SOME_ID, CHANGESET_SOME_AUTHOR, CHANGESET_NORMALIZED_FILE_PATH);
+        doReturn("").when(mockedChangeSet).getStoredFilePath();
+        verifyWhereParamsListInTheGeneratedStatement(expectedWhereParams, Boolean.FALSE);
+    }
 
     private void verifyWhereParamsListInTheGeneratedStatement(List<String> expectedWhereParams, Boolean useNormalizedEnvVar) {
 
@@ -85,9 +98,9 @@ public class UpdateChangeSetChecksumGeneratorTest {
         initializeSystemPropertyTo(useNormalizedEnvVar ==null? null: String.valueOf(useNormalizedEnvVar));
 
         try (MockedStatic<SqlGeneratorFactory> staticSqlGeneratorFactory = mockStatic(SqlGeneratorFactory.class)) {
-
             staticSqlGeneratorFactory.when(SqlGeneratorFactory::getInstance).thenReturn(sqlGeneratorFactory);
             UpdateChangeSetChecksumStatement statement = new UpdateChangeSetChecksumStatement(mockedChangeSet);
+
             sqlGenerator.generateSql(statement, mockedDatabase, null);
             ArgumentCaptor<SqlStatement> statementCaptor = ArgumentCaptor.forClass(SqlStatement.class);
             verify(sqlGeneratorFactory,times(1))

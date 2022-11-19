@@ -13,6 +13,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
+import liquibase.util.StringUtil;
 
 public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<UpdateChangeSetChecksumStatement> {
     @Override
@@ -45,7 +46,8 @@ public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<Updat
 
     private String getFilePathToUseInWhereClause(ChangeSet changeSet) {
         String changeSetFilePath = changeSet.getFilePath();
-        if (!GlobalConfiguration.STORE_NORMALIZED_FILE_NAME_IN_DATABASECHANGELOG_TABLE.getCurrentValue()) {
+        if (!GlobalConfiguration.STORE_NORMALIZED_FILE_NAME_IN_DATABASECHANGELOG_TABLE.getCurrentValue()
+                && StringUtil.isNotEmpty(changeSet.getStoredFilePath())) {
             changeSetFilePath = changeSet.getStoredFilePath();
         }
         return changeSetFilePath;

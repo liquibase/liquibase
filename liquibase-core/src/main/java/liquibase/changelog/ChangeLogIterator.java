@@ -41,6 +41,8 @@ public class ChangeLogIterator {
 	        for (ChangeSet changeSet : changeSetsForRanChangeSet) {
                 if (changeSet != null) {
                     changeSet.setFilePath(DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()));
+                    // to allow switching between saving normalized or configured path
+                    changeSet.setStoredFilePath(ranChangeSet.getStoredChangeLog());
                     changeSets.add(changeSet);
                 }
 	        }
