@@ -584,6 +584,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 database.setAutoCommit(!runInTransaction);
             }
 
+            executor.modifyChangeSet(this);
+
             executor.comment("Changeset " + toString(false));
             if (StringUtil.trimToNull(getComments()) != null) {
                 String comments = getComments();
