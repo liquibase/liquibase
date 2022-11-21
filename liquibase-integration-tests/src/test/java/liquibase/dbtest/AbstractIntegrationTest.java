@@ -1,10 +1,6 @@
 package liquibase.dbtest;
 
 import groovy.lang.Tuple2;
-
-import java.io.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import liquibase.*;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataChange;
@@ -14,7 +10,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
@@ -40,8 +35,8 @@ import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
-import liquibase.precondition.core.TableExistsPrecondition;
 import liquibase.logging.core.JavaLogService;
+import liquibase.precondition.core.TableExistsPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -57,16 +52,19 @@ import liquibase.util.RegexMatcher;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
+import java.io.*;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static liquibase.test.SnapshotAssert.assertThat;
 import static org.junit.Assert.*;
-import static org.junit.Assume.*;
+import static org.junit.Assume.assumeNotNull;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.

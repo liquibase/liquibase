@@ -130,7 +130,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
                     .createStatement();
 
             String schemaName = getSchemaName();
-            if (database.supportsSchemas() && schemaName == null) {
+            if (schemaName == null) {
                 schemaName = database.getDefaultSchemaName();
             }
             String tableName = getTableName();
