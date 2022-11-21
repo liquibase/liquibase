@@ -305,9 +305,6 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testSnapshotReportsAllObjectTypes() throws Exception {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per " +
-                "issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
-
         runCompleteChangeLog();
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl(getDatabase()));
 

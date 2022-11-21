@@ -53,4 +53,15 @@ public class FirebirdIntegrationTest extends AbstractIntegrationTest {
     public void testRunUpdateOnOldChangelogTableFormat() throws Exception {
     }
 
+    @Test
+    @Override
+    @Ignore
+    public void testOutputChangeLog() throws Exception {}
+
+    @Test
+    @Override
+    @Ignore
+    public void testSnapshotReportsAllObjectTypes() throws Exception {}
+
+
 }
