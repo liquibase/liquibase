@@ -293,11 +293,12 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testEmptyRollbackableSqlChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
+        assumeTrue(!(database instanceof FirebirdDatabase));
 
-        Liquibase liquibase = createLiquibase(emptyRollbackSqlChangeLog);
+        createLiquibase(emptyRollbackSqlChangeLog);
         clearDatabase();
 
-        liquibase = createLiquibase(emptyRollbackSqlChangeLog);
+        Liquibase liquibase = createLiquibase(emptyRollbackSqlChangeLog);
         liquibase.update(this.contexts);
 
         liquibase = createLiquibase(emptyRollbackSqlChangeLog);

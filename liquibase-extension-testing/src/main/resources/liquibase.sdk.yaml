@@ -82,5 +82,5 @@ liquibase:
 
       firebird:
         imageName: jacobalberty/firebird
-        version: 4.0
+        version: v4
 
