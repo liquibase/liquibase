@@ -68,7 +68,7 @@
 	</fileSets>
 	<files>
         <file>
-            <source>${project.build.directory}/liquibase-0-SNAPSHOT.jar</source>
+            <source>${project.build.directory}/liquibase-${project.version}.jar</source>
             <destName>internal/lib/liquibase-core.jar</destName>
             <fileMode>0644</fileMode>
         </file>

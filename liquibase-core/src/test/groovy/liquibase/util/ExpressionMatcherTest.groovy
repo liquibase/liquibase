@@ -23,7 +23,9 @@ class ExpressionMatcherTest extends Specification {
         "a and x"               | ["x", "y", "z"] | false
         "y and x"               | ["x", "y", "z"] | true
         "(a or x) and (y or b)" | ["x", "y", "z"] | true
+        "(a, x) and (y, b)"     | ["x", "y", "z"] | true
         "(a or x) and (c or d)" | ["x", "y", "z"] | false
+        "(a, x) and (c, d)"     | ["x", "y", "z"] | false
         ""                      | []              | true
         ""                      | ["x"]           | false
     }
