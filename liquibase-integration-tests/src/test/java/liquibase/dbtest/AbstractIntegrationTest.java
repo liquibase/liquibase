@@ -292,8 +292,6 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testEmptyRollbackableSqlChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
-
         createLiquibase(emptyRollbackSqlChangeLog);
         clearDatabase();
 
@@ -368,7 +366,6 @@ public abstract class AbstractIntegrationTest {
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRunUpdateOnOldChangelogTableFormat() throws Exception {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase();
@@ -412,7 +409,6 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testOutputChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
 
         StringWriter output = new StringWriter();
         Liquibase liquibase;
@@ -534,7 +530,6 @@ public abstract class AbstractIntegrationTest {
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testUpdateClearUpdate() throws Exception {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase();
@@ -591,7 +586,6 @@ public abstract class AbstractIntegrationTest {
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRollbackableChangeLogScriptOnFutureDatabase() throws Exception {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
 
         StringWriter writer = new StringWriter();
 
@@ -825,7 +819,6 @@ public abstract class AbstractIntegrationTest {
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testClearChecksums() throws Exception {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase();
@@ -844,7 +837,6 @@ public abstract class AbstractIntegrationTest {
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testTagEmptyDatabase() throws Exception {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase();
@@ -863,7 +855,6 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testUnrunChangeSetsEmptyDatabase() throws Exception {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
@@ -891,7 +882,6 @@ public abstract class AbstractIntegrationTest {
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRollbackToChange() throws Exception {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
 
         Liquibase liquibase = createLiquibase(rollbackChangeLog);
         wipeDatabase();
@@ -963,7 +953,6 @@ public abstract class AbstractIntegrationTest {
    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
    public void testDiffExternalForeignKeys() throws Exception {
        assumeNotNull(this.getDatabase());
-       assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
        clearDatabase();
        Liquibase liquibase = createLiquibase(externalfkInitChangeLog);
        liquibase.update(contexts);
@@ -1046,7 +1035,6 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testGenerateChangeLogWithNoChanges() throws Exception {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
 
         runCompleteChangeLog();
 
@@ -1061,7 +1049,6 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testInsertLongClob() {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
 
         DatabaseChangeLog longClobChangelog = new DatabaseChangeLog();
         ChangeSet longClobInsert = new ChangeSet(longClobChangelog);
@@ -1094,7 +1081,6 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testTableExistsPreconditionTableNameMatch() throws Exception {
         assumeNotNull(this.getDatabase());
-        assumeFalse("Ignoring test as it seems there is some transacting handling issue on Firebird as per issue https://github.com/FirebirdSQL/firebird/issues/3361", database instanceof FirebirdDatabase);
         runChangeLogFile(commonChangeLog);
 
         TableExistsPrecondition precondition = new TableExistsPrecondition();
