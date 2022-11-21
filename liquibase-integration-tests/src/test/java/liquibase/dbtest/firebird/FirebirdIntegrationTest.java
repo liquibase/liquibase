@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.DatabaseException;
+import org.junit.After;
 
 /**
  * To configure database:
@@ -29,6 +30,13 @@ public class FirebirdIntegrationTest extends AbstractIntegrationTest {
         return new CatalogAndSchema[] {
                 CatalogAndSchema.DEFAULT
         };
+    }
+
+    @After
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        getDatabase().close();
     }
 
 }
