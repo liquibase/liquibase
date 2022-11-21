@@ -14,6 +14,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.H2Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -39,7 +40,6 @@ import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.precondition.core.TableExistsPrecondition;
-import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.logging.core.JavaLogService;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -596,6 +596,7 @@ public abstract class AbstractIntegrationTest {
     @Test
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testTag() throws Exception {
+        //This test will validate a tag can be set successfully to the DB, plus make sure the given tag exists in the DB.
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
@@ -606,6 +607,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.update(this.contexts);
 
         liquibase.tag("Test Tag");
+        liquibase.tagExists("Test Tag");
     }
 
     @Test
@@ -649,6 +651,10 @@ public abstract class AbstractIntegrationTest {
             }
             if (database instanceof PostgresDatabase) {
                 compareControl.addSuppressedField(Column.class, "type"); //database returns different nvarchar2 info even though they are the same
+            }
+            if (database instanceof H2Database) {
+                //original changeset 2659-Create-MyView-with-quotes in the h2 changelog uses QUOTE_ALL_OBJECTS, but generated changesets do not use that attribute so the name comes through as differnt
+                compareControl.addSuppressedField(View.class, "name");
             }
 
             DiffOutputControl diffOutputControl = new DiffOutputControl();

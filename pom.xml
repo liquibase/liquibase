@@ -55,6 +55,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.enforcer.requireMavenVersion>3.6</maven.enforcer.requireMavenVersion>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mmZ</maven.build.timestamp.format>
+        <maven.deploy.skip>true</maven.deploy.skip>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
         <build.number>0</build.number>
         <build.commit>unknown</build.commit>
@@ -72,6 +73,13 @@
         <argLine></argLine>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/liquibase/liquibase</url>
+        </repository>
+    </distributionManagement>
 
     <modules>
         <module>liquibase-core</module>
@@ -320,15 +328,6 @@
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.0.0</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>none</phase>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
