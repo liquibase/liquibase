@@ -54,6 +54,15 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
         return (T) this;
     }
 
+    public Integer getOrder() {
+        return getAttribute("order", Integer.class);
+    }
+
+    public T setOrder(Integer order) {
+        setAttribute("order", order);
+        return (T) this;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

@@ -252,7 +252,7 @@ public class DiffToChangeLog {
                     }
                 } else if (o1 instanceof StoredDatabaseLogic && o1.getAttribute("order", Integer.class) != null
                         && o2.getAttribute("order", Integer.class) != null) {
-                    int order = o1.getAttribute("order", Long.class).compareTo(o2.getAttribute("order", Long.class));
+                    int order = o1.getAttribute("order", Integer.class).compareTo(o2.getAttribute("order", Integer.class));
                     if (order != 0) {
                         return order;
                     }
