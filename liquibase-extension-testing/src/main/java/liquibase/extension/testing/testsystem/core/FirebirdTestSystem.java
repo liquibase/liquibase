@@ -17,6 +17,7 @@ public class FirebirdTestSystem  extends DatabaseTestSystem {
         super(definition);
     }
 
+    @SuppressWarnings("java:S2095")
     @Override
     protected DatabaseWrapper createContainerWrapper() throws Exception {
         return new DockerDatabaseWrapper(new FirebirdContainer(
