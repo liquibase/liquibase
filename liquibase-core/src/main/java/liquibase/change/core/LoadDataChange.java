@@ -477,14 +477,14 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             throw new RuntimeException("Error parsing " + getRelativeTo() + " on line " + e.getLineNumber() + ": " + e.getMessage());
         } catch (IOException | LiquibaseException e) {
             throw new RuntimeException(e);
-        } catch (UnexpectedLiquibaseException ule) {
+        } catch (Exception ule) {
             if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
                     .getFailOnError()) {
                 LOG.info("Changeset " + getChangeSet().toString(false) +
                         " failed, but failOnError was false.  Error: " + ule.getMessage());
                 return new SqlStatement[0];
             } else {
-                throw ule;
+                throw new UnexpectedLiquibaseException(ule.getMessage());
             }
         }
         // Do nothing
