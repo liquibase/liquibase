@@ -293,7 +293,6 @@
                 <customChange class="liquibase.change.custom.ExampleCustomTaskChange">
             <param name="helloTo" value="world"/>
         </customChange>
-
     </changeSet>
 
     <changeSet id="60" author="nvoxland">
