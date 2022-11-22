@@ -69,7 +69,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
                 schemaName = "dbo";
             }
 
-            Sql[] generatedSql = {new UnparsedSql("DECLARE @TableName SYSNAME " +
+            return new Sql[]{new UnparsedSql("DECLARE @TableName SYSNAME " +
                     "set @TableName = N'" +statement.getTableName() + "'; " +
                     "DECLARE @FullTableName SYSNAME " +
                     "set @FullTableName = N'" + schemaName + "." + statement.getTableName() + "'; " +
@@ -108,8 +108,6 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
                     "@level2type = N'COLUMN', " +
                     "@level2name = @ColumnName; " +
                     "END")};
-
-            return generatedSql;
         } else {
             return new Sql[]{new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
                     + "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"
