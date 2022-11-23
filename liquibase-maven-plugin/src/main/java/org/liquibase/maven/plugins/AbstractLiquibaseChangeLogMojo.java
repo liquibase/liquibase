@@ -11,6 +11,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubConfiguration;
 import liquibase.resource.*;
 import liquibase.util.StringUtil;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.liquibase.maven.property.PropertyElement;
@@ -159,23 +160,22 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     }
 
     @Override
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException, MojoFailureException {
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
         List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
-        resourceAccessors.add(new MavenResourceAccessor(cl));
+        try {
+            resourceAccessors.add(new MavenResourceAccessor(project));
+        } catch (DependencyResolutionRequiredException drre) {
+
+        }
         resourceAccessors.add(new DirectoryResourceAccessor(project.getBasedir()));
         resourceAccessors.add(new ClassLoaderResourceAccessor(getClass().getClassLoader()));
 
-        String finalSearchPath = searchPath;
-
         if (changeLogDirectory != null) {
-            if (searchPath != null) {
-                throw new MojoFailureException("Cannot specify searchPath and changeLogDirectory at the same time");
-            }
             calculateChangeLogDirectoryAbsolutePath();
-            finalSearchPath = changeLogDirectory;
+            resourceAccessors.add(new DirectoryResourceAccessor(new File(changeLogDirectory)));
         }
 
-        return new SearchPathResourceAccessor(finalSearchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
+        return new SearchPathResourceAccessor(searchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 
     @Override

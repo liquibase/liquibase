@@ -20,6 +20,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.resource.SearchPathResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -916,16 +917,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     protected ClassLoader getMavenArtifactClassLoader() throws MojoExecutionException {
-        try {
-            return MavenUtils.getArtifactClassloader(project,
-                    includeArtifact,
-                    includeTestOutputDirectory,
-                    getClass(),
-                    getLog(),
-                    verbose);
-        } catch (MalformedURLException e) {
-            throw new MojoExecutionException("Failed to create artifact classloader", e);
-        }
+        return null;
+//        try {
+//            return MavenUtils.getArtifactClassloader(project,
+//                    includeArtifact,
+//                    includeTestOutputDirectory,
+//                    getClass(),
+//                    getLog(),
+//                    verbose);
+//        } catch (MalformedURLException e) {
+//            throw new MojoExecutionException("Failed to create artifact classloader", e);
+//        }
     }
 
     /**
@@ -948,9 +950,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    @SuppressWarnings("java:S2095")
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException, MojoFailureException {
-        ResourceAccessor mFO = new MavenResourceAccessor(cl);
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws DependencyResolutionRequiredException, IOException {
+        ResourceAccessor mFO = new MavenResourceAccessor(project);
         ResourceAccessor fsFO = new DirectoryResourceAccessor(project.getBasedir());
         return new SearchPathResourceAccessor(searchPath, mFO, fsFO);
     }
