@@ -137,7 +137,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
-        return returnList.toArray(new String[returnList.size()]);
+        return returnList.toArray(new String[0]);
     }
     
 }

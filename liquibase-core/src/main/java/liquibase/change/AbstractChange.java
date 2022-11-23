@@ -37,6 +37,11 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     private ChangeSet changeSet;
 
+    /**
+     * Represent an empty array of {@link SqlStatement}.
+     */
+    public static final SqlStatement[] EMPTY_SQL_STATEMENT = {};
+
     public AbstractChange() {
     }
 
@@ -496,7 +501,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             throw new RollbackImpossibleException(e);
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     /**

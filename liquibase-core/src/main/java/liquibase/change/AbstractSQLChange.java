@@ -228,13 +228,13 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
         String sql = StringUtil.trimToNull(getSql());
         if (sql == null) {
-            return new SqlStatement[0];
+            return EMPTY_SQL_STATEMENT;
         }
 
         String processedSQL = normalizeLineEndings(sql);
         if (this instanceof RawSQLChange && ((RawSQLChange) this).isRerunnable()) {
             returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
-            return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
+            return returnStatements.toArray(EMPTY_SQL_STATEMENT);
         }
         for (String statement : StringUtil.processMultiLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
@@ -257,7 +257,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
         }
 
-        return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
+        return returnStatements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     @Override

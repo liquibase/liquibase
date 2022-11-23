@@ -89,7 +89,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
             changes.add(change);
         }
 
-        return changes.toArray(new Change[changes.size()]);
+        return changes.toArray(EMPTY_CHANGE);
     }
 
     protected void handleNullableDifferences(Column column, ObjectDifferences differences, DiffOutputControl control, List<Change> changes, Database referenceDatabase, Database comparisonDatabase) {
