@@ -106,7 +106,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
 
         if (!areChangeSetAttributesValid(changeSet)) {
-            changeSet.setValidationFailed(false);
+            changeSet.setValidationFailed(true);
             shouldValidate = false;
         };
 
@@ -168,7 +168,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
         boolean valid = false;
         if (authorEmpty && idEmpty) {
-            validationErrors.addError("ChangeSet Id and Author is empty", changeSet);
+            validationErrors.addError("ChangeSet Id and Author are empty", changeSet);
         } else if (authorEmpty) {
             validationErrors.addError("ChangeSet Author is empty", changeSet);
         } else if (idEmpty) {
