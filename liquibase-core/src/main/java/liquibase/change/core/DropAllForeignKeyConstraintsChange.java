@@ -82,13 +82,15 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         List<DropForeignKeyConstraintChange> childDropChanges = new ArrayList<>();
 
         try {
+            SnapshotControl control = new SnapshotControl(database);
+            control.getTypesToInclude().add(ForeignKey.class);
             CatalogAndSchema catalogAndSchema =
                     new CatalogAndSchema(getBaseTableCatalogName(), getBaseTableSchemaName());
             catalogAndSchema = catalogAndSchema.standardize(database);
             Table target = SnapshotGeneratorFactory.getInstance().createSnapshot(
                     new Table(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName(),
                             database.correctObjectName(getBaseTableName(), Table.class))
-                    , database, new SnapshotControl(database, Table.class, ForeignKey.class));
+                    , database);
 
             List<ForeignKey> results = ((target == null) ? null : target.getOutgoingForeignKeys());
             Set<String> handledConstraints = new HashSet<>();
