@@ -276,71 +276,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
-        if (database.supportsAutoIncrement()) {
-            if (table instanceof Table) {
-                if (database instanceof OracleDatabase) {
-                    Column.AutoIncrementInformation autoIncrementInfo = new Column.AutoIncrementInformation();
-                    String data_default = StringUtil.trimToEmpty((String) columnMetadataResultSet.get("DATA_DEFAULT")).toLowerCase();
-                    if (data_default.contains("iseq$$") && data_default.endsWith("nextval")) {
-                        column.setAutoIncrementInformation(autoIncrementInfo);
-                    }
-
-                    Boolean isIdentityColumn = columnMetadataResultSet.yesNoToBoolean("IDENTITY_COLUMN");
-                    if (Boolean.TRUE.equals(isIdentityColumn)) { // Oracle 12+
-                        Boolean defaultOnNull = columnMetadataResultSet.yesNoToBoolean("DEFAULT_ON_NULL");
-                        String generationType = columnMetadataResultSet.getString("GENERATION_TYPE");
-                        autoIncrementInfo.setDefaultOnNull(defaultOnNull);
-                        autoIncrementInfo.setGenerationType(generationType);
-
-                        column.setAutoIncrementInformation(autoIncrementInfo);
-                    }
-                } else {
-                    if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
-                        // It is possible to make a column in Postgres that is varchar (for example) and reported as auto-increment. In this case,
-                        // we'd rather just preserve the default value, so we remove the auto-increment information since that doesn't really make any sense.
-                        String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
-                        isAutoincrement = StringUtil.trimToNull(isAutoincrement);
-                        if (isAutoincrement == null) {
-                            column.setAutoIncrementInformation(null);
-                        } else if (database instanceof PostgresDatabase && PostgresDatabase.VALID_AUTO_INCREMENT_COLUMN_TYPE_NAMES.stream().noneMatch(typeName -> typeName.equalsIgnoreCase((String) columnMetadataResultSet.get("TYPE_NAME")))) {
-                            column.setAutoIncrementInformation(null);
-                        } else if (isAutoincrement.equals("YES")) {
-                            column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-                        } else if (isAutoincrement.equals("NO")) {
-                            column.setAutoIncrementInformation(null);
-                        } else if (isAutoincrement.equals("")) {
-                            Scope.getCurrentScope().getLog(getClass()).info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
-                            column.setAutoIncrementInformation(null);
-                        } else {
-                            throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
-                        }
-                    } else {
-                        //probably older version of java, need to select from the column to find out if it is auto-increment
-                        String selectStatement;
-                        if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
-                            selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
-                            Scope.getCurrentScope().getLog(getClass()).fine("rawCatalogName : <" + rawCatalogName + ">");
-                            Scope.getCurrentScope().getLog(getClass()).fine("rawSchemaName : <" + rawSchemaName + ">");
-                            Scope.getCurrentScope().getLog(getClass()).fine("rawTableName : <" + rawTableName + ">");
-                            Scope.getCurrentScope().getLog(getClass()).fine("raw selectStatement : <" + selectStatement + ">");
-
-
-                        } else {
-                            selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
-                        }
-                        Scope.getCurrentScope().getLog(getClass()).fine("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
-                        Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
-
-                        try (Statement statement = underlyingConnection.createStatement(); ResultSet columnSelectRS = statement.executeQuery(selectStatement)) {
-                            if (columnSelectRS.getMetaData().isAutoIncrement(1)) {
-                                column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-                            } else {
-                                column.setAutoIncrementInformation(null);
-                            }
-                        }
-                    }
-                }
-            }
+        if (database.supportsAutoIncrement() && table instanceof Table) {
+            column = this.columnAutoIncrementService.enableColumnAutoIncrementIfAvailable(column, database,
+                    columnMetadataResultSet, rawCatalogName, rawSchemaName, rawTableName, rawColumnName);
         }
 
         DataType type = readDataType(columnMetadataResultSet, column, database);
