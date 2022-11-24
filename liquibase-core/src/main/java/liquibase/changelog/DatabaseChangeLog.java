@@ -635,11 +635,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (pathName == null) {
                 throw new SetupException("No path attribute for includeAll");
             }
-            pathName = pathName.replace('\\', '/');
 
-            if (StringUtil.isNotEmpty(pathName) && !(pathName.endsWith("/"))) {
-                pathName = pathName + '/';
-            }
             String relativeTo = null;
             if (isRelativeToChangelogFile) {
                 relativeTo = this.getPhysicalFilePath();
@@ -656,6 +652,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                             .replace("\\", "/");
                 }
 
+                if (StringUtil.isNotEmpty(path) && !(path.endsWith("/"))) {
+                    path = path + '/';
+                }
                 path = path.replace("\\", "/");
                 LOG.fine("includeAll for " + pathName);
                 LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
