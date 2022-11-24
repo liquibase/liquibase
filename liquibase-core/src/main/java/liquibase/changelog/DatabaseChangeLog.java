@@ -652,10 +652,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                             .replace("\\", "/");
                 }
 
+                path = path.replace("\\", "/");
                 if (StringUtil.isNotEmpty(path) && !(path.endsWith("/"))) {
                     path = path + '/';
                 }
-                path = path.replace("\\", "/");
                 LOG.fine("includeAll for " + pathName);
                 LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
 
