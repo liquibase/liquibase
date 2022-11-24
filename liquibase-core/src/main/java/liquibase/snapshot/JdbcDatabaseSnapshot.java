@@ -1719,8 +1719,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof SybaseDatabase) {
-                        Scope.getCurrentScope().getLog(getClass()).warning("Finding unique constraints not currently supported for Sybase");
-                        return null; //TODO: find sybase sql
+                        sql = "select idx.name as CONSTRAINT_NAME, tbl.name as TABLE_NAME "
+                                + "from sysindexes idx "
+                                + "inner join sysobjects tbl on tbl.id = idx.id "
+                                + "where idx.indid between 1 and 254 "
+                                + "and (idx.status & 2) = 2 "
+                                + "and tbl.type = 'U'";
+                        if (tableName != null) {
+                            sql += " and tbl.name = '" + database.correctObjectName(tableName, Table.class) + "'";
+                        }
                     } else if (database instanceof SybaseASADatabase) {
                         sql = "select sysconstraint.constraint_name, sysconstraint.constraint_type, systable.table_name " +
                                 "from sysconstraint, systable " +
