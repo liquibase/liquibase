@@ -29,7 +29,7 @@ import java.util.List;
 public class CreateTableChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private List<ColumnConfig> columns;
-    Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
+    /*Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
     private String tableType;
     private String catalogName;
     private String schemaName;
