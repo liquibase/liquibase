@@ -374,7 +374,6 @@ public class JdbcExecutor extends AbstractExecutor {
                             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
                             stmt.execute(stmtText);
                         }
-                        con.commit();
                     } finally {
                         JdbcUtil.closeStatement(stmt);
                     }
@@ -557,5 +556,4 @@ public class JdbcExecutor extends AbstractExecutor {
             return sql;
         }
     }
-
 }

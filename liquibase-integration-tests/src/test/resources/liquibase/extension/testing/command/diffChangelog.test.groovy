@@ -2,6 +2,7 @@ package liquibase.extension.testing.command
 
 import liquibase.change.AddColumnConfig
 import liquibase.change.ColumnConfig
+import liquibase.change.ConstraintsConfig
 import liquibase.change.core.AddColumnChange
 import liquibase.change.core.AddPrimaryKeyChange
 import liquibase.change.core.CreateTableChange
@@ -180,19 +181,15 @@ Optional Args:
                     new CreateTableChange(
                         tableName: "person",
                         columns: [
-                            ColumnConfig.fromName("address").setType("VARCHAR(255)")
-                        ]
-                    ),
-                    new AddColumnChange(
-                        tableName: "person",
-                        columns: [
-                           new AddColumnConfig(new Column(ColumnConfig.fromName("id").setType("VARCHAR(255)")))
+                            ColumnConfig.fromName("address").setType("VARCHAR(255)"),
+                            ColumnConfig.fromName("id").setType("VARCHAR(255)")
+                                    .setConstraints(new ConstraintsConfig().setNullable(false))
                         ]
                     ),
                     new AddPrimaryKeyChange(
                         tableName:       "person",
                         columnNames:     "id",
-                        constraintName:  "pk_person"
+                        constraintName:  "pk_person",
                     )
             ]
 
