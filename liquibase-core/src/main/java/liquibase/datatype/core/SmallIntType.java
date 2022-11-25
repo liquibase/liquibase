@@ -11,7 +11,7 @@ import liquibase.statement.DatabaseFunction;
 
 import java.util.Locale;
 
-@DataTypeInfo(name="smallint", aliases = {"java.sql.Types.SMALLINT", "int2", "smallserial"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "smallint", aliases = {"java.sql.Types.SMALLINT", "int2", "smallserial"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class SmallIntType extends LiquibaseDataType {
 
     private boolean autoIncrement;
@@ -36,9 +36,9 @@ public class SmallIntType extends LiquibaseDataType {
             return type;
         }
         if ((database instanceof AbstractDb2Database) ||
-            (database instanceof DerbyDatabase) ||
-            (database instanceof FirebirdDatabase) ||
-            (database instanceof InformixDatabase)) {
+                (database instanceof DerbyDatabase) ||
+                (database instanceof FirebirdDatabase) ||
+                (database instanceof InformixDatabase)) {
             return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
 
@@ -61,7 +61,9 @@ public class SmallIntType extends LiquibaseDataType {
             }
             return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
-
+        if ((database instanceof SybaseDatabase) || (database instanceof H2Database)) {
+            return new DatabaseDataType("SMALLINT");
+        }
         return super.toDatabaseDataType(database);
     }
 

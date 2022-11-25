@@ -8,13 +8,6 @@ import liquibase.structure.core.Index;
 import liquibase.util.StringUtil;
 
 public class Db2zDatabase extends AbstractDb2Database {
-	
-	public Db2zDatabase() {
-        super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
-        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
-        super.sequenceCurrentValueFunction = "PREVIOUS VALUE FOR %s";
-        super.unquotedObjectsAreUppercased=true;
-    }
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
@@ -24,11 +17,6 @@ public class Db2zDatabase extends AbstractDb2Database {
     @Override
     public String getShortName() {
         return "db2z";
-    }
-
-    @Override
-    public boolean supportsDDLInTransaction() {
-        return false;
     }
 
     @Override
