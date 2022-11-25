@@ -3,13 +3,14 @@ package liquibase.database.core
 import liquibase.CatalogAndSchema
 import liquibase.Scope
 import liquibase.database.DatabaseConnection
+import liquibase.exception.DatabaseException
 import liquibase.executor.Executor
 import liquibase.executor.ExecutorService
 import liquibase.statement.core.GetViewDefinitionStatement
 import spock.lang.Specification
 import spock.lang.Unroll
 
-public class SybaseDatabaseTest  extends Specification {
+public class SybaseDatabaseTest extends Specification {
 
     def cleanup() {
         Scope.currentScope.getSingleton(ExecutorService.class).reset()
@@ -81,5 +82,32 @@ public class SybaseDatabaseTest  extends Specification {
             database.escapeIndexName("cat", null, "index_name") == "index_name"
             database.escapeIndexName(null, "schem", "index_name") == "index_name"
             database.escapeIndexName("cat", "schem", "index_name") == "index_name"
+    }
+
+    def supportsInitiallyDeferrableColumns() {
+        when:
+        def database = new SybaseDatabase()
+
+        then:
+        database.supportsInitiallyDeferrableColumns() == false
+    }
+
+    def getCurrentDateTimeFunction() {
+        when:
+        def database = new SybaseDatabase()
+
+        then:
+        database.getCurrentDateTimeFunction() == "GETDATE()"
+    }
+
+    def testGetDefaultDriver() throws DatabaseException {
+        when:
+        def database = new SybaseDatabase()
+
+        then:
+        database.getDefaultDriver("jdbc:xsybase://localhost/liquibase")     == "com.sybase.jdbc4.jdbc.SybDriver"
+        database.getDefaultDriver("jdbc:sybase:Tds://localhost/liquibase")  == "com.sybase.jdbc4.jdbc.SybDriver"
+        database.getDefaultDriver("jdbc:jtds:sybase://localhost/liquibase") == "net.sourceforge.jtds.jdbc.Driver"
+        database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase") == null
     }
 }
