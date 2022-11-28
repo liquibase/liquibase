@@ -136,10 +136,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         // If it is == 10 then we check the minor version
         //
         int minorVersion = getMinorVersion(database);
-        if (majorVersion > 10 || minorVersion >= 5) {
-          return true;
-        }
-        return false;
+        return majorVersion > 10 || minorVersion >= 5;
     }
 
     private int getMajorVersion(Database database) {
