@@ -9,6 +9,10 @@
         <version>0-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
+
     <artifactId>liquibase-core</artifactId>
     <packaging>jar</packaging>
 
