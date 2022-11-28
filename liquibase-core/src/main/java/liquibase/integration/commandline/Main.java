@@ -1876,9 +1876,11 @@ public class Main {
                         throw new CommandLineParsingException(
                                 String.format(coreBundle.getString("command.requires.tag"), COMMANDS.UPDATE_TO_TAG));
                     }
-
-                    liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression
-                            (getLabelFilter()));
+                    try {
+                        liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    } catch (LiquibaseException updateException) {
+                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
+                    }
                 } else if (COMMANDS.UPDATE_TO_TAG_SQL.equalsIgnoreCase(command)) {
                     if ((commandParams == null) || commandParams.isEmpty()) {
                         throw new CommandLineParsingException(
