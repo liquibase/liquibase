@@ -55,6 +55,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.enforcer.requireMavenVersion>3.6</maven.enforcer.requireMavenVersion>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mmZ</maven.build.timestamp.format>
+        <maven.deploy.skip>true</maven.deploy.skip>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
         <build.number>0</build.number>
         <build.commit>unknown</build.commit>
@@ -72,6 +73,13 @@
         <argLine></argLine>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/liquibase/liquibase</url>
+        </repository>
+    </distributionManagement>
 
     <modules>
         <module>liquibase-core</module>
@@ -117,14 +125,8 @@
 
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>4.8.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
-            <version>4.8.0</version>
+            <version>4.8.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -171,7 +173,7 @@
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>2.5.2</version>
+            <version>2.7.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -192,7 +194,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.5.0</version>
+            <version>42.5.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -206,7 +208,7 @@
         <dependency>
             <groupId>com.ibm.db2</groupId>
             <artifactId>jcc</artifactId>
-            <version>11.5.7.0</version>
+            <version>11.5.8.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -220,7 +222,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.39.3.0</version>
+            <version>3.39.4.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -292,7 +294,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.13.1</version>
+                <version>2.1.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -326,15 +328,6 @@
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.0.0</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>none</phase>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
