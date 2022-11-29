@@ -444,8 +444,8 @@
         </createTable>
         <addPrimaryKey tableName="nocluster_table" columnNames="id" clustered="false"/>
     </changeSet>
-    <changeSet id="table-type" author="mallod">
-        <createTable tableName="tableTypeTest" tableType="row-based">
+    <changeSet id="table-type" author="mallod" dbms="snowflake">
+        <createTable tableName="tableTypeTest" tableType="Transient">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
