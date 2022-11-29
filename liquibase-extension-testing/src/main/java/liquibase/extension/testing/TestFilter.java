@@ -111,10 +111,6 @@ public class TestFilter {
             return false;
         }
 
-        if (includeValue != null) {
-            return false;
-        }
-
-        return true;
+        return includeValue == null;
     }
 }
