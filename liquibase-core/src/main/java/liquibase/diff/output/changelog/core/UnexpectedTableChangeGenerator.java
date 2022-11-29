@@ -3,7 +3,6 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
 import liquibase.database.Database;
-import liquibase.database.core.Db2zDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
@@ -39,14 +38,13 @@ public class UnexpectedTableChangeGenerator extends AbstractChangeGenerator impl
         if (control.getIncludeCatalog()) {
             change.setCatalogName(unexpectedTable.getSchema().getCatalogName());
         }
-        // Because of different schema meaning in DB2 Z for OS we need to always include it to be able to drop
-        if (control.getIncludeSchema() || referenceDatabase instanceof Db2zDatabase) {
+        if (control.getIncludeSchema()) {
             change.setSchemaName(unexpectedTable.getSchema().getName());
         }
 
         for (Column column : unexpectedTable.getColumns()) {
             control.setAlreadyHandledUnexpected(column);
-        }
+        };
         control.setAlreadyHandledUnexpected(unexpectedTable.getPrimaryKey());
 
         for (Index index : unexpectedTable.getIndexes()) {
