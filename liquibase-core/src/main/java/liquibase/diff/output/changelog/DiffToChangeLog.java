@@ -784,15 +784,11 @@ public class DiffToChangeLog {
         boolean sawAutocommitBefore = false;
 
         for (Change change : changes) {
-            boolean thisStatementAutocommits = true;
+            boolean thisStatementAutocommits = !(change instanceof InsertDataChange)
+                    && !(change instanceof DeleteDataChange)
+                    && !(change instanceof UpdateDataChange)
+                    && !(change instanceof LoadDataChange);
 
-            if ((change instanceof InsertDataChange
-                    || change instanceof DeleteDataChange
-                    || change instanceof UpdateDataChange
-                    || change instanceof LoadDataChange
-            )) {
-                thisStatementAutocommits = false;
-            }
             if (change instanceof RawSQLChange) {
                 if (((RawSQLChange) change).getSql().trim().matches("SET\\s+\\w+\\s+\\w+")) {
                     //don't separate out when there is a `SET X Y` statement
