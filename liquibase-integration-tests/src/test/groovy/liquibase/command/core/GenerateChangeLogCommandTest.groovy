@@ -57,10 +57,32 @@ drop table str4;
         contents.count("<changeSet") == 1
         contents.count("primaryKey=\"true\"") == 2
         contents.count("<addPrimaryKey") == 0
+        // drop the table before we create it again in the update below
+        !mysql.executeSql("drop table str4")
+
+        when:
+        runUpdate()
+
+        then:
+        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
         new File("objects").deleteDir()
+    }
+
+    private void runUpdate() {
+        UpdateCommandStep step = new UpdateCommandStep()
+
+        CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(UpdateCommandStep.URL_ARG, mysql.getConnectionUrl())
+        commandScope.addArgumentValue(UpdateCommandStep.USERNAME_ARG, mysql.getUsername())
+        commandScope.addArgumentValue(UpdateCommandStep.PASSWORD_ARG, mysql.getPassword())
+        commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "output.xml")
+
+        OutputStream outputStream = new ByteArrayOutputStream()
+        CommandResultsBuilder commandResultsBuilder = new CommandResultsBuilder(commandScope, outputStream)
+        step.run(commandResultsBuilder)
     }
 }
 
