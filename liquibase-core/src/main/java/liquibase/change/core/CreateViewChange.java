@@ -228,10 +228,7 @@ public class CreateViewChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<>();
 
-        boolean replaceIfExists = false;
-        if ((getReplaceIfExists() != null) && getReplaceIfExists()) {
-            replaceIfExists = true;
-        }
+        boolean replaceIfExists = (getReplaceIfExists() != null) && getReplaceIfExists();
 
         boolean fullDefinition = false;
         if (this.fullDefinition != null) {

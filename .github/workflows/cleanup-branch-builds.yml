@@ -1,0 +1,35 @@
+name: Cleanup on Branch Delete
+
+on:
+  workflow_dispatch:
+  delete:
+    branches:
+      - '**DAT-**'
+jobs:
+  delete-package:
+    name: Delete Github Package for Branch
+    runs-on: ubuntu-latest
+    steps:
+      # Get version id(s) based on version name
+    - uses: castlabs/get-package-version-id-action@v2.0
+      id: version
+      with:
+        version: "${{ github.ref_name }}-SNAPSHOT"
+
+    - uses: actions/delete-package-versions@v3
+      if: ${{ steps.version.outputs.ids != '' }}
+      with:
+        # Name of the package.
+        # Defaults to an empty string.
+        # Required if `package-version-ids` input is not given.
+        package-name: org.liquibase.liquibase-core
+
+        # The number of latest versions to keep.
+        # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
+        # When set to 0, all deletable versions will be deleted.
+        # When set greater than 0, all deletable package versions except the specified number will be deleted.
+        min-versions-to-keep: 0
+
+        # Can be a single package version id, or a comma separated list of package version ids.
+        # Defaults to an empty string.
+        package-version-ids: "${{ steps.version.outputs.ids }}"
