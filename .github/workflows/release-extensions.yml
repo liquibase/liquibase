@@ -21,6 +21,7 @@ jobs:
           - liquibase-cosmosdb
           - liquibase-db2i
           - liquibase-filechangelog
+          - liquibase-nochangeloglock
           - liquibase-hanadb
           - liquibase-hibernate
           - liquibase-maxdb
