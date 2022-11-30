@@ -31,11 +31,7 @@ public class ResultSetCache {
 
             String schemaKey = resultSetExtractor.wantedKeyParameters().createSchemaKey(resultSetExtractor.database);
 
-            Map<String, List<CachedRow>> cache = cacheBySchema.get(schemaKey);
-            if (cache == null) {
-                cache = new HashMap<>();
-                cacheBySchema.put(schemaKey, cache);
-            }
+            Map<String, List<CachedRow>> cache = cacheBySchema.computeIfAbsent(schemaKey, k -> new HashMap<>());
 
             if (cache.containsKey(wantedKey)) {
                 return cache.get(wantedKey);
@@ -78,11 +74,7 @@ public class ResultSetCache {
                         String rowSchema = CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
                                 equals(resultSetExtractor.database.getSchemaAndCatalogCase())?resultSetExtractor.getSchemaKey(row):
                                 resultSetExtractor.getSchemaKey(row).toLowerCase();
-                        cache = cacheBySchema.get(rowSchema);
-                        if (cache == null) {
-                            cache = new HashMap<String, List<CachedRow>>();
-                            cacheBySchema.put(rowSchema, cache);
-                        }
+                        cache = cacheBySchema.computeIfAbsent(rowSchema, k -> new HashMap<String, List<CachedRow>>());
                     }
                     if (!cache.containsKey(rowKey)) {
                         cache.put(rowKey, new ArrayList<CachedRow>());

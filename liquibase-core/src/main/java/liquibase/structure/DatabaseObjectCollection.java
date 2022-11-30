@@ -72,20 +72,12 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
         if (databaseObject == null) {
             return;
         }
-        Map<String, Set<DatabaseObject>> collectionMap = cache.get(databaseObject.getClass());
-        if (collectionMap == null) {
-            collectionMap = new HashMap<>();
-            cache.put(databaseObject.getClass(), collectionMap);
-        }
+        Map<String, Set<DatabaseObject>> collectionMap = cache.computeIfAbsent(databaseObject.getClass(), k -> new HashMap<>());
 
         String[] hashes = DatabaseObjectComparatorFactory.getInstance().hash(databaseObject, null, database);
 
         for (String hash : hashes) {
-            Set<DatabaseObject> collection = collectionMap.get(hash);
-            if (collection == null) {
-                collection = new HashSet<>();
-                collectionMap.put(hash, collection);
-            }
+            Set<DatabaseObject> collection = collectionMap.computeIfAbsent(hash, k -> new HashSet<>());
             collection.add(databaseObject);
         }
     }
