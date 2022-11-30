@@ -1,7 +1,7 @@
 Liquibase Core Changelog
 ===========================================
 
-Change is version Liquibase v4.18.0
+Changes in version Liquibase v4.18.0
 
 ## Notable Changes
 * [PRO] Hashicorp Vault extension and Liquibase Pro
