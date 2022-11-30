@@ -58,11 +58,7 @@ public class CachedRow {
     public Boolean getBoolean(String columnName) {
         Object o = row.get(columnName);
         if (o instanceof Number) {
-            if (((Number) o).longValue() == 0) {
-                return false;
-            } else {
-                return true;
-            }
+            return ((Number) o).longValue() != 0;
         }
         if (o instanceof String) {
             String s = (String)o;

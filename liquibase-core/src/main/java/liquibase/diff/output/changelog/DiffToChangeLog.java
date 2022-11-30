@@ -663,7 +663,7 @@ public class DiffToChangeLog {
                 "                   SELECT DISTINCT " +
                 "                         substring(pg_identify_object(classid, objid, 0)::text, E'(\\\\w+?)\\\\.') as referenced_schema_name, " +
                 "                         CASE classid\n" +
-                "                              WHEN 'pg_constraint'::regclass THEN (SELECT CONTYPE FROM pg_constraint WHERE oid = objid)\n" +
+                "                              WHEN 'pg_constraint'::regclass THEN (SELECT CONTYPE::text FROM pg_constraint WHERE oid = objid)\n" +
                 "                              ELSE objid::text\n" +
                 "                              END AS CONTYPE,\n" +
                 "                         CASE classid\n" +
@@ -784,15 +784,11 @@ public class DiffToChangeLog {
         boolean sawAutocommitBefore = false;
 
         for (Change change : changes) {
-            boolean thisStatementAutocommits = true;
+            boolean thisStatementAutocommits = !(change instanceof InsertDataChange)
+                    && !(change instanceof DeleteDataChange)
+                    && !(change instanceof UpdateDataChange)
+                    && !(change instanceof LoadDataChange);
 
-            if ((change instanceof InsertDataChange
-                    || change instanceof DeleteDataChange
-                    || change instanceof UpdateDataChange
-                    || change instanceof LoadDataChange
-            )) {
-                thisStatementAutocommits = false;
-            }
             if (change instanceof RawSQLChange) {
                 if (((RawSQLChange) change).getSql().trim().matches("SET\\s+\\w+\\s+\\w+")) {
                     //don't separate out when there is a `SET X Y` statement
