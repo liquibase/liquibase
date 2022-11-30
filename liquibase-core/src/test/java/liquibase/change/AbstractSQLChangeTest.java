@@ -1,15 +1,8 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.database.OfflineConnection;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MockDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.exception.DatabaseException;
-import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.StreamUtil;
 import org.junit.Test;
 

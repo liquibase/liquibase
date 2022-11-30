@@ -1,6 +1,5 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.resource.PathResource;
 import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
@@ -9,7 +8,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 

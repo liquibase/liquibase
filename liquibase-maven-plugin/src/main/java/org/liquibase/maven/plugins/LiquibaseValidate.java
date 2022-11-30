@@ -1,9 +1,7 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
-import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
-import liquibase.integration.commandline.Main;
 import org.apache.maven.plugin.MojoFailureException;
 
 import java.util.ResourceBundle;
