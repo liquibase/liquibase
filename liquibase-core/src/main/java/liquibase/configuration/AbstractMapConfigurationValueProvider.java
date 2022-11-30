@@ -153,11 +153,7 @@ public abstract class AbstractMapConfigurationValueProvider extends AbstractConf
 
         //check for everythingSmashedTogether case insensitively
         wantedKey = wantedKey.replace("-", "");
-        if (wantedKey.equalsIgnoreCase(storedKey)) {
-            return true;
-        }
-
-        return false;
+        return wantedKey.equalsIgnoreCase(storedKey);
     }
 
 }

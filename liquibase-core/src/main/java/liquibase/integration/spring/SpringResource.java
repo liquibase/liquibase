@@ -3,6 +3,7 @@ package liquibase.integration.spring;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.OpenOptions;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.WritableResource;
 
 import java.io.IOException;
@@ -41,7 +42,7 @@ class SpringResource extends liquibase.resource.AbstractResource {
     @Override
     public liquibase.resource.Resource resolveSibling(String other) {
         try {
-            Resource otherResource = this.resource.createRelative("../"+other);
+            Resource otherResource = this.resource.createRelative(other);
 
             return new SpringResource(resolveSiblingPath(other), otherResource.getURI(), otherResource);
         } catch (IOException e) {
