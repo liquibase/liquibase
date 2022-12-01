@@ -57,7 +57,7 @@ public class ChangeLogHistoryServiceFactory {
             SortedSet<ChangeLogHistoryService> foundServices = new TreeSet<>(new Comparator<ChangeLogHistoryService>() {
                 @Override
                 public int compare(ChangeLogHistoryService o1, ChangeLogHistoryService o2) {
-                    return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
+                    return -1 * Integer.compare(o1.getPriority(), o2.getPriority());
                 }
             });
 
