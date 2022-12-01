@@ -1793,6 +1793,9 @@ public class Main {
                 if (commandParams.contains("--" + OPTIONS.VERBOSE)) {
                     runVerbose = true;
                 }
+                Scope.getCurrentScope().getLog(getClass()).severe("qqqq - no mdc");
+                Scope.getCurrentScope().getLog(getClass()).mdc("qqqq", "added mdc");
+                Scope.getCurrentScope().getLog(getClass()).severe("qqqq - after mdc");
                 liquibase.reportStatus(runVerbose, new Contexts(contexts), new LabelExpression(getLabelFilter()),
                         getOutputWriter());
                 return;

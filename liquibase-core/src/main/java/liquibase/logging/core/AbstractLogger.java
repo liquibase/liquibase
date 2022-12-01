@@ -93,4 +93,9 @@ public abstract class AbstractLogger extends AbstractExtensibleObject implements
     protected String filterMessage(String message) {
         return message;
     }
+
+    @Override
+    public void mdc(String key, String value) {
+        // Do nothing by default
+    }
 }
