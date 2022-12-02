@@ -24,8 +24,10 @@ import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
+
 
 /**
  * Encapsulates the information stored in the change log XML file.
@@ -233,18 +235,26 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public ChangeSet getChangeSet(String path, String author, String id) {
-        for (ChangeSet changeSet : changeSets) {
+	    final List<ChangeSet> possibleChangeSets = getChangeSets(path, author, id);
+	    if (possibleChangeSets.isEmpty()){
+	    	return null;
+	    }
+	    return possibleChangeSets.get(0);
+    }
+
+    public List<ChangeSet> getChangeSets(String path, String author, String id) {
+	    final ArrayList<ChangeSet> changeSetsToReturn = new ArrayList<>();
+	    for (ChangeSet changeSet : this.changeSets) {
             final String normalizedPath = normalizePath(changeSet.getFilePath());
             if (normalizedPath != null &&
                     normalizedPath.equalsIgnoreCase(normalizePath(path)) &&
                     changeSet.getAuthor().equalsIgnoreCase(author) &&
                     changeSet.getId().equalsIgnoreCase(id) &&
                     isDbmsMatch(changeSet.getDbmsSet())) {
-                return changeSet;
+                changeSetsToReturn.add(changeSet);
             }
         }
-
-        return null;
+        return changeSetsToReturn;
     }
 
     public List<ChangeSet> getChangeSets() {
@@ -342,6 +352,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             changeSet.setStoredFilePath(ranChangeSet.getStoredChangeLog());
         }
         return changeSet;
+    }
+
+    public List<ChangeSet> getChangeSets(RanChangeSet ranChangeSet) {
+        return getChangeSets(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
     }
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
@@ -621,11 +635,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (pathName == null) {
                 throw new SetupException("No path attribute for includeAll");
             }
-            pathName = pathName.replace('\\', '/');
 
-            if (StringUtil.isNotEmpty(pathName) && !(pathName.endsWith("/"))) {
-                pathName = pathName + '/';
-            }
             String relativeTo = null;
             if (isRelativeToChangelogFile) {
                 relativeTo = this.getPhysicalFilePath();
@@ -638,9 +648,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     path = pathName;
                 } else {
                     path = resourceAccessor.get(relativeTo).resolveSibling(pathName).getPath();
+                    path = Paths.get(path).normalize().toString()
+                            .replace("\\", "/");
                 }
 
                 path = path.replace("\\", "/");
+                if (StringUtil.isNotEmpty(path) && !(path.endsWith("/"))) {
+                    path = path + '/';
+                }
                 LOG.fine("includeAll for " + pathName);
                 LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
 
@@ -741,6 +756,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (isRelativePath) {
             try {
                 fileName = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(fileName).getPath();
+                fileName = Paths.get(fileName).normalize().toString()
+                        .replace("\\", "/");
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }

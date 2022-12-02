@@ -65,14 +65,15 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
                                  LabelExpression labels) throws DatabaseException {
         for (RanChangeSet ranChangeSet : this.getRanChangeSets()) {
             if (ranChangeSet.getLastCheckSum() == null) {
-                ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
-                if ((changeSet != null) && new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() &&
-                    new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()
-                    ) {
-                    Scope.getCurrentScope().getLog(getClass()).fine(
-                            "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
-                    );
-                    replaceChecksum(changeSet);
+                List<ChangeSet> changeSets = databaseChangeLog.getChangeSets(ranChangeSet);
+                for (ChangeSet changeSet : changeSets) {
+                    if ((changeSet != null) && new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() &&
+                        new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()) {
+                        Scope.getCurrentScope().getLog(getClass()).fine(
+                                "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
+                        );
+                        replaceChecksum(changeSet);
+                    }
                 }
             }
         }

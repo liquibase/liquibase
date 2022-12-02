@@ -65,6 +65,8 @@ public final class ExpressionMatcher {
             expression = left + " :" + String.valueOf(matches(nestedExpression, items)).toUpperCase() + " " + right;
         }
 
+        expression = expression.replaceAll("\\s*,\\s*", " or ");
+        
         String[] orSplit = expression.split("\\s+or\\s+");
         if (orSplit.length > 1) {
             for (String split : orSplit) {
