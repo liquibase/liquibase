@@ -609,7 +609,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                     } else if ((value instanceof Collection) && !((Collection) value).isEmpty() && allObjects
                             .containsKey(((Collection) value).iterator().next())) {
                         List<DatabaseObject> newList = new ArrayList<DatabaseObject>();
-                        for (String element : (Collection<String>) value) {
+                        for (Object element : (Collection<Object>)value) {
                             newList.add(allObjects.get(element));
                         }
                         if (ObjectUtil.hasProperty(object, attr)) {
