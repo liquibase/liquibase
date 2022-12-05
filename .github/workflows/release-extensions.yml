@@ -9,7 +9,7 @@ on:
 jobs:
   trigger-release:
     name: "Trigger Releases"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
@@ -21,6 +21,7 @@ jobs:
           - liquibase-cosmosdb
           - liquibase-db2i
           - liquibase-filechangelog
+          - liquibase-nochangeloglock
           - liquibase-hanadb
           - liquibase-hibernate
           - liquibase-maxdb
