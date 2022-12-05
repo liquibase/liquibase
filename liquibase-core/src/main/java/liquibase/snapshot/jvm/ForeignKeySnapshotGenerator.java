@@ -305,11 +305,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 return false;
             }
 
-            if (driverMajorVersion > 6 || (driverMajorVersion == 6 && driverMinorVersion >= 3)) {
-                return false;
-            }
-
-            return true;
+            return driverMajorVersion <= 6 && (driverMajorVersion != 6 || driverMinorVersion < 3);
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }

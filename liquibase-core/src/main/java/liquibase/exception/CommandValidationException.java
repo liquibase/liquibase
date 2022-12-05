@@ -21,6 +21,10 @@ public class CommandValidationException extends CommandExecutionException {
         super(buildMessage(argument, message), cause);
     }
 
+    public CommandValidationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     private static String buildMessage(String argument, String message) {
         return "Invalid argument '" + argument + "': " + message;
     }
