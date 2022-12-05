@@ -54,8 +54,8 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
     @Override
     protected Object toMap(final LiquibaseSerializable object) {
         if (object instanceof DatabaseObject) {
-            if (object instanceof Column && (BooleanUtil.isTrue(((Column) object).getDescending()) || BooleanUtil.isTrue(((Column) object).getComputed()))) {
-                //not really a "real" column that has a snapshot to reference, just serialize it
+            if (object instanceof Column && ((Column) object).isBelongsToIndex()) {
+                //not really a "real" column that has a snapshot to reference, just serialize the ColumnObject
                 return super.toMap(object);
             } else if (alreadySerializingObject) {
                 String snapshotId = ((DatabaseObject) object).getSnapshotId();

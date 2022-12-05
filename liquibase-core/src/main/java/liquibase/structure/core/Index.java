@@ -7,11 +7,7 @@ import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Index extends AbstractDatabaseObject {
 
@@ -159,6 +155,28 @@ public class Index extends AbstractDatabaseObject {
 	}
 
     @Override
+    public Object getSerializableFieldValue(String field) {
+        //
+        // For columns within an Index, we now represent
+        // all the columns as actual Column objects with
+        // the belongsToIndex flag set
+        //
+        if (field != null && field.equals("columns")) {
+            List<Object> returnList = new ArrayList<>();
+            for (Column column : getColumns()) {
+                Column c = new Column();
+                c.setName(column.getName());
+                c.setDescending(column.getDescending());
+                c.setComputed(column.getComputed());
+                c.setBelongsToIndex(true);
+                returnList.add(c);
+            }
+            return returnList;
+        }
+        return super.getSerializableFieldValue(field);
+    }
+
+    @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         super.load(parsedNode, resourceAccessor);
         ParsedNode columns = parsedNode.getChild(null, "columns");
@@ -166,18 +184,41 @@ public class Index extends AbstractDatabaseObject {
         for (int i=0; i < nodes.size(); i++) {
             ParsedNode node = nodes.get(i);
             Column column = new Column();
-            // column.load(node, resourceAccessor);
+            column.load(node, resourceAccessor);
             column.setName((String) node.getChildren(null, "name").get(0).getValue());
             column.setDescending(node.getChildValue(null, "descending", Boolean.class));
             column.setComputed(node.getChildValue(null, "computed", Boolean.class));
-            if (getColumns().get(i) == null) {
-                getColumns().set(i, column);
-            } else {
-                getColumns().add(column);
+            getColumns().add(column);
+        }
+        //
+        // Clear out any null objects which may have been added before
+        // by the super class load. We check to see if the list only
+        // contains Column objects in order to support older snapshots
+        // which may have both Column objects and reference strings
+        //
+        if (!nodes.isEmpty() && allColumnObjects(getColumns())) {
+            List<Column> newList = new ArrayList<>();
+            for (Column column : getColumns()) {
+                if (column == null) {
+                    continue;
+                }
+                newList.add(column);
             }
+            setColumns(newList);
         }
     }
 
+    //
+    // Make sure this list only contains Column objects
+    //
+    private boolean allColumnObjects(List columns) {
+        for (Object object : columns) {
+            if (object instanceof String) {
+                return false;
+            }
+        }
+        return true;
+    }
     public Boolean getClustered() {
         return getAttribute("clustered", Boolean.class);
     }

@@ -348,15 +348,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, ReflectiveOperationException {
         for (String field : new HashSet<>(object.getAttributes())) {
             Object fieldValue = object.getAttribute(field, Object.class);
+            //
+            // Make sure we always assign a snapshot ID when we handle index columns
+            // in the case where one of the columns is descending
+            //
             if ("columns".equals(field) && ((object.getClass() == PrimaryKey.class) || (object.getClass() == Index
                     .class) || (object.getClass() == UniqueConstraint.class))) {
                 if ((fieldValue != null) && !((Collection) fieldValue).isEmpty()) {
-                    Column column = (Column) ((Collection) fieldValue).iterator().next();
-                    String columnName = column.getName().toLowerCase();
-                    if (BooleanUtil.isTrue(column.getDescending()) ||
-                        columnName.endsWith(" asc") ||
-                        columnName.endsWith(" desc") ||
-                        columnName.endsWith(" random")) {
+                    if (descendingColumnExists((Collection<Column>)fieldValue)) {
                         List<Column> columns = (List<Column>)fieldValue;
                         for (Column col : columns) {
                             if (col.getSnapshotId() != null) {
@@ -382,6 +381,21 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
     }
 
+    //
+    // Check for existence of a descending column within the Collection
+    //
+    private boolean descendingColumnExists(Collection<Column> fieldValue) {
+        for (Column column : fieldValue) {
+            String columnName = column.getName().toLowerCase();
+            if (BooleanUtil.isTrue(column.getDescending()) ||
+                    columnName.endsWith(" asc") ||
+                    columnName.endsWith(" desc") ||
+                    columnName.endsWith(" random")) {
+                return true;
+            }
+        }
+        return false;
+    }
     private Object replaceObject(Object fieldValue) throws DatabaseException, InvalidExampleException, ReflectiveOperationException {
         if (fieldValue == null) {
             return null;
@@ -608,9 +622,18 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                         }
                     } else if ((value instanceof Collection) && !((Collection) value).isEmpty() && allObjects
                             .containsKey(((Collection) value).iterator().next())) {
+                        //
+                        // This collection may contain both references (String with snapshotId)
+                        // or an actual DatabaseObject. If the element is a reference String then
+                        // we go retrieve the actual object, else we just add the object
+                        //
                         List<DatabaseObject> newList = new ArrayList<DatabaseObject>();
                         for (Object element : (Collection<Object>)value) {
-                            newList.add(allObjects.get(element));
+                            if (element instanceof String) {
+                                newList.add(allObjects.get(element));
+                            } else {
+                                newList.add((DatabaseObject)element);
+                            }
                         }
                         if (ObjectUtil.hasProperty(object, attr)) {
                             ObjectUtil.setProperty(object, attr, newList);
