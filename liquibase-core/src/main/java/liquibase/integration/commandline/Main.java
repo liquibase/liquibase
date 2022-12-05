@@ -1831,17 +1831,8 @@ public class Main {
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
                     try {
                         liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
-                    } catch (LiquibaseException e) {
-                        if (rollbackOnError) {
-                            CommandScope commandScope = new CommandScope("internalRollbackOnError");
-                            commandScope.addArgumentValue("database", database);
-                            commandScope.addArgumentValue("exception", e);
-                            commandScope.addArgumentValue("listener", defaultChangeExecListener);
-                            commandScope.addArgumentValue("rollbackOnError", rollbackOnError);
-                            commandScope.execute();
-                        } else {
-                            throw e;
-                        }
+                    } catch (LiquibaseException updateException) {
+                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
                 } else if (COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(getLabelFilter()));
@@ -1871,8 +1862,12 @@ public class Main {
                     liquibase.markNextChangeSetRan(new Contexts(contexts), new LabelExpression(getLabelFilter()),
                             getOutputWriter());
                 } else if (COMMANDS.UPDATE_COUNT.equalsIgnoreCase(command)) {
-                    liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
-                            LabelExpression(getLabelFilter()));
+                    try {
+                        liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
+                                LabelExpression(getLabelFilter()));
+                    } catch (LiquibaseException updateException) {
+                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
+                    }
                 } else if (COMMANDS.UPDATE_COUNT_SQL.equalsIgnoreCase(command)) {
                     liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
                             LabelExpression(getLabelFilter()), getOutputWriter());
@@ -1881,9 +1876,11 @@ public class Main {
                         throw new CommandLineParsingException(
                                 String.format(coreBundle.getString("command.requires.tag"), COMMANDS.UPDATE_TO_TAG));
                     }
-
-                    liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression
-                            (getLabelFilter()));
+                    try {
+                        liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    } catch (LiquibaseException updateException) {
+                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
+                    }
                 } else if (COMMANDS.UPDATE_TO_TAG_SQL.equalsIgnoreCase(command)) {
                     if ((commandParams == null) || commandParams.isEmpty()) {
                         throw new CommandLineParsingException(
@@ -1965,7 +1962,11 @@ public class Main {
                     liquibase.futureRollbackSQL(getCommandArgument(), new Contexts(contexts), new LabelExpression
                             (getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(command)) {
-                    liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    try {
+                        liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    } catch (LiquibaseException updateException) {
+                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
+                    }
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
                     CommandScope historyCommand = new CommandScope("internalHistory");
                     historyCommand.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, database);
@@ -2177,6 +2178,19 @@ public class Main {
             }
         } else {
             return outputStream;
+        }
+    }
+
+    private void handleUpdateException(Database database, LiquibaseException exception, DefaultChangeExecListener defaultChangeExecListener, boolean rollbackOnError) throws LiquibaseException {
+        try {
+            CommandScope commandScope = new CommandScope("internalRollbackOnError");
+            commandScope.addArgumentValue("database", database);
+            commandScope.addArgumentValue("exception", exception);
+            commandScope.addArgumentValue("listener", defaultChangeExecListener);
+            commandScope.addArgumentValue("rollbackOnError", rollbackOnError);
+            commandScope.execute();
+        } catch (IllegalArgumentException ignoredCommandNotFound) {
+            throw exception;
         }
     }
 

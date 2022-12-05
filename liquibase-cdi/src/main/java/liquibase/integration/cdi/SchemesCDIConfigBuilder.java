@@ -102,6 +102,7 @@ public class SchemesCDIConfigBuilder {
                 log.fine(String.format("[id = %s] File [path='%s'] already exists, failed to delete.", id, path));
             }
         }
+
         if (!output.createNewFile()) {
             throw new RuntimeException(String.format("[id = %s] Cannot create [%s] file.", id, output));
         }
@@ -117,10 +118,12 @@ public class SchemesCDIConfigBuilder {
         for (Bean<?> bean : beans) {
             classesSet.add(bean.getBeanClass());
         }
+
         Set<Annotation> annotationsSet = new LinkedHashSet<>();
         for (Class clazz : classesSet) {
             annotationsSet.add(clazz.getAnnotation(LiquibaseSchema.class));
         }
+
         List<LiquibaseSchema> liquibaseSchemaList = new ArrayList<>();
         for (Annotation ann : annotationsSet) {
             liquibaseSchemaList.add((LiquibaseSchema) ann);
@@ -145,7 +148,8 @@ public class SchemesCDIConfigBuilder {
             schemes.append(String.format(INCLUDE_TPL, schema)).append("\n");
         }
 
-        log.info(String.format("[id = %s] Scan complete [took=%s milliseconds].", id, System.currentTimeMillis() - start));
+        long end = System.currentTimeMillis();
+        log.info(String.format("[id = %s] Scan complete [took=%s milliseconds].", id, end - start));
         log.fine(String.format("[id = %s] Resolved schemes: %n%s%n", id, schemes));
         log.fine(String.format("[id = %s] Generating root liquibase file...", id));
 

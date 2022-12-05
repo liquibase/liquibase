@@ -327,10 +327,8 @@ public class ResultSetCache {
                             if (informixIndexTrimHint == false) {
                                 value = ((String) value).trim(); // Trim the value normally
                             } else {
-                                boolean startsWithSpace = false;
-                                if ((database instanceof InformixDatabase) && ((String) value).matches("^ .*$")) {
-                                    startsWithSpace = true; // Set the flag if the value started with a space
-                                }
+                                boolean startsWithSpace = (database instanceof InformixDatabase) && ((String) value).matches("^ .*$");
+                                // Set the flag if the value started with a space
                                 value = ((String) value).trim(); // Trim the value normally
                                 if (startsWithSpace == true) {
                                     value = " " + value; // Put the space back at the beginning if the flag was set
