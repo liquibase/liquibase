@@ -1581,6 +1581,10 @@ public class Main {
                 if (file.exists() && (!Boolean.parseBoolean(overwriteOutputFile))) {
                     throw new LiquibaseException(
                             String.format(coreBundle.getString("changelogfile.already.exists"), currentChangeLogFile));
+                } else {
+                    try (OutputStream os = file.openOutputStream(new OpenOptions().setTruncate(true))) {
+                        // do nothing here, this is just to erase the contents of the generated changelog
+                    }
                 }
 
                 CatalogAndSchema[] finalTargetSchemas = computedSchemas.finalTargetSchemas;
