@@ -4,7 +4,12 @@ import liquibase.exception.LiquibaseException;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -199,6 +204,37 @@ public class TableOutput {
         } catch (IOException ioe) {
             throw new LiquibaseException(ioe);
         }
+    }
+
+    /**
+     * Compute the size of the largest string of each column of the provided table
+     * @param rows the provided table to compute widths from
+     * @return an empty immutable list if the provided table is empty
+     * @throws RuntimeException if rows is null or the column count is not the same for every row
+     */
+    public static List<Integer> computeMaxWidths(List<List<String>> rows) {
+        if (rows.isEmpty()) {
+            return Collections.emptyList();
+        }
+        int columnCount = rows.iterator().next().size();
+        List<Integer> widths = new ArrayList<>(Collections.nCopies(columnCount, 0));
+        for (List<String> row : rows) {
+            if (row.size() != columnCount) {
+                throw new RuntimeException(
+                        String.format("could not compute table width: heterogeneous tables are not supported. " +
+                                        "Expected each row to have %d column(s), found %d",
+                                columnCount,
+                                row.size())
+                );
+            }
+            for (int i = 0; i < row.size(); i++) {
+                String column = row.get(i);
+                if (column.length() > widths.get(i)) {
+                    widths.set(i, column.length());
+                }
+            }
+        }
+        return widths;
     }
 
     private static boolean allEmptyStrings(String[] strings) {
