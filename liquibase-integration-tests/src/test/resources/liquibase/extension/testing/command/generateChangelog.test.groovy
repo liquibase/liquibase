@@ -3,6 +3,7 @@ package liquibase.extension.testing.command
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
+import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
 import liquibase.extension.testing.setup.SetupCleanResources
 
@@ -87,6 +88,21 @@ Optional Args:
         expectedResults = [
                 statusCode   : 0
         ]
+    }
+
+    run "File already exists and no overwrite parameter provided", {
+        arguments = [
+            url     : { it.url },
+            username: { it.username },
+            password: { it.password },
+            changelogFile: "target/test-classes/changelog-test.xml"
+        ]
+        setup {
+            copyResource("changelogs/diffChangeLog-test-21938109283.xml", "changelog-test.xml")
+            cleanResources("changelog-test.xml")
+        }
+        expectedException = CommandExecutionException.class
+        expectedExceptionMessage = "Output ChangeLogFile 'target/test-classes/changelog-test.xml' already exists!"
     }
 
     run "Filtering with includeObjects", {
