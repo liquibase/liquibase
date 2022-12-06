@@ -21,7 +21,7 @@ public class Column extends AbstractDatabaseObject {
     private String name;
     private Boolean computed;
     private Boolean descending;
-    private boolean belongsToIndex;
+    private boolean forIndex;
 
     public Column() {
     }
@@ -61,12 +61,12 @@ public class Column extends AbstractDatabaseObject {
         setRemarks(columnConfig.getRemarks());
     }
 
-    public boolean isBelongsToIndex() {
-        return belongsToIndex;
+    public boolean isForIndex() {
+        return forIndex;
     }
 
-    public void setBelongsToIndex(boolean belongsToIndex) {
-        this.belongsToIndex = belongsToIndex;
+    public void setForIndex(boolean forIndex) {
+        this.forIndex = forIndex;
     }
 
     public Relation getRelation() {
@@ -475,7 +475,7 @@ public class Column extends AbstractDatabaseObject {
         if (BooleanUtil.isTrue(getDescending()) || BooleanUtil.isTrue(getComputed())) {
             fields.remove("relation");
         }
-        fields.remove("belongsToIndex");
+        fields.remove("forIndex");
         return fields;
     }
 }

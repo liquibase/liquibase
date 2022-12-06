@@ -159,7 +159,7 @@ public class Index extends AbstractDatabaseObject {
         //
         // For columns within an Index, we now represent
         // all the columns as actual Column objects with
-        // the belongsToIndex flag set
+        // the forIndex flag set
         //
         if (field != null && field.equals("columns")) {
             List<Object> returnList = new ArrayList<>();
@@ -168,7 +168,7 @@ public class Index extends AbstractDatabaseObject {
                 c.setName(column.getName());
                 c.setDescending(column.getDescending());
                 c.setComputed(column.getComputed());
-                c.setBelongsToIndex(true);
+                c.setForIndex(true);
                 returnList.add(c);
             }
             return returnList;
