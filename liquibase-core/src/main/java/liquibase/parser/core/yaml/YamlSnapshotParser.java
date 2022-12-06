@@ -7,6 +7,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.exception.LiquibaseParseException;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.core.ParsedNode;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.RestoredDatabaseSnapshot;
@@ -19,18 +20,21 @@ import java.util.Map;
 
 public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
 
+    @SuppressWarnings("java:S2095")
     @Override
     public DatabaseSnapshot parse(String path, ResourceAccessor resourceAccessor) throws LiquibaseParseException {
         Yaml yaml = new Yaml(new SafeConstructor());
 
-        try (
-                InputStream stream = resourceAccessor.openStream(null, path);
-        ) {
-            if (stream == null) {
+        try {
+            Resource resource = resourceAccessor.get(path);
+            if (resource == null) {
                 throw new LiquibaseParseException(path + " does not exist");
             }
-    
-            Map parsedYaml = getParsedYamlFromInputStream(yaml, stream);
+
+            Map parsedYaml;
+            try (InputStream stream = resource.openInputStream()) {
+                parsedYaml = getParsedYamlFromInputStream(yaml, stream);
+            }
 
             Map rootList = (Map) parsedYaml.get("snapshot");
             if (rootList == null) {

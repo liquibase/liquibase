@@ -900,12 +900,13 @@ public class XMLChangeLogSerializerTest {
     					"runAlways","true",
     					"runOnChange","true",
     					"logicalFilePath","path/to/file.json",
-    					"context","context",
+    					"contextFilter","context",
     					"dbms","mssql",
     					"objectQuotingStrategy","LEGACY",
     					"failOnError","true",
     					"labels","label",
-    					"created","created"),
+    					"created","created",
+                        "runInTransaction","false"),
     			attsMap(node));
     	
     }
@@ -935,20 +936,25 @@ public class XMLChangeLogSerializerTest {
     	changeSet.setFailOnError(true);
     	changeSet.setLabels(new Labels("label"));
     	changeSet.setLogicalFilePath("path/to/file.json");
+        changeSet.setIgnore(true);
+        changeSet.setRunOrder("last");
 
     	String out = new XMLChangeLogSerializer().serialize(changeSet, true);
     	
     	assertEquals("<changeSet author=\"tms\"\n"
-    			+ "        context=\"context\"\n"
+    			+ "        contextFilter=\"context\"\n"
     			+ "        created=\"created\"\n"
     			+ "        dbms=\"mssql\"\n"
     			+ "        failOnError=\"true\"\n"
     			+ "        id=\"1\"\n"
+                + "        ignore=\"true\"\n"
     			+ "        labels=\"label\"\n"
     			+ "        logicalFilePath=\"path/to/file.json\"\n"
     			+ "        objectQuotingStrategy=\"LEGACY\"\n"
     			+ "        runAlways=\"true\"\n"
-    			+ "        runOnChange=\"true\"/>", out);
+                + "        runInTransaction=\"false\"\n"
+    			+ "        runOnChange=\"true\"\n"
+                + "        runOrder=\"last\"/>", out);
     	
     }
 

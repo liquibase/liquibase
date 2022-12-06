@@ -12,14 +12,16 @@ class CompositeResourceAccessorTest extends Specification {
     @Shared
     InputStream validStream = this.getClass().getClassLoader().getResourceAsStream("liquibase/resource/CompositeResourceAccessorTest.class")
     InputStreamList empty = new InputStreamList()
+
     @Shared
-    SortedSet<String> validResources;
+    List<Resource> validResources;
 
     def setupSpec() {
-        validResources = new TreeSet<>()
+        validResources = new ArrayList<>()
         def resources = this.getClass().getClassLoader().getResources("liquibase")
         while (resources.hasMoreElements()) {
-            validResources.add(resources.nextElement().toExternalForm())
+            URL element = resources.nextElement()
+            validResources.add(new URIResource(element.toExternalForm().replaceFirst(".*/liquibase/", "liquibase/"), element.toURI()))
         }
 
     }
@@ -38,38 +40,20 @@ class CompositeResourceAccessorTest extends Specification {
     }
 
     @Unroll
-    def "openStreams"() {
+    def "search"() {
         when:
-        1 * first.openStreams(null, "file") >> firstAccessorMock
-        1 * second.openStreams(null, "file") >> secondAccessorMock
-        def is = composite.openStreams(null, "file");
-
-        then:
-        is.streams == expected;
-
-        where:
-        firstAccessorMock                                           | secondAccessorMock                                          | expected
-        new InputStreamList(new URI("test://stream1"), validStream) | null                                                        | [(new URI("test://stream1")): validStream]
-        null                                                        | new InputStreamList(new URI("test://stream2"), validStream) | [(new URI("test://stream2")): validStream]
-        null                                                        | null                                                        | [:]
-        new InputStreamList(new URI("test://stream1"), validStream) | new InputStreamList(new URI("test://stream2"), validStream) | [(new URI("test://stream1")): validStream, (new URI("test://stream2")): validStream]
-    }
-
-    @Unroll
-    def "list"() {
-        when:
-        1 * first.list(null, "file", true, true, true) >> firstAccessorMock
-        1 * second.list(null, "file", true, true, true) >> secondAccessorMock
-        def list = composite.list(null, "file", true, true, true);
+        1 * first.search("file", true) >> firstAccessorMock
+        1 * second.search("file", true) >> secondAccessorMock
+        def list = composite.search("file", true);
 
         then:
         list == expected
 
         where:
         firstAccessorMock | secondAccessorMock | expected
-        validResources    | [] as SortedSet    | validResources
-        [] as SortedSet   | validResources     | validResources
-        [] as SortedSet   | [] as SortedSet    | [] as SortedSet
+        validResources    | [] as List         | validResources
+        [] as List        | validResources     | validResources
+        [] as List        | [] as List         | [] as List
         validResources    | validResources     | validResources
     }
 }

@@ -16,9 +16,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -89,44 +86,6 @@ public class MavenUtils {
             urlArray[i] = uriList.get(i).toURL();
         }
         return new URLClassLoader(urlArray, clazz.getClassLoader());
-    }
-
-    public static boolean checkProLicense(String liquibaseProLicenseKey, String commandName, Log log) {
-        boolean hasProLicense = true;
-        LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-        if (licenseService == null) {
-            return false;
-        }
-        if (liquibaseProLicenseKey == null) {
-            log.info("");
-            if (commandName != null) {
-                log.info("The command '" + commandName + "' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com." +
-                        "Add liquibase.pro.licenseKey as a Maven property or add liquibase.pro.licenseKey=<yourKey> into your defaults file.");
-            }
-            log.info("");
-            hasProLicense = false;
-        } else {
-            Location licenseKeyLocation =
-                    new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, liquibaseProLicenseKey);
-            LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
-            if (result.code != 0) {
-                String allMessages = String.join("\n", result.messages);
-                log.warn(allMessages);
-                hasProLicense = false;
-            }
-            String licenseInfo = licenseService.getLicenseInfo();
-            log.info(licenseInfo);
-
-            //
-            // If the license has expired then just disable the service
-            //
-            if (licenseService.daysTilExpiration() < 0) {
-                licenseService.disable();
-                hasProLicense = false;
-            }
-        }
-        log.info(licenseService.getLicenseInfo());
-        return hasProLicense;
     }
 
     /**

@@ -88,7 +88,7 @@ public class JdbcConnection implements DatabaseConnection {
             if (driverClassName.equals("org.h2.Driver")) {
                 errorMessage += ". Make sure your H2 database is active and accessible by opening a new terminal window, run \"liquibase init start-h2\", and then return to this terminal window to run commands";
             }
-            throw new DatabaseException(errorMessage + ".  " + sqle.getMessage());
+            throw new DatabaseException(errorMessage + ".  " + sqle.getMessage(), sqle);
         }
     }
 
@@ -482,7 +482,7 @@ public class JdbcConnection implements DatabaseConnection {
     @Override
     public void rollback() throws DatabaseException {
         try {
-            if (!con.getAutoCommit() && !con.isClosed()) {
+            if (!con.isClosed() && !con.getAutoCommit()) {
                 con.rollback();
             }
         } catch (SQLException e) {

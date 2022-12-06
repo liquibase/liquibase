@@ -26,7 +26,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labels (String) Label expression to use for filtering which changes to mark as executed
+  labelFilter (String) Label expression to use for filtering which changes to mark as executed
     Default: null
   password (String) The database password
     Default: null
@@ -39,7 +39,7 @@ Optional Args:
             url              : { it.altUrl },
             username         : { it.altUsername },
             password         : { it.altPassword },
-            changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+            changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
         setup {
@@ -79,7 +79,7 @@ Optional Args:
     run "Run without URL should throw an exception",  {
         arguments = [
                 url: "",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml"
         ]
 
         expectedException = CommandValidationException.class

@@ -16,11 +16,7 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
 
     @Override
     public boolean snapshotByDefault() {
-        if (LicenseServiceUtils.isProLicenseValid()) {
-            return true;
-        } else {
-            return false;
-        }
+        return LicenseServiceUtils.isProLicenseValid();
     }
 
     @Override

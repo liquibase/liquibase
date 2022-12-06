@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MySQLDatabase;
@@ -77,7 +78,9 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                 CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
                 view.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
+                ObjectQuotingStrategy originalQuotingStrategy = database.getObjectQuotingStrategy();
                 try {
+                    database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
                     String definition = database.getViewDefinition(schemaFromJdbcInfo, view.getName());
 
                     if (definition.startsWith("FULL_DEFINITION: ")) {
@@ -127,6 +130,8 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                     view.setDefinition(definition);
                 } catch (DatabaseException e) {
                     throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getSchema().getCatalogName(), view.getSchema().getName(), rawViewName), e);
+                } finally {
+                    database.setObjectQuotingStrategy(originalQuotingStrategy);
                 }
 
                 return view;

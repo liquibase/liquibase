@@ -3,10 +3,14 @@ package liquibase.command;
 import liquibase.Scope;
 import liquibase.configuration.*;
 import liquibase.exception.CommandExecutionException;
+import liquibase.exception.CommandValidationException;
 import liquibase.util.StringUtil;
 
+import java.io.FilterOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * The primary facade used for executing commands.
@@ -18,10 +22,10 @@ import java.util.*;
  */
 public class CommandScope {
 
+    public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(".*\\.");
     private final CommandDefinition commandDefinition;
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
-    private final CommandScopeValueProvider commandScopeValueProvider = new CommandScopeValueProvider();
 
     /**
      * Config key including the command name. Example `liquibase.command.update`
@@ -95,7 +99,7 @@ public class CommandScope {
      */
     public <T> ConfiguredValue<T> getConfiguredValue(CommandArgumentDefinition<T> argument) {
         ConfigurationDefinition<T> configDef = createConfigurationDefinition(argument, true);
-        ConfiguredValue<T> providedValue = configDef.getCurrentConfiguredValue();
+        ConfiguredValue<T> providedValue = configDef.getCurrentConfiguredValue(new CommandScopeValueProvider());
 
         if (!providedValue.found() || providedValue.wasDefaultValueUsed()) {
             ConfigurationDefinition<T> noCommandConfigDef = createConfigurationDefinition(argument, false);
@@ -105,8 +109,6 @@ public class CommandScope {
                 providedValue = noCommandNameProvidedValue;
             }
         }
-
-        providedValue.override(commandScopeValueProvider.getProvidedValue(configDef.getKey(), argument.getName()));
 
         return providedValue;
     }
@@ -126,17 +128,21 @@ public class CommandScope {
      * Think "what would be piped out", not "what the user is told about what is happening".
      */
     public CommandScope setOutput(OutputStream outputStream) {
-        this.outputStream = outputStream;
+        /*
+        This is an UnclosableOutputStream because we do not want individual command steps to inadvertently (or
+        intentionally) close the System.out OutputStream. Closing System.out renders it unusable for other command
+        steps which expect it to still be open.  If the passed OutputStream is null then we do not create it.
+         */
+        if (outputStream != null) {
+            this.outputStream = new UnclosableOutputStream(outputStream);
+        } else {
+            this.outputStream = null;
+        }
 
         return this;
     }
 
-    /**
-     * Executes the command in this scope, and returns the results.
-     */
-    public CommandResults execute() throws CommandExecutionException {
-        CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
-
+    public void validate() throws CommandValidationException {
         for (ConfigurationValueProvider provider : Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getProviders()) {
             provider.validate(this);
         }
@@ -152,6 +158,15 @@ public class CommandScope {
         for (CommandStep step : pipeline) {
             step.validate(this);
         }
+    }
+
+    /**
+     * Executes the command in this scope, and returns the results.
+     */
+    public CommandResults execute() throws CommandExecutionException {
+        CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
+        final List<CommandStep> pipeline = commandDefinition.getPipeline();
+        validate();
         try {
             for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
@@ -164,7 +179,9 @@ public class CommandScope {
             }
         } finally {
             try {
-                this.outputStream.flush();
+                if (this.outputStream != null) {
+                    this.outputStream.flush();
+                }
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
             }
@@ -183,6 +200,7 @@ public class CommandScope {
 
         return new ConfigurationDefinition.Builder(key)
                 .define(argument.getName(), argument.getDataType())
+                .addAliases(argument.getAliases())
                 .setDefaultValue(argument.getDefaultValue())
                 .setDescription(argument.getDescription())
                 .setValueHandler(argument.getValueConverter())
@@ -190,6 +208,32 @@ public class CommandScope {
                 .buildTemporary();
     }
 
+    /**
+     * This class is a wrapper around OutputStreams, and makes them impossible for callers to close.
+     */
+    private static class UnclosableOutputStream extends FilterOutputStream {
+        public UnclosableOutputStream(OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            out.write(b, off, len);
+        }
+
+        /**
+         * This method does not actually close the underlying stream, but rather only flushes it. Callers should not be
+         * closing the stream they are given.
+         */
+        @Override
+        public void close() throws IOException {
+            out.flush();
+        }
+    }
+
+    /**
+     * Adapts the command-scoped arguments into the overall ValueProvider system
+     */
     private class CommandScopeValueProvider extends AbstractMapConfigurationValueProvider {
 
         @Override
@@ -205,6 +249,20 @@ public class CommandScope {
         @Override
         protected String getSourceDescription() {
             return "Command argument";
+        }
+
+        @Override
+        public ProvidedValue getProvidedValue(String... keyAndAliases) {
+            return super.getProvidedValue(keyAndAliases);
+        }
+
+        @Override
+        protected boolean keyMatches(String wantedKey, String storedKey) {
+            if (wantedKey.contains(".")) {
+                return super.keyMatches(NO_PREFIX_PATTERN.matcher(wantedKey).replaceFirst(""), storedKey);
+            } else {
+                return super.keyMatches(wantedKey, storedKey);
+            }
         }
     }
 }

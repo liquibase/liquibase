@@ -1,10 +1,10 @@
 package liquibase.dbdoc;
 
-import java.io.File;
+import liquibase.resource.Resource;
 
 public class AuthorListWriter extends HTMLListWriter {
 
-    public AuthorListWriter(File outputDir) {
+    public AuthorListWriter(Resource outputDir) {
         super("All Authors", "authors.html", "authors", outputDir);
     }
 

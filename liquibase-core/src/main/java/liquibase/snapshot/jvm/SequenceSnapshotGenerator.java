@@ -7,8 +7,6 @@ import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotIdService;
@@ -30,6 +28,20 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
     public SequenceSnapshotGenerator() {
         super(Sequence.class, new Class[]{Schema.class});
     }
+
+    private static final String COMMON_PG_SEQUENCE_QUERY = "JOIN pg_namespace ns on c.relnamespace = ns.oid " +
+            "LEFT JOIN pg_depend d ON c.oid = d.objid " +
+            "WHERE c.relkind = 'S' " +
+            "AND ns.nspname = 'SCHEMA_NAME' " +
+            "AND (c.oid not in (select ds.objid FROM pg_depend ds where ds.refobjsubid > 0)" +
+            "OR  (" +
+            "   d.deptype = 'a' AND EXISTS (" +
+            "       select 1 from pg_attribute a " +
+            "        JOIN pg_class t ON t.oid = d.refobjid AND a.attrelid=t.oid AND a.attnum=d.refobjsubid " +
+            "        LEFT JOIN pg_catalog.pg_attrdef ad ON ad.adrelid = a.attrelid AND ad.adnum = a.attnum" +
+            "        WHERE a.atthasdef = false or not (pg_get_expr(ad.adbin, ad.adrelid) ilike '%' || c.relname || '%'))" +
+            "   )" +
+            ")";
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
@@ -194,6 +206,10 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
              * 12cR1: http://docs.oracle.com/database/121/SQLRF/statements_6017.htm
              * 11gR2: http://docs.oracle.com/cd/E11882_01/server.112/e41084/statements_6015.htm
              */
+            String catalogName = schema.getCatalogName();
+            if (catalogName == null || catalogName.isEmpty()) {
+                catalogName = database.getDefaultCatalogName();
+            }
             return "SELECT sequence_name, \n" +
                     "CASE WHEN increment_by > 0 \n" +
                     "     THEN CASE WHEN min_value=1 THEN NULL ELSE min_value END\n" +
@@ -208,7 +224,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "CASE WHEN order_flag = 'N' THEN NULL ELSE order_flag END AS is_ordered, \n" +
                     "LAST_NUMBER as START_VALUE, \n" +
                     "CASE WHEN cache_size = 20 THEN NULL ELSE cache_size END AS cache_size \n" +
-                    "FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getCatalogName() + "'";
+                    "FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + catalogName + "'";
         } else if (database instanceof PostgresDatabase) {
             int version = 9;
             try {
@@ -216,23 +232,17 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             } catch (Exception ignore) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Failed to retrieve database version: " + ignore);
             }
+            String pgSequenceQuery = COMMON_PG_SEQUENCE_QUERY.replace("SCHEMA_NAME", schema.getName());
             if (version < 10) { // 'pg_sequence' view does not exists yet
-                return "SELECT c.relname AS \"SEQUENCE_NAME\" FROM pg_class c " +
-                        "join pg_namespace on c.relnamespace = pg_namespace.oid " +
-                        "WHERE c.relkind='S' " +
-                        "AND nspname = '" + schema.getName() + "' " +
-                        "AND c.oid not in (select d.objid FROM pg_depend d where d.refobjsubid > 0)";
+                return "SELECT c.relname AS \"SEQUENCE_NAME\" FROM pg_class c " + pgSequenceQuery;
             } else {
                 return "SELECT c.relname AS \"SEQUENCE_NAME\", " +
                     "  s.seqmin AS \"MIN_VALUE\", s.seqmax AS \"MAX_VALUE\", s.seqincrement AS \"INCREMENT_BY\", " +
                     "  s.seqcycle AS \"WILL_CYCLE\", s.seqstart AS \"START_VALUE\", s.seqcache AS \"CACHE_SIZE\", " +
                     "  pg_catalog.format_type(s.seqtypid, NULL) AS \"SEQ_TYPE\" " +
                         "FROM pg_class c " +
-                        "JOIN pg_namespace ns on c.relnamespace = ns.oid " +
                         "JOIN pg_sequence s on c.oid = s.seqrelid " +
-                        "WHERE c.relkind = 'S' " +
-                        "AND ns.nspname = '" + schema.getName() + "' " +
-                        "AND c.oid not in (select d.objid FROM pg_depend d where d.refobjsubid > 0)";
+                        pgSequenceQuery;
             }
         } else if (database instanceof MSSQLDatabase) {
             return "SELECT SEQUENCE_NAME, " +

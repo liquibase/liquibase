@@ -72,9 +72,10 @@ TOKEN:
 |	< S_IDENTIFIER: ( <LETTER> | <UNICODE_LETTERS> )+ ( <DIGIT> | <LETTER> | <UNICODE_LETTERS> | <SPECIAL_CHARS> )* >
 | 	< #LETTER: ["a"-"z", "A"-"Z", "_", "$"] >
 |   < #SPECIAL_CHARS: "$" | "_" | "#" | "@" >
-|   < S_CHAR_LITERAL: "'" (~["'"]|"\\'")* "'" ("'" (~["'"]|"\\'")* "'")*>
+|   < S_CHAR_LITERAL: (["U","E","N","R","B"]|"RB"|"_utf8")? (("'" ( <ESC> | ~["'", "\\", "\n", "\r"] )* "'") | ("'" ("''" | ~["'"])* "'")) >
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])+ "\"" | ("`" (~["\n","\r","`"])+ "`") | ( "[" ~["0"-"9","]"] (~["\n","\r","]"])* "]" ) >
 |    <EMPTY_QUOTE: "\"" "\"">
+|   < #ESC: "\\" ["n","t","b","r","f","\\","'","\""] >
 
 /*
 Built list from http://stackoverflow.com/a/37668315/45756
@@ -359,7 +360,7 @@ Built list from http://stackoverflow.com/a/37668315/45756
     "\u2102",
     "\u2107",
     "\u210A"-"\u2113",
-    "\u2115",
+    "\u2115"-"\u2116",
     "\u2119"-"\u211D",
     "\u2124",
     "\u2126",

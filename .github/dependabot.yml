@@ -8,9 +8,6 @@ updates:
 
   - package-ecosystem: "maven"
     directory: "/"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 50
     schedule:
       interval: "daily"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]

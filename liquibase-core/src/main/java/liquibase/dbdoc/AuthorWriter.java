@@ -2,16 +2,16 @@ package liquibase.dbdoc;
 
 import liquibase.change.Change;
 import liquibase.database.Database;
+import liquibase.resource.Resource;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
 public class AuthorWriter extends HTMLWriter {
 
-    public AuthorWriter(File rootOutputDir, Database database) {
-        super(new File(rootOutputDir, "authors"), database);
+    public AuthorWriter(Resource rootOutputDir, Database database) {
+        super(rootOutputDir.resolve("authors"), database);
     }
 
     @Override

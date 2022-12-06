@@ -9,6 +9,10 @@
         <version>0-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
+
     <artifactId>liquibase-core</artifactId>
     <packaging>jar</packaging>
 
@@ -50,13 +54,13 @@
             <version>1.3</version>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <artifactId>osgi.core</artifactId>
+            <version>8.0.0</version>
             <scope>provided</scope>
-            <version>5.0.0</version>
-        </dependency>        
+        </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
@@ -111,10 +115,8 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.6</version>
+            <version>5.7.1</version>
         </dependency>
-
-
     </dependencies>
 
     <build>
@@ -127,9 +129,16 @@
 
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.javacc.plugin</groupId>
                 <artifactId>javacc-maven-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.0.3</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.java.dev.javacc</groupId>
+                        <artifactId>javacc</artifactId>
+                        <version>7.0.12</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
                         <id>javacc</id>
@@ -148,7 +157,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>5.1.4</version>
+                <version>5.1.8</version>
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>org.liquibase.core</Bundle-SymbolicName>
@@ -236,50 +245,8 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.3.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <artifactSet>
-                                <includes>
-                                    <include>com.opencsv:*</include>
-                                    <include>org.apache.commons:commons-lang3</include>
-                                    <include>org.apache.commons:commons-text</include>
-                                    <include>org.apache.commons:commons-collections4</include>
-                                </includes>
-                            </artifactSet>
-                            <relocations>
-                                <relocation>
-                                    <pattern>org.apache.commons.collections4</pattern>
-                                    <shadedPattern>liquibase.repackaged.org.apache.commons.collections4</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons.lang3</pattern>
-                                    <shadedPattern>liquibase.repackaged.org.apache.commons.lang3</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons.text</pattern>
-                                    <shadedPattern>liquibase.repackaged.org.apache.commons.text</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.opencsv</pattern>
-                                    <shadedPattern>liquibase.repackaged.com.opencsv</shadedPattern>
-                                </relocation>
-                            </relocations>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.2</version>
+                <version>3.3.0</version>
                 <configuration>
                     <archive>
                         <manifest>

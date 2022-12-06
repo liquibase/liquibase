@@ -7,8 +7,24 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TableOutput {
+    /**
+     *
+     * This method outputs the input data in a tabular format with wrapping of lines
+     *
+     * @param table                    2-dimensional array of data
+     * @param maxWidths                Maximum widths of each column to control wrapping
+     * @param leftJustifiedRows        If true then add "-" to format string
+     * @param writer                   Writer to use for output
+     *
+     */
+    public static void formatOutput(List<List<String>> table, List<Integer> maxWidths, boolean leftJustifiedRows, Writer writer) throws LiquibaseException {
+        formatOutput(table.stream().map(u -> u.toArray(new String[0])).toArray(String[][]::new), maxWidths, leftJustifiedRows, writer);
+    }
+
     /**
      *
      * This method outputs the input data in a tabular format with wrapping of lines
@@ -34,17 +50,31 @@ public class TableOutput {
      *
      */
     public static void formatOutput(String[][] table, int[] maxWidths, boolean leftJustifiedRows, Writer writer) throws LiquibaseException {
+        formatOutput(table, IntStream.of(maxWidths).boxed().collect(Collectors.toList()), leftJustifiedRows, writer);
+    }
+
+    /**
+     *
+     * This method outputs the input data in a tabular format with wrapping of lines
+     *
+     * @param table                    2-dimensional array of data
+     * @param maxWidths                Maximum widths of each column to control wrapping
+     * @param leftJustifiedRows        If true then add "-" to format string
+     * @param writer                   Writer to use for output
+     *
+     */
+    public static void formatOutput(String[][] table, List<Integer> maxWidths, boolean leftJustifiedRows, Writer writer) throws LiquibaseException {
         /*
          * Default maximum allowed width. Line will be wrapped beyond this width.
          */
         int defaultMaxWidth = 30;
 
-        if (table[0].length != maxWidths.length) {
+        if (table[0].length != maxWidths.size()) {
             throw new RuntimeException("Table and maximum widths arrays must be the same length");
         } else {
-            for (int i=0; i < maxWidths.length; i++) {
-                if (maxWidths[i] == 0) {
-                    maxWidths[i] = defaultMaxWidth;
+            for (int i=0; i < maxWidths.size(); i++) {
+                if (maxWidths.get(i) == 0) {
+                    maxWidths.set(i, defaultMaxWidth);
                 }
             }
         }
@@ -63,7 +93,7 @@ public class TableOutput {
             // This makes the logic below more straight-forward
             //
             for (int i=0; i < row.length; i++) {
-                row[i] = padColumn(row[i], maxWidths[i]);
+                row[i] = padColumn(row[i], maxWidths.get(i));
             }
             //
             // If any cell length is more than max width, then this will
@@ -74,23 +104,33 @@ public class TableOutput {
             // Multi-line count
             //
             int multiLine = 0;
+            // In cases where a row contains content for a single line only, separation line doesn't appear
+            // This verifies all the row values have empty string at the end which will eventually be switched with
+            // the table line separator
+            boolean endLineAdded = false;
             do {
                 isMultiLine = false;
                 String[] newRow = new String[row.length];
                 for (int i = 0; i < row.length; i++) {
                     // If data is less than max width, use that as it is.
-                    if (row[i] == null || row[i].length() < maxWidths[i]) {
-                        newRow[i] = multiLine == 0 ? row[i] : "";
-                    } else if ((row[i].length() > (multiLine * maxWidths[i]))) {
+                    if (row[i] == null || row[i].length() < maxWidths.get(i)) {
+                        if (multiLine == 0) {
+                            newRow[i] = row[i];
+                        } else {
+                            newRow[i] = "";
+                            endLineAdded = true;
+                        }
+                    } else if ((row[i].length() > (multiLine * maxWidths.get(i)))) {
                         //
-                        // If the cell width is more than max width, then split the data at maxWidths[i].
+                        // If the cell width is more than max width, then split the data at maxWidths.get(i).
                         // the rest of the data will go on the next row
                         //
-                        int end = Math.min(row[i].length(), ((multiLine * maxWidths[i]) + maxWidths[i]));
-                        newRow[i] = row[i].substring((multiLine * maxWidths[i]), end);
+                        int end = Math.min(row[i].length(), ((multiLine * maxWidths.get(i)) + maxWidths.get(i)));
+                        newRow[i] = row[i].substring((multiLine * maxWidths.get(i)), end);
                         isMultiLine = true;
                     } else {
                         newRow[i] = "";
+                        endLineAdded = true;
                     }
                 }
                 finalTableList.add(newRow);
@@ -98,6 +138,9 @@ public class TableOutput {
                     multiLine++;
                 }
             } while (isMultiLine);
+            if (!endLineAdded) {
+                finalTableList.add(new String[]{""});
+            }
         }
         String[][] finalTable = new String[finalTableList.size()][finalTableList.get(0).length];
         for (int i = 0; i < finalTable.length; i++) {
@@ -145,16 +188,11 @@ public class TableOutput {
          * Output table
          */
         outputLines.append(line);
-        boolean firstLine = true;
         for (String[] strings : finalTable) {
             if (allEmptyStrings(strings)) {
                 outputLines.append(line);
             } else {
                 outputLines.append(String.format(formatString.toString(), (Object[]) strings));
-            }
-            if (firstLine) {
-                outputLines.append(line);
-                firstLine = false;
             }
         }
         try {
@@ -213,6 +251,11 @@ public class TableOutput {
      * @return the new current running width
      */
     private static int doAppend(int runningWidth, String part, int maxWidth, StringBuilder result) {
+        // If a word that is longer than the maxWidth is appended before this method is called, it will spill onto
+        // multiple lines, and we only care about the runningWidth of the last line.
+        if (runningWidth > maxWidth) {
+            runningWidth = runningWidth % maxWidth;
+        }
         int spaceWidth = runningWidth > 0 ? 1 : 0;
         if (runningWidth + (part.length() + spaceWidth) > maxWidth) {
             runningWidth = fillLineWithSpaces(runningWidth, maxWidth, result);

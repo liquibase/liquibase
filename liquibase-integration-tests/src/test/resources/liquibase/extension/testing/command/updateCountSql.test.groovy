@@ -27,8 +27,12 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labels (String) Changeset labels to match
+  labelFilter (String) Changeset labels to match
     Default: null
+  outputDefaultCatalog (Boolean) Control whether names of objects in the default catalog are fully qualified or not. If true they are. If false, only objects outside the default catalog are fully qualified
+    Default: true
+  outputDefaultSchema (Boolean) Control whether names of objects in the default schema are fully qualified or not. If true they are. If false, only objects outside the default schema are fully qualified
+    Default: true
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
@@ -42,7 +46,7 @@ Optional Args:
                 username: { it.username },
                 password: { it.password },
                 count        : 1,
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml",
         ]
 
         expectedResults = [
@@ -56,7 +60,7 @@ Optional Args:
                 username: { it.username },
                 password: { it.password },
                 count        : 1,
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml",
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml",
         ]
 
         setup {
@@ -95,7 +99,7 @@ Optional Args:
 
     run "Run without count throws an exception", {
         arguments = [
-                changelogFile: "changelogs/hsqldb/complete/simple.changelog.xml"
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
         ]
         expectedException = CommandValidationException.class
     }

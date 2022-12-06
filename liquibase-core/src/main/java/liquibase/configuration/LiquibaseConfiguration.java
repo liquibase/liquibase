@@ -105,27 +105,45 @@ public class LiquibaseConfiguration implements SingletonObject {
         return Collections.unmodifiableSortedSet(this.configurationValueProviders);
     }
 
-
     /**
-     * Searches for the given keys in the current providers.
-     *
-     * @param keyAndAliases The first element should be the canonical key name, with later elements being aliases. At least one element must be provided.
-     * @return the value for the key, or null if not configured.
+     * Convenience method for {@link #getCurrentConfiguredValue(ConfigurationValueConverter, ConfigurationValueObfuscator, ConfigurationValueProvider[], String...)}
+     * with no additional value providers.
      */
     public <DataType> ConfiguredValue<DataType> getCurrentConfiguredValue(ConfigurationValueConverter<DataType> converter, ConfigurationValueObfuscator<DataType> obfuscator, String... keyAndAliases) {
+        return this.getCurrentConfiguredValue(converter, obfuscator, null, keyAndAliases);
+    }
+
+    /**
+     * Searches for the given keys in the current providers and applies any applicable modifiers.
+     *
+     * @param keyAndAliases The first element should be the canonical key name, with later elements being aliases. At least one element must be provided.
+     * @param additionalValueProviders additional {@link ConfigurationValueProvider}s to use with higher priority than the ones registered in {@link LiquibaseConfiguration}. The higher the array index, the higher the priority. Can be null.
+     * @return the value for the key, or null if not configured.
+     */
+    public <DataType> ConfiguredValue<DataType> getCurrentConfiguredValue(ConfigurationValueConverter<DataType> converter,
+                                                                          ConfigurationValueObfuscator<DataType> obfuscator,
+                                                                          ConfigurationValueProvider[] additionalValueProviders,
+                                                                          String... keyAndAliases) {
         if (keyAndAliases == null || keyAndAliases.length == 0) {
             throw new IllegalArgumentException("Must specify at least one key");
         }
 
         ConfiguredValue<DataType> details = new ConfiguredValue<>(keyAndAliases[0], converter, obfuscator);
 
-        for (ConfigurationValueProvider provider : configurationValueProviders) {
+        List<ConfigurationValueProvider> finalValueProviders = new ArrayList<>(configurationValueProviders);
+        if (additionalValueProviders != null) {
+            finalValueProviders.addAll(Arrays.asList(additionalValueProviders));
+        }
+
+        for (ConfigurationValueProvider provider : finalValueProviders) {
             final ProvidedValue providerValue = provider.getProvidedValue(keyAndAliases);
 
             if (providerValue != null) {
                 details.override(providerValue);
             }
         }
+
+        Scope.getCurrentScope().getSingleton(ConfiguredValueModifierFactory.class).override(details);
 
         final String foundValue = String.valueOf(details.getValue());
         if (!foundValue.equals(lastLoggedKeyValues.get(keyAndAliases[0]))) {
@@ -143,17 +161,11 @@ public class LiquibaseConfiguration implements SingletonObject {
                     logMessage.append(StringUtil.lowerCaseFirst(providedValue.describe()));
                     Object value = providedValue.getValue();
                     if (value != null) {
-                        if (converter != null) {
-                            value = converter.convert(value);
-                        }
+                        String finalValue = String.valueOf(value);
                         if (obfuscator != null) {
-                            try {
-                                value = obfuscator.obfuscate((DataType) value);
-                            } catch (ClassCastException e) {
-                                value = "*****";
-                            }
+                            finalValue = "*****";
                         }
-                        logMessage.append(" of '").append(value).append("'");
+                        logMessage.append(" of '").append(finalValue).append("'");
                     }
                     foundFirstValue = true;
                 }
@@ -190,20 +202,23 @@ public class LiquibaseConfiguration implements SingletonObject {
     }
 
     /**
-     * @return the registered {@link ConfigurationDefinition} asssociated with this key. Null if none match.
+     * @return the registered {@link ConfigurationDefinition} associated with this key. Null if none match.
      */
     public ConfigurationDefinition<?> getRegisteredDefinition(String key) {
         for (ConfigurationDefinition<?> def : getRegisteredDefinitions(true)) {
-            if (def.getKey().equalsIgnoreCase(key)) {
-                return def;
+            List<String> keys = new ArrayList<>();
+            keys.add(def.getKey());
+            keys.addAll(def.getAliasKeys());
+
+            for (String keyName : keys) {
+                if (keyName.equalsIgnoreCase(key)) {
+                    return def;
+                }
+                if (keyName.replace(".", "").equalsIgnoreCase(key)) {
+                    return def;
+                }
             }
-            final Set<String> aliasKeys = def.getAliasKeys();
-            if (aliasKeys != null && aliasKeys.contains(key)) {
-                return def;
-            }
-            if(def.getKey().replace(".","").equalsIgnoreCase(key)) {
-                return def;
-            }
+            
         }
         return null;
     }

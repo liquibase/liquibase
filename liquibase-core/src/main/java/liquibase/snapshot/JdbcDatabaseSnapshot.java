@@ -278,7 +278,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     if (database instanceof OracleDatabase || database instanceof MSSQLDatabase) {
                         return JdbcDatabaseSnapshot.this.getAllCatalogsStringScratchData() != null || (tableName == null && indexName == null) || super.shouldBulkSelect(schemaKey, resultSetCache);
                     }
@@ -374,7 +374,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             }
 
             @Override
-            boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+            protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                 return !(tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName()));
             }
 
@@ -388,13 +388,20 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                 try {
-                    return extract(
+                    List<CachedRow> returnList =
+                       extract(
                             databaseMetaData.getColumns(
                                     ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema),
-                                    ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema),
-                                    tableName,
+                                    escapeForLike(((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), database),
+                                    escapeForLike(tableName, database),
                                     SQL_FILTER_MATCH_ALL)
                     );
+                    //
+                    // IF MARIADB
+                    // Query to get actual data types and then map each column to its CachedRow
+                    //
+                    determineActualDataTypes(returnList, tableName);
+                    return returnList;
                 } catch (SQLException e) {
                     if (shouldReturnEmptyColumns(e)) { //view with table already dropped. Act like it has no columns.
                         return new ArrayList<>();
@@ -415,15 +422,80 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                 try {
-                    return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database)
-                            .getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database)
-                            .getJdbcSchemaName(catalogAndSchema), SQL_FILTER_MATCH_ALL, SQL_FILTER_MATCH_ALL));
+                    List<CachedRow> returnList =
+                        extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database)
+                                    .getJdbcCatalogName(catalogAndSchema),
+                            escapeForLike(((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), database),
+                            SQL_FILTER_MATCH_ALL, SQL_FILTER_MATCH_ALL));
+                    //
+                    // IF MARIADB
+                    // Query to get actual data types and then map each column to its CachedRow
+                    //
+                    determineActualDataTypes(returnList, null);
+                    return returnList;
                 } catch (SQLException e) {
                     if (shouldReturnEmptyColumns(e)) {
                         return new ArrayList<>();
                     } else {
                         throw e;
                     }
+                }
+            }
+
+            //
+            // For MariaDB, query for the data type column so that we can correctly
+            // set the DATETIME(6) type if specified
+            //
+            private void determineActualDataTypes(List<CachedRow> returnList, String tableName) {
+                //
+                // If not MariaDB then just return
+                //
+                if (!(database instanceof MariaDBDatabase)) {
+                    return;
+                }
+
+                //
+                // Query for actual data type for column. The actual DATA_TYPE column string is
+                // not returned by the DatabaseMetadata.getColumns() query, and it is needed
+                // to capture DATETIME(<precision>) data types.
+                //
+                String selectStatement =
+                    "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS " +
+                    "WHERE TABLE_SCHEMA = '" + schemaName + "'";
+                if (tableName != null) {
+                    selectStatement += " AND TABLE_NAME='" + tableName + "'";
+                }
+                Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+                try (Statement statement = underlyingConnection.createStatement(); ResultSet columnSelectRS = statement.executeQuery(selectStatement)) {
+                    //
+                    // Iterate the result set from the query and match the rows
+                    // to the rows that were returned by getColumns() in order
+                    // to assign the actual DATA_TYPE string to the appropriate row.
+                    //
+                    while (columnSelectRS.next()) {
+                        String selectedTableName = columnSelectRS.getString("TABLE_NAME");
+                        String selectedColumnName = columnSelectRS.getString("COLUMN_NAME");
+                        String actualDataType = columnSelectRS.getString("DATA_TYPE");
+                        for (CachedRow row : returnList) {
+                            String rowTableName = row.getString("TABLE_NAME");
+                            String rowColumnName = row.getString("COLUMN_NAME");
+                            String rowTypeName = row.getString("TYPE_NAME");
+                            int rowDataType = row.getInt("DATA_TYPE");
+                            if (rowTableName.equalsIgnoreCase(selectedTableName) &&
+                                rowColumnName.equalsIgnoreCase(selectedColumnName) &&
+                                rowTypeName.equalsIgnoreCase("datetime") &&
+                                rowDataType == Types.OTHER &&
+                                !rowTypeName.equalsIgnoreCase(actualDataType)) {
+                                row.set("TYPE_NAME", actualDataType);
+                                row.set("DATA_TYPE", Types.TIMESTAMP);
+                                break;
+                            }
+                        }
+                    }
+                } catch (SQLException sqle) {
+                    //
+                    // Do not stop
+                    //
                 }
             }
 
@@ -862,7 +934,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             }
 
             @Override
-            boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+            protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                 if (database instanceof AbstractDb2Database || database instanceof MSSQLDatabase) {
                     return super.shouldBulkSelect(schemaKey, resultSetCache); //can bulk and fast fetch
                 } else {
@@ -905,7 +977,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             }
 
             @Override
-            boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+            protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                 if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) ||
                         tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
                     return false;
@@ -963,7 +1035,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 List<Map> result;
 
                 try {
-                    result = (List<Map>) new RowMapperNotNullConstraintsResultSetExtractor(new ColumnMapRowMapper() {
+                    result = (List<Map>) new RowMapperNotNullConstraintsResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
                         @Override
                         protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                             Object value = super.getColumnValue(rs, index);
@@ -989,7 +1061,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return getResultSetCache("getTables").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     return table == null || getAllCatalogsStringScratchData() != null || super.shouldBulkSelect(schemaKey, resultSetCache);
                 }
 
@@ -1029,8 +1101,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), ((table == null) ?
-                            SQL_FILTER_MATCH_ALL : escapeForLike(table)), new String[]{"TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), ((table == null) ?
+                            SQL_FILTER_MATCH_ALL : escapeForLike(table, database)), new String[]{"TABLE"}));
                 }
 
                 @Override
@@ -1049,7 +1121,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), SQL_FILTER_MATCH_ALL, new String[]{"TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), SQL_FILTER_MATCH_ALL, new String[]{"TABLE"}));
                 }
 
                 private List<CachedRow> queryMssql(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
@@ -1133,8 +1205,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 private List<CachedRow> queryPostgres(CatalogAndSchema catalogAndSchema, String tableName) throws SQLException {
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), ((tableName == null) ?
-                            SQL_FILTER_MATCH_ALL : escapeForLike(tableName)), new String[]{"TABLE", "PARTITIONED TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), ((tableName == null) ?
+                            SQL_FILTER_MATCH_ALL : escapeForLike(tableName, database)), new String[]{"TABLE", "PARTITIONED TABLE"}));
 
                 }
             });
@@ -1150,7 +1222,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return getResultSetCache("getViews").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     return view == null || getAllCatalogsStringScratchData() != null || super.shouldBulkSelect(schemaKey, resultSetCache);
                 }
 
@@ -1186,8 +1258,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), ((view == null) ? SQL_FILTER_MATCH_ALL
-                            : escapeForLike(view)), new String[]{"VIEW"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), ((view == null) ? SQL_FILTER_MATCH_ALL
+                            : escapeForLike(view, database)), new String[]{"VIEW"}));
                 }
 
                 @Override
@@ -1200,7 +1272,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema), SQL_FILTER_MATCH_ALL, new String[]{"VIEW"}));
+                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), SQL_FILTER_MATCH_ALL, new String[]{"VIEW"}));
                 }
 
 
@@ -1460,7 +1532,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     if ((database instanceof OracleDatabase) || (database instanceof MSSQLDatabase)) {
                         return table == null || getAllCatalogsStringScratchData() != null || super.shouldBulkSelect(schemaKey, resultSetCache);
                     } else {
@@ -1474,7 +1546,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return getResultSetCache("getUniqueConstraints").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     return tableName == null || getAllCatalogsStringScratchData() != null || super.shouldBulkSelect(schemaKey, resultSetCache);
                 }
 
@@ -1698,10 +1770,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         return (String) JdbcDatabaseSnapshot.this.getScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY);
     }
 
-    private String escapeForLike(String string) {
+    private String escapeForLike(String string, Database database) {
         if (string == null) {
             return null;
         }
+
+        if (database instanceof SQLiteDatabase) {
+            //sqlite jdbc's queries does not support escaped patterns.
+            return string;
+        }
+
         return string
                 .replace("%", "\\%")
                 .replace("_", "\\_");

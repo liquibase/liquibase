@@ -32,19 +32,19 @@ public interface Executor extends Plugin {
     int getPriority();
 
     /**
-     * Validate if the change set can be executed by this Executor
+     * Validate if the changeset can be executed by this Executor
      * If the ChangeSet can be executed return an empty ValidationErrors object
      * otherwise return the errors
      *
-     * @param changeSet The change set to validate
+     * @param changeSet The changeset to validate
      * @return ValidationErrors  Any errors which occur during validation
      */
     ValidationErrors validate(ChangeSet changeSet);
 
     /**
-     * Allow this Executor to make any needed changes to the change set
+     * Allow this Executor to make any needed changes to the changeset
      *
-     * @param changeSet The change set to operate on
+     * @param changeSet The changeset to operate on
      */
     void modifyChangeSet(ChangeSet changeSet);
 

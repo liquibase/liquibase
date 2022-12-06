@@ -63,11 +63,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        if (BooleanUtil.isTrue(thisColumn.getDescending()) != BooleanUtil.isTrue(otherColumn.getDescending())) {
-            return false;
-        }
-
-        return true;
+        return BooleanUtil.isTrue(thisColumn.getDescending()) == BooleanUtil.isTrue(otherColumn.getDescending());
     }
 
 

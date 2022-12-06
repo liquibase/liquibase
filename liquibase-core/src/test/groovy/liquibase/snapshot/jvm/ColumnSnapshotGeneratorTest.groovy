@@ -1,9 +1,13 @@
 package liquibase.snapshot.jvm
 
+import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.PostgresDatabase
 import liquibase.snapshot.CachedRow
+import liquibase.statement.DatabaseFunction
 import liquibase.structure.core.Column
+import liquibase.structure.core.DataType
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class ColumnSnapshotGeneratorTest extends Specification {
     private ColumnSnapshotGenerator columnSnapshotGenerator
@@ -43,5 +47,21 @@ class ColumnSnapshotGeneratorTest extends Specification {
         then:
         dataType.getColumnSize() == 100
         dataType.getTypeName() == "varchar"
+    }
+
+    @Unroll
+    def "readDefaultValue"() {
+        expect:
+        columnSnapshotGenerator.readDefaultValue(new CachedRow(["COLUMN_DEF": columnValue]), new Column("col").setType(new DataType(datatype)), db) == expected
+
+        where:
+        columnValue          | datatype  | db                     | expected
+        null                 | "varchar" | new MSSQLDatabase()    | null
+        "(NULL)"             | "varchar" | new MSSQLDatabase()    | new DatabaseFunction("null")
+        "3"                  | "int"     | new PostgresDatabase() | 3
+        3                    | "int"     | new PostgresDatabase() | 3
+        "(3)::real"          | "float"   | new PostgresDatabase() | 3
+        "3::real"            | "float"   | new PostgresDatabase() | 3
+        "'a value'::varchar" | "varchar" | new PostgresDatabase() | "a value"
     }
 }

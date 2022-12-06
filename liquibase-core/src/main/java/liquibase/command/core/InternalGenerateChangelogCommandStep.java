@@ -60,6 +60,7 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
         }
 
         final Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
+        referenceDatabase.setOutputDefaultSchema(commandScope.getArgumentValue(DIFF_OUTPUT_CONTROL_ARG).getIncludeSchema());
 
         InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
 
@@ -87,7 +88,7 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
 
             }
             if (StringUtil.trimToNull(changeLogFile) != null) {
-                Scope.getCurrentScope().getUI().sendMessage("Generated changelog written to " + new File(changeLogFile).getAbsolutePath());
+                Scope.getCurrentScope().getUI().sendMessage("Generated changelog written to " + changeLogFile);
             }
         } finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);
