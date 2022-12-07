@@ -90,6 +90,52 @@ Optional Args:
         ]
     }
 
+    run "File already exists and overwrite parameter is provided", {
+        arguments = [
+            url     : { it.url },
+            username: { it.username },
+            password: { it.password },
+            changelogFile: "target/test-classes/changelog-test2.xml",
+            overwriteOutputFile: true
+        ]
+        setup {
+            copyResource("changelogs/diffChangeLog-test-21938109283.xml", "changelog-test2.xml")
+            cleanResources("changelog-test2.xml")
+            database = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new TagDatabaseChange(
+                            tag: "version_2.0"
+                    ),
+                    new CreateTableChange(
+                            tableName: "liquibaseRunInfo",
+                            columns: [
+                                    ColumnConfig.fromName("timesRan")
+                                            .setType("INT")
+                            ]
+                    ),
+            ]
+        }
+        expectedFileContent = [
+                "target/test-classes/changelog-test2.xml" : [CommandTests.assertContains("<changeSet ", 3)]
+        ]
+        expectedResults = [
+                statusCode   : 0
+        ]
+    }
+
     run "File already exists and no overwrite parameter provided", {
         arguments = [
             url     : { it.url },
