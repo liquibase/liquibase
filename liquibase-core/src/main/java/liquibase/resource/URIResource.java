@@ -1,5 +1,7 @@
 package liquibase.resource;
 
+import liquibase.exception.UnexpectedLiquibaseException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -31,5 +33,10 @@ public class URIResource extends AbstractResource {
     @Override
     public InputStream openInputStream() throws IOException {
         return getUri().toURL().openStream();
+    }
+
+    @Override
+    public boolean delete() {
+        throw new UnexpectedLiquibaseException("URI resources cannot be deleted.");
     }
 }

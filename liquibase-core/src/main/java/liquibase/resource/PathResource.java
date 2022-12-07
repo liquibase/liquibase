@@ -93,4 +93,13 @@ public class PathResource extends AbstractResource {
 
         }
     }
+
+    @Override
+    public boolean delete() throws IOException {
+        if (Files.isDirectory(this.path)) {
+            throw new FileNotFoundException(this.path + " is a directory");
+        } else {
+            return Files.deleteIfExists(this.path);
+        }
+    }
 }

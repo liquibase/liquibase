@@ -73,4 +73,9 @@ class SpringResource extends liquibase.resource.AbstractResource {
         }
         throw new IOException("Read only");
     }
+
+    @Override
+    public boolean delete() throws IOException {
+        throw new UnexpectedLiquibaseException("Spring resources cannot be deleted.");
+    }
 }
