@@ -1,9 +1,9 @@
 package liquibase.structure.core;
 
+import liquibase.diff.compare.DatabaseObjectCollectionComparator;
 import liquibase.license.LicenseServiceUtils;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectComparator;
 import liquibase.util.StringUtil;
 
 public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends AbstractDatabaseObject {
@@ -58,7 +58,7 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
         return (T) this;
     }
 
-    public DatabaseObjectComparator getDbObjectComparator() {
+    public DatabaseObjectCollectionComparator getDbObjectComparator() {
         return null;
     }
 
