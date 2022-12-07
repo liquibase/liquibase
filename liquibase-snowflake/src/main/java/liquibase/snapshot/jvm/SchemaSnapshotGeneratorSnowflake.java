@@ -39,6 +39,6 @@ public class SchemaSnapshotGeneratorSnowflake extends SchemaSnapshotGenerator {
             }
         }
 
-        return returnList.toArray(new String[returnList.size()]);
+        return returnList.toArray(new String[0]);
     }
 }

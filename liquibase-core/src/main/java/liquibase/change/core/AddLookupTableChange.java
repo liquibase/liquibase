@@ -253,7 +253,7 @@ public class AddLookupTableChange extends AbstractChange {
         addFKChange.setConstraintName(getFinalConstraintName());
         statements.addAll(Arrays.asList(addFKChange.generateStatements(database)));
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     @Override

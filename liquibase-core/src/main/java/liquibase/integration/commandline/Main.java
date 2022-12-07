@@ -836,7 +836,7 @@ public class Main {
             fixedArgs.add(arg);
         }
 
-        return fixedArgs.toArray(new String[fixedArgs.size()]);
+        return fixedArgs.toArray(new String[0]);
     }
 
     /**
@@ -1427,7 +1427,7 @@ public class Main {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
                 @Override
                 public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread()
+                    return new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
                             .getContextClassLoader());
                 }
             });
@@ -1436,7 +1436,7 @@ public class Main {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
                 @Override
                 public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[urls.size()]), null);
+                    return new URLClassLoader(urls.toArray(new URL[0]), null);
                 }
             });
         }

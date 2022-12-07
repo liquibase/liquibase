@@ -24,7 +24,7 @@ public class SqlGeneratorChain<T extends SqlStatement> {
         }
 
         if (!sqlGenerators.hasNext()) {
-            return new Sql[0];
+            return EMPTY_SQL;
         }
 
         return sqlGenerators.next().generateSql(statement, database, this);

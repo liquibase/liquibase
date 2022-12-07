@@ -185,7 +185,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
         }
         
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     @Override

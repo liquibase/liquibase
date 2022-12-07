@@ -159,7 +159,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             }
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     protected CreateTableStatement generateCreateTableStatement() {

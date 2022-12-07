@@ -134,7 +134,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
             }
         }
 
-        return returnList.toArray(new Sql[returnList.size()]);
+        return returnList.toArray(EMPTY_SQL);
     }
 
     protected Column getAffectedColumn(SetNullableStatement statement) {

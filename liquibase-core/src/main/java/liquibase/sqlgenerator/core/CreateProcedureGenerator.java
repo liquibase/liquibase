@@ -83,7 +83,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
         procedureText = removeTrailingDelimiter(procedureText, statement.getEndDelimiter());
         if (procedureText == null) {
-            return sql.toArray(new Sql[0]);
+            return sql.toArray(EMPTY_SQL);
         }
 
         if ((database instanceof MSSQLDatabase) &&
@@ -108,7 +108,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         }
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
         surroundWithSchemaSets(sql, statement.getSchemaName(), database);
-        return sql.toArray(new Sql[sql.size()]);
+        return sql.toArray(EMPTY_SQL);
     }
 
     public static String removeTrailingDelimiter(String procedureText, String endDelimiter) {
