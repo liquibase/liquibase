@@ -21,6 +21,8 @@ import net.snowflake.client.jdbc.internal.google.gson.internal.bind.util.ISO8601
 
 import java.util.*;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
  * Adds a column to an existing table.
  */

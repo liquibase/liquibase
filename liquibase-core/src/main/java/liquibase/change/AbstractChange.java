@@ -23,6 +23,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
  * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is
  * purely for convenience but recommended.
@@ -36,11 +38,6 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     protected static final String NODENAME_COLUMN = "column";
 
     private ChangeSet changeSet;
-
-    /**
-     * Represent an empty array of {@link SqlStatement}.
-     */
-    public static final SqlStatement[] EMPTY_SQL_STATEMENT = {};
 
     public AbstractChange() {
     }

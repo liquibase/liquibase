@@ -21,6 +21,8 @@ import liquibase.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
  * Adds a not-null constraint to an existing column.
  */

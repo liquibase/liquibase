@@ -22,6 +22,8 @@ import liquibase.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
  * Creates a new table.
  */

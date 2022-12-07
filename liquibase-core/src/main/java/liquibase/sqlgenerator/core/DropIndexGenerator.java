@@ -35,7 +35,7 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
                 return EMPTY_SQL;
             } else if (associatedWith.contains(Index.MARK_FOREIGN_KEY)) {
                 if (!((database instanceof OracleDatabase) || (database instanceof MSSQLDatabase))) {
-                    return EMPTY_CHANGE;
+                    return EMPTY_SQL;
                 }
             }
         }

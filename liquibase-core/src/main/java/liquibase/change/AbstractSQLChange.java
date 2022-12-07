@@ -19,6 +19,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
  * 

@@ -127,7 +127,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         addUniqueConstraintStatements(statement, database, returnSql);
         addForeignKeyStatements(statement, database, returnSql);
 
-        return returnSql.toArray(EMPTY_CHANGE);
+        return returnSql.toArray(EMPTY_SQL);
     }
 
     protected String generateSingleColumBaseSQL(AddColumnStatement statement, Database database) {
