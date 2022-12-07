@@ -216,7 +216,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     "i.CREATOR AS INDEX_QUALIFIER, " +
                                     "i.IMPLICIT AS INDEX_IMPLICIT " +
                                     "FROM SYSIBM.SYSKEYS k " +
-                                    "JOIN SYSIBM.SYSINDEXES i ON k.IXNAME = i.NAME " +
+                                    "JOIN SYSIBM.SYSINDEXES i ON k.IXNAME = i.NAME AND k.IXCREATOR = i.CREATOR " +
                                     "WHERE  i.CREATOR = '" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
                         } else {
                             sql = "SELECT i.CREATOR AS TABLE_SCHEM, " +
@@ -229,7 +229,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     "k.ORDERING AS ORDER, " +
                                     "i.CREATOR AS INDEX_QUALIFIER " +
                                     "FROM SYSIBM.SYSKEYS k " +
-                                    "JOIN SYSIBM.SYSINDEXES i ON k.IXNAME = i.NAME " +
+                                    "JOIN SYSIBM.SYSINDEXES i ON k.IXNAME = i.NAME AND k.IXCREATOR = i.CREATOR " +
                                     "WHERE  i.CREATOR = '" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
                         }
                         if (!bulkFetch && tableName != null) {
