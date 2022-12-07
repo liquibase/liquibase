@@ -70,7 +70,7 @@ jobs:
         run: |
           version=${{ needs.setup.outputs.version }}
 
-          unzip liquibase-additional-*.zip
+          unzip -j liquibase-additional-*.zip
 
           ##extracts and sign poms
           unzip -j liquibase-core-${version}.jar META-INF/maven/org.liquibase/liquibase-core/pom.xml
