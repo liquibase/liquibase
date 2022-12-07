@@ -1,6 +1,5 @@
 package liquibase.resource;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -74,6 +73,4 @@ public interface Resource {
      * For example, a file resource may return a path of <code>my/file.txt</code> and a uri of <code>file:/tmp/project/liquibase/my/file.txt</code> for a resource accessor using <code>file:/tmp/project/liquibase</code> as a root
      */
     URI getUri();
-
-    boolean delete() throws IOException;
 }

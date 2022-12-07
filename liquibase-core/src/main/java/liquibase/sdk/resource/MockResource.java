@@ -10,7 +10,7 @@ import java.net.URI;
 
 public class MockResource extends AbstractResource {
 
-    private String content;
+    private final String content;
 
     public MockResource(String path, String content) {
         super(path, URI.create("mock:" + path));
@@ -29,12 +29,6 @@ public class MockResource extends AbstractResource {
 
     public Resource resolveSibling(String other) {
         return new MockResource(resolveSiblingPath(other), "Sibling resource to " + getPath());
-    }
-
-    @Override
-    public boolean delete() {
-        content = null;
-        return true;
     }
 
     @Override
