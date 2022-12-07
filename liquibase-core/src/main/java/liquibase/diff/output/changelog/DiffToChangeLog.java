@@ -177,7 +177,7 @@ public class DiffToChangeLog {
                                 }
                             }
 
-                            try (OutputStream outputStream = file.openOutputStream(new OpenOptions().setTruncate(overwriteOutputFile))) {
+                            try (OutputStream outputStream = file.openOutputStream(new OpenOptions())) {
                                 outputStream.write(fileContents.toString().getBytes());
                             }
                         }
