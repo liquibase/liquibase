@@ -82,9 +82,13 @@ public class DiffToChangeLog {
     }
 
     public void print(String changeLogFile) throws ParserConfigurationException, IOException, DatabaseException {
+        this.print(changeLogFile, false);
+    }
+
+    public void print(String changeLogFile, Boolean overwriteOutputFile) throws ParserConfigurationException, IOException, DatabaseException {
         this.changeSetPath = changeLogFile;
         ChangeLogSerializer changeLogSerializer = ChangeLogSerializerFactory.getInstance().getSerializer(changeLogFile);
-        this.print(changeLogFile, changeLogSerializer);
+        this.print(changeLogFile, changeLogSerializer, overwriteOutputFile);
     }
 
     public void print(PrintStream out) throws ParserConfigurationException, IOException, DatabaseException {
@@ -92,6 +96,10 @@ public class DiffToChangeLog {
     }
 
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
+        this.print(changeLogFile, changeLogSerializer, false);
+    }
+
+    public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer, Boolean overwriteOutputFile) throws ParserConfigurationException, IOException, DatabaseException {
         this.changeSetPath = changeLogFile;
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
         Resource file = pathHandlerFactory.getResource(changeLogFile);
@@ -135,30 +143,41 @@ public class DiffToChangeLog {
                             //print changeLog only if there are available changeSets to print instead of printing it always
                             printNew(changeLogSerializer, file);
                         } else {
-                            Scope.getCurrentScope().getLog(getClass()).info(file.getUri() + " exists, appending");
-                            StringBuilder fileContents = new StringBuilder(StreamUtil.readStreamAsString(file.openInputStream()));
+                            StringBuilder fileContents = new StringBuilder();
                             ByteArrayOutputStream out = new ByteArrayOutputStream();
                             print(new PrintStream(out, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()), changeLogSerializer);
 
                             String xml = new String(out.toByteArray(), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
-                            String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
-
-                            innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
-                            innerXml = innerXml.trim();
-                            if ("".equals(innerXml)) {
-                                Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
-                                return;
-                            }
-
-                            int endTagIndex = fileContents.indexOf(DATABASE_CHANGE_LOG_CLOSING_XML_TAG);
-                            if (endTagIndex == -1) {
+                            if (overwriteOutputFile) {
+                                // write xml contents to file
+                                Scope.getCurrentScope().getLog(getClass()).info(file.getUri() + " exists, overwriting");
                                 fileContents.append(xml);
                             } else {
-                                String lineSeparator = GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getCurrentValue();
-                                String toInsert = "    " + innerXml + lineSeparator;
-                                fileContents.insert(endTagIndex, toInsert);
+                                // read existing file
+                                Scope.getCurrentScope().getLog(getClass()).info(file.getUri() + " exists, appending");
+                                fileContents = new StringBuilder(StreamUtil.readStreamAsString(file.openInputStream()));
+
+                                String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
+
+                                innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
+                                innerXml = innerXml.trim();
+                                if ("".equals(innerXml)) {
+                                    Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
+                                    return;
+                                }
+
+                                // insert new XML
+                                int endTagIndex = fileContents.indexOf(DATABASE_CHANGE_LOG_CLOSING_XML_TAG);
+                                if (endTagIndex == -1) {
+                                    fileContents.append(xml);
+                                } else {
+                                    String lineSeparator = GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getCurrentValue();
+                                    String toInsert = "    " + innerXml + lineSeparator;
+                                    fileContents.insert(endTagIndex, toInsert);
+                                }
                             }
-                            try (OutputStream outputStream = file.openOutputStream(new OpenOptions())) {
+
+                            try (OutputStream outputStream = file.openOutputStream(new OpenOptions().setTruncate(overwriteOutputFile))) {
                                 outputStream.write(fileContents.toString().getBytes());
                             }
                         }
