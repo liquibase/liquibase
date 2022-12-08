@@ -11,7 +11,7 @@ on:
 jobs:
   build-master:
     name: Build & Package Master
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       contents: read
       packages: write
@@ -39,7 +39,7 @@ jobs:
 
   build-sha:
     name: Build & Package SHA
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       contents: read
       packages: write
