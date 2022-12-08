@@ -1039,7 +1039,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         @Override
                         protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                             Object value = super.getColumnValue(rs, index);
-                            if (value == null || !(value instanceof String)) {
+                            if (!(value instanceof String)) {
                                 return value;
                             }
                             return value.toString().trim();

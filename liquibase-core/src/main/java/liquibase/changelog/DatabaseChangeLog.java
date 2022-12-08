@@ -383,7 +383,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
         try {
             Object value = parsedNode.getValue();
-            if ((value != null) && (value instanceof String)) {
+            if ((value instanceof String)) {
                 parsedNode.setValue(changeLogParameters.expandExpressions(parsedNode.getValue(String.class), this));
             }
 
