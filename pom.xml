@@ -201,7 +201,7 @@
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.0.8</version>
+            <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -229,7 +229,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.13.22</version>
+            <version>3.13.25</version>
         </dependency>
 
 
@@ -435,7 +435,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.1.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
