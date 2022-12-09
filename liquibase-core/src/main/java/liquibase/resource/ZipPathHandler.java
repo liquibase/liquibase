@@ -18,6 +18,7 @@ public class ZipPathHandler extends AbstractPathHandler {
     /**
      * Returns {@link #PRIORITY_SPECIALIZED} for all "jar:file:" or files that end in ".jar" or ".zip"
      */
+    @Override
     public int getPriority(String root) {
         if (root == null) {
             return PRIORITY_NOT_APPLICABLE;
@@ -34,6 +35,7 @@ public class ZipPathHandler extends AbstractPathHandler {
         return PRIORITY_NOT_APPLICABLE;
     }
 
+    @Override
     public ResourceAccessor getResourceAccessor(String root) throws FileNotFoundException {
         root = root.replace("jar:", "").replace("!/", "");
 
