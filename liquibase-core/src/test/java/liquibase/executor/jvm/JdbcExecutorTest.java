@@ -11,6 +11,8 @@ import java.sql.SQLException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class JdbcExecutorTest {
@@ -41,12 +43,12 @@ public class JdbcExecutorTest {
         assertNotNull(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle2));
         assertNotNull(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", mysql));
 
-        assertTrue(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle1) == Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle1));
-        assertTrue(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle2) == Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle2));
-        assertTrue(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", mysql) == Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", mysql));
+        assertSame(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle1), Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle1));
+        assertSame(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle2), Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle2));
+        assertSame(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", mysql), Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", mysql));
 
-        assertTrue(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle1) != Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle2));
-        assertTrue(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle1) != Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", mysql));
+        assertNotSame(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle1), Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle2));
+        assertNotSame(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", oracle1), Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", mysql));
     }
 
     @Test
