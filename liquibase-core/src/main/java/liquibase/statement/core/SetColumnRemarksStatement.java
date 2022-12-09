@@ -10,10 +10,10 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
     private String columnName;
     private String remarks;
     private String columnDataType;
+    private boolean isView;
 
     public SetColumnRemarksStatement(String catalogName, String schemaName, String tableName, String columnName, String remarks) {
         this(catalogName, schemaName, tableName, columnName, remarks, null);
-
     }
 
     public SetColumnRemarksStatement(String catalogName,
@@ -28,6 +28,23 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
         this.columnName = columnName;
         this.remarks = remarks;
         this.columnDataType = columnDataType;
+        this.isView = false;
+    }
+
+    public SetColumnRemarksStatement(String catalogName,
+                                     String schemaName,
+                                     String tableName,
+                                     String columnName,
+                                     String remarks,
+                                     String columnDataType,
+                                     boolean isView) {
+        this.catalogName = catalogName;
+        this.schemaName = schemaName;
+        this.tableName = tableName;
+        this.columnName = columnName;
+        this.remarks = remarks;
+        this.columnDataType = columnDataType;
+        this.isView = isView;
     }
 
     public String getColumnDataType() {
@@ -52,5 +69,9 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
 
     public String getRemarks() {
         return remarks;
+    }
+
+    public boolean isView() {
+        return isView;
     }
 }

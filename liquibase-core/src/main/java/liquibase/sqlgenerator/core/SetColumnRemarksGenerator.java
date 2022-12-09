@@ -63,52 +63,45 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
         } else if (database instanceof MSSQLDatabase) {
             String schemaName = statement.getSchemaName();
             if (schemaName == null) {
-                schemaName = database.getDefaultSchemaName();
+                schemaName = database.getDefaultSchemaName() != null ? database.getDefaultSchemaName() : "dbo";
             }
-            if (schemaName == null) {
-                schemaName = "dbo";
-            }
+            String tableName = statement.getTableName();
+            String qualifiedTableName = String.format("%s.%s", schemaName, statement.getTableName());
+            String columnName = statement.getColumnName();
 
-            Sql[] generatedSql = {new UnparsedSql("DECLARE @TableName SYSNAME " +
-                    "set @TableName = N'" +statement.getTableName() + "'; " +
-                    "DECLARE @FullTableName SYSNAME " +
-                    "set @FullTableName = N'" + schemaName + "." + statement.getTableName() + "'; " +
-                    "DECLARE @ColumnName SYSNAME " +
-                    "set @ColumnName = N'" + statement.getColumnName() + "'; " +
-                    "DECLARE @MS_DescriptionValue NVARCHAR(3749); " +
-                    "SET @MS_DescriptionValue = N'" + remarksEscaped + "';" +
-                    "DECLARE @MS_Description NVARCHAR(3749) " +
-                    "set @MS_Description = NULL; " +
-                    "SET @MS_Description = (SELECT CAST(Value AS NVARCHAR(3749)) AS [MS_Description] " +
-                    "FROM sys.extended_properties AS ep " +
-                    "WHERE ep.major_id = OBJECT_ID(@FullTableName) " +
-                    "AND ep.minor_id=COLUMNPROPERTY(ep.major_id, @ColumnName, 'ColumnId') " +
-                    "AND ep.name = N'MS_Description'); " +
-                    "IF @MS_Description IS NULL " +
-                    "BEGIN " +
-                    "EXEC sys.sp_addextendedproperty " +
-                    "@name  = N'MS_Description', " +
-                    "@value = @MS_DescriptionValue, " +
-                    "@level0type = N'SCHEMA', " +
-                    "@level0name = N'" + schemaName + "', " +
-                    "@level1type = N'TABLE', " +
-                    "@level1name = @TableName, " +
-                    "@level2type = N'COLUMN', " +
-                    "@level2name = @ColumnName; " +
-                    "END " +
+            Sql[] generatedSql = {new UnparsedSql("IF EXISTS( " +
+                    "        SELECT extended_properties.value" +
+                    "        FROM SYS.EXTENDED_PROPERTIES" +
+                    "        WHERE major_id = OBJECT_ID('" + qualifiedTableName + "')" +
+                    "          AND name = N'MS_DESCRIPTION'" +
+                    "          AND minor_id = (" +
+                    "            SELECT column_id" +
+                    "            FROM SYS.COLUMNS" +
+                    "            WHERE name = '" + columnName + "'" +
+                    "                AND object_id = OBJECT_ID('" + qualifiedTableName + "')" +
+                    "            )" +
+                    "    )" +
+                    "    BEGIN " +
+                    "        EXEC sys.sp_updateextendedproperty @name = N'MS_Description'" +
+                    "            , @value = N'" + remarksEscaped + "'" +
+                    "            , @level0type = N'SCHEMA'" +
+                    "            , @level0name = N'" + schemaName + "'" +
+                    "            , @level1type = N'TABLE'" +
+                    "            , @level1name = N'" + tableName + "'" +
+                    "            , @level2type = N'COLUMN'" +
+                    "            , @level2name = N'" + columnName + "'"+
+                    "    END " +
                     "ELSE " +
-                    "BEGIN " +
-                    "EXEC sys.sp_updateextendedproperty " +
-                    "@name  = N'MS_Description', " +
-                    "@value = @MS_DescriptionValue, " +
-                    "@level0type = N'SCHEMA', " +
-                    "@level0name = N'" + schemaName + "', " +
-                    "@level1type = N'TABLE', " +
-                    "@level1name = @TableName, " +
-                    "@level2type = N'COLUMN', " +
-                    "@level2name = @ColumnName; " +
-                    "END")};
-
+                    "    BEGIN " +
+                    "        EXEC sys.sp_addextendedproperty @name = N'MS_Description'" +
+                    "            , @value = N'" + remarksEscaped + "'" +
+                    "            , @level0type = N'SCHEMA'" +
+                    "            , @level0name = N'" + schemaName + "'" +
+                    "            , @level1type = N'TABLE'" +
+                    "            , @level1name = N'" + tableName + "'" +
+                    "            , @level2type = N'COLUMN'" +
+                    "            , @level2name = N'" + columnName + "'"+
+                    "    END")};
             return generatedSql;
         } else {
             return new Sql[]{new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
