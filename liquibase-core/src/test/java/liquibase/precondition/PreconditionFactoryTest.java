@@ -27,8 +27,8 @@ public class PreconditionFactoryTest {
     @Test
     public void getInstance() {
         assertNotNull(PreconditionFactory.getInstance());
-        
-        assertTrue(PreconditionFactory.getInstance() == PreconditionFactory.getInstance());
+
+        assertSame(PreconditionFactory.getInstance(), PreconditionFactory.getInstance());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class PreconditionFactoryTest {
     public void reset() {
         PreconditionFactory instance1 = PreconditionFactory.getInstance();
         PreconditionFactory.reset();
-        assertFalse(instance1 == PreconditionFactory.getInstance());
+        assertNotSame(instance1, PreconditionFactory.getInstance());
     }
 
     @SuppressWarnings("unchecked")
