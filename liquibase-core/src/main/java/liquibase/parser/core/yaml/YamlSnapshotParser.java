@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
 
-    public static final int CODE_POINT_LIMIT = 9 * 1024 * 1024;
+    public static final int CODE_POINT_LIMIT = Integer.MAX_VALUE;
 
     @SuppressWarnings("java:S2095")
     @Override
