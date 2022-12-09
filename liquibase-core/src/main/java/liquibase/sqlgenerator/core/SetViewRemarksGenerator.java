@@ -49,29 +49,29 @@ public class SetViewRemarksGenerator extends AbstractSqlGenerator<SetViewRemarks
             String qualifiedTableName = String.format("%s.%s", schemaName, statement.getViewName());
 
             sql = "IF EXISTS( " +
-                    "        SELECT extended_properties.value" +
-                    "        FROM SYS.EXTENDED_PROPERTIES" +
-                    "        WHERE major_id = OBJECT_ID('" + qualifiedTableName + "')" +
-                    "          AND name = N'MS_DESCRIPTION'" +
-                    "          AND minor_id = 0" +
-                    "    )" +
-                    "    BEGIN " +
-                    "        EXEC sys.sp_updateextendedproperty @name = N'MS_Description'" +
-                    "            , @value = N'" + remarksEscaped + "'" +
-                    "            , @level0type = N'SCHEMA'" +
-                    "            , @level0name = N'" + schemaName + "'" +
-                    "            , @level1type = N'VIEW'" +
-                    "            , @level1name = N'" + viewName + "'" +
-                    "    END " +
-                    "ELSE " +
-                    "    BEGIN " +
-                    "        EXEC sys.sp_addextendedproperty @name = N'MS_Description'" +
-                    "            , @value = N'" + remarksEscaped + "'" +
-                    "            , @level0type = N'SCHEMA'" +
-                    "            , @level0name = N'" + schemaName + "'" +
-                    "            , @level1type = N'VIEW'" +
-                    "            , @level1name = N'" + viewName + "'" +
-                    "    END";
+                    " SELECT extended_properties.value" +
+                    " FROM SYS.EXTENDED_PROPERTIES" +
+                    " WHERE major_id = OBJECT_ID('" + qualifiedTableName + "')" +
+                    " AND name = N'MS_DESCRIPTION'" +
+                    " AND minor_id = 0" +
+                    " )" +
+                    " BEGIN " +
+                    " EXEC sys.sp_updateextendedproperty @name = N'MS_Description'" +
+                    " , @value = N'" + remarksEscaped + "'" +
+                    " , @level0type = N'SCHEMA'" +
+                    " , @level0name = N'" + schemaName + "'" +
+                    " , @level1type = N'VIEW'" +
+                    " , @level1name = N'" + viewName + "'" +
+                    " END " +
+                    " ELSE " +
+                    " BEGIN " +
+                    " EXEC sys.sp_addextendedproperty @name = N'MS_Description'" +
+                    " , @value = N'" + remarksEscaped + "'" +
+                    " , @level0type = N'SCHEMA'" +
+                    " , @level0name = N'" + schemaName + "'" +
+                    " , @level1type = N'VIEW'" +
+                    " , @level1name = N'" + viewName + "'" +
+                    " END";
         }
         return new Sql[]{new UnparsedSql(sql, getAffectedTable(statement))};
     }

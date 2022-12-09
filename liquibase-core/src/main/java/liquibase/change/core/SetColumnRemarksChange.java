@@ -17,6 +17,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     private String columnName;
     private String remarks;
     private String columnDataType;
+    private boolean isView = false;
 
     @Override
     public ValidationErrors validate(Database database) {
@@ -29,7 +30,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
-                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType)
+                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType, isView)
         };
     }
 
@@ -89,5 +90,13 @@ public class SetColumnRemarksChange extends AbstractChange {
 
     public void setColumnDataType(String columnDataType) {
         this.columnDataType = columnDataType;
+    }
+
+    public boolean isView() {
+        return isView;
+    }
+
+    public void setView(boolean view) {
+        isView = view;
     }
 }

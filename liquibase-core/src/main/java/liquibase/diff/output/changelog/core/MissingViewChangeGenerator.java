@@ -101,6 +101,7 @@ public class MissingViewChangeGenerator extends AbstractChangeGenerator implemen
                             columnRemarks.setCatalogName(control.getIncludeCatalog() ? view.getSchema().getCatalogName() : null);
                             columnRemarks.setSchemaName(control.getIncludeSchema() ? view.getSchema().getName() : null);
                             columnRemarks.setTableName(column.getRelation().getName());
+                            columnRemarks.setView(true);
                             columnRemarksList.add(columnRemarks);
                         }
                 );

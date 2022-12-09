@@ -43,29 +43,29 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 			String qualifiedTableName = String.format("%s.%s", schemaName, statement.getTableName());
 
 			sql = "IF EXISTS( " +
-					"        SELECT extended_properties.value" +
-					"        FROM SYS.EXTENDED_PROPERTIES" +
-					"        WHERE major_id = OBJECT_ID('" + qualifiedTableName + "')" +
-					"          AND name = N'MS_DESCRIPTION'" +
-					"          AND minor_id = 0" +
-					"    )" +
-					"    BEGIN " +
-					"        EXEC sys.sp_updateextendedproperty @name = N'MS_Description'" +
-					"            , @value = N'" + remarksEscaped + "'" +
-					"            , @level0type = N'SCHEMA'" +
-					"            , @level0name = N'" + schemaName + "'" +
-					"            , @level1type = N'TABLE'" +
-					"            , @level1name = N'" + tableName + "'" +
-					"    END " +
-					"ELSE " +
-					"    BEGIN " +
-					"        EXEC sys.sp_addextendedproperty @name = N'MS_Description'" +
-					"            , @value = N'" + remarksEscaped + "'" +
-					"            , @level0type = N'SCHEMA'" +
-					"            , @level0name = N'" + schemaName + "'" +
-					"            , @level1type = N'TABLE'" +
-					"            , @level1name = N'" + tableName + "'" +
-					"    END";
+					" SELECT extended_properties.value" +
+					" FROM SYS.EXTENDED_PROPERTIES" +
+					" WHERE major_id = OBJECT_ID('" + qualifiedTableName + "')" +
+					" AND name = N'MS_DESCRIPTION'" +
+					" AND minor_id = 0" +
+					" )" +
+					" BEGIN " +
+					" EXEC sys.sp_updateextendedproperty @name = N'MS_Description'" +
+					" , @value = N'" + remarksEscaped + "'" +
+					" , @level0type = N'SCHEMA'" +
+					" , @level0name = N'" + schemaName + "'" +
+					" , @level1type = N'TABLE'" +
+					" , @level1name = N'" + tableName + "'" +
+					" END " +
+					" ELSE " +
+					" BEGIN " +
+					" EXEC sys.sp_addextendedproperty @name = N'MS_Description'" +
+					" , @value = N'" + remarksEscaped + "'" +
+					" , @level0type = N'SCHEMA'" +
+					" , @level0name = N'" + schemaName + "'" +
+					" , @level1type = N'TABLE'" +
+					" , @level1name = N'" + tableName + "'" +
+					" END";
 		} else {
 			sql = "COMMENT ON TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " IS '"
 					+ remarksEscaped + "'";
