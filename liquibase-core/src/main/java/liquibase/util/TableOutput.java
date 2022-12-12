@@ -156,36 +156,26 @@ public class TableOutput {
          *
          * Map columnLengths is <column_number, column_length>
          */
-        Map<Integer, Integer> columnLengths = new HashMap<>();
-        Arrays.stream(finalTable).forEach(a -> {
-            for (int i=0; i < a.length; i++) {
-                columnLengths.putIfAbsent(i, 0);
-                if (a[i] != null && columnLengths.get(i) < a[i].length()) {
-                    columnLengths.put(i, a[i].length());
-                }
-            }
-        });
+        List<Integer> columnLengths = computeMaxWidths(finalTable);
 
         /*
          * Prepare format String
          */
         final StringBuilder formatString = new StringBuilder();
         String flag = leftJustifiedRows ? "-" : "";
-        columnLengths.forEach((key, value) -> formatString.append("| %" + flag + value + "s "));
+        columnLengths.forEach((value) -> formatString.append("| %" + flag + value + "s "));
         formatString.append("|\n");
 
         /*
          * Prepare line for top, bottom & below header row.
          */
-        String line = columnLengths.entrySet().stream().reduce("", (ln, b) -> {
-            StringBuilder tempLine = new StringBuilder("+-");
-            for (int i=0; i < b.getValue(); ++i) {
-                tempLine.append("-");
-            }
-            tempLine.append("-");
-            return ln + tempLine;
-        }, (a, b) -> a + b);
-        line = line + "+\n";
+        StringBuilder builder = new StringBuilder();
+        for (Integer columnLength : columnLengths) {
+            builder.append("+-");
+            builder.append(String.join("", Collections.nCopies(columnLength, "-")));
+            builder.append("-");
+        }
+        String line = builder.append("+\n").toString();
 
         /*
          * Output table
@@ -213,22 +203,32 @@ public class TableOutput {
      * @throws RuntimeException if rows is null or the column count is not the same for every row
      */
     public static List<Integer> computeMaxWidths(List<List<String>> rows) {
-        if (rows.isEmpty()) {
+        return computeMaxWidths(rows.stream().map(row -> row.toArray(new String[0])).toArray(String[][]::new));
+    }
+
+    /**
+     * Compute the size of the largest string of each column of the provided table
+     * @param rows the provided table to compute widths from
+     * @return an empty immutable list if the provided table is empty
+     * @throws RuntimeException if rows is null or the column count is not the same for every row
+     */
+    public static List<Integer> computeMaxWidths(String[][] rows) {
+        if (rows.length == 0) {
             return Collections.emptyList();
         }
-        int columnCount = rows.iterator().next().size();
+        int columnCount = rows[0].length;
         List<Integer> widths = new ArrayList<>(Collections.nCopies(columnCount, 0));
-        for (List<String> row : rows) {
-            if (row.size() != columnCount) {
+        for (String[] row : rows) {
+            if (row.length != columnCount) {
                 throw new RuntimeException(
                         String.format("could not compute table width: heterogeneous tables are not supported. " +
                                         "Expected each row to have %d column(s), found %d",
                                 columnCount,
-                                row.size())
+                                row.length)
                 );
             }
-            for (int i = 0; i < row.size(); i++) {
-                String column = row.get(i);
+            for (int i = 0; i < row.length; i++) {
+                String column = row[i];
                 if (column.length() > widths.get(i)) {
                     widths.set(i, column.length());
                 }
