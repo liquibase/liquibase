@@ -1,13 +1,11 @@
 package liquibase.util;
 
-import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.GlobalConfiguration;
 import liquibase.resource.ResourceAccessor;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Utilities for working with streams.

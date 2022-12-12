@@ -1,6 +1,5 @@
 package liquibase.parser;
 
-import liquibase.GlobalConfiguration;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 
