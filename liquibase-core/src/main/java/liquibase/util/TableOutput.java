@@ -16,6 +16,18 @@ import java.util.stream.IntStream;
 public class TableOutput {
     /**
      *
+     * This method outputs the input data in a tabular format *without* wrapping of lines
+     *
+     * @param table                    2-dimensional array of data
+     * @param leftJustifiedRows        If true then add "-" to format string
+     * @param writer                   Writer to use for output
+     *
+     */
+    public static void formatUnwrappedOutput(List<List<String>> table, boolean leftJustifiedRows, Writer writer) throws LiquibaseException {
+        formatOutput(table, computeMaxWidths(table), leftJustifiedRows, writer);
+    }
+    /**
+     *
      * This method outputs the input data in a tabular format with wrapping of lines
      *
      * @param table                    2-dimensional array of data

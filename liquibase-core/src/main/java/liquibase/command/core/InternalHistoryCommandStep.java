@@ -212,7 +212,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
                     )
                     .collect(Collectors.toList());
             data.add(0, HEADERS);
-            TableOutput.formatOutput(data, TableOutput.computeMaxWidths(data), true, output);
+            TableOutput.formatUnwrappedOutput(data, true, output);
             output.println();
         }
 
