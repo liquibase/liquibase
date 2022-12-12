@@ -156,7 +156,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                 final String message = "ERROR: The file '" + e.getInput() + "' was not found. " +
                         "The <changelog|snapshot> file property cannot be configured with " +
                         "a fully qualified path, but must be a relative path on the property, " +
-                        "and any local or remote base of the path set on the searchpath property.";
+                        "and any local or remote base of the path set on the '--search-path' property.";
                 throw new ChangeLogParseException(message);
             }
             throw e;
