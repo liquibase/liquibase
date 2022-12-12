@@ -15,7 +15,7 @@ class GenerateChangeLogMSSQLCommandTest extends Specification {
     @Shared
     private DatabaseTestSystem mssql = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mssql")
 
-    def "Should generate table and view columns and be able to use the generated sql changelog"() {
+    def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated sql changelog"() {
         given:
         runUpdate('changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
