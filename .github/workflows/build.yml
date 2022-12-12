@@ -23,7 +23,7 @@ jobs:
     permissions:
       contents: none
     name: Check if Build should be done
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Supress builds for PRs from branch github-action-*
         if: github.event.pull_request && contains(github.head_ref, 'github-action')
@@ -44,7 +44,7 @@ jobs:
   setup:
     name: Setup
     needs: check_build_safety
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       proBranchName: ${{ steps.find-branches.outputs.proBranchName }}
       proBranchSha: ${{ steps.find-branches.outputs.proBranchSha }}
@@ -143,7 +143,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-2019 ]
+        os: [ ubuntu-20.04, macos-latest, windows-2019 ]
         java: [ 8, 11, 17, 18 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
@@ -197,7 +197,7 @@ jobs:
             ./**/target/site
 
       - name: Archive Modules
-        if: ${{ matrix.java == 8 && matrix.os == 'ubuntu-latest'}}
+        if: ${{ matrix.java == 8 && matrix.os == 'ubuntu-20.04'}}
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-modules
@@ -206,7 +206,7 @@ jobs:
 
   sonar:
     name: Sonar Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: build
     steps:
       - uses: actions/checkout@v3
@@ -234,7 +234,7 @@ jobs:
 
   integration-test:
     name: Integration Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
@@ -437,7 +437,7 @@ jobs:
 
   finish:
     name: Finish Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [ setup, build, integration-test, package, sonar ]
     if: ${{ needs.setup.outputs.setupSuccessful }}
     steps:

@@ -30,7 +30,7 @@ public class AbstractLiquibaseChangeLogMojoTest {
         //THEN
         List<String> locations = changeLogAccessor.describeLocations();
         String dirLocation = locations.get(0).replace("\\", "/");
-        Assert.assertTrue(locations.size() == 1);
+        Assert.assertEquals(1, locations.size());
         Assert.assertEquals(mojo.changeLogDirectory, dirLocation);
     }
 

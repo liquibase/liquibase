@@ -26,12 +26,15 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
 
     public static final CommandArgumentDefinition<String> AUTHOR_ARG;
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;
+    public static final CommandArgumentDefinition<Boolean> OVERWRITE_OUTPUT_FILE_ARG;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
 
         AUTHOR_ARG = builder.argument("author", String.class).build();
         CONTEXT_ARG = builder.argument("context", String.class).build();
+        OVERWRITE_OUTPUT_FILE_ARG = builder.argument("overwriteOutputFile", Boolean.class)
+                .description("Flag to allow overwriting of output changelog file").build();
 
     }
 
@@ -75,7 +78,8 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
         try {
             referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
             if (StringUtil.trimToNull(changeLogFile) != null) {
-                changeLogWriter.print(changeLogFile);
+                Boolean overwriteOutputFile = commandScope.getArgumentValue(OVERWRITE_OUTPUT_FILE_ARG);
+                changeLogWriter.print(changeLogFile, overwriteOutputFile);
             } else {
                 PrintStream outputStream = new PrintStream(resultsBuilder.getOutputStream());
 
