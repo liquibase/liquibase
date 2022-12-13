@@ -8,10 +8,10 @@ on:
 jobs:
   delete-package:
     name: Delete Github Package for Branch
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       # Get version id(s) based on version name
-    - uses: castlabs/get-package-version-id-action@v2.0
+    - uses: castlabs/get-package-version-id-action@v2.1
       id: version
       with:
         version: "${{ github.ref_name }}-SNAPSHOT"

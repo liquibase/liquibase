@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class ChangeLogIteratorTest {
@@ -59,7 +60,7 @@ public class ChangeLogIteratorTest {
         }
         catch (LiquibaseException e) {
             boolean b = e.getMessage().contains("Unable to locate Executor");
-            assertEquals(b, true);
+            assertTrue(b);
         }
         assertEquals(7, testChangeLogVisitor.visitedChangeSets.size());
     }

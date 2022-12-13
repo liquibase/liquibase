@@ -13,17 +13,11 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DatabaseDataType;
-import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.ForeignKeyConstraint;
-import liquibase.statement.NotNullConstraint;
-import liquibase.statement.UniqueConstraint;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.ForeignKey;
@@ -76,6 +70,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         Iterator<String> columnIterator = statement.getColumns().iterator();
 
         BigInteger mysqlTableOptionStartWith = null;
+        List<String> autoIncrementColumns = new ArrayList<>();
 
         /* We have reached the point after "CREATE TABLE ... (" and will now iterate through the column list. */
         while (columnIterator.hasNext()) {
@@ -103,6 +98,9 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
             boolean isAutoIncrementColumn = autoIncrementConstraint != null;
+            if (isAutoIncrementColumn) {
+                autoIncrementColumns.add(column);
+            }
             boolean isPrimaryKeyColumn = (statement.getPrimaryKeyConstraint() != null) && statement
                     .getPrimaryKeyConstraint().getColumns().contains(column);
             isPrimaryKeyAutoIncrement = isPrimaryKeyAutoIncrement || (isPrimaryKeyColumn && isAutoIncrementColumn);
@@ -255,7 +253,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     }
                 }
                 buffer.append(" PRIMARY KEY (");
-                buffer.append(database.escapeColumnNameList(StringUtil.join(statement.getPrimaryKeyConstraint().getColumns(), ", ")));
+                buffer.append(database.escapeColumnNameList(StringUtil.join(getPrimaryKeyColumns(statement.getPrimaryKeyConstraint().getColumns(), database, autoIncrementColumns), ", ")));
                 buffer.append(")");
                 // Setting up table space for PK's index if it exist
                 if (((database instanceof OracleDatabase) || (database instanceof PostgresDatabase)) && (statement
@@ -396,6 +394,38 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         }
         additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
         return additionalSql.toArray(new Sql[additionalSql.size()]);
+    }
+
+    /**
+     * Given the list of primary key columns, return that same list in the order that the database platform expects
+     * based on the order of the auto increment columns.
+     * @param primaryKeyColumns the primary key columns in the create table statement
+     * @param autoIncrementColumns a list of the columns (in order) that are specified as auto increment columns
+     * @return the sorted list of primary keys
+     */
+    private List<String> getPrimaryKeyColumns(List<String> primaryKeyColumns, Database database, List<String> autoIncrementColumns) {
+        // MySQL requires that the columns in the PK statement follow the same order as the auto-increment columns.
+        if (database instanceof MySQLDatabase) {
+            // Creating a copy of the list so that the list parameter is not mutated.
+            List<String> pkColumnsCopy = new ArrayList<>(primaryKeyColumns);
+            // Now sort the PKs based on the order of the auto increment columns.
+            List<String> sortedPkColumns = new ArrayList<>(primaryKeyColumns.size());
+            for (String autoIncrementColumn : autoIncrementColumns) {
+                if (pkColumnsCopy.contains(autoIncrementColumn)) {
+                    sortedPkColumns.add(autoIncrementColumn);
+                }
+            }
+
+            // Remove all of the PKs that have been processed already.
+            pkColumnsCopy.removeAll(sortedPkColumns);
+
+            // Add whatever is left.
+            sortedPkColumns.addAll(pkColumnsCopy);
+
+            return sortedPkColumns;
+        } else {
+            return primaryKeyColumns;
+        }
     }
 
     protected Relation getAffectedTable(CreateTableStatement statement) {
