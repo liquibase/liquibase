@@ -20,8 +20,6 @@ public interface Logger extends ExtensibleObject, AutoCloseable {
      */
     void log(Level level, String message, Throwable e);
 
-    void mdc(String key, String value);
-
 
     /**
      * Log that a severe error that occurred.

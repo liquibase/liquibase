@@ -54,7 +54,6 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
         outputBestPracticeMessage();
 
         String changeLogFile = StringUtil.trimToNull(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
-        Scope.getCurrentScope().getLog(getClass()).mdc(CHANGELOG_FILE_ARG.getName(), changeLogFile);
         if (changeLogFile != null && changeLogFile.toLowerCase().endsWith(".sql")) {
             Scope.getCurrentScope().getUI().sendMessage("\n" + INFO_MESSAGE + "\n");
             Scope.getCurrentScope().getLog(getClass()).info("\n" + INFO_MESSAGE + "\n");
