@@ -8,7 +8,6 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.structure.core.View;
-import liquibase.util.ObjectUtil;
 
 /**
  * Drops an existing view.

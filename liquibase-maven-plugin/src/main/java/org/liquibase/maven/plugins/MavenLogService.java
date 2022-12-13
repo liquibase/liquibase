@@ -1,6 +1,5 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.logging.LogMessageFilter;
 import liquibase.logging.Logger;
 import liquibase.logging.core.AbstractLogService;
 import liquibase.logging.core.AbstractLogger;

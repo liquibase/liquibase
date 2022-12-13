@@ -2,7 +2,6 @@ package liquibase.configuration;
 
 import liquibase.Scope;
 import liquibase.SingletonObject;
-import liquibase.plugin.AbstractPluginFactory;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;

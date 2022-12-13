@@ -3,7 +3,6 @@ package org.liquibase.maven.plugins;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
-import liquibase.command.CommandScope;
 import liquibase.exception.LiquibaseException;
 
 /**

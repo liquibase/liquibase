@@ -9,7 +9,6 @@ import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.SearchPathResourceAccessor;
 import org.apache.tools.ant.AntClassLoader;

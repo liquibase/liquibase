@@ -1,11 +1,7 @@
 package org.liquibase.maven.plugins;
 
-import org.codehaus.plexus.configuration.PlexusConfiguration;
-import org.junit.Test;
-
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Some basic tests that validate the setting of properties for the LiquibaseUpdate mojo.

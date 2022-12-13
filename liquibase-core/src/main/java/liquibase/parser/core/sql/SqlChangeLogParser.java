@@ -9,11 +9,9 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 @SuppressWarnings("java:S2583")
 public class SqlChangeLogParser implements ChangeLogParser {
