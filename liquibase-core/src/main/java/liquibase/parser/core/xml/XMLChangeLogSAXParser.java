@@ -156,7 +156,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                     "The <changelog|snapshot> file property cannot be configured with " +
                     "a fully qualified path, but must be a relative path on the property, " +
                     "and any local or remote base of the path set on the '--search-path' property.";
-            Scope.getCurrentScope().getUI().sendErrorMessage("ERROR: " + e.getMessage(), e);
+            Scope.getCurrentScope().getLog(getClass()).severe("ERROR: " + e.getMessage(), e);
             throw new ChangeLogParseException(message);
         } catch (Exception e) {
             throw new ChangeLogParseException(e);
