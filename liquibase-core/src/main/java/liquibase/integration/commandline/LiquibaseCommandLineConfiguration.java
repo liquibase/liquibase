@@ -4,7 +4,6 @@ import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
 
-import java.io.File;
 import java.util.logging.Level;
 
 /**

@@ -1,6 +1,5 @@
 package liquibase.statement.core;
 
-import liquibase.ContextExpression;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.*;
 

@@ -15,8 +15,6 @@ import liquibase.changelog.RollbackContainer;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
-import liquibase.logging.LogService;
-import liquibase.logging.Logger;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;

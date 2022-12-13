@@ -1,14 +1,10 @@
 package liquibase.change.core;
 
-import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.DatabaseDataType;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.*;
@@ -17,7 +13,6 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
-import net.snowflake.client.jdbc.internal.google.gson.internal.bind.util.ISO8601Utils;
 
 import java.util.*;
 
