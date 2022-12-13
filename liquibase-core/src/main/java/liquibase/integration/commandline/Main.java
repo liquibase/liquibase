@@ -214,246 +214,250 @@ public class Main {
             scopeObjects.put(Scope.Attr.ui.name(), ui);
         }
 
-        return Scope.child(scopeObjects, new Scope.ScopedRunnerWithReturn<Integer>() {
-            @Override
-            public Integer run() throws Exception {
-                Main main = new Main();
-
-                try {
-                    if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
-                        main.printHelp(outputStream);
-                        return Integer.valueOf(0);
-                    } else if (("--" + OPTIONS.VERSION).equals(args[0])) {
-                        main.command = "";
-                        main.parseDefaultPropertyFiles();
-                        Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
-                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersionInfo()));
-
-                        LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-                        if (licenseService != null && main.liquibaseProLicenseKey != null) {
-                            Location licenseKeyLocation =
-                                    new Location("property liquibaseProLicenseKey", main.liquibaseProLicenseKey);
-                            LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
-                            if (result.code != 0) {
-                                String allMessages = String.join("\n", result.messages);
-                                Scope.getCurrentScope().getUI().sendErrorMessage(allMessages);
-                            }
-                        }
-                        if (licenseService != null) {
-                            Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
-                        }
-
-
-                        Scope.getCurrentScope().getUI().sendMessage(String.format("Running Java under %s (Version %s)",
-                                System.getProperties().getProperty("java.home"),
-                                SystemUtil.getJavaVersion()
-                        ));
-                        return Integer.valueOf(0);
-                    }
-
-                    //
-                    // Look for characters which cannot be handled
-                    //
-                    for (int i = 0; i < args.length; i++) {
-                        CodePointCheck codePointCheck = checkArg(args[i]);
-                        if (codePointCheck != null) {
-                            String message =
-                                    "A non-standard character '" + codePointCheck.ch +
-                                            "' was detected on the command line at position " +
-                                            (codePointCheck.position + 1) + " of argument number " + (i + 1) +
-                                            ".\nIf problems occur, please remove the character and try again.";
-                            LOG.warning(message);
-                            System.err.println(message);
-                        }
-                    }
+        try {
+            return Scope.child(scopeObjects, new Scope.ScopedRunnerWithReturn<Integer>() {
+                @Override
+                public Integer run() throws Exception {
+                    Main main = new Main();
 
                     try {
-                        main.parseOptions(args);
-                        if (main.command == null) {
+                        if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                             main.printHelp(outputStream);
                             return Integer.valueOf(0);
-                        }
-                    } catch (CommandLineParsingException e) {
-                        Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
-                        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("how.to.display.help"));
-                        throw e;
-                    }
+                        } else if (("--" + OPTIONS.VERSION).equals(args[0])) {
+                            main.command = "";
+                            main.parseDefaultPropertyFiles();
+                            Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersionInfo()));
 
-                    if (!Main.runningFromNewCli) {
-                        final ConsoleUIService ui = (ConsoleUIService) Scope.getCurrentScope().getUI();
-                        System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
-
-                        java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
-                        java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
-                        liquibaseLogger.setParent(rootLogger);
-
-                        LogService logService = Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
-                        if (logService instanceof JavaLogService) {
-                            ((JavaLogService) logService).setParent(liquibaseLogger);
-                        }
-
-                        if (main.logLevel == null) {
-                            String defaultLogLevel = System.getProperty("liquibase.log.level");
-                            if (defaultLogLevel == null) {
-                                setLogLevel(logService, rootLogger, liquibaseLogger, Level.OFF);
-                            } else {
-                                setLogLevel(logService, rootLogger, liquibaseLogger, parseLogLevel(defaultLogLevel, ui));
-                            }
-                        } else {
-                            setLogLevel(logService, rootLogger, liquibaseLogger, parseLogLevel(main.logLevel, ui));
-                        }
-
-                        if (main.logFile != null) {
-                            FileHandler fileHandler = new FileHandler(main.logFile, true);
-                            fileHandler.setFormatter(new SimpleFormatter());
-                            if (liquibaseLogger.getLevel() == Level.OFF) {
-                                fileHandler.setLevel(Level.FINE);
-                            }
-
-                            rootLogger.addHandler(fileHandler);
-                            for (Handler handler : rootLogger.getHandlers()) {
-                                if (handler instanceof ConsoleHandler) {
-                                    handler.setLevel(Level.OFF);
+                            LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+                            if (licenseService != null && main.liquibaseProLicenseKey != null) {
+                                Location licenseKeyLocation =
+                                        new Location("property liquibaseProLicenseKey", main.liquibaseProLicenseKey);
+                                LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+                                if (result.code != 0) {
+                                    String allMessages = String.join("\n", result.messages);
+                                    Scope.getCurrentScope().getUI().sendErrorMessage(allMessages);
                                 }
                             }
-                        }
-
-                        if (main.command != null && main.command.toLowerCase().endsWith("sql")) {
-                            ui.setOutputStream(System.err);
-                        }
-                    }
-
-                    LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-                    if (licenseService != null) {
-                        if (main.liquibaseProLicenseKey == null) {
-                            if (!Main.runningFromNewCli) {
-                                Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                            if (licenseService != null) {
+                                Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                             }
-                        } else {
-                            Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", main.liquibaseProLicenseKey);
-                            LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
-                            if (result.code != 0) {
-                                String allMessages = String.join("\n", result.messages);
-                                if (!Main.runningFromNewCli) {
-                                    Scope.getCurrentScope().getUI().sendMessage(allMessages);
-                                }
-                            } else {
-                                main.liquibaseProLicenseValid = true;
-                            }
+
+
+                            Scope.getCurrentScope().getUI().sendMessage(String.format("Running Java under %s (Version %s)",
+                                    System.getProperties().getProperty("java.home"),
+                                    SystemUtil.getJavaVersion()
+                            ));
+                            return Integer.valueOf(0);
                         }
 
                         //
-                        // Check to see if we have an expired license
+                        // Look for characters which cannot be handled
                         //
-                        if (licenseService.daysTilExpiration() < 0) {
-                            main.liquibaseProLicenseValid = false;
-                        }
-                        if (!Main.runningFromNewCli) {
-                            Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
-                        }
-                    }
-
-                    if (!Main.runningFromNewCli) {
-                        Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
-                    }
-
-                    if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
-                        Scope.getCurrentScope().getUI().sendErrorMessage((
-                                String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                                        LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
-                        return Integer.valueOf(0);
-                    }
-
-                    if (setupNeeded(main)) {
-                        List<String> setupMessages = main.checkSetup();
-                        if (!setupMessages.isEmpty()) {
-                            main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : outputStream);
-                            return Integer.valueOf(1);
-                        }
-                    }
-
-                    //
-                    // Store the Hub API key for later use
-                    //
-                    if (StringUtil.isNotEmpty(main.liquibaseHubApiKey)) {
-                        DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, main.liquibaseHubApiKey);
-                    }
-
-                    //
-                    // Store the Hub URL for later use
-                    //
-                    if (StringUtil.isNotEmpty(main.liquibaseHubUrl)) {
-                        DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_URL, main.liquibaseHubUrl);
-                    }
-
-                    main.applyDefaults();
-                    Map<String, Object> innerScopeObjects = new HashMap<>();
-                    innerScopeObjects.put("defaultsFile", LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentValue());
-                    if (!Main.runningFromNewCli) {
-                        innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
-                    }
-                    Scope.child(innerScopeObjects, () -> {
-                        main.doMigration();
-
-                        if (!Main.runningFromNewCli) {
-                            if (COMMANDS.UPDATE.equals(main.command)) {
-                                Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
-                            } else if (main.command.startsWith(COMMANDS.ROLLBACK)) {
-                                Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("rollback.successful"));
-                            } else {
-                                Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("command.successful"), main.command));
+                        for (int i = 0; i < args.length; i++) {
+                            CodePointCheck codePointCheck = checkArg(args[i]);
+                            if (codePointCheck != null) {
+                                String message =
+                                        "A non-standard character '" + codePointCheck.ch +
+                                                "' was detected on the command line at position " +
+                                                (codePointCheck.position + 1) + " of argument number " + (i + 1) +
+                                                ".\nIf problems occur, please remove the character and try again.";
+                                LOG.warning(message);
+                                System.err.println(message);
                             }
                         }
-                    });
-                } catch (Throwable e) {
-                    String message = e.getMessage();
-                    if (e.getCause() != null) {
-                        message = e.getCause().getMessage();
-                    }
-                    if (message == null) {
-                        message = coreBundle.getString("unknown.reason");
-                    }
-                    // At a minimum, log the message.  We don't need to print the stack
-                    // trace because the logger already did that upstream.
-                    try {
-                        if (e.getCause() instanceof ValidationFailedException) {
-                            ((ValidationFailedException) e.getCause()).printDescriptiveError(outputStream);
-                        } else {
-                            if (!Main.runningFromNewCli) {
-                                if (main.outputsLogMessages) {
-                                    Scope.getCurrentScope().getUI().sendErrorMessage((String.format(coreBundle.getString("unexpected.error"), message)), e);
+
+                        try {
+                            main.parseOptions(args);
+                            if (main.command == null) {
+                                main.printHelp(outputStream);
+                                return Integer.valueOf(0);
+                            }
+                        } catch (CommandLineParsingException e) {
+                            Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("how.to.display.help"));
+                            throw e;
+                        }
+
+                        if (!Main.runningFromNewCli) {
+                            final ConsoleUIService ui = (ConsoleUIService) Scope.getCurrentScope().getUI();
+                            System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
+
+                            java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
+                            java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
+                            liquibaseLogger.setParent(rootLogger);
+
+                            LogService logService = Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
+                            if (logService instanceof JavaLogService) {
+                                ((JavaLogService) logService).setParent(liquibaseLogger);
+                            }
+
+                            if (main.logLevel == null) {
+                                String defaultLogLevel = System.getProperty("liquibase.log.level");
+                                if (defaultLogLevel == null) {
+                                    setLogLevel(logService, rootLogger, liquibaseLogger, Level.OFF);
                                 } else {
-                                    Scope.getCurrentScope().getUI().sendMessage((String.format(coreBundle.getString("unexpected.error"), message)));
-                                    Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("for.more.information.use.loglevel.flag"));
+                                    setLogLevel(logService, rootLogger, liquibaseLogger, parseLogLevel(defaultLogLevel, ui));
+                                }
+                            } else {
+                                setLogLevel(logService, rootLogger, liquibaseLogger, parseLogLevel(main.logLevel, ui));
+                            }
 
-                                    //send it to the LOG in case we're using logFile
-                                    Scope.getCurrentScope().getLog(getClass()).severe((String.format(coreBundle.getString("unexpected.error"), message)), e);
+                            if (main.logFile != null) {
+                                FileHandler fileHandler = new FileHandler(main.logFile, true);
+                                fileHandler.setFormatter(new SimpleFormatter());
+                                if (liquibaseLogger.getLevel() == Level.OFF) {
+                                    fileHandler.setLevel(Level.FINE);
+                                }
+
+                                rootLogger.addHandler(fileHandler);
+                                for (Handler handler : rootLogger.getHandlers()) {
+                                    if (handler instanceof ConsoleHandler) {
+                                        handler.setLevel(Level.OFF);
+                                    }
                                 }
                             }
+
+                            if (main.command != null && main.command.toLowerCase().endsWith("sql")) {
+                                ui.setOutputStream(System.err);
+                            }
                         }
-                    } catch (IllegalFormatException e1) {
-                        if (Main.runningFromNewCli) {
-                            throw e1;
+
+                        LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+                        if (licenseService != null) {
+                            if (main.liquibaseProLicenseKey == null) {
+                                if (!Main.runningFromNewCli) {
+                                    Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                                }
+                            } else {
+                                Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", main.liquibaseProLicenseKey);
+                                LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+                                if (result.code != 0) {
+                                    String allMessages = String.join("\n", result.messages);
+                                    if (!Main.runningFromNewCli) {
+                                        Scope.getCurrentScope().getUI().sendMessage(allMessages);
+                                    }
+                                } else {
+                                    main.liquibaseProLicenseValid = true;
+                                }
+                            }
+
+                            //
+                            // Check to see if we have an expired license
+                            //
+                            if (licenseService.daysTilExpiration() < 0) {
+                                main.liquibaseProLicenseValid = false;
+                            }
+                            if (!Main.runningFromNewCli) {
+                                Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                            }
                         }
 
-                        e1.printStackTrace();
-                    }
-                    if (runningFromNewCli) {
-                        throw e;
-                    } else {
-                        throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
-                    }
-                }
+                        if (!Main.runningFromNewCli) {
+                            Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                        }
 
-                if (isHubEnabled(main.command) &&
-                        HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue() != null &&
-                        !Scope.getCurrentScope().getSingleton(HubServiceFactory.class).isOnline()) {
-                    Scope.getCurrentScope().getUI().sendMessage("WARNING: The command " + main.command + " operations were not synced with your Liquibase Hub account because: " + StringUtil.lowerCaseFirst(Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason()));
-                }
+                        if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
+                            Scope.getCurrentScope().getUI().sendErrorMessage((
+                                    String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
+                                            LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
+                            return Integer.valueOf(0);
+                        }
 
-                return Integer.valueOf(0);
-            }
-        });
+                        if (setupNeeded(main)) {
+                            List<String> setupMessages = main.checkSetup();
+                            if (!setupMessages.isEmpty()) {
+                                main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : outputStream);
+                                return Integer.valueOf(1);
+                            }
+                        }
+
+                        //
+                        // Store the Hub API key for later use
+                        //
+                        if (StringUtil.isNotEmpty(main.liquibaseHubApiKey)) {
+                            DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, main.liquibaseHubApiKey);
+                        }
+
+                        //
+                        // Store the Hub URL for later use
+                        //
+                        if (StringUtil.isNotEmpty(main.liquibaseHubUrl)) {
+                            DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_URL, main.liquibaseHubUrl);
+                        }
+
+                        main.applyDefaults();
+                        Map<String, Object> innerScopeObjects = new HashMap<>();
+                        innerScopeObjects.put("defaultsFile", LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentValue());
+                        if (!Main.runningFromNewCli) {
+                            innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
+                        }
+                        Scope.child(innerScopeObjects, () -> {
+                            main.doMigration();
+
+                            if (!Main.runningFromNewCli) {
+                                if (COMMANDS.UPDATE.equals(main.command)) {
+                                    Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+                                } else if (main.command.startsWith(COMMANDS.ROLLBACK)) {
+                                    Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("rollback.successful"));
+                                } else {
+                                    Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("command.successful"), main.command));
+                                }
+                            }
+                        });
+                    } catch (Throwable e) {
+                        String message = e.getMessage();
+                        if (e.getCause() != null) {
+                            message = e.getCause().getMessage();
+                        }
+                        if (message == null) {
+                            message = coreBundle.getString("unknown.reason");
+                        }
+                        // At a minimum, log the message.  We don't need to print the stack
+                        // trace because the logger already did that upstream.
+                        try {
+                            if (e.getCause() instanceof ValidationFailedException) {
+                                ((ValidationFailedException) e.getCause()).printDescriptiveError(outputStream);
+                            } else {
+                                if (!Main.runningFromNewCli) {
+                                    if (main.outputsLogMessages) {
+                                        Scope.getCurrentScope().getUI().sendErrorMessage((String.format(coreBundle.getString("unexpected.error"), message)), e);
+                                    } else {
+                                        Scope.getCurrentScope().getUI().sendMessage((String.format(coreBundle.getString("unexpected.error"), message)));
+                                        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("for.more.information.use.loglevel.flag"));
+
+                                        //send it to the LOG in case we're using logFile
+                                        Scope.getCurrentScope().getLog(getClass()).severe((String.format(coreBundle.getString("unexpected.error"), message)), e);
+                                    }
+                                }
+                            }
+                        } catch (IllegalFormatException e1) {
+                            if (Main.runningFromNewCli) {
+                                throw e1;
+                            }
+
+                            e1.printStackTrace();
+                        }
+                        if (runningFromNewCli) {
+                            throw e;
+                        } else {
+                            throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
+                        }
+                    }
+
+                    if (isHubEnabled(main.command) &&
+                            HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue() != null &&
+                            !Scope.getCurrentScope().getSingleton(HubServiceFactory.class).isOnline()) {
+                        Scope.getCurrentScope().getUI().sendMessage("WARNING: The command " + main.command + " operations were not synced with your Liquibase Hub account because: " + StringUtil.lowerCaseFirst(Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason()));
+                    }
+
+                    return Integer.valueOf(0);
+                }
+            });
+        } finally {
+            Scope.getCurrentScope().getMdcManager().clear();
+        }
     }
 
     private static boolean setupNeeded(Main main) throws CommandLineParsingException {
