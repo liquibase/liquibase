@@ -3,6 +3,7 @@ package liquibase.command.core;
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.command.*;
+import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.serializer.SnapshotSerializerFactory;
@@ -24,15 +25,38 @@ public class SnapshotCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"snapshot"};
 
+    public static final CommandArgumentDefinition<String> USERNAME_ARG;
+    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
+    public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
+    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
+    public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
     public static final CommandArgumentDefinition<String> SNAPSHOT_FORMAT_ARG;
+    public static final CommandArgumentDefinition<String> DRIVER_ARG;
+    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<SnapshotControl> SNAPSHOT_CONTROL_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
+        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
+                .description("The JDBC database connection URL").build();
         SCHEMAS_ARG = builder.argument("schemas", String.class)
                 .description("The schemas to snapshot").build();
+        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
+                .description("The default schema name to use for the database connection").build();
+        DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
+                .description("The default catalog name to use for the database connection").build();
+        DRIVER_ARG = builder.argument("driver", String.class)
+                .description("The JDBC driver class").build();
+        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
+                .description("The JDBC driver properties file").build();
+        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
+                .description("Username to use to connect to the database").build();
+        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
+                .description("Password to use to connect to the database")
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)
                 .description("Output format to use (JSON, YAML, or TXT)").build();
         DATABASE_ARG = builder.argument("database", Database.class).hidden().build();
