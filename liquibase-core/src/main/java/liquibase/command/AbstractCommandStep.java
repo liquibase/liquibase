@@ -42,7 +42,7 @@ public abstract class AbstractCommandStep implements CommandStep {
     protected void setOrCreateDatabase(CommandScope commandScope, CommandArgumentDefinition<Database> databaseCommandArgument) throws DatabaseException {
         if (commandScope.getArgumentValue(databaseCommandArgument) == null) {
             CommandBuilder builder = new CommandBuilder();
-            String url = commandScope.getArgumentValue(builder.argument(CommonArgumentNames.URL, String.class).build());
+            String url = commandScope.getArgumentValue(builder.argument(CommonArgumentNames.URL, String.class).required().build());
             String username = commandScope.getArgumentValue(builder.argument(CommonArgumentNames.USERNAME, String.class).build());
             String password = commandScope.getArgumentValue(builder.argument(CommonArgumentNames.PASSWORD, String.class).build());
             String defaultSchemaName = commandScope.getArgumentValue(builder.argument("defaultSchemaName", String.class).build());
