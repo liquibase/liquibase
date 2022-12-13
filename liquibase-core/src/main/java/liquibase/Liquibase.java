@@ -7,6 +7,7 @@ import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.command.CommandScope;
 import liquibase.command.core.InternalDropAllCommandStep;
+import liquibase.command.core.TagCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -1883,28 +1884,11 @@ public class Liquibase implements AutoCloseable {
      * 'Tags' the database for future rollback
      */
     public void tag(String tagString) throws LiquibaseException {
-        runInScope(new Scope.ScopedRunner() {
-            @Override
-            public void run() throws Exception {
-
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                lockService.waitForLock();
-
-                try {
-                    ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
-
-                    checkLiquibaseTables(false, null, new Contexts(),
-                            new LabelExpression());
-                    getDatabase().tag(tagString);
-                } finally {
-                    try {
-                        lockService.releaseLock();
-                    } catch (LockException e) {
-                        LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                    }
-                }
-            }
-        });
+        CommandScope tagCommand = new CommandScope("tag");
+        tagCommand
+                .addArgumentValue(TagCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(TagCommandStep.TAG_ARG, tagString);
+        tagCommand.execute();
     }
 
     public boolean tagExists(String tagString) throws LiquibaseException {
