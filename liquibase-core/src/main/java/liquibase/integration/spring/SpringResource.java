@@ -3,7 +3,6 @@ package liquibase.integration.spring;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.OpenOptions;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.WritableResource;
 
 import java.io.IOException;

@@ -106,6 +106,13 @@ public class LiquibaseGenerateChangeLogMojo extends
     @PropertyElement
     protected  Boolean includeSchema;
 
+    /**
+     * Flag to allow overwriting of output changelog file
+     *
+     * @parameter property="liquibase.overwriteOutputFile" default-value="false"
+     */
+    @PropertyElement
+    protected boolean overwriteOutputFile;
 
     @Override
 	protected void performLiquibaseTask(Liquibase liquibase)
@@ -145,7 +152,7 @@ public class LiquibaseGenerateChangeLogMojo extends
             CatalogAndSchema[] targetSchemas = computedSchemas.finalTargetSchemas;
 
                 CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, targetSchemas, StringUtil.trimToNull(diffTypes),
-                        StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl);
+                        StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl, overwriteOutputFile);
                 getLog().info("Output written to Change Log file, " + outputChangeLogFile);
             });
         }  catch (Exception e) {

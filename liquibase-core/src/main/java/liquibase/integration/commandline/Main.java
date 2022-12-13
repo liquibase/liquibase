@@ -1582,7 +1582,8 @@ public class Main {
                 }
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                 Resource file = pathHandlerFactory.getResource(currentChangeLogFile);
-                if (file.exists() && (!Boolean.parseBoolean(overwriteOutputFile))) {
+                final boolean overwriteOutputFileBool = Boolean.parseBoolean(overwriteOutputFile);
+                if (file.exists() && (!overwriteOutputFileBool)) {
                     throw new LiquibaseException(
                             String.format(coreBundle.getString("changelogfile.already.exists"), currentChangeLogFile));
                 }
@@ -1591,7 +1592,7 @@ public class Main {
                 CommandLineUtils.doGenerateChangeLog(currentChangeLogFile, database, finalTargetSchemas,
                         StringUtil.trimToNull(diffTypes), StringUtil.trimToNull(changeSetAuthor),
                         StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataOutputDirectory),
-                        diffOutputControl);
+                        diffOutputControl, overwriteOutputFileBool);
                 return;
             } else if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {
                 CommandScope snapshotCommand = new CommandScope("internalSnapshot");
