@@ -160,6 +160,7 @@ public class StandardLockService implements LockService {
                         executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
                     }
                 }
+                break;
             } catch (Exception e) {
                 if (i == maxIterations - 1) {
                     throw e;
