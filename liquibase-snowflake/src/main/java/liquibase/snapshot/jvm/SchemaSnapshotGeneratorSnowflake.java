@@ -15,11 +15,11 @@ import java.util.List;
 public class SchemaSnapshotGeneratorSnowflake extends SchemaSnapshotGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        int priority = super.getPriority(objectType, database);
         if (database instanceof SnowflakeDatabase) {
-            priority += PRIORITY_DATABASE;
+            return super.getPriority(objectType, database) + PRIORITY_DATABASE;
+        } else {
+            return PRIORITY_NONE;
         }
-        return priority;
     }
 
     @Override
