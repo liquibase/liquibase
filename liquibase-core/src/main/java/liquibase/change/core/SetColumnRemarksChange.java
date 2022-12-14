@@ -8,7 +8,11 @@ import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 
-@DatabaseChange(name="setColumnRemarks", description = "Set remarks on a column", priority = ChangeMetaData.PRIORITY_DEFAULT)
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+@DatabaseChange(name = "setColumnRemarks", description = "Set remarks on a column", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class SetColumnRemarksChange extends AbstractChange {
 
     private String catalogName;
@@ -17,7 +21,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     private String columnName;
     private String remarks;
     private String columnDataType;
-    private boolean isView = false;
+    private Boolean isView;
 
     @Override
     public ValidationErrors validate(Database database) {
@@ -29,7 +33,7 @@ public class SetColumnRemarksChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[] {
+        return new SqlStatement[]{
                 new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType, isView)
         };
     }
@@ -76,7 +80,7 @@ public class SetColumnRemarksChange extends AbstractChange {
 
     @Override
     public String getConfirmationMessage() {
-        return "Remarks set on " + tableName+"."+columnName;
+        return "Remarks set on " + tableName + "." + columnName;
     }
 
     @Override
@@ -92,11 +96,12 @@ public class SetColumnRemarksChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public boolean isView() {
-        return isView;
-    }
-
     public void setView(boolean view) {
         isView = view;
+    }
+
+    @Override
+    public Set<String> getSerializableFields() {
+        return new HashSet<>(Arrays.asList("catalogName", "schemaName", "tableName", "columnName", "remarks", "columnDataType"));
     }
 }

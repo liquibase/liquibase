@@ -13,6 +13,8 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
+import java.util.Optional;
+
 public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRemarksStatement> {
     @Override
     public int getPriority() {
@@ -68,7 +70,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
             String tableName = statement.getTableName();
             String qualifiedTableName = String.format("%s.%s", schemaName, statement.getTableName());
             String columnName = statement.getColumnName();
-            String targetObject = statement.isView() ? "VIEW" : "TABLE";
+            String targetObject = Optional.ofNullable(statement.isView()).orElse(Boolean.FALSE) ? "VIEW" : "TABLE";
 
             Sql[] generatedSql = {new UnparsedSql("IF EXISTS( " +
                     " SELECT extended_properties.value" +
