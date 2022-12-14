@@ -40,10 +40,8 @@ public final class ExpressionMatcher {
      * @return {@code true} if provided list of items satisfy expression criteria. {@code false} otherwise.
      */
     public static boolean matches(String expression, Collection<String> items) {
+        final String requiredNotRegex = "^@\\s*(!|not )";
         expression = StringUtil.trimToEmpty(expression);
-        if (items.isEmpty()) {
-            return true;
-        }
 
         if (expression.equals(":TRUE")) {
             return true;
@@ -66,7 +64,7 @@ public final class ExpressionMatcher {
         }
 
         expression = expression.replaceAll("\\s*,\\s*", " or ");
-        
+
         String[] orSplit = expression.split("\\s+or\\s+");
         if (orSplit.length > 1) {
             for (String split : orSplit) {
@@ -94,6 +92,19 @@ public final class ExpressionMatcher {
         } else if (expression.toLowerCase().startsWith("not ")) {
             notExpression = true;
             expression = expression.substring(4).trim();
+        } else if (expression.matches(requiredNotRegex + ".+")) {
+            notExpression = true;
+            expression = expression.replaceFirst(requiredNotRegex, "").trim();
+        }
+
+        boolean requiredExpression = false;
+        if (expression.startsWith("@")) {
+            requiredExpression = true;
+            expression = expression.substring(1).trim();
+        }
+
+        if (!requiredExpression && items.isEmpty()) {
+            return true;
         }
 
         if (expression.trim().equals(":TRUE")) {
