@@ -30,8 +30,8 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
         }
         changeSet.getSqlVisitors().removeAll(visitorsToRemove);
 
-        if ((labelExpression == null) || labelExpression.isEmpty()) {
-            return new ChangeSetFilterResult(true, "No runtime labels specified, all labels will run", this.getClass());
+        if (labelExpression == null) {
+            labelExpression = new LabelExpression();
         }
 
         Collection<Labels> inheritableLabels = changeSet.getInheritableLabels();
