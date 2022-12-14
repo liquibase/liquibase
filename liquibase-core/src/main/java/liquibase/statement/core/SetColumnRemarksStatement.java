@@ -1,6 +1,7 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.util.ColumnOwnerType;
 
 public class SetColumnRemarksStatement extends AbstractSqlStatement {
 
@@ -10,7 +11,7 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
     private String columnName;
     private String remarks;
     private String columnDataType;
-    private Boolean isView;
+    private ColumnOwnerType ownerType;
 
     public SetColumnRemarksStatement(String catalogName, String schemaName, String tableName, String columnName, String remarks) {
         this(catalogName, schemaName, tableName, columnName, remarks, null);
@@ -28,7 +29,7 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
         this.columnName = columnName;
         this.remarks = remarks;
         this.columnDataType = columnDataType;
-        this.isView = Boolean.FALSE;
+        this.ownerType = ColumnOwnerType.UNKNOWN;
     }
 
     public SetColumnRemarksStatement(String catalogName,
@@ -37,14 +38,14 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
                                      String columnName,
                                      String remarks,
                                      String columnDataType,
-                                     Boolean isView) {
+                                     ColumnOwnerType ownerType) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
         this.remarks = remarks;
         this.columnDataType = columnDataType;
-        this.isView = isView;
+        this.ownerType = ownerType;
     }
 
     public String getColumnDataType() {
@@ -71,7 +72,7 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
         return remarks;
     }
 
-    public Boolean isView() {
-        return isView;
+    public ColumnOwnerType getOwnerType() {
+        return ownerType;
     }
 }

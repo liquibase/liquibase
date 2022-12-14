@@ -13,6 +13,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
+import liquibase.util.ColumnOwnerType;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ public class MissingViewChangeGenerator extends AbstractChangeGenerator implemen
                             columnRemarks.setCatalogName(control.getIncludeCatalog() ? view.getSchema().getCatalogName() : null);
                             columnRemarks.setSchemaName(control.getIncludeSchema() ? view.getSchema().getName() : null);
                             columnRemarks.setTableName(column.getRelation().getName());
-                            columnRemarks.setView(true);
+                            columnRemarks.setOwnerType(ColumnOwnerType.VIEW);
                             columnRemarksList.add(columnRemarks);
                         }
                 );

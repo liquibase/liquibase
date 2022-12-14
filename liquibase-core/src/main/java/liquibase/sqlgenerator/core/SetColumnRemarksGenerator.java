@@ -11,6 +11,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.util.ColumnOwnerType;
 import liquibase.util.StringUtil;
 
 import java.util.Optional;
@@ -70,7 +71,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
             String tableName = statement.getTableName();
             String qualifiedTableName = String.format("%s.%s", schemaName, statement.getTableName());
             String columnName = statement.getColumnName();
-            String targetObject = Optional.ofNullable(statement.isView()).orElse(Boolean.FALSE) ? "VIEW" : "TABLE";
+            String targetObject = statement.getOwnerType() == ColumnOwnerType.VIEW ? "VIEW" : "TABLE";
 
             Sql[] generatedSql = {new UnparsedSql("IF EXISTS( " +
                     " SELECT extended_properties.value" +

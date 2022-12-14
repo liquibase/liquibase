@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
+import liquibase.util.ColumnOwnerType;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,7 +22,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     private String columnName;
     private String remarks;
     private String columnDataType;
-    private Boolean isView;
+    private ColumnOwnerType ownerType;
 
     @Override
     public ValidationErrors validate(Database database) {
@@ -34,7 +35,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType, isView)
+                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType, ownerType)
         };
     }
 
@@ -96,8 +97,8 @@ public class SetColumnRemarksChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public void setView(boolean view) {
-        isView = view;
+    public void setOwnerType(ColumnOwnerType ownerType) {
+        this.ownerType = ownerType;
     }
 
     @Override
