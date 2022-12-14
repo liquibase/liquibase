@@ -71,7 +71,7 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
         return remarks;
     }
 
-    public boolean isView() {
+    public Boolean isView() {
         return isView;
     }
 }
