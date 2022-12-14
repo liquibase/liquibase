@@ -296,7 +296,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return tableType;
     }
 
-    @DatabaseChangeProperty(since = "4.13")
     public void setTableType(String tableType) {
         this.tableType = tableType;
     }

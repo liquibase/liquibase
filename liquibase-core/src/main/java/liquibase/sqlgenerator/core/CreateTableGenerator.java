@@ -55,7 +55,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         buffer.append("CREATE ");
 
         if (statement.getTableType() != null && statement.getTableType().trim().isEmpty()) {
-            buffer.append(statement.getTableType().toUpperCase(Locale.ROOT));
+            buffer.append(statement.getTableType().toUpperCase());
         }
 
         buffer.append("TABLE ").append(database.escapeTableName(statement.getCatalogName(),
