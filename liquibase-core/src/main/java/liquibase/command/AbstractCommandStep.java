@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.MissingRequiredArgumentException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ResourceAccessor;
@@ -39,10 +40,13 @@ public abstract class AbstractCommandStep implements CommandStep {
      * @param databaseCommandArgument the CommandArgumentDefinition identifying the expected database object
      * @throws DatabaseException Thrown when there is a connection error
      */
-    protected void setOrCreateDatabase(CommandScope commandScope, CommandArgumentDefinition<Database> databaseCommandArgument) throws DatabaseException {
+    protected void setOrCreateDatabase(CommandScope commandScope, CommandArgumentDefinition<Database> databaseCommandArgument) throws DatabaseException, CommandValidationException {
         if (commandScope.getArgumentValue(databaseCommandArgument) == null) {
             CommandBuilder builder = new CommandBuilder();
-            String url = commandScope.getArgumentValue(builder.argument(CommonArgumentNames.URL, String.class).required().build());
+            String url = commandScope.getArgumentValue(builder.argument(CommonArgumentNames.URL, String.class).build());
+            if (StringUtil.isEmpty(url)) {
+                throw new CommandValidationException("url", "missing required argument", new MissingRequiredArgumentException("url"));
+            }
             String username = commandScope.getArgumentValue(builder.argument(CommonArgumentNames.USERNAME, String.class).build());
             String password = commandScope.getArgumentValue(builder.argument(CommonArgumentNames.PASSWORD, String.class).build());
             String defaultSchemaName = commandScope.getArgumentValue(builder.argument("defaultSchemaName", String.class).build());
