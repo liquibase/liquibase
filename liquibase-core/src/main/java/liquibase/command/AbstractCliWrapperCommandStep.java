@@ -1,6 +1,5 @@
 package liquibase.command;
 
-import liquibase.Scope;
 import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
 

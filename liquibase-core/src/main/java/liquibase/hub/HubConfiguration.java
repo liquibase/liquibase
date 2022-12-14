@@ -3,7 +3,6 @@ package liquibase.hub;
 import liquibase.Scope;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.AutoloadedConfigurations;
-import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;

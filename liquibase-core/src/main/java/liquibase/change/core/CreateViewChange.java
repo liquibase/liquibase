@@ -10,14 +10,12 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
-import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.statement.core.SetViewRemarksStatement;
 import liquibase.structure.core.View;
 import liquibase.util.FileUtil;
@@ -228,10 +226,7 @@ public class CreateViewChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<>();
 
-        boolean replaceIfExists = false;
-        if ((getReplaceIfExists() != null) && getReplaceIfExists()) {
-            replaceIfExists = true;
-        }
+        boolean replaceIfExists = (getReplaceIfExists() != null) && getReplaceIfExists();
 
         boolean fullDefinition = false;
         if (this.fullDefinition != null) {

@@ -1578,7 +1578,8 @@ public class Main {
                 }
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                 Resource file = pathHandlerFactory.getResource(currentChangeLogFile);
-                if (file.exists() && (!Boolean.parseBoolean(overwriteOutputFile))) {
+                final boolean overwriteOutputFileBool = Boolean.parseBoolean(overwriteOutputFile);
+                if (file.exists() && (!overwriteOutputFileBool)) {
                     throw new LiquibaseException(
                             String.format(coreBundle.getString("changelogfile.already.exists"), currentChangeLogFile));
                 }
@@ -1587,7 +1588,7 @@ public class Main {
                 CommandLineUtils.doGenerateChangeLog(currentChangeLogFile, database, finalTargetSchemas,
                         StringUtil.trimToNull(diffTypes), StringUtil.trimToNull(changeSetAuthor),
                         StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataOutputDirectory),
-                        diffOutputControl);
+                        diffOutputControl, overwriteOutputFileBool);
                 return;
             } else if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {
                 CommandScope snapshotCommand = new CommandScope("internalSnapshot");
@@ -1876,9 +1877,11 @@ public class Main {
                         throw new CommandLineParsingException(
                                 String.format(coreBundle.getString("command.requires.tag"), COMMANDS.UPDATE_TO_TAG));
                     }
-
-                    liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression
-                            (getLabelFilter()));
+                    try {
+                        liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    } catch (LiquibaseException updateException) {
+                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
+                    }
                 } else if (COMMANDS.UPDATE_TO_TAG_SQL.equalsIgnoreCase(command)) {
                     if ((commandParams == null) || commandParams.isEmpty()) {
                         throw new CommandLineParsingException(
@@ -1960,7 +1963,11 @@ public class Main {
                     liquibase.futureRollbackSQL(getCommandArgument(), new Contexts(contexts), new LabelExpression
                             (getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(command)) {
-                    liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    try {
+                        liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    } catch (LiquibaseException updateException) {
+                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
+                    }
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
                     CommandScope historyCommand = new CommandScope("internalHistory");
                     historyCommand.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, database);
