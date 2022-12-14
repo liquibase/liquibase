@@ -40,7 +40,7 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
             return new ChangeSetFilterResult(true, "Changeset runs under all labels", this.getClass());
         }
 
-        if (labelExpression.matches(changeSet.getLabels()) && LabelExpression.matchesAll(inheritableLabels, labelExpression)) {
+        if (new LabelExpression(changeSet.getLabels().toString()).matches(new Labels(labelExpression.getLabels())) && LabelExpression.matchesAll(inheritableLabels, labelExpression)) {
             return new ChangeSetFilterResult(true, "Labels matches '" + labelExpression.toString() + "'", this.getClass());
         }
         else {
