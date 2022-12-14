@@ -1,7 +1,6 @@
 package liquibase.hub.model;
 
 import java.util.Date;
-import java.util.UUID;
 
 public class HubLink {
     private String shortUrl;

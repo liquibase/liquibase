@@ -1,15 +1,9 @@
 package liquibase.resource;
 
 import liquibase.Scope;
-import liquibase.logging.Logger;
-import liquibase.util.CollectionUtil;
-import liquibase.util.StringUtil;
 
 import java.io.*;
-import java.nio.file.FileSystem;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
 
 /**
  * A @{link ResourceAccessor} implementation for files on the file system.

@@ -6,7 +6,6 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializer;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StandardNamespaceDetails implements NamespaceDetails {

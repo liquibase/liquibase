@@ -91,6 +91,12 @@
             <artifactId>mariadb-java-client</artifactId>
             <version>${mariadb.version}</version>
             <optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.waffle</groupId>
+					<artifactId>waffle-jna</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
