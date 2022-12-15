@@ -1,13 +1,20 @@
 package liquibase.command;
 
+import liquibase.Contexts;
 import liquibase.GlobalConfiguration;
+import liquibase.LabelExpression;
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryService;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.MissingRequiredArgumentException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.lockservice.LockServiceFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
@@ -135,6 +142,17 @@ public abstract class AbstractCommandStep implements CommandStep {
             Scope.getCurrentScope().getLog(getClass()).warning(
                     coreBundle.getString("problem.closing.connection"), e);
         }
+    }
+
+    protected void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
+                                     Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        ChangeLogHistoryService changeLogHistoryService =
+                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(getDatabase());
+        changeLogHistoryService.init();
+        if (updateExistingNullChecksums) {
+            changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
+        }
+        LockServiceFactory.getInstance().getLockService(getDatabase()).init();
     }
 
     /**

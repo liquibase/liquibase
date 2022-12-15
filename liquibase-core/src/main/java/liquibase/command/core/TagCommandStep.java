@@ -75,17 +75,6 @@ public class TagCommandStep extends AbstractCommandStep {
         }
     }
 
-    public void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
-                                     Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        ChangeLogHistoryService changeLogHistoryService =
-                ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(getDatabase());
-        changeLogHistoryService.init();
-        if (updateExistingNullChecksums) {
-            changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
-        }
-        LockServiceFactory.getInstance().getLockService(getDatabase()).init();
-    }
-
     @Override
     public String[][] defineCommandNames() {
         return new String[][] { COMMAND_NAME };
