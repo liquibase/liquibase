@@ -131,12 +131,14 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             try {
                 viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
                 for (CachedRow row : viewsMetadataRs) {
-                    CatalogAndSchema catalogAndSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"));
-                    View view = new View();
                     String name = row.getString("TABLE_NAME");
-                    if (database instanceof PostgresDatabase && POSTGRES_EXCLUDED_PUBLIC_VIEWS.contains(name)) {
+                    if (database instanceof PostgresDatabase
+                            && "public".equalsIgnoreCase(schema.getName())
+                            && POSTGRES_EXCLUDED_PUBLIC_VIEWS.contains(name)) {
                         continue;
                     }
+                    View view = new View();
+                    CatalogAndSchema catalogAndSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"));
                     view.setName(name);
                     view.setSchema(new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName()));
                     view.setRemarks(row.getString("REMARKS"));
