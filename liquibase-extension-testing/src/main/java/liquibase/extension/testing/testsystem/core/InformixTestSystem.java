@@ -3,7 +3,6 @@ package liquibase.extension.testing.testsystem.core;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.UnimplementedWrapper;
-import org.jetbrains.annotations.NotNull;
 
 public class InformixTestSystem  extends DatabaseTestSystem {
 
