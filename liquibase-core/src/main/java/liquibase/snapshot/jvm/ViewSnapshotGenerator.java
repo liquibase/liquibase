@@ -1,6 +1,7 @@
 package liquibase.snapshot.jvm;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 import liquibase.CatalogAndSchema;
@@ -8,6 +9,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -15,13 +17,16 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtils;
 
 public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
+    private static final List<String> POSTGRES_EXCLUDED_PUBLIC_VIEWS = Arrays.asList(
+            "pg_buffercache",
+            "pg_stat_statements"
+    );
     public ViewSnapshotGenerator() {
         super(View.class, new Class[] { Schema.class });
     }
@@ -128,7 +133,11 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                 for (CachedRow row : viewsMetadataRs) {
                     CatalogAndSchema catalogAndSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"));
                     View view = new View();
-                    view.setName(row.getString("TABLE_NAME"));
+                    String name = row.getString("TABLE_NAME");
+                    if (database instanceof PostgresDatabase && POSTGRES_EXCLUDED_PUBLIC_VIEWS.contains(name)) {
+                        continue;
+                    }
+                    view.setName(name);
                     view.setSchema(new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName()));
                     view.setRemarks(row.getString("REMARKS"));
                     view.setDefinition(row.getString("OBJECT_BODY"));
