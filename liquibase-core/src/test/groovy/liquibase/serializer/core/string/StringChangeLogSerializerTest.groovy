@@ -3,6 +3,7 @@ package liquibase.serializer.core.string
 import liquibase.Scope
 import liquibase.changelog.ChangeSet
 import liquibase.test.JUnitResourceAccessor
+import liquibase.util.ColumnOwnerType
 import spock.lang.Specification
 import spock.lang.Unroll;
 
@@ -308,6 +309,8 @@ public class StringChangeLogSerializerTest extends Specification {
             } else if (field.getType().equals(InputStream.class)) {
                 //nothing
             } else if (field.getType().equals(LoadDataChange.LOAD_DATA_TYPE.class)) {
+                //nothing
+            } else if (field.getType().equals(ColumnOwnerType.class)) {
                 //nothing
             } else if (field.getType().equals(long.class)) {
                 field.set(object, createInteger().longValue());
