@@ -9,8 +9,6 @@ Short Description: Mark the current database state with the specified tag
 Long Description: NOT SET
 Required Args:
   tag (String) Tag to add to the database changelog table
-  url (String) The JDBC database connection URL
-    OBFUSCATED
 Optional Args:
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -21,6 +19,9 @@ Optional Args:
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
   password (String) Password to use to connect to the database
+    Default: null
+    OBFUSCATED
+  url (String) The JDBC database connection URL
     Default: null
     OBFUSCATED
   username (String) Username to use to connect to the database
@@ -35,9 +36,7 @@ Optional Args:
                 tag: "version_2.0"
         ]
 
-        expectedResults = [
-                statusCode   : 0
-        ]
+        expectedException = null
     }
 
     run "Run without a tag should throw an exception",  {
@@ -50,6 +49,7 @@ Optional Args:
     run "Run without a URL should throw an exception",  {
         arguments = [
                 url          : "",
+                database     : null,
                 tag          : "version_2.0"
         ]
         expectedException = CommandValidationException.class

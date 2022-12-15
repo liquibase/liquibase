@@ -31,6 +31,8 @@ public class TagCommandStep extends AbstractCommandStep {
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
+        TAG_ARG = builder.argument("tag", String.class).required()
+                .description("Tag to add to the database changelog table").build();
         URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).description("The JDBC database connection URL").build();
         DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
                 .description("The default schema name to use for the database connection").build();
@@ -46,8 +48,6 @@ public class TagCommandStep extends AbstractCommandStep {
                 .description("Password to use to connect to the database")
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
-        TAG_ARG = builder.argument("tag", String.class).required()
-                .description("Tag to add to the database changelog table").build();
         DATABASE_ARG = builder.argument("database", Database.class).hidden().build();
     }
 
