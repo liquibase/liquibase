@@ -2,10 +2,6 @@ package liquibase.extension.testing.testsystem.core;
 
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
-import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
-import org.jetbrains.annotations.NotNull;
-
-import java.sql.SQLException;
 
 public class HsqlTestSystem extends DatabaseTestSystem {
 
