@@ -104,7 +104,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 
-        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[0]));
 
         return this;
     }
@@ -136,7 +136,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         allConstraints.add(pkConstraint);
 
 
-        addColumn(columnName, columnType, defaultValue, remarks, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue, remarks, allConstraints.toArray(new ColumnConstraint[0]));
 
         return this;
     }

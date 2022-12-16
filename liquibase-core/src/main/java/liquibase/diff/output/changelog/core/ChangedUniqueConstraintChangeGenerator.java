@@ -90,7 +90,7 @@ public class ChangedUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
         returnList.add(addUniqueConstraintChange);
 
-        return returnList.toArray(new Change[returnList.size()]);
+        return returnList.toArray(EMPTY_CHANGE);
     }
 
     protected DropUniqueConstraintChange createDropUniqueConstraintChange() {
