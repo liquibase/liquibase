@@ -67,12 +67,12 @@ public final class CheckSum {
      * Compute a storedCheckSum of the given string.
      */
     public static CheckSum compute(String valueToChecksum) {
+        valueToChecksum = valueToChecksum.replaceAll("\\s+","");
+        valueToChecksum = StringUtil.standardizeLineEndings(valueToChecksum)
+                .replace("\uFFFD", "");
         return new CheckSum(MD5Util.computeMD5(
                 //remove "Unknown" unicode char 65533
-                Normalizer.normalize(
-                    StringUtil.standardizeLineEndings(valueToChecksum)
-                            .replace("\uFFFD", "")
-                        , Normalizer.Form.NFC)
+                Normalizer.normalize(valueToChecksum, Normalizer.Form.NFC)
         ), getCurrentVersion());
     }
 
