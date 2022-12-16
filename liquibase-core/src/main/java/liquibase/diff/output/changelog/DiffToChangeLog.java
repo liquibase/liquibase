@@ -259,7 +259,7 @@ public class DiffToChangeLog {
         }
 
         List<Class<? extends DatabaseObject>> types = getOrderedOutputTypes(ChangedObjectChangeGenerator.class);
-        List<ChangeSet> updateChangeSets = new ArrayList<ChangeSet>();
+        List<ChangeSet> updateChangeSets = new ArrayList<>();
 
         // Keep a reference to DiffResult in the comparision database so that it can be retrieved later
         // This is to avoid changing the MissingObjectChangeGenerator API and still be able to pass the
@@ -281,7 +281,7 @@ public class DiffToChangeLog {
         }
 
         types = getOrderedOutputTypes(MissingObjectChangeGenerator.class);
-        List<DatabaseObject> missingObjects = new ArrayList<DatabaseObject>();
+        List<DatabaseObject> missingObjects = new ArrayList<>();
         for (Class<? extends DatabaseObject> type : types) {
             for (DatabaseObject object : diffResult.getMissingObjects(type, getDbObjectComparator())) {
                 if (object == null) {
@@ -293,7 +293,7 @@ public class DiffToChangeLog {
             }
         }
 
-        List<ChangeSet> createChangeSets = new ArrayList<ChangeSet>();
+        List<ChangeSet> createChangeSets = new ArrayList<>();
 
         for (DatabaseObject object : sortMissingObjects(missingObjects, diffResult.getReferenceSnapshot().getDatabase())) {
             ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
@@ -302,7 +302,7 @@ public class DiffToChangeLog {
             addToChangeSets(changes, createChangeSets, quotingStrategy, created);
         }
 
-        List<ChangeSet> deleteChangeSets = new ArrayList<ChangeSet>();
+        List<ChangeSet> deleteChangeSets = new ArrayList<>();
 
         types = getOrderedOutputTypes(UnexpectedObjectChangeGenerator.class);
         for (Class<? extends DatabaseObject> type : types) {
@@ -320,7 +320,7 @@ public class DiffToChangeLog {
         }
 
 
-        List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
+        List<ChangeSet> changeSets = new ArrayList<>();
         changeSets.addAll(createChangeSets);
         changeSets.addAll(deleteChangeSets);
         changeSets.addAll(updateChangeSets);
@@ -385,7 +385,7 @@ public class DiffToChangeLog {
                     }
                 };
 
-                DependencyUtil.DependencyGraph<String> graph = new DependencyUtil.DependencyGraph<String>(nameListener);
+                DependencyUtil.DependencyGraph<String> graph = new DependencyUtil.DependencyGraph<>(nameListener);
                 addDependencies(graph, schemas, database);
                 graph.computeDependencies();
 

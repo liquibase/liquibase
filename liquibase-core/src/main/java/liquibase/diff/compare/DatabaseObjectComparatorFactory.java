@@ -172,7 +172,7 @@ public class DatabaseObjectComparatorFactory {
         final DatabaseObjectComparatorChain comparatorChain =
             createComparatorChain(object1.getClass(), compareControl.getSchemaComparisons(), accordingTo);
         if (comparatorChain != null) {
-            return comparatorChain.findDifferences(object1, object2, accordingTo, compareControl, new HashSet<String>());
+            return comparatorChain.findDifferences(object1, object2, accordingTo, compareControl, new HashSet<>());
         }
         return null;
     }

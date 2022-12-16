@@ -80,12 +80,12 @@ public class ResultSetCache {
                                 resultSetExtractor.getSchemaKey(row).toLowerCase();
                         cache = cacheBySchema.get(rowSchema);
                         if (cache == null) {
-                            cache = new HashMap<String, List<CachedRow>>();
+                            cache = new HashMap<>();
                             cacheBySchema.put(rowSchema, cache);
                         }
                     }
                     if (!cache.containsKey(rowKey)) {
-                        cache.put(rowKey, new ArrayList<CachedRow>());
+                        cache.put(rowKey, new ArrayList<>());
                     }
                     cache.get(rowKey).add(row);
                 }
