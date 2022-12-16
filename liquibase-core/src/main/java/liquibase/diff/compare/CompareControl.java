@@ -182,7 +182,7 @@ public class CompareControl {
             } else if (databaseRole.equals(DatabaseRole.REFERENCE)) {
                 schemas[i] = schemaComparisons[i].getReferenceSchema();
             } else {
-                throw new UnexpectedLiquibaseException("Unknkown diff type: " + databaseRole);
+                throw new UnexpectedLiquibaseException("Unknown diff type: " + databaseRole);
             }
         }
         return schemas;

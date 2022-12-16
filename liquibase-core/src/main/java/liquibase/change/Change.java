@@ -27,7 +27,7 @@ import java.util.Set;
 public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject {
 
     /**
-     * This method will be called by the changlelog parsing process after all of the
+     * This method will be called by the changelog parsing process after all of the
      * properties have been set to allow the task to do any additional initialization logic.
      */
     public void finishInitialization() throws SetupException;
