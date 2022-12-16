@@ -173,7 +173,7 @@ public class ValidationErrors {
 
     @Override
     public boolean equals(Object obj) {
-        if ((obj == null) || !(obj instanceof ValidationErrors)) {
+        if (!(obj instanceof ValidationErrors)) {
             return false;
         }
         return this.toString().equals(obj.toString());
