@@ -1239,12 +1239,10 @@ public class Main {
         // Check the licensing keys to see if they are being set from properties
         //
         if (liquibaseProLicenseKey == null) {
-            String key = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.licenseKey").getValue();
-            liquibaseProLicenseKey = key;
+            liquibaseProLicenseKey = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.licenseKey").getValue();
         }
         if (liquibaseHubApiKey == null) {
-            String key = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
-            liquibaseHubApiKey = key;
+            liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
         }
 
         //
