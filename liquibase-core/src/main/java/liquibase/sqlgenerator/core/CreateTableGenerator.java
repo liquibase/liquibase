@@ -387,7 +387,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             sql += " COMMENT='" + database.escapeStringForDatabase(statement.getRemarks()) + "' ";
         }
         additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
-        return additionalSql.toArray(new Sql[additionalSql.size()]);
+        return additionalSql.toArray(EMPTY_SQL);
     }
 
     /**
