@@ -158,7 +158,14 @@ public class LiquibaseConfiguration implements SingletonObject {
                     if (foundFirstValue) {
                         logMessage.append("Overrides ");
                     }
-                    logMessage.append(StringUtil.lowerCaseFirst(providedValue.describe()));
+
+                    String describe = providedValue.describe();
+                    char[] chars = describe.toCharArray();
+                    if (chars.length >= 2 && Character.isUpperCase(chars[0]) && Character.isUpperCase(chars[1])) {
+                        logMessage.append(describe);
+                    } else {
+                        logMessage.append(StringUtil.lowerCaseFirst(describe));
+                    }
                     Object value = providedValue.getValue();
                     if (value != null) {
                         String finalValue = String.valueOf(value);
