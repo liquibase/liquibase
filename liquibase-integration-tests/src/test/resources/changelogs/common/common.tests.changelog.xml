@@ -512,6 +512,10 @@
         </loadData>
     </changeSet>
 
+    <changeSet id="sampleCSVData" author="nvoxland">
+        <loadData tableName="csvdata" file="changelogs/sample.data1.csv.gz"/>
+    </changeSet>
+
     <changeSet id="createTableNamedPKRef" author="nvoxland">
         <createTable tableName="createtablenamedpkref">
             <column name="id" type="int">

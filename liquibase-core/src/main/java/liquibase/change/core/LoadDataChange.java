@@ -40,6 +40,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.change.ChangeParameterMetaData.ALL;
@@ -720,7 +721,13 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         if (!resource.exists()) {
             return null;
         }
-        Reader streamReader = StreamUtil.readStreamWithReader(resource.openInputStream(), getEncoding());
+
+        @SuppressWarnings("java:S2095") // SONAR want us to close the stream here, but it is only read by CSVReader outside this method.
+        InputStream stream = resource.openInputStream();
+        if (resource.getPath().toLowerCase().endsWith(".gz") && !(stream instanceof GZIPInputStream)) {
+            stream = new GZIPInputStream(stream);
+        }
+        Reader streamReader = StreamUtil.readStreamWithReader(stream, getEncoding());
 
         char quotchar;
         if (StringUtil.trimToEmpty(this.quotchar).isEmpty()) {
