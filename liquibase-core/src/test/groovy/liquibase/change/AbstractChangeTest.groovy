@@ -255,7 +255,7 @@ class AbstractChangeTest extends Specification {
         SqlStatement[] rollbackStatements = new ExampleParamlessAbstractChange() {
             @Override
             protected Change[] createInverses() {
-                return new Change[0]
+                return EMPTY_CHANGE
             }
         }.generateRollbackStatements(database)
 

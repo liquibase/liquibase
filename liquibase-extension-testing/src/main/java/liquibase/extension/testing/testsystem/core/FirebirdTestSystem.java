@@ -3,7 +3,6 @@ package liquibase.extension.testing.testsystem.core;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.DockerDatabaseWrapper;
-import liquibase.extension.testing.testsystem.wrapper.UnimplementedWrapper;
 import org.firebirdsql.testcontainers.FirebirdContainer;
 import org.testcontainers.utility.DockerImageName;
 

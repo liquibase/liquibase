@@ -7,7 +7,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
 import liquibase.database.DatabaseList;
 import liquibase.exception.*;
 import liquibase.precondition.ErrorPrecondition;
