@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
  * Creates a new view.
  */
@@ -274,7 +276,7 @@ public class CreateViewChange extends AbstractChange {
             }
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     protected CreateViewStatement createViewStatement(String catalogName, String schemaName, String viewName, String selectQuery, boolean b) {

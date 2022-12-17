@@ -48,8 +48,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
 
     @Override
     public CommandValidationErrors validate() {
-        CommandValidationErrors commandValidationErrors = new CommandValidationErrors(this);
-        return commandValidationErrors;
+        return new CommandValidationErrors(this);
     }
 
     @Override
