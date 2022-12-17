@@ -20,5 +20,5 @@ public interface CustomTaskChange extends CustomChange {
      * @param database
      * @throws liquibase.exception.CustomChangeException an exception occurs while processing this change
      */
-    public void execute(Database database) throws CustomChangeException;
+    void execute(Database database) throws CustomChangeException;
 }
