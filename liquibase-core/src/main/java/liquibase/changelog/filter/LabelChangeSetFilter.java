@@ -34,13 +34,12 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
             labelExpression = new LabelExpression();
         }
 
-        Collection<Labels> inheritableLabels = changeSet.getInheritableLabels();
-        if ((changeSet.getLabels() == null || changeSet.getLabels().isEmpty()) &&
-            (inheritableLabels == null || inheritableLabels.isEmpty())) {
-            return new ChangeSetFilterResult(true, "Changeset runs under all labels", this.getClass());
+        if ((labelExpression == null) || labelExpression.isEmpty()) {
+            return new ChangeSetFilterResult(true, "No runtime labels specified, all labels will run", this.getClass());
         }
 
-        if (new LabelExpression(changeSet.getLabels().toString()).matches(new Labels(labelExpression.getLabels())) && LabelExpression.matchesAll(inheritableLabels, labelExpression)) {
+        Collection<Labels> inheritableLabels = changeSet.getInheritableLabels();
+        if (labelExpression.matches(changeSet.getLabels()) && LabelExpression.matchesAll(inheritableLabels, labelExpression)) {
             return new ChangeSetFilterResult(true, "Labels matches '" + labelExpression.toString() + "'", this.getClass());
         }
         else {
