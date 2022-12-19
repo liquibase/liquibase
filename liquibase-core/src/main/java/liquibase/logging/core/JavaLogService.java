@@ -34,10 +34,6 @@ public class JavaLogService extends AbstractLogService {
         return logger;
     }
 
-    public void setupFormat() {
-        System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
-    }
-
     /**
      * Because java.util.logging differentiates between the log name and the class/method logging,
      * we can collapses the log names to a simpler/smaller set to allow configuration to rely on the class name less.

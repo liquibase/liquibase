@@ -636,8 +636,9 @@ public class LiquibaseCommandLine {
         java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
         if (logService instanceof JavaLogService) {
             ((JavaLogService) logService).setParent(liquibaseLogger);
-            ((JavaLogService) logService).setupFormat();
         }
+
+        System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
 
         java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
         Level cliLogLevel = logLevel;
