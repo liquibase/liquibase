@@ -1888,9 +1888,8 @@ public class Liquibase implements AutoCloseable {
      */
     public void tag(String tagString) throws LiquibaseException {
         CommandScope tagCommand = new CommandScope("tag");
-        Database database = tagCommand.getArgumentValue(TagCommandStep.DATABASE_ARG);
         tagCommand
-                .addArgumentValue(TagCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(InternalDatabaseCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(TagCommandStep.TAG_ARG, tagString);
         tagCommand.execute();
     }

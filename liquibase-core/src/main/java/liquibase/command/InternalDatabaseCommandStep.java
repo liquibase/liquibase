@@ -14,7 +14,6 @@ import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -169,6 +168,7 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
         } else {
             commandDefinition.getArgument(InternalDatabaseCommandStep.DATABASE_ARG.getName()).hide();
             commandDefinition.getArgument(InternalDatabaseCommandStep.DATABASE_ARG.getName()).setRequired(false);
+            //commandDefinition.getArgument(InternalDatabaseCommandStep.URL_ARG.getName()).setRequired(false);
         }
     }
 
