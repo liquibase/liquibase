@@ -43,9 +43,14 @@ public class CommandFactory implements SingletonObject {
             throw new IllegalArgumentException("Unknown command '" + StringUtil.join(commandName, " ") + "'");
         }
 
-        final Set<CommandArgumentDefinition<?>> stepArguments = this.commandArgumentDefinitions.get(StringUtil.join(commandDefinition.getName(), " "));
+        final Set<CommandArgumentDefinition<?>> stepArguments = new HashSet<>();
+        for (CommandStep step : pipeline) {
+            for (String[] name : step.defineCommandNames()) {
+                stepArguments.addAll(this.commandArgumentDefinitions.get(StringUtil.join(name, " ")));
+            }
+        }
 
-        if (stepArguments != null) {
+        if (!stepArguments.isEmpty()) {
             for (CommandArgumentDefinition<?> commandArg : stepArguments) {
                 commandDefinition.add(commandArg);
             }

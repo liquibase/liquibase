@@ -3,7 +3,6 @@ package liquibase.command.core;
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.serializer.SnapshotSerializerFactory;
@@ -25,41 +24,18 @@ public class SnapshotCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"snapshot"};
 
-    public static final CommandArgumentDefinition<String> USERNAME_ARG;
-    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
     public static final CommandArgumentDefinition<String> SNAPSHOT_FORMAT_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<SnapshotControl> SNAPSHOT_CONTROL_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
-                .description("The JDBC database connection URL").build();
+        DATABASE_ARG = builder.argument("database", Database.class).hidden().build();
         SCHEMAS_ARG = builder.argument("schemas", String.class)
                 .description("The schemas to snapshot").build();
-        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-                .description("The default schema name to use for the database connection").build();
-        DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-                .description("The default catalog name to use for the database connection").build();
-        DRIVER_ARG = builder.argument("driver", String.class)
-                .description("The JDBC driver class").build();
-        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
-                .description("The JDBC driver properties file").build();
-        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
-                .description("Username to use to connect to the database").build();
-        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
-                .description("Password to use to connect to the database")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
-                .build();
         SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)
                 .description("Output format to use (JSON, YAML, or TXT)").build();
-        DATABASE_ARG = builder.argument("database", Database.class).hidden().build();
         SNAPSHOT_CONTROL_ARG = builder.argument("snapshotControl", SnapshotControl.class).hidden().build();
     }
 
@@ -100,28 +76,28 @@ public class SnapshotCommandStep extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        this.setOrCreateDatabase(commandScope, DATABASE_ARG);
+        Database database = commandScope.getArgumentValue(DATABASE_ARG);
 
-        CatalogAndSchema[] schemas = parseSchemas(getDatabase(), commandScope.getArgumentValue(SCHEMAS_ARG));
+        CatalogAndSchema[] schemas = parseSchemas(database, commandScope.getArgumentValue(SCHEMAS_ARG));
 
-        InternalSnapshotCommandStep.logUnsupportedDatabase(getDatabase(), this.getClass());
+        InternalSnapshotCommandStep.logUnsupportedDatabase(database, this.getClass());
         SnapshotControl snapshotControl;
         if (commandScope.getArgumentValue(SNAPSHOT_CONTROL_ARG) == null) {
-            snapshotControl = new SnapshotControl(getDatabase());
+            snapshotControl = new SnapshotControl(database);
         } else {
             snapshotControl = commandScope.getArgumentValue(SnapshotCommandStep.SNAPSHOT_CONTROL_ARG);
         }
 
         if (schemas == null) {
-            schemas = new CatalogAndSchema[]{getDatabase().getDefaultSchema()};
+            schemas = new CatalogAndSchema[]{database.getDefaultSchema()};
         }
 
-        ObjectQuotingStrategy originalQuotingStrategy = getDatabase().getObjectQuotingStrategy();
+        ObjectQuotingStrategy originalQuotingStrategy = database.getObjectQuotingStrategy();
 
-        getDatabase().setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
 
         try {
-            DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, getDatabase(), snapshotControl);
+            DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
 
             snapshot.setMetadata(this.getSnapshotMetadata());
 
@@ -139,14 +115,7 @@ public class SnapshotCommandStep extends AbstractCommandStep {
             //
             // Reset the quoting strategy
             //
-            getDatabase().setObjectQuotingStrategy(originalQuotingStrategy);
-
-            //
-            // Need to clean up here since we created the Database
-            //
-            if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
-                closeDatabase(true);
-            }
+            database.setObjectQuotingStrategy(originalQuotingStrategy);
         }
     }
 
