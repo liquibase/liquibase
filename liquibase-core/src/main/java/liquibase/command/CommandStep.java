@@ -21,8 +21,6 @@ public interface CommandStep {
      */
     int ORDER_NOT_APPLICABLE = -1;
 
-    int ORDER_LAST = Integer.MAX_VALUE;
-
     /**
      * Defines new command names
      * For example, if it is part of `liquibase update`, this should return new String[][]{ new String[] {"update"}}.

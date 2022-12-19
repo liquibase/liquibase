@@ -20,11 +20,11 @@ public class TagCommandStep extends AbstractCommandStep {
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         TAG_ARG = builder.argument("tag", String.class).required()
-                .description("Tag to add to the database changelog table").build();
-        DATABASE_ARG = builder.argument("database", Database.class).hidden()
-        .description("Database connection defined as argument or created by DatabasePreCommandStep").build();
+            .description("Tag to add to the database changelog table").build();
+        DATABASE_ARG = builder.argument("database", Database.class).required()
+                .description("Database connection").build();
+        InternalDatabaseCommandStep.addApplicableCommand(COMMAND_NAME);
     }
-
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {

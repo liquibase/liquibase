@@ -50,5 +50,4 @@ liquibase.command.core.UpdateTestingRollbackCommandStep
 liquibase.command.core.UpdateToTagCommandStep
 liquibase.command.core.UpdateToTagSqlCommandStep
 liquibase.command.core.ValidateCommandStep
-liquibase.command.database.DatabasePreCommandStep
-liquibase.command.database.DatabasePostCommandStep
+liquibase.command.InternalDatabaseCommandStep

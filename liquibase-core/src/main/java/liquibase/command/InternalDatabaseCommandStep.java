@@ -1,10 +1,7 @@
-package liquibase.command.database;
+package liquibase.command;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.command.*;
-import liquibase.command.core.SnapshotCommandStep;
-import liquibase.command.core.TagCommandStep;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.exception.CommandValidationException;
@@ -16,15 +13,20 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+
+import static java.util.ResourceBundle.getBundle;
+
 @LiquibaseService(skip = true)
-public class DatabasePreCommandStep extends AbstractCommandStep {
+public class InternalDatabaseCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
 
     public static final String[] COMMAND_NAME = {"databasePreStep"};
 
-    public static final String[][] APPLICABLE_COMMANDS = new String[][]{
-            TagCommandStep.COMMAND_NAME,
-            SnapshotCommandStep.COMMAND_NAME
-    };
+    private final static List<String[]> APPLICABLE_COMMANDS = new ArrayList<>();
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
@@ -34,6 +36,8 @@ public class DatabasePreCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+
+    private Database database;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -56,6 +60,20 @@ public class DatabasePreCommandStep extends AbstractCommandStep {
     }
 
     /**
+     * Method that allows Commands to register themselves to be able to use this CommandStep.
+     * @param commandName the command name.
+     */
+    public static void addApplicableCommand(String[] commandName) {
+        APPLICABLE_COMMANDS.add(commandName);
+    }
+
+    @Override
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+        commandScope.addArgumentValue(DATABASE_ARG.getName(), this.obtainDatabase(commandScope, DATABASE_ARG));
+    }
+
+    /**
      * Try to retrieve and set the database object from the command scope, otherwise creates a new one .
      *
      * @param commandScope current command scope
@@ -75,10 +93,9 @@ public class DatabasePreCommandStep extends AbstractCommandStep {
             String defaultCatalogName = commandScope.getArgumentValue(builder.argument("defaultCatalogName", String.class).build());
             String driver = commandScope.getArgumentValue(builder.argument("driver", String.class).build());
             String driverPropertiesFile = commandScope.getArgumentValue(builder.argument("driverPropertiesFile", String.class).build());
-            commandScope.addArgumentValue(DatabasePostCommandStep.CLOSE_DATABASE_AFTER_COMMAND_ARG.getName(), Boolean.TRUE);
-            return createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile);
+            this.database = createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile);
+            return this.database;
         } else {
-            commandScope.addArgumentValue(DatabasePostCommandStep.CLOSE_DATABASE_AFTER_COMMAND_ARG.getName(), Boolean.FALSE);
             return commandScope.getArgumentValue(databaseCommandArgument);
         }
     }
@@ -140,8 +157,6 @@ public class DatabasePreCommandStep extends AbstractCommandStep {
         return database;
     }
 
-
-
     @Override
     public String[][] defineCommandNames() {
         return new String[][] { COMMAND_NAME };
@@ -149,25 +164,32 @@ public class DatabasePreCommandStep extends AbstractCommandStep {
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        super.adjustCommandDefinition(commandDefinition);
         if (commandDefinition.getPipeline().size() == 1) {
             commandDefinition.setInternal(true);
+        } else {
+            commandDefinition.getArgument(InternalDatabaseCommandStep.DATABASE_ARG.getName()).hide();
+            commandDefinition.getArgument(InternalDatabaseCommandStep.DATABASE_ARG.getName()).setRequired(false);
         }
-    }
-
-    @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
-        commandScope.addArgumentValue(DATABASE_ARG.getName(), this.obtainDatabase(commandScope, DATABASE_ARG));
     }
 
     @Override
     public int getOrder(CommandDefinition commandDefinition) {
         for (String[] commandName : APPLICABLE_COMMANDS) {
             if (commandDefinition.is(commandName)) {
-                return 900;
+                return 500;
             }
         }
         return super.getOrder(commandDefinition);
+    }
+
+    @Override
+    public void cleanUp(CommandResultsBuilder resultsBuilder) {
+        if (database != null) {
+            try {
+                database.close();
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).warning(coreBundle.getString("problem.closing.connection"), e);
+            }
+        }
     }
 }

@@ -77,11 +77,22 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         return required;
     }
 
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+
     /**
      * Hidden arguments are ones that can be called via integrations, but should not be normally shown in help to users.
      */
     public boolean getHidden() {
         return hidden;
+    }
+
+    /**
+     * Set this argument as hidden.
+     */
+    public void hide() {
+        this.hidden = true;
     }
 
     /**

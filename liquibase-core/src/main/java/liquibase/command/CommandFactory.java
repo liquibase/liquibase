@@ -39,7 +39,7 @@ public class CommandFactory implements SingletonObject {
         }
 
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
-        if (pipeline.size() == 0) {
+        if (pipeline.isEmpty()) {
             throw new IllegalArgumentException("Unknown command '" + StringUtil.join(commandName, " ") + "'");
         }
 
