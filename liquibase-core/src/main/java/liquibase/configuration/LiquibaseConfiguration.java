@@ -159,6 +159,11 @@ public class LiquibaseConfiguration implements SingletonObject {
                         logMessage.append("Overrides ");
                     }
 
+                    //
+                    // Only lower case the first character is
+                    // the first two characters are NOT uppercase.  This allows provider
+                    // strings like 'AWS' to be displayed correctly, i.e. as 'AWS', not 'aWS'
+                    //
                     String describe = providedValue.describe();
                     char[] chars = describe.toCharArray();
                     if (chars.length >= 2 && Character.isUpperCase(chars[0]) && Character.isUpperCase(chars[1])) {
