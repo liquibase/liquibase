@@ -13,17 +13,11 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DatabaseDataType;
-import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.ForeignKeyConstraint;
-import liquibase.statement.NotNullConstraint;
-import liquibase.statement.UniqueConstraint;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.ForeignKey;
@@ -393,7 +387,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             sql += " COMMENT='" + database.escapeStringForDatabase(statement.getRemarks()) + "' ";
         }
         additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
-        return additionalSql.toArray(new Sql[additionalSql.size()]);
+        return additionalSql.toArray(EMPTY_SQL);
     }
 
     /**

@@ -32,7 +32,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
 	@Override
     public DatabaseObject[] getContainingObjects() {
-		return getColumns().toArray(new Column[getColumns().size()]);
+		return getColumns().toArray(new Column[0]);
 	}
 
 	@Override

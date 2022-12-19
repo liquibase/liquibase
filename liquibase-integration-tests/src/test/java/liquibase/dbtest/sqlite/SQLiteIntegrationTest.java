@@ -6,13 +6,11 @@ import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.ValidationFailedException;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.structure.core.UniqueConstraint;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.Date;
 
-import static liquibase.test.SnapshotAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class SQLiteIntegrationTest extends AbstractIntegrationTest {

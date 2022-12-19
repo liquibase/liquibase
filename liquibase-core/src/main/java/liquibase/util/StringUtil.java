@@ -110,7 +110,7 @@ public class StringUtil {
             returnArray.add(trimmedString);
         }
 
-        return returnArray.toArray(new String[returnArray.size()]);
+        return returnArray.toArray(new String[0]);
     }
 
     /**
