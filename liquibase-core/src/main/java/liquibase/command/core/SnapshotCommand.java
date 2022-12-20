@@ -54,7 +54,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }
 
-        this.schemas = finalList.toArray(new CatalogAndSchema[finalList.size()]);
+        this.schemas = finalList.toArray(new CatalogAndSchema[0]);
 
 
         return this;

@@ -54,7 +54,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                     supported.add(database.getShortName());
                 }
             }
-            return supported.toArray(new String[supported.size()]);
+            return supported.toArray(new String[0]);
 
         } else {
             return super.createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);

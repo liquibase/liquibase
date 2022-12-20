@@ -110,6 +110,46 @@ public class ValidatingVisitorTest {
     }
 
     @Test
+    public void visit_validateErrorOnEmptyAuthor() throws Exception {
+
+        ChangeSet changeSet = new ChangeSet("emptyAuthor", "", false, false, "path/changelog", null, null, null);
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>());
+        handler.visit(changeSet, new DatabaseChangeLog(), null, null);
+
+        assertEquals(1, handler.getValidationErrors().getErrorMessages().size());
+        assertTrue(handler.getValidationErrors().getErrorMessages().get(0).contains("Author"));
+        assertFalse(handler.validationPassed());
+    }
+
+    @Test
+    public void visit_validateErrorOnEmptyId() throws Exception {
+
+        ChangeSet changeSet = new ChangeSet("", "emptyId", false, false, "path/changelog", null, null, null);
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>());
+        handler.visit(changeSet, new DatabaseChangeLog(), null, null);
+
+        assertEquals(1, handler.getValidationErrors().getErrorMessages().size());
+        assertTrue(handler.getValidationErrors().getErrorMessages().get(0).contains("Id"));
+        assertFalse(handler.validationPassed());
+    }
+
+    @Test
+    public void visit_validateErrorOnEmptyAuthorAndId() throws Exception {
+
+        ChangeSet changeSet = new ChangeSet("", "", false, false, "path/changelog", null, null, null);
+
+        ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>());
+        handler.visit(changeSet, new DatabaseChangeLog(), null, null);
+
+        assertEquals(1, handler.getValidationErrors().getErrorMessages().size());
+        assertTrue(handler.getValidationErrors().getErrorMessages().get(0).contains("Author"));
+        assertTrue(handler.getValidationErrors().getErrorMessages().get(0).contains("Id"));
+        assertFalse(handler.validationPassed());
+    }
+
+    @Test
     public void visit_torunOnly() throws Exception {
 
         changeSet1.addChange(new CreateTableChange() {

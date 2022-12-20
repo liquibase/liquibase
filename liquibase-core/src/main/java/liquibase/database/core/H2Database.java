@@ -235,11 +235,10 @@ public class H2Database extends AbstractJdbcDatabase {
             return true;
         }
         String url = getConnection().getURL();
-        boolean isLocalURL = (
+        return (
                 super.isSafeToRunUpdate()
                         || (!url.startsWith("jdbc:h2:tcp:") && (!url.startsWith("jdbc:h2:ssl:"))) // exclude remote URLs
         );
-        return isLocalURL;
     }
 
     @Override

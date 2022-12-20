@@ -106,7 +106,7 @@ public class ChangedViewChangeGenerator extends AbstractChangeGenerator implemen
         }
 
 
-        return changes.toArray(new Change[changes.size()]);
+        return changes.toArray(EMPTY_CHANGE);
     }
 
     protected CreateViewChange createViewChange() {
