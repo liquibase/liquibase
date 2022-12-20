@@ -46,7 +46,7 @@ public class CommandFactory implements SingletonObject {
         final Set<CommandArgumentDefinition<?>> stepArguments = new HashSet<>();
         for (CommandStep step : pipeline) {
             for (String[] name : step.defineCommandNames()) {
-                stepArguments.addAll(this.commandArgumentDefinitions.get(StringUtil.join(name, " ")));
+                stepArguments.addAll(this.commandArgumentDefinitions.getOrDefault(StringUtil.join(name, " "), new HashSet<>()));
             }
         }
 
