@@ -1,7 +1,8 @@
-package liquibase.command;
+package liquibase.command.core;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.exception.CommandValidationException;

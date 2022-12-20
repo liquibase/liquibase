@@ -6,7 +6,7 @@ import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.command.CommandScope;
-import liquibase.command.InternalDatabaseCommandStep;
+import liquibase.command.core.InternalDatabaseCommandStep;
 import liquibase.command.core.InternalDropAllCommandStep;
 import liquibase.command.core.TagCommandStep;
 import liquibase.database.Database;
