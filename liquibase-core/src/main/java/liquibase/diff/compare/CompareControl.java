@@ -135,9 +135,8 @@ public class CompareControl {
                 referenceSchemas.add(correctedReferenceSchema);
                 targetSchemas.add(correctedTargetSchema);
             }
-            returnObj.finalSchemaComparisons = schemaComparisons.toArray(new CompareControl
-                .SchemaComparison[schemaComparisons.size()]);
-            returnObj.finalTargetSchemas = targetSchemas.toArray(new CatalogAndSchema[targetSchemas.size()]);
+            returnObj.finalSchemaComparisons = schemaComparisons.toArray(new SchemaComparison[0]);
+            returnObj.finalTargetSchemas = targetSchemas.toArray(new CatalogAndSchema[0]);
         }
 
         return returnObj;

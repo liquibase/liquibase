@@ -235,18 +235,26 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public ChangeSet getChangeSet(String path, String author, String id) {
-        for (ChangeSet changeSet : changeSets) {
+	    final List<ChangeSet> possibleChangeSets = getChangeSets(path, author, id);
+	    if (possibleChangeSets.isEmpty()){
+	    	return null;
+	    }
+	    return possibleChangeSets.get(0);
+    }
+
+    public List<ChangeSet> getChangeSets(String path, String author, String id) {
+	    final ArrayList<ChangeSet> changeSetsToReturn = new ArrayList<>();
+	    for (ChangeSet changeSet : this.changeSets) {
             final String normalizedPath = normalizePath(changeSet.getFilePath());
             if (normalizedPath != null &&
                     normalizedPath.equalsIgnoreCase(normalizePath(path)) &&
                     changeSet.getAuthor().equalsIgnoreCase(author) &&
                     changeSet.getId().equalsIgnoreCase(id) &&
                     isDbmsMatch(changeSet.getDbmsSet())) {
-                return changeSet;
+                changeSetsToReturn.add(changeSet);
             }
         }
-
-        return null;
+        return changeSetsToReturn;
     }
 
     public List<ChangeSet> getChangeSets() {
@@ -344,6 +352,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             changeSet.setStoredFilePath(ranChangeSet.getStoredChangeLog());
         }
         return changeSet;
+    }
+
+    public List<ChangeSet> getChangeSets(RanChangeSet ranChangeSet) {
+        return getChangeSets(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
     }
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
@@ -623,11 +635,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (pathName == null) {
                 throw new SetupException("No path attribute for includeAll");
             }
-            pathName = pathName.replace('\\', '/');
 
-            if (StringUtil.isNotEmpty(pathName) && !(pathName.endsWith("/"))) {
-                pathName = pathName + '/';
-            }
             String relativeTo = null;
             if (isRelativeToChangelogFile) {
                 relativeTo = this.getPhysicalFilePath();
@@ -645,6 +653,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
 
                 path = path.replace("\\", "/");
+                if (StringUtil.isNotEmpty(path) && !(path.endsWith("/"))) {
+                    path = path + '/';
+                }
                 LOG.fine("includeAll for " + pathName);
                 LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
 

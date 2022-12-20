@@ -3,7 +3,6 @@ package liquibase.extension.testing.testsystem.core;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.DockerDatabaseWrapper;
-import liquibase.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;

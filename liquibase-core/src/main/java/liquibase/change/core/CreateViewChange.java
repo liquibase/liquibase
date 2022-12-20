@@ -10,14 +10,12 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
-import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.statement.core.SetViewRemarksStatement;
 import liquibase.structure.core.View;
 import liquibase.util.FileUtil;
@@ -32,6 +30,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
 /**
  * Creates a new view.
@@ -228,10 +228,7 @@ public class CreateViewChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<>();
 
-        boolean replaceIfExists = false;
-        if ((getReplaceIfExists() != null) && getReplaceIfExists()) {
-            replaceIfExists = true;
-        }
+        boolean replaceIfExists = (getReplaceIfExists() != null) && getReplaceIfExists();
 
         boolean fullDefinition = false;
         if (this.fullDefinition != null) {
@@ -279,7 +276,7 @@ public class CreateViewChange extends AbstractChange {
             }
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     protected CreateViewStatement createViewStatement(String catalogName, String schemaName, String viewName, String selectQuery, boolean b) {

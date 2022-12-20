@@ -1,0 +1,66 @@
+name: Build Main/Master SNAPSHOT
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "5 6 * * *"
+  push:
+    branches:
+      - 'main'
+      - 'master'
+jobs:
+  build-master:
+    name: Build & Package Master
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Java for publishing to GitHub Repository
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+          server-id: github
+
+      # Version artifact based off of branch and commit SHA.
+      - name: Version Artifact
+        run: mvn versions:set -DnewVersion="master-SNAPSHOT"
+
+      # Publish to GitHub Packages
+      - name: Publish package
+        run: mvn -B clean deploy -DskipTests=true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-sha:
+    name: Build & Package SHA
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Java for publishing to GitHub Repository
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+          server-id: github
+
+      # Version artifact based off of branch and commit SHA.
+      - name: Version Artifact
+        run: mvn versions:set -DnewVersion="$(git rev-parse --short HEAD)-SNAPSHOT"
+
+      # Publish to GitHub Packages
+      - name: Publish package
+        run: mvn -B clean deploy -DskipTests=true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

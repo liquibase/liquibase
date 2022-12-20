@@ -5,7 +5,6 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
@@ -165,7 +164,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         if (returnList.size() == 0) {
             returnList.add(database.getDefaultCatalogName());
         }
-        return returnList.toArray(new String[returnList.size()]);
+        return returnList.toArray(new String[0]);
     }
     
 }

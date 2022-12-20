@@ -8,7 +8,7 @@ import liquibase.exception.LiquibaseException;
 /**
  * <p>Applies the DatabaseChangeLogs to the database, testing rollback. This is
  * done by updating the database, rolling it back then updating it again.</p>
- * 
+ *
  * @description Liquibase UpdateTestingRollback Maven plugin
  * @goal updateTestingRollback
  */
@@ -16,6 +16,10 @@ public class LiquibaseUpdateTestingRollback extends AbstractLiquibaseUpdateMojo 
 
     @Override
     protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
-        liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+        try {
+            liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+        } catch (LiquibaseException exception) {
+            handleUpdateException(exception);
+        }
     }
 }

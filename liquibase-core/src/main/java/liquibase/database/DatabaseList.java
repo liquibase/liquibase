@@ -54,11 +54,7 @@ public class DatabaseList {
         }
 
 
-        if (dbmsSupported.isEmpty() || dbmsSupported.contains(databaseShortName)) {
-            return true;
-        }
-
-        return false;
+        return dbmsSupported.isEmpty() || dbmsSupported.contains(databaseShortName);
 
     }
 
