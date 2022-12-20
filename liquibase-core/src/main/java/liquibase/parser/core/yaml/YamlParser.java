@@ -1,7 +1,6 @@
 package liquibase.parser.core.yaml;
 
 import liquibase.Scope;
-import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.parser.LiquibaseParser;
 import liquibase.resource.ResourceAccessor;

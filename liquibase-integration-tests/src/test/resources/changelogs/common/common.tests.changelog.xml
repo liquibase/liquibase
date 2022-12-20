@@ -512,6 +512,10 @@
         </loadData>
     </changeSet>
 
+    <changeSet id="sampleCSVData" author="nvoxland">
+        <loadData tableName="csvdata" file="changelogs/sample.data1.csv.gz"/>
+    </changeSet>
+
     <changeSet id="createTableNamedPKRef" author="nvoxland">
         <createTable tableName="createtablenamedpkref">
             <column name="id" type="int">
@@ -1173,7 +1177,7 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="example" author="view-if-exists" dbms="!oracle">
+    <changeSet id="example" author="view-if-exists" dbms="!oracle,!firebird">
         <dropView viewName="does_not_exist" ifExists="true"/>
     </changeSet>
 

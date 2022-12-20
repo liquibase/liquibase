@@ -22,6 +22,6 @@ public class UpdateDataChangeGenerator extends AbstractSqlGenerator<UpdateExecut
 
     @Override
     public Sql[] generateSql(UpdateExecutablePreparedStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[0];
+        return EMPTY_SQL;
     }
 }

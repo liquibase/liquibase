@@ -7,7 +7,6 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
 import liquibase.configuration.AbstractMapConfigurationValueProvider;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
 

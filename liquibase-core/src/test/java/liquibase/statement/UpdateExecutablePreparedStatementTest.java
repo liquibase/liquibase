@@ -7,7 +7,6 @@ import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ResourceAccessor;
-import liquibase.structure.core.Column;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.*;

@@ -22,9 +22,8 @@ public class HTMLListWriter {
     }
 
     public void writeHTML(SortedSet objects) throws IOException {
-        Writer fileWriter = new OutputStreamWriter(outputDir.resolve(filename).openOutputStream(new OpenOptions()), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
 
-        try {
+        try (Writer fileWriter = new OutputStreamWriter(outputDir.resolve(filename).openOutputStream(new OpenOptions()), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
             fileWriter.append("<HTML>\n" + "<HEAD><meta charset=\"utf-8\"/>\n" + "<TITLE>\n");
             fileWriter.append(title);
             fileWriter.append("\n" + "</TITLE>\n" + "<LINK REL =\"stylesheet\" TYPE=\"text/css\" HREF=\"stylesheet.css\" TITLE=\"Style\">\n" + "</HEAD>\n" + "<BODY BGCOLOR=\"white\">\n" + "<FONT size=\"+1\" CLASS=\"FrameHeadingFont\">\n" + "<B>");
@@ -49,8 +48,6 @@ public class HTMLListWriter {
                     "\n" +
                     "</BODY>\n" +
                     "</HTML>");
-        } finally {
-            fileWriter.close();
         }
     }
 

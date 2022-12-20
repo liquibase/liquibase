@@ -108,7 +108,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             }
         }
         sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
-        return sql.toArray(new Sql[sql.size()]);
+        return sql.toArray(EMPTY_SQL);
     }
 
     private boolean shouldPrependDropViewStatement(Database database, CreateViewStatement statement) {
