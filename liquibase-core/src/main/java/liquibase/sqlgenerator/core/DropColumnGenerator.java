@@ -76,7 +76,7 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
                 }
             }
         }
-        return result.toArray(new Sql[result.size()]);
+        return result.toArray(EMPTY_SQL);
     }
 
     private Sql[] generateSingleColumnSql(DropColumnStatement statement, Database database) {
@@ -102,7 +102,7 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
         for (DropColumnStatement column : columns) {
             affected.add(getAffectedColumn(column));
         }
-        return affected.toArray(new Column[affected.size()]);
+        return affected.toArray(new Column[0]);
     }
 
     protected Column getAffectedColumn(DropColumnStatement statement) {

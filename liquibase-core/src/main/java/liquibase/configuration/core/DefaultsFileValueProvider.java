@@ -7,7 +7,6 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
 import liquibase.configuration.AbstractMapConfigurationValueProvider;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
 
@@ -138,13 +137,9 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
             return true;
         }
 
-        if (wantedKey.replaceFirst("^liquibase\\.", "").equalsIgnoreCase(StringUtil.toCamelCase(storedKey))
-                || wantedKey.replaceFirst("^liquibase\\.command\\.", "").equalsIgnoreCase(StringUtil.toCamelCase(storedKey))) {
-            //Stored the argument name without a prefix
-            return true;
-        }
-
-        return false;
+        //Stored the argument name without a prefix
+        return wantedKey.replaceFirst("^liquibase\\.", "").equalsIgnoreCase(StringUtil.toCamelCase(storedKey))
+                || wantedKey.replaceFirst("^liquibase\\.command\\.", "").equalsIgnoreCase(StringUtil.toCamelCase(storedKey));
     }
 
     @Override

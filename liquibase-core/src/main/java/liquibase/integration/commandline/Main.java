@@ -836,7 +836,7 @@ public class Main {
             fixedArgs.add(arg);
         }
 
-        return fixedArgs.toArray(new String[fixedArgs.size()]);
+        return fixedArgs.toArray(new String[0]);
     }
 
     /**
@@ -1239,12 +1239,10 @@ public class Main {
         // Check the licensing keys to see if they are being set from properties
         //
         if (liquibaseProLicenseKey == null) {
-            String key = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.licenseKey").getValue();
-            liquibaseProLicenseKey = key;
+            liquibaseProLicenseKey = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.licenseKey").getValue();
         }
         if (liquibaseHubApiKey == null) {
-            String key = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
-            liquibaseHubApiKey = key;
+            liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
         }
 
         //
@@ -1427,7 +1425,7 @@ public class Main {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
                 @Override
                 public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread()
+                    return new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
                             .getContextClassLoader());
                 }
             });
@@ -1436,7 +1434,7 @@ public class Main {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
                 @Override
                 public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[urls.size()]), null);
+                    return new URLClassLoader(urls.toArray(new URL[0]), null);
                 }
             });
         }
@@ -1578,7 +1576,8 @@ public class Main {
                 }
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                 Resource file = pathHandlerFactory.getResource(currentChangeLogFile);
-                if (file.exists() && (!Boolean.parseBoolean(overwriteOutputFile))) {
+                final boolean overwriteOutputFileBool = Boolean.parseBoolean(overwriteOutputFile);
+                if (file.exists() && (!overwriteOutputFileBool)) {
                     throw new LiquibaseException(
                             String.format(coreBundle.getString("changelogfile.already.exists"), currentChangeLogFile));
                 }
@@ -1587,7 +1586,7 @@ public class Main {
                 CommandLineUtils.doGenerateChangeLog(currentChangeLogFile, database, finalTargetSchemas,
                         StringUtil.trimToNull(diffTypes), StringUtil.trimToNull(changeSetAuthor),
                         StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataOutputDirectory),
-                        diffOutputControl);
+                        diffOutputControl, overwriteOutputFileBool);
                 return;
             } else if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {
                 CommandScope snapshotCommand = new CommandScope("internalSnapshot");
@@ -1876,9 +1875,11 @@ public class Main {
                         throw new CommandLineParsingException(
                                 String.format(coreBundle.getString("command.requires.tag"), COMMANDS.UPDATE_TO_TAG));
                     }
-
-                    liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression
-                            (getLabelFilter()));
+                    try {
+                        liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    } catch (LiquibaseException updateException) {
+                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
+                    }
                 } else if (COMMANDS.UPDATE_TO_TAG_SQL.equalsIgnoreCase(command)) {
                     if ((commandParams == null) || commandParams.isEmpty()) {
                         throw new CommandLineParsingException(
@@ -1960,7 +1961,11 @@ public class Main {
                     liquibase.futureRollbackSQL(getCommandArgument(), new Contexts(contexts), new LabelExpression
                             (getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(command)) {
-                    liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    try {
+                        liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(getLabelFilter()));
+                    } catch (LiquibaseException updateException) {
+                        handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
+                    }
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
                     CommandScope historyCommand = new CommandScope("internalHistory");
                     historyCommand.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, database);

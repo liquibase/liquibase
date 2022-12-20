@@ -69,7 +69,7 @@
         </addColumn>
     </changeSet>
     <changeSet id="8" author="nvoxland">
-        <addNotNullConstraint tableName="publication" columnName="title" defaultNullValue="-1"/>
+        <addNotNullConstraint tableName="magazine" columnName="title" defaultNullValue="-1"/>
     </changeSet>
 
     <changeSet id="9" author="nvoxland">
@@ -134,7 +134,7 @@
 
     <changeSet id="20" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
-            <param name="tableName" value="page"/>
+            <param name="tableName" value="pageTable"/>
             <param name="columnName" value="magazine_id"/>
             <param name="newValue" value="4"/>
         </customChange>

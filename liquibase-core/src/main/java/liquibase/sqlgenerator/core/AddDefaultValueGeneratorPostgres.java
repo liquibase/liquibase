@@ -53,7 +53,7 @@ public class AddDefaultValueGeneratorPostgres extends AddDefaultValueGenerator {
                 getAffectedColumn(statement),
                 getAffectedSequence(sequenceFunction));
         commands.add(alterSequenceOwner);
-        return commands.toArray(new Sql[commands.size()]);
+        return commands.toArray(EMPTY_SQL);
     }
 
     protected Sequence getAffectedSequence(SequenceNextValueFunction sequenceFunction) {

@@ -11,7 +11,7 @@ on:
 jobs:
   setup:
     name: Setup
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       tag: ${{ steps.collect-data.outputs.tag }}
       version: ${{ steps.collect-data.outputs.version }}
@@ -39,7 +39,7 @@ jobs:
   deploy_maven:
     name: Deploy to Maven
     needs: [ setup ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Download release assets
         uses: robinraju/release-downloader@v1.6
@@ -70,7 +70,7 @@ jobs:
         run: |
           version=${{ needs.setup.outputs.version }}
 
-          unzip liquibase-additional-*.zip
+          unzip -j liquibase-additional-*.zip
 
           ##extracts and sign poms
           unzip -j liquibase-core-${version}.jar META-INF/maven/org.liquibase/liquibase-core/pom.xml
@@ -168,7 +168,7 @@ jobs:
   deploy_javadocs:
     name: Upload Javadocs
     needs: [ setup ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
       id-token: write

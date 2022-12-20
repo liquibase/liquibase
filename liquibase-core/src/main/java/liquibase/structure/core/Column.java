@@ -21,6 +21,7 @@ public class Column extends AbstractDatabaseObject {
     private String name;
     private Boolean computed;
     private Boolean descending;
+    private boolean forIndex;
 
     public Column() {
     }
@@ -58,6 +59,14 @@ public class Column extends AbstractDatabaseObject {
         }
 
         setRemarks(columnConfig.getRemarks());
+    }
+
+    public boolean isForIndex() {
+        return forIndex;
+    }
+
+    public void setForIndex(boolean forIndex) {
+        this.forIndex = forIndex;
     }
 
     public Relation getRelation() {
@@ -466,6 +475,7 @@ public class Column extends AbstractDatabaseObject {
         if (BooleanUtil.isTrue(getDescending()) || BooleanUtil.isTrue(getComputed())) {
             fields.remove("relation");
         }
+        fields.remove("forIndex");
         return fields;
     }
 }

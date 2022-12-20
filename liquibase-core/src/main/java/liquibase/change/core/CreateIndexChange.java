@@ -103,7 +103,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
                         getTableName(),
                         this.isUnique(),
                         getAssociatedWith(),
-                        getColumns().toArray(new AddColumnConfig[getColumns().size()]))
+                        getColumns().toArray(new AddColumnConfig[0]))
                         .setTablespace(getTablespace())
                         .setClustered(getClustered())
         };

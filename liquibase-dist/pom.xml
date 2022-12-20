@@ -19,11 +19,11 @@
 		<postgresql.version>42.5.1</postgresql.version>
 		<mssql.version>11.2.1.jre8</mssql.version>
 		<mysql.version>8.0.21</mysql.version>
-		<mariadb.version>3.0.8</mariadb.version>
+		<mariadb.version>3.1.0</mariadb.version>
 		<oracle.version>21.7.0.0</oracle.version>
-		<sqlite.version>3.39.3.0</sqlite.version>
-		<db2.version>11.5.7.0</db2.version>
-		<firebird.version>4.0.6.java8</firebird.version>
+		<sqlite.version>3.40.0.0</sqlite.version>
+		<db2.version>11.5.8.0</db2.version>
+		<firebird.version>4.0.8.java8</firebird.version>
 
 		<assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
 	</properties>
@@ -76,7 +76,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.13.22</version>
+            <version>3.13.25</version>
         </dependency>
 
         <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
@@ -91,6 +91,12 @@
             <artifactId>mariadb-java-client</artifactId>
             <version>${mariadb.version}</version>
             <optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.waffle</groupId>
+					<artifactId>waffle-jna</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -174,7 +180,7 @@
 			<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.4.1</version>
 				<dependencies>
 					<dependency>
                         <groupId>com.github.marcosemiao.maven.plugins.shade.resource</groupId>

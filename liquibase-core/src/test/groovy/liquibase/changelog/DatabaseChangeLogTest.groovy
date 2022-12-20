@@ -370,7 +370,7 @@ create view sql_view as select * from sql_table;'''
         changeLogFile.includeAll("", true, { r -> r != changeLogFile.physicalFilePath}, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
 
         then:
-        resourceAccessor.callingPath == "com/example/children"
+        resourceAccessor.callingPath == "com/example/children/"
     }
 
     @Unroll("#featureName: #changeSets")

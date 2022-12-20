@@ -1,6 +1,5 @@
 package liquibase.precondition;
 
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.ChangeLogParserConfiguration;
