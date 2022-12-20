@@ -17,6 +17,6 @@ public class BatchDmlExecutablePreparedStatementGenerator extends AbstractSqlGen
 
     @Override
     public Sql[] generateSql(BatchDmlExecutablePreparedStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[0];
+        return EMPTY_SQL;
     }
 }

@@ -57,7 +57,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
         }
 
         if (!differences.hasDifferences()) {
-            return new Change[0];
+            return EMPTY_CHANGE;
         }
 
         Index index = (Index) changedObject;

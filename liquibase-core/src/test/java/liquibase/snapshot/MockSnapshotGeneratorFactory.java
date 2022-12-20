@@ -7,7 +7,6 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class MockSnapshotGeneratorFactory extends SnapshotGeneratorFactory{

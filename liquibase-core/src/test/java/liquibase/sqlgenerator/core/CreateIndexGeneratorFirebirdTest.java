@@ -6,7 +6,6 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Column;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

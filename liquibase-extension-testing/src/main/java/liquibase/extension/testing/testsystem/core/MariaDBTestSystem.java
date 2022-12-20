@@ -3,9 +3,7 @@ package liquibase.extension.testing.testsystem.core;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.DockerDatabaseWrapper;
-import org.jetbrains.annotations.NotNull;
 import org.testcontainers.containers.MariaDBContainer;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 public class MariaDBTestSystem extends DatabaseTestSystem {

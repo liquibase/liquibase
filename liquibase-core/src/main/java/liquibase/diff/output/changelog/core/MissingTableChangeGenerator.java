@@ -155,8 +155,8 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
             boolean primaryKeyOrderMatchesTableOrder = checkPrimaryKeyOrderMatchesTableOrder(missingTable, pkColumnList);
 
             ConstraintsConfig constraintsConfig = null;
-            // In MySQL, the primary key must be specified at creation for an autoincrement column
-            if ((pkColumnList != null) && primaryKeyOrderMatchesTableOrder &&  pkColumnList.contains(column.getName())) {
+            // In MySQL, the primary key must be specified at creation for an autoincrement column, but it is not required to match the order of the table.
+            if ((pkColumnList != null) && (primaryKeyOrderMatchesTableOrder || referenceDatabase instanceof MySQLDatabase) &&  pkColumnList.contains(column.getName())) {
                 if ((referenceDatabase instanceof MSSQLDatabase) && (primaryKey.getBackingIndex() != null) &&
                         (primaryKey.getBackingIndex().getClustered() != null) && !primaryKey.getBackingIndex()
                         .getClustered()) {

@@ -9,7 +9,6 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.structure.core.Column;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
