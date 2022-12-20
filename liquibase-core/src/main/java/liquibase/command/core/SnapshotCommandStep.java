@@ -31,9 +31,8 @@ public class SnapshotCommandStep extends AbstractCommandStep {
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        DATABASE_ARG = builder.argument("database", Database.class).required().description("Database connection").build();
-        SCHEMAS_ARG = builder.argument("schemas", String.class)
-                .description("The schemas to snapshot").build();
+        DATABASE_ARG = builder.argument("database", Database.class).hidden().description("Database connection").build();
+        SCHEMAS_ARG = builder.argument("schemas", String.class).description("The schemas to snapshot").build();
         SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)
                 .description("Output format to use (JSON, YAML, or TXT)").build();
         SNAPSHOT_CONTROL_ARG = builder.argument("snapshotControl", SnapshotControl.class).hidden().build();

@@ -34,6 +34,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private String defaultValueDescription;
     private ConfigurationValueConverter<DataType> valueConverter;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
+    private CommandArgumentDefinition<?> supersededBy;
 
     protected CommandArgumentDefinition(String name, Class<DataType> type) {
         this.name = name;
@@ -79,6 +80,14 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
 
     public void setRequired(boolean required) {
         this.required = required;
+    }
+
+    public CommandArgumentDefinition<?> getSupersededBy() {
+        return this.supersededBy;
+    }
+
+    public void setSupersededBy(CommandArgumentDefinition<?> supersededBy) {
+        this.supersededBy = supersededBy;
     }
 
     /**
@@ -132,12 +141,9 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      */
     public void validate(CommandScope commandScope) throws CommandValidationException {
         final DataType currentValue = commandScope.getArgumentValue(this);
-        if (this.isRequired() && currentValue == null && !(
-                //FIXME ugly hack, need something better than that.
-                (this.getName().equals(InternalDatabaseCommandStep.URL_ARG.getName()) &&
-            commandScope.getArgumentValue(InternalDatabaseCommandStep.DATABASE_ARG) != null ))
-        ) {
-            throw new CommandValidationException(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getCurrentValue().convert(this.getName()), "missing required argument", new MissingRequiredArgumentException(this.getName()));
+        if (this.isRequired() && currentValue == null &&
+           (this.getSupersededBy()  == null || commandScope.getArgumentValue(this.getSupersededBy()) == null)) {
+                throw new CommandValidationException(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getCurrentValue().convert(this.getName()), "missing required argument", new MissingRequiredArgumentException(this.getName()));
         }
     }
 
@@ -196,6 +202,16 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
          */
         public Building<DataType> required() {
             this.newCommandArgument.required = true;
+
+            return this;
+        }
+
+        /**
+         * Specifies a CommandArgument that can replace this one if this one is not available.
+         *
+         */
+        public Building<DataType> supersededBy(CommandArgumentDefinition<?> commandArgumentDefinition) {
+            this.newCommandArgument.supersededBy = commandArgumentDefinition;
 
             return this;
         }

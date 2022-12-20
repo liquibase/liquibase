@@ -40,7 +40,6 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required().description("The JDBC database connection URL").build();
         DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
                 .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
@@ -56,6 +55,9 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
         DATABASE_ARG = builder.argument("database", Database.class).hidden().build();
+        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required().supersededBy(DATABASE_ARG)
+                .description("The JDBC database connection URL").build();
+        DATABASE_ARG.setSupersededBy(URL_ARG);
     }
 
     /**
