@@ -11,7 +11,6 @@ import liquibase.exception.MissingRequiredArgumentException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ResourceAccessor;
-import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
 
-@LiquibaseService(skip = true)
 public class InternalDatabaseCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
 
     public static final String[] COMMAND_NAME = {"databasePreStep"};
@@ -63,9 +61,11 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
 
     /**
      * Method that allows Commands to register themselves to be able to use this CommandStep.
-     * @param commandName the command name.
+     *
+     * @deprecated beta approach
      */
-    public static void addApplicableCommand(String[] commandName) {
+    @Deprecated
+    protected static void addApplicableCommand(String[] commandName) {
         APPLICABLE_COMMANDS.add(commandName);
     }
 
