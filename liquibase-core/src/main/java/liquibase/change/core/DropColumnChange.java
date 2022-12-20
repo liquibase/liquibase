@@ -146,7 +146,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
         }
         
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new SqlStatement[0]);
     }
     
     private SqlStatement[] generateSingleColumn(Database database) throws DatabaseException {
@@ -162,7 +162,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
         }
         
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new SqlStatement[0]);
     }
     
     @Override

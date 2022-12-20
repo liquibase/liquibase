@@ -288,7 +288,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && (database.getDefaultSchemaName() != null) && database
-                        .getOutputDefaultSchema()) {
+                        .getOutputDefaultSchema() && (database.supportsSchemas() || database.supportsCatalogs())) {
                     referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) + "." + referencesString;
                 }
                 buffer.append(referencesString);
@@ -393,7 +393,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             sql += " COMMENT='" + database.escapeStringForDatabase(statement.getRemarks()) + "' ";
         }
         additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
-        return additionalSql.toArray(new Sql[additionalSql.size()]);
+        return additionalSql.toArray(EMPTY_SQL);
     }
 
     /**

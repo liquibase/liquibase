@@ -113,4 +113,9 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
     public boolean createsIndexesForForeignKeys() {
         return true;
     }
+
+    @Override
+    public String getConnectionCatalogName() {
+        return "DEFAULT";
+    }
 }

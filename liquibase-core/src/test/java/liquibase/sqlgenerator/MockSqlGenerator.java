@@ -76,6 +76,6 @@ public class MockSqlGenerator implements SqlGenerator {
 
         sql.addAll(Arrays.asList(sqlGeneratorChain.generateSql(statement, database)));
 
-        return sql.toArray(new Sql[sql.size()]);
+        return sql.toArray(EMPTY_SQL);
     }
 }
