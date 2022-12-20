@@ -29,25 +29,42 @@ public class StringUtils {
             return returnString;
         }
     }
-    
+
     /**
      * Removes any comments from multiple line SQL using {@link #stripComments(String)}
-     *  and then extracts each individual statement using {@link #splitSQL(String, String)}.
-     * 
-     * @param multiLineSQL A String containing all the SQL statements
+     * and then extracts each individual statement using {@link #splitSQL(String, String)}.
+     *
+     * @param multiLineSQL  A String containing all the SQL statements
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
      */
-    public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
-
+    public static String[] processMultiLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
         StringClauses parsed = SqlParser.parse(multiLineSQL, true, !stripComments);
 
-        List<String> returnArray = new ArrayList<String>();
+        List<String> returnArray = new ArrayList<>();
 
         StringBuilder currentString = new StringBuilder();
         String previousPiece = null;
         boolean previousDelimiter = false;
-        for (Object piece : parsed.toArray(true)) {
-            if (splitStatements && piece instanceof String && isDelimiter((String) piece, previousPiece, endDelimiter)) {
+        List<Object> parsedArray = Arrays.asList(parsed.toArray(true));
+        int isInClause = 0;
+        List<Object> tokens = mergeTokens(parsedArray, endDelimiter);
+        for (int i = 0; i < tokens.size(); i++) {
+            Object piece = tokens.get(i);
+            String nextPiece = null;
+            int nextIndex = i + 1;
+            while (nextPiece == null && nextIndex < tokens.size()) {
+                nextPiece = StringUtils.trimToNull(String.valueOf(tokens.get(nextIndex)));
+                nextIndex++;
+            }
+
+            if (piece instanceof String && ((String) piece).equalsIgnoreCase("BEGIN") &&  (!"transaction".equalsIgnoreCase(nextPiece) && !"trans".equalsIgnoreCase(nextPiece))) {
+                isInClause++;
+            }
+            if (piece instanceof String && ((String) piece).equalsIgnoreCase("END") && isInClause > 0  && (!"transaction".equalsIgnoreCase(nextPiece) && !"trans".equalsIgnoreCase(nextPiece))) {
+                isInClause--;
+            }
+
+            if (isInClause == 0 && splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
                 String trimmedString = StringUtils.trimToNull(currentString.toString());
                 if (trimmedString != null) {
                     returnArray.add(trimmedString);
@@ -55,8 +72,8 @@ public class StringUtils {
                 currentString = new StringBuilder();
                 previousDelimiter = true;
             } else {
-                if (!previousDelimiter || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace after a delimiter
-                    if (!currentString.toString().equals("") || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace before the statement
+                if (!previousDelimiter || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace after a delimiter
+                    if ((currentString.length() > 0) || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace before the statement
                         currentString.append(piece);
                     }
                 }
@@ -70,7 +87,42 @@ public class StringUtils {
             returnArray.add(trimmedString);
         }
 
-        return returnArray.toArray(new String[returnArray.size()]);
+        return returnArray.toArray(new String[0]);
+    }
+
+    /**
+     * Delimiters like "//" may span multiple tokens. Look for them and combine them
+     */
+    private static List<Object> mergeTokens(List<Object> parsedArray, String endDelimiter) {
+        if (endDelimiter == null) {
+            return parsedArray;
+        }
+
+        List<Object> returnList = new ArrayList<>();
+        List<String> possibleMerge = new ArrayList<>();
+        for (Object obj : parsedArray) {
+            if (possibleMerge.size() == 0) {
+                if ((obj instanceof String) && endDelimiter.startsWith((String) obj)) {
+                    possibleMerge.add((String) obj);
+                } else {
+                    returnList.add(obj);
+                }
+            } else {
+                String possibleMergeString = StringUtils.join(possibleMerge, "") + obj.toString();
+                if (endDelimiter.equals(possibleMergeString)) {
+                    returnList.add(possibleMergeString);
+                    possibleMerge.clear();
+                } else if (endDelimiter.startsWith(possibleMergeString)) {
+                    possibleMerge.add(obj.toString());
+                } else {
+                    returnList.addAll(possibleMerge);
+                    returnList.add(obj);
+                    possibleMerge.clear();
+                }
+            }
+        }
+
+        return returnList;
     }
 
     protected static boolean isDelimiter(String piece, String previousPiece, String endDelimiter) {
@@ -89,7 +141,7 @@ public class StringUtils {
      * Splits a (possible) multi-line SQL statement along ;'s and "go"'s.
      */
     public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
-        return processMutliLineSQL(multiLineSQL, false, true, endDelimiter);
+        return processMultiLineSQL(multiLineSQL, false, true, endDelimiter);
     }
 
     /**

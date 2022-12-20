@@ -31,7 +31,6 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
@@ -438,7 +437,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (value instanceof String) {
                 String finalValue = StringUtils.trimToNull((String) value);
                 if (finalValue != null) {
-                    String[] strings = StringUtils.processMutliLineSQL(finalValue, true, true, ";");
+                    String[] strings = StringUtils.processMultiLineSQL(finalValue, true, true, ";");
                     for (String string : strings) {
                         addRollbackChange(new RawSQLChange(string));
                         foundValue = true;
