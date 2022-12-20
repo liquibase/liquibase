@@ -111,7 +111,7 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
         returnList.add(change);
 
-        return returnList.toArray(new Change[returnList.size()]);
+        return returnList.toArray(EMPTY_CHANGE);
 
 
     }

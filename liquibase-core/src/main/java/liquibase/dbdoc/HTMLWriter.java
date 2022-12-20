@@ -33,10 +33,9 @@ public abstract class HTMLWriter {
     }
 
     public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog) throws IOException, DatabaseHistoryException, DatabaseException {
-        Writer fileWriter = createFileWriter(object);
 
 
-        try {
+        try (Writer fileWriter = createFileWriter(object)) {
             fileWriter.append("<html>");
             writeHeader(object, fileWriter);
             fileWriter.append("<body BGCOLOR=\"white\" onload=\"windowTitle();\">");
@@ -49,8 +48,6 @@ public abstract class HTMLWriter {
 
             fileWriter.append("</body>");
             fileWriter.append("</html>");
-        } finally {
-            fileWriter.close();
         }
 
     }
