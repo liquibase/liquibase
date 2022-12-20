@@ -279,8 +279,8 @@ public class CreateViewChange extends AbstractChange {
         return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
-    protected CreateViewStatement createViewStatement(String catalogName, String schemaName, String viewName, String selectQuery, boolean b) {
-        return new CreateViewStatement(catalogName, schemaName, viewName, selectQuery, b);
+    protected CreateViewStatement createViewStatement(String catalogName, String schemaName, String viewName, String selectQuery, boolean replaceIfExists) {
+        return new CreateViewStatement(catalogName, schemaName, viewName, selectQuery, replaceIfExists);
     }
 
     @Override
