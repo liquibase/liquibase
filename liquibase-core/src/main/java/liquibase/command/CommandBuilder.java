@@ -34,4 +34,5 @@ public class CommandBuilder {
     public <DataType> CommandResultDefinition.Building<DataType> result(String name, Class<DataType> type) {
         return new CommandResultDefinition.Building<>(new CommandResultDefinition<>(name, type));
     }
+
 }
