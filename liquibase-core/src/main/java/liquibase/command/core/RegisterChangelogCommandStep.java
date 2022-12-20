@@ -1,7 +1,6 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangelogRewriter;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
@@ -15,9 +14,6 @@ import liquibase.hub.HubServiceFactory;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Project;
-import liquibase.parser.ChangeLogParser;
-import liquibase.parser.ChangeLogParserFactory;
-import liquibase.resource.ResourceAccessor;
 import liquibase.ui.UIService;
 import liquibase.util.StringUtil;
 

@@ -3,17 +3,14 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,10 +26,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
-        if (database instanceof SQLiteDatabase) {
-            return true;
-        }
-        return false;
+        return database instanceof SQLiteDatabase;
     }
 
     @DatabaseChangeProperty(mustEqualExisting ="primaryKey.catalog")

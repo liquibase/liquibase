@@ -26,8 +26,8 @@ public class ChangeLogSerializerFactoryTest {
     @Test
     public void getInstance() {
         assertNotNull(ChangeLogSerializerFactory.getInstance());
-        
-        assertTrue(ChangeLogSerializerFactory.getInstance() == ChangeLogSerializerFactory.getInstance());
+
+        assertSame(ChangeLogSerializerFactory.getInstance(), ChangeLogSerializerFactory.getInstance());
     }
 
     @Test
@@ -64,7 +64,7 @@ public class ChangeLogSerializerFactoryTest {
     public void reset() {
         ChangeLogSerializerFactory instance1 = ChangeLogSerializerFactory.getInstance();
         ChangeLogSerializerFactory.reset();
-        assertFalse(instance1 == ChangeLogSerializerFactory.getInstance());
+        assertNotSame(instance1, ChangeLogSerializerFactory.getInstance());
     }
 
     @Test

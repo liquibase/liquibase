@@ -17,7 +17,6 @@ import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.StringUtil;
 import liquibase.verify.AbstractVerifyTest;
 import org.junit.BeforeClass;

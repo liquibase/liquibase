@@ -1,10 +1,6 @@
 package liquibase.dbtest;
 
 import groovy.lang.Tuple2;
-
-import java.io.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import liquibase.*;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataChange;
@@ -14,6 +10,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.H2Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -38,9 +35,8 @@ import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
-import liquibase.precondition.core.TableExistsPrecondition;
-import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.logging.core.JavaLogService;
+import liquibase.precondition.core.TableExistsPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -56,12 +52,15 @@ import liquibase.util.RegexMatcher;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
+import java.io.*;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static liquibase.test.SnapshotAssert.assertThat;
 import static org.junit.Assert.*;
@@ -291,11 +290,10 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testEmptyRollbackableSqlChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
-
-        Liquibase liquibase = createLiquibase(emptyRollbackSqlChangeLog);
+        createLiquibase(emptyRollbackSqlChangeLog);
         clearDatabase();
 
-        liquibase = createLiquibase(emptyRollbackSqlChangeLog);
+        Liquibase liquibase = createLiquibase(emptyRollbackSqlChangeLog);
         liquibase.update(this.contexts);
 
         liquibase = createLiquibase(emptyRollbackSqlChangeLog);
@@ -305,7 +303,6 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testSnapshotReportsAllObjectTypes() throws Exception {
         assumeNotNull(this.getDatabase());
-
         runCompleteChangeLog();
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl(getDatabase()));
 
@@ -364,6 +361,7 @@ public abstract class AbstractIntegrationTest {
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRunUpdateOnOldChangelogTableFormat() throws Exception {
         assumeNotNull(this.getDatabase());
+
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase();
 
@@ -596,6 +594,7 @@ public abstract class AbstractIntegrationTest {
     @Test
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testTag() throws Exception {
+        //This test will validate a tag can be set successfully to the DB, plus make sure the given tag exists in the DB.
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
@@ -606,6 +605,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.update(this.contexts);
 
         liquibase.tag("Test Tag");
+        liquibase.tagExists("Test Tag");
     }
 
     @Test
@@ -649,6 +649,10 @@ public abstract class AbstractIntegrationTest {
             }
             if (database instanceof PostgresDatabase) {
                 compareControl.addSuppressedField(Column.class, "type"); //database returns different nvarchar2 info even though they are the same
+            }
+            if (database instanceof H2Database) {
+                //original changeset 2659-Create-MyView-with-quotes in the h2 changelog uses QUOTE_ALL_OBJECTS, but generated changesets do not use that attribute so the name comes through as differnt
+                compareControl.addSuppressedField(View.class, "name");
             }
 
             DiffOutputControl diffOutputControl = new DiffOutputControl();
@@ -757,12 +761,9 @@ public abstract class AbstractIntegrationTest {
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");
 
-        FileOutputStream output = new FileOutputStream(tempFile);
-        try {
+        try (FileOutputStream output = new FileOutputStream(tempFile)) {
             new DiffToChangeLog(diffResult, new DiffOutputControl()).print(new PrintStream(output));
             output.flush();
-        } finally {
-            output.close();
         }
 
         liquibase = createLiquibase(tempFile.getName());
@@ -855,7 +856,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         List<ChangeSet> list = liquibase.listUnrunChangeSets(new Contexts(this.contexts), new LabelExpression());
 
-        assertTrue("querying the changelog table on an empty target should return at least 1 un-run changeset", !list.isEmpty());
+        assertFalse("querying the changelog table on an empty target should return at least 1 un-run changeset", list.isEmpty());
 
     }
 
@@ -1111,7 +1112,9 @@ public abstract class AbstractIntegrationTest {
 
         Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
         conn.createStatement().execute("update DATABASECHANGELOG set md5sum = '1:xxx'");
-        conn.commit();
+        if (!conn.getAutoCommit()) {
+            conn.commit();;
+        }
 
         liquibase.getDatabase().getRanChangeSetList();
         liquibase.update(contexts);

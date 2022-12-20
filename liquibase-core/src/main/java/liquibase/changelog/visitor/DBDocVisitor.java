@@ -150,7 +150,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         for (Column column : snapshot.get(Column.class)) {
-            if (database.isLiquibaseObject(column.getRelation())) {
+            if (shouldNotWriteColumnHtml(column)) {
                 continue;
             }
             columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
@@ -168,6 +168,11 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
         recentChangesWriter.writeHTML("index", recentChanges, null, rootChangeLogName);
 
+    }
+
+    private boolean shouldNotWriteColumnHtml(Column column) {
+        return database.isLiquibaseObject(column.getRelation()) ||
+                Boolean.TRUE.equals(column.getComputed());
     }
 
     private void copyFile(String fileToCopy, Resource rootOutputDir) throws IOException {
