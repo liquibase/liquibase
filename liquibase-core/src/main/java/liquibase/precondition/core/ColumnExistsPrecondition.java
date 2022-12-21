@@ -4,6 +4,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
+import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.*;
@@ -146,23 +147,28 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
                 } catch (SQLException e) {
                     throw new PreconditionErrorException(e, changeLog, this);
                 }
-            }
+            } else {
+                String sql;
+                if (database instanceof FirebirdDatabase) {
+                    sql = format("select t.%s from %s t where 0=1",
+                            database.escapeColumnNameList(columnName),
+                            database.escapeObjectName(tableName, Table.class));
+                } else {
+                    sql = format("select t.%s from %s.%s t where 0=1",
+                            database.escapeColumnNameList(columnName),
+                            database.escapeObjectName(schemaName, Schema.class),
+                            database.escapeObjectName(tableName, Table.class));
+                }
 
-            try {
-                String sql = format("select t.%s from %s.%s t where 0=1",
-                        database.escapeColumnNameList(columnName),
-                        database.escapeObjectName(schemaName, Schema.class),
-                        database.escapeObjectName(tableName, Table.class));
-                statement.executeQuery(sql).close();
-
-                // column exists
-                return;
-
-            } catch (SQLException e) {
-                // column or table does not exist
-                throw new PreconditionFailedException(format(
-                        "Column %s.%s.%s does not exist", schemaName,
-                        tableName, columnName), changeLog, this);
+                try {
+                    statement.executeQuery(sql).close();
+                    // column exists
+                } catch (SQLException e) {
+                    // column or table does not exist
+                    throw new PreconditionFailedException(format(
+                            "Column %s.%s.%s does not exist", schemaName,
+                            tableName, columnName), changeLog, this);
+                }
             }
 
         } catch (DatabaseException e) {

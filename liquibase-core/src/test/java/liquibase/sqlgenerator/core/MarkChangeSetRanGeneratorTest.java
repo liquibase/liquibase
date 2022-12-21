@@ -2,14 +2,20 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.ContextExpression;
 import liquibase.Labels;
+import liquibase.Scope;
+import liquibase.change.core.SQLFileChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.core.MockDatabase;
+import liquibase.sdk.resource.MockResourceAccessor;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -132,4 +138,35 @@ public class MarkChangeSetRanGeneratorTest extends AbstractSqlGeneratorTest<Mark
 
         changeSet.setContextFilter(null);
         assertEquals("p1", new MarkChangeSetRanGenerator().getContextsColumn(changeSet));
-    }}
+    }
+
+    @Test
+    public void makeSureDescriptionIsTruncatedWhenALongPathIsSet() throws Exception {
+
+        MockResourceAccessor resourceAccessor = new MockResourceAccessor();
+        String filePath = "This/is/a/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/ver/long/test/change/path";
+
+        resourceAccessor.setContent(filePath, "test");
+        final DatabaseChangeLog changeLog = new DatabaseChangeLog();
+        final ChangeSet changeSet = new ChangeSet("1", "a", false, false, "c", null, null, changeLog);
+
+        SQLFileChange sqlFileChange = new SQLFileChange();
+        sqlFileChange.setPath(filePath);
+        changeSet.addChange(sqlFileChange);
+
+        MarkChangeSetRanStatement changeSetRanStatement = new MarkChangeSetRanStatement(changeSet, ChangeSet.ExecType.EXECUTED);
+        MarkChangeSetRanGenerator changeSetRanGenerator = new MarkChangeSetRanGenerator();
+        Map<String, Object> newMap = new HashMap<>();
+        newMap.put(Scope.Attr.resourceAccessor.name(), resourceAccessor);
+
+        String sql = Scope.child(newMap, () -> changeSetRanGenerator.generateSql(changeSetRanStatement, new MockDatabase(), new MockSqlGeneratorChain())[0].toSql());
+
+        final int descriptionColumnIndex = 18;
+        String databaseChangeLogDescription = sql.split(",")[descriptionColumnIndex];
+        String truncatedPath = databaseChangeLogDescription.split("path=")[1].split("'")[0];
+
+        assertTrue(truncatedPath.endsWith("/..."));
+        assertTrue(truncatedPath.length() <= filePath.length());
+
+    }
+}
