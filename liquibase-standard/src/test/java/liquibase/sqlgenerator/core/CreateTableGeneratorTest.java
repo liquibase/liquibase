@@ -399,7 +399,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
             }
         }
     }
-    
+
     @Test
     public void testAutoIncrementDB2Database() throws Exception {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
@@ -1237,6 +1237,19 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
                 statement.addPrimaryKeyColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("varchar2(40)", database), new ColumnConfig().setDefaultValue(null).getDefaultValueObject(), "PK", "");
                 if (shouldBeImplementation(database)) {
                     assertEquals("CREATE TABLE CATALOG_NAME.TABLE_NAME (COLUMN1_NAME VARCHAR2(40) NOT NULL, CONSTRAINT PK PRIMARY KEY (COLUMN1_NAME))", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testWithCreateIfNotExistsInH2Database() {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database.supportIfNotExists()) {
+                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+                statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("java.sql.Types.TIMESTAMP", database), new ColumnConfig().setDefaultValue("null").getDefaultValueObject());
+                if (shouldBeImplementation(database)) {
+                    assertTrue(this.generatorUnderTest.generateSql(statement, database, null)[0].toSql().startsWith("CREATE TABLE IF NOT EXISTS "));
                 }
             }
         }

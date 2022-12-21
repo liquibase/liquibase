@@ -667,4 +667,9 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     public void warnAboutAlterColumn(String changeName, Warnings warnings ) {
         warnings.addWarning("Due to " + this.getShortName() + " SQL limitations, " + changeName + " will lose primary key/autoincrement/not null/comment settings explicitly redefined in the change. Use <sql> or <modifySql> to re-specify all configuration if this is the case");
     }
+
+    @Override
+    public boolean supportIfNotExists() {
+        return true;
+    }
 }

@@ -62,4 +62,8 @@ public class DB2Database extends AbstractDb2Database {
 		return "DB2/LUW";
 	}
 
+	@Override
+	public boolean supportIfNotExists() {
+		return true;
+	}
 }

@@ -472,7 +472,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     public boolean isCaseSensitive() {
         return false;
     }
-    
+
     @Override
     public void setConnection(DatabaseConnection conn) {
         oracleSyntax = null;
@@ -518,5 +518,10 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy, String generationType, Boolean defaultOnNull) {
         final String clause = super.getAutoIncrementClause(startWith, incrementBy, generationType, defaultOnNull);
         return clause.replace(",", ""); //sql doesn't use commas between the values
+    }
+
+    @Override
+    public boolean supportIfNotExists() {
+        return true;
     }
 }

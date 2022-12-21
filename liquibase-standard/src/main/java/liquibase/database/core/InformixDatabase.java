@@ -258,4 +258,8 @@ public class InformixDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
+	@Override
+	public boolean supportIfNotExists() {
+		return true;
+	}
 }

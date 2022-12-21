@@ -131,4 +131,9 @@ public class CockroachDatabase extends PostgresDatabase {
             return true;
         }
     }
+
+    @Override
+    public boolean supportIfNotExists() {
+        return true;
+    }
 }

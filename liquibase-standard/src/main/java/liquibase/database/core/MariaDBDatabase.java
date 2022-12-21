@@ -113,4 +113,9 @@ public class MariaDBDatabase extends MySQLDatabase {
             return false;
         }
     }
+
+    @Override
+    public boolean supportIfNotExists() {
+        return true;
+    }
 }

@@ -1656,4 +1656,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.UPPER_CASE;
     }
+
+    @Override
+    public boolean supportIfNotExists() {
+        return false;
+    }
 }

@@ -582,4 +582,9 @@ public class H2Database extends AbstractJdbcDatabase {
         // http://www.h2database.com/html/datatypes.html seems to imply 9 digits
         return 9;
     }
+
+    @Override
+    public boolean supportIfNotExists() {
+        return true;
+    }
 }

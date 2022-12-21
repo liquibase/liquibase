@@ -262,6 +262,11 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
+    @Override
+    public boolean supportIfNotExists() {
+        return true;
+    }
+
     public interface AlterTableVisitor {
         ColumnConfig[] getColumnsToAdd();
 
