@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.statement.core.RawSqlStatement;
@@ -13,6 +14,8 @@ import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -61,10 +64,16 @@ public class InternalExecuteSqlCommandStep extends AbstractCommandStep {
         } else {
             final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
             Resource resource = pathHandlerFactory.getResource(sqlFile);
-            if (!resource.exists()){
-                throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
+            if (!resource.exists()) {
+                if (ChangeLogParserConfiguration.WARN_ON_MISSING_CHANGELOGS.getCurrentValue()) {
+                    Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(sqlFile));
+                    sqlText = FileUtil.EMPTY_FILE;
+                } else {
+                    throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
+                }
+            } else {
+                sqlText = StreamUtil.readStreamAsString(resource.openInputStream());
             }
-            sqlText = StreamUtil.readStreamAsString(resource.openInputStream());
         }
 
         String out = "";
