@@ -20,8 +20,7 @@ public class TagCommandStep extends AbstractCommandStep {
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         TAG_ARG = builder.argument("tag", String.class).required().description("Tag to add to the database changelog table").build();
-        DATABASE_ARG = builder.argument("database", Database.class).hidden().description("Database connection").build();
-        InternalDatabaseCommandStep.addApplicableCommand(COMMAND_NAME);
+        DATABASE_ARG = builder.databaseArgument().build();
     }
 
     @Override
@@ -33,7 +32,7 @@ public class TagCommandStep extends AbstractCommandStep {
 
         try {
             ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-            changeLogService.generateDeploymentId(); // TODO do we need that?
+            changeLogService.generateDeploymentId();
             changeLogService.init();
             LockServiceFactory.getInstance().getLockService(database).init();
             changeLogService.tag(commandScope.getArgumentValue(TagCommandStep.TAG_ARG));

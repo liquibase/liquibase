@@ -172,7 +172,7 @@ public class CommandScope {
                 command.run(resultsBuilder);
             }
 
-            // after executing our pipeline, runs cleanup in inverse order if the CommandStep implements the interface
+            // after executing our pipeline, runs cleanup in inverse
             for (int i = pipeline.size() -1; i >= 0; i--) {
                 CommandStep command = pipeline.get(i);
                 if (command instanceof CleanUpCommandStep) {

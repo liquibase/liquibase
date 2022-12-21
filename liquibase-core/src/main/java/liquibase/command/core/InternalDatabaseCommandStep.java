@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.Beta;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.*;
@@ -19,11 +20,14 @@ import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
 
+/**
+ * Internal command step to be used on CommandStep pipeline to manage the database connection.
+ */
 public class InternalDatabaseCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
 
     public static final String[] COMMAND_NAME = {"databasePreStep"};
 
-    private final static List<String[]> APPLICABLE_COMMANDS = new ArrayList<>();
+    private static final List<String[][]> APPLICABLE_COMMANDS = new ArrayList<>();
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
@@ -64,26 +68,25 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
      *
      * @deprecated beta approach
      */
-    @Deprecated
-    protected static void addApplicableCommand(String[] commandName) {
+    @Beta
+    public static void addApplicableCommand(String[]... commandName) {
         APPLICABLE_COMMANDS.add(commandName);
     }
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        commandScope.addArgumentValue(DATABASE_ARG.getName(), this.obtainDatabase(commandScope, DATABASE_ARG));
+        commandScope.addArgumentValue(DATABASE_ARG.getName(), this.obtainDatabase(commandScope));
     }
 
     /**
      * Try to retrieve and set the database object from the command scope, otherwise creates a new one .
      *
      * @param commandScope current command scope
-     * @param databaseCommandArgument the CommandArgumentDefinition identifying the expected database object
      * @throws DatabaseException Thrown when there is a connection error
      */
-    private Database obtainDatabase(CommandScope commandScope, CommandArgumentDefinition<Database> databaseCommandArgument) throws DatabaseException, CommandValidationException {
-        if (commandScope.getArgumentValue(databaseCommandArgument) == null) {
+    private Database obtainDatabase(CommandScope commandScope) throws DatabaseException, CommandValidationException {
+        if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
             CommandBuilder builder = new CommandBuilder();
             String url = commandScope.getArgumentValue(builder.argument(CommonArgumentNames.URL, String.class).build());
             if (StringUtil.isEmpty(url)) {
@@ -98,7 +101,7 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
             this.database = createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile);
             return this.database;
         } else {
-            return commandScope.getArgumentValue(databaseCommandArgument);
+            return commandScope.getArgumentValue(DATABASE_ARG);
         }
     }
 
@@ -168,18 +171,16 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         if (commandDefinition.getPipeline().size() == 1) {
             commandDefinition.setInternal(true);
-        } else {
-            commandDefinition.getArgument(InternalDatabaseCommandStep.DATABASE_ARG.getName()).hide();
-            commandDefinition.getArgument(InternalDatabaseCommandStep.DATABASE_ARG.getName()).setRequired(false);
-            //commandDefinition.getArgument(InternalDatabaseCommandStep.URL_ARG.getName()).setRequired(false);
         }
     }
 
     @Override
     public int getOrder(CommandDefinition commandDefinition) {
-        for (String[] commandName : APPLICABLE_COMMANDS) {
-            if (commandDefinition.is(commandName)) {
-                return 500;
+        for (String[][] commandNames : APPLICABLE_COMMANDS) {
+            for (String[] commandName : commandNames) {
+                if (commandDefinition.is(commandName)) {
+                    return 500;
+                }
             }
         }
         return super.getOrder(commandDefinition);
