@@ -42,6 +42,8 @@ public class InternalDiffChangelogCommandStep extends InternalDiffCommandStep {
         CommandScope commandScope = resultsBuilder.getCommandScope();
 
         Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
+        referenceDatabase.setOutputDefaultSchema(commandScope.getArgumentValue(DIFF_OUTPUT_CONTROL_ARG).getIncludeSchema());
+
         String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
 
         InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());

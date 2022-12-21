@@ -225,7 +225,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
             ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
             resourceAccessor = getResourceAccessor(artifactClassLoader);
-        } catch (MojoExecutionException e) {
+        } catch (Exception e) {
             throw new LiquibaseException("Could not create the class loader, " + e, e);
         }
 
@@ -300,13 +300,11 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 referenceDefaultCatalogName, referenceDefaultSchemaName,
                 database);
 
-        CompareControl.SchemaComparison[] finalSchemaComparisons = computedSchemas.finalSchemaComparisons;
-        return finalSchemaComparisons;
+        return computedSchemas.finalSchemaComparisons;
     }
     private PrintStream createPrintStream() throws LiquibaseException {
         try {
-            PrintStream printStream = (outputFile != null ? new PrintStream(outputFile) : System.out);
-            return printStream;
+            return (outputFile != null ? new PrintStream(outputFile) : System.out);
         }
         catch (FileNotFoundException fnfe) {
             throw new LiquibaseException(fnfe);

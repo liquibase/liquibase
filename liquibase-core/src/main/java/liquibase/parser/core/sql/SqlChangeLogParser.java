@@ -7,12 +7,11 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 @SuppressWarnings("java:S2583")
 public class SqlChangeLogParser implements ChangeLogParser {
@@ -36,14 +35,9 @@ public class SqlChangeLogParser implements ChangeLogParser {
         RawSQLChange change = new RawSQLChange();
 
         try {
-            InputStream sqlStream = resourceAccessor.openStream(null, physicalChangeLogLocation);
-            if (sqlStream != null) {
-                String sql = StreamUtil.readStreamAsString(sqlStream);
-                change.setSql(sql);
-            }
-            else {
-                throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
-            }
+            Resource sqlResource = resourceAccessor.getExisting(physicalChangeLogLocation);
+            String sql = StreamUtil.readStreamAsString(sqlResource.openInputStream());
+            change.setSql(sql);
         } catch (IOException e) {
             throw new ChangeLogParseException(e);
         }

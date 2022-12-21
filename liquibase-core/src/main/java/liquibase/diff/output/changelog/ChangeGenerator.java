@@ -7,6 +7,11 @@ import liquibase.structure.DatabaseObject;
 
 public interface ChangeGenerator {
 
+    /**
+     * Represent an empty array of {@link Change}.
+     */
+    Change[] EMPTY_CHANGE = {};
+
     final int PRIORITY_NONE = -1;
     final int PRIORITY_DEFAULT = 1;
     final int PRIORITY_DATABASE = 5;

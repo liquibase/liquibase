@@ -4,7 +4,6 @@ import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SqlStatement;
@@ -21,6 +20,8 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     protected static final String COLUMN_NAME = "colToMakeUQ";
     protected static final String CONSTRAINT_NAME = "UQ_TEST";
     protected static final String TABLESPACE_NAME = "LIQUIBASE2";
+    protected static final String CATALOG_NAME = "LBCAT2";
+    protected static final String SCHEMA_NAME = "LBSCHEM2";
 
     @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
@@ -126,8 +127,8 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     @Test
     public void execute_withSchema() throws Exception {
         statementUnderTest = new AddUniqueConstraintStatement(
-                AbstractIntegrationTest.ALT_CATALOG,
-                AbstractIntegrationTest.ALT_SCHEMA,
+                CATALOG_NAME,
+                SCHEMA_NAME,
                 TABLE_NAME,
                 new ColumnConfig[]
                         {new ColumnConfig().setName(COLUMN_NAME)},

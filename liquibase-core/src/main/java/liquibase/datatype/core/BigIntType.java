@@ -7,7 +7,6 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Locale;
@@ -15,7 +14,7 @@ import java.util.Locale;
 /**
  * Represents a signed integer number using 64 bits of storage.
  */
-@DataTypeInfo(name="bigint", aliases = {"java.sql.Types.BIGINT", "java.math.BigInteger", "java.lang.Long", "integer8", "bigserial", "serial8", "int8"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "bigint", aliases = {"java.sql.Types.BIGINT", "java.math.BigInteger", "java.lang.Long", "integer8", "bigserial", "serial8", "int8"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BigIntType extends LiquibaseDataType {
 
     private boolean autoIncrement;
@@ -39,10 +38,7 @@ public class BigIntType extends LiquibaseDataType {
             }
         }
         if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("NUMBER", 38,0);
-        }
-        if (database instanceof SybaseDatabase) {
-            return new DatabaseDataType("BIGINT");
+            return new DatabaseDataType("NUMBER", 38, 0);
         }
         if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("bigint"));
@@ -53,7 +49,8 @@ public class BigIntType extends LiquibaseDataType {
             return type;
         }
         if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof
-            HsqlDatabase) || (database instanceof FirebirdDatabase)) {
+                HsqlDatabase) || (database instanceof FirebirdDatabase) || (database instanceof SybaseDatabase)
+                || (database instanceof SybaseASADatabase) || (database instanceof H2Database)) {
             return new DatabaseDataType("BIGINT");
         }
         if (database instanceof PostgresDatabase) {
@@ -69,9 +66,6 @@ public class BigIntType extends LiquibaseDataType {
 
                 }
             }
-        }
-        if (database instanceof SybaseASADatabase) {
-            return new DatabaseDataType("BIGINT");
         }
         return super.toDatabaseDataType(database);
     }

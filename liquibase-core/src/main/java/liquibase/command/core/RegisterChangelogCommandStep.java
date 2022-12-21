@@ -1,7 +1,6 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangelogRewriter;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
@@ -15,17 +14,14 @@ import liquibase.hub.HubServiceFactory;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Project;
-import liquibase.parser.ChangeLogParser;
-import liquibase.parser.ChangeLogParserFactory;
-import liquibase.resource.ResourceAccessor;
 import liquibase.ui.UIService;
 import liquibase.util.StringUtil;
 
+import java.io.File;
 import java.io.PrintWriter;
-import java.nio.file.Paths;
 import java.util.*;
 
-public class RegisterChangelogCommandStep extends AbstractCommandStep {
+public class RegisterChangelogCommandStep extends AbstractHubChangelogCommandStep {
 
     public static final String[] COMMAND_NAME = {"registerChangelog"};
 
@@ -132,7 +128,7 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
             //
             // Go create the Hub Changelog
             //
-            String changelogFilename = Paths.get(databaseChangeLog.getFilePath()).getFileName().toString();
+            String changelogFilename = new File(databaseChangeLog.getFilePath()).getName();
             HubChangeLog newChangeLog = new HubChangeLog();
             newChangeLog.setProject(project);
             newChangeLog.setFileName(changelogFilename);
@@ -268,12 +264,5 @@ public class RegisterChangelogCommandStep extends AbstractCommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Register the changelog with a Liquibase Hub project");
-    }
-
-    private DatabaseChangeLog parseChangeLogFile(String changeLogFile) throws LiquibaseException {
-        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
-        return parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
     }
 }

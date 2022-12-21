@@ -1,12 +1,15 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.Scope;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.logging.Logger;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -59,9 +62,15 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         }
         validationErrors.checkRequiredField("tableName", statement.getTableName());
 
-        if (statement.isPrimaryKey() && ((database instanceof H2Database) || (database instanceof AbstractDb2Database) ||
-                (database instanceof DerbyDatabase) || (database instanceof SQLiteDatabase))) {
-            validationErrors.addError("Cannot add a primary key column");
+        try {
+            if (statement.isPrimaryKey() && ((database instanceof AbstractDb2Database) ||
+                    (database instanceof DerbyDatabase) || (database instanceof SQLiteDatabase)) ||
+                    (database instanceof H2Database && database.getDatabaseMajorVersion() < 2)) {
+                validationErrors.addError("Cannot add a primary key column");
+            }
+        }
+        catch (DatabaseException e) {
+            //do nothing
         }
 
         // TODO HsqlDatabase autoincrement on non primary key? other databases?
@@ -114,7 +123,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 result.addAll(Arrays.asList(generateSingleColumn(column, database)));
             }
         }
-        return result.toArray(new Sql[result.size()]);
+        return result.toArray(EMPTY_SQL);
     }
 
     protected Sql[] generateSingleColumn(AddColumnStatement statement, Database database) {
@@ -127,7 +136,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         addUniqueConstraintStatements(statement, database, returnSql);
         addForeignKeyStatements(statement, database, returnSql);
 
-        return returnSql.toArray(new Sql[returnSql.size()]);
+        return returnSql.toArray(EMPTY_SQL);
     }
 
     protected String generateSingleColumBaseSQL(AddColumnStatement statement, Database database) {
@@ -202,7 +211,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         for (AddColumnStatement c : columns) {
             cols.add(getAffectedColumn(c));
         }
-        return cols.toArray(new Column[cols.size()]);
+        return cols.toArray(new Column[0]);
     }
 
     protected Column getAffectedColumn(AddColumnStatement statement) {

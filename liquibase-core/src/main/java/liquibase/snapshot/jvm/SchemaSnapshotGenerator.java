@@ -125,19 +125,13 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
     protected String[] getDatabaseSchemaNames(Database database) throws SQLException, DatabaseException {
         List<String> returnList = new ArrayList<>();
 
-        ResultSet schemas = null;
-        try {
-            schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas();
+        try (ResultSet schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas()) {
             while (schemas.next()) {
                 returnList.add(JdbcUtil.getValueForColumn(schemas, "TABLE_SCHEM", database));
             }
-        } finally {
-            if (schemas != null) {
-                schemas.close();
-            }
         }
 
-        return returnList.toArray(new String[returnList.size()]);
+        return returnList.toArray(new String[0]);
     }
     
 }

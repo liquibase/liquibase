@@ -16,6 +16,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +30,7 @@ import java.util.Locale;
 public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMojo {
 
     /**
-   * Specifies the directory where Liquibase can find your <i>changelog</i> file.
+   * Specifies the directory where Liquibase can find your <i>changelog</i> file. This is an aliases for searchPath
      *
    * @parameter property="liquibase.changeLogDirectory"
      */
@@ -158,18 +159,23 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     }
 
     @Override
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException, MojoFailureException {
         List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
         resourceAccessors.add(new MavenResourceAccessor(cl));
-        resourceAccessors.add(new FileSystemResourceAccessor(project.getBasedir()));
+        resourceAccessors.add(new DirectoryResourceAccessor(project.getBasedir()));
         resourceAccessors.add(new ClassLoaderResourceAccessor(getClass().getClassLoader()));
 
+        String finalSearchPath = searchPath;
+
         if (changeLogDirectory != null) {
+            if (searchPath != null) {
+                throw new MojoFailureException("Cannot specify searchPath and changeLogDirectory at the same time");
+            }
             calculateChangeLogDirectoryAbsolutePath();
-            resourceAccessors.add(new FileSystemResourceAccessor(new File(changeLogDirectory)));
+            finalSearchPath = changeLogDirectory;
         }
 
-        return new SearchPathResourceAccessor(searchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
+        return new SearchPathResourceAccessor(finalSearchPath, resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 
     @Override

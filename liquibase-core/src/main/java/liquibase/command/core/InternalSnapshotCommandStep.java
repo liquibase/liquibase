@@ -62,7 +62,7 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }
 
-        return finalList.toArray(new CatalogAndSchema[finalList.size()]);
+        return finalList.toArray(new CatalogAndSchema[0]);
     }
 
     public Map<String, Object> getSnapshotMetadata() {
@@ -112,11 +112,6 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
 
         return SnapshotSerializerFactory.getInstance().getSerializer(format.toLowerCase(Locale.US)).serialize((DatabaseSnapshot) snapshotResults.getResult("snapshot"), true);
     }
-//
-//        public void merge(SnapshotCommandResult resultToMerge) {
-//            this.snapshot.merge(resultToMerge.snapshot);
-//        }
-//    }
 
     public static void logUnsupportedDatabase(Database database, Class callingClass) {
         if (LicenseServiceUtils.isProLicenseValid()) {
@@ -124,7 +119,8 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
                     || database instanceof OracleDatabase
                     || database instanceof MySQLDatabase
                     || database instanceof DB2Database
-                    || database instanceof PostgresDatabase)) {
+                    || database instanceof PostgresDatabase
+                    || database.getShortName().equalsIgnoreCase("snowflake"))) { //TODO: Update to use SnowflakeDatabase once the liquibase-snowflake module is fully integrated into liquibase-core
                 Scope.getCurrentScope().getUI().sendMessage("INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
             }
         }

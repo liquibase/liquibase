@@ -654,7 +654,7 @@
             "changeSet": {
                 "id": "hasIndexPrecondition",
                 "author": "nvoxland",
-                "dbms": "oracle,mssql,mysql,h2,hsql,postgresql",
+                "dbms": "oracle,mssql,mysql,h2,hsqldb,postgresql",
                 "preConditions": [
                     {
                         "indexExists": {

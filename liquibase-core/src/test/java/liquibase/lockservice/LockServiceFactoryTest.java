@@ -14,6 +14,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -34,7 +36,7 @@ public class LockServiceFactoryTest {
     @Test
     public void getInstance() {
         assertNotNull(LockServiceFactory.getInstance());
-        assertTrue(LockServiceFactory.getInstance() == LockServiceFactory.getInstance());
+        assertSame(LockServiceFactory.getInstance(), LockServiceFactory.getInstance());
 
 //        Collection<LockService> lockServices = LockServiceFactory.getInstance().getLockServices();
 //        assertEquals(0, lockServices.size());
@@ -73,12 +75,12 @@ public class LockServiceFactoryTest {
         assertNotNull(lockServiceFactory.getLockService(oracle2));
         assertNotNull(lockServiceFactory.getLockService(mysql));
 
-        assertTrue(lockServiceFactory.getLockService(oracle1) == lockServiceFactory.getLockService(oracle1));
-        assertTrue(lockServiceFactory.getLockService(oracle2) == lockServiceFactory.getLockService(oracle2));
-        assertTrue(lockServiceFactory.getLockService(mysql) == lockServiceFactory.getLockService(mysql));
+        assertSame(lockServiceFactory.getLockService(oracle1), lockServiceFactory.getLockService(oracle1));
+        assertSame(lockServiceFactory.getLockService(oracle2), lockServiceFactory.getLockService(oracle2));
+        assertSame(lockServiceFactory.getLockService(mysql), lockServiceFactory.getLockService(mysql));
 
-        assertTrue(lockServiceFactory.getLockService(oracle1) != lockServiceFactory.getLockService(oracle2));
-        assertTrue(lockServiceFactory.getLockService(oracle1) != lockServiceFactory.getLockService(mysql));
+        assertNotSame(lockServiceFactory.getLockService(oracle1), lockServiceFactory.getLockService(oracle2));
+        assertNotSame(lockServiceFactory.getLockService(oracle1), lockServiceFactory.getLockService(mysql));
 
         assertTrue(lockServiceFactory.getLockService(getMockDatabase()) instanceof MockLockService);
     }

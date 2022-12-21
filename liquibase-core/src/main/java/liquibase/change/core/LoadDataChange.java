@@ -17,6 +17,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.io.EmptyLineAndCommentSkippingInputStream;
 import liquibase.logging.Logger;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
@@ -31,10 +32,7 @@ import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
-import liquibase.util.BooleanUtil;
-import liquibase.util.ObjectUtil;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
+import liquibase.util.*;
 import liquibase.util.csv.CSVReader;
 
 import java.io.IOException;
@@ -42,6 +40,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.change.ChangeParameterMetaData.ALL;
@@ -266,9 +265,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public SqlStatement[] generateStatements(Database database) {
         boolean databaseSupportsBatchUpdates = supportsBatchUpdates(database);
 
-        CSVReader reader = null;
-        try {
-            reader = getCSVReader();
+        try (CSVReader reader = getCSVReader()) {
 
             if (reader == null) {
                 throw new UnexpectedLiquibaseException("Unable to read file " + this.getFile());
@@ -490,15 +487,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             } else {
                 throw ule;
             }
-        } finally {
-            if (null != reader) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    // Do nothing
-                }
-            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+        // Do nothing
     }
 
     /**
@@ -712,10 +704,21 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         if (resourceAccessor == null) {
             throw new UnexpectedLiquibaseException("No file resourceAccessor specified for " + getFile());
         }
-        String relativeTo = getRelativeTo();
-        InputStream stream = resourceAccessor.openStream(relativeTo, file);
-        if (stream == null) {
+
+        Resource resource;
+        if (getRelativeTo() == null) {
+            resource = resourceAccessor.get(file);
+        } else {
+            resource = resourceAccessor.get(getRelativeTo()).resolveSibling(file);
+        }
+        if (!resource.exists()) {
             return null;
+        }
+
+        @SuppressWarnings("java:S2095") // SONAR want us to close the stream here, but it is only read by CSVReader outside this method.
+        InputStream stream = resource.openInputStream();
+        if (resource.getPath().toLowerCase().endsWith(".gz") && !(stream instanceof GZIPInputStream)) {
+            stream = new GZIPInputStream(stream);
         }
         Reader streamReader = StreamUtil.readStreamWithReader(stream, getEncoding());
 
@@ -787,12 +790,15 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
-            stream = Scope.getCurrentScope().getResourceAccessor().openStream(getRelativeTo(), file);
-            if (stream == null) {
-                throw new UnexpectedLiquibaseException(String.format(
-                        coreBundle.getString("file.not.found"), file));
+            ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+            Resource resource;
+            if (getRelativeTo() == null) {
+                resource = resourceAccessor.getExisting(file);
+            } else {
+                resource = resourceAccessor.get(getRelativeTo()).resolveSibling(file);
             }
-            stream = new EmptyLineAndCommentSkippingInputStream(stream, commentLineStartsWith);
+
+            stream = new EmptyLineAndCommentSkippingInputStream(resource.openInputStream(), commentLineStartsWith);
             return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true));
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);

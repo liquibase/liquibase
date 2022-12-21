@@ -1,22 +1,20 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.database.OfflineConnection;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MockDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.exception.DatabaseException;
-import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.StreamUtil;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class AbstractSQLChangeTest {
 
@@ -92,7 +90,7 @@ public class AbstractSQLChangeTest {
 
         assertEquals(sql.toString(), sqlCRLF.toString());
         assertEquals(sql.toString(), sqlLF.toString());
-        assertFalse(sql.toString().equals(sqlDifferent.toString()));
+        assertNotEquals(sql.toString(), sqlDifferent.toString());
     }
 
     @Test
@@ -106,15 +104,15 @@ public class AbstractSQLChangeTest {
 
         ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
         change.setSplitStatements(false);
-        assertFalse(baseCheckSum.toString().equals(change.generateCheckSum().toString()));
+        assertNotEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
 
         change = new ExampleAbstractSQLChange("SOME SQL");
         change.setEndDelimiter("X");
-        assertFalse(baseCheckSum.toString().equals(change.generateCheckSum().toString()));
+        assertNotEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
 
         change = new ExampleAbstractSQLChange("SOME SQL");
         change.setStripComments(true);
-        assertFalse(baseCheckSum.toString().equals(change.generateCheckSum().toString()));
+        assertNotEquals(baseCheckSum.toString(), change.generateCheckSum().toString());
     }
 
 //    @Test

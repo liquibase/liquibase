@@ -1,5 +1,6 @@
 package liquibase.database;
 
+import liquibase.exception.ValidationErrors;
 import liquibase.util.StringUtil;
 
 import java.util.Collection;
@@ -53,11 +54,7 @@ public class DatabaseList {
         }
 
 
-        if (dbmsSupported.isEmpty() || dbmsSupported.contains(databaseShortName)) {
-            return true;
-        }
-
-        return false;
+        return dbmsSupported.isEmpty() || dbmsSupported.contains(databaseShortName);
 
     }
 
@@ -80,5 +77,29 @@ public class DatabaseList {
             }
         }
         return dbmsSet;
+    }
+
+    /**
+     * This method will validate whether a dbms is valid and match with supported database, if it doesn't then
+     * will add a validation error for it.
+     * @param definition
+     * @param vErrors
+     */
+    public static void validateDefinitions(String definition, ValidationErrors vErrors) {
+        if(!definition.contentEquals("none") && !definition.contentEquals("all") && !definition.startsWith("!")) {
+            Database database = DatabaseFactory.getInstance().getDatabase(definition.toLowerCase());
+            if (database == null) {
+                vErrors.addError(String.format("%s is not a supported DB", definition));
+            }
+        }
+    }
+
+    /**
+     * This method will validate if a set of definitions/dbms are valid supported DBs.
+     * @param definitions
+     * @param vErrors
+     */
+    public static void validateDefinitions(Collection<String> definitions, ValidationErrors vErrors) {
+        definitions.stream().forEach( definition -> validateDefinitions(definition, vErrors));
     }
 }

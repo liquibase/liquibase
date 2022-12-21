@@ -15,8 +15,10 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
-import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.util.FilenameUtil;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StreamUtil;
@@ -33,7 +35,7 @@ import static java.util.ResourceBundle.getBundle;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    protected static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
     private String catalogName;
@@ -57,6 +59,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     //Cache the executeWithFlags method to avoid reflection overhead
     private static Method executeWithFlagsMethod;
 
+    private Map<String, Object> snapshotScratchPad = new HashMap<>();
+
     protected ExecutablePreparedStatementBase(Database database, String catalogName, String schemaName, String
             tableName, List<? extends ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
         this.database = database;
@@ -70,7 +74,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         this.resourceAccessor = resourceAccessor;
     }
 
-    private static InputStream createStream(InputStream in) {
+    protected static InputStream createStream(InputStream in) {
         return (in instanceof BufferedInputStream) ? in : new BufferedInputStream(in);
     }
 
@@ -180,11 +184,18 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
      */
     protected void attachParams(List<? extends ColumnConfig> cols, PreparedStatement stmt)
             throws SQLException, DatabaseException {
+        final Logger LOG = Scope.getCurrentScope().getLog(getClass());
         int i = 1;  // index starts from 1
         for (ColumnConfig col : cols) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Applying column parameter = " + i + " for column " + col.getName());
-            applyColumnParameter(stmt, i, col);
-            i++;
+            LOG.fine("Applying column parameter = " + i + " for column " + col.getName());
+            if (col.getValueObject() instanceof DatabaseFunction) {
+                // It's impossible to add a 'db function' to a prepared statement. Adding functions should be handled while building the SQL statement.
+                LOG.fine("Skipping column parameter for " + col.getName() + ", cannot add functions to prepared statements.");
+            } else {
+                LOG.fine("Applying column parameter = " + i + " for column " + col.getName());
+                applyColumnParameter(stmt, i, col);
+                i++;
+            }
         }
     }
 
@@ -199,7 +210,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
      * @throws SQLException      if JDBC objects to a setting (non-existent bind number, wrong column type etc.)
      * @throws DatabaseException if an I/O error occurs during the read of LOB values
      */
-    private void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException,
+    @SuppressWarnings("squid:S3776")
+    protected void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException,
             DatabaseException {
 
         final Logger LOG = Scope.getCurrentScope().getLog(getClass());
@@ -272,6 +284,25 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             LOG.fine("value is blob = " + col.getValueBlobFile());
             try {
                 LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
+
+                if (database instanceof PostgresDatabase) {
+                    String snapshotKeyName = String.format("%s-%s-%s-%s", getCatalogName(), getSchemaName(), getTableName(), col.getName());
+                    Column snapshot = (Column) this.getScratchData(snapshotKeyName);
+                    if (snapshot == null) {
+                        snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(
+                                new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), col.getName()), database);
+                        this.setScratchData(snapshotKeyName, snapshot);
+                    }
+
+                    if (snapshot.getType().getTypeName().equalsIgnoreCase("bytea")) {
+                        if (lob.length <= Integer.MAX_VALUE) {
+                            stmt.setBinaryStream(i, lob.content, (int) lob.length);
+                        } else {
+                            stmt.setBinaryStream(i, lob.content, lob.length);
+                        }
+                        return;
+                    }
+                }
                 if (lob.length <= Integer.MAX_VALUE) {
                     stmt.setBlob(i, lob.content, (int) lob.length);
                 } else {
@@ -334,7 +365,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     @SuppressWarnings("java:S2583")
-    private LOBContent<InputStream> toBinaryStream(String valueLobFile) throws LiquibaseException, IOException {
+    protected LOBContent<InputStream> toBinaryStream(String valueLobFile) throws LiquibaseException, IOException {
         InputStream in = getResourceAsStream(valueLobFile);
 
         if (in == null) {
@@ -378,7 +409,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     @SuppressWarnings("java:S2583")
-    private LOBContent<Reader> toCharacterStream(String valueLobFile, String encoding)
+    protected LOBContent<Reader> toCharacterStream(String valueLobFile, String encoding)
             throws IOException, LiquibaseException {
         InputStream in = getResourceAsStream(valueLobFile);
 
@@ -422,9 +453,9 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     @SuppressWarnings("squid:S2095")
-    private InputStream getResourceAsStream(String valueLobFile) throws IOException, LiquibaseException {
+    protected InputStream getResourceAsStream(String valueLobFile) throws IOException {
         String fileName = getFileName(valueLobFile);
-        return this.resourceAccessor.openStream(null, fileName);
+        return this.resourceAccessor.getExisting(fileName).openInputStream();
     }
 
     private String getFileName(String fileName) {
@@ -462,6 +493,14 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         return resourceAccessor;
     }
 
+    private Object getScratchData(String key) {
+        return snapshotScratchPad.get(key);
+    }
+
+    private Object setScratchData(String key, Object data) {
+        return snapshotScratchPad.put(key, data);
+    }
+
     protected long getContentLength(InputStream in) throws IOException {
         long length = 0;
         byte[] buf = new byte[4096];
@@ -484,13 +523,21 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         return length;
     }
 
-    private class LOBContent<T> {
+    protected static class LOBContent<T> {
         private final T content;
         private final long length;
 
-        LOBContent(T content, long length) {
+        public LOBContent(T content, long length) {
             this.content = content;
             this.length = length;
+        }
+
+        public T getContent() {
+            return content;
+        }
+
+        public long getLength() {
+            return length;
         }
     }
 

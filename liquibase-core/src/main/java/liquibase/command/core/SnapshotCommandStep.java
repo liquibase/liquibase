@@ -7,11 +7,9 @@ import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.license.LicenseServiceUtils;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -95,7 +93,7 @@ public class SnapshotCommandStep extends AbstractCommandStep {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }
 
-        return finalList.toArray(new CatalogAndSchema[finalList.size()]);
+        return finalList.toArray(new CatalogAndSchema[0]);
     }
 
     public Map<String, Object> getSnapshotMetadata() {
@@ -125,7 +123,7 @@ public class SnapshotCommandStep extends AbstractCommandStep {
 
         CatalogAndSchema[] schemas = parseSchemas(database, commandScope.getArgumentValue(SCHEMAS_ARG));
 
-        logUnsupportedDatabase(database, this.getClass());
+        InternalSnapshotCommandStep.logUnsupportedDatabase(database, this.getClass());
         SnapshotControl snapshotControl;
         if (commandScope.getArgumentValue(SNAPSHOT_CONTROL_ARG) == null) {
             snapshotControl = new SnapshotControl(database);
@@ -255,18 +253,6 @@ public class SnapshotCommandStep extends AbstractCommandStep {
         return SnapshotSerializerFactory.getInstance()
                                         .getSerializer(format.toLowerCase(Locale.US))
                                         .serialize(snapshot, true);
-    }
-
-    private void logUnsupportedDatabase(Database database, Class callingClass) {
-        if (LicenseServiceUtils.isProLicenseValid()) {
-            if (!(database instanceof MSSQLDatabase
-                || database instanceof OracleDatabase
-                || database instanceof MySQLDatabase
-                || database instanceof DB2Database
-                || database instanceof PostgresDatabase)) {
-                Scope.getCurrentScope().getUI().sendMessage("INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
-            }
-        }
     }
 
 }

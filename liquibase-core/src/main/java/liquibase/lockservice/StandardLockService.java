@@ -2,13 +2,14 @@ package liquibase.lockservice;
 
 import liquibase.Scope;
 import liquibase.change.Change;
+import liquibase.changelog.ChangeLogHistoryService;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.exception.DatabaseException;
@@ -28,7 +29,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
 import java.security.SecureRandom;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -322,6 +322,7 @@ public class StandardLockService implements LockService {
 
                 hasChangeLogLock = true;
 
+                ChangeLogHistoryServiceFactory.getInstance().resetAll();
                 database.setCanCacheLiquibaseTableInfo(true);
                 return true;
             }
@@ -442,7 +443,7 @@ public class StandardLockService implements LockService {
                     );
                 }
             }
-            return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);
+            return allLocks.toArray(new DatabaseChangeLogLock[0]);
         } catch (Exception e) {
             throw new LockException(e);
         }
@@ -465,6 +466,15 @@ public class StandardLockService implements LockService {
         hasChangeLogLock = false;
         hasDatabaseChangeLogLockTable = null;
         isDatabaseChangeLogLockTableInitialized = false;
+
+        if (this.database != null) {
+            ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+            // On reseting the lock the changelog service has to be invalidated due to the fact that
+            // some liquibase component released the lock temporarily. In this time span another JVM instance
+            // might have acquired the database lock and could have applied further changesets to prevent that
+            // liquibase works with an outdated changelog.
+            changelogService.reset();
+        }
     }
 
     @Override

@@ -1,13 +1,11 @@
 package liquibase.util;
 
-import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.GlobalConfiguration;
 import liquibase.resource.ResourceAccessor;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Utilities for working with streams.
@@ -87,10 +85,9 @@ public abstract class StreamUtil {
      * @deprecated use {@link ResourceAccessor#openStream(String, String)}
      */
     public static InputStream openStream(String path, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
-        String relativeTo = null;
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            relativeTo = changeSet.getChangeLog().getPhysicalFilePath();
+            path = resourceAccessor.get(changeSet.getChangeLog().getPhysicalFilePath()).resolveSibling(path).getPath();
         }
-        return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
+        return resourceAccessor.getExisting(path).openInputStream();
     }
 }
