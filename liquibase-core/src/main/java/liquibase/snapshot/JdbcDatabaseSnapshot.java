@@ -609,7 +609,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "WHEN 'varchar(max)' THEN " + java.sql.Types.VARCHAR + " " +
                         "WHEN 'xml' THEN " + java.sql.Types.LONGVARCHAR + " " +
                         "WHEN 'LONGNVARCHAR' THEN " + java.sql.Types.SQLXML + " " +
-                        "ELSE " + Types.OTHER + " END AS data_type, " +
+                        "ELSE " + Types.OTHER + " END AS DATA_TYPE, " +
                         "CASE WHEN c.is_nullable = 'true' THEN 1 ELSE 0 END AS NULLABLE, " +
                         "10 as NUM_PREC_RADIX, " +
                         "c.column_id as ORDINAL_POSITION, " +
