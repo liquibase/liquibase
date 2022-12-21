@@ -310,24 +310,9 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
 
             int returnChar = stream.read();
-            if (isWhiteSpace(returnChar)) {
-                returnChar = ' ';
-            }
 
-            while ((returnChar == ' ') && (!seenNonSpace || (lastChar == ' '))) {
+            while (isWhiteSpace(returnChar)) {
                 returnChar = stream.read();
-
-                if (isWhiteSpace(returnChar)) {
-                    returnChar = ' ';
-                }
-            }
-
-            seenNonSpace = true;
-
-            lastChar = returnChar;
-
-            if ((lastChar == ' ') && isOnlyWhitespaceRemaining()) {
-                return -1;
             }
 
             return returnChar;
@@ -351,40 +336,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         @Override
         public synchronized void reset() throws IOException {
             stream.reset();
-        }
-
-        private boolean isOnlyWhitespaceRemaining() throws IOException {
-            try {
-                int quickBufferUsed = 0;
-                while (true) {
-                    byte read = (byte) stream.read();
-                    if (quickBufferUsed >= quickBuffer.length) {
-                        resizingBuffer.add(read);
-                    } else {
-                        quickBuffer[quickBufferUsed++] = read;
-                    }
-
-                    if (read == -1) {
-                        return true;
-                    }
-                    if (!isWhiteSpace(read)) {
-                        if (!resizingBuffer.isEmpty()) {
-
-                            byte[] buf = new byte[resizingBuffer.size()];
-                            for (int i=0; i< resizingBuffer.size(); i++) {
-                                buf[i] = resizingBuffer.get(i);
-                            }
-
-                            stream.unread(buf);
-                        }
-
-                        stream.unread(quickBuffer, 0, quickBufferUsed);
-                        return false;
-                    }
-                }
-            } finally {
-                resizingBuffer.clear();
-            }
         }
 
         private boolean isWhiteSpace(int read) {

@@ -238,13 +238,14 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
      */
     @Override
     public CheckSum generateCheckSum() {
-        if (this.path == null) {
-            return super.generateCheckSum();
-        }
-
         InputStream stream = null;
         try {
-            stream = openSqlStream();
+            if(this.path == null) {
+                stream = new ByteArrayInputStream(this.procedureText.getBytes());
+            }
+            else {
+                stream = openSqlStream();
+            }
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -261,8 +262,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                     stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
                 } catch (UnsupportedEncodingException e) {
                     throw new AssertionError(encoding +
-                        " is not supported by the JVM, this should not happen according to the JavaDoc of " +
-                        "the Charset class"
+                            " is not supported by the JVM, this should not happen according to the JavaDoc of " +
+                            "the Charset class"
                     );
                 }
             }
@@ -280,6 +281,14 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             }
         }
 
+    }
+
+    @Override
+    public String[] getExcludedFieldFilters() {
+        return new String[]{
+                "path",
+                "dbms"
+        };
     }
 
     @Override

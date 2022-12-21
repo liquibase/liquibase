@@ -675,22 +675,17 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
                 log.fine("Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
-                    if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
-                        if (listener != null) {
-                            listener.willRun(change, this, changeLog, database);
-                        }
-                        if (change.generateStatementsVolatile(database)) {
-                            executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
-                        }
+                    if (listener != null) {
+                        listener.willRun(change, this, changeLog, database);
+                    }
+                    if (change.generateStatementsVolatile(database)) {
+                        executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
+                    }
 
-
-                        database.executeStatements(change, databaseChangeLog, sqlVisitors);
-                        log.info(change.getConfirmationMessage());
-                        if (listener != null) {
-                            listener.ran(change, this, changeLog, database);
-                        }
-                    } else {
-                        log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
+                    database.executeStatements(change, databaseChangeLog, sqlVisitors);
+                    log.info(change.getConfirmationMessage());
+                    if (listener != null) {
+                        listener.ran(change, this, changeLog, database);
                     }
                 }
 
@@ -886,6 +881,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     public List<Change> getChanges() {
         return Collections.unmodifiableList(changes);
+    }
+
+    /**
+     * Method created to remove changes from a changeset
+     * @param collection
+     */
+    public void removeAllChanges(Collection<?> collection) {
+        this.changes.removeAll(collection);
     }
 
     public void addChange(Change change) {

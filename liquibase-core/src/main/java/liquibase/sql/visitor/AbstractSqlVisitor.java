@@ -76,7 +76,15 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
 
     @Override
     public CheckSum generateCheckSum() {
-        return CheckSum.compute(new StringChangeLogSerializer().serialize(this, false));
+        return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter(){
+            @Override
+            public boolean include(Object obj, String field, Object value) {
+                if(field.equals("applicableDbms") || field.equals("contextFilter") || field.equals("labels")) {
+                    return false;
+                }
+                return super.include(obj, field, value);
+            }
+        }).serialize(this, false));
     }
 
     @Override
