@@ -164,7 +164,7 @@ public class ResultSetCache {
                 Collections.addAll(permutations, permute(params, fromIndex + 1));
                 Collections.addAll(permutations, permute(nullVersion, fromIndex + 1));
 
-                return permutations.toArray(new String[permutations.size()]);
+                return permutations.toArray(new String[0]);
             }
         }
 

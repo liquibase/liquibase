@@ -836,7 +836,7 @@ public class Main {
             fixedArgs.add(arg);
         }
 
-        return fixedArgs.toArray(new String[fixedArgs.size()]);
+        return fixedArgs.toArray(new String[0]);
     }
 
     /**
@@ -1239,12 +1239,10 @@ public class Main {
         // Check the licensing keys to see if they are being set from properties
         //
         if (liquibaseProLicenseKey == null) {
-            String key = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.licenseKey").getValue();
-            liquibaseProLicenseKey = key;
+            liquibaseProLicenseKey = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.licenseKey").getValue();
         }
         if (liquibaseHubApiKey == null) {
-            String key = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
-            liquibaseHubApiKey = key;
+            liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
         }
 
         //
@@ -1427,7 +1425,7 @@ public class Main {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
                 @Override
                 public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread()
+                    return new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
                             .getContextClassLoader());
                 }
             });
@@ -1436,7 +1434,7 @@ public class Main {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
                 @Override
                 public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[urls.size()]), null);
+                    return new URLClassLoader(urls.toArray(new URL[0]), null);
                 }
             });
         }

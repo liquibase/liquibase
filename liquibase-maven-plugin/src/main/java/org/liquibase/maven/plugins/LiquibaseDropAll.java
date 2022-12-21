@@ -76,7 +76,7 @@ public class LiquibaseDropAll extends AbstractLiquibaseChangeLogMojo {
             for (String name : schemas.split(",")) {
                 schemaObjs.add(new CatalogAndSchema(catalog, name));
             }
-	      		liquibase.dropAll(schemaObjs.toArray(new CatalogAndSchema[schemaObjs.size()]));
+	      		liquibase.dropAll(schemaObjs.toArray(new CatalogAndSchema[0]));
 		    } else {
 			      liquibase.dropAll();
 		    }

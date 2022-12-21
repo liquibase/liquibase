@@ -38,7 +38,7 @@ public class IndexComparator implements DatabaseObjectComparator {
             hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, chain.getSchemaComparisons(), accordingTo)));
         }
 
-        return hashes.toArray(new String[hashes.size()]);
+        return hashes.toArray(new String[0]);
     }
 
 
