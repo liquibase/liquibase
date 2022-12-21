@@ -207,7 +207,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         }
 
         /**
-         * Specifies a CommandArgument that can replace this one if this one is not available.
+         * Specifies a CommandArgument that can replace this one if it is not available.
          *
          */
         public Building<DataType> supersededBy(CommandArgumentDefinition<?> commandArgumentDefinition) {

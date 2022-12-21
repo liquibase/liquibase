@@ -36,8 +36,6 @@ public class CommandBuilder {
     /**
      * Creates a database argument and registers the current Step as an applicable command
      * to the InternalDatabaseCommandStep.
-     *
-     * @deprecated Beta approach, may be subject to change in future releases
      */
     @Beta
     public CommandArgumentDefinition.Building<Database> databaseArgument() {

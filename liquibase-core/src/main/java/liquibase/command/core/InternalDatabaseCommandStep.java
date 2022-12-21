@@ -65,8 +65,6 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
 
     /**
      * Method that allows Commands to register themselves to be able to use this CommandStep.
-     *
-     * @deprecated beta approach
      */
     @Beta
     public static void addApplicableCommand(String[]... commandName) {
