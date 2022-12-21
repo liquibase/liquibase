@@ -36,8 +36,12 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
     public StandardObjectChangeFilter(FilterType type, String filter) {
         this.filterType = type;
         if (databaseObjects.isEmpty()) {
-            ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
-            databaseObjects.addAll(serviceLocator.findInstances(DatabaseObject.class));
+            synchronized (StandardObjectChangeFilter.class) {
+                if (databaseObjects.isEmpty()) {
+                    ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
+                    databaseObjects.addAll(serviceLocator.findInstances(DatabaseObject.class));
+                }
+            }
         }
         parseFilter(filter);
     }

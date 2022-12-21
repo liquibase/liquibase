@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChangeFactory extends AbstractPluginFactory<Change>{
 
-    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
+    private final Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
 
     private ChangeFactory() {
 
@@ -49,10 +49,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
     }
 
     public ChangeMetaData getChangeMetaData(Change change) {
-        if (!metaDataByClass.containsKey(change.getClass())) {
-            metaDataByClass.put(change.getClass(), change.createChangeMetaData());
-        }
-        return metaDataByClass.get(change.getClass());
+        return metaDataByClass.computeIfAbsent(change.getClass(), ignored -> change.createChangeMetaData());
     }
 
 

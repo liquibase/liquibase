@@ -6,14 +6,17 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.snapshot.*;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DiffGeneratorFactory {
 
     private static DiffGeneratorFactory instance;
-    private List<DiffGenerator> implementedGenerators = new ArrayList<>();
+    private final Collection<DiffGenerator> implementedGenerators = new ConcurrentLinkedQueue<>();
 
     protected DiffGeneratorFactory() {
         try {
@@ -34,30 +37,22 @@ public class DiffGeneratorFactory {
     }
 
     public void register(DiffGenerator generator) {
-        implementedGenerators.add(0, generator);
+        implementedGenerators.add(generator);
     }
 
 
     public DiffGenerator getGenerator(Database referenceDatabase, Database comparisonDatabase) {
-        SortedSet<DiffGenerator> foundGenerators = new TreeSet<>(new Comparator<DiffGenerator>() {
-            @Override
-            public int compare(DiffGenerator o1, DiffGenerator o2) {
-                return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
-            }
-        });
+        Optional<DiffGenerator> diffGenerator = implementedGenerators
+                .stream()
+                .filter(dg -> dg.supports(referenceDatabase, comparisonDatabase))
+                .min(PrioritizedService.COMPARATOR);
 
-        for (DiffGenerator diffGenerator : implementedGenerators) {
-            if (diffGenerator.supports(referenceDatabase, comparisonDatabase)) {
-                foundGenerators.add(diffGenerator);
-            }
-        }
-
-        if (foundGenerators.isEmpty()) {
+        if (!diffGenerator.isPresent()) {
             throw new UnexpectedLiquibaseException("Cannot find DiffGenerator for " + referenceDatabase.getShortName() + ", " + comparisonDatabase.getShortName());
         }
 
         try {
-            return foundGenerators.iterator().next().getClass().getConstructor().newInstance();
+            return diffGenerator.get().getClass().getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
