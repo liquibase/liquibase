@@ -17,6 +17,6 @@ public class InsertDataChangeGenerator extends AbstractSqlGenerator<InsertExecut
 
     @Override
     public Sql[] generateSql(InsertExecutablePreparedStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[0];
+        return EMPTY_SQL;
     }
 }

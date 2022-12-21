@@ -632,9 +632,11 @@ public class LiquibaseCommandLine {
     private void configureLogging(Level logLevel, String logFile) throws IOException {
         configuredLogLevel = logLevel;
 
-        final JavaLogService logService = (JavaLogService) Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
+        final LogService logService = Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
         java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
-        logService.setParent(liquibaseLogger);
+        if (logService instanceof JavaLogService) {
+            ((JavaLogService) logService).setParent(liquibaseLogger);
+        }
 
         System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
 

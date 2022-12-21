@@ -23,7 +23,7 @@ public class DropAllTask extends BaseLiquibaseTask {
                 for (String name : schemaNames) {
                     schemas.add(new CatalogAndSchema(catalog,  name));
                 }
-                liquibase.dropAll(schemas.toArray(new CatalogAndSchema[schemas.size()]));
+                liquibase.dropAll(schemas.toArray(new CatalogAndSchema[0]));
             } else {
                 liquibase.dropAll();
             }

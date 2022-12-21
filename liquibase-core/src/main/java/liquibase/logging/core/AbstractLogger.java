@@ -1,8 +1,6 @@
 package liquibase.logging.core;
 
 import liquibase.AbstractExtensibleObject;
-import liquibase.GlobalConfiguration;
-import liquibase.exception.UnknownConfigurationType;
 import liquibase.logging.LogMessageFilter;
 import liquibase.logging.Logger;
 

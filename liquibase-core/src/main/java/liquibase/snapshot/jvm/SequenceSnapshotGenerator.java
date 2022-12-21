@@ -87,8 +87,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             sequences = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                     .getExecutor("jdbc", database)
                     .queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
-            DatabaseObject sequenceRow = getSequences(example, database, sequences);
-            return sequenceRow;
+            return getSequences(example, database, sequences);
         }
     }
 
