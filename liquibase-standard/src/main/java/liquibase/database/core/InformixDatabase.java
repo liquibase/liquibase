@@ -259,8 +259,8 @@ public class InformixDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
-    @Override
-    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
-        return type.isAssignableFrom(Table.class);
-    }
+	@Override
+	public boolean supportIfNotExists() {
+		return true;
+	}
 }

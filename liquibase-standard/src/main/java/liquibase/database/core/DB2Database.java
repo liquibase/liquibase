@@ -65,7 +65,7 @@ public class DB2Database extends AbstractDb2Database {
 	}
 
 	@Override
-	public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
-		return type.isAssignableFrom(Table.class);
+	public boolean supportIfNotExists() {
+		return true;
 	}
 }

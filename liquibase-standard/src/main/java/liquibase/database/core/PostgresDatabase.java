@@ -413,7 +413,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
-        return type.isAssignableFrom(Table.class);
+    public boolean supportIfNotExists() {
+        return true;
     }
 }

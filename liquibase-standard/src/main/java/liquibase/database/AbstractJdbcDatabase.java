@@ -1660,7 +1660,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+    public boolean supportIfNotExists() {
         return false;
     }
 }

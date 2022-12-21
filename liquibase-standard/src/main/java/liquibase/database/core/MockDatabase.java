@@ -826,7 +826,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+    public boolean supportIfNotExists() {
         return false;
     }
 }

@@ -135,7 +135,7 @@ public class CockroachDatabase extends PostgresDatabase {
     }
 
     @Override
-    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
-        return type.isAssignableFrom(Table.class);
+    public boolean supportIfNotExists() {
+        return true;
     }
 }

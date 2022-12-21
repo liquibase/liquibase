@@ -57,10 +57,9 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         if (StringUtil.isNotEmpty(statement.getTableType())) {
             buffer.append(statement.getTableType().trim().toUpperCase()).append(" ");
         }
-
         buffer.append("TABLE ");
 
-        if (statement.isIfNotExists() && database.supportsCreateIfNotExists(Table.class)) {
+        if (database.supportIfNotExists()) {
             buffer.append("IF NOT EXISTS ");
         }
 
