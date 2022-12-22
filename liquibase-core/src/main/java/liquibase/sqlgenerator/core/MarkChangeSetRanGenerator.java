@@ -48,7 +48,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         try {
             try {
                 if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
-                    return new Sql[0]; //don't mark
+                    return EMPTY_SQL; //don't mark
                 }
 
                 String tag = null;

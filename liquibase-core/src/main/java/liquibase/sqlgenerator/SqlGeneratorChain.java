@@ -9,6 +9,8 @@ import liquibase.statement.SqlStatement;
 import java.util.Iterator;
 import java.util.SortedSet;
 
+import static liquibase.sqlgenerator.SqlGenerator.EMPTY_SQL;
+
 public class SqlGeneratorChain<T extends SqlStatement> {
     private Iterator<SqlGenerator<T>> sqlGenerators;
 
@@ -24,7 +26,7 @@ public class SqlGeneratorChain<T extends SqlStatement> {
         }
 
         if (!sqlGenerators.hasNext()) {
-            return new Sql[0];
+            return EMPTY_SQL;
         }
 
         return sqlGenerators.next().generateSql(statement, database, this);

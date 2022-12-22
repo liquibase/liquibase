@@ -27,6 +27,11 @@ import java.util.Set;
 public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject {
 
     /**
+     * Represent an empty array of {@link Change}
+     */
+     Change[] EMPTY_CHANGE = {};
+
+    /**
      * This method will be called by the changlelog parsing process after all of the
      * properties have been set to allow the task to do any additional initialization logic.
      */

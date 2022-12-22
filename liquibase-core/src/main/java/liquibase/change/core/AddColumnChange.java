@@ -1,14 +1,10 @@
 package liquibase.change.core;
 
-import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.DatabaseDataType;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.*;
@@ -17,9 +13,10 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
-import net.snowflake.client.jdbc.internal.google.gson.internal.bind.util.ISO8601Utils;
 
 import java.util.*;
+
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
 /**
  * Adds a column to an existing table.
@@ -157,7 +154,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     column.getType(),
                     column.getDefaultValueObject(),
                     column.getRemarks(),
-                    constraints.toArray(new ColumnConstraint[constraints.size()]));
+                    constraints.toArray(new ColumnConstraint[0]));
             addColumnStatement.setDefaultValueConstraintName(column.getDefaultValueConstraintName());
             addColumnStatement.setComputed(column.getComputed());
 
@@ -206,7 +203,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             }
         }
 
-        return sql.toArray(new SqlStatement[sql.size()]);
+        return sql.toArray(EMPTY_SQL_STATEMENT);
     }
 
     @Override
@@ -231,7 +228,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             inverse.addColumn(aColumn);
         }
         inverses.add(inverse);
-        return inverses.toArray(new Change[inverses.size()]);
+        return inverses.toArray(EMPTY_CHANGE);
     }
 
     @Override

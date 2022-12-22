@@ -23,16 +23,13 @@ public class NoJavaSpecificCodeTest {
     private void checkJavaClasses(File directory) throws Exception {
         for (File file : directory.listFiles()) {
             if (file.getName().endsWith(".java")) {
-                BufferedReader reader = new BufferedReader(new FileReader(file));
-                try {
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         if (line.contains("java.sql")) {
-                            fail(file.getCanonicalPath()+" contains java.sql");
+                            fail(file.getCanonicalPath() + " contains java.sql");
                         }
                     }
-                } finally {
-                    reader.close();
                 }
             } else if (file.isDirectory()) {
                 checkJavaClasses(file);

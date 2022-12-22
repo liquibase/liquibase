@@ -10,7 +10,6 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
@@ -127,7 +126,7 @@ public class SnapshotGeneratorFactory {
           * snapshot. If that works, we count that as confirmation of existence.
           */
 
-        SnapshotControl snapshotControl = (new SnapshotControl(database, false, types.toArray(new Class[types.size()])));
+        SnapshotControl snapshotControl = (new SnapshotControl(database, false, types.toArray(new Class[0])));
         snapshotControl.setWarnIfObjectNotFound(false);
 
         if (createSnapshot(example, database,snapshotControl) != null) {
