@@ -330,7 +330,7 @@ public class Liquibase implements AutoCloseable {
         String cacheKey = contexts +"/"+ labelExpression;
         if (!this.upToDateFastCheck.containsKey(cacheKey)) {
             try {
-                if (listUnrunChangeSets(contexts, labelExpression, false).isEmpty()) {
+                if (listUnrunChangeSets(contexts, labelExpression, true).isEmpty()) {
                     LOG.fine("Fast check found no un-run changesets");
                     upToDateFastCheck.put(cacheKey, true);
                 } else {
