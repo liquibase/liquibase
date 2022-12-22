@@ -103,11 +103,11 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             Integer partitions = (Integer) tableMetadataResultSet.get("PARTITIONS");
             String implicitlyCreated = (String) tableMetadataResultSet.get("IMPLICIT");
             if ("N".equalsIgnoreCase(implicitlyCreated) && partitions != null && partitions > 0) {
-                StringBuilder tableSpaceName = new StringBuilder()
+                StringBuilder tablespaceName = new StringBuilder()
                         .append(database.escapeObjectName((String) tableMetadataResultSet.get("DB_NAME"), Table.class))
                         .append(".")
                         .append(database.escapeObjectName((String) tableMetadataResultSet.get("TBSPACE"), Table.class));
-                table.setTableSpace(tableSpaceName.toString());
+                table.setTablespace(tablespaceName.toString());
             }
         }
 

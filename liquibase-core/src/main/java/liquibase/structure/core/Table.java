@@ -31,12 +31,12 @@ public class Table extends Relation {
         return getAttribute("outgoingForeignKeys", List.class);
     }
 
-    public String getTableSpace() {
-        return getAttribute("tableSpace", String.class);
+    public String getTablespace() {
+        return getAttribute("tablespace", String.class);
     }
 
-    public Relation setTableSpace(String remarks) {
-        setAttribute("tableSpace", remarks);
+    public Relation setTablespace(String remarks) {
+        setAttribute("tablespace", remarks);
         return this;
     }
 
