@@ -75,11 +75,8 @@ public final class ChangeExecListenerUtils {
             File file = new File(propertiesFile);
             if (file.exists()) {
                 Properties properties = new Properties();
-                FileInputStream inputStream = new FileInputStream(propertiesFile);
-                try {
+                try (FileInputStream inputStream = new FileInputStream(propertiesFile)) {
                     properties.load(inputStream);
-                } finally {
-                    inputStream.close();
                 }
                 return properties;
             } else {

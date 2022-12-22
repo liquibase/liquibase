@@ -164,7 +164,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         if (returnList.size() == 0) {
             returnList.add(database.getDefaultCatalogName());
         }
-        return returnList.toArray(new String[returnList.size()]);
+        return returnList.toArray(new String[0]);
     }
     
 }

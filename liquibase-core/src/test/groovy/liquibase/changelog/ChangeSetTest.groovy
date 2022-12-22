@@ -4,6 +4,7 @@ package liquibase.changelog
 import liquibase.Scope
 import liquibase.change.CheckSum
 import liquibase.change.core.*
+import liquibase.database.core.MockDatabase
 import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
@@ -622,6 +623,28 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.isInheritableIgnore()
+    }
+
+    def "execute returns a MARK_RAN state when changeSet is set with validation failed as true"() {
+        when:
+        DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("com/example/test.xml")
+        def changeSet = new ChangeSet(databaseChangeLog)
+        def node = new ParsedNode(null, "changeSet").addChildren([id: "1", author: "mallod"])
+        changeSet.setValidationFailed(true)
+
+        then:
+        changeSet.execute(databaseChangeLog, new MockDatabase()) == ChangeSet.ExecType.MARK_RAN
+    }
+
+    def "execute returns a EXECUTED state when changeSet is set with validation failed as false"() {
+        when:
+        DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("com/example/test.xml")
+        def changeSet = new ChangeSet(databaseChangeLog)
+        def node = new ParsedNode(null, "changeSet").addChildren([id: "2", author: "mallod"])
+        changeSet.setValidationFailed(false)
+
+        then:
+        changeSet.execute(databaseChangeLog, new MockDatabase()) == ChangeSet.ExecType.EXECUTED
     }
 
 }

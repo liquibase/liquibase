@@ -53,7 +53,7 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
 			result.add(completeStatement(statement, sql));
 		}
 
-		return result.toArray(new UnparsedSql[result.size()]);
+		return result.toArray(new UnparsedSql[0]);
 	}
     
 	private Sql completeStatement(InsertSetStatement statement, StringBuilder sql) {
