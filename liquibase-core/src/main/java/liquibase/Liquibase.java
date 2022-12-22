@@ -6,7 +6,7 @@ import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.command.CommandScope;
-import liquibase.command.core.InternalDatabaseCommandStep;
+import liquibase.command.core.DbUrlConnectionCommandStep;
 import liquibase.command.core.InternalDropAllCommandStep;
 import liquibase.command.core.TagCommandStep;
 import liquibase.database.Database;
@@ -1887,11 +1887,10 @@ public class Liquibase implements AutoCloseable {
      * @deprecated Use {link {@link CommandScope(String)} to tag instead of this method.
      */
     public void tag(String tagString) throws LiquibaseException {
-        CommandScope tagCommand = new CommandScope("tag");
-        tagCommand
-                .addArgumentValue(InternalDatabaseCommandStep.DATABASE_ARG, database)
-                .addArgumentValue(TagCommandStep.TAG_ARG, tagString);
-        tagCommand.execute();
+        new CommandScope("tag")
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(TagCommandStep.TAG_ARG, tagString)
+                .execute();
     }
 
     public boolean tagExists(String tagString) throws LiquibaseException {

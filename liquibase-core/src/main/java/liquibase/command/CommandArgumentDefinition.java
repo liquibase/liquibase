@@ -8,7 +8,10 @@ import liquibase.exception.MissingRequiredArgumentException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.ObjectUtil;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -26,7 +29,6 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private final String name;
     private SortedSet<String> aliases = new TreeSet<>();
     private final Class<DataType> dataType;
-
     private String description;
     private boolean required;
     private boolean hidden;
@@ -78,10 +80,6 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         return required;
     }
 
-    public void setRequired(boolean required) {
-        this.required = required;
-    }
-
     public CommandArgumentDefinition<?> getSupersededBy() {
         return this.supersededBy;
     }
@@ -95,13 +93,6 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      */
     public boolean getHidden() {
         return hidden;
-    }
-
-    /**
-     * Set this argument as hidden.
-     */
-    public void hide() {
-        this.hidden = true;
     }
 
     /**

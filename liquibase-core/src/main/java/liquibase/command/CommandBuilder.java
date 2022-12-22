@@ -1,7 +1,7 @@
 package liquibase.command;
 
 import liquibase.Beta;
-import liquibase.command.core.InternalDatabaseCommandStep;
+import liquibase.command.core.DbUrlConnectionCommandStep;
 import liquibase.database.Database;
 
 /**
@@ -39,7 +39,7 @@ public class CommandBuilder {
      */
     @Beta
     public CommandArgumentDefinition.Building<Database> databaseArgument() {
-        InternalDatabaseCommandStep.addApplicableCommand(this.commandNames);
+        DbUrlConnectionCommandStep.addApplicableCommand(this.commandNames);
         return new CommandArgumentDefinition.Building<>(commandNames,
                 new CommandArgumentDefinition<>("database", Database.class))
                 .description("Database connection");

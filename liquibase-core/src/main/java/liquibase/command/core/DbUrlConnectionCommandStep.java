@@ -6,10 +6,10 @@ import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.core.DatabaseUtils;
 import liquibase.exception.CommandValidationException;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.MissingRequiredArgumentException;
-import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
@@ -23,9 +23,7 @@ import static java.util.ResourceBundle.getBundle;
 /**
  * Internal command step to be used on CommandStep pipeline to manage the database connection.
  */
-public class InternalDatabaseCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
-
-    public static final String[] COMMAND_NAME = {"databasePreStep"};
+public class DbUrlConnectionCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
 
     private static final List<String[][]> APPLICABLE_COMMANDS = new ArrayList<>();
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -42,7 +40,7 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
     private Database database;
 
     static {
-        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
+        CommandBuilder builder = new CommandBuilder();
         DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
                 .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
@@ -85,17 +83,13 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
      */
     private Database obtainDatabase(CommandScope commandScope) throws DatabaseException, CommandValidationException {
         if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
-            CommandBuilder builder = new CommandBuilder();
-            String url = commandScope.getArgumentValue(builder.argument(CommonArgumentNames.URL, String.class).build());
-            if (StringUtil.isEmpty(url)) {
-                throw new CommandValidationException("url", "missing required argument", new MissingRequiredArgumentException("url"));
-            }
-            String username = commandScope.getArgumentValue(builder.argument(CommonArgumentNames.USERNAME, String.class).build());
-            String password = commandScope.getArgumentValue(builder.argument(CommonArgumentNames.PASSWORD, String.class).build());
-            String defaultSchemaName = commandScope.getArgumentValue(builder.argument("defaultSchemaName", String.class).build());
-            String defaultCatalogName = commandScope.getArgumentValue(builder.argument("defaultCatalogName", String.class).build());
-            String driver = commandScope.getArgumentValue(builder.argument("driver", String.class).build());
-            String driverPropertiesFile = commandScope.getArgumentValue(builder.argument("driverPropertiesFile", String.class).build());
+            String url = commandScope.getArgumentValue(URL_ARG);
+            String username = commandScope.getArgumentValue(USERNAME_ARG);
+            String password = commandScope.getArgumentValue(PASSWORD_ARG);
+            String defaultSchemaName = commandScope.getArgumentValue(DEFAULT_SCHEMA_NAME_ARG);
+            String defaultCatalogName = commandScope.getArgumentValue(DEFAULT_CATALOG_NAME_ARG);
+            String driver = commandScope.getArgumentValue(DRIVER_ARG);
+            String driverPropertiesFile = commandScope.getArgumentValue(DRIVER_PROPERTIES_FILE_ARG);
             this.database = createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile);
             return this.database;
         } else {
@@ -103,6 +97,7 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
         }
     }
 
+    @SuppressWarnings("java:S2095")
     /**
      *
      * Method to create a Database object given these parameters
@@ -136,40 +131,57 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
         if (clazz != null) {
             propertyProviderClass = clazz.getName();
         }
-        String liquibaseCatalogName = GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue();
-        String liquibaseSchemaName = GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue();
-        String databaseChangeLogTablespaceName = GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentValue();
-        String databaseChangeLogLockTableName = GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue();
-        String databaseChangeLogTableName = GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue();
-        Database database = CommandLineUtils.createDatabaseObject(resourceAccessor,
-                        url,
-                        username,
-                        password,
-                        driver,
-                        defaultCatalogName,
-                        defaultSchemaName,
-                        true,
-                        true,
-                        databaseClassName,
-                        driverPropertiesFile,
-                        propertyProviderClass,
-                        liquibaseCatalogName, liquibaseSchemaName,
-                        databaseChangeLogTableName,
-                        databaseChangeLogLockTableName);
-        database.setLiquibaseTablespaceName(databaseChangeLogTablespaceName);
+        String liquibaseCatalogName = StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue());
+        String liquibaseSchemaName = StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue());
+        String databaseChangeLogTablespaceName = StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentValue());
+        String databaseChangeLogLockTableName = StringUtil.trimToNull(GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue());
+        String databaseChangeLogTableName = StringUtil.trimToNull(GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue());
+
+        try {
+            defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+            defaultSchemaName = StringUtil.trimToNull(defaultSchemaName);
+
+            database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver,
+                    databaseClassName, driverPropertiesFile, propertyProviderClass, resourceAccessor);
+
+            if (!database.supportsSchemas()) {
+                if ((defaultSchemaName != null) && (defaultCatalogName == null)) {
+                    defaultCatalogName = defaultSchemaName;
+                }
+                if ((liquibaseSchemaName != null) && (liquibaseCatalogName == null)) {
+                    liquibaseCatalogName = liquibaseSchemaName;
+                }
+            }
+
+            defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+            defaultSchemaName = StringUtil.trimToNull(defaultSchemaName);
+
+            database.setDefaultCatalogName(defaultCatalogName);
+            database.setDefaultSchemaName(defaultSchemaName);
+            database.setOutputDefaultCatalog(true);
+            database.setOutputDefaultSchema(true);
+            database.setLiquibaseCatalogName(liquibaseCatalogName);
+            database.setLiquibaseTablespaceName(databaseChangeLogTablespaceName);
+            database.setLiquibaseSchemaName(liquibaseSchemaName);
+            if (databaseChangeLogTableName != null) {
+                database.setDatabaseChangeLogTableName(databaseChangeLogTableName);
+                if (databaseChangeLogLockTableName != null) {
+                    database.setDatabaseChangeLogLockTableName(databaseChangeLogLockTableName);
+                } else {
+                    database.setDatabaseChangeLogLockTableName(databaseChangeLogTableName + "LOCK");
+                }
+            }
+            DatabaseUtils.initializeDatabase(defaultCatalogName, defaultSchemaName, database);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+
         return database;
     }
 
     @Override
     public String[][] defineCommandNames() {
-        return new String[][] { COMMAND_NAME };
-    }
-
-    @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
+        return null;
     }
 
     @Override
@@ -189,6 +201,7 @@ public class InternalDatabaseCommandStep extends AbstractCommandStep implements 
         if (database != null) {
             try {
                 database.close();
+                database = null;
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).warning(coreBundle.getString("problem.closing.connection"), e);
             }

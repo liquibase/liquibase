@@ -5,6 +5,7 @@ import liquibase.SingletonObject;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.StringUtil;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -34,7 +35,11 @@ public class CommandFactory implements SingletonObject {
         CommandDefinition commandDefinition = new CommandDefinition(commandName);
         for (CommandStep step : findAllInstances()) {
             if (step.getOrder(commandDefinition) > 0) {
-                commandDefinition.add(step);
+                try {
+                    commandDefinition.add(step.getClass().getConstructor().newInstance());
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    throw new IllegalArgumentException(e);
+                }
             }
         }
 
@@ -45,8 +50,11 @@ public class CommandFactory implements SingletonObject {
 
         final Set<CommandArgumentDefinition<?>> stepArguments = new HashSet<>();
         for (CommandStep step : pipeline) {
-            for (String[] name : step.defineCommandNames()) {
-                stepArguments.addAll(this.commandArgumentDefinitions.getOrDefault(StringUtil.join(name, " "), new HashSet<>()));
+            String[][] names = step.defineCommandNames();
+            if (names != null) {
+                for (String[] name : names) {
+                    stepArguments.addAll(this.commandArgumentDefinitions.getOrDefault(StringUtil.join(name, " "), new HashSet<>()));
+                }
             }
         }
 
@@ -72,8 +80,11 @@ public class CommandFactory implements SingletonObject {
     public SortedSet<CommandDefinition> getCommands(boolean includeInternal) {
         Map<String, String[]> commandNames = new HashMap<>();
         for (CommandStep step : findAllInstances()) {
-            for (String[] name : step.defineCommandNames()) {
-                commandNames.put(StringUtil.join(name, " "), name);
+            String[][] names = step.defineCommandNames();
+            if (names != null) {
+                for (String[] name : names) {
+                    commandNames.put(StringUtil.join(name, " "), name);
+                }
             }
         }
 
