@@ -202,7 +202,7 @@ public class MergeColumnChange extends AbstractChange {
 	        statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(database)));
         
         }
-        return statements.toArray(new SqlStatement[0]);
+        return statements.toArray(SqlStatement.EMPTY_SQL_STATEMENT);
 
     }
 
