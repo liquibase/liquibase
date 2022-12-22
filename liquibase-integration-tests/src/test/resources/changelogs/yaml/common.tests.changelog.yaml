@@ -332,7 +332,7 @@ databaseChangeLog:
   - changeSet:
       id: hasIndexPrecondition
       author: nvoxland
-      dbms: oracle,mssql,mysql,h2,hsql,postgresql  # can checkConstraint with or without table name, derby doesn't work with just column names
+      dbms: oracle,mssql,mysql,h2,hsqldb,postgresql  # can checkConstraint with or without table name, derby doesn't work with just column names
       preConditions:
         - indexExists:
             indexName: idx_compoundtest

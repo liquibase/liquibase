@@ -4,7 +4,6 @@ import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
 
-import java.io.File;
 import java.util.logging.Level;
 
 /**
@@ -22,7 +21,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<String> DEFAULTS_FILE;
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
     public static final ConfigurationDefinition<String> LOG_CHANNELS;
-    public static final ConfigurationDefinition<File> LOG_FILE;
+    public static final ConfigurationDefinition<String> LOG_FILE;
     public static final ConfigurationDefinition<String> OUTPUT_FILE;
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<ArgumentConverter> ARGUMENT_CONVERTER;
@@ -66,7 +65,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 .setDefaultValue("liquibase", "Controls which log channels have their level set by the liquibase.logLevel setting. Comma separate multiple values. To set the level of all channels, use 'all'. Example: liquibase,org.mariadb.jdbc")
                 .build();
 
-        LOG_FILE = builder.define("logFile", File.class).build();
+        LOG_FILE = builder.define("logFile", String.class).build();
         OUTPUT_FILE = builder.define("outputFile", String.class).build();
 
         MONITOR_PERFORMANCE = builder.define("monitorPerformance", String.class)

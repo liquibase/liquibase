@@ -4,10 +4,10 @@ import liquibase.Scope;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URI;
 import java.nio.file.*;
 import java.util.Collections;
+import java.util.List;
 
 public class ZipResourceAccessor extends AbstractPathResourceAccessor {
 
@@ -64,4 +64,8 @@ public class ZipResourceAccessor extends AbstractPathResourceAccessor {
         return new PathResource(pathToAdd, file);
     }
 
+    @Override
+    public List<String> describeLocations() {
+        return Collections.singletonList(fileSystem.toString());
+    }
 }

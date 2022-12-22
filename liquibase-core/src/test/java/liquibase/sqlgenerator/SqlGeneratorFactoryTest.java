@@ -37,8 +37,8 @@ public class SqlGeneratorFactoryTest {
     @Test
     public void getInstance() {
         assertNotNull(SqlGeneratorFactory.getInstance());
-        
-        assertTrue(SqlGeneratorFactory.getInstance() == SqlGeneratorFactory.getInstance());
+
+        assertSame(SqlGeneratorFactory.getInstance(), SqlGeneratorFactory.getInstance());
     }
 
     @Test
@@ -167,7 +167,7 @@ public class SqlGeneratorFactoryTest {
     @Test
     public void reset() {
         SqlGeneratorFactory.reset();
-        assertFalse(factory == SqlGeneratorFactory.getInstance());
+        assertNotSame(factory, SqlGeneratorFactory.getInstance());
     }
 
     @SuppressWarnings("unchecked")

@@ -113,7 +113,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                 changes.add(change);
             }
 
-            return changes.toArray(new Change[changes.size()]);
+            return changes.toArray(EMPTY_CHANGE);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         } finally {

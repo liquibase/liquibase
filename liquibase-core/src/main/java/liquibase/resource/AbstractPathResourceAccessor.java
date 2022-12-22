@@ -48,7 +48,20 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
 
     private String standardizePath(String path) {
         try {
-            return new File(path).toPath().normalize().toString().replace("\\", "/").replaceFirst("^/", "");
+            //
+            // Flip the separators to Linux-style and replace the first separator
+            // If then root path is the absolute path for Linux or Windows then return that result
+            //
+            String rootPath = getRootPath().toString();
+            String result = new File(path).toPath().normalize().toString().replace("\\", "/").replaceFirst("^/", "");
+            if (rootPath.equals("/") || rootPath.equals("\\")) {
+                return result;
+            }
+
+            //
+            // Strip off any Windows drive prefix and return the result
+            //
+            return result.replaceFirst("^\\w:/","");
         } catch (InvalidPathException e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Failed to standardize path " + path, e);
             return path;

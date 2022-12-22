@@ -37,7 +37,7 @@ Optional Args:
                 username:   { it.username },
                 password:   { it.password },
                 outputDirectory: "target/test-classes",
-                changelogFile  : "changelogs/hsqldb/complete/simple.changelog.xml",
+                changelogFile  : "changelogs/h2/complete/simple.changelog.xml",
         ]
 
         expectedResults = [
@@ -47,7 +47,7 @@ Optional Args:
 
     run "Run without an outputDirectory should throw an exception",  {
         arguments = [
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
                 outputDirectory: ""
         ]
         expectedException = CommandValidationException.class
@@ -63,7 +63,7 @@ Optional Args:
     run "Run without a URL should throw an exception",  {
         arguments = [
                 url          : "",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.changelog.xml",
+                changelogFile: "changelogs/h2/complete/rollback.tag.changelog.xml",
                 outputDirectory: "version_2.0"
         ]
         expectedException = CommandValidationException.class

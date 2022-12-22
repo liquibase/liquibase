@@ -8,6 +8,7 @@ import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.dbdoc.*;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.OpenOptions;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -155,7 +156,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         for (Column column : snapshot.get(Column.class)) {
-            if (database.isLiquibaseObject(column.getRelation())) {
+            if (shouldNotWriteColumnHtml(column)) {
                 continue;
             }
             columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
@@ -175,6 +176,11 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
     }
 
+    private boolean shouldNotWriteColumnHtml(Column column) {
+        return database.isLiquibaseObject(column.getRelation()) ||
+                Boolean.TRUE.equals(column.getComputed());
+    }
+
     private void copyFile(String fileToCopy, Resource rootOutputDir) throws IOException {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileToCopy);
         OutputStream outputStream = null;
@@ -182,7 +188,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
             if (inputStream == null) {
                 throw new IOException("Can not find " + fileToCopy);
             }
-            outputStream = rootOutputDir.resolve(fileToCopy.replaceFirst(".*\\/", "")).openOutputStream(true);
+            outputStream = rootOutputDir.resolve(fileToCopy.replaceFirst(".*\\/", "")).openOutputStream(new OpenOptions());
             StreamUtil.copy(inputStream, outputStream);
         } finally {
             if (outputStream != null) {
