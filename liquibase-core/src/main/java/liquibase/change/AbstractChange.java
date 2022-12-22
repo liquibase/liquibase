@@ -471,7 +471,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter() {
             @Override
             public boolean include(Object obj, String field, Object value) {
-                if(getExcludedFieldFilters().toString().contains(field)) {
+                if(Arrays.stream(getExcludedFieldFilters()).anyMatch(filter -> filter.toLowerCase().equals(field))) {
                     return false;
                 }
                 return super.include(obj, field, value);

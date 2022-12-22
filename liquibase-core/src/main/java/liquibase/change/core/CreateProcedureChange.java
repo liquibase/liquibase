@@ -240,38 +240,35 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
-            if(this.path == null) {
-                stream = new ByteArrayInputStream(this.procedureText.getBytes());
+            if (this.path == null) {
+                String procedureText = this.procedureText;
+                if ((stream == null) && (procedureText == null)) {
+                    procedureText = "";
+                }
+                String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+                if (procedureText != null) {
+                    try {
+                        stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
+                    } catch (UnsupportedEncodingException e) {
+                        throw new AssertionError(encoding +
+                                " is not supported by the JVM, this should not happen according to the JavaDoc of " +
+                                "the Charset class"
+                        );
+                    }
+                }
             }
             else {
                 stream = openSqlStream();
-            }
-        } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-
-        try {
-            String procedureText = this.procedureText;
-            if ((stream == null) && (procedureText == null)) {
-                procedureText = "";
-            }
-
-            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-            if (procedureText != null) {
-                try {
-                    stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
-                } catch (UnsupportedEncodingException e) {
-                    throw new AssertionError(encoding +
-                            " is not supported by the JVM, this should not happen according to the JavaDoc of " +
-                            "the Charset class"
-                    );
-                }
             }
 
             CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
 
             return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
-        } finally {
+
+        } catch (IOException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        finally {
             if (stream != null) {
                 try {
                     stream.close();
@@ -287,7 +284,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     public String[] getExcludedFieldFilters() {
         return new String[]{
                 "path",
-                "dbms"
+                "dbms",
+                "relativeToChangelogFile"
         };
     }
 
