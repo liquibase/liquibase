@@ -201,7 +201,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 );
             }
 
-            return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
+            return CheckSum.compute(new NormalizingStream(stream), false);
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
         } finally {
@@ -282,7 +282,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     public static class NormalizingStream extends InputStream {
-        private ByteArrayInputStream headerStream;
         private PushbackInputStream stream;
 
         private byte[] quickBuffer = new byte[100];
@@ -292,24 +291,17 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         private int lastChar = 'X';
         private boolean seenNonSpace;
 
+        @Deprecated
         public NormalizingStream(String endDelimiter, Boolean splitStatements, Boolean stripComments, InputStream stream) {
+            this(stream);
+        }
+
+        public NormalizingStream(InputStream stream) {
             this.stream = new PushbackInputStream(stream, 2048);
-            try {
-                this.headerStream = new ByteArrayInputStream((endDelimiter+":"+splitStatements+":"+stripComments+":").getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
-            } catch (UnsupportedEncodingException e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
         }
 
         @Override
         public int read() throws IOException {
-            if (headerStream != null) {
-                int returnChar = headerStream.read();
-                if (returnChar != -1) {
-                    return returnChar;
-                }
-                headerStream = null;
-            }
 
             int returnChar = stream.read();
 

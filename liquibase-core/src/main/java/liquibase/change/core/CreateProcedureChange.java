@@ -110,13 +110,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
-    @DatabaseChangeProperty(
-        exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
-                "    IS\n" +
-                "    BEGIN\n" +
-                "      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');\n" +
-                "    END;",
-        serializationType = SerializationType.DIRECT_VALUE)
+    @DatabaseChangeProperty(isChangeProperty = false)
     /**
      * @deprecated Use getProcedureText() instead
      */
@@ -132,7 +126,13 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.procedureText = procedureText;
     }
 
-    @DatabaseChangeProperty(isChangeProperty = false)
+    @DatabaseChangeProperty(
+            exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
+                    "    IS\n" +
+                    "    BEGIN\n" +
+                    "      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');\n" +
+                    "    END;",
+            serializationType = SerializationType.DIRECT_VALUE)
     public String getProcedureText() {
         return procedureText;
     }
@@ -242,27 +242,20 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         try {
             if (this.path == null) {
                 String procedureText = this.procedureText;
-                if ((stream == null) && (procedureText == null)) {
-                    procedureText = "";
-                }
                 String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-                if (procedureText != null) {
-                    try {
-                        stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
-                    } catch (UnsupportedEncodingException e) {
-                        throw new AssertionError(encoding +
-                                " is not supported by the JVM, this should not happen according to the JavaDoc of " +
-                                "the Charset class"
-                        );
-                    }
+                try {
+                    stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
+                } catch (UnsupportedEncodingException e) {
+                    throw new AssertionError(encoding +
+                            " is not supported by the JVM, this should not happen according to the JavaDoc of " +
+                            "the Charset class"
+                    );
                 }
             }
             else {
                 stream = openSqlStream();
             }
-
-            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
-
+            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
             return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
 
         } catch (IOException e) {
@@ -285,7 +278,10 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return new String[]{
                 "path",
                 "dbms",
-                "relativeToChangelogFile"
+                "relativeToChangelogFile",
+                "procedureText",
+                "encoding",
+                "comments"
         };
     }
 

@@ -11,6 +11,7 @@ import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -79,12 +80,20 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
         return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.FieldFilter(){
             @Override
             public boolean include(Object obj, String field, Object value) {
-                if(field.equals("applicableDbms") || field.equals("contextFilter") || field.equals("labels")) {
+                if(Arrays.stream(getExcludedFieldFilters()).anyMatch(filter -> filter.equals(field))) {
                     return false;
                 }
                 return super.include(obj, field, value);
             }
         }).serialize(this, false));
+    }
+
+    public String[] getExcludedFieldFilters() {
+        return new String[]{
+                "applicableDbms",
+                "contextFilter",
+                "labels"
+        };
     }
 
     @Override

@@ -177,6 +177,16 @@ public class CreateViewChange extends AbstractChange {
         }
     }
 
+    @Override
+    public String[] getExcludedFieldFilters() {
+        return new String[] {
+                "path",
+                "relativeToChangelogFile",
+                "selectQuery",
+                "encoding"
+        };
+    }
+
     /**
      * Calculates the checksum based on the contained SQL.
      *
@@ -184,35 +194,30 @@ public class CreateViewChange extends AbstractChange {
      */
     @Override
     public CheckSum generateCheckSum() {
-        if (this.path == null) {
-            return super.generateCheckSum();
-        }
 
         InputStream stream = null;
         try {
-            stream = openSqlStream();
-        } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-
-        try {
-            String selectQuery = this.selectQuery;
-            if ((stream == null) && (selectQuery == null)) {
-                selectQuery = "";
-            }
-
-            String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-            if (selectQuery != null) {
+            if (this.path == null) {
+                String selectQuery = this.selectQuery;
+                String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
                 try {
                     stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
                 } catch (UnsupportedEncodingException e) {
-                    throw new AssertionError(encoding+" is not supported by the JVM, this should not happen according to the JavaDoc of the Charset class");
+                    throw new AssertionError(encoding +
+                            " is not supported by the JVM, this should not happen according to the JavaDoc of " +
+                            "the Charset class"
+                    );
                 }
             }
+            else {
+                stream = openSqlStream();
+            }
 
-			CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
-
+            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
             return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
+
+        } catch (IOException e) {
+            throw new UnexpectedLiquibaseException(e);
         } finally {
             if (stream != null) {
                 try {

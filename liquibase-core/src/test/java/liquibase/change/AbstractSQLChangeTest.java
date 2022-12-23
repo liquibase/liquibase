@@ -228,8 +228,8 @@ public class AbstractSQLChangeTest {
     }
 
     private void assertNormalizingStreamCorrect(String expected, String toCorrect) throws IOException {
-        AbstractSQLChange.NormalizingStream normalizingStream = new AbstractSQLChange.NormalizingStream("x", true, false, new ByteArrayInputStream(toCorrect.getBytes()));
-        assertEquals("x:true:false:"+expected, StreamUtil.readStreamAsString(normalizingStream));
+        AbstractSQLChange.NormalizingStream normalizingStream = new AbstractSQLChange.NormalizingStream(new ByteArrayInputStream(toCorrect.getBytes()));
+        assertEquals(expected, StreamUtil.readStreamAsString(normalizingStream));
     }
 
 //    @Test
