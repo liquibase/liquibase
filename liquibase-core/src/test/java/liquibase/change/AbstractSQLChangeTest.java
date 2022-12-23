@@ -71,7 +71,7 @@ public class AbstractSQLChangeTest {
     }
 
     @Test
-    public void setEndDelmiter() {
+    public void setEndDelimiter() {
         AbstractSQLChange change = new ExampleAbstractSQLChange();
 
         change.setEndDelimiter("GO");

@@ -1,6 +1,7 @@
 package liquibase.change.core
 
 import liquibase.Scope
+import liquibase.change.CheckSum
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
@@ -16,6 +17,8 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.sqlgenerator.core.CreateProcedureGenerator
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
+import liquibase.util.StringUtil
+import spock.lang.Shared
 import spock.lang.Unroll
 
 public class CreateProcedureChangeTest extends StandardChangeTest {
@@ -27,6 +30,8 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         then:
         "Stored procedure created" == refactoring.getConfirmationMessage()
     }
+
+    public static final String PROCEDURE_TEXT = "SOME SQL";
 
     def "checkStatus"() {
         when:
@@ -70,7 +75,7 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         fileContents.trim() == "My Logic Here"
 
         where:
-        sqlPath | logicalFilePath | relativeToChangelogFile
+        sqlPath                    | logicalFilePath      | relativeToChangelogFile
         "com/example/my-logic.sql" | null                 | false
         "com/example/my-logic.sql" | "a/logical/path.xml" | false
         "my-logic.sql"             | null                 | true
@@ -90,11 +95,91 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         valErrors.getErrorMessages().get(0).contains(expectedValidationErrorMsg);
 
         where:
-        database               | dbms   | expectedValidationErrorMsg
+        database               | dbms                             | expectedValidationErrorMsg
         new PostgresDatabase() | "post"                           | String.format("%s is not a supported DB", dbms)
         new PostgresDatabase() | "postgresql"                     | ""
         new MockDatabase()     | "postgresql, h2, mssql, !sqlite" | ""
         new PostgresDatabase() | "none"                           | ""
         new PostgresDatabase() | "all"                            | ""
+    }
+
+    def dbmsIsNotConsideredOnCheckSumGeneration() {
+        when:
+        CreateProcedureChange change = new CreateProcedureChange()
+        change.setProcedureText(PROCEDURE_TEXT)
+        CheckSum procedureCheckSumWithoutDbms = change.generateCheckSum()
+        CreateProcedureChange change2 = new CreateProcedureChange()
+        change2.setProcedureText(PROCEDURE_TEXT)
+        change2.setDbms("postgresql")
+        CheckSum procedureCheckSumWithDbms = change2.generateCheckSum()
+
+        then:
+        procedureCheckSumWithoutDbms == procedureCheckSumWithDbms
+
+    }
+
+    def pathIsNotConsideredOnCheckSumGeneration() {
+        when:
+        String testScopeId = Scope.enter([
+                "resourceAccessor": new MockResourceAccessor([
+                        "test.sql": PROCEDURE_TEXT
+                ])
+        ])
+
+        CreateProcedureChange change = new CreateProcedureChange()
+        change.setProcedureText(PROCEDURE_TEXT)
+        CheckSum procedureCheckSumWithoutPath = change.generateCheckSum()
+        CreateProcedureChange change2 = new CreateProcedureChange()
+        change2.setProcedureText(PROCEDURE_TEXT)
+        change2.setPath("test.sql")
+        change2.setRelativeToChangelogFile(false)
+        //Below check sum generation should not take either path nor relativeToChangeLogFile properties into account
+        CheckSum procedureCheckSumWithPath = change2.generateCheckSum()
+        //TODO: Move this Scope.exit() call into a cleanUpSpec method
+        Scope.exit(testScopeId)
+
+        then:
+        procedureCheckSumWithoutPath == procedureCheckSumWithPath
+    }
+
+    def commentIsNotConsideredOnCheckSumGeneration() {
+        when:
+        CreateProcedureChange change = new CreateProcedureChange()
+        change.setProcedureText(PROCEDURE_TEXT)
+        CheckSum procedureCheckSumWithoutComments = change.generateCheckSum()
+        CreateProcedureChange change2 = new CreateProcedureChange()
+        change2.setProcedureText(PROCEDURE_TEXT)
+        change2.setComments("This is a test")
+        CheckSum procedureCheckSumWithComments = change2.generateCheckSum()
+
+        then:
+        procedureCheckSumWithoutComments == procedureCheckSumWithComments
+    }
+
+    def encodingIsNotConsideredOnCheckSumGeneration() {
+        when:
+        CreateProcedureChange change = new CreateProcedureChange()
+        change.setProcedureText(PROCEDURE_TEXT)
+        CheckSum procedureCheckSumWithoutEncoding = change.generateCheckSum()
+        CreateProcedureChange change2 = new CreateProcedureChange()
+        change2.setProcedureText(PROCEDURE_TEXT)
+        change2.setEncoding("UTF-8")
+        CheckSum procedureCheckSumWithEncoding = change2.generateCheckSum()
+
+        then:
+        procedureCheckSumWithoutEncoding == procedureCheckSumWithEncoding
+    }
+
+    def procedureTextUpdatedIsNotConsideredOnCheckSumGeneration() {
+        when:
+        CreateProcedureChange change = new CreateProcedureChange()
+        change.setProcedureText(PROCEDURE_TEXT)
+        CheckSum procedureTextCheckSum = change.generateCheckSum()
+        CreateProcedureChange change2 = new CreateProcedureChange()
+        change2.setProcedureText(PROCEDURE_TEXT.concat("      \n"))
+        CheckSum procedureTextModifiedCheckSum = change2.generateCheckSum()
+
+        then:
+        procedureTextCheckSum == procedureTextModifiedCheckSum
     }
 }
