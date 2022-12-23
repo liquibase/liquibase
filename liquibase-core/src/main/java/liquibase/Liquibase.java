@@ -330,12 +330,15 @@ public class Liquibase implements AutoCloseable {
         String cacheKey = contexts +"/"+ labelExpression;
         if (!this.upToDateFastCheck.containsKey(cacheKey)) {
             try {
-                if (listUnrunChangeSets(contexts, labelExpression, true).isEmpty()) {
+                if (listUnrunChangeSets(contexts, labelExpression, false).isEmpty()) {
                     LOG.fine("Fast check found no un-run changesets");
                     upToDateFastCheck.put(cacheKey, true);
                 } else {
                     upToDateFastCheck.put(cacheKey, false);
                 }
+            } catch (DatabaseException e) {
+                LOG.info("Error querying Liquibase tables, disabling fast check for this execution. Reason: " + e.getMessage());
+                upToDateFastCheck.put(cacheKey, false);
             } finally {
                 // Discard the cached fetched un-run changeset list, as if
                 // another peer is running the changesets in parallel, we may
