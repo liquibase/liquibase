@@ -1,14 +1,9 @@
 package liquibase.sdk.resource;
 
-import liquibase.GlobalConfiguration;
 import liquibase.resource.AbstractResourceAccessor;
-import liquibase.resource.InputStreamList;
 import liquibase.resource.Resource;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import java.util.*;
 
 public class MockResourceAccessor extends AbstractResourceAccessor {
@@ -58,5 +53,9 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     @Override
     public List<String> describeLocations() {
         return Collections.singletonList("MockResouceAccessor.java");
+    }
+
+    public void setContent(String fileName, String content) {
+        this.contentByFileName.put(fileName, content);
     }
 }

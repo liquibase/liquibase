@@ -2,7 +2,6 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
-import liquibase.change.Change;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
