@@ -7,8 +7,6 @@ import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

@@ -3,7 +3,6 @@ package liquibase.change;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtil;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.Normalizer;

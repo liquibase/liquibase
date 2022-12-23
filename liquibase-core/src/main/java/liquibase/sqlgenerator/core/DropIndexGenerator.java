@@ -32,10 +32,10 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         List<String> associatedWith = StringUtil.splitAndTrim(statement.getAssociatedWith(), ",");
         if (associatedWith != null) {
             if (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT)) {
-                return new Sql[0];
+                return EMPTY_SQL;
             } else if (associatedWith.contains(Index.MARK_FOREIGN_KEY)) {
                 if (!((database instanceof OracleDatabase) || (database instanceof MSSQLDatabase))) {
-                    return new Sql[0];
+                    return EMPTY_SQL;
                 }
             }
         }

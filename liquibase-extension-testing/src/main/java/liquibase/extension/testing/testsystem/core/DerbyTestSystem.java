@@ -2,11 +2,7 @@ package liquibase.extension.testing.testsystem.core;
 
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
-import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
-import liquibase.extension.testing.testsystem.wrapper.UnimplementedWrapper;
 import org.jetbrains.annotations.NotNull;
-
-import java.sql.SQLException;
 
 public class DerbyTestSystem extends DatabaseTestSystem {
 

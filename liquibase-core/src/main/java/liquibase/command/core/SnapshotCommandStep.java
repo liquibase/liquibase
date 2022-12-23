@@ -7,11 +7,9 @@ import liquibase.command.*;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.license.LicenseServiceUtils;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -95,7 +93,7 @@ public class SnapshotCommandStep extends AbstractCommandStep {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }
 
-        return finalList.toArray(new CatalogAndSchema[finalList.size()]);
+        return finalList.toArray(new CatalogAndSchema[0]);
     }
 
     public Map<String, Object> getSnapshotMetadata() {

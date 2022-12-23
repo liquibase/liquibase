@@ -63,7 +63,7 @@ public class RenameSequenceChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<>();
         statements.add(new RenameSequenceStatement(getCatalogName(), getSchemaName(), getOldSequenceName(), getNewSequenceName()));
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new SqlStatement[0]);
     }
 
     @Override

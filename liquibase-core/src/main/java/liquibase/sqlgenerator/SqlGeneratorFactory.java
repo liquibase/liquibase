@@ -6,7 +6,6 @@ import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
@@ -15,6 +14,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
+
+import static liquibase.sqlgenerator.SqlGenerator.EMPTY_SQL;
 
 /**
  * SqlGeneratorFactory is a singleton registry of SqlGenerators.
@@ -193,7 +194,7 @@ public class SqlGeneratorFactory {
     public Sql[] generateSql(Change change, Database database) {
         SqlStatement[] sqlStatements = change.generateStatements(database);
         if (sqlStatements == null) {
-            return new Sql[0];
+            return EMPTY_SQL;
         } else {
             return generateSql(sqlStatements, database);
         }
@@ -209,7 +210,7 @@ public class SqlGeneratorFactory {
               returnList.addAll(sqlList);
             }
         }
-        return returnList.toArray(new Sql[returnList.size()]);
+        return returnList.toArray(EMPTY_SQL);
     }
 
     public Sql[] generateSql(SqlStatement statement, Database database) {

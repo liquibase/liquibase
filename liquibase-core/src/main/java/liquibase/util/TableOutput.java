@@ -1,10 +1,8 @@
 package liquibase.util;
 
-import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;

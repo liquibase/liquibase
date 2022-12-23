@@ -14,6 +14,11 @@ package liquibase.statement;
  */
 public interface SqlStatement {
 
+    /**
+     * Represent an empty array of {@link SqlStatement}.
+     */
+    SqlStatement[] EMPTY_SQL_STATEMENT = {};
+
     boolean skipOnUnsupported();
 
     boolean continueOnError();

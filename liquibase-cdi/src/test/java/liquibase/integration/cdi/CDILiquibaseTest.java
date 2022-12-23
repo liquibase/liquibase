@@ -1,11 +1,7 @@
 package liquibase.integration.cdi;
 
 import liquibase.Scope;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.LiquibaseException;
 import liquibase.logging.core.BufferedLogService;
-import liquibase.logging.core.CompositeLogService;
-import liquibase.logging.core.CompositeLogger;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.After;
