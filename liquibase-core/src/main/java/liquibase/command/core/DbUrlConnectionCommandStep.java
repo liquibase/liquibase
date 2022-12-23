@@ -25,6 +25,8 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class DbUrlConnectionCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
 
+    public static final String[] COMMAND_NAME = {"dbUrlConnectionCommandStep"};
+
     private static final List<String[][]> APPLICABLE_COMMANDS = new ArrayList<>();
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
@@ -40,7 +42,7 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
     private Database database;
 
     static {
-        CommandBuilder builder = new CommandBuilder();
+        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
                 .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
@@ -181,7 +183,14 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
 
     @Override
     public String[][] defineCommandNames() {
-        return null;
+        return new String[][] { COMMAND_NAME };
+    }
+
+    @Override
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        if (commandDefinition.getPipeline().size() == 1) {
+            commandDefinition.setInternal(true);
+        }
     }
 
     @Override
