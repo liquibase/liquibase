@@ -1087,17 +1087,23 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 private List<CachedRow> queryDb2Zos(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
                     String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
 
-                    String sql = "SELECT CREATOR AS TABLE_SCHEM, " +
-                            "NAME AS TABLE_NAME, " +
-                            "'TABLE' AS TABLE_TYPE, " +
-                            "REMARKS " +
-                            "FROM  SYSIBM.SYSTABLES " +
-                            "WHERE TYPE = 'T' ";
+                    String sql = "SELECT t.CREATOR AS TABLE_SCHEM, " +
+                            "       t.NAME AS TABLE_NAME, " +
+                            "       'TABLE' AS TABLE_TYPE, " +
+                            "       t.REMARKS AS REMARKS, " +
+                            "       tsp.DBNAME AS DB_NAME, " +
+                            "       tsp.NAME  AS TBSPACE, " +
+                            "       tsp.IMPLICIT  AS IMPLICIT, " +
+                            "       tsp.PARTITIONS AS PARTITIONS " +
+                            "FROM  SYSIBM.SYSTABLES t " +
+                            "          INNER JOIN SYSIBM.SYSTABLESPACE tsp " +
+                            "                     ON t.TSNAME= tsp.NAME AND t.DBNAME= tsp.DBNAME " +
+                            "WHERE t.TYPE = 'T'";
                     if (ownerName != null) {
-                        sql += "AND CREATOR='" + ownerName + "'";
+                        sql += " AND t.CREATOR='" + ownerName + "'";
                     }
                     if (tableName != null) {
-                        sql += " AND NAME='" + tableName + "'";
+                        sql += " AND t.NAME='" + tableName + "'";
                     }
 
                     return executeAndExtract(sql, database);

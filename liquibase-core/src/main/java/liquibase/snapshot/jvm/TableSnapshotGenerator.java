@@ -3,14 +3,12 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -98,6 +96,18 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                 table.setAttribute("duration", "ON COMMIT DELETE ROWS");
             } else if (duration != null && duration.equals("SYS$SESSION")) {
                 table.setAttribute("duration", "ON COMMIT PRESERVE ROWS");
+            }
+        }
+
+        if (database instanceof Db2zDatabase) {
+            Integer partitions = (Integer) tableMetadataResultSet.get("PARTITIONS");
+            String implicitlyCreated = (String) tableMetadataResultSet.get("IMPLICIT");
+            if ("N".equalsIgnoreCase(implicitlyCreated) && partitions != null && partitions > 0) {
+                StringBuilder tablespaceName = new StringBuilder()
+                        .append(database.escapeObjectName((String) tableMetadataResultSet.get("DB_NAME"), Table.class))
+                        .append(".")
+                        .append(database.escapeObjectName((String) tableMetadataResultSet.get("TBSPACE"), Table.class));
+                table.setTablespace(tablespaceName.toString());
             }
         }
 

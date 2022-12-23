@@ -31,6 +31,15 @@ public class Table extends Relation {
         return getAttribute("outgoingForeignKeys", List.class);
     }
 
+    public String getTablespace() {
+        return getAttribute("tablespace", String.class);
+    }
+
+    public Relation setTablespace(String remarks) {
+        setAttribute("tablespace", remarks);
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
