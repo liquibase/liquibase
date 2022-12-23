@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
@@ -91,10 +92,10 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                         + "] AS SELECT " +
                         "''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
                 viewDefinition.replace("CREATE", "ALTER");
-            } else if (database instanceof HsqlDatabase) {
+            } else if (shouldPrependDropViewStatement(database, statement)) {
                 sql.add(new UnparsedSql(
                     "DROP VIEW IF EXISTS " + database.escapeViewName(statement.getCatalogName(),
-                        statement.getSchemaName(), statement.getViewName())));
+                    statement.getSchemaName(), statement.getViewName())));
             } else {
                 //
                 // Do not generate CREATE OR REPLACE if:
@@ -108,6 +109,17 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         }
         sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
         return sql.toArray(EMPTY_SQL);
+    }
+
+    private boolean shouldPrependDropViewStatement(Database database, CreateViewStatement statement) {
+        // allow overriding the value of the dropIfCannotReplace attribute
+        // from liquibase.properties or command line
+        boolean dropIfCannotReplace = false;
+        if (GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getCurrentValue() != null) {
+            dropIfCannotReplace = GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getCurrentValue();
+        } 
+        return database instanceof HsqlDatabase ||
+              (database instanceof PostgresDatabase && dropIfCannotReplace);
     }
 
     //

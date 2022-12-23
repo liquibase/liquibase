@@ -177,6 +177,16 @@ alter table test_table add column name2 varchar(20);
 
 """.trim()
 
+    private static final String VALID_CHANGELOG_WITH_IGNORE_PROP = """
+--liquibase formatted sql
+-- changeset sk:1 ignore:true
+create table changeSetToIgnore (
+    id int primary key
+);
+--rollback drop table changeSetToIgnore;
+
+""".trim()
+
     private static final String END_DELIMITER_CHANGELOG = """
 --liquibase formatted sql
 
@@ -403,6 +413,16 @@ CREATE TABLE ALL_CAPS_TABLE_2 (
 
         changeLog.getChangeSets().get(24).getRollback().getChanges().size() == 1
         ((RawSQLChange) changeLog.getChangeSets().get(24).getRollback().getChanges().get(0)).getSql().startsWith("create table test_table (")
+    }
+
+    def parseIgnoreProperty() throws Exception {
+        expect:
+        ChangeLogParameters params = new ChangeLogParameters()
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(VALID_CHANGELOG_WITH_IGNORE_PROP).parse("asdf.sql", params, new JUnitResourceAccessor())
+
+        changeLog.getChangeSets().get(0).getAuthor() == "sk"
+        changeLog.getChangeSets().get(0).getId() == "1"
+        assert changeLog.getChangeSets().get(0).isIgnore()
     }
 
     def "parse changeset with colon in ID"() throws Exception {

@@ -52,7 +52,13 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         List<Sql> additionalSql = new ArrayList<>();
 
         StringBuilder buffer = new StringBuilder();
-        buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(),
+        buffer.append("CREATE ");
+
+        if (statement.getTableType() != null && statement.getTableType().trim().isEmpty()) {
+            buffer.append(statement.getTableType().toUpperCase());
+        }
+
+        buffer.append("TABLE ").append(database.escapeTableName(statement.getCatalogName(),
                 statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");
 
@@ -282,7 +288,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && (database.getDefaultSchemaName() != null) && database
-                        .getOutputDefaultSchema()) {
+                        .getOutputDefaultSchema() && (database.supportsSchemas() || database.supportsCatalogs())) {
                     referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) + "." + referencesString;
                 }
                 buffer.append(referencesString);
