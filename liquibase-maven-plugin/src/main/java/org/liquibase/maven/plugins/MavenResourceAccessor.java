@@ -1,13 +1,6 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.InputStreamList;
-import liquibase.resource.Resource;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.SortedSet;
 
 /**
  * Extension of {@link liquibase.resource.ClassLoaderResourceAccessor} for Maven which will use a default or user specified {@link ClassLoader} to load files/resources.

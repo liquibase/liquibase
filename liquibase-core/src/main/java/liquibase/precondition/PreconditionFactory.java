@@ -2,7 +2,6 @@ package liquibase.precondition;
 
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.HashMap;
 import java.util.Map;

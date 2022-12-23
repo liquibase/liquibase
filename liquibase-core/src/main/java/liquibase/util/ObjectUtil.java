@@ -487,7 +487,7 @@ public class ObjectUtil {
         }
 
         public PropertyDescriptor[] getDescriptors() {
-            return descriptors.values().toArray(new PropertyDescriptor[descriptors.values().size()]);
+            return descriptors.values().toArray(new PropertyDescriptor[0]);
         }
 
         public Class<?> getTargetClass() {

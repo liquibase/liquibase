@@ -75,7 +75,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         }
 
         public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException, SQLException {
-            List<CachedRow> indexes = getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
+
+            return getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
                 public boolean isBulkFetchMode;
 
@@ -256,11 +257,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
 
                         // Iterate through all the candidate tables and try to find the index.
-                        for (String tableName : tables) {
+                        for (String tableName1 : tables) {
                             ResultSet rs = databaseMetaData.getIndexInfo(
                                     ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema),
                                     ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema),
-                                    tableName,
+                                    tableName1,
                                     false,
                                     true);
                             List<CachedRow> rows = extract(rs, (database instanceof InformixDatabase));
@@ -285,8 +286,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return false;
                 }
             });
-
-            return indexes;
         }
 
         protected void warnAboutDbaRecycleBin() {
@@ -1719,8 +1718,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof SybaseDatabase) {
-                        Scope.getCurrentScope().getLog(getClass()).warning("Finding unique constraints not currently supported for Sybase");
-                        return null; //TODO: find sybase sql
+                        sql = "select idx.name as CONSTRAINT_NAME, tbl.name as TABLE_NAME "
+                                + "from sysindexes idx "
+                                + "inner join sysobjects tbl on tbl.id = idx.id "
+                                + "where idx.indid between 1 and 254 "
+                                + "and (idx.status & 2) = 2 "
+                                + "and tbl.type = 'U'";
+                        if (tableName != null) {
+                            sql += " and tbl.name = '" + database.correctObjectName(tableName, Table.class) + "'";
+                        }
                     } else if (database instanceof SybaseASADatabase) {
                         sql = "select sysconstraint.constraint_name, sysconstraint.constraint_type, systable.table_name " +
                                 "from sysconstraint, systable " +

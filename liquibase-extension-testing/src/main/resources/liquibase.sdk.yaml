@@ -80,3 +80,6 @@ liquibase:
       sqlite:
         url: "jdbc:sqlite::memory:"
 
+      firebird:
+        imageName: jacobalberty/firebird
+        version: v4

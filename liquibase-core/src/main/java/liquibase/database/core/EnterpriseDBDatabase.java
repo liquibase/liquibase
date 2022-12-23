@@ -4,8 +4,6 @@ import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;

@@ -131,8 +131,7 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
           output[pos] = chars[i];
           pos++;
         }
-        String edited = new String(output);
-        return edited;
+        return new String(output);
     }
 
     private void setPropertyIgnoreSchemaAndCatalogCase(Change change, String field, String value, CompareControl.SchemaComparison comparison) {

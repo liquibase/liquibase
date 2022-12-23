@@ -5,7 +5,6 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
 import liquibase.dbdoc.*;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.OpenOptions;
