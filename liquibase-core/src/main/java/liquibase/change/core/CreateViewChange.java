@@ -11,14 +11,12 @@ import liquibase.exception.ValidationErrors;
 import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
-import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.statement.core.SetViewRemarksStatement;
 import liquibase.structure.core.View;
 import liquibase.util.FileUtil;
@@ -248,12 +246,7 @@ public class CreateViewChange extends AbstractChange {
 			try {
 				InputStream stream = openSqlStream();
                 if (stream == null) {
-                    if (ChangeLogParserConfiguration.WARN_ON_MISSING_CHANGELOGS.getCurrentValue()) {
-                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(path));
-                        stream = new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
-                    } else {
-                        throw new IOException(FileUtil.getFileNotFoundMessage(path));
-                    }
+                    stream = returnEmptyResourceIfMissingFile(path);
                 }
 				selectQuery = StreamUtil.readStreamAsString(stream, encoding);
 			    if (getChangeSet() != null) {

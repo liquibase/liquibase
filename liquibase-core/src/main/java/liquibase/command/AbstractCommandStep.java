@@ -1,6 +1,10 @@
 package liquibase.command;
 
+import liquibase.Scope;
 import liquibase.exception.CommandValidationException;
+import liquibase.exception.LiquibaseException;
+import liquibase.parser.ChangeLogParserConfiguration;
+import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
@@ -39,5 +43,14 @@ public abstract class AbstractCommandStep implements CommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
 
+    }
+
+    protected String returnEmptyResourceIfMissingFile(String sqlFile) throws LiquibaseException {
+        if (ChangeLogParserConfiguration.WARN_OR_ERROR_ON_MISSING_CHANGELOGS.getCurrentValue()) {
+            Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(sqlFile));
+            return FileUtil.EMPTY_FILE;
+        } else {
+            throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
+        }
     }
 }

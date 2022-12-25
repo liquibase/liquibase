@@ -158,14 +158,18 @@ public interface ResourceAccessor extends AutoCloseable {
     default Resource getExisting(String path) throws IOException {
         Resource resource = get(path);
         if (!resource.exists()) {
-            if (ChangeLogParserConfiguration.WARN_ON_MISSING_CHANGELOGS.getCurrentValue()) {
-                Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(path));
-                resource = new EmptyResource();
-            } else {
-                throw new IOException(FileUtil.getFileNotFoundMessage(path));
-            }
+            resource = returnEmptyResourceIfMissingFile(path);
         }
         return resource;
+    }
+
+    static Resource returnEmptyResourceIfMissingFile(String path) throws IOException {
+        if (ChangeLogParserConfiguration.WARN_OR_ERROR_ON_MISSING_CHANGELOGS.getCurrentValue()) {
+            Scope.getCurrentScope().getLog(ResourceAccessor.class).warning(FileUtil.getFileNotFoundMessage(path));
+            return new EmptyResource();
+        } else {
+            throw new IOException(FileUtil.getFileNotFoundMessage(path));
+        }
     }
 
     /**

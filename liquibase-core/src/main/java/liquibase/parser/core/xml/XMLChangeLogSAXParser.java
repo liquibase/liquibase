@@ -113,12 +113,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                             physicalChangeLogLocation.replaceFirst("WEB-INF/classes/", ""),
                             changeLogParameters, resourceAccessor);
                 } else {
-                    if (ChangeLogParserConfiguration.WARN_ON_MISSING_CHANGELOGS.getCurrentValue()) {
-                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
-                        resource = new EmptyResource();
-                    } else {
-                        throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
-                    }
+                    resource = returnEmptyResourceIfMissingFileResource(physicalChangeLogLocation);
                 }
             }
 
