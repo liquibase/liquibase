@@ -14,9 +14,13 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
     private String resourceFilter;
     private ContextExpression context;
 
+    private Integer minDepth;
+
+    private Integer maxDepth;
+
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<>(Arrays.asList("path", "errorIfMissingOrEmpty", "relativeToChangelogFile", "resourceFilter", "context"));
+        return new LinkedHashSet<>(Arrays.asList("path", "errorIfMissingOrEmpty", "relativeToChangelogFile", "resourceFilter", "context", "minDepth", "maxDepth"));
     }
 
     @Override
@@ -68,4 +72,12 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
     public void setContext(ContextExpression context) {
         this.context = context;
     }
+
+    public Integer getMinDepth() { return minDepth; }
+
+    public void setMinDepth (Integer minDepth) { this.minDepth = minDepth; }
+
+    public Integer getMaxDepth() { return maxDepth; }
+
+    public void setMaxDepth (Integer maxDepth) { this.maxDepth = maxDepth; }
 }

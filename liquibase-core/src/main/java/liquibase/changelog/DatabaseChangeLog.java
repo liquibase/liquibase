@@ -494,6 +494,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         includeContextFilter,
                         labels,
                         ignore,
+                        node.getChildValue(null, "minDepth", Integer.valueOf(1)),
+                        node.getChildValue(null, "maxDepth", Integer.MAX_VALUE),
                         (ModifyChangeSets)nodeScratch.get("modifyChangeSets"));
                 break;
             }
@@ -604,7 +606,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 resourceAccessor,
                 includeContextFilter,
                 labels,
-                ignore);
+                ignore,
+                1,
+                Integer.MAX_VALUE);
     }
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
@@ -614,10 +618,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ResourceAccessor resourceAccessor,
                            ContextExpression includeContextFilter,
                            Labels labels,
-                           boolean ignore)
+                           boolean ignore,
+                           Integer minDepth,
+                           Integer maxDepth)
             throws SetupException {
         includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
-                   resourceAccessor, includeContextFilter, labels, ignore, new ModifyChangeSets(null));
+                   resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, new ModifyChangeSets(null));
     }
 
     public void includeAll(String pathName,
@@ -629,6 +635,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ContextExpression includeContextFilter,
                            Labels labels,
                            boolean ignore,
+                           Integer minDepth,
+                           Integer maxDepth,
                            ModifyChangeSets modifyChangeSets)
             throws SetupException {
         try {
@@ -659,8 +667,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 LOG.fine("includeAll for " + pathName);
                 LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
 
-                //TODO: JML update to have minDepth and maxDepth attributes
-                unsortedResources = resourceAccessor.search(path, 1, Integer.MAX_VALUE);
+                unsortedResources = resourceAccessor.search(path, minDepth, maxDepth);
             } catch (IOException e) {
                 if (errorIfMissingOrEmpty) {
                     throw e;
