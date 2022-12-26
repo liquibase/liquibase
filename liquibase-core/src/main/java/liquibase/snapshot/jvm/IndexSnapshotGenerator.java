@@ -305,8 +305,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (exampleName != null) {
-            Index index = foundIndexes.get(exampleName);
-            return index;
+            return foundIndexes.get(exampleName);
         } else {
             //prefer clustered version of the index
             List<Index> nonClusteredIndexes = new ArrayList<>();

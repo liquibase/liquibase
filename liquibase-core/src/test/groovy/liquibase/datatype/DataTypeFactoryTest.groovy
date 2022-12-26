@@ -33,6 +33,9 @@ class DataTypeFactoryTest extends Specification {
         "serial4"                                      | new MockDatabase()     | "INT"                                          | IntType       | true
         "xml"                                          | new MockDatabase()     | "XML"                                          | XMLType       | false
         "real"                                         | new DB2Database()      | "REAL"                                         | FloatType     | false
+        "varbinary(200)"                               | new DB2Database()      | "VARBINARY(200)"                               | BlobType      | false
+        "binary(200)"                                  | new DB2Database()      | "BINARY(200)"                                  | BlobType      | false
+        "java.sql.Types.VARBINARY(200)"                | new DB2Database()      | "VARBINARY(200)"                               | BlobType      | false
         "xml"                                          | new DB2Database()      | "XML"                                          | XMLType       | false
         "bigint"                                       | new MSSQLDatabase()    | "bigint"                                       | BigIntType    | false
         "[bigint]"                                     | new MSSQLDatabase()    | "bigint"                                       | BigIntType    | false
