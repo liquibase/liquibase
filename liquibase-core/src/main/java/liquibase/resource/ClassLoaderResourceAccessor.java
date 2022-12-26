@@ -1,7 +1,6 @@
 package liquibase.resource;
 
 import liquibase.Scope;
-import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
