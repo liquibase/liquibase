@@ -870,29 +870,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             try (InputStream _is = handlePropertyFileInputStream(propertyFile)) {
                 InputStream is = _is;
                 if (is == null) {
-                    if (ChangeLogParserConfiguration.WARN_ON_MISSING_CHANGELOGS.getCurrentValue()) {
-                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(propertyFile));
-                        is = new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
-                    } else {
-                        throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
-                    }
+                    is = returnEmptyResourceIfMissingFile(propertyFile);
                 }
-
                 parsePropertiesFile(is);
                 getLog().info(MavenUtils.LOG_SEPARATOR);
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
-            try (InputStream _is = handlePropertyFileInputStream(propertyFile)) {
-                InputStream is = _is;
-                if (is == null) {
-                    if (ChangeLogParserConfiguration.WARN_ON_MISSING_CHANGELOGS.getCurrentValue()) {
-                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(propertyFile));
-                        is = new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
-                    } else {
-                        throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
-                    }
-                }
 
                 LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
                 final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(is, "Property file "+propertyFile);
@@ -900,6 +881,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
+        }
+    }
+
+    protected ByteArrayInputStream returnEmptyResourceIfMissingFile(String propertyFile) throws MojoExecutionException {
+        if (ChangeLogParserConfiguration.WARN_OR_ERROR_ON_MISSING_CHANGELOGS.getCurrentValue()) {
+            Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(propertyFile));
+            return new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
+        } else {
+            throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
         }
     }
 

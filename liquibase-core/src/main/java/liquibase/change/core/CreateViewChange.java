@@ -245,12 +245,7 @@ public class CreateViewChange extends AbstractChange {
 			try {
 				InputStream stream = openSqlStream();
                 if (stream == null) {
-                    if (ChangeLogParserConfiguration.WARN_ON_MISSING_CHANGELOGS.getCurrentValue()) {
-                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(path));
-                        stream = new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
-                    } else {
-                        throw new IOException(FileUtil.getFileNotFoundMessage(path));
-                    }
+                    stream = returnEmptyResourceIfMissingFile(path);
                 }
 				selectQuery = StreamUtil.readStreamAsString(stream, encoding);
 			    if (getChangeSet() != null) {
