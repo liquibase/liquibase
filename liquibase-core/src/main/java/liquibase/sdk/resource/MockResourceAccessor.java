@@ -1,5 +1,6 @@
 package liquibase.sdk.resource;
 
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.Resource;
 
@@ -36,6 +37,11 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
             return null;
         }
         return returnSet;
+    }
+
+    @Override
+    public List<Resource> search(String path, Integer minDepth, Integer maxDepth) throws IOException {
+        throw new UnexpectedLiquibaseException("Method not implemented");
     }
 
     @Override

@@ -48,6 +48,11 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
+    public List<liquibase.resource.Resource> search(String searchPath, Integer minDepth, Integer maxDepth) throws IOException {
+        throw new UnexpectedLiquibaseException("Method not implemented");
+    }
+
+    @Override
     public List<liquibase.resource.Resource> search(String searchPath, boolean recursive) throws IOException {
         if (recursive) {
             searchPath += "/**";

@@ -1,6 +1,7 @@
 package liquibase.resource;
 
 import liquibase.Scope;
+import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -96,7 +97,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 //    }
 
     @Override
-    public List<Resource> search(String path, boolean recursive) throws IOException {
+    public List<Resource> search(String path, Integer minDepth, Integer maxDepth) throws IOException {
         init();
 
         final LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
@@ -116,16 +117,26 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             urlExternalForm = urlExternalForm.replaceFirst(Pattern.quote(path) + "/?$", "");
 
             try (ResourceAccessor resourceAccessor = pathHandlerFactory.getResourceAccessor(urlExternalForm)) {
-                returnList.addAll(resourceAccessor.search(path, recursive));
+                returnList.addAll(resourceAccessor.search(path, minDepth, maxDepth));
             } catch (Exception e) {
                 throw new IOException(e.getMessage(), e);
             }
         }
 
-        returnList.addAll(additionalResourceAccessors.search(path, recursive));
+        returnList.addAll(additionalResourceAccessors.search(path, minDepth, maxDepth));
 
 
         return new ArrayList<>(returnList);
+    }
+
+    @Override
+    public List<Resource> search(String path, boolean recursive) throws IOException {
+        if (recursive) {
+            return search(path, 1, Integer.MAX_VALUE);
+        }
+        else {
+            return search(path, 1, 1);
+        }
     }
 
     @Override

@@ -129,6 +129,30 @@ public interface ResourceAccessor extends AutoCloseable {
      * </ul>
      *
      * @param path      The path to lookup resources in.
+     * @param minDepth  Minimum folder depth from path to start searching (default: 0)
+     * @param maxDepth  Maximum folder depth from path to stop searching (default: null)
+     * @return empty set if nothing was found
+     * @throws IOException if there is an error searching the system.
+     */
+    List<Resource> search(String path, Integer minDepth, Integer maxDepth) throws IOException;
+
+    /**
+     * Returns the path to all resources contained in the given path.
+     * Multiple resources may be returned with the same path, but only if they are actually unique files.
+     * Order is important to pay attention to, they should be returned in a user-expected manner based on this resource accessor.
+     * <br><br>
+     * Should return an empty list if:
+     * <ul>
+     *     <li>Path does not exist</li>
+     * </ul>
+     * Should throw an exception if:
+     * <ul>
+     *     <li>Path is null</li>
+     *     <li>Path is not a "directory"</li>
+     *     <li>Path exists but cannot be read from</li>
+     * </ul>
+     *
+     * @param path      The path to lookup resources in.
      * @param recursive Set to true and will return paths to contents in subdirectories as well.
      * @return empty set if nothing was found
      * @throws IOException if there is an error searching the system.

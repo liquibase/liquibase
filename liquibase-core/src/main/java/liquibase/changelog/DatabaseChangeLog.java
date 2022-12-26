@@ -659,7 +659,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 LOG.fine("includeAll for " + pathName);
                 LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
 
-                unsortedResources = resourceAccessor.search(path, true);
+                //TODO: JML update to have minDepth and maxDepth attributes
+                unsortedResources = resourceAccessor.search(path, 1, Integer.MAX_VALUE);
             } catch (IOException e) {
                 if (errorIfMissingOrEmpty) {
                     throw e;

@@ -45,6 +45,16 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
+    public List<Resource> search(String path, Integer minDepth, Integer maxDepth) throws IOException {
+        LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
+        for (ResourceAccessor accessor : resourceAccessors) {
+            returnList.addAll(CollectionUtil.createIfNull(accessor.search(path, minDepth, maxDepth)));
+        }
+
+        return new ArrayList<>(returnList);
+    }
+
+    @Override
     public List<Resource> search(String path, boolean recursive) throws IOException {
         LinkedHashSet<Resource> returnList = new LinkedHashSet<>();
         for (ResourceAccessor accessor : resourceAccessors) {

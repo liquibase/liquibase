@@ -69,7 +69,7 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
     }
 
     @Override
-    public List<Resource> search(String startPath, boolean recursive) throws IOException {
+    public List<Resource> search(String startPath, Integer minDepth, Integer maxDepth) throws IOException {
         if (startPath == null) {
             throw new IllegalArgumentException("Path must not be null");
         }
@@ -92,10 +92,20 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
             throw new IOException("'" + startPath + "' is a file, not a directory");
         }
 
+        if (minDepth == null) {
+            minDepth = 1;
+        }
+
+        final int finalMinDepth = minDepth;
+
+        if (maxDepth == null) {
+            maxDepth = Integer.MAX_VALUE;
+        }
+
         SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                if (attrs.isRegularFile()) {
+                if (attrs.isRegularFile() && residesInDepthBoundaries(file)) {
                     addToReturnList(file);
                 }
 
@@ -107,6 +117,12 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
                 return FileVisitResult.CONTINUE;
             }
 
+            private boolean residesInDepthBoundaries(Path file) {
+                final int depth = file.getParent().getNameCount() - rootPath.getNameCount();
+
+                return depth >= finalMinDepth;
+            }
+
             private void addToReturnList(Path file) {
                 String pathToAdd = rootPath.relativize(file).normalize().toString().replace("\\", "/");
 
@@ -115,11 +131,19 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
             }
         };
 
-        int maxDepth = recursive ? Integer.MAX_VALUE : 1;
-
         Files.walkFileTree(basePath, Collections.singleton(FileVisitOption.FOLLOW_LINKS), maxDepth, fileVisitor);
 
         return returnSet;
+    }
+
+    @Override
+    public List<Resource> search(String startPath, boolean recursive) throws IOException {
+        if (recursive) {
+            return search(startPath, 1, Integer.MAX_VALUE);
+        }
+        else {
+            return search(startPath, 1, 1);
+        }
     }
 
     protected abstract Resource createResource(Path file, String pathToAdd);
