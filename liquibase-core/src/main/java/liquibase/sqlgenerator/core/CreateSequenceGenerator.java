@@ -50,7 +50,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
                 validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, H2Database.class);
             }
         } else {
-            validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class, CockroachDatabase.class);
+            validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class, CockroachDatabase.class, FirebirdDatabase.class);
         }
 
 

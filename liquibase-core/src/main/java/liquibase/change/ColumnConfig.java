@@ -889,7 +889,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         private final Number delegate;
         private final String value;
 
-        private ValueNumeric(final String value, final Number numeric) {
+        public ValueNumeric(final String value, final Number numeric) {
             this.delegate = numeric;
             this.value = value;
         }

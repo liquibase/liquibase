@@ -48,7 +48,7 @@ public class TagDatabaseChange extends AbstractChange {
 
     @Override
     protected Change[] createInverses() {
-        return new Change[0];
+        return EMPTY_CHANGE;
     }
 
     @Override
