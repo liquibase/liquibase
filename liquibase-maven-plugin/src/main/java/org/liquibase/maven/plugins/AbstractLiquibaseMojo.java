@@ -867,11 +867,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         if (propertyFile != null) {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
-            try (InputStream _is = handlePropertyFileInputStream(propertyFile)) {
-                InputStream is = _is;
-                if (is == null) {
-                    is = returnEmptyResourceIfMissingFile(propertyFile);
-                }
+            try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
                 parsePropertiesFile(is);
                 getLog().info(MavenUtils.LOG_SEPARATOR);
 
@@ -881,15 +877,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
-        }
-    }
-
-    protected ByteArrayInputStream returnEmptyResourceIfMissingFile(String propertyFile) throws MojoExecutionException {
-        if (ChangeLogParserConfiguration.WARN_OR_ERROR_ON_MISSING_CHANGELOGS.getCurrentValue()) {
-            Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(propertyFile));
-            return new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
-        } else {
-            throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
         }
     }
 
