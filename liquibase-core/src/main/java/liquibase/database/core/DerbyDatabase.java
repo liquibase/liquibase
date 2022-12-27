@@ -63,7 +63,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             }
         } else if (url.startsWith("jdbc:derby") || url.startsWith("java:derby")) {
             //Use EmbeddedDriver if using a derby URL but without the `://` in it
-            return "org.apache.derby.jdbc.EmbeddedDriver";
+            return "org.apache.derby.iapi.jdbc.AutoloadedDriver";
         }
         return null;
     }
