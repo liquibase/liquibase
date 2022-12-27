@@ -18,7 +18,6 @@ public class DatabaseObjectCollectionComparator implements Comparator<DatabaseOb
             if (i != 0) {
                 return i;
             }
-
         }
 
         String name1 = StringUtil.trimToEmpty(o1.getName());
