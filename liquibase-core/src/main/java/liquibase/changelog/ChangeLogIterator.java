@@ -6,7 +6,6 @@ import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.changelog.visitor.ValidatingVisitor;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -37,11 +36,13 @@ public class ChangeLogIterator {
     public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, ChangeSetFilter... changeSetFilters) {
         final List<ChangeSet> changeSets = new ArrayList<>();
         for (RanChangeSet ranChangeSet : changeSetList) {
-            ChangeSet changeSet = changeLog.getChangeSet(ranChangeSet);
-            if (changeSet != null) {
-                changeSet.setFilePath(DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()));
-                changeSets.add(changeSet);
-            }
+	        final List<ChangeSet> changeSetsForRanChangeSet = changeLog.getChangeSets(ranChangeSet);
+	        for (ChangeSet changeSet : changeSetsForRanChangeSet) {
+                if (changeSet != null) {
+                    changeSet.setFilePath(DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()));
+                    changeSets.add(changeSet);
+                }
+	        }
         }
         this.databaseChangeLog = (new DatabaseChangeLog() {
             @Override

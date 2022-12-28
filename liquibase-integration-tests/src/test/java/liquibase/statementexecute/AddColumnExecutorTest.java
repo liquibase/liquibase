@@ -3,7 +3,6 @@ package liquibase.statementexecute;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.CreateTableStatement;

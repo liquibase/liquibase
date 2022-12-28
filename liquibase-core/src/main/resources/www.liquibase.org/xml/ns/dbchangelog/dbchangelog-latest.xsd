@@ -991,6 +991,7 @@
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="tablespace" type="xsd:string"/>
+            <xsd:attribute name="tableType" type="xsd:string"/>
             <xsd:attribute name="remarks" type="xsd:string"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
@@ -1212,6 +1213,7 @@
             <xsd:attribute name="viewName" type="xsd:string" use="required"/>
             <xsd:attribute name="catalogName" type="xsd:string"/>
             <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="booleanExp"/>
         </xsd:complexType>
     </xsd:element>
 

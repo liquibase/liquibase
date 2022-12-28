@@ -478,19 +478,21 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             String changeSetPath = rollbackNode.getChildValue(null, "changeSetPath", getFilePath());
 
             DatabaseChangeLog changeLog = this.getChangeLog();
-            ChangeSet changeSet = changeLog.getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
-            while ((changeSet == null) && (changeLog != null)) {
-                changeLog = changeLog.getParentChangeLog();
-                if (changeLog != null) {
-                    changeSet = changeLog.getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
-                }
+	        List<ChangeSet> changeSets = changeLog.getChangeSets(changeSetPath, changeSetAuthor, changeSetId);
+	        while (changeSets.isEmpty() && (changeLog != null)) {
+		        changeLog = changeLog.getParentChangeLog();
+		        if (changeLog != null) {
+			        changeSets = changeLog.getChangeSets(changeSetPath, changeSetAuthor, changeSetId);
+		        }
+	        }
+            if (changeSets.isEmpty()) {
+                throw new ParsedNodeException("Change set " + new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false) + " does not exist");
             }
-            if (changeSet == null) {
-                throw new ParsedNodeException("Changeset " + new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false) + " does not exist");
-            }
-            for (Change change : changeSet.getChanges()) {
-                rollback.getChanges().add(change);
-            }
+	        for (ChangeSet changeSet : changeSets) {
+		        for (Change change : changeSet.getChanges()) {
+			        rollback.getChanges().add(change);
+		        }
+	        }
             return;
         }
 
@@ -581,6 +583,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (database.supportsDDLInTransaction()) {
                 database.setAutoCommit(!runInTransaction);
             }
+
+            executor.modifyChangeSet(this);
 
             executor.comment("Changeset " + toString(false));
             if (StringUtil.trimToNull(getComments()) != null) {
@@ -804,7 +808,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (hasCustomRollbackChanges()) {
                 final List<SqlStatement> statements = new LinkedList<>();
                 for (Change change : rollback.getChanges()) {
-                    if (((change instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
+                    if (this.ignoreSpecificChangeTypes(change, database)) {
                         continue;
                     }
                     if (listener != null) {
@@ -831,6 +835,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 List<Change> changes = getChanges();
                 for (int i = changes.size() - 1; i >= 0; i--) {
                     Change change = changes.get(i);
+                    if (change instanceof RawSQLChange && this.getFilePath().toLowerCase().endsWith(".sql")) {
+                        throw new RollbackFailedException("Liquibase does not support automatic rollback generation for raw " +
+                            "sql changes (did you mean to specify keyword \"empty\" to ignore rolling back this change?)");
+                    }
                     database.executeRollbackStatements(change, sqlVisitors);
                 }
             }
@@ -859,6 +867,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
 
+    }
+
+    private boolean ignoreSpecificChangeTypes(Change change, Database database) {
+        return ((change instanceof DbmsTargetedChange) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true))
+             || ((change instanceof RawSQLChange) && "empty".equalsIgnoreCase(((RawSQLChange)change).getSql()));
     }
 
     /**

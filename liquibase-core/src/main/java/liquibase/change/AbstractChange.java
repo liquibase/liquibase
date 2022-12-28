@@ -28,6 +28,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
  * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is
  * purely for convenience but recommended.
@@ -501,7 +503,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             throw new RollbackImpossibleException(e);
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     /**
@@ -783,9 +785,10 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         SortedSet<String> names = new TreeSet<>();
         for (Map.Entry<String, ChangeParameterMetaData> entry : metaData.getParameters().entrySet()) {
             String lowerCaseKey = entry.getKey().toLowerCase();
-            if (lowerCaseKey.endsWith("name")
-                && !lowerCaseKey.contains("schema")
-                && !lowerCaseKey.contains("catalog")) {
+            if ((lowerCaseKey.endsWith("name")
+                        && !lowerCaseKey.contains("schema")
+                        && !lowerCaseKey.contains("catalog"))
+                    || lowerCaseKey.equals("path")) {
                 Object currentValue = entry.getValue().getCurrentValue(this);
                 if (currentValue != null) {
                     names.add(entry.getKey()+"="+ currentValue);

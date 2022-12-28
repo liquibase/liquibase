@@ -26,6 +26,8 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
  * Extracts data from an existing column to create a lookup table.
  * A foreign key is created between the old column and the new lookup table.
@@ -253,7 +255,7 @@ public class AddLookupTableChange extends AbstractChange {
         addFKChange.setConstraintName(getFinalConstraintName());
         statements.addAll(Arrays.asList(addFKChange.generateStatements(database)));
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     @Override

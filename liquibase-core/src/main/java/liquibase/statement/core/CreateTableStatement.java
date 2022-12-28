@@ -1,12 +1,14 @@
 package liquibase.statement.core;
 
-import liquibase.ContextExpression;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.*;
 
 import java.util.*;
 
 public class CreateTableStatement extends AbstractSqlStatement implements CompoundStatement {
+    /** Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
+    private String tableType;
+
     private String catalogName;
     private String schemaName;
     private String tableName;
@@ -39,9 +41,10 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         this.tableName = tableName;
     }
 
-    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks) {
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType) {
         this(catalogName, schemaName, tableName);
         this.remarks = remarks;
+        this.tableType = tableType;
     }
 
     public String getCatalogName() {
@@ -105,7 +108,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 
-        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[0]));
 
         return this;
     }
@@ -137,7 +140,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         allConstraints.add(pkConstraint);
 
 
-        addColumn(columnName, columnType, defaultValue, remarks, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue, remarks, allConstraints.toArray(new ColumnConstraint[0]));
 
         return this;
     }
@@ -269,5 +272,13 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
 
     public boolean isComputed(String columnName) {
         return this.computedColumns.contains(columnName);
+    }
+
+    public String getTableType() {
+        return tableType;
+    }
+
+    public void setTableType(String tableType) {
+        this.tableType = tableType;
     }
 }

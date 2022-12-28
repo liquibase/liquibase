@@ -1,13 +1,8 @@
 package liquibase.configuration.core;
 
-import liquibase.configuration.AbstractConfigurationValueProvider;
 import liquibase.configuration.AbstractMapConfigurationValueProvider;
-import liquibase.configuration.ConfigurationValueProvider;
-import liquibase.configuration.ProvidedValue;
-import liquibase.util.StringUtil;
 
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Searches for the configuration values in the system properties {@link System#getProperties()}.

@@ -322,16 +322,6 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return generateStatements(procedureText, endDelimiter, database);
     }
 
-    @Override
-    protected Change[] createInverses() {
-        DropProcedureChange dropProcedureChange = new DropProcedureChange();
-        dropProcedureChange.setProcedureName(getProcedureName());
-        dropProcedureChange.setSchemaName(getSchemaName());
-        dropProcedureChange.setCatalogName(getCatalogName());
-
-        return new Change[] { dropProcedureChange };
-    }
-
     protected SqlStatement[] generateStatements(String logicText, String endDelimiter, Database database) {
         CreateProcedureStatement statement =
             new CreateProcedureStatement(

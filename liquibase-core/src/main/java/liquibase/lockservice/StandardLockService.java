@@ -10,7 +10,6 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.exception.DatabaseException;
@@ -30,7 +29,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
 import java.security.SecureRandom;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -324,6 +322,7 @@ public class StandardLockService implements LockService {
 
                 hasChangeLogLock = true;
 
+                ChangeLogHistoryServiceFactory.getInstance().resetAll();
                 database.setCanCacheLiquibaseTableInfo(true);
                 return true;
             }
@@ -444,7 +443,7 @@ public class StandardLockService implements LockService {
                     );
                 }
             }
-            return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);
+            return allLocks.toArray(new DatabaseChangeLogLock[0]);
         } catch (Exception e) {
             throw new LockException(e);
         }

@@ -36,7 +36,7 @@ public class InitializeDatabaseChangeLogLockTableGenerator extends AbstractSqlGe
             sql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(deleteStatement, database)));
             sql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(insertStatement, database)));
 
-            return sql.toArray(new Sql[sql.size()]);
+            return sql.toArray(EMPTY_SQL);
         } finally {
             database.setObjectQuotingStrategy(currentStrategy);
         }

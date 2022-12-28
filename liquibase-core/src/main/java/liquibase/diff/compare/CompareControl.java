@@ -48,15 +48,15 @@ public class CompareControl {
             String referenceCatalogName = null;
             String referenceSchemaName = splitReferenceSchemas[i];
             if (referenceSchemaName.contains(".")) {
-                referenceCatalogName = referenceSchemaName.split(".", 2)[0];
-                referenceSchemaName = referenceSchemaName.split(".", 2)[1];
+                referenceCatalogName = referenceSchemaName.split("\\.", 2)[0];
+                referenceSchemaName = referenceSchemaName.split("\\.", 2)[1];
             }
 
             String comparisonCatalogName = null;
             String comparisonSchemaName = splitComparisonSchemas[i];
             if (comparisonSchemaName.contains(".")) {
-                comparisonCatalogName = comparisonSchemaName.split(".", 2)[0];
-                comparisonSchemaName = comparisonSchemaName.split(".", 2)[1];
+                comparisonCatalogName = comparisonSchemaName.split("\\.", 2)[0];
+                comparisonSchemaName = comparisonSchemaName.split("\\.", 2)[1];
             }
 
             CatalogAndSchema referenceSchema = new CatalogAndSchema(referenceCatalogName, referenceSchemaName);
@@ -135,9 +135,8 @@ public class CompareControl {
                 referenceSchemas.add(correctedReferenceSchema);
                 targetSchemas.add(correctedTargetSchema);
             }
-            returnObj.finalSchemaComparisons = schemaComparisons.toArray(new CompareControl
-                .SchemaComparison[schemaComparisons.size()]);
-            returnObj.finalTargetSchemas = targetSchemas.toArray(new CatalogAndSchema[targetSchemas.size()]);
+            returnObj.finalSchemaComparisons = schemaComparisons.toArray(new SchemaComparison[0]);
+            returnObj.finalTargetSchemas = targetSchemas.toArray(new CatalogAndSchema[0]);
         }
 
         return returnObj;

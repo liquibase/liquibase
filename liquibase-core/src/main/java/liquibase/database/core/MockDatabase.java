@@ -2,7 +2,6 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
-import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.*;
 import liquibase.database.*;

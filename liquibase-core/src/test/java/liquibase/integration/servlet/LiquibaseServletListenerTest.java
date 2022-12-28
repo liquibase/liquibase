@@ -72,7 +72,7 @@ public class LiquibaseServletListenerTest extends TestCase {
         }
         try (Connection pooled = dataSource.getConnection()) {
             servletListener.contextInitialized(servletContext);
-            assertEquals("connection.closed", false, pooled.isClosed());
+            assertFalse("connection.closed", pooled.isClosed());
         }
     }
 

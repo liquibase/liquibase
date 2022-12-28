@@ -43,7 +43,7 @@ public class MissingIndexChangeGenerator extends AbstractChangeGenerator impleme
             PrimaryKey primaryKey = ((Table) index.getRelation()).getPrimaryKey();
             if ((primaryKey != null) && DatabaseObjectComparatorFactory.getInstance().isSameObject(missingObject,
                 primaryKey.getBackingIndex(), control.getSchemaComparisons(), referenceDatabase)) {
-                return new Change[0]; //will be handled by the PK
+                return EMPTY_CHANGE; //will be handled by the PK
             }
         }
 
