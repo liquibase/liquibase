@@ -126,7 +126,7 @@ public class SnapshotGeneratorFactory {
           * snapshot. If that works, we count that as confirmation of existence.
           */
 
-        SnapshotControl snapshotControl = (new SnapshotControl(database, false, types.toArray(new Class[types.size()])));
+        SnapshotControl snapshotControl = (new SnapshotControl(database, false, types.toArray(new Class[0])));
         snapshotControl.setWarnIfObjectNotFound(false);
 
         if (createSnapshot(example, database,snapshotControl) != null) {

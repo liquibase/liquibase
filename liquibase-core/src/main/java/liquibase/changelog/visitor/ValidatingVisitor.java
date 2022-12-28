@@ -103,6 +103,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
         changeSet.setStoredCheckSum(ran?ranChangeSet.getLastCheckSum():null);
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
+
+        if (!areChangeSetAttributesValid(changeSet)) {
+            changeSet.setValidationFailed(true);
+            shouldValidate = false;
+        };
+
         for (Change change : changeSet.getChanges()) {
             try {
                 change.finishInitialization();
@@ -154,6 +160,23 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             seenChangeSets.add(changeSetString);
         }
     } // public void visit(...)
+
+    private boolean areChangeSetAttributesValid(ChangeSet changeSet) {
+        boolean authorEmpty = StringUtil.isEmpty(changeSet.getAuthor());
+        boolean idEmpty = StringUtil.isEmpty(changeSet.getId());
+
+        boolean valid = false;
+        if (authorEmpty && idEmpty) {
+            validationErrors.addError("ChangeSet Id and Author are empty", changeSet);
+        } else if (authorEmpty) {
+            validationErrors.addError("ChangeSet Author is empty", changeSet);
+        } else if (idEmpty) {
+            validationErrors.addError("ChangeSet Id is empty", changeSet);
+        } else {
+            valid = true;
+        }
+        return valid;
+    }
 
     public List<String> getInvalidMD5Sums() {
         return invalidMD5Sums;

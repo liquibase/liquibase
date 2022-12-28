@@ -100,9 +100,8 @@ public class AddDefaultValueGeneratorSQLite extends AddDefaultValueGenerator {
                 return true;
             }
         };
-        Sql[] generatedSqls = SQLiteDatabase.getAlterTableSqls(database, alterTableVisitor, statement.getCatalogName(),
-                statement.getSchemaName(), statement.getTableName());
 
-        return generatedSqls;
+        return SQLiteDatabase.getAlterTableSqls(database, alterTableVisitor, statement.getCatalogName(),
+                statement.getSchemaName(), statement.getTableName());
     }
 }
