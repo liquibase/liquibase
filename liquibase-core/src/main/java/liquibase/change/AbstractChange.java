@@ -780,9 +780,10 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         SortedSet<String> names = new TreeSet<>();
         for (Map.Entry<String, ChangeParameterMetaData> entry : metaData.getParameters().entrySet()) {
             String lowerCaseKey = entry.getKey().toLowerCase();
-            if (lowerCaseKey.endsWith("name")
-                && !lowerCaseKey.contains("schema")
-                && !lowerCaseKey.contains("catalog")) {
+            if ((lowerCaseKey.endsWith("name")
+                        && !lowerCaseKey.contains("schema")
+                        && !lowerCaseKey.contains("catalog"))
+                    || lowerCaseKey.equals("path")) {
                 Object currentValue = entry.getValue().getCurrentValue(this);
                 if (currentValue != null) {
                     names.add(entry.getKey()+"="+ currentValue);

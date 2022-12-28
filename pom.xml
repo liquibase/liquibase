@@ -232,6 +232,12 @@
             <version>3.13.25</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.firebirdsql.jdbc</groupId>
+            <artifactId>jaybird</artifactId>
+            <version>4.0.6.java8</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- needed for newer java versions -->
         <dependency>
