@@ -5,6 +5,5 @@ package liquibase.util;
  */
 public enum ColumnOwnerType {
     TABLE,
-    VIEW,
-    UNKNOWN
+    VIEW
 }

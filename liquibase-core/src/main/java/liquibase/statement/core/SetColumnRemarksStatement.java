@@ -29,7 +29,6 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
         this.columnName = columnName;
         this.remarks = remarks;
         this.columnDataType = columnDataType;
-        this.ownerType = ColumnOwnerType.UNKNOWN;
     }
 
     public SetColumnRemarksStatement(String catalogName,

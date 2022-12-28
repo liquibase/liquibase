@@ -71,7 +71,10 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
             String tableName = statement.getTableName();
             String qualifiedTableName = String.format("%s.%s", schemaName, statement.getTableName());
             String columnName = statement.getColumnName();
-            String targetObject = statement.getOwnerType() == ColumnOwnerType.VIEW ? "VIEW" : "TABLE";
+            String targetObject = "TABLE";
+            if (statement.getOwnerType() != null && statement.getOwnerType() == ColumnOwnerType.VIEW) {
+                targetObject = "VIEW";
+            }
 
             Sql[] generatedSql = {new UnparsedSql("IF EXISTS( " +
                     " SELECT extended_properties.value" +
