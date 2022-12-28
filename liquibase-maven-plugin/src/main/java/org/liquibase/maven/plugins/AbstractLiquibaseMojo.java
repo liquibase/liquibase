@@ -835,7 +835,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         return new Liquibase("", Scope.getCurrentScope().getResourceAccessor(), db);
     }
 
-    public void configureFieldsAndValues() throws MojoExecutionException, MojoFailureException {
+    public void configureFieldsAndValues() throws MojoExecutionException {
         // Load the properties file if there is one, but only for values that the user has not
         // already specified.
         if (propertyFile != null) {
@@ -846,9 +846,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 getLog().info(MavenUtils.LOG_SEPARATOR);
 
                 LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
-                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(is, "Property file "+propertyFile);
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(is, "Property file " + propertyFile);
                 liquibaseConfiguration.registerProvider(fileProvider);
-            } catch (IOException e) {
+            } catch (IOException | MojoFailureException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
