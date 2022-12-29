@@ -1,6 +1,7 @@
 package liquibase
 
 import liquibase.changelog.ChangeLogIterator
+import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.Database
 import liquibase.database.core.MockDatabase
@@ -93,8 +94,19 @@ class LiquibaseTest extends Specification {
 
         mockHubService = (MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()
         mockHubService.reset()
+        def databaseChangeLog = new DatabaseChangeLog(changeLogId: MockHubService.randomUUID.toString())
+        databaseChangeLog.addChangeSet(new ChangeSet(
+                "test",
+                "test",
+                false,
+                false,
+                "test",
+                "",
+                "",
+                databaseChangeLog));
         ChangeLogParserFactory.getInstance().register(new MockChangeLogParser(changeLogs: [
-                "com/example/changelog.mock": new DatabaseChangeLog(changeLogId: MockHubService.randomUUID.toString())
+                "com/example/changelog.mock":
+                        databaseChangeLog
         ]))
     }
 
