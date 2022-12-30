@@ -1,5 +1,9 @@
 package liquibase.change
 
+import liquibase.change.core.CreateProcedureChange
+import liquibase.change.core.CreateTableChange
+import liquibase.change.core.CreateViewChange
+import liquibase.change.core.SQLFileChange
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.Database
@@ -12,6 +16,7 @@ import liquibase.serializer.LiquibaseSerializable
 import liquibase.statement.SqlStatement
 import org.junit.Test
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import static liquibase.test.Assert.assertArraysEqual
 import static org.junit.Assert.assertSame
@@ -322,6 +327,20 @@ class AbstractChangeTest extends Specification {
     @Test
     void createSupportedDatabasesMetaData_nullAnnotation() {
         assertArraysEqual(["COMPUTE"].toArray(), new ExampleAbstractChange().createSupportedDatabasesMetaData("x", null))
+    }
+
+    @Unroll("#featureName: #path is included as part of description for a #change")
+    void pathIsIncludedAsPartOfChangeDescription() {
+        when:
+        change.setPath(path);
+
+        then:
+        change.getDescription().contains(path) == true
+
+        where:
+        path | change
+        "This/is/a/test/change/path" | new SQLFileChange()
+        "This/is/a/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/very/ver/long/test/change/path" | new CreateProcedureChange()
     }
 
     @DatabaseChange(name = "exampleParamelessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
