@@ -243,13 +243,15 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             if (this.path == null) {
                 String procedureText = this.procedureText;
                 String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-                try {
-                    stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
-                } catch (UnsupportedEncodingException e) {
-                    throw new AssertionError(encoding +
-                            " is not supported by the JVM, this should not happen according to the JavaDoc of " +
-                            "the Charset class"
-                    );
+                if (procedureText != null) {
+                    try {
+                        stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
+                    } catch (UnsupportedEncodingException e) {
+                        throw new AssertionError(encoding +
+                                " is not supported by the JVM, this should not happen according to the JavaDoc of " +
+                                "the Charset class"
+                        );
+                    }
                 }
             }
             else {
