@@ -1,5 +1,7 @@
 package liquibase
 
+import liquibase.changelog.ChangeLogHistoryService
+import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.ChangeLogIterator
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
@@ -501,6 +503,32 @@ class LiquibaseTest extends Specification {
 
         then:
         assertSqlOutputAppliesTags(writer.toString(), "1.1");
+    }
+
+    def validateContextLabelEntryHasNotBeenAddedPreviously() {
+        when:
+        h2Connection = getInMemoryH2DatabaseConnection()
+        Liquibase liquibase = createDatabaseAtTag(h2Connection, "1.0")
+        Contexts context = new Contexts("testContext")
+        LabelExpression label = new LabelExpression("testLabel")
+
+        then:
+        assertFalse(liquibase.isUpToDateFastCheck(context, label))
+
+    }
+
+    def validateContextLabelEntryHasBeenAddedPreviously() {
+        when:
+        h2Connection = getInMemoryH2DatabaseConnection()
+        Liquibase liquibase = new Liquibase("liquibase/test-changelog-fast-check.xml", new ClassLoaderResourceAccessor(),
+                h2Connection);
+        Contexts context = new Contexts("testContext")
+        LabelExpression label = new LabelExpression("testLabel")
+        liquibase.update();
+
+        then:
+        assertTrue(liquibase.isUpToDateFastCheck(context, label))
+
     }
 
     private JdbcConnection getInMemoryH2DatabaseConnection() throws SQLException {
