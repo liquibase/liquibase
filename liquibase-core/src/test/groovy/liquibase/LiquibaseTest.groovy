@@ -1,7 +1,5 @@
 package liquibase
 
-import liquibase.changelog.ChangeLogHistoryService
-import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.ChangeLogIterator
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
