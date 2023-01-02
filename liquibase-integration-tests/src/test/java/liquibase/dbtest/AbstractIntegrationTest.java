@@ -94,6 +94,8 @@ public abstract class AbstractIntegrationTest {
     private Database database;
     private String defaultSchemaName;
 
+    private final String pathChangeLog;
+
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
         if (dbms != null) {
             this.testSystem = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem(dbms.getShortName());
@@ -108,6 +110,7 @@ public abstract class AbstractIntegrationTest {
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
         this.emptyRollbackSqlChangeLog = "changelogs/common/rollbackable.changelog.sql";
+        this.pathChangeLog = "changelogs/common/pathChangeLog.xml";
         logger = Scope.getCurrentScope().getLog(getClass());
 
         Scope.setScopeManager(new TestScopeManager());
@@ -1160,6 +1163,20 @@ public abstract class AbstractIntegrationTest {
 
             fail("Migration JVM failed with exit code " + output.getFirst() + ": " + output.getSecond());
         }
+    }
+
+    @Test
+    public void testPathFromChangeObjectIsDeployed() throws Exception {
+        assumeNotNull(this.getDatabase());
+        Liquibase liquibase;
+        clearDatabase();
+
+        String pathToSet = "changelogs/common/commentTest.sql";
+
+        liquibase = createLiquibase(pathChangeLog);
+        liquibase.update(this.contexts);
+
+        assertTrue(liquibase.getDatabaseChangeLog().getChangeSets().stream().allMatch(changeSet -> changeSet.getDescription().contains(pathToSet)));
     }
 
     private ProcessBuilder prepareExternalLiquibaseProcess() {
