@@ -29,6 +29,7 @@ class DirectoryPathHandlerTest extends Specification {
         "file:/tmp/liquibase.xml"       | PRIORITY_DEFAULT
         "file:///tmp/liquibase.xml"     | PRIORITY_DEFAULT
         "http://localhost"              | PRIORITY_NOT_APPLICABLE
+        "https://localhost"             | PRIORITY_NOT_APPLICABLE
         "some-path:including-colon.yml" | PRIORITY_DEFAULT
     }
 
