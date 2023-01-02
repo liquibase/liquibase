@@ -2,6 +2,7 @@ package liquibase.structure;
 
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
+import liquibase.diff.compare.DatabaseObjectCollectionComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
@@ -48,7 +49,7 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
 
     @Override
     public Object getSerializableFieldValue(String field) {
-        SortedSet<DatabaseObject> objects = new TreeSet<>(new DatabaseObjectComparator());
+        SortedSet<DatabaseObject> objects = new TreeSet<>(new DatabaseObjectCollectionComparator());
         try {
             Map<String, Set<DatabaseObject>> map = cache.get(Class.forName(field));
             if (map == null) {
