@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
+import liquibase.database.core.FirebirdDatabase;
 import liquibase.dbdoc.*;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.OpenOptions;
@@ -133,7 +134,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(computedSchemaList, database, new SnapshotControl(database));
-        if (schemaList != null && schemaList.length != 0) {
+        if (schemaList != null && schemaList.length != 0 && !(database instanceof FirebirdDatabase)) {
             this.validateRequiredSchemas(snapshot, computedSchemaList);
         }
 
