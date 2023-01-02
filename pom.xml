@@ -126,7 +126,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
-            <version>4.8.1</version>
+            <version>4.10.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -232,6 +232,12 @@
             <version>3.13.25</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.firebirdsql.jdbc</groupId>
+            <artifactId>jaybird</artifactId>
+            <version>4.0.6.java8</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- needed for newer java versions -->
         <dependency>

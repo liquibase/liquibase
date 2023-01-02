@@ -1,10 +1,6 @@
 package liquibase.dbtest;
 
 import groovy.lang.Tuple2;
-
-import java.io.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import liquibase.*;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataChange;
@@ -39,8 +35,8 @@ import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
-import liquibase.precondition.core.TableExistsPrecondition;
 import liquibase.logging.core.JavaLogService;
+import liquibase.precondition.core.TableExistsPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -56,12 +52,15 @@ import liquibase.util.RegexMatcher;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
+import java.io.*;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static liquibase.test.SnapshotAssert.assertThat;
 import static org.junit.Assert.*;
@@ -95,6 +94,8 @@ public abstract class AbstractIntegrationTest {
     private Database database;
     private String defaultSchemaName;
 
+    private final String pathChangeLog;
+
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
         if (dbms != null) {
             this.testSystem = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem(dbms.getShortName());
@@ -109,6 +110,7 @@ public abstract class AbstractIntegrationTest {
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
         this.emptyRollbackSqlChangeLog = "changelogs/common/rollbackable.changelog.sql";
+        this.pathChangeLog = "changelogs/common/pathChangeLog.xml";
         logger = Scope.getCurrentScope().getLog(getClass());
 
         Scope.setScopeManager(new TestScopeManager());
@@ -291,11 +293,10 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testEmptyRollbackableSqlChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
-
-        Liquibase liquibase = createLiquibase(emptyRollbackSqlChangeLog);
+        createLiquibase(emptyRollbackSqlChangeLog);
         clearDatabase();
 
-        liquibase = createLiquibase(emptyRollbackSqlChangeLog);
+        Liquibase liquibase = createLiquibase(emptyRollbackSqlChangeLog);
         liquibase.update(this.contexts);
 
         liquibase = createLiquibase(emptyRollbackSqlChangeLog);
@@ -305,7 +306,6 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testSnapshotReportsAllObjectTypes() throws Exception {
         assumeNotNull(this.getDatabase());
-
         runCompleteChangeLog();
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl(getDatabase()));
 
@@ -364,6 +364,7 @@ public abstract class AbstractIntegrationTest {
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRunUpdateOnOldChangelogTableFormat() throws Exception {
         assumeNotNull(this.getDatabase());
+
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase();
 
@@ -1114,7 +1115,9 @@ public abstract class AbstractIntegrationTest {
 
         Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
         conn.createStatement().execute("update DATABASECHANGELOG set md5sum = '1:xxx'");
-        conn.commit();
+        if (!conn.getAutoCommit()) {
+            conn.commit();;
+        }
 
         liquibase.getDatabase().getRanChangeSetList();
         liquibase.update(contexts);
@@ -1160,6 +1163,20 @@ public abstract class AbstractIntegrationTest {
 
             fail("Migration JVM failed with exit code " + output.getFirst() + ": " + output.getSecond());
         }
+    }
+
+    @Test
+    public void testPathFromChangeObjectIsDeployed() throws Exception {
+        assumeNotNull(this.getDatabase());
+        Liquibase liquibase;
+        clearDatabase();
+
+        String pathToSet = "changelogs/common/commentTest.sql";
+
+        liquibase = createLiquibase(pathChangeLog);
+        liquibase.update(this.contexts);
+
+        assertTrue(liquibase.getDatabaseChangeLog().getChangeSets().stream().allMatch(changeSet -> changeSet.getDescription().contains(pathToSet)));
     }
 
     private ProcessBuilder prepareExternalLiquibaseProcess() {
