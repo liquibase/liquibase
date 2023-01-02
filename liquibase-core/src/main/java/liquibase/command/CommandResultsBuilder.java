@@ -1,7 +1,6 @@
 package liquibase.command;
 
 import liquibase.Scope;
-import liquibase.precondition.FailedPrecondition;
 import liquibase.util.StringUtil;
 
 import java.io.OutputStream;

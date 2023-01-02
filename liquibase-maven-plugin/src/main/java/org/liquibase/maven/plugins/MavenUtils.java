@@ -2,9 +2,6 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import liquibase.Scope;
-import liquibase.exception.LiquibaseException;
-import liquibase.license.*;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;

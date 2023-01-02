@@ -108,7 +108,7 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
         List<String> associatedWith = StringUtil.splitAndTrim(statement.getAssociatedWith(), ",");
         if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains
             (Index.MARK_UNIQUE_CONSTRAINT) || associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
-            return new Sql[0];
+            return EMPTY_SQL;
         }
 
         StringBuilder buffer = new StringBuilder();
@@ -258,10 +258,7 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
         /* At this point, we know that expr at least has the form of an identifier. If it is a function, it must
          * be in the list of database functions.
          */
-        if (database.isFunction(expr))
-            return true;
-        else
-            return false;
+        return database.isFunction(expr);
     }
 }
 

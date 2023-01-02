@@ -3,9 +3,7 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -60,10 +58,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
                 String ascOrDesc = row.getString("ASC_OR_DESC");
                 Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                boolean computed = false;
-                if (descending != null && descending) {
-                    computed = true;
-                }
+                boolean computed = descending != null && descending;
                 returnKey.addColumn(position - 1, new Column(columnName)
                         .setDescending(descending)
                         .setComputed(computed)

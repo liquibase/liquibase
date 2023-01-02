@@ -5,7 +5,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownFormatException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +41,7 @@ public class SnapshotParserFactory {
         snapshotParserComparator = new Comparator<SnapshotParser>() {
             @Override
             public int compare(SnapshotParser o1, SnapshotParser o2) {
-                return Integer.valueOf(o2.getPriority()).compareTo(o1.getPriority());
+                return Integer.compare(o2.getPriority(), o1.getPriority());
             }
         };
 

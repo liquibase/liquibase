@@ -17,7 +17,6 @@ import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.StringUtil;
 import liquibase.verify.AbstractVerifyTest;
 import org.junit.BeforeClass;
@@ -228,7 +227,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 Collections.sort(paramLists, new Comparator<List<String>>() {
                     @Override
                     public int compare(List<String> o1, List<String> o2) {
-                        int comp = Integer.valueOf(o1.size()).compareTo(o2.size());
+                        int comp = Integer.compare(o1.size(), o2.size());
                         if (comp == 0) {
                             comp =  StringUtil.join(o1,",").compareTo(StringUtil.join(o2, ","));
                         }

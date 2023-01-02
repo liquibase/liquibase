@@ -3,7 +3,6 @@ package liquibase.lockservice;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,7 +55,7 @@ public class LockServiceFactory {
 			      SortedSet<LockService> foundServices = new TreeSet<>(new Comparator<LockService>() {
                 @Override
                 public int compare(LockService o1, LockService o2) {
-                    return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
+                    return -1 * Integer.compare(o1.getPriority(), o2.getPriority());
                 }
             });
 
