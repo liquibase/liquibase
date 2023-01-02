@@ -19,9 +19,11 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DBDocVisitor implements ChangeSetVisitor {
 
@@ -125,11 +127,15 @@ public class DBDocVisitor implements ChangeSetVisitor {
         copyFile("liquibase/dbdoc/globalnav.html", rootOutputDir);
         copyFile("liquibase/dbdoc/overview-summary.html", rootOutputDir);
 
-        if ( schemaList == null ) {
-            schemaList = new CatalogAndSchema[]{database.getDefaultSchema()};
+        CatalogAndSchema[] computedSchemaList = schemaList;
+        if (schemaList == null) {
+            computedSchemaList = new CatalogAndSchema[]{database.getDefaultSchema()};
         }
 
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaList, database, new SnapshotControl(database));
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(computedSchemaList, database, new SnapshotControl(database));
+        if (schemaList != null) {
+            this.validateRequiredSchemas(snapshot, computedSchemaList);
+        }
 
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
         SortedSet<Table> tables = new TreeSet<>(snapshot.get(Table.class));
@@ -174,6 +180,22 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
         recentChangesWriter.writeHTML("index", recentChanges, null, rootChangeLogName);
 
+    }
+
+    private void validateRequiredSchemas(DatabaseSnapshot snapshot, CatalogAndSchema[] schemaList) throws LiquibaseException {
+        Set<Schema> schemasFoundAtDb = snapshot.get(Schema.class);
+        Set<String> schemasNamesAtDb = schemasFoundAtDb.stream().map(s -> s.getName().toLowerCase()).collect(Collectors.toSet());
+        Set<String> requiredSchemaNames = Arrays.stream(schemaList).map(s -> s.getSchemaName().toLowerCase()).collect(Collectors.toSet());
+        List<String> notFoundSchemas = new ArrayList<>();
+
+        for (String required : requiredSchemaNames) {
+            if (!schemasNamesAtDb.contains(required)) {
+                notFoundSchemas.add(required);
+            }
+        }
+        if (!notFoundSchemas.isEmpty()) {
+            throw new LiquibaseException("The following schema(s) could not be found at database: " + StringUtil.join(notFoundSchemas, ","));
+        }
     }
 
     private boolean shouldNotWriteColumnHtml(Column column) {
