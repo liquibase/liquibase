@@ -20,7 +20,7 @@ public class DirectoryPathHandler extends AbstractPathHandler {
             return PRIORITY_DEFAULT;
         }
 
-        if (root.startsWith("file:") || root.matches("^[A-Za-z]:.*")) {
+        if (root.startsWith("file:") || root.matches("^[A-Za-z,:].*")) {
             return PRIORITY_DEFAULT;
         } else {
             return PRIORITY_NOT_APPLICABLE;
