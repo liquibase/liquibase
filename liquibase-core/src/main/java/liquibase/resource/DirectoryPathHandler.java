@@ -20,7 +20,11 @@ public class DirectoryPathHandler extends AbstractPathHandler {
             return PRIORITY_DEFAULT;
         }
 
-        if (root.matches("^https?://.*")) {
+        if (root.matches("^https?://.*")) { // Do not support http files
+            return PRIORITY_NOT_APPLICABLE;
+        }
+
+        if (root.matches("^proto:.*")) { // Do not support protobuf files
             return PRIORITY_NOT_APPLICABLE;
         }
 
