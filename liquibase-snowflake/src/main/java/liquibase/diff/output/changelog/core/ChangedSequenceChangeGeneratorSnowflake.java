@@ -41,7 +41,7 @@ public class ChangedSequenceChangeGeneratorSnowflake extends ChangedSequenceChan
         if (changes.isEmpty()) {
             return null;
         } else {
-            return changes.toArray(new Change[changes.size()]);
+            return changes.toArray(EMPTY_CHANGE);
         }
     }
 }

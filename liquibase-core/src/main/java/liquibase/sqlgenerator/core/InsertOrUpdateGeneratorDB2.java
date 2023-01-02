@@ -28,7 +28,7 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 			List<Sql> list = new ArrayList<>(Arrays.asList(sqls));
 			list.add(new UnparsedSql("CALL " + DB2_Z_INSERT_OR_UPDATE_PROCEDURE + "()"));
 			list.add(new UnparsedSql("DROP PROCEDURE " + DB2_Z_INSERT_OR_UPDATE_PROCEDURE));
-			sqls = list.toArray(new Sql[list.size()]);
+			sqls = list.toArray(EMPTY_SQL);
 		}
 		return sqls;
 	}

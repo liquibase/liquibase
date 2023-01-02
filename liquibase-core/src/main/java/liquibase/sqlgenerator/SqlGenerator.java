@@ -49,6 +49,11 @@ public interface SqlGenerator<T extends SqlStatement> extends PrioritizedService
     int PRIORITY_DATABASE = 5;
 
     /**
+     * Represent an empty array of {@link Sql}.
+     */
+    Sql[] EMPTY_SQL = {};
+
+    /**
      * Of all the SqlGenerators that "support" a given SqlStatement/Database, SqlGeneratorFactory will return the one
      * with the highest priority.
      */

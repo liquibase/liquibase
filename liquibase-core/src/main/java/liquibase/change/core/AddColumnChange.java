@@ -16,6 +16,8 @@ import liquibase.util.StringUtil;
 
 import java.util.*;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
  * Adds a column to an existing table.
  */
@@ -152,7 +154,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     column.getType(),
                     column.getDefaultValueObject(),
                     column.getRemarks(),
-                    constraints.toArray(new ColumnConstraint[constraints.size()]));
+                    constraints.toArray(new ColumnConstraint[0]));
             addColumnStatement.setDefaultValueConstraintName(column.getDefaultValueConstraintName());
             addColumnStatement.setComputed(column.getComputed());
 
@@ -201,7 +203,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             }
         }
 
-        return sql.toArray(new SqlStatement[sql.size()]);
+        return sql.toArray(EMPTY_SQL_STATEMENT);
     }
 
     @Override
@@ -226,7 +228,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             inverse.addColumn(aColumn);
         }
         inverses.add(inverse);
-        return inverses.toArray(new Change[inverses.size()]);
+        return inverses.toArray(EMPTY_CHANGE);
     }
 
     @Override

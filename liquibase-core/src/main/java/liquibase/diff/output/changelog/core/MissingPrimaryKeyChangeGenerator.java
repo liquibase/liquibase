@@ -116,7 +116,7 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
         control.setAlreadyHandledMissing(pk.getBackingIndex());
         returnList.add(change);
 
-        return returnList.toArray(new Change[returnList.size()]);
+        return returnList.toArray(EMPTY_CHANGE);
 
     }
 

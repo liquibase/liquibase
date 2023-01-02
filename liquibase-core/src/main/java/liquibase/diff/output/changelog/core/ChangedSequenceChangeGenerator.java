@@ -96,7 +96,7 @@ public class ChangedSequenceChangeGenerator extends AbstractChangeGenerator impl
         } else if (comparisonDatabase instanceof PostgresDatabase) {
             return new Change[] {accumulatedChange};
         } else {
-            return changes.toArray(new Change[changes.size()]);
+            return changes.toArray(EMPTY_CHANGE);
         }
     }
 

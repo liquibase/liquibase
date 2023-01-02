@@ -93,7 +93,7 @@ public class SnapshotCommandStep extends AbstractCommandStep {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }
 
-        return finalList.toArray(new CatalogAndSchema[finalList.size()]);
+        return finalList.toArray(new CatalogAndSchema[0]);
     }
 
     public Map<String, Object> getSnapshotMetadata() {
