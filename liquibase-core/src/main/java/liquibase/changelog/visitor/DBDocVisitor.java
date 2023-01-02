@@ -184,6 +184,10 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
     private void validateRequiredSchemas(DatabaseSnapshot snapshot, CatalogAndSchema[] schemaList) throws LiquibaseException {
         Set<Schema> schemasFoundAtDb = snapshot.get(Schema.class);
+        if (schemasFoundAtDb == null || schemasFoundAtDb.isEmpty()) {
+            throw new LiquibaseException("Could not find any schemas at the configured database.");
+        }
+
         Set<String> schemasNamesAtDb = schemasFoundAtDb.stream().map(s -> s.getName().toLowerCase()).collect(Collectors.toSet());
         Set<String> requiredSchemaNames = Arrays.stream(schemaList).map(s -> s.getSchemaName().toLowerCase()).collect(Collectors.toSet());
         List<String> notFoundSchemas = new ArrayList<>();
