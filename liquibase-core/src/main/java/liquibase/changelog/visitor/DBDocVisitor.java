@@ -133,7 +133,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(computedSchemaList, database, new SnapshotControl(database));
-        if (schemaList != null) {
+        if (schemaList != null && schemaList.length != 0) {
             this.validateRequiredSchemas(snapshot, computedSchemaList);
         }
 
@@ -185,7 +185,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
     private void validateRequiredSchemas(DatabaseSnapshot snapshot, CatalogAndSchema[] schemaList) throws LiquibaseException {
         Set<Schema> schemasFoundAtDb = snapshot.get(Schema.class);
         if (schemasFoundAtDb == null || schemasFoundAtDb.isEmpty()) {
-            throw new LiquibaseException("Could not find any schemas at the configured database.");
+            throw new LiquibaseException("Could not find any of the required schemas at the configured database.");
         }
 
         Set<String> schemasNamesAtDb = schemasFoundAtDb.stream().map(s -> s.getName().toLowerCase()).collect(Collectors.toSet());
