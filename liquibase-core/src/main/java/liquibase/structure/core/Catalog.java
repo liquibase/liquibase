@@ -71,11 +71,7 @@ public class Catalog extends AbstractDatabaseObject {
         if (databaseObject == null) {
             return;
         }
-        Set<DatabaseObject> objects = this.getObjects().get(databaseObject.getClass());
-        if (objects == null) {
-            objects = new HashSet<>();
-            this.getObjects().put(databaseObject.getClass(), objects);
-        }
+        Set<DatabaseObject> objects = this.getObjects().computeIfAbsent(databaseObject.getClass(), k -> new HashSet<>());
         objects.add(databaseObject);
 
     }
