@@ -26,6 +26,7 @@ class ISODateFormatTest extends Specification {
         "2011-04-21T10:13:40.084004Z"      | "2011-04-21T10:13:40.084004" //utc timezone
         "2011-04-21T10:13:40.084004-05:00" | "2011-04-21T10:13:40.084004" //est timezone
         "2011-04-21T10:13:40.01234567"     | "2011-04-21T10:13:40.01234567" //leading nano fractions
+        "10:13:40"                         | "10:13:40"
     }
 
     @Unroll

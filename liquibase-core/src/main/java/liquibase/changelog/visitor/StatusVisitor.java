@@ -74,7 +74,7 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
 
     /**
      * Return the status of all changeSets, in the order they exist in the databasechangelog.
-     * Any change sets not in the current change log but previously ran against the database will be at the front of the List
+     * Any changesets not in the current change log but previously ran against the database will be at the front of the List
      * with a not run reason type of {@link liquibase.changelog.filter.NotInChangeLogChangeSetFilter}
      */
     public List<ChangeSetStatus> getStatuses() {
@@ -88,7 +88,7 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
             status.setComments(changeSet.getComments());
             status.setDescription(changeSet.getDescription());
             status.setWillRun(false);
-            status.setFilterResults(new HashSet<>(Arrays.asList(new ChangeSetFilterResult(false, "Change set is not in change log", NotInChangeLogChangeSetFilter.class))));
+            status.setFilterResults(new HashSet<>(Arrays.asList(new ChangeSetFilterResult(false, "Changeset is not in change log", NotInChangeLogChangeSetFilter.class))));
             status.setRanChangeSet(changeSet);
 
             returnList.add(status);
@@ -100,7 +100,7 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
     }
 
     /**
-     * Return the change sets that will execute
+     * Return the changesets that will execute
      */
     public List<ChangeSetStatus> getChangeSetsToRun() {
         ArrayList<ChangeSetStatus> returnList = new ArrayList<>();
@@ -114,7 +114,7 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
     }
 
     /**
-     * Return the change sets that will NOT execute
+     * Return the changesets that will NOT execute
      */
     public List<ChangeSetStatus> getChangeSetsToSkip() {
         ArrayList<ChangeSetStatus> returnList = new ArrayList<>();

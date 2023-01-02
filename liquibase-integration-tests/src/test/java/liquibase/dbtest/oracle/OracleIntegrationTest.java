@@ -41,12 +41,6 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
             System.setProperty("oracle.net.tns_admin",System.getenv("TNS_ADMIN"));
     }
 
-    @Override
-    @Test
-    public void testRunChangeLog() throws Exception {
-        super.testRunChangeLog();    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
     @Test
     public void sqlplusChangelog() throws Exception {
         Database database = this.getDatabase();

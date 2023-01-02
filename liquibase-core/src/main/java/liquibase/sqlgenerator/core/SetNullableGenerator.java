@@ -5,6 +5,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -59,6 +60,17 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
     }
 
     @Override
+    public Warnings warn(SetNullableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        Warnings warnings = super.warn(statement, database, sqlGeneratorChain);
+
+        if (database instanceof MySQLDatabase) {
+            ((MySQLDatabase) database).warnAboutAlterColumn("setNullable", warnings);
+        }
+
+        return warnings;
+    }
+
+    @Override
     public Sql[] generateSql(SetNullableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
 
@@ -89,12 +101,26 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
                 nullableString = "";
             }
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + nullableString + ")";
-        } else if (database instanceof FirebirdDatabase && !(database instanceof Firebird3Database)) {
-            // For Firebird database prior to Firebird 3 the ALTER TABLE syntax is not working
-            // As a workaround we can modify the system table entry directly (see http://www.firebirdfaq.org/faq103/)
-            sql = "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = " + (statement.isNullable() ? "NULL" : "1") + " WHERE RDB$RELATION_NAME = '" + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "' AND RDB$FIELD_NAME = '" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + "'";
         } else {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
+            final String standardSqlStatement = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
+
+            if (database instanceof FirebirdDatabase) {
+                try {
+                    if (database.getDatabaseMajorVersion() <= 2) {
+                        // For Firebird database prior to Firebird 3 the ALTER TABLE syntax is not working
+                        // As a workaround we can modify the system table entry directly (see http://www.firebirdfaq.org/faq103/)
+                        sql = "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = " + (statement.isNullable() ? "NULL" : "1") + " WHERE RDB$RELATION_NAME = '" + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "' AND RDB$FIELD_NAME = '" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + "'";
+                    } else {
+                        sql = standardSqlStatement;
+                    }
+                } catch (DatabaseException ignored) {
+                    //assume it's firebird 3+
+                    sql = standardSqlStatement;
+                }
+
+            } else {
+                sql = standardSqlStatement;
+            }
         }
 
         List<Sql> returnList = new ArrayList<>();
@@ -107,7 +133,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
             }
         }
 
-        return returnList.toArray(new Sql[returnList.size()]);
+        return returnList.toArray(EMPTY_SQL);
     }
 
     protected Column getAffectedColumn(SetNullableStatement statement) {

@@ -14,13 +14,15 @@ public class UpdateToTagSqlCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<String> LABELS_ARG;
+    public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> TAG_ARG;
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+    public static final CommandArgumentDefinition<Boolean> OUTPUT_DEFAULT_SCHEMA_ARG;
+    public static final CommandArgumentDefinition<Boolean> OUTPUT_DEFAULT_CATALOG_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -42,7 +44,8 @@ public class UpdateToTagSqlCommandStep extends AbstractCliWrapperCommandStep {
                 .build();
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class).required()
                 .description("The root changelog").build();
-        LABELS_ARG = builder.argument("labels", String.class)
+        LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
+                .addAlias("labels")
                 .description("Changeset labels to match").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Changeset contexts to match").build();
@@ -52,6 +55,14 @@ public class UpdateToTagSqlCommandStep extends AbstractCliWrapperCommandStep {
             .description("Fully-qualified class which specifies a ChangeExecListener").build();
         CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG = builder.argument("changeExecListenerPropertiesFile", String.class)
             .description("Path to a properties file for the ChangeExecListenerClass").build();
+        OUTPUT_DEFAULT_SCHEMA_ARG = builder.argument("outputDefaultSchema", Boolean.class)
+                .description("Control whether names of objects in the default schema are fully qualified or not. If true they are. If false, only objects outside the default schema are fully qualified")
+                .defaultValue(true)
+                .build();
+        OUTPUT_DEFAULT_CATALOG_ARG = builder.argument("outputDefaultCatalog", Boolean.class)
+                .description("Control whether names of objects in the default catalog are fully qualified or not. If true they are. If false, only objects outside the default catalog are fully qualified")
+                .defaultValue(true)
+                .build();
     }
 
     @Override

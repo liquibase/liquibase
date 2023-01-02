@@ -5,13 +5,14 @@ import liquibase.command.CommandScope;
 import liquibase.command.core.RegisterChangelogCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.resource.SearchPathResourceAccessor;
 import org.apache.maven.plugin.MojoFailureException;
 import org.liquibase.maven.property.PropertyElement;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 
@@ -80,11 +81,14 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
      *
      */
     @Override
-    protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
         List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
         File baseDir = project.getBasedir();
         File sourceDir = new File(baseDir, "src/main/resources");
-        resourceAccessors.add(new FileSystemResourceAccessor(baseDir, sourceDir));
-        return new CompositeResourceAccessor(resourceAccessors);
+        if (sourceDir.exists()) {
+            resourceAccessors.add(new DirectoryResourceAccessor(sourceDir));
+        }
+        resourceAccessors.add(new DirectoryResourceAccessor(baseDir));
+        return new SearchPathResourceAccessor(resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 }

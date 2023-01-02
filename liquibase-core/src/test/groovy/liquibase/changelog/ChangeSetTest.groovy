@@ -1,7 +1,11 @@
 package liquibase.changelog
 
+
+import liquibase.Scope
 import liquibase.change.CheckSum
 import liquibase.change.core.*
+import liquibase.database.core.MockDatabase
+import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.precondition.core.RunningAsPrecondition
@@ -136,6 +140,12 @@ public class ChangeSetTest extends Specification {
                 continue
             } else if (param == "objectQuotingStrategy") {
                 testValue[param] = "QUOTE_ONLY_RESERVED_WORDS"
+            } else if (param == "runInTransaction") {
+                testValue[param] = "false"
+            } else if (param == "runOrder") {
+                testValue[param] = "last"
+            } else if (param == "ignore") {
+                testValue[param] = "true"
             } else {
                 testValue[param] = "value for ${param}"
             }
@@ -179,6 +189,39 @@ public class ChangeSetTest extends Specification {
         changeSet.changes[0].tableName == "table_1"
         changeSet.changes[0].changeSet == changeSet
         changeSet.changes[1].tableName == "table_2"
+    }
+
+    def "load node with unknown change types and strict parsing"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        def node = new ParsedNode(null, "changeSet")
+                .addChildren([id: "1", author: "nvoxland"])
+                .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
+                .addChild(new ParsedNode(null, "invalid").addChild(null, "tableName", "table_2"))
+        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        def e = thrown(ParsedNodeException)
+        e.message == "Error parsing com/example/test.xml: Unknown change type 'invalid'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial."
+    }
+
+    def "load node with unknown change types and lax parsing"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        def node = new ParsedNode(null, "changeSet")
+                .addChildren([id: "1", author: "nvoxland"])
+                .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
+                .addChild(new ParsedNode(null, "invalid").addChild(null, "tableName", "table_2"))
+
+        Scope.child([(ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getKey()): ChangeLogParserConfiguration.ChangelogParseMode.LAX], {
+            ->
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } as Scope.ScopedRunner)
+
+
+        then:
+        notThrown(ParsedNodeException)
+        changeSet.getChanges().size() == 1
     }
 
     def "load node with rollback containing sql as value"() {
@@ -374,17 +417,17 @@ public class ChangeSetTest extends Specification {
         changeSet.sqlVisitors.size() == 3
         assert ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).applyToRollback
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).applicableDbms == null
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).contexts == null
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).contextFilter == null
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).replace == "a"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).with == "b"
 
         that(((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).contexts.toString() == "live, test"
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).contextFilter.toString() == "live, test"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).replace == "x1"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).with == "y1"
 
         that(((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).contexts.toString() == "live, test"
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).contextFilter.toString() == "live, test"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).replace == "x2"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).with == "y2"
     }
@@ -559,6 +602,49 @@ public class ChangeSetTest extends Specification {
         dbmsList | expectedValue
         ""       | null
         null     | null
+    }
+
+    def isInheritableIgnore() {
+        when:
+        def changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, null);
+
+        then:
+        !changeSet.isInheritableIgnore()
+
+        when:
+        def parent = new DatabaseChangeLog("com/example/test.xml")
+        changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, null, parent);
+
+        then:
+        !changeSet.isInheritableIgnore()
+
+        when:
+        parent.setIncludeIgnore(true)
+
+        then:
+        changeSet.isInheritableIgnore()
+    }
+
+    def "execute returns a MARK_RAN state when changeSet is set with validation failed as true"() {
+        when:
+        DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("com/example/test.xml")
+        def changeSet = new ChangeSet(databaseChangeLog)
+        def node = new ParsedNode(null, "changeSet").addChildren([id: "1", author: "mallod"])
+        changeSet.setValidationFailed(true)
+
+        then:
+        changeSet.execute(databaseChangeLog, new MockDatabase()) == ChangeSet.ExecType.MARK_RAN
+    }
+
+    def "execute returns a EXECUTED state when changeSet is set with validation failed as false"() {
+        when:
+        DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("com/example/test.xml")
+        def changeSet = new ChangeSet(databaseChangeLog)
+        def node = new ParsedNode(null, "changeSet").addChildren([id: "2", author: "mallod"])
+        changeSet.setValidationFailed(false)
+
+        then:
+        changeSet.execute(databaseChangeLog, new MockDatabase()) == ChangeSet.ExecType.EXECUTED
     }
 
 }

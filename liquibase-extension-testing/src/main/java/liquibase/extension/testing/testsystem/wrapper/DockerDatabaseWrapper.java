@@ -81,8 +81,13 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
             }
 
         }
+        try {
 
-        container.start();
+            container.start();
+        } catch(Throwable e ) {
+            Scope.getCurrentScope().getLog(getClass()).severe("Exception occurred in Docker:"+container.getLogs());
+            throw  e;
+        }
 
         Scope.getCurrentScope().getLog(getClass()).info("Running " + testSystem.getDefinition() + " as container " + container.getContainerName());
     }

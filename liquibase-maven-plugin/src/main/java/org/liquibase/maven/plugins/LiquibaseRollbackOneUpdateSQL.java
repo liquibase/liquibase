@@ -27,7 +27,7 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMojo {
     /**
-     * Specifies the Deployment ID in the DATABASECHANGELOG table for all change sets you
+     * Specifies the Deployment ID in the DATABASECHANGELOG table for all changesets you
      * want to rollback.
      *
      * @parameter property="liquibase.deploymentId"
@@ -64,11 +64,6 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         //
         // Check the Pro license
         //
-        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
-        if (!hasProLicense) {
-            throw new LiquibaseException(
-                    "The 'rollbackOneUpdateSQL' command requires a valid Liquibase Pro license. Get a free Pro license key at https://liquibase.com/protrial and add liquibase.pro.licenseKey=<yourKey> into your defaults file or use --pro-license-key=<yourKey> before your command in the CLI.");
-        }
         Database database = liquibase.getDatabase();
         CommandScope liquibaseCommand = new CommandScope("internalRollbackOneUpdateSQL");
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);

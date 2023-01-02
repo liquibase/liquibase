@@ -3,8 +3,10 @@ package liquibase.change;
 import liquibase.change.core.AddColumnChange;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MockDatabase;
+import liquibase.exception.RollbackImpossibleException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
+import liquibase.statement.core.DropColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import org.junit.Assert;
 import org.junit.Test;
@@ -92,5 +94,21 @@ public class AddColumnChangeTest {
         Assert.assertTrue(statements[0] instanceof AddColumnStatement);
         AddColumnStatement stmt = (AddColumnStatement)statements[0];
         Assert.assertNull(stmt.getUniqueStatementName());
+    }
+
+    @Test
+    public void generateRollbackStatements_catalog_schema_table() throws RollbackImpossibleException {
+        AddColumnChange change = new AddColumnChange();
+        change.setCatalogName("catalog1");
+        change.setSchemaName("schema1");
+        change.setTableName("table1");
+
+        SqlStatement[] statements = change.generateRollbackStatements(new MockDatabase());
+        Assert.assertEquals(1, statements.length);
+        Assert.assertTrue(statements[0] instanceof DropColumnStatement);
+        DropColumnStatement dropStmt = (DropColumnStatement)statements[0];
+        Assert.assertEquals("catalog1", dropStmt.getCatalogName());
+        Assert.assertEquals("schema1", dropStmt.getSchemaName());
+        Assert.assertEquals("table1", dropStmt.getTableName());
     }
 }

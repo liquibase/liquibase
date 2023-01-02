@@ -1,6 +1,7 @@
 package liquibase.dbtest.h2;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
@@ -10,16 +11,18 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.diff.output.report.DiffToReport;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.core.RawSqlStatement;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.PrintStream;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class H2IntegrationTest extends AbstractIntegrationTest {
 
@@ -65,18 +68,6 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         writer.close();
 
 
-    }
-
-    @Test
-    public void snapshot() throws Exception {
-        if (getDatabase() == null) {
-            return;
-        }
-
-
-        runCompleteChangeLog();
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl(getDatabase()));
-        System.out.println(snapshot);
     }
 
     @Test
@@ -138,6 +129,64 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
     public void testGenerateChangeLogWithNoChanges() throws Exception {
         super.testGenerateChangeLogWithNoChanges();    //To change body of overridden methods use File | Settings |
         // File Templates.
+    }
+
+    @Test
+    public void testRollbackByContext() throws Exception {
+        Integer insertedValue = 1;
+        String colName = "COL1";
+        String tableName = "tmp_tbl";
+        for (String context : Arrays.asList("ctx1", "ctx2")) {
+            clearDatabase();
+
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                    .execute(new RawSqlStatement(String.format("CREATE TABLE %s (%s varchar(50))", tableName, colName)));
+
+            Liquibase liquibase = createLiquibase("changelogs/h2/complete/rollback.different.contexts.changelog.xml");
+            liquibase.update(context);
+
+            List<Map<String, ?>> queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                    .queryForList(new RawSqlStatement(String.format("select * from %s", tableName)));
+
+            Assert.assertEquals(1, queryResult.size());
+            Assert.assertEquals(insertedValue.toString(), queryResult.get(0).get(colName));
+            insertedValue++;
+
+            liquibase.rollback(1, context);
+            queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                    .queryForList(new RawSqlStatement(String.format("select * from %s", tableName)));
+            Assert.assertEquals("Rollbacking for " + insertedValue, 2, queryResult.size());
+            Assert.assertEquals(insertedValue.toString(), queryResult.get(1).get(colName));
+            insertedValue++;
+        }
+    }
+
+    @Test
+    public void testRollbackWithoutContext() throws Exception {
+        Integer insertedValue = 5;
+        String colName = "COL1";
+        String tableName = "tmp_tbl";
+
+        clearDatabase();
+
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(new RawSqlStatement(String.format("CREATE TABLE %s (%s varchar(50))", tableName, colName)));
+
+        Liquibase liquibase = createLiquibase("changelogs/h2/complete/rollback.sql.changelog.xml");
+        liquibase.update();
+
+        List<Map<String, ?>> queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .queryForList(new RawSqlStatement(String.format("select * from %s", tableName)));
+
+        Assert.assertEquals(1, queryResult.size());
+        Assert.assertEquals(insertedValue.toString(), queryResult.get(0).get(colName));
+        insertedValue++;
+
+        liquibase.rollback(1, null);
+        queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .queryForList(new RawSqlStatement(String.format("select * from %s", tableName)));
+        Assert.assertEquals("Rollbacking for " + insertedValue, 2, queryResult.size());
+        Assert.assertEquals(insertedValue.toString(), queryResult.get(1).get(colName));
     }
 
     @Override

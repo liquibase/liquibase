@@ -1,10 +1,10 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
-import liquibase.structure.core.Relation;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -92,23 +92,34 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                         + "] AS SELECT " +
                         "''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
                 viewDefinition.replace("CREATE", "ALTER");
-            } else if (database instanceof HsqlDatabase) {
+            } else if (shouldPrependDropViewStatement(database, statement)) {
                 sql.add(new UnparsedSql(
                     "DROP VIEW IF EXISTS " + database.escapeViewName(statement.getCatalogName(),
-                        statement.getSchemaName(), statement.getViewName())));
+                    statement.getSchemaName(), statement.getViewName())));
             } else {
                 //
                 // Do not generate CREATE OR REPLACE if:
                 // 1) It is already in the SQL
                 // 2) The DB2 version is < 10.5
                 //
-                if (!viewDefinition.contains("replace")) {
+                if (!statement.getSelectQuery().toUpperCase().contains("OR REPLACE")) {
                     viewDefinition.replace("CREATE", "CREATE OR REPLACE");
                 }
             }
         }
         sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
-        return sql.toArray(new Sql[sql.size()]);
+        return sql.toArray(EMPTY_SQL);
+    }
+
+    private boolean shouldPrependDropViewStatement(Database database, CreateViewStatement statement) {
+        // allow overriding the value of the dropIfCannotReplace attribute
+        // from liquibase.properties or command line
+        boolean dropIfCannotReplace = false;
+        if (GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getCurrentValue() != null) {
+            dropIfCannotReplace = GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getCurrentValue();
+        } 
+        return database instanceof HsqlDatabase ||
+              (database instanceof PostgresDatabase && dropIfCannotReplace);
     }
 
     //
@@ -137,10 +148,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         // If it is == 10 then we check the minor version
         //
         int minorVersion = getMinorVersion(database);
-        if (majorVersion > 10 || minorVersion >= 5) {
-          return true;
-        }
-        return false;
+        return majorVersion > 10 || minorVersion >= 5;
     }
 
     private int getMajorVersion(Database database) {

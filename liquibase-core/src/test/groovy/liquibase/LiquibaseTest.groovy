@@ -199,7 +199,28 @@ class LiquibaseTest extends Specification {
 //        verify(database).setCurrentDateTimeFunction(testFunction);
 //    }
 
-    def "update communicates with hub"() {
+    def "update() communicates with hub"() {
+        given:
+        Map<String, Object> scopedObjects = new HashMap<>()
+        TestConsoleUIService uiService = new TestConsoleUIService()
+        scopedObjects.put(Scope.Attr.ui.name(), uiService)
+
+        def scopeId = Scope.enter(null, scopedObjects)
+
+        when:
+        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
+        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "API_KEY", {
+            liquibase.update()
+        })
+        Scope.exit(scopeId)
+
+        then:
+        mockHubService.sentObjects.toString() ==
+                "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author], startOperation/$MockHubService.randomUUID:[$MockHubService.operationCreateDate]]"
+
+    }
+
+    def "update(\"\") communicates with hub"() {
         given:
         Map<String, Object> scopedObjects = new HashMap<>()
         TestConsoleUIService uiService = new TestConsoleUIService()
@@ -272,7 +293,7 @@ class LiquibaseTest extends Specification {
         then:
         connection == null
         message ==
-                "WARNING: The API key 'API_KEY' was found, but no changelog ID exists.\n" +
+                "WARNING: An API key was configured, but no changelog ID exists.\n" +
                 "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
                 "Learn more at https://hub.liquibase.com."
     }

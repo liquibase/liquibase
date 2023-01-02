@@ -7,11 +7,16 @@ import liquibase.database.OfflineConnection;
 import liquibase.exception.LiquibaseParseException;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.core.ParsedNode;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.RestoredDatabaseSnapshot;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
+import org.yaml.snakeyaml.resolver.Resolver;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,18 +24,23 @@ import java.util.Map;
 
 public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
 
+    public static final int CODE_POINT_LIMIT = Integer.MAX_VALUE;
+
+    @SuppressWarnings("java:S2095")
     @Override
     public DatabaseSnapshot parse(String path, ResourceAccessor resourceAccessor) throws LiquibaseParseException {
-        Yaml yaml = new Yaml(new SafeConstructor());
+        Yaml yaml = createYaml();
 
-        try (
-                InputStream stream = resourceAccessor.openStream(null, path);
-        ) {
-            if (stream == null) {
+        try {
+            Resource resource = resourceAccessor.get(path);
+            if (resource == null) {
                 throw new LiquibaseParseException(path + " does not exist");
             }
-    
-            Map parsedYaml = getParsedYamlFromInputStream(yaml, stream);
+
+            Map parsedYaml;
+            try (InputStream stream = resource.openInputStream()) {
+                parsedYaml = getParsedYamlFromInputStream(yaml, stream);
+            }
 
             Map rootList = (Map) parsedYaml.get("snapshot");
             if (rootList == null) {
@@ -55,13 +65,31 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
 
             return snapshot;
         } catch (LiquibaseParseException e) {
-            throw (LiquibaseParseException) e;
+            throw e;
         }
         catch (Exception e) {
             throw new LiquibaseParseException(e);
         }
     }
-    
+
+    private Yaml createYaml() {
+        LoaderOptions loaderOptions = new LoaderOptions();
+        loaderOptions.setCodePointLimit(CODE_POINT_LIMIT);
+        Representer representer = new Representer(new DumperOptions());
+        DumperOptions dumperOptions = initDumperOptions(representer);
+        return new Yaml(new SafeConstructor(loaderOptions), representer, dumperOptions, loaderOptions, new Resolver());
+    }
+
+    private static DumperOptions initDumperOptions(Representer representer) {
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultFlowStyle(representer.getDefaultFlowStyle());
+        dumperOptions.setDefaultScalarStyle(representer.getDefaultScalarStyle());
+        dumperOptions
+                .setAllowReadOnlyProperties(representer.getPropertyUtils().isAllowReadOnlyProperties());
+        dumperOptions.setTimeZone(representer.getTimeZone());
+        return dumperOptions;
+    }
+
     private Map getParsedYamlFromInputStream(Yaml yaml, InputStream stream) throws LiquibaseParseException {
         Map parsedYaml;
         try (

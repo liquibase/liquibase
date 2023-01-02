@@ -55,7 +55,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
     private String contexts;
 
-    private String labels;
+    private String labelFilter;
 
     private Map<String, String> parameters;
 
@@ -161,7 +161,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		liquibase.setChangeLog(changeLog);
 		liquibase.setChangeLogParameters(parameters);
 		liquibase.setContexts(contexts);
-        liquibase.setLabels(labels);
+        liquibase.setLabelFilter(labelFilter);
 		liquibase.setDropFirst(dropFirst);
 		liquibase.setClearCheckSums(clearCheckSums);
 		liquibase.setShouldRun(shouldRun);
@@ -201,15 +201,29 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		this.contexts = contexts;
 	}
 
-    public String getLabels() {
-        return labels;
-    }
+	/**
+	 * @deprecated use {@link #getLabelFilter()}
+	 */
+	public String getLabels() {
+		return getLabelFilter();
+	}
 
-    public void setLabels(String labels) {
-        this.labels = labels;
-    }
+	/**
+	 * @deprecated use {@link #setLabelFilter(String)}
+	 */
+	public void setLabels(String labels) {
+		setLabelFilter(labels);
+	}
 
-    public Map<String, String> getParameters() {
+	public String getLabelFilter() {
+		return labelFilter;
+	}
+
+	public void setLabelFilter(String labelFilter) {
+		this.labelFilter = labelFilter;
+	}
+
+	public Map<String, String> getParameters() {
 		return parameters;
 	}
 

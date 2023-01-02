@@ -1,5 +1,8 @@
 package liquibase.util
 
+import liquibase.resource.DirectoryPathHandler
+import spock.lang.IgnoreIf
+import spock.lang.Requires
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -29,8 +32,42 @@ class FileUtilTest extends Specification {
         def message = FileUtil.getFileNotFoundMessage("path/to/file")
 
         then:
-        message.startsWith("The file path/to/file was not found in")
-        message.endsWith("Specifying files by absolute path was removed in Liquibase 4.0. Please use a relative path or add '/' to the classpath parameter.")
+        message.startsWith("The file path/to/file was not found in the configured search path")
+        message.endsWith("More locations can be added with the 'searchPath' parameter.")
+    }
+
+    @Requires({ System.getProperty("os.name").toLowerCase().contains("win") })
+    @Unroll
+    def "isAbsolute (Windows): #input"() {
+        expect:
+        FileUtil.isAbsolute(input) == expected
+
+        where:
+        input                       | expected
+        null                        | false
+        "simple"                    | false
+        "with/path"                 | false
+        "with\\path"                | false
+        "c:\\windows\\path"         | true
+        "c:/windows/path"           | true
+        "/c:/windows/path"          | true
+        "D:\\windows\\path"         | true
+        "file:/tmp/liquibase.xml"   | false
+        "file:///tmp/liquibase.xml" | false
+    }
+
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("win") })
+    @Unroll
+    def "isAbsolute (Linux): #input"() {
+        expect:
+        FileUtil.isAbsolute(input) == expected
+
+        where:
+        input                       | expected
+        null                        | false
+        "simple"                    | false
+        "with/path"                 | false
+        "/etc/config"               | true
     }
 
 }

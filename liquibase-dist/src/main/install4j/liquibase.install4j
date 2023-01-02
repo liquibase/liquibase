@@ -8,8 +8,15 @@
     <variables>
       <variable name="liquibaseVersion" value="0-SNAPSHOT" />
     </variables>
-    <codeSigning macEnabled="true" macPkcs12File="../../../target/keys/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../target/keys/datical_windows.pfx" />
-    <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk11/jdk-11.0.12+7" />
+    <codeSigning macEnabled="true" macPkcs12File="../../../target/keys/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../target/keys/datical_windows.pfx" macNotarize="true" appleId="daticaldev@datical.com" useAscProvider="true" ascProvider="BQ3PYUB226">
+      <macSearchedJars>
+        <entry>jna-*</entry>
+        <entry>swt-*</entry>
+        <entry>javafx-*</entry>
+        <entry>sqlite-*</entry>
+      </macSearchedJars>
+    </codeSigning>
+    <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk17/jdk-17.0.4.1+1" />
   </application>
   <files>
     <mountPoints>

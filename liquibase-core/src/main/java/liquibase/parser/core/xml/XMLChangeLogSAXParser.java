@@ -1,14 +1,18 @@
 package liquibase.parser.core.xml;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.core.ParsedNode;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.BomAwareInputStream;
 import liquibase.util.FileUtil;
+import liquibase.util.LiquibaseUtil;
 import org.xml.sax.*;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
@@ -16,8 +20,12 @@ import java.io.InputStream;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
-    public static final String LIQUIBASE_SCHEMA_VERSION = "4.6";
+    public static final String LIQUIBASE_SCHEMA_VERSION;
     private SAXParserFactory saxParserFactory;
+
+    static {
+        LIQUIBASE_SCHEMA_VERSION = computeSchemaVersion(LiquibaseUtil.getBuildVersion());
+    }
 
     private final LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
 
@@ -25,6 +33,13 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         saxParserFactory = SAXParserFactory.newInstance();
         saxParserFactory.setValidating(true);
         saxParserFactory.setNamespaceAware(true);
+        if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
+            try {
+                saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            } catch (Throwable e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot enable FEATURE_SECURE_PROCESSING: " + e.getMessage(), e);
+            }
+        }
     }
 
     @Override
@@ -45,10 +60,26 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         return saxParserFactory;
     }
 
+    /**
+     * When set to true, a warning will be printed to the console if the XSD version used does not match the version
+     * of Liquibase. If "latest" is used as the XSD version, no warning is printed.
+     */
+    public void setShouldWarnOnMismatchedXsdVersion(boolean shouldWarnOnMismatchedXsdVersion) {
+        resolver.setShouldWarnOnMismatchedXsdVersion(shouldWarnOnMismatchedXsdVersion);
+    }
+
     @Override
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        try (InputStream inputStream = resourceAccessor.openStream(null, physicalChangeLogLocation)) {
+        try  {
+            Resource resource = resourceAccessor.get(physicalChangeLogLocation);
             SAXParser parser = saxParserFactory.newSAXParser();
+            if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
+                try {
+                    parser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "http,https"); //need to allow external schemas on http/https to support the liquibase.org xsd files
+                } catch (SAXException e) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Cannot enable ACCESS_EXTERNAL_SCHEMA: " + e.getMessage(), e);
+                }
+            }
             trySetSchemaLanguageProperty(parser);
 
             XMLReader xmlReader = parser.getXMLReader();
@@ -73,7 +104,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                 }
             });
 
-            if (inputStream == null) {
+            if (!resource.exists()) {
                 if (physicalChangeLogLocation.startsWith("WEB-INF/classes/")) {
                     // Correct physicalChangeLogLocation and try again.
                     return parseToNode(
@@ -86,7 +117,9 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
             XMLChangeLogSAXHandler contentHandler = new XMLChangeLogSAXHandler(physicalChangeLogLocation, resourceAccessor, changeLogParameters);
             xmlReader.setContentHandler(contentHandler);
-            xmlReader.parse(new InputSource(new BomAwareInputStream(inputStream)));
+            try (InputStream stream = resource.openInputStream()) {
+                xmlReader.parse(new InputSource(new BomAwareInputStream(stream)));
+            }
 
             return contentHandler.getDatabaseChangeLogTree();
         } catch (ChangeLogParseException e) {
@@ -134,5 +167,18 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         } catch (SAXNotRecognizedException | SAXNotSupportedException ignored) {
             //ok, parser need not support it
         }
+    }
+
+    static String computeSchemaVersion(String version) {
+        String finalVersion = null;
+
+        if (version != null && version.contains(".")) {
+            String[] splitVersion = version.split("\\.");
+            finalVersion = splitVersion[0] + "." + splitVersion[1];
+        }
+        if (finalVersion == null) {
+            finalVersion = "latest";
+        }
+        return finalVersion;
     }
 }

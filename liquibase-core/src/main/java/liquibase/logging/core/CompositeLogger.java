@@ -1,7 +1,6 @@
 package liquibase.logging.core;
 
 import liquibase.logging.LogMessageFilter;
-import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 
 import java.util.List;
@@ -11,8 +10,14 @@ public class CompositeLogger extends AbstractLogger {
 
     private final List<Logger> loggers;
 
+    /**
+     * @deprecated use {@link #CompositeLogger(List)}
+     */
     public CompositeLogger(List<Logger> loggers, LogMessageFilter filter) {
-        super(filter);
+        this(loggers);
+    }
+
+    public CompositeLogger(List<Logger> loggers) {
         this.loggers = loggers;
     }
 
@@ -30,7 +35,7 @@ public class CompositeLogger extends AbstractLogger {
         }
 
         for (Logger logger : loggers) {
-            logger.log(level, filterMessage(message), e);
+            logger.log(level, message, e);
         }
 
     }

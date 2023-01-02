@@ -13,8 +13,16 @@ public class CommandValidationException extends CommandExecutionException {
         super(message);
     }
 
+    public CommandValidationException(Throwable cause) {
+        super(cause);
+    }
+
     public CommandValidationException(String argument, String message, Throwable cause) {
         super(buildMessage(argument, message), cause);
+    }
+
+    public CommandValidationException(String message, Throwable cause) {
+        super(message, cause);
     }
 
     private static String buildMessage(String argument, String message) {

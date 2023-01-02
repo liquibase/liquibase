@@ -2,32 +2,53 @@ package liquibase.integration.spring;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.AbstractResourceAccessor;
-import liquibase.resource.InputStreamList;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.ContextResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.*;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.util.StringUtils;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SpringResourceAccessor extends AbstractResourceAccessor {
 
     private final ResourceLoader resourceLoader;
+    private final DefaultResourceLoader fallbackResourceLoader;
 
     public SpringResourceAccessor(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
+        if (resourceLoader == null) {
+            this.fallbackResourceLoader = new DefaultResourceLoader(Thread.currentThread().getContextClassLoader());
+        } else {
+            this.fallbackResourceLoader = new DefaultResourceLoader(resourceLoader.getClassLoader());
+        }
     }
 
     @Override
-    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-        String searchPath = getCompletePath(relativeTo, path);
+    public void close() throws Exception {
 
+    }
+
+    @Override
+    public List<liquibase.resource.Resource> getAll(String path) throws IOException {
+        path = finalizeSearchPath(path);
+        final Resource[] springResources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(path);
+        List<liquibase.resource.Resource> returnList = new ArrayList<>();
+        for (Resource resource : springResources) {
+            if (resource.exists()) {
+                returnList.add(new SpringResource(path, resource.getURI(), resource));
+            }
+        }
+
+        if (returnList.isEmpty()) {
+            return null;
+        }
+        return returnList;
+    }
+
+    @Override
+    public List<liquibase.resource.Resource> search(String searchPath, boolean recursive) throws IOException {
         if (recursive) {
             searchPath += "/**";
         } else {
@@ -36,53 +57,20 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         searchPath = finalizeSearchPath(searchPath);
 
         final Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(searchPath);
-        SortedSet<String> returnSet = new TreeSet<>();
+        List<liquibase.resource.Resource> returnList = new ArrayList<>();
         for (Resource resource : resources) {
             final boolean isFile = resourceIsFile(resource);
-            if (isFile && includeFiles) {
-                returnSet.add(getResourcePath(resource));
-            }
-            if (!isFile && includeDirectories) {
-                returnSet.add(getResourcePath(resource));
-            }
-        }
-
-        return returnSet;
-    }
-
-    @Override
-    public SortedSet<String> describeLocations() {
-        final TreeSet<String> returnSet = new TreeSet<>();
-
-        final ClassLoader classLoader = resourceLoader.getClassLoader();
-        if (classLoader instanceof URLClassLoader) {
-            for (URL url : ((URLClassLoader) classLoader).getURLs()) {
-                returnSet.add(url.toExternalForm());
-            }
-        } else {
-            returnSet.add("Spring resources");
-        }
-
-        return returnSet;
-    }
-
-    @Override
-    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-        String searchPath = getCompletePath(relativeTo, streamPath);
-        searchPath = finalizeSearchPath(searchPath);
-
-        final Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(searchPath);
-
-        InputStreamList returnList = new InputStreamList();
-        for (Resource foundResource : resources) {
-            try {
-                returnList.add(foundResource.getURI(), foundResource.getInputStream());
-            } catch (FileNotFoundException ignored) {
-                //don't add it to the return list
+            if (isFile) {
+                returnList.add(new SpringResource(getResourcePath(resource), resource.getURI(), resource));
             }
         }
 
         return returnList;
+    }
+
+    @Override
+    public List<String> describeLocations() {
+        return Collections.singletonList("Spring classpath");
     }
 
     /**
@@ -102,7 +90,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
             if (url.contains("!")) {
                 return url.replaceFirst(".*!", "");
             } else {
-                while (!resourceLoader.getResource("classpath:" + url).exists()) {
+                while (!getResource("classpath:" + url).exists()) {
                     String newUrl = url.replaceFirst("^/?.*?/", "");
                     if (newUrl.equals(url)) {
                         throw new UnexpectedLiquibaseException("Could determine path for " + resource.getURL().toExternalForm());
@@ -132,16 +120,32 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
             relativeTo = relativeTo.replace("\\", "/");
 
             boolean relativeIsFile;
-            Resource rootResource = resourceLoader.getResource(relativeTo);
+            Resource rootResource = getResource(relativeTo);
             relativeIsFile = resourceIsFile(rootResource);
 
             if (relativeIsFile) {
-                searchPath = relativeTo.replaceFirst("/[^/]+$", "") + "/" + path;
+                String relativePath = relativeTo.replaceFirst("[^/]+$", "");
+                searchPath = relativePath + path;
             } else {
                 searchPath = relativeTo + "/" + path;
             }
         }
         return searchPath;
+    }
+
+    /**
+     * Looks up the given resource.
+     */
+    protected Resource getResource(String resourcePath) {
+        //some ResourceLoaders (FilteredReactiveWebContextResource) lie about whether they exist or not which can confuse the rest of the code.
+        //check the "fallback" loader first, and if that can't find it use the "real" one.
+        // The fallback one should be more reasonable in it's `exists()` function
+        Resource defaultLoaderResource = fallbackResourceLoader.getResource(resourcePath);
+        if (defaultLoaderResource.exists()) {
+            return defaultLoaderResource;
+        }
+
+        return resourceLoader.getResource(resourcePath);
     }
 
     /**
@@ -163,12 +167,16 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
      * Default implementation adds "classpath:" and removes duplicated /'s and classpath:'s
      */
     protected String finalizeSearchPath(String searchPath) {
+        if(searchPath.matches("^classpath\\*?:.*")) {
+            searchPath = searchPath.replace("classpath:","").replace("classpath*:","");
+            searchPath = "classpath*:/" +searchPath;
+        } else if(!searchPath.matches("^\\w+:.*")) {
+            searchPath = "classpath*:/" +searchPath;
+        }
         searchPath = searchPath.replace("\\", "/");
-        searchPath = searchPath.replaceAll("classpath\\*?:", "");
-        searchPath = "/" + searchPath;
         searchPath = searchPath.replaceAll("//+", "/");
 
-        searchPath = "classpath*:" + searchPath;
+        searchPath = StringUtils.cleanPath(searchPath);
 
         return searchPath;
     }

@@ -14,11 +14,13 @@ public class ChangelogSyncToTagSqlCommandStep extends AbstractCliWrapperCommandS
     public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> LABELS_ARG;
+    public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> TAG_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+    public static final CommandArgumentDefinition<Boolean> OUTPUT_DEFAULT_SCHEMA_ARG;
+    public static final CommandArgumentDefinition<Boolean> OUTPUT_DEFAULT_CATALOG_ARG;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -39,12 +41,21 @@ public class ChangelogSyncToTagSqlCommandStep extends AbstractCliWrapperCommandS
         PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .description("The database password").build();
-        LABELS_ARG = builder.argument("labels", String.class)
+        LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
+                .addAlias("labels")
                 .description("Changeset labels to match").build();
         CONTEXTS_ARG = builder.argument("contexts", String.class)
                 .description("Changeset contexts to match").build();
         TAG_ARG = builder.argument("tag", String.class).required()
                 .description("Tag ID to execute changelogSync to").build();
+        OUTPUT_DEFAULT_SCHEMA_ARG = builder.argument("outputDefaultSchema", Boolean.class)
+                .description("Control whether names of objects in the default schema are fully qualified or not. If true they are. If false, only objects outside the default schema are fully qualified")
+                .defaultValue(true)
+                .build();
+        OUTPUT_DEFAULT_CATALOG_ARG = builder.argument("outputDefaultCatalog", Boolean.class)
+                .description("Control whether names of objects in the default catalog are fully qualified or not. If true they are. If false, only objects outside the default catalog are fully qualified")
+                .defaultValue(true)
+                .build();
     }
 
     @Override

@@ -4,8 +4,6 @@ import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
@@ -23,7 +21,7 @@ public class EnterpriseDBDatabase extends PostgresDatabase {
                     if (stmt != null) {
                         try (ResultSet rs = stmt.executeQuery("select version()")) {
                             if (rs.next()) {
-                                return ((String) JdbcUtil.getResultSetValue(rs, 1)).startsWith("EnterpriseDB");
+                                return ((String) JdbcUtil.getResultSetValue(rs, 1)).contains("EnterpriseDB");
                             }
                         }
                     }

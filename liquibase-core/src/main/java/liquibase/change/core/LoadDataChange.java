@@ -17,6 +17,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.io.EmptyLineAndCommentSkippingInputStream;
 import liquibase.logging.Logger;
+import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
@@ -31,10 +32,7 @@ import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
-import liquibase.util.BooleanUtil;
-import liquibase.util.ObjectUtil;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
+import liquibase.util.*;
 import liquibase.util.csv.CSVReader;
 
 import java.io.IOException;
@@ -42,6 +40,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.change.ChangeParameterMetaData.ALL;
@@ -264,19 +263,9 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        boolean databaseSupportsBatchUpdates = false;
-        try {
-            if (!(database instanceof MySQLDatabase)) {
-                //mysql supports batch updates, but the performance vs. the big insert is worse
-                databaseSupportsBatchUpdates = database.supportsBatchUpdates();
-            }
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+        boolean databaseSupportsBatchUpdates = supportsBatchUpdates(database);
 
-        CSVReader reader = null;
-        try {
-            reader = getCSVReader();
+        try (CSVReader reader = getCSVReader()) {
 
             if (reader == null) {
                 throw new UnexpectedLiquibaseException("Unable to read file " + this.getFile());
@@ -297,15 +286,13 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 throw new UnexpectedLiquibaseException(e);
             }
 
-            List<ExecutablePreparedStatementBase> preparedStatements = new ArrayList<>();
-            boolean anyPreparedStatements = false;
             String[] line;
             // Start at '1' to take into account the header (already processed):
             int lineNumber = 1;
 
             boolean isCommentingEnabled = StringUtil.isNotEmpty(commentLineStartsWith);
 
-            List<SqlStatement> statements = new ArrayList<>();
+            List<LoadDataRowConfig> rows = new ArrayList<>();
             while ((line = reader.readNext()) != null) {
                 lineNumber++;
                 if
@@ -363,9 +350,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         } else if (columnConfig.getType() == null) {
                             // columnConfig did not specify a type
                             valueConfig.setValue(value);
-                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UNKNOWN) {
-                            // columnConfig did not match a specific type
-                            valueConfig.setValue(value);
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.BOOLEAN) {
                             if (value == null) { // TODO getDefaultValueBoolean should use BooleanUtil.parseBoolean also for consistent behaviour
                                 valueConfig.setValueBoolean(columnConfig.getDefaultValueBoolean());
@@ -378,11 +362,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             } else {
                                 valueConfig.setValueNumeric(columnConfig.getDefaultValueNumeric());
                             }
-                        } else if (columnConfig.getType().toLowerCase().contains("date")
-                                || columnConfig.getType().toLowerCase().contains("time")
-                        ) {
-                            if ("NULL".equalsIgnoreCase(value) ||
-                                    "".equals(value)) {
+                        } else if (columnConfig.getType().equalsIgnoreCase("date")
+                                || columnConfig.getType().equalsIgnoreCase("datetime")
+                                || columnConfig.getType().equalsIgnoreCase("time")) {
+                            if ("NULL".equalsIgnoreCase(value) || "".equals(value)) {
                                 valueConfig.setValue(null);
                             } else {
                                 try {
@@ -446,6 +429,9 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             } else {
                                 valueConfig.setValue(value);
                             }
+                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UNKNOWN) {
+                            // columnConfig did not match a specific type
+                            valueConfig.setValue(value);
                         } else {
                             throw new UnexpectedLiquibaseException(
                                     String.format(coreBundle.getString("loaddata.type.is.not.supported"),
@@ -482,89 +468,12 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         }
                         actuallyUsePreparedStatements = usePreparedStatements;
                     } else {
-                        actuallyUsePreparedStatements = needsPreparedStatement || (databaseSupportsBatchUpdates && !isLoggingExecutor(database));
+                        actuallyUsePreparedStatements = needsPreparedStatement || (!isLoggingExecutor(database) && preferPreparedStatements(database));
                     }
                 }
-
-                if (actuallyUsePreparedStatements) {
-                    anyPreparedStatements = true;
-                    ExecutablePreparedStatementBase stmt =
-                            this.createPreparedStatement(
-                                    database, getCatalogName(), getSchemaName(), getTableName(), columnsFromCsv,
-                                    getChangeSet(), Scope.getCurrentScope().getResourceAccessor()
-                            );
-                    preparedStatements.add(stmt);
-                } else {
-                    InsertStatement insertStatement =
-                            this.createStatement(getCatalogName(), getSchemaName(), getTableName());
-
-                    for (LoadDataColumnConfig column : columnsFromCsv) {
-                        String columnName = column.getName();
-                        Object value = column.getValueObject();
-
-                        if (value == null) {
-                            value = "NULL";
-                        }
-
-                        insertStatement.addColumnValue(columnName, value);
-
-                        if (insertStatement instanceof InsertOrUpdateStatement) {
-                            ((InsertOrUpdateStatement) insertStatement).setAllowColumnUpdate(columnName, column.getAllowUpdate() == null || column.getAllowUpdate());
-                        }
-                    }
-
-                    statements.add(insertStatement);
-                }
-                // end of: will we use a PreparedStatement?
+                rows.add(new LoadDataRowConfig(actuallyUsePreparedStatements, columnsFromCsv));
             }
-            // end of: loop for every input line from the CSV file
-
-            if (anyPreparedStatements) {
-                // If we have only prepared statements and the database supports batching, let's roll
-                if (databaseSupportsBatchUpdates && statements.isEmpty() && (!preparedStatements.isEmpty())) {
-                    if (database instanceof PostgresDatabase) {
-                        // we don't do batch updates for Postgres but we still send as a prepared statement, see LB-744
-                        return preparedStatements.toArray(new SqlStatement[preparedStatements.size()]);
-                    } else {
-                        return new SqlStatement[]{
-                                new BatchDmlExecutablePreparedStatement(
-                                        database, getCatalogName(), getSchemaName(),
-                                        getTableName(), columns,
-                                        getChangeSet(), Scope.getCurrentScope().getResourceAccessor(),
-                                        preparedStatements)
-                        };
-                    }
-                } else {
-                    return statements.toArray(new SqlStatement[statements.size()]);
-                }
-            } else {
-                if (statements.isEmpty()) {
-                    // avoid returning unnecessary dummy statement
-                    return new SqlStatement[0];
-                }
-
-                InsertSetStatement statementSet = this.createStatementSet(
-                        getCatalogName(), getSchemaName(), getTableName()
-                );
-                for (SqlStatement stmt : statements) {
-                    statementSet.addInsertStatement((InsertStatement) stmt);
-                }
-
-                if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database
-                        instanceof PostgresDatabase)) {
-                    List<InsertStatement> innerStatements = statementSet.getStatements();
-                    if ((innerStatements != null) && (!innerStatements.isEmpty()) && (innerStatements.get(0)
-                            instanceof InsertOrUpdateStatement)) {
-                        //cannot do insert or update in a single statement
-                        return statementSet.getStatementsArray();
-                    }
-                    // we only return a single "statement" - it's capable of emitting multiple sub-statements,
-                    // should the need arise, on generation.
-                    return new SqlStatement[]{statementSet};
-                } else {
-                    return statementSet.getStatementsArray();
-                }
-            }
+            return generateStatementsFromRows(database, rows);
         } catch (CsvMalformedLineException e) {
             throw new RuntimeException("Error parsing " + getRelativeTo() + " on line " + e.getLineNumber() + ": " + e.getMessage());
         } catch (IOException | LiquibaseException e) {
@@ -572,21 +481,37 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         } catch (UnexpectedLiquibaseException ule) {
             if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
                     .getFailOnError()) {
-                LOG.info("Change set " + getChangeSet().toString(false) +
+                LOG.info("Changeset " + getChangeSet().toString(false) +
                         " failed, but failOnError was false.  Error: " + ule.getMessage());
                 return new SqlStatement[0];
             } else {
                 throw ule;
             }
-        } finally {
-            if (null != reader) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    // Do nothing
-                }
-            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+        // Do nothing
+    }
+
+    /**
+     * If the loaded data does not require a prepared statement, and the user did not specify whether to use them or not,
+     * should we use prepared statements as a default?
+     */
+    private boolean preferPreparedStatements(Database database) {
+        if (database instanceof PostgresDatabase) {
+            return false; //postgresql seems surprisingly slow with prepared statements
+        }
+        return supportsBatchUpdates(database);
+    }
+
+    protected boolean supportsBatchUpdates(Database database) {
+        boolean databaseSupportsBatchUpdates = false;
+        try {
+            databaseSupportsBatchUpdates = database.supportsBatchUpdates();
+        } catch (DatabaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        return databaseSupportsBatchUpdates;
     }
 
     private boolean isLoggingExecutor(Database database) {
@@ -754,7 +679,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
      * the header columns of the CSV file.
      *
      * @param headers the headers of the CSV file
-     * @return a List of LoadDataColumnConfigs
      */
     private void addColumnsFromHeaders(String[] headers) {
         int i = 0;
@@ -780,10 +704,21 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         if (resourceAccessor == null) {
             throw new UnexpectedLiquibaseException("No file resourceAccessor specified for " + getFile());
         }
-        String relativeTo = getRelativeTo();
-        InputStream stream = resourceAccessor.openStream(relativeTo, file);
-        if (stream == null) {
+
+        Resource resource;
+        if (getRelativeTo() == null) {
+            resource = resourceAccessor.get(file);
+        } else {
+            resource = resourceAccessor.get(getRelativeTo()).resolveSibling(file);
+        }
+        if (!resource.exists()) {
             return null;
+        }
+
+        @SuppressWarnings("java:S2095") // SONAR want us to close the stream here, but it is only read by CSVReader outside this method.
+        InputStream stream = resource.openInputStream();
+        if (resource.getPath().toLowerCase().endsWith(".gz") && !(stream instanceof GZIPInputStream)) {
+            stream = new GZIPInputStream(stream);
         }
         Reader streamReader = StreamUtil.readStreamWithReader(stream, getEncoding());
 
@@ -855,12 +790,15 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
-            stream = Scope.getCurrentScope().getResourceAccessor().openStream(getRelativeTo(), file);
-            if (stream == null) {
-                throw new UnexpectedLiquibaseException(String.format(
-                        coreBundle.getString("file.not.found"), file));
+            ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+            Resource resource;
+            if (getRelativeTo() == null) {
+                resource = resourceAccessor.getExisting(file);
+            } else {
+                resource = resourceAccessor.get(getRelativeTo()).resolveSibling(file);
             }
-            stream = new EmptyLineAndCommentSkippingInputStream(stream, commentLineStartsWith);
+
+            stream = new EmptyLineAndCommentSkippingInputStream(resource.openInputStream(), commentLineStartsWith);
             return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true));
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -885,8 +823,112 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+
+    protected SqlStatement[] generateStatementsFromRows(Database database, List<LoadDataRowConfig> rows) {
+        List<SqlStatement> statements = new ArrayList<>();
+        List<ExecutablePreparedStatementBase> preparedStatements = new ArrayList<>();
+
+        for (LoadDataRowConfig row : rows) {
+            List<LoadDataColumnConfig> columnsFromCsv = row.getColumns();
+            if (row.needsPreparedStatement()) {
+                ExecutablePreparedStatementBase stmt =
+                        this.createPreparedStatement(
+                                database, getCatalogName(), getSchemaName(), getTableName(), columnsFromCsv,
+                                getChangeSet(), Scope.getCurrentScope().getResourceAccessor()
+                        );
+                preparedStatements.add(stmt);
+            } else {
+                InsertStatement insertStatement =
+                        this.createStatement(getCatalogName(), getSchemaName(), getTableName());
+
+                for (LoadDataColumnConfig column : columnsFromCsv) {
+                    String columnName = column.getName();
+                    Object value = column.getValueObject();
+
+                    if (value == null) {
+                        value = "NULL";
+                    }
+
+                    insertStatement.addColumnValue(columnName, value);
+
+                    if (insertStatement instanceof InsertOrUpdateStatement) {
+                        ((InsertOrUpdateStatement) insertStatement).setAllowColumnUpdate(columnName, column.getAllowUpdate() == null || column.getAllowUpdate());
+                    }
+                }
+
+                statements.add(insertStatement);
+            }
+        }
+        if (rows.stream().anyMatch(LoadDataRowConfig::needsPreparedStatement)) {
+            // If we have only prepared statements and the database supports batching, let's roll
+            if (supportsBatchUpdates(database) && !preparedStatements.isEmpty()) {
+                if (database instanceof PostgresDatabase || database instanceof MySQLDatabase) {
+                    // we don't do batch updates for Postgres but we still send as a prepared statement, see LB-744
+                    // mysql supports batch updates, but the performance vs. the big insert is worse
+                    return preparedStatements.toArray(new SqlStatement[0]);
+                } else {
+                    return new SqlStatement[]{
+                            new BatchDmlExecutablePreparedStatement(
+                                    database, getCatalogName(), getSchemaName(),
+                                    getTableName(), columns,
+                                    getChangeSet(), Scope.getCurrentScope().getResourceAccessor(),
+                                    preparedStatements)
+                    };
+                }
+            } else {
+                return statements.toArray(new SqlStatement[0]);
+            }
+        } else {
+            if (statements.isEmpty()) {
+                // avoid returning unnecessary dummy statement
+                return new SqlStatement[0];
+            }
+
+            InsertSetStatement statementSet = this.createStatementSet(
+                    getCatalogName(), getSchemaName(), getTableName()
+            );
+            for (SqlStatement stmt : statements) {
+                statementSet.addInsertStatement((InsertStatement) stmt);
+            }
+
+            if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database
+                    instanceof PostgresDatabase)) {
+                List<InsertStatement> innerStatements = statementSet.getStatements();
+                if ((innerStatements != null) && (!innerStatements.isEmpty()) && (innerStatements.get(0)
+                        instanceof InsertOrUpdateStatement)) {
+                    //cannot do insert or update in a single statement
+                    return statementSet.getStatementsArray();
+                }
+                // we only return a single "statement" - it's capable of emitting multiple sub-statements,
+                // should the need arise, on generation.
+                return new SqlStatement[]{statementSet};
+            } else {
+                return statementSet.getStatementsArray();
+            }
+        }
+    }
+
     @SuppressWarnings("HardCodedStringLiteral")
     public enum LOAD_DATA_TYPE {
         BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP, UUID, OTHER, UNKNOWN
+    }
+
+    protected static class LoadDataRowConfig {
+
+        private final boolean needsPreparedStatement;
+        private final List<LoadDataColumnConfig> columns;
+
+        public LoadDataRowConfig(boolean needsPreparedStatement, List<LoadDataColumnConfig> columns) {
+            this.needsPreparedStatement = needsPreparedStatement;
+            this.columns = columns;
+        }
+
+        public boolean needsPreparedStatement() {
+            return needsPreparedStatement;
+        }
+
+        public List<LoadDataColumnConfig> getColumns() {
+            return columns;
+        }
     }
 }

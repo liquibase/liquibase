@@ -6,6 +6,9 @@ import liquibase.statement.*;
 import java.util.*;
 
 public class CreateTableStatement extends AbstractSqlStatement implements CompoundStatement {
+    /** Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
+    private String tableType;
+
     private String catalogName;
     private String schemaName;
     private String tableName;
@@ -30,6 +33,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private HashMap<String, NotNullConstraint> notNullColumns = new HashMap<>();
 
     private Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
+    private Set<String> computedColumns = new HashSet<>();
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName = catalogName;
@@ -37,9 +41,10 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         this.tableName = tableName;
     }
 
-    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks) {
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType) {
         this(catalogName, schemaName, tableName);
         this.remarks = remarks;
+        this.tableType = tableType;
     }
 
     public String getCatalogName() {
@@ -103,7 +108,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 
-        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[0]));
 
         return this;
     }
@@ -113,8 +118,14 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         return addPrimaryKeyColumn(columnName, columnType, defaultValue, validate, false, false, keyName, tablespace, constraints);
     }
 
+
     public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue,
                                                     Boolean validate, boolean deferrable, boolean initiallyDeferred, String keyName, String tablespace, ColumnConstraint... constraints) {
+        return addPrimaryKeyColumn(columnName, columnType, defaultValue, validate, deferrable, initiallyDeferred, keyName, tablespace, null, constraints);
+    }
+
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue,
+                                                    Boolean validate, boolean deferrable, boolean initiallyDeferred, String keyName, String tablespace, String remarks, ColumnConstraint... constraints) {
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
         if (validate != null) {
             pkConstraint.setValidatePrimaryKey(validate);
@@ -129,7 +140,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         allConstraints.add(pkConstraint);
 
 
-        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue, remarks, allConstraints.toArray(new ColumnConstraint[0]));
 
         return this;
     }
@@ -253,5 +264,21 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
 
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
+    }
+
+    public void setComputed(String columnName) {
+        this.computedColumns.add(columnName);
+    }
+
+    public boolean isComputed(String columnName) {
+        return this.computedColumns.contains(columnName);
+    }
+
+    public String getTableType() {
+        return tableType;
+    }
+
+    public void setTableType(String tableType) {
+        this.tableType = tableType;
     }
 }

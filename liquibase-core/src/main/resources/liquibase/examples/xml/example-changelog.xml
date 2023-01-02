@@ -4,13 +4,14 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns:pro="http://www.liquibase.org/xml/ns/pro"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd
-    http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd ">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+    http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd ">
 
-    <changeSet id="1" author="your.name">
+      <changeSet id="1" author="your.name" labels="example-label" context="example-context">
+          <comment>example-comment</comment>
         <createTable tableName="person">
-            <column name="id" type="int">
-                <constraints primaryKey="true"/>
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(50)">
                 <constraints nullable="false"/>
@@ -21,10 +22,11 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="2" author="your.name">
+    <changeSet id="2" author="your.name" labels="example-label" context="example-context">
+        <comment>example-comment</comment>
         <createTable tableName="company">
-            <column name="id" type="int">
-                <constraints primaryKey="true"/>
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(50)">
                 <constraints nullable="false"/>
@@ -35,7 +37,8 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="3" author="other.dev">
+    <changeSet id="3" author="other.dev" labels="example-label" context="example-context">
+        <comment>example-comment</comment>
         <addColumn tableName="person">
             <column name="country" type="varchar(2)"/>
         </addColumn>

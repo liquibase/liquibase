@@ -2,13 +2,14 @@ package liquibase.lockservice;
 
 import liquibase.Scope;
 import liquibase.change.Change;
+import liquibase.changelog.ChangeLogHistoryService;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.exception.DatabaseException;
@@ -28,7 +29,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
 import java.security.SecureRandom;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,19 +37,19 @@ import java.util.*;
 import static java.util.ResourceBundle.getBundle;
 
 public class StandardLockService implements LockService {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    protected static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
 
     protected boolean hasChangeLogLock;
 
-    private Long changeLogLockPollRate;
-    private Long changeLogLockRecheckTime;
+    protected Long changeLogLockPollRate;
+    protected Long changeLogLockRecheckTime;
 
-    private Boolean hasDatabaseChangeLogLockTable;
-    private boolean isDatabaseChangeLogLockTableInitialized;
-    private ObjectQuotingStrategy quotingStrategy;
-    private final SecureRandom random = new SecureRandom();
+    protected Boolean hasDatabaseChangeLogLockTable;
+    protected boolean isDatabaseChangeLogLockTableInitialized;
+    protected ObjectQuotingStrategy quotingStrategy;
+    protected final SecureRandom random = new SecureRandom();
 
 
     public StandardLockService() {
@@ -70,7 +70,7 @@ public class StandardLockService implements LockService {
         this.database = database;
     }
 
-    public Long getChangeLogLockWaitTime() {
+    protected Long getChangeLogLockWaitTime() {
         if (changeLogLockPollRate != null) {
             return changeLogLockPollRate;
         }
@@ -82,7 +82,7 @@ public class StandardLockService implements LockService {
         this.changeLogLockPollRate = changeLogLockWaitTime;
     }
 
-    public Long getChangeLogLockRecheckTime() {
+    protected Long getChangeLogLockRecheckTime() {
         if (changeLogLockRecheckTime != null) {
             return changeLogLockRecheckTime;
         }
@@ -187,7 +187,7 @@ public class StandardLockService implements LockService {
      * Determine whether the databasechangeloglock table has been initialized.
      * @param forceRecheck if true, do not use any cached information, and recheck the actual database
      */
-    private boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated, final boolean forceRecheck) {
+    protected boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated, final boolean forceRecheck) {
         if (!isDatabaseChangeLogLockTableInitialized || forceRecheck) {
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
 
@@ -222,7 +222,7 @@ public class StandardLockService implements LockService {
      * Check whether the databasechangeloglock table exists in the database.
      * @param forceRecheck if true, do not use any cached information and check the actual database
      */
-    private boolean hasDatabaseChangeLogLockTable(boolean forceRecheck) {
+    protected boolean hasDatabaseChangeLogLockTable(boolean forceRecheck) {
         if (forceRecheck || hasDatabaseChangeLogLockTable == null) {
             try {
                 hasDatabaseChangeLogLockTable = SnapshotGeneratorFactory.getInstance()
@@ -234,7 +234,7 @@ public class StandardLockService implements LockService {
         return hasDatabaseChangeLogLockTable;
     }
 
-    public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
+    protected boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
         return hasDatabaseChangeLogLockTable(false);
     }
 
@@ -322,6 +322,7 @@ public class StandardLockService implements LockService {
 
                 hasChangeLogLock = true;
 
+                ChangeLogHistoryServiceFactory.getInstance().resetAll();
                 database.setCanCacheLiquibaseTableInfo(true);
                 return true;
             }
@@ -331,6 +332,7 @@ public class StandardLockService implements LockService {
             try {
                 database.rollback();
             } catch (DatabaseException e) {
+
             }
         }
 
@@ -441,7 +443,7 @@ public class StandardLockService implements LockService {
                     );
                 }
             }
-            return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);
+            return allLocks.toArray(new DatabaseChangeLogLock[0]);
         } catch (Exception e) {
             throw new LockException(e);
         }
@@ -464,6 +466,15 @@ public class StandardLockService implements LockService {
         hasChangeLogLock = false;
         hasDatabaseChangeLogLockTable = null;
         isDatabaseChangeLogLockTableInitialized = false;
+
+        if (this.database != null) {
+            ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+            // On reseting the lock the changelog service has to be invalidated due to the fact that
+            // some liquibase component released the lock temporarily. In this time span another JVM instance
+            // might have acquired the database lock and could have applied further changesets to prevent that
+            // liquibase works with an outdated changelog.
+            changelogService.reset();
+        }
     }
 
     @Override

@@ -15,7 +15,6 @@ import org.junit.Test;
 import java.math.BigInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<CreateSequenceStatement> {
@@ -87,7 +86,7 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
         createSequenceStatement.setDataType("int");
 
         errors = new CreateSequenceGenerator().validate(createSequenceStatement, postgresDatabase, new MockSqlGeneratorChain());
-        assertThat(errors.getErrorMessages()).contains("AS is not allowed on postgresql");
+        assertThat(errors.getErrorMessages()).contains("dataType is not allowed on postgresql");
 
 
         // verify that if no version is available the validate() method passes
@@ -107,21 +106,48 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
     }
 
     @Test
-    public void h2IgnoresDataType() {
+    public void oldH2FailsValidationWithDataType() throws Exception {
+        DatabaseConnection dbConnection = mock(DatabaseConnection.class);
+        H2Database h2Database = new H2Database();
+        h2Database.setConnection(dbConnection);
 
+        CreateSequenceStatement stmt = createSampleSqlStatement();
 
-        final CreateSequenceStatement stmt = new CreateSequenceStatement(null, null, "test_seq")
-                .setDataType("BIGINT");
-        ValidationErrors errors = new CreateSequenceGenerator().validate(stmt, new H2Database(), new MockSqlGeneratorChain());
+        // versions before 2.0 do not support the `with <dataType>` clause
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(1);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(4);
+
+        stmt.setDataType("BIGINT");
+        ValidationErrors errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
         assertThat(errors.getErrorMessages()).isEmpty();
         assertThat(errors.getWarningMessages()).isEmpty();
 
         stmt.setDataType("INT");
-        errors = new CreateSequenceGenerator().validate(stmt, new H2Database(), new MockSqlGeneratorChain());
-        assertThat(errors.getErrorMessages()).isEmpty();
-        assertEquals("H2 only creates BIGINT sequences. Ignoring requested type INT", errors.getWarningMessages().get(0));
-        assertEquals("CREATE SEQUENCE test_seq", new CreateSequenceGenerator().generateSql(stmt, new H2Database(), new MockSqlGeneratorChain())[0].toSql());
+        errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).containsExactly("dataType is not allowed on h2");
 
+        String sql = generatorUnderTest.generateSql(stmt, h2Database, new MockSqlGeneratorChain())[0].toSql();
+        assertThat(sql).isEqualTo("CREATE SEQUENCE SCHEMA_NAME.SEQUENCE_NAME");
+
+        // since 2.0 `with <dataType>` *is* supported
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(2);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(0);
+
+        stmt.setDataType("BIGINT");
+        errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
+        assertThat(errors.getWarningMessages()).isEmpty();
+
+        sql = generatorUnderTest.generateSql(stmt, h2Database, new MockSqlGeneratorChain())[0].toSql();
+        assertThat(sql).isEqualTo("CREATE SEQUENCE SCHEMA_NAME.SEQUENCE_NAME AS BIGINT");
+
+        stmt.setDataType("INT");
+        errors = generatorUnderTest.validate(stmt, h2Database, new MockSqlGeneratorChain());
+        assertThat(errors.getErrorMessages()).isEmpty();
+        assertThat(errors.getWarningMessages()).isEmpty();
+
+        sql = generatorUnderTest.generateSql(stmt, h2Database, new MockSqlGeneratorChain())[0].toSql();
+        assertThat(sql).isEqualTo("CREATE SEQUENCE SCHEMA_NAME.SEQUENCE_NAME AS INT");
     }
 
 //    @Before

@@ -1,23 +1,18 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangelogRewriter;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
 import liquibase.exception.CommandExecutionException;
-import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
 import liquibase.hub.model.HubChangeLog;
-import liquibase.parser.ChangeLogParser;
-import liquibase.parser.ChangeLogParserFactory;
-import liquibase.resource.ResourceAccessor;
 
 import java.io.PrintWriter;
 import java.util.UUID;
 
-public class DeactivateChangelogCommandStep extends AbstractCommandStep {
+public class DeactivateChangelogCommandStep extends AbstractHubChangelogCommandStep {
 
     public static final String[] COMMAND_NAME = {"deactivateChangelog"};
 
@@ -95,12 +90,6 @@ public class DeactivateChangelogCommandStep extends AbstractCommandStep {
         }
     }
 
-    private DatabaseChangeLog parseChangeLogFile(String changeLogFile) throws LiquibaseException {
-        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
-        return parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
-    }
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Removes the changelogID from your changelog so it stops sending reports to Liquibase Hub");

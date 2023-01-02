@@ -3,7 +3,6 @@ package liquibase.statementexecute;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -23,11 +22,11 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
         table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int", database), null, new ColumnConstraint[]{ new NotNullConstraint() });
         statements.add(table);
 
-        if (database.supportsSchemas()) {
-            table = new CreateTableStatement(AbstractIntegrationTest.ALT_CATALOG, AbstractIntegrationTest.ALT_SCHEMA, TABLE_NAME);
-            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int", database), null, new ColumnConstraint[]{  new NotNullConstraint()});
-            statements.add(table);
-        }
+//        if (database.supportsSchemas()) {
+//            table = new CreateTableStatement(AbstractIntegrationTest.ALT_CATALOG, AbstractIntegrationTest.ALT_SCHEMA, TABLE_NAME);
+//            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int", database), null, new ColumnConstraint[]{  new NotNullConstraint()});
+//            statements.add(table);
+//        }
         return statements;
     }
 

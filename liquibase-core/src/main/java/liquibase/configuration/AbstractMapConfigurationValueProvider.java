@@ -5,9 +5,7 @@ import liquibase.util.StringUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Convenience class for {@link ConfigurationValueProvider}s that can collect the possible values into a Map.
@@ -137,27 +135,23 @@ public abstract class AbstractMapConfigurationValueProvider extends AbstractConf
      * @param storedKey the key stored in the map
      */
     protected boolean keyMatches(String wantedKey, String storedKey) {
-        if (storedKey.equalsIgnoreCase(wantedKey)) {
+        if (wantedKey.equalsIgnoreCase(storedKey)) {
             return true;
         }
 
         wantedKey = StringUtil.toKabobCase(wantedKey);
-        if (storedKey.equalsIgnoreCase(wantedKey)) {
+        if (wantedKey.equalsIgnoreCase(storedKey)) {
             return true;
         }
 
         wantedKey = wantedKey.replace(".", "-");
-        if (storedKey.equalsIgnoreCase(wantedKey)) {
+        if (wantedKey.equalsIgnoreCase(storedKey)) {
             return true;
         }
 
         //check for everythingSmashedTogether case insensitively
         wantedKey = wantedKey.replace("-", "");
-        if (storedKey.equalsIgnoreCase(wantedKey)) {
-            return true;
-        }
-
-        return false;
+        return wantedKey.equalsIgnoreCase(storedKey);
     }
 
 }

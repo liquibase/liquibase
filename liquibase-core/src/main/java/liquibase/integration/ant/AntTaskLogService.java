@@ -1,6 +1,5 @@
 package liquibase.integration.ant;
 
-import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.AbstractLogService;
 import org.apache.tools.ant.Task;
@@ -14,7 +13,7 @@ public final class AntTaskLogService extends AbstractLogService {
     private final AntTaskLogger logger;
 
     public AntTaskLogService(Task task) {
-        logger = new AntTaskLogger(task, this.filter);
+        logger = new AntTaskLogger(task);
     }
 
     @Override

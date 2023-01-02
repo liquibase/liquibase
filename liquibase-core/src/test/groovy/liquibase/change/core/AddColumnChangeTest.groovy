@@ -4,18 +4,61 @@ import liquibase.change.AddColumnConfig
 import liquibase.change.Change
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
+import liquibase.database.core.H2Database
+import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
 import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.sqlgenerator.SqlGeneratorFactory
+import liquibase.statement.SqlStatement
 import liquibase.structure.core.Column
 import liquibase.structure.core.PrimaryKey
 import liquibase.structure.core.Table
+import spock.lang.Unroll
 
-public class AddColumnChangeTest extends StandardChangeTest {
+class AddColumnChangeTest extends StandardChangeTest {
 
+
+    @Unroll
+    def "valid setups are allowed"() {
+        when:
+        def change = new AddColumnChange()
+        change.setTableName("test_table")
+        change.addColumn(columnConfig)
+
+        then:
+        !change.validate(new H2Database()).hasErrors()
+
+        where:
+        columnConfig << [
+                new AddColumnConfig()
+                        .setType("int")
+                        .setName("test_col"),
+                new AddColumnConfig()
+                        .setName("payload_id AS JSON_VALUE(payload,'\$.id')")
+                        .setComputed(true)
+        ]
+    }
+
+    def "computed columns generate expected sql"() {
+        when:
+        def db = new MSSQLDatabase()
+
+        def change = new AddColumnChange()
+        change.setTableName("test_table")
+        change.addColumn(new AddColumnConfig()
+                .setName("payload_id AS JSON_VALUE(payload,'\$.id')")
+                .setComputed(true))
+
+        def statements = change.generateStatements(db)
+
+        then:
+        SqlGeneratorFactory.getInstance().generateSql(statements, db)*.toString() == ["ALTER TABLE test_table ADD payload_id AS JSON_VALUE(payload,'\$.id');"]
+
+    }
 
     def "add and remove column methods"() throws Exception {
         when:
@@ -111,8 +154,8 @@ public class AddColumnChangeTest extends StandardChangeTest {
         when:
         def node = new ParsedNode(null, "addColumn")
                 .addChildren([tableName: "table_name"])
-                .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type:"int", beforeColumn: "before_col"]))
-                .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type:"int", position: "3"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type: "int", beforeColumn: "before_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type: "int", position: "3"]))
         def change = new AddColumnChange()
         try {
             change.load(node, resourceSupplier.simpleResourceAccessor)
@@ -131,7 +174,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
 
         change.columns[1].name == "col_2"
         change.columns[1].type == "int"
-        change.columns[1].position== 3
+        change.columns[1].position == 3
     }
 
     protected void addColumnsToSnapshot(Table table, Change change, MockSnapshotGeneratorFactory snapshotFactory) {

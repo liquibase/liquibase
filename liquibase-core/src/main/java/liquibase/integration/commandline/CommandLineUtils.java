@@ -65,6 +65,7 @@ public class CommandLineUtils {
                 databaseChangeLogTableName, databaseChangeLogLockTableName);
     }
 
+    @SuppressWarnings("java:S2095")
     public static Database createDatabaseObject(ResourceAccessor resourceAccessor,
                                                 String url,
                                                 String username,
@@ -230,9 +231,17 @@ public class CommandLineUtils {
                 schemaName)}, snapshotTypes, author, context, dataDir, diffOutputControl);
     }
 
+
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[]
             schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl
                                                    diffOutputControl) throws IOException, ParserConfigurationException,
+            LiquibaseException {
+        doGenerateChangeLog(changeLogFile, originalDatabase, schemas, snapshotTypes, author, context, dataDir, diffOutputControl, false);
+    }
+
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[]
+            schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl
+                                                   diffOutputControl, boolean overwriteOutputFile) throws IOException, ParserConfigurationException,
             LiquibaseException {
         CompareControl.SchemaComparison[] comparisons = new CompareControl.SchemaComparison[schemas.length];
         int i = 0;
@@ -250,7 +259,8 @@ public class CommandLineUtils {
                 .addArgumentValue(InternalGenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(InternalGenerateChangelogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl)
                 .addArgumentValue(InternalGenerateChangelogCommandStep.AUTHOR_ARG, author)
-                .addArgumentValue(InternalGenerateChangelogCommandStep.CONTEXT_ARG, context);
+                .addArgumentValue(InternalGenerateChangelogCommandStep.CONTEXT_ARG, context)
+                .addArgumentValue(InternalGenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, overwriteOutputFile);
 
         command.setOutput(System.out);
         try {
@@ -271,14 +281,16 @@ public class CommandLineUtils {
         buildTimeString = LiquibaseUtil.getBuildTime();
 
         StringBuilder banner = new StringBuilder();
+        if (GlobalConfiguration.SHOW_BANNER.getCurrentValue()) {
 
-        // Banner is stored in liquibase/banner.txt in resources.
-        Class commandLinUtilsClass = CommandLineUtils.class;
-        InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
-        try {
-            banner.append(readFromInputStream(inputStream));
-        } catch (IOException e) {
-            Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
+            // Banner is stored in liquibase/banner.txt in resources.
+            Class commandLinUtilsClass = CommandLineUtils.class;
+            InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
+            try {
+                banner.append(readFromInputStream(inputStream));
+            } catch (IOException e) {
+                Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
+            }
         }
 
         banner.append(String.format(

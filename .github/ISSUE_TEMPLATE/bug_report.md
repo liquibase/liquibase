@@ -21,6 +21,8 @@ assignees: ''
 
 **Operating System Type & Version**:
 
+**Infrastructure Type/Provider**: <AWC, GCS, Azure, VM, etc>
+
 
 ## Description
 

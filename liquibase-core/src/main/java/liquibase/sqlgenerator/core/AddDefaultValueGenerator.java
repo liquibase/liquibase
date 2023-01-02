@@ -2,11 +2,13 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.BooleanType;
 import liquibase.datatype.core.CharType;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -59,6 +61,17 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
         }
 
         return validationErrors;
+    }
+
+    @Override
+    public Warnings warn(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        Warnings warnings = super.warn(statement, database, sqlGeneratorChain);
+
+        if (database instanceof MySQLDatabase) {
+            ((MySQLDatabase) database).warnAboutAlterColumn("addDefaultValue", warnings);
+        }
+
+        return warnings;
     }
 
     @Override

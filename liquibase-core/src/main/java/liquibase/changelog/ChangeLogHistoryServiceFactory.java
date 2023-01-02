@@ -3,7 +3,6 @@ package liquibase.changelog;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,9 +11,9 @@ public class ChangeLogHistoryServiceFactory {
 
     private static ChangeLogHistoryServiceFactory instance;
 
-    private List<ChangeLogHistoryService> registry = new ArrayList<>();
+    private final List<ChangeLogHistoryService> registry = new ArrayList<>();
 
-    private Map<Database, ChangeLogHistoryService> services = new ConcurrentHashMap<>();
+    private final Map<Database, ChangeLogHistoryService> services = new ConcurrentHashMap<>();
 
     public static synchronized ChangeLogHistoryServiceFactory getInstance() {
         if (instance == null) {

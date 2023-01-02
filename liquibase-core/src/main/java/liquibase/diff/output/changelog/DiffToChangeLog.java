@@ -11,25 +11,32 @@ import liquibase.database.core.*;
 import liquibase.diff.DiffResult;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
+import liquibase.diff.compare.DatabaseObjectCollectionComparator;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.resource.OpenOptions;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
 import liquibase.util.DependencyUtil;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -80,9 +87,13 @@ public class DiffToChangeLog {
     }
 
     public void print(String changeLogFile) throws ParserConfigurationException, IOException, DatabaseException {
+        this.print(changeLogFile, false);
+    }
+
+    public void print(String changeLogFile, Boolean overwriteOutputFile) throws ParserConfigurationException, IOException, DatabaseException {
         this.changeSetPath = changeLogFile;
         ChangeLogSerializer changeLogSerializer = ChangeLogSerializerFactory.getInstance().getSerializer(changeLogFile);
-        this.print(changeLogFile, changeLogSerializer);
+        this.print(changeLogFile, changeLogSerializer, overwriteOutputFile);
     }
 
     public void print(PrintStream out) throws ParserConfigurationException, IOException, DatabaseException {
@@ -90,23 +101,28 @@ public class DiffToChangeLog {
     }
 
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
+        this.print(changeLogFile, changeLogSerializer, false);
+    }
+
+    public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer, Boolean overwriteOutputFile) throws ParserConfigurationException, IOException, DatabaseException {
         this.changeSetPath = changeLogFile;
-        File file = new File(changeLogFile);
+        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+        Resource file = pathHandlerFactory.getResource(changeLogFile);
 
         final Map<String, Object> newScopeObjects = new HashMap<>();
 
-        File objectsDir = null;
+        Resource objectsDir = null;
         if (changeLogFile.toLowerCase().endsWith("sql")) {
             DeprecatedConfigurationValueProvider.setData("liquibase.pro.sql.inline", "true");
         } else if (this.diffResult.getComparisonSnapshot() instanceof EmptyDatabaseSnapshot) {
-            objectsDir = new File(file.getParentFile(), "objects");
+            objectsDir = file.resolveSibling("objects");
         } else {
-            objectsDir = new File(file.getParentFile(), "objects-" + new Date().getTime());
+            objectsDir = file.resolveSibling("objects-" + new Date().getTime());
         }
 
         if (objectsDir != null) {
             if (objectsDir.exists()) {
-                throw new UnexpectedLiquibaseException("The generatechangelog command would overwrite your existing stored logic files. To run this command please remove or rename the '"+objectsDir.getCanonicalPath()+"' dir in your local project directory");
+                throw new UnexpectedLiquibaseException("The generatechangelog command would overwrite your existing stored logic files. To run this command please remove or rename the '"+objectsDir+"' dir");
             }
             newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, objectsDir);
         }
@@ -132,51 +148,43 @@ public class DiffToChangeLog {
                             //print changeLog only if there are available changeSets to print instead of printing it always
                             printNew(changeLogSerializer, file);
                         } else {
-                            Scope.getCurrentScope().getLog(getClass()).info(file + " exists, appending");
+                            StringBuilder fileContents = new StringBuilder();
                             ByteArrayOutputStream out = new ByteArrayOutputStream();
                             print(new PrintStream(out, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()), changeLogSerializer);
 
                             String xml = new String(out.toByteArray(), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
-                            String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
+                            if (overwriteOutputFile) {
+                                // write xml contents to file
+                                Scope.getCurrentScope().getLog(getClass()).info(file.getUri() + " exists, overwriting");
+                                fileContents.append(xml);
+                            } else {
+                                // read existing file
+                                Scope.getCurrentScope().getLog(getClass()).info(file.getUri() + " exists, appending");
+                                fileContents = new StringBuilder(StreamUtil.readStreamAsString(file.openInputStream()));
 
-                            innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
-                            innerXml = innerXml.trim();
-                            if ("".equals(innerXml)) {
-                                Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
-                                return;
-                            }
+                                String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
 
-                            try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw")) {
-
-                                String line;
-                                long offset = 0;
-                                boolean foundEndTag = false;
-                                while ((line = randomAccessFile.readLine()) != null) {
-                                    int index = line.indexOf(DATABASE_CHANGE_LOG_CLOSING_XML_TAG);
-                                    if (index >= 0) {
-                                        foundEndTag = true;
-                                        break;
-                                    } else {
-                                        offset = randomAccessFile.getFilePointer();
-                                    }
+                                innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
+                                innerXml = innerXml.trim();
+                                if ("".equals(innerXml)) {
+                                    Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
+                                    return;
                                 }
 
-                                String lineSeparator = GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getCurrentValue();
-
-                                if (foundEndTag) {
-                                    randomAccessFile.seek(offset);
-                                    randomAccessFile.writeBytes("    ");
-                                    randomAccessFile.write(innerXml.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
-                                    randomAccessFile.writeBytes(lineSeparator);
-                                    randomAccessFile.writeBytes(DATABASE_CHANGE_LOG_CLOSING_XML_TAG + lineSeparator);
+                                // insert new XML
+                                int endTagIndex = fileContents.indexOf(DATABASE_CHANGE_LOG_CLOSING_XML_TAG);
+                                if (endTagIndex == -1) {
+                                    fileContents.append(xml);
                                 } else {
-                                    randomAccessFile.seek(0);
-                                    long length = randomAccessFile.length();
-                                    randomAccessFile.seek(length);
-                                    randomAccessFile.write(xml.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+                                    String lineSeparator = GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getCurrentValue();
+                                    String toInsert = "    " + innerXml + lineSeparator;
+                                    fileContents.insert(endTagIndex, toInsert);
                                 }
                             }
 
+                            try (OutputStream outputStream = file.openOutputStream(new OpenOptions())) {
+                                outputStream.write(fileContents.toString().getBytes());
+                            }
                         }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -217,7 +225,7 @@ public class DiffToChangeLog {
      * Prints changeLog that would bring the target database to be the same as
      * the reference database
      */
-    public void printNew(ChangeLogSerializer changeLogSerializer, File file) throws ParserConfigurationException, IOException, DatabaseException {
+    public void printNew(ChangeLogSerializer changeLogSerializer, Resource file) throws ParserConfigurationException, IOException, DatabaseException {
 
         List<ChangeSet> changeSets = generateChangeSets();
 
@@ -228,7 +236,7 @@ public class DiffToChangeLog {
             Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
         }
 
-        try (FileOutputStream stream = new FileOutputStream(file);
+        try (OutputStream stream = file.openOutputStream(new OpenOptions());
              PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
             changeLogSerializer.write(changeSets, out);
         }
@@ -248,7 +256,7 @@ public class DiffToChangeLog {
 
     public List<ChangeSet> generateChangeSets() {
         final ChangeGeneratorFactory changeGeneratorFactory = ChangeGeneratorFactory.getInstance();
-        DatabaseObjectComparator comparator = new DatabaseObjectComparator();
+        DatabaseObjectCollectionComparator comparator = new DatabaseObjectCollectionComparator();
 
         String created = null;
         if (GlobalConfiguration.GENERATE_CHANGESET_CREATED_VALUES.getCurrentValue()) {
@@ -262,9 +270,9 @@ public class DiffToChangeLog {
         // This is to avoid changing the MissingObjectChangeGenerator API and still be able to pass the
         // initial DiffResult Object which can be used to check for the objects available in the database
         // without doing any expensive db calls. Example usage is in MissingUniqueConstraintChangeGenerator#alreadyExists()
-        Database comparisionDatabase = diffResult.getComparisonSnapshot().getDatabase();
-        if (comparisionDatabase instanceof AbstractJdbcDatabase) {
-            ((AbstractJdbcDatabase) comparisionDatabase).set("diffResult", diffResult);
+        Database comparisonDatabase = diffResult.getComparisonSnapshot().getDatabase();
+        if (comparisonDatabase instanceof AbstractJdbcDatabase) {
+            ((AbstractJdbcDatabase) comparisonDatabase).set("diffResult", diffResult);
         }
 
         for (Class<? extends DatabaseObject> type : types) {
@@ -280,7 +288,7 @@ public class DiffToChangeLog {
         types = getOrderedOutputTypes(MissingObjectChangeGenerator.class);
         List<DatabaseObject> missingObjects = new ArrayList<DatabaseObject>();
         for (Class<? extends DatabaseObject> type : types) {
-            for (DatabaseObject object : diffResult.getMissingObjects(type, getDbObjectComparator())) {
+            for (DatabaseObject object : diffResult.getMissingObjects(type, getDatabaseObjectCollectionComparator())) {
                 if (object == null) {
                     continue;
                 }
@@ -312,8 +320,8 @@ public class DiffToChangeLog {
             }
         }
         // remove the diffResult from the database object
-        if (comparisionDatabase instanceof AbstractJdbcDatabase) {
-            ((AbstractJdbcDatabase) comparisionDatabase).set("diffResult", null);
+        if (comparisonDatabase instanceof AbstractJdbcDatabase) {
+            ((AbstractJdbcDatabase) comparisonDatabase).set("diffResult", null);
         }
 
 
@@ -324,8 +332,8 @@ public class DiffToChangeLog {
         return changeSets;
     }
 
-    private DatabaseObjectComparator getDbObjectComparator() {
-        return new DatabaseObjectComparator() {
+    private DatabaseObjectCollectionComparator getDatabaseObjectCollectionComparator() {
+        return new DatabaseObjectCollectionComparator() {
             @Override
             public int compare(DatabaseObject o1, DatabaseObject o2) {
                 if (o1 instanceof Column && o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null && o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) {
@@ -333,15 +341,15 @@ public class DiffToChangeLog {
                     if (i != 0) {
                         return i;
                     }
-                } else if (o1 instanceof StoredDatabaseLogic && o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null
-                        && o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) {
-                    int order = o1.getAttribute(ORDER_ATTRIBUTE, Long.class).compareTo(o2.getAttribute(ORDER_ATTRIBUTE, Long.class));
-                    if (order != 0) {
-                        return order;
+                } else if (o1 instanceof StoredDatabaseLogic) {
+                    if (o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null && o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) {
+                        int order = o1.getAttribute(ORDER_ATTRIBUTE, Long.class).compareTo(o2.getAttribute(ORDER_ATTRIBUTE, Long.class));
+                        if (order != 0) {
+                            return order;
+                        }
                     }
                 }
                 return super.compare(o1, o2);
-
             }
         };
     }
@@ -679,7 +687,7 @@ public class DiffToChangeLog {
                 "                   SELECT DISTINCT " +
                 "                         substring(pg_identify_object(classid, objid, 0)::text, E'(\\\\w+?)\\\\.') as referenced_schema_name, " +
                 "                         CASE classid\n" +
-                "                              WHEN 'pg_constraint'::regclass THEN (SELECT CONTYPE FROM pg_constraint WHERE oid = objid)\n" +
+                "                              WHEN 'pg_constraint'::regclass THEN (SELECT CONTYPE::text FROM pg_constraint WHERE oid = objid)\n" +
                 "                              ELSE objid::text\n" +
                 "                              END AS CONTYPE,\n" +
                 "                         CASE classid\n" +
@@ -772,7 +780,7 @@ public class DiffToChangeLog {
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
                     ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
-                            null, false, quotingStrategy, null);
+                            null, true, quotingStrategy, null);
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
                         changeSet.setLabels(diffOutputControl.getLabels());
@@ -782,7 +790,7 @@ public class DiffToChangeLog {
                 }
             } else {
                 ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, csContext,
-                        null, false, quotingStrategy, null);
+                        null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
                     changeSet.setLabels(diffOutputControl.getLabels());
@@ -800,15 +808,11 @@ public class DiffToChangeLog {
         boolean sawAutocommitBefore = false;
 
         for (Change change : changes) {
-            boolean thisStatementAutocommits = true;
+            boolean thisStatementAutocommits = !(change instanceof InsertDataChange)
+                    && !(change instanceof DeleteDataChange)
+                    && !(change instanceof UpdateDataChange)
+                    && !(change instanceof LoadDataChange);
 
-            if ((change instanceof InsertDataChange
-                    || change instanceof DeleteDataChange
-                    || change instanceof UpdateDataChange
-                    || change instanceof LoadDataChange
-            )) {
-                thisStatementAutocommits = false;
-            }
             if (change instanceof RawSQLChange) {
                 if (((RawSQLChange) change).getSql().trim().matches("SET\\s+\\w+\\s+\\w+")) {
                     //don't separate out when there is a `SET X Y` statement

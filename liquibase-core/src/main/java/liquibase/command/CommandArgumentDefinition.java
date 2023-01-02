@@ -8,7 +8,7 @@ import liquibase.exception.MissingRequiredArgumentException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.ObjectUtil;
 
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -24,6 +24,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private static final Pattern ALLOWED_ARGUMENT_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
 
     private final String name;
+    private SortedSet<String> aliases = new TreeSet<>();
     private final Class<DataType> dataType;
 
     private String description;
@@ -45,6 +46,13 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Aliases for the argument.  Must be camelCase alphanumeric.
+     */
+    public SortedSet<String> getAliases() {
+        return Collections.unmodifiableSortedSet(aliases);
     }
 
     /**
@@ -157,6 +165,14 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         Building(String[][] commandNames, CommandArgumentDefinition<DataType> newCommandArgument) {
             this.commandNames = commandNames;
             this.newCommandArgument = newCommandArgument;
+
+            //
+            // If the argument name is "url", then we set up an obfuscator to avoid bleeding credentials
+            // via the logging framework
+            //
+            if (newCommandArgument.getName().equalsIgnoreCase(CommonArgumentNames.URL.getArgumentName())) {
+                this.setValueObfuscator((ConfigurationValueObfuscator<DataType>) ConfigurationValueObfuscator.URL_OBFUSCATOR);
+            }
         }
 
         /**
@@ -231,6 +247,15 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
          */
         public Building<DataType> setValueObfuscator(ConfigurationValueObfuscator<DataType> valueObfuscator) {
             newCommandArgument.valueObfuscator = valueObfuscator;
+            return this;
+        }
+
+
+        /**
+         * Adds an alias for this command argument
+         */
+        public Building<DataType> addAlias(String alias) {
+            newCommandArgument.aliases.add(alias);
             return this;
         }
 

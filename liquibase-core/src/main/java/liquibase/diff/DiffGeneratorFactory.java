@@ -6,7 +6,6 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.*;
 
 import java.util.*;
@@ -84,7 +83,7 @@ public class DiffGeneratorFactory {
 
     public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, CompareControl compareControl) throws DatabaseException {
         Database referenceDatabase = referenceSnapshot.getDatabase();
-        if (comparisonSnapshot !=null && referenceSnapshot!=null) {
+        if (comparisonSnapshot !=null && referenceDatabase!=null) {
             if (referenceDatabase.getDefaultCatalogName() == null || referenceDatabase.getDefaultCatalogName().isEmpty()) {
                 referenceDatabase.setDefaultCatalogName(comparisonSnapshot.getDatabase().getDefaultCatalogName());
             }

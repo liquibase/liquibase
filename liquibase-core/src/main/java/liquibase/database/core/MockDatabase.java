@@ -2,7 +2,6 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
-import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.*;
 import liquibase.database.*;
@@ -44,6 +43,7 @@ public class MockDatabase implements Database, InternalDatabase {
     private String defaultSchemaName;
     private boolean caseSensitive;
     private DatabaseConnection connection = new MockDatabaseConnection();
+    private String currentDateTimeFunction = "DATETIME()";
 
 
     @Override
@@ -256,11 +256,12 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public String getCurrentDateTimeFunction() {
-        return "DATETIME()";
+        return currentDateTimeFunction;
     }
 
     @Override
     public void setCurrentDateTimeFunction(final String function) {
+        this.currentDateTimeFunction = function;
     }
 
     @Override

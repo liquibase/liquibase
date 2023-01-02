@@ -1,5 +1,6 @@
 package liquibase.diff.output.changelog.core;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.LoadDataChange;
 import liquibase.change.core.LoadDataColumnConfig;
@@ -9,6 +10,9 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.resource.OpenOptions;
+import liquibase.resource.PathHandlerFactory;
+import liquibase.resource.Resource;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Data;
@@ -71,22 +75,17 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                     columnNames.add(rs.getMetaData().getColumnName(i + 1));
                 }
 
+                final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                 String fileName = table.getName().toLowerCase() + ".csv";
+                Resource externalFileResource = pathHandlerFactory.getResource(fileName);
                 if (dataDir != null) {
-                    fileName = dataDir + "/" + fileName;
-
-                    File parentDir = new File(dataDir);
-                    if (!parentDir.exists()) {
-                        parentDir.mkdirs();
-                    }
-                    if (!parentDir.isDirectory()) {
-                        throw new IOException(parentDir.getAbsolutePath() + " is not a valid directory");
-                    }
+                    Resource dataDirResource = pathHandlerFactory.getResource(dataDir);
+                    externalFileResource = dataDirResource.resolve(fileName);
                 }
 
                 String[] dataTypes = new String[0];
                 try (
-                        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+                        OutputStream fileOutputStream = externalFileResource.openOutputStream(new OpenOptions());
                         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
                                 fileOutputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
                         CSVWriter outputFile = new CSVWriter(new BufferedWriter(outputStreamWriter));
@@ -141,7 +140,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 }
 
                 LoadDataChange change = new LoadDataChange();
-                change.setFile(fileName);
+                change.setFile(externalFileResource.getPath());
                 change.setEncoding(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
                 if (outputControl.getIncludeCatalog()) {
                     change.setCatalogName(table.getSchema().getCatalogName());

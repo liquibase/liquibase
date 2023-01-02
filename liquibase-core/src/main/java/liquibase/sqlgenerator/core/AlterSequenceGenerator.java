@@ -33,7 +33,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             validationErrors.checkDisallowedField("minValue", alterSequenceStatement.getMinValue(), database, H2Database.class);
         }
 
-        validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database, HsqlDatabase.class, DB2Database.class);
+        validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database, HsqlDatabase.class, DB2Database.class, MSSQLDatabase.class);
         validationErrors.checkDisallowedField("dataType", alterSequenceStatement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class);
         validationErrors.checkRequiredField("sequenceName", alterSequenceStatement.getSequenceName());
 
@@ -68,7 +68,9 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
 
         if (statement.getOrdered() != null) {
             if (statement.getOrdered()) {
-                buffer.append(" ORDER");
+                buffer.append(" ORDER ");
+            } else {
+                buffer.append(" NOORDER ");
             }
         }
 
@@ -94,8 +96,8 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        return new Sql[]{
-                new UnparsedSql(buffer.toString(), getAffectedSequence(statement))
+        return new Sql[] {
+            new UnparsedSql(buffer.toString(), getAffectedSequence(statement))
         };
     }
 

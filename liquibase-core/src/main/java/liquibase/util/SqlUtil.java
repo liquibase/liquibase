@@ -21,6 +21,8 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Locale.US;
+
 public abstract class SqlUtil {
 
     public static boolean isNumeric(int dataType) {
@@ -120,7 +122,7 @@ public abstract class SqlUtil {
         }
 
         String typeName = type.getTypeName();
-        try (Scanner scanner = new Scanner(stringVal.trim())) {
+        try (Scanner scanner = new Scanner(stringVal.trim()).useLocale(US)) {
             if (typeId == Types.ARRAY) {
                 return new DatabaseFunction(stringVal);
             } else if ((liquibaseDataType instanceof BigIntType || typeId == Types.BIGINT)) {
@@ -149,6 +151,9 @@ public abstract class SqlUtil {
                 if (scanner.hasNextBoolean()) {
                     value = scanner.nextBoolean();
                 } else if (scanner.hasNextInt()) {
+                    if (stringVal.length() > 1) {
+                        stringVal = stringVal.substring(0, 1);
+                    }
                     value = Integer.valueOf(stringVal);
                 }
 

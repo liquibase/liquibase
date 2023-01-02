@@ -14,7 +14,6 @@ import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.util.StringUtil;
 
-import java.io.File;
 import java.io.PrintStream;
 
 public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogCommandStep {
@@ -22,19 +21,20 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
     public static final String[] COMMAND_NAME = {"internalGenerateChangelog"};
 
     private static final String INFO_MESSAGE =
-            "When generating formatted SQL changelogs, it is important to decide if batched statements\n" +
-            "should be split or not.  For storedlogic objects, the default behavior is 'splitStatements:false'\n." +
-            "All other objects default to 'splitStatements:true'.  See https://docs.liquibase.org for additional information.";
-
+            "BEST PRACTICE: When generating formatted SQL changelogs, always check if the 'splitStatements' attribute" + System.lineSeparator() +
+            "works for your environment. See https://docs.liquibase.com/commands/generatechangelog.html for more information. ";
 
     public static final CommandArgumentDefinition<String> AUTHOR_ARG;
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;
+    public static final CommandArgumentDefinition<Boolean> OVERWRITE_OUTPUT_FILE_ARG;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
 
         AUTHOR_ARG = builder.argument("author", String.class).build();
         CONTEXT_ARG = builder.argument("context", String.class).build();
+        OVERWRITE_OUTPUT_FILE_ARG = builder.argument("overwriteOutputFile", Boolean.class)
+                .description("Flag to allow overwriting of output changelog file").build();
 
     }
 
@@ -62,6 +62,7 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
         }
 
         final Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
+        referenceDatabase.setOutputDefaultSchema(commandScope.getArgumentValue(DIFF_OUTPUT_CONTROL_ARG).getIncludeSchema());
 
         InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
 
@@ -77,7 +78,8 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
         try {
             referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
             if (StringUtil.trimToNull(changeLogFile) != null) {
-                changeLogWriter.print(changeLogFile);
+                Boolean overwriteOutputFile = commandScope.getArgumentValue(OVERWRITE_OUTPUT_FILE_ARG);
+                changeLogWriter.print(changeLogFile, overwriteOutputFile);
             } else {
                 PrintStream outputStream = new PrintStream(resultsBuilder.getOutputStream());
 
@@ -89,7 +91,7 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
 
             }
             if (StringUtil.trimToNull(changeLogFile) != null) {
-                Scope.getCurrentScope().getUI().sendMessage("Generated changelog written to " + new File(changeLogFile).getAbsolutePath());
+                Scope.getCurrentScope().getUI().sendMessage("Generated changelog written to " + changeLogFile);
             }
         } finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);

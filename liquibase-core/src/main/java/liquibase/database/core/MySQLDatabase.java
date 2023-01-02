@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
@@ -660,5 +661,9 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             precision = Integer.parseInt(precisionMatcher.group().replaceAll("[(,)]", ""));
         }
         return precision;
+    }
+
+    public void warnAboutAlterColumn(String changeName, Warnings warnings ) {
+        warnings.addWarning("Due to " + this.getShortName() + " SQL limitations, " + changeName + " will lose primary key/autoincrement/not null/comment settings explicitly redefined in the change. Use <sql> or <modifySql> to re-specify all configuration if this is the case");
     }
 }

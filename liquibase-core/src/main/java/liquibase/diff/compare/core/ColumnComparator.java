@@ -2,6 +2,7 @@ package liquibase.diff.compare.core;
 
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparator;
@@ -62,11 +63,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        if (BooleanUtil.isTrue(thisColumn.getDescending()) != BooleanUtil.isTrue(otherColumn.getDescending())) {
-            return false;
-        }
-
-        return true;
+        return BooleanUtil.isTrue(thisColumn.getDescending()) == BooleanUtil.isTrue(otherColumn.getDescending());
     }
 
 
@@ -91,7 +88,35 @@ public class ColumnComparator implements DatabaseObjectComparator {
         if (autoIncrement1 != autoIncrement2 && !compareControl.isSuppressedField(Column.class, "autoIncrementInformation")) { //only compare if autoIncrement or not since there are sometimes expected differences in start/increment/etc value.
             differences.addDifference("autoIncrement", autoIncrement1, autoIncrement2);
         }
+        if (accordingTo instanceof PostgresDatabase && autoIncrement1 && autoIncrement2) {
+            String type1 = ((Column) databaseObject1).getType().getTypeName();
+            String type2 = ((Column) databaseObject2).getType().getTypeName();
+            boolean typesEquivalent = isPostgresAutoIncrementEquivalentType(type1, type2) || isPostgresAutoIncrementEquivalentType(type2, type1);
+            if (typesEquivalent) {
+                differences.removeDifference("type");
+            }
+        }
 
         return differences;
+    }
+
+    /**
+     * Determine if the two types are essentially equivalent.
+     * @param type1 first type to compare
+     * @param type2 second type to compare
+     * @return true if the types are essentially equivalent (bigserial and int8/bigint would be considered equivalent),
+     * false otherwise
+     */
+    private boolean isPostgresAutoIncrementEquivalentType(String type1, String type2) {
+        if (type1.equalsIgnoreCase(type2)) {
+            return true;
+        } else if (type1.equalsIgnoreCase("bigserial")) {
+            return type2.equalsIgnoreCase("bigserial") || type2.equalsIgnoreCase("int8");
+        } else if (type1.equalsIgnoreCase("serial")) {
+            return type2.equalsIgnoreCase("serial") || type2.equalsIgnoreCase("int4");
+        } else if (type1.equalsIgnoreCase("smallserial")) {
+            return type2.equalsIgnoreCase("smallserial") || type2.equalsIgnoreCase("int2");
+        }
+        return false;
     }
 }

@@ -34,4 +34,22 @@ class HubConfigurationTest extends Specification {
         "http://localhost:8080"            | "http://localhost:8080"
     }
 
+    @Unroll
+    def "obfuscate api key"() {
+        expect:
+        Scope.child([(HubConfiguration.LIQUIBASE_HUB_API_KEY.key): input], { ->
+            HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValueObfuscated()
+        } as Scope.ScopedRunnerWithReturn) == expected
+
+        where:
+        input   | expected
+        null    | null
+        "a"     | "a"
+        "ab"    | "ab"
+        "abc"   | "abc"
+        "abcd"  | "abcd"
+        "abcde" | "abcd****"
+        "abcdf" | "abcd****"
+    }
+
 }

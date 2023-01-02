@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
-class ResultSetCache {
+public class ResultSetCache {
     private Map<String, Integer> timesSingleQueried = new HashMap<>();
     private Map<String, Boolean> didBulkQuery = new HashMap<>();
     private boolean bulkTracking = true;
@@ -164,7 +164,7 @@ class ResultSetCache {
                 Collections.addAll(permutations, permute(params, fromIndex + 1));
                 Collections.addAll(permutations, permute(nullVersion, fromIndex + 1));
 
-                return permutations.toArray(new String[permutations.size()]);
+                return permutations.toArray(new String[0]);
             }
         }
 
@@ -254,15 +254,15 @@ class ResultSetCache {
             throw new UnexpectedLiquibaseException("Not Implemented");
         }
 
-        boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+        protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
             return resultSetCache.getTimesSingleQueried(schemaKey) >= 3;
         }
 
-        List<CachedRow> executeAndExtract(String sql, Database database) throws DatabaseException, SQLException {
+        protected List<CachedRow> executeAndExtract(String sql, Database database) throws DatabaseException, SQLException {
             return executeAndExtract(sql, database, false);
         }
 
-        List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint)
+        protected List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint)
                 throws DatabaseException, SQLException {
             if (sql == null) {
                 return new ArrayList<>();
@@ -314,7 +314,7 @@ class ResultSetCache {
             List<Map> result;
             List<CachedRow> returnList = new ArrayList<>();
             try {
-                result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper() {
+                result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper(database.isCaseSensitive()) {
                     @Override
                     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                         Object value = super.getColumnValue(rs, index);
@@ -327,10 +327,8 @@ class ResultSetCache {
                             if (informixIndexTrimHint == false) {
                                 value = ((String) value).trim(); // Trim the value normally
                             } else {
-                                boolean startsWithSpace = false;
-                                if ((database instanceof InformixDatabase) && ((String) value).matches("^ .*$")) {
-                                    startsWithSpace = true; // Set the flag if the value started with a space
-                                }
+                                boolean startsWithSpace = (database instanceof InformixDatabase) && ((String) value).matches("^ .*$");
+                                // Set the flag if the value started with a space
                                 value = ((String) value).trim(); // Trim the value normally
                                 if (startsWithSpace == true) {
                                     value = " " + value; // Put the space back at the beginning if the flag was set

@@ -16,10 +16,13 @@ import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
 /**
  * Creates a new table.
@@ -28,6 +31,8 @@ import java.util.List;
 public class CreateTableChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private List<ColumnConfig> columns;
+    /*Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
+    private String tableType;
     private String catalogName;
     private String schemaName;
     private String tableName;
@@ -46,7 +51,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         if (columns != null) {
             for (ColumnConfig columnConfig : columns) {
-                if (columnConfig.getType() == null) {
+                if (columnConfig.getType() == null && !ObjectUtil.defaultIfNull(columnConfig.getComputed(), false)) {
                     validationErrors.addError("column 'type' is required for all columns");
                 }
                 if (columnConfig.getName() == null) {
@@ -67,13 +72,18 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             Object defaultValue = column.getDefaultValueObject();
 
-            LiquibaseDataType columnType = DataTypeFactory.getInstance().fromDescription(column.getType() + (isAutoIncrement ? "{autoIncrement:true}" : ""), database);
-            isAutoIncrement |= columnType.isAutoIncrement();
+            LiquibaseDataType columnType = null;
+            if (column.getType() != null) {
+                columnType = DataTypeFactory.getInstance().fromDescription(column.getType() + (isAutoIncrement ? "{autoIncrement:true}" : ""), database);
+                isAutoIncrement |= columnType.isAutoIncrement();
+            }
+
             if ((constraints != null) && (constraints.isPrimaryKey() != null) && constraints.isPrimaryKey()) {
                 statement.addPrimaryKeyColumn(column.getName(), columnType, defaultValue, constraints.getValidatePrimaryKey(),
                         constraints.isDeferrable() != null && constraints.isDeferrable(),
                         constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred(),
-                    constraints.getPrimaryKeyName(),constraints.getPrimaryKeyTablespace());
+                    constraints.getPrimaryKeyName(),constraints.getPrimaryKeyTablespace(),
+                        column.getRemarks());
 
             } else {
                 statement.addColumn(column.getName(),
@@ -131,7 +141,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         List<SqlStatement> statements = new ArrayList<>();
         statements.add(statement);
 
-        if (StringUtil.trimToNull(remarks) != null) {
+        if (StringUtil.trimToNull(remarks) != null && !(database instanceof MySQLDatabase)) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, tableName, remarks);
             if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                 statements.add(remarksStatement);
@@ -140,19 +150,24 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         for (ColumnConfig column : getColumns()) {
             String columnRemarks = StringUtil.trimToNull(column.getRemarks());
-            if (columnRemarks != null) {
+            if (columnRemarks != null && !(database instanceof MySQLDatabase)) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks, column.getType());
                 if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                     statements.add(remarksStatement);
                 }
             }
+
+            final Boolean computed = column.getComputed();
+            if (computed != null && computed) {
+                statement.setComputed(column.getName());
+            }
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     protected CreateTableStatement generateCreateTableStatement() {
-        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks());
+        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType());
     }
 
     @Override
@@ -279,4 +294,11 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    public String getTableType() {
+        return tableType;
+    }
+
+    public void setTableType(String tableType) {
+        this.tableType = tableType;
+    }
 }

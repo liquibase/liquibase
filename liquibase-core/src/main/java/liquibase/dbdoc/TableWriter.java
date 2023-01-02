@@ -2,9 +2,9 @@ package liquibase.dbdoc;
 
 import liquibase.change.Change;
 import liquibase.database.Database;
+import liquibase.resource.Resource;
 import liquibase.structure.core.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -13,8 +13,8 @@ import java.util.List;
 
 public class TableWriter extends HTMLWriter {
 
-    public TableWriter(File rootOutputDir, Database database) {
-        super(new File(rootOutputDir, "tables"), database);
+    public TableWriter(Resource rootOutputDir, Database database) {
+        super(rootOutputDir.resolve("tables"), database);
     }
 
     @Override

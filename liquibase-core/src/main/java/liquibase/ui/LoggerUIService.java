@@ -2,7 +2,6 @@ package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
 import liquibase.Scope;
-import liquibase.exception.LiquibaseException;
 
 import java.util.logging.Level;
 

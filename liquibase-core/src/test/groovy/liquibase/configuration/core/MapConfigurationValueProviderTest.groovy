@@ -19,6 +19,15 @@ class MapConfigurationValueProviderTest extends Specification {
         provider.getProvidedValue("empty-property") == null
     }
 
+    def "null values count as not set"() {
+        when:
+        def provider = new MapConfigurationValueProvider(["null.property": null])
+
+        then:
+        provider.getProvidedValue("null.property") == null
+        provider.getProvidedValue("null-property") == null
+    }
+
     @Unroll
     def "keyMatches"() {
         expect:
@@ -42,6 +51,7 @@ class MapConfigurationValueProviderTest extends Specification {
         "parent.child"        | "parent"               | false
         "upper.kabob"         | "UPPER-KABOB"          | true
         "one.two.three"       | "one-two-three"        | true
+        "null-name"           | null                   | false
     }
 
     def "changing map values get picked up dispite caching"() {

@@ -21,7 +21,6 @@ import org.yaml.snakeyaml.representer.Represent;
 import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.resolver.Resolver;
 
-import java.beans.IntrospectionException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -109,7 +108,8 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                     }
                     for (int i = 0; i < valueAsList.size(); i++) {
                         if (valueAsList.get(i) instanceof LiquibaseSerializable) {
-                            valueAsList.set(i, toMap((LiquibaseSerializable) valueAsList.get(i)));
+                            Object m = convertToMap(valueAsList, i);
+                            valueAsList.set(i, m);
                         }
                     }
                     value = valueAsList;
@@ -153,6 +153,10 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         return containerMap;
     }
 
+    protected Object convertToMap(List valueAsList, int index) {
+        return toMap((LiquibaseSerializable) valueAsList.get(index));
+    }
+
     protected Comparator<String> getComparator(LiquibaseSerializable object) {
         return new Comparator<String>() {
             @Override
@@ -163,7 +167,8 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     }
 
     private String removeClassTypeMarksFromSerializedJson(String json) {
-        json = json.replaceAll("!!int \"(\\d+)\"", "$1");
+        // Handle both negative and positive numbers
+        json = json.replaceAll("!!int \"(-?\\d+)\"", "$1");
         json = json.replaceAll("!!bool \"(\\w+)\"", "$1");
         json = json.replaceAll("!!timestamp \"([^\"]*)\"", "$1");
         json = json.replaceAll("!!float \"([^\"]*)\"", "$1");

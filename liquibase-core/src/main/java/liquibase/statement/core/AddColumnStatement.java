@@ -17,6 +17,7 @@ public class AddColumnStatement extends AbstractSqlStatement {
     private String addAfterColumn;
     private String addBeforeColumn;
     private Integer addAtPosition;
+    private Boolean computed;
     private Set<ColumnConstraint> constraints = new HashSet<>();
 
     private List<AddColumnStatement> columns = new ArrayList<>();
@@ -214,5 +215,13 @@ public class AddColumnStatement extends AbstractSqlStatement {
 
     public void setDefaultValueConstraintName(String defaultValueConstraintName) {
         this.defaultValueConstraintName = defaultValueConstraintName;
+    }
+
+    public Boolean getComputed() {
+        return computed;
+    }
+
+    public void setComputed(Boolean computed) {
+        this.computed = computed;
     }
 }

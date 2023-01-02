@@ -56,7 +56,11 @@ public class CommandResultsBuilder {
     }
 
     public CommandFailedException commandFailed(String message, int exitCode) {
-        return new CommandFailedException(this.build(), exitCode, message);
+        return commandFailed(message, exitCode, false);
+    }
+
+    public CommandFailedException commandFailed(String message, int exitCode, boolean expected) {
+        return new CommandFailedException(this.build(), exitCode, message, expected);
     }
 
     /**
@@ -64,7 +68,9 @@ public class CommandResultsBuilder {
      */
     CommandResults build() {
         try {
-            outputStream.flush();
+            if (this.outputStream != null) {
+                outputStream.flush();
+            }
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Error flushing " + StringUtil.join(commandScope.getCommand().getName(), " ") + " output: " + e.getMessage(), e);
         }

@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -38,6 +39,16 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
     }
 
     @Override
+    public Warnings warn(SetColumnRemarksStatement statementType, Database database, SqlGeneratorChain<SetColumnRemarksStatement> sqlGeneratorChain) {
+        final Warnings warnings = super.warn(statementType, database, sqlGeneratorChain);
+        if (database instanceof MySQLDatabase) {
+            ((MySQLDatabase) database).warnAboutAlterColumn("setColumnRemarks", warnings);
+        }
+
+        return warnings;
+    }
+
+    @Override
     public Sql[] generateSql(SetColumnRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
         String remarksEscaped = database.escapeStringForDatabase(StringUtil.trimToEmpty(statement.getRemarks()));
@@ -58,7 +69,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
                 schemaName = "dbo";
             }
 
-            Sql[] generatedSql = {new UnparsedSql("DECLARE @TableName SYSNAME " +
+            return new Sql[]{new UnparsedSql("DECLARE @TableName SYSNAME " +
                     "set @TableName = N'" +statement.getTableName() + "'; " +
                     "DECLARE @FullTableName SYSNAME " +
                     "set @FullTableName = N'" + schemaName + "." + statement.getTableName() + "'; " +
@@ -97,8 +108,6 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
                     "@level2type = N'COLUMN', " +
                     "@level2name = @ColumnName; " +
                     "END")};
-
-            return generatedSql;
         } else {
             return new Sql[]{new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
                     + "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"

@@ -1,13 +1,11 @@
 package liquibase.integration.servlet;
 
 import liquibase.configuration.AbstractConfigurationValueProvider;
-import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.ProvidedValue;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.servlet.ServletContext;
 
 public class ServletConfigurationValueProvider extends AbstractConfigurationValueProvider {
 
@@ -18,10 +16,10 @@ public class ServletConfigurationValueProvider extends AbstractConfigurationValu
         return 30;
     }
 
-    private final ServletContext servletContext;
+    private final GenericServletWrapper.ServletContext servletContext;
     private final InitialContext initialContext;
 
-    public ServletConfigurationValueProvider(ServletContext servletContext, InitialContext initialContext) {
+    public ServletConfigurationValueProvider(GenericServletWrapper.ServletContext servletContext, InitialContext initialContext) {
         this.servletContext = servletContext;
         this.initialContext = initialContext;
     }

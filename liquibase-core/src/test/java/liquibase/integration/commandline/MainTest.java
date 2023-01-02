@@ -1,21 +1,24 @@
 package liquibase.integration.commandline;
 
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.util.StringUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Collections;
-import java.util.Properties;
-import java.util.Arrays;
-import java.util.List;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -28,18 +31,18 @@ public class MainTest {
       char badChar = 8192;
       char anotherBadChar = 160;
       Main.CodePointCheck codePointCheck = Main.checkArg("test");
-      Assert.assertTrue("This should be a valid string", codePointCheck == null);
+        Assert.assertNull("This should be a valid string", codePointCheck);
 
       StringBuilder builder = new StringBuilder();
       builder.append(badChar);
       codePointCheck = Main.checkArg(builder.toString());
-      Assert.assertTrue("The first character should be invalid",codePointCheck.position == 0);
+        assertEquals("The first character should be invalid", 0, codePointCheck.position);
 
       builder = new StringBuilder();
       builder.append("A");
       builder.append(badChar);
       codePointCheck = Main.checkArg(builder.toString());
-      Assert.assertTrue("The last character should be invalid",codePointCheck.position == builder.length()-1);
+        assertEquals("The last character should be invalid", codePointCheck.position, builder.length() - 1);
 
       builder = new StringBuilder();
       builder.append("ABC");
@@ -47,7 +50,7 @@ public class MainTest {
       builder.append("DEF");
       int pos = builder.toString().indexOf(anotherBadChar);
       codePointCheck = Main.checkArg(builder.toString());
-      Assert.assertTrue("The character in position " + pos + " should be invalid",codePointCheck.position == pos);
+        assertEquals("The character in position " + pos + " should be invalid", codePointCheck.position, pos);
     }
 
 
@@ -58,12 +61,12 @@ public class MainTest {
         main.url = "jdbc:oracle://localhost:1521/ORCL";
         main.commandParams.add("--outputSchemasAs");
         List<String> messages = main.checkSetup();
-        Assert.assertTrue("There should be no messages from Main.checkSetup", messages.size() == 0);
+        assertEquals("There should be no messages from Main.checkSetup", 0, messages.size());
 
         main.command = "update";
         main.changeLogFile = "changelog.xml";
         messages = main.checkSetup();
-        Assert.assertTrue("There should be one message from Main.checkSetup", messages.size() == 1);
+        assertEquals("There should be one message from Main.checkSetup", 1, messages.size());
     }
 
 //    @Rule
@@ -510,7 +513,7 @@ public class MainTest {
     @Test
     public void checkSetup() {
         Main cli = new Main();
-        assertTrue(!cli.checkSetup().isEmpty());
+        assertFalse(cli.checkSetup().isEmpty());
 
         cli.driver = "driver";
         cli.username = "username";
@@ -519,10 +522,10 @@ public class MainTest {
         cli.changeLogFile = "file";
         cli.classpath = "classpath";
 
-        assertTrue(!cli.checkSetup().isEmpty());
+        assertFalse(cli.checkSetup().isEmpty());
 
         cli.command = "BadCommand";
-        assertTrue(!cli.checkSetup().isEmpty());
+        assertFalse(cli.checkSetup().isEmpty());
 
         cli.command = "migrate";
         assertEquals(0, cli.checkSetup().size());

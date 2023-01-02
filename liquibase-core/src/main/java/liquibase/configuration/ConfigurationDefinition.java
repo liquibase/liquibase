@@ -1,6 +1,5 @@
 package liquibase.configuration;
 
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.util.ObjectUtil;
@@ -55,7 +54,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     }
 
     /**
-     * Convenience method around {@link #getCurrentConfiguredValue()} to return the value.
+     * Convenience method around {@link #getCurrentConfiguredValue(ConfigurationValueProvider...)} to return the value.
      */
     public DataType getCurrentValue() {
         final Object value = getCurrentConfiguredValue().getProvidedValue().getValue();
@@ -71,7 +70,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     }
 
     /**
-     * Convenience method around {@link #getCurrentConfiguredValue()} to return the obfuscated version of the value.
+     * Convenience method around {@link #getCurrentConfiguredValue(ConfigurationValueProvider...)} to return the obfuscated version of the value.
      *
      * @return the obfuscated value, or the plain-text value if no obfuscator is defined for this definition.
      */
@@ -84,13 +83,23 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
      * Will always return a {@link ConfiguredValue},
      */
     public ConfiguredValue<DataType> getCurrentConfiguredValue() {
+        return getCurrentConfiguredValue(new ConfigurationValueProvider[]{});
+    }
+
+    /**
+     * @return Full details on the current value for this definition.
+     * Will always return a {@link ConfiguredValue},
+     *
+     * @param additionalValueProviders additional {@link ConfigurationValueProvider}s to use with higher priority than the ones registered in {@link LiquibaseConfiguration}. The higher the array index, the higher the priority.
+     */
+    public ConfiguredValue<DataType> getCurrentConfiguredValue(ConfigurationValueProvider... additionalValueProviders) {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
 
         List<String> keyList = new ArrayList<>();
         keyList.add(this.getKey());
         keyList.addAll(this.getAliasKeys());
 
-        ConfiguredValue<?> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(valueConverter, valueObfuscator, keyList.toArray(new String[0]));
+        ConfiguredValue<?> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(valueConverter, valueObfuscator, additionalValueProviders, keyList.toArray(new String[0]));
 
         if (!configurationValue.found()) {
             defaultValue = this.getDefaultValue();
@@ -101,7 +110,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
                 } else {
                     obfuscatedValue = valueObfuscator.obfuscate(defaultValue);
                 }
-                if (!loggedUsingDefault && !key.equals(GlobalConfiguration.FILTER_LOG_MESSAGES.getKey())) {
+                if (!loggedUsingDefault) {
                     Scope.getCurrentScope().getLog(getClass()).fine("Configuration " + key + " is using the default value of " + obfuscatedValue);
                     loggedUsingDefault = true;
                 }
@@ -248,16 +257,18 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         public <T> Building<T> define(String key, Class<T> dataType) {
             final ConfigurationDefinition<T> definition = new ConfigurationDefinition<>(defaultKeyPrefix + "." + key, dataType);
 
-            return new Building<>(definition);
+            return new Building<>(definition, defaultKeyPrefix);
         }
     }
 
     public static class Building<DataType> {
 
         private final ConfigurationDefinition<DataType> definition;
+        private final String defaultKeyPrefix;
 
-        private Building(ConfigurationDefinition<DataType> definition) {
+        private Building(ConfigurationDefinition<DataType> definition, String defaultKeyPrefix) {
             this.definition = definition;
+            this.defaultKeyPrefix = defaultKeyPrefix;
         }
 
         public Building<DataType> addAliasKey(String alias) {
@@ -312,6 +323,17 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         public Building<DataType> setInternal(boolean internal) {
             definition.internal = internal;
 
+            return this;
+        }
+
+        public Building<DataType> addAliases(Collection<String> aliases) {
+            for (String alias : aliases) {
+                if (!alias.contains(".")) {
+                    alias = defaultKeyPrefix + "." + alias;
+
+                    addAliasKey(alias);
+                }
+            }
             return this;
         }
 

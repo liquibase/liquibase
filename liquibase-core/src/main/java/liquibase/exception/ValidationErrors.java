@@ -5,6 +5,7 @@ import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.precondition.Precondition;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -31,6 +32,10 @@ public class ValidationErrors {
 
     public ValidationErrors(Change change) {
         this.change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName();
+    }
+
+    public ValidationErrors(Precondition precondition) {
+        this.change = precondition.getName();
     }
 
     public String getChangeName() {
@@ -123,6 +128,12 @@ public class ValidationErrors {
         return this;
     }
 
+
+    public ValidationErrors addError(String message, ChangeSet changeSet) {
+        this.errorMessages.add(message + ", " + changeSet);
+        return this;
+    }
+
     public List<String> getErrorMessages() {
         return errorMessages;
     }
@@ -146,7 +157,7 @@ public class ValidationErrors {
 
     public void addAll(ValidationErrors validationErrors, ChangeSet changeSet) {
         for (String message : validationErrors.getErrorMessages()) {
-            this.errorMessages.add(message + ", " + changeSet);
+            this.addError(message, changeSet);
         }
         for (String message : validationErrors.getWarningMessages()) {
             this.warningMessages.add(message + ", " + changeSet);
