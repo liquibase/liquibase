@@ -297,7 +297,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
 
         public NormalizingStream(InputStream stream) {
-            if(stream != null) {
+            if(stream == null) {
                 stream = new ByteArrayInputStream(new byte[0]);
             }
             this.stream = new PushbackInputStream(stream, 2048);
