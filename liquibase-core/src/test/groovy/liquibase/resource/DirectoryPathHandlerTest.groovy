@@ -17,18 +17,19 @@ class DirectoryPathHandlerTest extends Specification {
         new DirectoryPathHandler().getPriority(input) == expected
 
         where:
-        input                       | expected
-        null                        | PRIORITY_NOT_APPLICABLE
-        "simple"                    | PRIORITY_DEFAULT
-        "with/path"                 | PRIORITY_DEFAULT
-        "with\\path"                | PRIORITY_DEFAULT
-        "c:\\windows\\path"         | PRIORITY_DEFAULT
-        "c:/windows/path"           | PRIORITY_DEFAULT
-        "/c:/windows/path"          | PRIORITY_DEFAULT
-        "D:\\windows\\path"         | PRIORITY_DEFAULT
-        "file:/tmp/liquibase.xml"   | PRIORITY_DEFAULT
-        "file:///tmp/liquibase.xml" | PRIORITY_DEFAULT
-        "http://localhost"          | PRIORITY_NOT_APPLICABLE
+        input                           | expected
+        null                            | PRIORITY_NOT_APPLICABLE
+        "simple"                        | PRIORITY_DEFAULT
+        "with/path"                     | PRIORITY_DEFAULT
+        "with\\path"                    | PRIORITY_DEFAULT
+        "c:\\windows\\path"             | PRIORITY_DEFAULT
+        "c:/windows/path"               | PRIORITY_DEFAULT
+        "/c:/windows/path"              | PRIORITY_DEFAULT
+        "D:\\windows\\path"             | PRIORITY_DEFAULT
+        "file:/tmp/liquibase.xml"       | PRIORITY_DEFAULT
+        "file:///tmp/liquibase.xml"     | PRIORITY_DEFAULT
+        "http://localhost"              | PRIORITY_NOT_APPLICABLE
+        "some-path:including-colon.yml" | PRIORITY_DEFAULT
     }
 
     def "open reads existing file"() {

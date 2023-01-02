@@ -20,6 +20,10 @@ public class DirectoryPathHandler extends AbstractPathHandler {
             return PRIORITY_DEFAULT;
         }
 
+        if (root.matches("^https?://.*")) {
+            return PRIORITY_NOT_APPLICABLE;
+        }
+
         if (root.startsWith("file:") || root.matches("^[A-Za-z,:].*")) {
             return PRIORITY_DEFAULT;
         } else {
