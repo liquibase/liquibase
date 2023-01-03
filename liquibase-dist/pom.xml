@@ -20,7 +20,7 @@
 		<mssql.version>11.2.1.jre8</mssql.version>
 		<mysql.version>8.0.21</mysql.version>
 		<mariadb.version>3.1.0</mariadb.version>
-		<oracle.version>21.7.0.0</oracle.version>
+		<oracle.version>21.8.0.0</oracle.version>
 		<sqlite.version>3.40.0.0</sqlite.version>
 		<db2.version>11.5.8.0</db2.version>
 		<firebird.version>4.0.8.java8</firebird.version>
