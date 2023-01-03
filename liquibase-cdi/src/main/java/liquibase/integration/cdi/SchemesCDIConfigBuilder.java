@@ -191,7 +191,7 @@ public class SchemesCDIConfigBuilder {
         FileLock lock = null;
         try (
                 FileOutputStream fileStream = new FileOutputStream(lockPath);
-                FileChannel fileChannel = fileStream.getChannel();
+                FileChannel fileChannel = fileStream.getChannel()
         )
         {
             while (null == lock) {
