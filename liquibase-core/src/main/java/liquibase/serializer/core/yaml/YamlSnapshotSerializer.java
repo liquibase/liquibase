@@ -94,6 +94,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
         return super.toMap(object);
     }
 
+    @Override
     protected LiquibaseRepresenter getLiquibaseRepresenter() {
         return new SnapshotLiquibaseRepresenter();
     }
@@ -105,6 +106,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
 
     public static class SnapshotLiquibaseRepresenter extends LiquibaseRepresenter {
 
+        @Override
         protected void init() {
             multiRepresenters.put(DatabaseFunction.class, new TypeStoringAsStringRepresenter());
             multiRepresenters.put(SequenceNextValueFunction.class, new TypeStoringAsStringRepresenter());

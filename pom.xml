@@ -215,7 +215,7 @@
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>21.7.0.0</version>
+            <version>21.8.0.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -229,7 +229,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.13.25</version>
+            <version>3.13.26</version>
         </dependency>
 
         <dependency>
