@@ -58,6 +58,7 @@ public class MockHubService implements HubService {
         return new Project().setName("Project 1");
     }
 
+    @Override
     public HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException {
         if (randomUUID == null) {
             randomUUID = UUID.randomUUID();
