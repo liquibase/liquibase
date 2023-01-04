@@ -13,6 +13,7 @@ import liquibase.exception.MigrationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
+import liquibase.logging.mdc.MdcKey;
 
 import java.util.Set;
 
@@ -43,6 +44,10 @@ public class UpdateVisitor implements ChangeSetVisitor {
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database,
                       Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+        Scope scope = Scope.getCurrentScope();
+        scope.addMdcValue(MdcKey.CHANGESET_ID.getKey(), changeSet.getId());
+        scope.addMdcValue(MdcKey.CHANGESET_AUTHOR.getKey(), changeSet.getAuthor());
+        scope.addMdcValue(MdcKey.CHANGESET_FILEPATH.getKey(), changeSet.getFilePath());
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         if (! (executor instanceof LoggingExecutor)) {
             Scope.getCurrentScope().getUI().sendMessage("Running Changeset: " + changeSet);
@@ -61,6 +66,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
         if (!runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
             execType = ChangeSet.ExecType.RERAN;
         }
+        Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME.getKey(), execType.value);
         fireRan(changeSet, databaseChangeLog, database, execType);
         // reset object quoting strategy after running changeset
         this.database.setObjectQuotingStrategy(previousStr);

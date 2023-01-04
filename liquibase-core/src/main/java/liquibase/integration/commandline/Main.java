@@ -26,6 +26,7 @@ import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.resource.*;
 import liquibase.ui.ConsoleUIService;
 import liquibase.util.*;
@@ -1832,6 +1833,8 @@ public class Main {
 
             try {
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME.getKey(), COMMANDS.UPDATE);
+                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE.getKey(), COMMANDS.UPDATE);
                     try {
                         liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                     } catch (LiquibaseException updateException) {

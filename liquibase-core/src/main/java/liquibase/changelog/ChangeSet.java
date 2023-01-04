@@ -16,6 +16,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.logging.Logger;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -569,6 +570,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         long startTime = new Date().getTime();
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME.getKey(), String.valueOf(startTime));
 
         ExecType execType = null;
 
@@ -697,7 +699,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (runInTransaction) {
                     database.commit();
                 }
-                log.info("ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime + "ms"));
+                long endTime = new Date().getTime() - startTime;
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME.getKey(), String.valueOf(endTime));
+                log.info("ChangeSet " + toString(false) + " ran successfully in " + endTime + " ms");
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
