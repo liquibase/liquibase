@@ -242,13 +242,7 @@ public class ObjectUtil {
      * @return a list of methods belonging to the class of the object
      */
     private static Method[] getMethods(Object object) {
-        Method[] methods = methodCache.get(object.getClass());
-
-        if (methods == null) {
-            methods = object.getClass().getMethods();
-            methodCache.put(object.getClass(), methods);
-        }
-        return methods;
+        return methodCache.computeIfAbsent(object.getClass(), k -> object.getClass().getMethods());
     }
 
       /**
