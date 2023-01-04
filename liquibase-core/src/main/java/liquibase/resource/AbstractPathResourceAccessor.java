@@ -69,7 +69,10 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
     }
 
     @Override
-    public List<Resource> search(String startPath, Integer minDepth, Integer maxDepth) throws IOException {
+    public List<Resource> search(String startPath, SearchOptions searchOptions) throws IOException {
+        Integer minDepth = searchOptions.getMinDepth();
+        Integer maxDepth = searchOptions.getMaxDepth();
+
         if (startPath == null) {
             throw new IllegalArgumentException("Path must not be null");
         }
@@ -138,12 +141,11 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
 
     @Override
     public List<Resource> search(String startPath, boolean recursive) throws IOException {
-        if (recursive) {
-            return search(startPath, 1, Integer.MAX_VALUE);
-        }
-        else {
-            return search(startPath, 1, 1);
-        }
+        SearchOptions searchOptions = new SearchOptions();
+
+        searchOptions.setRecursive(recursive);
+
+        return search(startPath, searchOptions);
     }
 
     protected abstract Resource createResource(Path file, String pathToAdd);

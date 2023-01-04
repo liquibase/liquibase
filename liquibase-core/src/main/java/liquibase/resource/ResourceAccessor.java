@@ -113,7 +113,7 @@ public interface ResourceAccessor extends AutoCloseable {
     }
 
     /**
-     * Returns the path to all resources contained in the given path.
+     * Returns the path to all resources contained in the given path that match the searchOptions criteria.
      * Multiple resources may be returned with the same path, but only if they are actually unique files.
      * Order is important to pay attention to, they should be returned in a user-expected manner based on this resource accessor.
      * <br><br>
@@ -129,12 +129,19 @@ public interface ResourceAccessor extends AutoCloseable {
      * </ul>
      *
      * @param path      The path to lookup resources in.
-     * @param minDepth  Minimum folder depth from path to start searching (default: 0)
-     * @param maxDepth  Maximum folder depth from path to stop searching (default: null)
+     * @param searchOptions A set of criteria for how resources should be found/filtered
      * @return empty set if nothing was found
      * @throws IOException if there is an error searching the system.
      */
-    List<Resource> search(String path, Integer minDepth, Integer maxDepth) throws IOException;
+    default List<Resource> search(String path, SearchOptions searchOptions) throws IOException {
+        if(searchOptions == null) {
+            searchOptions = new SearchOptions();
+        }
+
+        Boolean searchRecursive = searchOptions.getRecursive();
+
+        return search(path, searchRecursive);
+    }
 
     /**
      * Returns the path to all resources contained in the given path.
@@ -279,6 +286,47 @@ public interface ResourceAccessor extends AutoCloseable {
         @Override
         public OutputStream openOutputStream(OpenOptions openOptions) throws IOException {
             return openOutputStream(new OpenOptions());
+        }
+    }
+
+    class SearchOptions {
+        private Integer minDepth;
+        private Integer maxDepth;
+
+        public SearchOptions() {
+            minDepth = 1;
+            maxDepth = 1;
+        }
+
+        public boolean getRecursive() {
+            return minDepth == 1 && (maxDepth == null || maxDepth == Integer.MAX_VALUE);
+        }
+
+        public void setRecursive(boolean recursive) {
+            if (recursive) {
+                minDepth = 1;
+                maxDepth = null;
+            }
+            else {
+                minDepth = 1;
+                maxDepth = 1;
+            }
+        }
+
+        public Integer getMinDepth() {
+            return minDepth;
+        }
+
+        public void setMinDepth(Integer minDepth) {
+            this.minDepth = minDepth;
+        }
+
+        public Integer getMaxDepth() {
+            return maxDepth;
+        }
+
+        public void setMaxDepth(Integer maxDepth) {
+            this.maxDepth = maxDepth;
         }
     }
 }

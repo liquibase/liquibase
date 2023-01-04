@@ -1,6 +1,5 @@
 package liquibase.sdk.resource;
 
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.Resource;
 
@@ -40,12 +39,7 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public List<Resource> search(String path, Integer minDepth, Integer maxDepth) throws IOException {
-        throw new UnexpectedLiquibaseException("Method not implemented");
-    }
-
-    @Override
-    public List<Resource> search(String path, boolean recursive) throws IOException {
+    public List<Resource> search(String path, SearchOptions searchOptions) throws IOException {
         path = path.replace("\\", "/");
         List<Resource> returnList = new ArrayList<>();
         for (String file : contentByFileName.keySet()) {
@@ -54,6 +48,15 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
             }
         }
         return returnList;
+    }
+
+    @Override
+    public List<Resource> search(String path, boolean recursive) throws IOException {
+        SearchOptions searchOptions = new SearchOptions();
+
+        searchOptions.setRecursive(recursive);
+
+        return search(path, searchOptions);
     }
 
     @Override

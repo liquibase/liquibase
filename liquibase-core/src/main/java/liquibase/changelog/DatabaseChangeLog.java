@@ -649,6 +649,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 relativeTo = this.getPhysicalFilePath();
             }
 
+            ResourceAccessor.SearchOptions searchOptions = new ResourceAccessor.SearchOptions();
+
+            searchOptions.setMinDepth(minDepth);
+            searchOptions.setMaxDepth(maxDepth);
+
             List<Resource> unsortedResources = null;
             try {
                 String path;
@@ -667,7 +672,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 LOG.fine("includeAll for " + pathName);
                 LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
 
-                unsortedResources = resourceAccessor.search(path, minDepth, maxDepth);
+                unsortedResources = resourceAccessor.search(path, searchOptions);
             } catch (IOException e) {
                 if (errorIfMissingOrEmpty) {
                     throw e;

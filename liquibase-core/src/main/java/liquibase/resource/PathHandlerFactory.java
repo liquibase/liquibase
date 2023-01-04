@@ -116,7 +116,7 @@ public class PathHandlerFactory extends AbstractPluginFactory<PathHandler> {
         }
 
         @Override
-        public List<Resource> search(String path, Integer minDepth, Integer maxDepth) throws IOException {
+        public List<Resource> search(String path, SearchOptions searchOptions) throws IOException {
             throw new UnexpectedLiquibaseException("Method not implemented");
         }
 
