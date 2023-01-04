@@ -66,10 +66,12 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
         this.contextFilter = contextFilter;
     }
 
+    @Override
     public Labels getLabels() {
         return labels;
     }
 
+    @Override
     public void setLabels(Labels labels) {
         this.labels = labels;
     }
