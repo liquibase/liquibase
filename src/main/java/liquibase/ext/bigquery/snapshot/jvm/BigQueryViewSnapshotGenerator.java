@@ -18,8 +18,6 @@ import liquibase.util.StringUtil;
 import java.util.List;
 import java.util.Map;
 
-import static liquibase.ext.bigquery.database.BigqueryDatabase.BIGQUERY_PRIORITY_DATABASE;
-
 public class BigQueryViewSnapshotGenerator extends ViewSnapshotGenerator {
 
 
@@ -29,7 +27,8 @@ public class BigQueryViewSnapshotGenerator extends ViewSnapshotGenerator {
         if (priority > PRIORITY_NONE && database instanceof BigqueryDatabase) {
             priority += PRIORITY_DATABASE;
         }
-        return priority;    }
+        return priority;
+    }
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
@@ -41,31 +40,27 @@ public class BigQueryViewSnapshotGenerator extends ViewSnapshotGenerator {
 
             CatalogAndSchema catalogAndSchema = (new CatalogAndSchema(schema.getCatalogName(), schema.getName())).customize(database);
             String jdbcSchemaName = database.correctObjectName(((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), Schema.class);
-            String query = String.format("SELECT view_definition FROM " + jdbcSchemaName + "." + database.getSystemSchema().toUpperCase() + ".VIEWS WHERE table_name='%s' AND table_schema='%s' AND table_catalog='%s';"
-                    , example.getName(), schema.getName(), schema.getCatalogName());
+            String query = String.format("SELECT view_definition FROM %s.%s.VIEWS WHERE table_name='%s' AND table_schema='%s' AND table_catalog='%s';",
+                    jdbcSchemaName, database.getSystemSchema().toUpperCase(), example.getName(), schema.getName(), schema.getCatalogName());
 
             List<Map<String, ?>> viewsMetadataRs = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                     .getExecutor("jdbc", database).queryForList(new RawSqlStatement(query));
 
-            String viewDefinition = "";
             if (viewsMetadataRs.isEmpty()) {
                 return null;
             } else {
                 Map<String, ?> row = viewsMetadataRs.get(0);
-                String rawViewName = example.getName(); //(String) row.get("VIEW_DEFINITION");
-                String rawSchemaName = schema.getName(); //StringUtil.trimToNull((String) row.get("TABLE_SCHEM"));
-                String rawCatalogName = schema.getCatalogName(); //StringUtil.trimToNull((String) row.get("TABLE_CAT"));
-                String remarks = null;// (String) row.get("REMARKS");
-
-                viewDefinition = (String) row.get("VIEW_DEFINITION");
+                String rawViewName = example.getName();
+                String rawSchemaName = schema.getName();
+                String rawCatalogName = schema.getCatalogName();
+                String remarks = null;
 
                 View view = (new View()).setName(this.cleanNameFromDatabase(rawViewName, database));
                 view.setRemarks(remarks);
                 CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
                 view.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
-                //try {
-                String definition = viewDefinition; //database.getViewDefinition(schemaFromJdbcInfo, view.getName());
+                String definition = (String) row.get("VIEW_DEFINITION");
                 if (definition.startsWith("FULL_DEFINITION: ")) {
                     definition = definition.replaceFirst("^FULL_DEFINITION: ", "");
                     view.setContainsFullDefinition(true);
