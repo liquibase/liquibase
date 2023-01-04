@@ -31,6 +31,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     }
 
+    @Override
     public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet)
         throws DatabaseException, DatabaseHistoryException {
         RanChangeSet foundRan = getRanChangeSet(changeSet);
@@ -61,6 +62,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         }
     }
 
+    @Override
     public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts,
                                  LabelExpression labels) throws DatabaseException {
         for (RanChangeSet ranChangeSet : this.getRanChangeSets()) {
@@ -118,14 +120,17 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     protected abstract void replaceChecksum(ChangeSet changeSet) throws DatabaseException;
 
+    @Override
     public String getDeploymentId() {
         return this.deploymentId;
     }
 
+    @Override
     public void resetDeploymentId() {
         this.deploymentId = null;
     }
 
+    @Override
     public void generateDeploymentId() {
         if (this.deploymentId == null) {
             String dateString = String.valueOf(new Date().getTime());
