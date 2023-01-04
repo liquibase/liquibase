@@ -330,7 +330,7 @@ public class DatabaseFactory {
     private static class DatabaseComparator implements Comparator<Database> {
         @Override
         public int compare(Database o1, Database o2) {
-            return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
+            return -1 * Integer.compare(o1.getPriority(), o2.getPriority());
         }
     }
 }
