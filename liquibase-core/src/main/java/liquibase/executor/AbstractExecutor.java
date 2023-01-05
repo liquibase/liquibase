@@ -97,6 +97,7 @@ public abstract class AbstractExecutor implements Executor {
         this.resourceAccessor = resourceAccessor;
     }
 
+    @Override
     public void setDatabase(Database database) {
         this.database = database;
     }

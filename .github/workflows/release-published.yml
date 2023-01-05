@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Download release assets
-        uses: robinraju/release-downloader@v1.6
+        uses: robinraju/release-downloader@v1.7
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
@@ -175,7 +175,7 @@ jobs:
       contents: read
     steps:
     - name: Download release javadocs
-      uses: robinraju/release-downloader@v1.6
+      uses: robinraju/release-downloader@v1.7
       with:
         repository: "liquibase/liquibase"
         tag: "${{ needs.setup.outputs.tag }}"
