@@ -2,6 +2,7 @@ package liquibase.structure;
 
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
+import liquibase.diff.compare.DatabaseObjectCollectionComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
@@ -48,7 +49,7 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
 
     @Override
     public Object getSerializableFieldValue(String field) {
-        SortedSet<DatabaseObject> objects = new TreeSet<>(new DatabaseObjectComparator());
+        SortedSet<DatabaseObject> objects = new TreeSet<>(new DatabaseObjectCollectionComparator());
         try {
             Map<String, Set<DatabaseObject>> map = cache.get(Class.forName(field));
             if (map == null) {
@@ -72,20 +73,12 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
         if (databaseObject == null) {
             return;
         }
-        Map<String, Set<DatabaseObject>> collectionMap = cache.get(databaseObject.getClass());
-        if (collectionMap == null) {
-            collectionMap = new HashMap<>();
-            cache.put(databaseObject.getClass(), collectionMap);
-        }
+        Map<String, Set<DatabaseObject>> collectionMap = cache.computeIfAbsent(databaseObject.getClass(), k -> new HashMap<>());
 
         String[] hashes = DatabaseObjectComparatorFactory.getInstance().hash(databaseObject, null, database);
 
         for (String hash : hashes) {
-            Set<DatabaseObject> collection = collectionMap.get(hash);
-            if (collection == null) {
-                collection = new HashSet<>();
-                collectionMap.put(hash, collection);
-            }
+            Set<DatabaseObject> collection = collectionMap.computeIfAbsent(hash, k -> new HashSet<>());
             collection.add(databaseObject);
         }
     }

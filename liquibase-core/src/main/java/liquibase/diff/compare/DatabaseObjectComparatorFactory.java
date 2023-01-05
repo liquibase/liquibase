@@ -69,6 +69,14 @@ public class DatabaseObjectComparatorFactory {
         unregister(toRemove);
     }
 
+    public DatabaseObjectComparator getComparator(Class<? extends DatabaseObject> comparatorClass, Database database) {
+        List<DatabaseObjectComparator> comparatorsForType = getComparators(comparatorClass, database);
+        if (! comparatorsForType.isEmpty()) {
+            return comparatorsForType.get(0);
+        }
+        return null;
+    }
+
     protected List<DatabaseObjectComparator> getComparators(Class<? extends DatabaseObject> comparatorClass, Database database) {
         String key = comparatorClass.getName()+":"+database.getShortName();
         if (validComparatorsByClassAndDatabase.containsKey(key)) {
