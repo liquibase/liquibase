@@ -166,7 +166,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         };
     }
 
-    private String removeClassTypeMarksFromSerializedJson(String json) {
+    public static String removeClassTypeMarksFromSerializedJson(String json) {
         // Handle both negative and positive numbers
         json = json.replaceAll("!!int \"(-?\\d+)\"", "$1");
         json = json.replaceAll("!!bool \"(\\w+)\"", "$1");

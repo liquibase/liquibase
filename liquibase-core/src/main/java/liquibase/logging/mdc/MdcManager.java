@@ -3,6 +3,8 @@ package liquibase.logging.mdc;
 import liquibase.Beta;
 import liquibase.plugin.Plugin;
 
+import java.util.Map;
+
 @Beta
 public interface MdcManager extends Plugin {
 
@@ -28,4 +30,7 @@ public interface MdcManager extends Plugin {
 
     @Beta
     int getPriority();
+
+    @Beta
+    Map<String, String> getAll();
 }

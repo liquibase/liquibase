@@ -149,6 +149,11 @@ class ScopeTest extends Specification {
             return Integer.MAX_VALUE
         }
 
+        @Override
+        Map<String, String> getAll() {
+            return Collections.unmodifiableMap(values)
+        }
+
         Map<String, String> getValues() {
             return values
         }

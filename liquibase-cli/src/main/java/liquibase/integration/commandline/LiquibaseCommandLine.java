@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.logging.*;
+import java.util.logging.Formatter;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -648,6 +649,9 @@ public class LiquibaseCommandLine {
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                 OutputStream outputStream = pathHandlerFactory.openResourceOutputStream(logFile, new OpenOptions().setAppend(true));
                 fileHandler = new StreamHandler(outputStream, new SimpleFormatter());
+
+                setFormatterOnHandler(logService, fileHandler);
+
                 rootLogger.addHandler(fileHandler);
             }
 
@@ -681,6 +685,20 @@ public class LiquibaseCommandLine {
         for (Handler handler : rootLogger.getHandlers()) {
             if (handler instanceof ConsoleHandler) {
                 handler.setLevel(cliLogLevel);
+            }
+            setFormatterOnHandler(logService, handler);
+        }
+    }
+
+    /**
+     * Set the formatter for the supplied handler if the supplied log service
+     * is a JavaLogService and that service specifies a custom formatter.
+     */
+    private void setFormatterOnHandler(LogService logService, Handler handler) {
+        if (logService instanceof JavaLogService && handler != null) {
+            Formatter customFormatter = ((JavaLogService) logService).getCustomFormatter();
+            if (customFormatter != null) {
+                handler.setFormatter(customFormatter);
             }
         }
     }
