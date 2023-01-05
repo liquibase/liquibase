@@ -56,11 +56,7 @@ public class SnapshotSerializerFactory {
 
     public void register(SnapshotSerializer snapshotSerializer) {
         for (String extension : snapshotSerializer.getValidFileExtensions()) {
-            List<SnapshotSerializer> snapshotSerializers = serializers.get(extension);
-            if (snapshotSerializers == null) {
-                snapshotSerializers = new ArrayList<>();
-                serializers.put(extension, snapshotSerializers);
-            }
+            List<SnapshotSerializer> snapshotSerializers = serializers.computeIfAbsent(extension, k -> new ArrayList<>());
             snapshotSerializers.add(snapshotSerializer);
             Collections.sort(snapshotSerializers, PrioritizedService.COMPARATOR);
         }
