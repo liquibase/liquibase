@@ -701,7 +701,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     database.commit();
                 }
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(new Date()));
-                log.info("ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime) + " ms");
+                log.info("ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime) + "ms");
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
