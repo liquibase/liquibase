@@ -28,6 +28,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
@@ -570,7 +571,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         long startTime = new Date().getTime();
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME.getKey(), String.valueOf(startTime));
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, new ISODateFormat().format(new Date()));
 
         ExecType execType = null;
 
@@ -699,9 +700,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (runInTransaction) {
                     database.commit();
                 }
-                long endTime = new Date().getTime() - startTime;
-                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME.getKey(), String.valueOf(endTime));
-                log.info("ChangeSet " + toString(false) + " ran successfully in " + endTime + " ms");
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(new Date()));
+                log.info("ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime) + " ms");
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }

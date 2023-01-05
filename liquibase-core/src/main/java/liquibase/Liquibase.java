@@ -32,6 +32,7 @@ import liquibase.logging.Logger;
 import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.core.CompositeLogService;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcValue;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
@@ -236,8 +237,8 @@ public class Liquibase implements AutoCloseable {
         runInScope(() -> {
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             lockService.waitForLock();
-            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TARGET_VALUE.getKey(), database.getConnection().getURL());
-            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TARGET_TYPE.getKey(), "url");
+            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TARGET_VALUE, database.getConnection().getURL());
+            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TARGET_TYPE, MdcValue.URL_DATABASE_TARGET);
 
             changeLogParameters.setContexts(contexts);
             changeLogParameters.setLabels(labelExpression);
@@ -255,7 +256,7 @@ public class Liquibase implements AutoCloseable {
                 ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
                 changelogService.generateDeploymentId();
 
-                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID.getKey(), changelogService.getDeploymentId());
+                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
 
                 changeLog.validate(database, contexts, labelExpression);
 

@@ -27,6 +27,7 @@ import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcValue;
 import liquibase.resource.*;
 import liquibase.ui.ConsoleUIService;
 import liquibase.util.*;
@@ -396,7 +397,7 @@ public class Main {
                         }
                         Scope.child(innerScopeObjects, () -> {
                             main.doMigration();
-
+                            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
                             if (!Main.runningFromNewCli) {
                                 if (COMMANDS.UPDATE.equals(main.command)) {
                                     Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
@@ -408,6 +409,7 @@ public class Main {
                             }
                         });
                     } catch (Throwable e) {
+                        Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
                         String message = e.getMessage();
                         if (e.getCause() != null) {
                             message = e.getCause().getMessage();
@@ -1833,8 +1835,8 @@ public class Main {
 
             try {
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME.getKey(), COMMANDS.UPDATE);
-                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE.getKey(), COMMANDS.UPDATE);
+                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, COMMANDS.UPDATE);
+                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMANDS.UPDATE);
                     try {
                         liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                     } catch (LiquibaseException updateException) {
