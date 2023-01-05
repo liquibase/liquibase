@@ -184,7 +184,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
             String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
 
-            try (PreparedStatement pstmt = factory.create(finalSql);) {
+            try (PreparedStatement pstmt = factory.create(finalSql)) {
                 final List<?> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
                 for (int i = 0; i < parameters.size(); i++) {
                     pstmt.setObject(i, parameters.get(0));

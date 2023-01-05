@@ -5,6 +5,7 @@ import liquibase.SingletonObject;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.StringUtil;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -34,18 +35,30 @@ public class CommandFactory implements SingletonObject {
         CommandDefinition commandDefinition = new CommandDefinition(commandName);
         for (CommandStep step : findAllInstances()) {
             if (step.getOrder(commandDefinition) > 0) {
-                commandDefinition.add(step);
+                try {
+                    commandDefinition.add(step.getClass().getConstructor().newInstance());
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    throw new IllegalArgumentException(e);
+                }
             }
         }
 
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
-        if (pipeline.size() == 0) {
+        if (pipeline.isEmpty()) {
             throw new IllegalArgumentException("Unknown command '" + StringUtil.join(commandName, " ") + "'");
         }
 
-        final Set<CommandArgumentDefinition<?>> stepArguments = this.commandArgumentDefinitions.get(StringUtil.join(commandDefinition.getName(), " "));
+        final Set<CommandArgumentDefinition<?>> stepArguments = new HashSet<>();
+        for (CommandStep step : pipeline) {
+            String[][] names = step.defineCommandNames();
+            if (names != null) {
+                for (String[] name : names) {
+                    stepArguments.addAll(this.commandArgumentDefinitions.getOrDefault(StringUtil.join(name, " "), new HashSet<>()));
+                }
+            }
+        }
 
-        if (stepArguments != null) {
+        if (!stepArguments.isEmpty()) {
             for (CommandArgumentDefinition<?> commandArg : stepArguments) {
                 commandDefinition.add(commandArg);
             }
@@ -67,8 +80,11 @@ public class CommandFactory implements SingletonObject {
     public SortedSet<CommandDefinition> getCommands(boolean includeInternal) {
         Map<String, String[]> commandNames = new HashMap<>();
         for (CommandStep step : findAllInstances()) {
-            for (String[] name : step.defineCommandNames()) {
-                commandNames.put(StringUtil.join(name, " "), name);
+            String[][] names = step.defineCommandNames();
+            if (names != null) {
+                for (String[] name : names) {
+                    commandNames.put(StringUtil.join(name, " "), name);
+                }
             }
         }
 
