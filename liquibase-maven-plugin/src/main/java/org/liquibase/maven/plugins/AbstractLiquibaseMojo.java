@@ -861,7 +861,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         return new Liquibase("", Scope.getCurrentScope().getResourceAccessor(), db);
     }
 
-    public void configureFieldsAndValues() throws MojoExecutionException, MojoFailureException {
+    public void configureFieldsAndValues() throws MojoExecutionException {
         // Load the properties file if there is one, but only for values that the user has not
         // already specified.
         if (propertyFile != null) {
