@@ -870,11 +870,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
                 parsePropertiesFile(is);
                 getLog().info(MavenUtils.LOG_SEPARATOR);
-
+            } catch (IOException | MojoFailureException | MojoExecutionException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+            try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
                 LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
-                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(is, "Property file "+propertyFile);
+                final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(is, "Property file " + propertyFile);
                 liquibaseConfiguration.registerProvider(fileProvider);
-            } catch (IOException e) {
+            } catch (IOException | MojoFailureException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
