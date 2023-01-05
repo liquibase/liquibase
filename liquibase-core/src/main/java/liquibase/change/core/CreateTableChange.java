@@ -28,7 +28,7 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
  * Creates a new table.
  */
 @DatabaseChange(name="createTable", description = "Create Table", priority = ChangeMetaData.PRIORITY_DEFAULT)
-public class CreateTableChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
+public class CreateTableChange extends AbstractChange implements ChangeWithColumns<ColumnConfig>, ChangeWithTablespace {
 
     private List<ColumnConfig> columns;
     /*Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
