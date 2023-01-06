@@ -22,7 +22,7 @@ public final class CheckSum {
     private int version;
     private String storedCheckSum;
 
-    private static final int CURRENT_CHECKSUM_ALGORITHM_VERSION = 8;
+    private static final int CURRENT_CHECKSUM_ALGORITHM_VERSION = 9;
     private static final char DELIMITER = ':';
     private static final Pattern CHECKSUM_PATTERN = Pattern.compile("(^\\d)" + DELIMITER + "([a-zA-Z0-9]++)");
 
