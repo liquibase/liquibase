@@ -25,7 +25,7 @@ public class BigQueryDatasetSnapshotGenerator extends SchemaSnapshotGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         int priority = super.getPriority(objectType, database);
-        if (database instanceof BigqueryDatabase) {
+        if (priority > PRIORITY_NONE && database instanceof BigqueryDatabase) {
             priority += PRIORITY_DATABASE;
         }
         return priority;
