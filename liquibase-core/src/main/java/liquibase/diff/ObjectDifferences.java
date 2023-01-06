@@ -344,11 +344,6 @@ public class ObjectDifferences {
                 return false;
             }
 
-
-            if (((Collection) referenceValue).size() != ((Collection) compareToValue).size()) {
-                return false;
-            }
-
             for (Object referenceObj : ((Collection) referenceValue)) {
                 Object foundMatch = null;
                 List<Object> unmatchedCompareToValues = new ArrayList<>(((Collection<?>) compareToValue));
