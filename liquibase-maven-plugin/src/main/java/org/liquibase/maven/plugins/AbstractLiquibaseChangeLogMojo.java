@@ -47,7 +47,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
 
 
     /**
-     * Specifies which contexts Liquibase will execute, which can be separated by a commaif multiple contexts
+     * Specifies which contexts Liquibase will execute, which can be separated by a comma if multiple contexts
       are required.
    * If a context is not specified, then ALL contexts will be executed.
      *
