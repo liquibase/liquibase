@@ -8,7 +8,7 @@ The code structure follows the standard Maven directory structure divided into m
 
 ## Testing
 
-While there are still older test classes written in JUnit, tests should be written in [Spock](https://spockframework.org/).
+While there are still older test classes written in JUnit, tests should be written in (or if possible migrated to) [Spock](https://spockframework.org/).
 
 ### Integration Testing
 
@@ -26,11 +26,48 @@ Liquibase handles this for you both to keep you focused on test writing, and als
 Within your tests, you create a reference to the system you are going to test against by calling `testSystem = Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("h2")` where the argument to `getTestSystem()` is the key for a configured system.
 The default  test systems are configured in [liquibase.sdk.yaml](liquibase-extension-testing/src/main/resources/liquibase.sdk.yaml). 
 When that line in your test is hit, the TestSystemFactory will use a running system if available, or start a new system if needed. 
-Any newly-started systems will for the lifetime of **all** the tests to be shared between them and be shut down at the end of the entire run.
+Any newly-started systems will be available for the lifetime of **all** the tests to be shared between them and be shut down at the end of the entire run.
 
-The base TestSystem class is designed to work for more than just Databases, so if you know you are connecting to a database you will want to cast it to a DatabaseTestSystem in order to call methods like `getConnection()` for use in connecting to it.
+The base TestSystem class is designed to work for more than just Databases, so if you know you are connecting to a database you will want to cast it to a DatabaseTestSystem in order to call methods like `getConnection()` for use in connecting to it. 
+For example:
+```java
+@Shared
+private DatabaseTestSystem mysql = 
+    (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mysql")
+```
 
 When TestSystems need to be started, Liquibase generally relies on Docker instances. For time when docker images are not available or are unneeded, they can also connect to an external database via a `url` setting. 
+
+When using docker instances, if we want to add support for a new database we want to test against, we need to create a new test class for which we will need to extend from `DatabaseTestSystem` and override
+`createContainerWrapper()` method, as displayed below:
+```java
+public class FirebirdTestSystem  extends DatabaseTestSystem {
+
+    public FirebirdTestSystem(Definition definition) {
+        super(definition);
+    }
+
+    @Override
+    protected DatabaseWrapper createContainerWrapper() throws Exception {      
+        return new DockerDatabaseWrapper(new FirebirdContainer(
+                DockerImageName.parse(getImageName()).withTag(getVersion()))
+                .withDatabaseName(getCatalog())
+                .withUsername(getUsername())
+                .withPassword(getPassword()),
+                this
+        );
+    }
+}
+```
+
+Additionally, we need to add the test dependency for the DB we are adding support for in the `pom.xml` file from **liquibase-extension-testing** module:
+```xml
+<dependency>
+    <groupId>org.firebirdsql</groupId>
+    <artifactId>firebird-testcontainers-java</artifactId>
+    <version>1.2.0</version>
+</dependency>
+```
 
 #### Controlling which systems are tested against
 
@@ -53,15 +90,23 @@ To shut down the instances started this way, run `liquibase sdk system down --na
 #### Local configuration
 
 The liquibase.sdk.yaml file contains the default configuration, but there are times you may want to change the default behavior. 
-By creating a `liquibase.sdk.local.yml` file in the [same directory](liquibase-extension-testing/src/main/resources) as the liquibase.sdk.yaml file, you can add settings to override just the settings you want to override.
-NOTE: gitignore is set to not allow the file to be commited because it's designed to be specific to you.
+By creating a `liquibase.sdk.local.yml` file in the [same directory](liquibase-extension-testing/src/main/resources) as the liquibase.sdk.yaml file, you can add just the settings you want to override.
+NOTE: gitignore is set to not allow the file to be committed because it's designed to be specific to you.
 
-For example:
-```
+Below there is an example of a default configuration which is going to be used across the different profiles, unless any of them overrides any given property:
+```yaml
 liquibase:
   sdk:
     testSystem:
-      test: mysql,h2,mssql
+      default:
+          username: lbuser
+          password: LiquibasePass1
+          catalog: lbcat
+          altCatalog: lbcat2
+          altSchema: lbschem2
+          altTablespace: liquibase2
+          keepRunning: true         
+      test: mysql,h2,mssql     
       acceptLicenses: mssql
 ```
 will run tests against mysql, h2, and mssql. It also specifies that you accept the EULA license the mssql docker container requires you to accept.
