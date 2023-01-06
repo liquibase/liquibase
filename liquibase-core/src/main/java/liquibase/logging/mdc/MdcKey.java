@@ -4,7 +4,7 @@ public class MdcKey {
     public static final String DEPLOYMENT_ID = "deploymentId";
     public static final String CHANGESET_ID = "changesetId";
     public static final String CHANGESET_AUTHOR = "changesetAuthor";
-    public static final String  CHANGESET_FILEPATH = "changesetFilepath";
+    public static final String CHANGESET_FILEPATH = "changesetFilepath";
     public static final String CHANGESET_OUTCOME = "changesetOutcome";
     public static final String OPERATION_TYPE = "liquibaseOperation";
     public static final String OPERATION_TARGET_TYPE = "liquibaseTargetType";
