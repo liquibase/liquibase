@@ -34,6 +34,7 @@ import liquibase.util.*;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -326,6 +327,10 @@ public class Main {
                             }
                         }
 
+                        Scope.getCurrentScope().getMdcManager().put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersionInfo());
+                        Scope.getCurrentScope().getMdcManager().put(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"));
+                        Scope.getCurrentScope().getMdcManager().put(MdcKey.LIQUIBASE_SYSTEM_NAME, InetAddress.getLocalHost().getHostName());
+
                         LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                         if (licenseService != null) {
                             if (main.liquibaseProLicenseKey == null) {
@@ -395,6 +400,10 @@ public class Main {
                         if (!Main.runningFromNewCli) {
                             innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
                         }
+                        Scope.getCurrentScope().getMdcManager().remove(MdcKey.LIQUIBASE_VERSION);
+                        Scope.getCurrentScope().getMdcManager().remove(MdcKey.LIQUIBASE_SYSTEM_NAME);
+                        Scope.getCurrentScope().getMdcManager().remove(MdcKey.LIQUIBASE_SYSTEM_USER);
+
                         Scope.child(innerScopeObjects, () -> {
                             main.doMigration();
                             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);

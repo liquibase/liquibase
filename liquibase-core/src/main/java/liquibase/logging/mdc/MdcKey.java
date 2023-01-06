@@ -14,4 +14,7 @@ public class MdcKey {
     public static final String CHANGESET_SQL = "changesetSql";
     public static final String DEPLOYMENT_OUTCOME = "deploymentOutcome";
     public static final String LIQUIBASE_COMMAND_NAME = "liquibaseCommandName";
+    public static final String LIQUIBASE_VERSION = "liquibaseVersion";
+    public static final String LIQUIBASE_SYSTEM_NAME = "liquibaseSystemName";
+    public static final String LIQUIBASE_SYSTEM_USER = "liquibaseSystemUser";
 }
