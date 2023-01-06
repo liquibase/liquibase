@@ -1843,8 +1843,8 @@ public class Main {
             }
 
             try {
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, command);
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, COMMANDS.UPDATE);
                     Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMANDS.UPDATE);
                     try {
                         liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
