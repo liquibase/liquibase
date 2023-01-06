@@ -882,7 +882,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     /**
-     * Returns an unmodifiable list of changes.  To add one, use the add Refactoring method.
+     * Returns an unmodifiable list of changes.  To add one, use the addRefactoring method.
      */
     public List<Change> getChanges() {
         return Collections.unmodifiableList(changes);
