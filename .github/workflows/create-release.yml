@@ -8,7 +8,9 @@ on:
       branch:
         description: 'Branch to release (Defaults to master)'
         required: false
-
+      runId:
+        description: 'RunId of liquibase/liquibase artifacts to attach'
+        required: true
 jobs:
   setup:
     name: Setup
@@ -16,6 +18,7 @@ jobs:
     outputs:
       version: ${{ steps.collect-data.outputs.version }}
       branch: ${{ steps.collect-data.outputs.branch }}
+      runId: ${{ steps.collect-data.outputs.runId }}
     steps:
       - name: Collect Data
         id: collect-data
@@ -24,9 +27,9 @@ jobs:
           script: |
             core.setOutput("version", context.payload.inputs.version);
             core.setOutput("branch", context.payload.inputs.branch || "master");
-
+            core.setOutput("runId", context.payload.inputs.runId);
       - run: |
-          echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }}"
+          echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
 
   reversion:
     needs: [ setup ]
@@ -48,8 +51,7 @@ jobs:
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
           workflow: build.yml
-          workflow_conclusion: success
-          branch: ${{ needs.setup.outputs.branch }}
+          run_id: ${{ needs.setup.outputs.runId }}
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
