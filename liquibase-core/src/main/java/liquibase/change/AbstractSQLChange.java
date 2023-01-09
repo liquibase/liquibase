@@ -282,7 +282,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     public static class NormalizingStream extends InputStream {
-        private PushbackInputStream stream;
+        private InputStream stream;
 
         private byte[] quickBuffer = new byte[100];
         private List<Byte> resizingBuffer = new ArrayList<>();

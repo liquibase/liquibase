@@ -27,6 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -199,15 +200,8 @@ public class CreateViewChange extends AbstractChange {
         try {
             if (this.path == null) {
                 String selectQuery = this.selectQuery;
-                String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-                try {
-                    stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
-                } catch (UnsupportedEncodingException e) {
-                    throw new AssertionError(encoding +
-                            " is not supported by the JVM, this should not happen according to the JavaDoc of " +
-                            "the Charset class"
-                    );
-                }
+                Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
+                stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
             }
             else {
                 stream = openSqlStream();
