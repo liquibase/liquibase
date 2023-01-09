@@ -8,10 +8,10 @@ import java.util.Set;
 
 public interface DatabaseObjectComparator {
 
-    final int PRIORITY_NONE = -1;
-    final int PRIORITY_DEFAULT = 1;
-    final int PRIORITY_TYPE = 5;
-    final int PRIORITY_DATABASE = 10;
+    int PRIORITY_NONE = -1;
+    int PRIORITY_DEFAULT = 1;
+    int PRIORITY_TYPE = 5;
+    int PRIORITY_DATABASE = 10;
 
     int getPriority(Class<? extends DatabaseObject> objectType, Database database);
 

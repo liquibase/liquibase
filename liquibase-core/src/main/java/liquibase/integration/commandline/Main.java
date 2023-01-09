@@ -1075,7 +1075,7 @@ public class Main {
                 entryValue = String.valueOf(entry.getValue());
             }
             if (integrationDetails != null) {
-                integrationDetails.setParameter("defaultsFile__" + String.valueOf(entry.getKey()), entryValue);
+                integrationDetails.setParameter("defaultsFile__" + entry.getKey(), entryValue);
             }
 
             try {
