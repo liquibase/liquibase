@@ -57,7 +57,7 @@ public class MD5Util {
             DigestInputStream digestStream = new DigestInputStream(stream, digest);
             byte[] buf = new byte[20480];
             while (digestStream.read(buf) != -1) {
-                ; //digest is updating
+                //digest is updating
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
