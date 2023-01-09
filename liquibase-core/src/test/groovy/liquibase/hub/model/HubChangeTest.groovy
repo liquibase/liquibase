@@ -105,7 +105,7 @@ class HubChangeTest extends Specification {
         hubChange.getContexts() == CONTEXT_LIST
         hubChange.getDescription() == "empty"
         // Checksum is generated automatically in the getter even if it is null
-        hubChange.getMd5sum() == "8:d41d8cd98f00b204e9800998ecf8427e"
+        hubChange.getMd5sum() == "9:d41d8cd98f00b204e9800998ecf8427e"
         // Constants
         hubChange.getOrderExecuted() == 0
         hubChange.getExecType() == "EXECUTED"
@@ -132,7 +132,7 @@ class HubChangeTest extends Specification {
         // Default value returned from ContextExpression.toString() if no contexts
         hubChange.getContexts() == "()"
         // Checksum is generated automatically in the getter even if it is null
-        hubChange.getMd5sum() == "8:d41d8cd98f00b204e9800998ecf8427e"
+        hubChange.getMd5sum() == "9:d41d8cd98f00b204e9800998ecf8427e"
         // Constants
         hubChange.getOrderExecuted() == 0
         hubChange.getExecType() == "EXECUTED"
