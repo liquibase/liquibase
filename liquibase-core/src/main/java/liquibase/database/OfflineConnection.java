@@ -47,11 +47,13 @@ public class OfflineConnection implements DatabaseConnection {
     private boolean sendsStringParametersAsUnicode = true;
     private String connectionUserName;
 
+    private static final Pattern PATTERN = Pattern.compile("offline:(\\w+)\\??(.*)");
+
     public OfflineConnection() {}
 
     public OfflineConnection(String url, ResourceAccessor resourceAccessor) {
         this.url = url;
-        Matcher matcher = Pattern.compile("offline:(\\w+)\\??(.*)").matcher(url);
+        Matcher matcher = PATTERN.matcher(url);
         if (!matcher.matches()) {
             throw new UnexpectedLiquibaseException("Could not parse offline url " + url);
         }

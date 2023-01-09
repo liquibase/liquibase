@@ -38,6 +38,8 @@ import static java.util.ResourceBundle.getBundle;
 public class OracleDatabase extends AbstractJdbcDatabase {
 	public static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
+    private static final Pattern VERSION_PATTERN = Pattern.compile("(\\d+)\\.(\\d+)\\..*");
+
     public static final String PRODUCT_NAME = "oracle";
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected final int SHORT_IDENTIFIERS_LENGTH = 30;
@@ -156,7 +158,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
                     String compatibleVersion = statement.getString(2);
                     if (compatibleVersion != null) {
-                        Matcher majorVersionMatcher = Pattern.compile("(\\d+)\\.(\\d+)\\..*").matcher(compatibleVersion);
+                        Matcher majorVersionMatcher = VERSION_PATTERN.matcher(compatibleVersion);
                         if (majorVersionMatcher.matches()) {
                             this.databaseMajorVersion = Integer.valueOf(majorVersionMatcher.group(1));
                             this.databaseMinorVersion = Integer.valueOf(majorVersionMatcher.group(2));

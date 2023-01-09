@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 
 public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
 
-    private static Pattern fileNamePatter = Pattern.compile(".*\\.(\\w+)\\.sql");
+    private static final Pattern FILE_NAME_PATTER = Pattern.compile(".*\\.(\\w+)\\.sql");
     private static Logger logger = Scope.getCurrentScope().getLog(FormattedSqlChangeLogSerializer.class);
 
 
@@ -83,7 +83,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
         if (filePath == null) {
             throw new UnexpectedLiquibaseException("You must specify the changelog file name as filename.DB_TYPE.sql. Example: changelog.mysql.sql");
         }
-        Matcher matcher = fileNamePatter.matcher(filePath);
+        Matcher matcher = FILE_NAME_PATTER.matcher(filePath);
         if (!matcher.matches()) {
             throw new UnexpectedLiquibaseException("Serializing changelog as sql requires a file name in the format *.databaseType.sql. Example: changelog.h2.sql. Passed: "+filePath);
         }
