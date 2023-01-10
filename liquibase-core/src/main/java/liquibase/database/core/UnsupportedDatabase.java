@@ -106,19 +106,6 @@ public class UnsupportedDatabase extends AbstractJdbcDatabase {
 
 
 //todo: reintroduce?    @Override
-//    protected boolean canCreateChangeLogTable() throws DatabaseException {
-//        //check index size.  Many drivers just return 0, so it's not a great test
-//        int maxIndexLength;
-//        try {
-//            maxIndexLength = getConnection().getMetaData().getMaxIndexLength();
-//
-//            return maxIndexLength == 0
-//                    || maxIndexLength >= 150 + 150 + 255 //id + author + filename length
-//                    && super.canCreateChangeLogTable();
-//        } catch (SQLException e) {
-//            throw new DatabaseException(e);
-//        }
-//    }
 
     @Override
     public boolean supportsTablespaces() {

@@ -41,9 +41,6 @@ public class MissingColumnChangeGenerator extends AbstractChangeGenerator implem
     @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Column column = (Column) missingObject;
-//        if (!shouldModifyColumn(column)) {
-//            continue;
-//        }
 
         if (column.getRelation() instanceof View) {
             return null;

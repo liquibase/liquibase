@@ -26,11 +26,4 @@ public class DerbyTestSystem extends DatabaseTestSystem {
         };
     }
 
-    //    @Override
-//    public Connection openConnection() throws SQLException {
-//        return DriverManager.getConnection("jdbc:h2:mem:"+getProperty("catalog", String.class),
-//                getProperty("username", String.class, true),
-//                getProperty("password", String.class)
-//        );
-//    }
 }

@@ -36,10 +36,6 @@ public class UnexpectedIndexChangeGenerator extends AbstractChangeGenerator impl
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Index index = (Index) unexpectedObject;
 
-//        if (index.getAssociatedWith().contains(Index.MARK_PRIMARY_KEY) || index.getAssociatedWith().contains(Index.MARK_FOREIGN_KEY) || index.getAssociatedWith().contains(Index.MARK_UNIQUE_CONSTRAINT)) {
-//            return null;
-//        }
-
         DropIndexChange change = new DropIndexChange();
         change.setTableName(index.getRelation().getName());
         if (control.getIncludeCatalog()) {

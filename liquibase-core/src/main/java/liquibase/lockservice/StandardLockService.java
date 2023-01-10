@@ -458,12 +458,6 @@ public class StandardLockService implements LockService {
     public void forceReleaseLock() throws LockException, DatabaseException {
         this.init();
         releaseLock();
-        /*try {
-            releaseLock();
-        } catch (LockException e) {
-            // ignore ?
-            Scope.getCurrentScope().getLog(getClass()).info("Ignored exception in forceReleaseLock: " + e.getMessage());
-        }*/
     }
 
     @Override

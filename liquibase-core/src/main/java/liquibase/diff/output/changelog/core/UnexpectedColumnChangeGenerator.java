@@ -38,9 +38,6 @@ public class UnexpectedColumnChangeGenerator extends AbstractChangeGenerator imp
     @Override
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Column column = (Column) unexpectedObject;
-//        if (!shouldModifyColumn(column)) {
-//            continue;
-//        }
 
         if (BooleanUtil.isTrue(column.getComputed()) || BooleanUtil.isTrue(column.getDescending()) ) { //not really a column to drop, probably part of an index or something
             return null;

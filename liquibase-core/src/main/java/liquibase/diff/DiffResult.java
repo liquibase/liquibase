@@ -185,12 +185,6 @@ public class DiffResult {
     }
 
     public boolean areEqual() throws DatabaseException, IOException {
-//        boolean differencesInData = false;
-//        if (compareControl.shouldDiffData()) {
-//            List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
-//            addInsertDataChanges(changeSets, dataDir);
-//            differencesInData = !changeSets.isEmpty();
-//        }
 
         return missingObjects.isEmpty() && unexpectedObjects.isEmpty() && changedObjects.isEmpty();
     }
