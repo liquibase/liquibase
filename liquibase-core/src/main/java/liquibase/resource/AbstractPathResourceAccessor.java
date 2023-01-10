@@ -40,7 +40,7 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
         if (Files.exists(finalPath)) {
             returnList.add(createResource(finalPath, path));
         } else {
-            log.fine("Path " + path + " in " + getRootPath() + " does not exist");
+            log.fine("Path " + path + " in " + getRootPath() + " does not exist (" + this + ")");
         }
 
         return returnList;
@@ -84,7 +84,7 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
 
         final List<Resource> returnSet = new ArrayList<>();
         if (!Files.exists(basePath)) {
-            log.fine("Path " + startPath + " in " + rootPath + " does not exist");
+            log.fine("Path " + startPath + " in " + rootPath + " does not exist (" + this + ")");
             return returnSet;
         }
 
