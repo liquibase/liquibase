@@ -12,7 +12,7 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> USE_PROCEDURE_SCHEMA;
     public static final ConfigurationDefinition<MissingPropertyMode> MISSING_PROPERTY_MODE;
     public static final ConfigurationDefinition<ChangelogParseMode> CHANGELOG_PARSE_MODE;
-    public static final ConfigurationDefinition<Boolean> WARN_OR_ERROR_ON_MISSING_CHANGELOGS;
+    public static final ConfigurationDefinition<Boolean> WARN_OR_ERROR_ON_MISSING_INCLUDE_FILE;
 
 
     static {
@@ -40,7 +40,7 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(ChangelogParseMode.STRICT)
                 .build();
 
-        WARN_OR_ERROR_ON_MISSING_CHANGELOGS = builder.define("warnOnMissingChangeLogs", Boolean.class)
+        WARN_OR_ERROR_ON_MISSING_INCLUDE_FILE = builder.define("warnOrErrorOnMissingInclude", Boolean.class)
                 .setDescription("If set to true, then liquibase will not throw exception on missing changelog file, instead will show a warning message.")
                 .setDefaultValue(false)
                 .build();

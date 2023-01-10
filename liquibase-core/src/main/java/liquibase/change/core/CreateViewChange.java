@@ -8,7 +8,6 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -28,7 +27,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -237,27 +235,27 @@ public class CreateViewChange extends AbstractChange {
             fullDefinition = this.fullDefinition;
         }
 
-		String selectQuery;
-		String path = getPath();
-		if (path == null) {
-			selectQuery = StringUtil.trimToNull(getSelectQuery());
-		} else {
-			try {
-				InputStream stream = openSqlStream();
+        String selectQuery;
+        String path = getPath();
+        if (path == null) {
+            selectQuery = StringUtil.trimToNull(getSelectQuery());
+        } else {
+            try {
+                InputStream stream = openSqlStream();
                 if (stream == null) {
-                    stream = returnEmptyResourceIfMissingFile(path);
+                    throw new IOException(FileUtil.getFileNotFoundMessage(path));
                 }
-				selectQuery = StreamUtil.readStreamAsString(stream, encoding);
-			    if (getChangeSet() != null) {
-					ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
-					if (parameters != null) {
-						selectQuery = parameters.expandExpressions(selectQuery, getChangeSet().getChangeLog());
-					}
-				}
-			} catch (IOException e) {
-				throw new UnexpectedLiquibaseException(e);
-			}
-		}
+                selectQuery = StreamUtil.readStreamAsString(stream, encoding);
+                if (getChangeSet() != null) {
+                    ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
+                    if (parameters != null) {
+                        selectQuery = parameters.expandExpressions(selectQuery, getChangeSet().getChangeLog());
+                    }
+                }
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
 
         if (!supportsReplaceIfExistsOption(database) && replaceIfExists) {
             statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));

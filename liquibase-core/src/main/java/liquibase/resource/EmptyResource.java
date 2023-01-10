@@ -1,16 +1,13 @@
 package liquibase.resource;
 
-import liquibase.util.FileUtil;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 
 /**
- * Used to represent {@link FileUtil#EMPTY_FILE}
+ * Used to represent an empty file
  */
 public final class EmptyResource implements Resource {
 
@@ -21,7 +18,7 @@ public final class EmptyResource implements Resource {
 
     @Override
     public InputStream openInputStream() throws IOException {
-        return new ByteArrayInputStream(FileUtil.EMPTY_FILE.getBytes(StandardCharsets.UTF_8));
+        return new ByteArrayInputStream(new byte[0]);
     }
 
     @Override

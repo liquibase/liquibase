@@ -15,7 +15,6 @@ import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.SearchPathResourceAccessor;
@@ -38,7 +37,6 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -868,9 +866,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
             try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
+                if (is == null) {
+                    throw new MojoExecutionException(FileUtil.getFileNotFoundMessage(propertyFile));
+                }
                 parsePropertiesFile(is);
                 getLog().info(MavenUtils.LOG_SEPARATOR);
-            } catch (IOException | MojoFailureException | MojoExecutionException e) {
+            } catch (IOException | MojoFailureException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
             try (InputStream is = handlePropertyFileInputStream(propertyFile)) {

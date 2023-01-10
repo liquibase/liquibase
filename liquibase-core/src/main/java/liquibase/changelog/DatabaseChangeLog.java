@@ -11,6 +11,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -20,6 +21,7 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
@@ -771,6 +773,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
             PARENT_CHANGE_LOG.set(this);
             try {
+                if(!resourceAccessor.get(fileName).exists()) {
+                    if (ChangeLogParserConfiguration.WARN_OR_ERROR_ON_MISSING_INCLUDE_FILE.getCurrentValue()) {
+                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(fileName));
+                        return false;
+                    } else {
+                        throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(fileName));
+                    }
+                }
                 ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
                 changeLog = parser.parse(fileName, changeLogParameters, resourceAccessor);
                 changeLog.setIncludeContextFilter(includeContextFilter);
@@ -798,6 +808,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 );
             }
             return false;
+        }
+        catch (IOException e) {
+            throw new LiquibaseException(e.getMessage(), e);
         }
         PreconditionContainer preconditions = changeLog.getPreconditions();
         if (preconditions != null) {

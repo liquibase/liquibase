@@ -6,13 +6,6 @@ import liquibase.Scope;
 import java.io.*;
 
 public class FileUtil {
-
-    public static final String EMPTY_FILE = "<?xml version=\"1.1\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
-            "            <databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n" +
-            "                               xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-            "                               xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n" +
-            "                               http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.10.xsd\">\n" +
-            "            </databaseChangeLog>";
     
     private FileUtil() {
         throw new IllegalStateException("This utility class must not be instantiated. Sorry.");

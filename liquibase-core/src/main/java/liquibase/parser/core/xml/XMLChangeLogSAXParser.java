@@ -4,9 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.core.ParsedNode;
-import liquibase.resource.EmptyResource;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.BomAwareInputStream;
@@ -113,7 +111,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                             physicalChangeLogLocation.replaceFirst("WEB-INF/classes/", ""),
                             changeLogParameters, resourceAccessor);
                 } else {
-                    resource = returnEmptyResourceIfMissingFileResource(physicalChangeLogLocation);
+                    throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
                 }
             }
 

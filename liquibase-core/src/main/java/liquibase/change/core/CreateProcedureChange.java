@@ -9,7 +9,6 @@ import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
@@ -17,11 +16,7 @@ import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
 import java.util.Map;
 
 @DatabaseChange(
@@ -227,10 +222,10 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             }
         } catch (IOException e) {
             throw new IOException(
-                "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +
-                path +
-                "> -Unable to read file",
-                e
+                    "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +
+                            path +
+                            "> -Unable to read file",
+                    e
             );
         }
     }
@@ -307,7 +302,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 try {
                     InputStream stream = openSqlStream();
                     if (stream == null) {
-                        stream = returnEmptyResourceIfMissingFile(path);
+                        throw new IOException(FileUtil.getFileNotFoundMessage(path));
                     }
                     procedureText = StreamUtil.readStreamAsString(stream, encoding);
                     if (getChangeSet() != null) {

@@ -4,13 +4,11 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
-import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.util.CollectionUtil;
 import liquibase.util.FileUtil;
 
 import java.io.*;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -158,18 +156,9 @@ public interface ResourceAccessor extends AutoCloseable {
     default Resource getExisting(String path) throws IOException {
         Resource resource = get(path);
         if (!resource.exists()) {
-            resource = returnEmptyResourceIfMissingFile(path);
+            throw new FileNotFoundException(FileUtil.getFileNotFoundMessage(path));
         }
         return resource;
-    }
-
-    static Resource returnEmptyResourceIfMissingFile(String path) throws IOException {
-        if (ChangeLogParserConfiguration.WARN_OR_ERROR_ON_MISSING_CHANGELOGS.getCurrentValue()) {
-            Scope.getCurrentScope().getLog(ResourceAccessor.class).warning(FileUtil.getFileNotFoundMessage(path));
-            return new EmptyResource();
-        } else {
-            throw new IOException(FileUtil.getFileNotFoundMessage(path));
-        }
     }
 
     /**
