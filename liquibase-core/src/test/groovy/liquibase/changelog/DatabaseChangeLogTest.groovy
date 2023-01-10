@@ -7,11 +7,13 @@ import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.exception.SetupException
 import liquibase.logging.core.BufferedLogService
+import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.resource.Resource
+import liquibase.resource.ResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.util.FileUtil
@@ -499,25 +501,30 @@ create view sql_view as select * from sql_table;'''
         "D:\\a\\liquibase\\DBDocTaskTest.xml" | "a/liquibase/DBDocTaskTest.xml"
     }
 
-    def "warning displays if include fails when file does not exist"() {
+    def "warning message is logged when changelog include fails because file does not exist"() {
         when:
-        BufferedLogService bufferLog = new BufferedLogService()
-        Map<String, Object> values = new HashMap<>()
-        values.put(Scope.Attr.logService.name(), bufferLog)
-        values.put("warnOnMissingInclude", true)
-        BufferedLogService updatedLog = Scope.child(values, new Scope.ScopedRunnerWithReturn<BufferedLogService>() {
-            @Override
-            BufferedLogService run() throws Exception {
-                if (values.get("warnOnMissingInclude")) {
-                    bufferLog.getLog(getClass()).warning(FileUtil.getFileNotFoundMessage("com/example/test1.xml"))
-                }
-                return bufferLog
-            }
+        def rootChangeLogPath = "com/example/root.xml"
+        def includedChangeLogPath = "com/example/test1.xml"
+        def resourceAccessor = new MockResourceAccessor([(rootChangeLogPath): test1Xml])
 
-        }) as BufferedLogService
+        def rootChangeLog = new DatabaseChangeLog(rootChangeLogPath)
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog"), resourceAccessor)
+
+        BufferedLogService bufferLog = new BufferedLogService()
+
+        Scope.child([
+                (Scope.Attr.logService.name()): bufferLog,
+                (ChangeLogParserConfiguration.WARN_ON_MISSING_INCLUDE_FILE.getKey()): true,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                    rootChangeLog
+                            .include(includedChangeLogPath, false, resourceAccessor, null, null, false, null, null);
+            }
+        })
 
         then:
-        updatedLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage("com/example/test1.xml"));
+        bufferLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage(includedChangeLogPath));
     }
 
 }
