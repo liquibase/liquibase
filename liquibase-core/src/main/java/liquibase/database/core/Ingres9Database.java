@@ -42,7 +42,7 @@ public class Ingres9Database extends AbstractJdbcDatabase {
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         final String sql = "select text_segment from iiviews where table_name = '" + viewName + "'";
         Statement stmt = null;
-        String definition = "";
+        final StringBuilder definition = new StringBuilder();
         try {
             if (getConnection() instanceof OfflineConnection) {
                 throw new DatabaseException("Cannot execute commands against an offline database");
@@ -50,7 +50,7 @@ public class Ingres9Database extends AbstractJdbcDatabase {
             stmt = ((JdbcConnection) getConnection()).getUnderlyingConnection().createStatement();
             try (ResultSet rs = stmt.executeQuery(sql)) {
                 while (rs.next()) {
-                    definition += rs.getString("text_segment");
+                    definition.append(rs.getString("text_segment"));
                 }
             }
         }
@@ -65,7 +65,7 @@ public class Ingres9Database extends AbstractJdbcDatabase {
         if (definition == null) {
             return null;
         }
-        return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
+        return CREATE_VIEW_AS_PATTERN.matcher(definition.toString()).replaceFirst("");
     }
 
     @Override

@@ -198,25 +198,25 @@ public abstract class LiquibaseDataType implements PrioritizedService {
 
     @Override
     public String toString() {
-        String returnString = getName();
+        StringBuilder returnString = new StringBuilder(getName());
         if ((parameters != null) && !parameters.isEmpty() && (maxParameters > 0)) {
-            returnString += "(";
+            returnString.append("(");
             for (Object param : parameters) {
                 if (returnString == null) {
-                    returnString += "NULL,";
+                    returnString.append("NULL,");
                 }
-                returnString += param.toString()+",";
+                returnString.append(param.toString()).append(",");
             }
-            returnString = returnString.replaceFirst(",$", "");
+            returnString = new StringBuilder(returnString.toString().replaceFirst(",$", ""));
 
-            returnString += ")";
+            returnString.append(")");
         }
 
         if (additionalInformation != null) {
-            returnString += " "+additionalInformation;
+            returnString.append(" ").append(additionalInformation);
         }
 
-        return returnString.trim();
+        return returnString.toString().trim();
     }
 
     @Override

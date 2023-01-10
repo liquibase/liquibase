@@ -104,14 +104,14 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     private Sql[] generateMultipleColumns(List<AddColumnStatement> columns, Database database) {
         List<Sql> result = new ArrayList<>();
         if (database instanceof MySQLDatabase) {
-            String alterTable = generateSingleColumBaseSQL(columns.get(0), database);
+            final StringBuilder alterTable = new StringBuilder(generateSingleColumBaseSQL(columns.get(0), database));
             for (int i = 0; i < columns.size(); i++) {
-                alterTable += generateSingleColumnSQL(columns.get(i), database);
+                alterTable.append(generateSingleColumnSQL(columns.get(i), database));
                 if (i < (columns.size() - 1)) {
-                    alterTable += ",";
+                    alterTable.append(",");
                 }
             }
-            result.add(new UnparsedSql(alterTable, getAffectedColumns(columns)));
+            result.add(new UnparsedSql(alterTable.toString(), getAffectedColumns(columns)));
 
             for (AddColumnStatement statement : columns) {
                 addUniqueConstraintStatements(statement, database, result);
