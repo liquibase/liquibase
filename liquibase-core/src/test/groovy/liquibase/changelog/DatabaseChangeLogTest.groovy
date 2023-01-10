@@ -2,9 +2,11 @@ package liquibase.changelog
 
 import liquibase.ContextExpression
 import liquibase.Labels
+import liquibase.Scope
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.exception.SetupException
+import liquibase.logging.core.BufferedLogService
 import liquibase.parser.core.ParsedNode
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
@@ -12,9 +14,12 @@ import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.resource.Resource
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
+import liquibase.util.FileUtil
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import java.util.logging.Level
 
 class DatabaseChangeLogTest extends Specification {
 
@@ -437,7 +442,7 @@ create view sql_view as select * from sql_table;'''
 
     def "include fails if no parser supports the file"() {
         when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml])
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.invalid": test1Xml])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
 
@@ -492,6 +497,27 @@ create view sql_view as select * from sql_table;'''
         "c:\\path\\to\\changelog.xml"         | "path/to/changelog.xml"
         "c:/path/to/changelog.xml"            | "path/to/changelog.xml"
         "D:\\a\\liquibase\\DBDocTaskTest.xml" | "a/liquibase/DBDocTaskTest.xml"
+    }
+
+    def "warning displays if include fails when file does not exist"() {
+        when:
+        BufferedLogService bufferLog = new BufferedLogService()
+        Map<String, Object> values = new HashMap<>()
+        values.put(Scope.Attr.logService.name(), bufferLog)
+        values.put("warnOnMissingInclude", true)
+        BufferedLogService updatedLog = Scope.child(values, new Scope.ScopedRunnerWithReturn<BufferedLogService>() {
+            @Override
+            BufferedLogService run() throws Exception {
+                if (values.get("warnOnMissingInclude")) {
+                    bufferLog.getLog(getClass()).warning(FileUtil.getFileNotFoundMessage("com/example/test1.xml"))
+                }
+                return bufferLog
+            }
+
+        }) as BufferedLogService
+
+        then:
+        updatedLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage("com/example/test1.xml"));
     }
 
 }
