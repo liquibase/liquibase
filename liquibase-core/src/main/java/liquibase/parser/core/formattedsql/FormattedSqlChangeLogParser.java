@@ -350,7 +350,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(authorGroup), changeLog);
 
                     changeSet =
-                       new ChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange, logicalFilePath, context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
+                       new ChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange, DatabaseChangeLog.normalizePath(logicalFilePath), context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
+                    changeSet.setStoredFilePath(logicalFilePath);
                     changeSet.setLabels(new Labels(labels));
                     changeSet.setIgnore(Boolean.parseBoolean(ignore));
                     changeSet.setFailOnError(failOnError);
