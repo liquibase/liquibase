@@ -11,7 +11,7 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME;
+    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
     public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
@@ -27,7 +27,7 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
 
         URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
             .description("The JDBC database connection URL").build();
-        DEFAULT_SCHEMA_NAME = builder.argument("defaultSchemaName", String.class)
+        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
                 .description("The default schema name to use for the database connection").build();
         DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
                 .description("The default catalog name to use for the database connection").build();
