@@ -1,14 +1,44 @@
 package liquibase.command;
 
+import liquibase.Scope;
 import liquibase.exception.CommandValidationException;
 import liquibase.util.StringUtil;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 /**
  * Convenience base class for {@link CommandStep} implementations.
  */
 public abstract class AbstractCommandStep implements CommandStep {
+
+    /**
+     * Verifies if any step in the pipeline of the commandDefinition requires an argument of type
+     * @param commandDefinition the master command definition
+     * @param type the generic type of the argument, ie: CommandArgumentDefinition<Database> (in this case, Database.class)
+     *
+     * @return true in case it has the argument with that generic type
+     */
+    protected boolean isCommandDefinitionHasArgumentOfType(CommandDefinition commandDefinition, Class<?> type) {
+        for (CommandStep step : commandDefinition.getPipeline()) {
+            Field[] declaredFields = step.getClass().getDeclaredFields();
+            for (Field field : declaredFields) {
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) && CommandArgumentDefinition.class.isAssignableFrom(field.getType())) {
+                    try {
+                        CommandArgumentDefinition<?> argumentDefinition = (CommandArgumentDefinition<?>) field.get(null);
+                        if (type.isAssignableFrom(argumentDefinition.getDataType())) {
+                            return true;
+                        }
+                    } catch (IllegalAccessException e) {
+                        Scope.getCurrentScope().getLog(getClass()).warning(String.format("Error accessing public field %s of step %s. Details: %s",
+                                field.getName(), Arrays.deepToString(step.defineCommandNames()), e.getMessage()));
+                        return false;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     /**
      * @return {@link #ORDER_DEFAULT} if the command scope's name matches {@link #defineCommandNames()}. Otherwise {@link #ORDER_NOT_APPLICABLE}

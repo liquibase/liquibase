@@ -7,6 +7,7 @@ import liquibase.util.StringUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Manages the command related implementations.
@@ -33,15 +34,25 @@ public class CommandFactory implements SingletonObject {
      */
     public CommandDefinition getCommandDefinition(String... commandName) throws IllegalArgumentException{
         CommandDefinition commandDefinition = new CommandDefinition(commandName);
-        for (CommandStep step : findAllInstances()) {
-            if (step.getOrder(commandDefinition) > 0) {
-                try {
-                    commandDefinition.add(step.getClass().getConstructor().newInstance());
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    throw new IllegalArgumentException(e);
+        int totalSteps;
+
+        // keep looping until we find all the required steps
+        do {
+            totalSteps = commandDefinition.getPipeline().size();
+            List<String[]> pipelineCommands = commandDefinition.getPipeline().stream()
+                    .map(p -> getCommandNameOrNull(p.defineCommandNames()))
+                    .collect(Collectors.toList());
+            for (CommandStep step : findAllInstances()) {
+                if (step.getOrder(commandDefinition) > 0 && !pipelineCommands.contains(getCommandNameOrNull(step.defineCommandNames()))) {
+                    try {
+                        commandDefinition.add(step.getClass().getConstructor().newInstance());
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                             NoSuchMethodException e) {
+                        throw new IllegalArgumentException(e);
+                    }
                 }
             }
-        }
+        } while(commandDefinition.getPipeline().size() > totalSteps);
 
         final List<CommandStep> pipeline = commandDefinition.getPipeline();
         if (pipeline.isEmpty()) {
@@ -70,6 +81,10 @@ public class CommandFactory implements SingletonObject {
 
 
         return commandDefinition;
+    }
+
+    private String[] getCommandNameOrNull(String[][] defineCommandNames) {
+        return (defineCommandNames != null && defineCommandNames.length >0) ? defineCommandNames[0] : null;
     }
 
     /**

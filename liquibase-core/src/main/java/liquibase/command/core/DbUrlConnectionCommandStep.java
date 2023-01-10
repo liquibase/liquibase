@@ -1,6 +1,5 @@
 package liquibase.command.core;
 
-import liquibase.Beta;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.*;
@@ -14,8 +13,6 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
@@ -25,9 +22,7 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class DbUrlConnectionCommandStep extends AbstractCommandStep implements CleanUpCommandStep {
 
-    public static final String[] COMMAND_NAME = {"dbUrlConnectionCommandStep"};
-
-    private static final List<String[][]> APPLICABLE_COMMANDS = new ArrayList<>();
+    protected static final String[] COMMAND_NAME = {"dbUrlConnectionCommandStep"};
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
@@ -38,6 +33,8 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+
+    public static final int ORDER = 100;
 
     private Database database;
 
@@ -61,14 +58,6 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
         URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required().supersededBy(DATABASE_ARG)
                 .description("The JDBC database connection URL").build();
         DATABASE_ARG.setSupersededBy(URL_ARG);
-    }
-
-    /**
-     * Method that allows Commands to register themselves to be able to use this CommandStep.
-     */
-    @Beta
-    public static void addApplicableCommand(String[]... commandName) {
-        APPLICABLE_COMMANDS.add(commandName);
     }
 
     @Override
@@ -195,12 +184,8 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
 
     @Override
     public int getOrder(CommandDefinition commandDefinition) {
-        for (String[][] commandNames : APPLICABLE_COMMANDS) {
-            for (String[] commandName : commandNames) {
-                if (commandDefinition.is(commandName)) {
-                    return 500;
-                }
-            }
+        if (isCommandDefinitionHasArgumentOfType(commandDefinition, Database.class)) {
+            return ORDER;
         }
         return super.getOrder(commandDefinition);
     }
