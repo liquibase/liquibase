@@ -31,6 +31,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     }
 
+    @Override
     public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet)
         throws DatabaseException, DatabaseHistoryException {
         RanChangeSet foundRan = getRanChangeSet(changeSet);
@@ -61,18 +62,20 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         }
     }
 
+    @Override
     public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts,
                                  LabelExpression labels) throws DatabaseException {
         for (RanChangeSet ranChangeSet : this.getRanChangeSets()) {
             if (ranChangeSet.getLastCheckSum() == null) {
-                ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
-                if ((changeSet != null) && new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() &&
-                    new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()
-                    ) {
-                    Scope.getCurrentScope().getLog(getClass()).fine(
-                            "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
-                    );
-                    replaceChecksum(changeSet);
+                List<ChangeSet> changeSets = databaseChangeLog.getChangeSets(ranChangeSet);
+                for (ChangeSet changeSet : changeSets) {
+                    if ((changeSet != null) && new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() &&
+                        new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()) {
+                        Scope.getCurrentScope().getLog(getClass()).fine(
+                                "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
+                        );
+                        replaceChecksum(changeSet);
+                    }
                 }
             }
         }
@@ -117,14 +120,17 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     protected abstract void replaceChecksum(ChangeSet changeSet) throws DatabaseException;
 
+    @Override
     public String getDeploymentId() {
         return this.deploymentId;
     }
 
+    @Override
     public void resetDeploymentId() {
         this.deploymentId = null;
     }
 
+    @Override
     public void generateDeploymentId() {
         if (this.deploymentId == null) {
             String dateString = String.valueOf(new Date().getTime());

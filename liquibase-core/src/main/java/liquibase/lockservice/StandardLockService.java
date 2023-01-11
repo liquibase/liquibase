@@ -10,7 +10,6 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.exception.DatabaseException;
@@ -30,7 +29,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
 import java.security.SecureRandom;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -135,33 +133,8 @@ public class StandardLockService implements LockService {
                     database.commit();
                 }
 
-                if (executor.updatesDatabase() && (database instanceof DerbyDatabase) && ((DerbyDatabase) database)
-                        .supportsBooleanDataType() || database.getClass().isAssignableFrom(DB2Database.class) && ((DB2Database) database)
-                        .supportsBooleanDataType()) {
-                    //check if the changelog table is of an old smallint vs. boolean format
-                    String lockTable = database.escapeTableName(
-                            database.getLiquibaseCatalogName(),
-                            database.getLiquibaseSchemaName(),
-                            database.getDatabaseChangeLogLockTableName()
-                    );
-                    Object obj = executor.queryForObject(
-                            new RawSqlStatement(
-                                    "SELECT MIN(locked) AS test FROM " + lockTable + " FETCH FIRST ROW ONLY"
-                            ), Object.class
-                    );
-                    if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
-                        executor.execute(
-                                new DropTableStatement(
-                                        database.getLiquibaseCatalogName(),
-                                        database.getLiquibaseSchemaName(),
-                                        database.getDatabaseChangeLogLockTableName(),
-                                        false
-                                )
-                        );
-                        executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-                        executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
-                    }
-                }
+                handleOldChangelogTableFormat(executor);
+                break;
             } catch (Exception e) {
                 if (i == maxIterations - 1) {
                     throw e;
@@ -177,6 +150,36 @@ public class StandardLockService implements LockService {
                         Scope.getCurrentScope().getLog(getClass()).warning("Lock table retry loop thread sleep interrupted", ex);
                     }
                 }
+            }
+        }
+    }
+
+    private void handleOldChangelogTableFormat(Executor executor) throws DatabaseException {
+        if (executor.updatesDatabase() && (database instanceof DerbyDatabase) && ((DerbyDatabase) database)
+                .supportsBooleanDataType() || database.getClass().isAssignableFrom(DB2Database.class) && ((DB2Database) database)
+                .supportsBooleanDataType()) {
+            //check if the changelog table is of an old smallint vs. boolean format
+            String lockTable = database.escapeTableName(
+                    database.getLiquibaseCatalogName(),
+                    database.getLiquibaseSchemaName(),
+                    database.getDatabaseChangeLogLockTableName()
+            );
+            Object obj = executor.queryForObject(
+                    new RawSqlStatement(
+                            "SELECT MIN(locked) AS test FROM " + lockTable + " FETCH FIRST ROW ONLY"
+                    ), Object.class
+            );
+            if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
+                executor.execute(
+                        new DropTableStatement(
+                                database.getLiquibaseCatalogName(),
+                                database.getLiquibaseSchemaName(),
+                                database.getDatabaseChangeLogLockTableName(),
+                                false
+                        )
+                );
+                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+                executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
             }
         }
     }
@@ -324,6 +327,7 @@ public class StandardLockService implements LockService {
 
                 hasChangeLogLock = true;
 
+                ChangeLogHistoryServiceFactory.getInstance().resetAll();
                 database.setCanCacheLiquibaseTableInfo(true);
                 return true;
             }
@@ -444,7 +448,7 @@ public class StandardLockService implements LockService {
                     );
                 }
             }
-            return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);
+            return allLocks.toArray(new DatabaseChangeLogLock[0]);
         } catch (Exception e) {
             throw new LockException(e);
         }

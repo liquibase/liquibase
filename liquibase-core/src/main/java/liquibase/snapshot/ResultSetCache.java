@@ -31,11 +31,7 @@ public class ResultSetCache {
 
             String schemaKey = resultSetExtractor.wantedKeyParameters().createSchemaKey(resultSetExtractor.database);
 
-            Map<String, List<CachedRow>> cache = cacheBySchema.get(schemaKey);
-            if (cache == null) {
-                cache = new HashMap<>();
-                cacheBySchema.put(schemaKey, cache);
-            }
+            Map<String, List<CachedRow>> cache = cacheBySchema.computeIfAbsent(schemaKey, k -> new HashMap<>());
 
             if (cache.containsKey(wantedKey)) {
                 return cache.get(wantedKey);
@@ -78,11 +74,7 @@ public class ResultSetCache {
                         String rowSchema = CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
                                 equals(resultSetExtractor.database.getSchemaAndCatalogCase())?resultSetExtractor.getSchemaKey(row):
                                 resultSetExtractor.getSchemaKey(row).toLowerCase();
-                        cache = cacheBySchema.get(rowSchema);
-                        if (cache == null) {
-                            cache = new HashMap<String, List<CachedRow>>();
-                            cacheBySchema.put(rowSchema, cache);
-                        }
+                        cache = cacheBySchema.computeIfAbsent(rowSchema, k -> new HashMap<String, List<CachedRow>>());
                     }
                     if (!cache.containsKey(rowKey)) {
                         cache.put(rowKey, new ArrayList<CachedRow>());
@@ -164,7 +156,7 @@ public class ResultSetCache {
                 Collections.addAll(permutations, permute(params, fromIndex + 1));
                 Collections.addAll(permutations, permute(nullVersion, fromIndex + 1));
 
-                return permutations.toArray(new String[permutations.size()]);
+                return permutations.toArray(new String[0]);
             }
         }
 
@@ -327,10 +319,8 @@ public class ResultSetCache {
                             if (informixIndexTrimHint == false) {
                                 value = ((String) value).trim(); // Trim the value normally
                             } else {
-                                boolean startsWithSpace = false;
-                                if ((database instanceof InformixDatabase) && ((String) value).matches("^ .*$")) {
-                                    startsWithSpace = true; // Set the flag if the value started with a space
-                                }
+                                boolean startsWithSpace = (database instanceof InformixDatabase) && ((String) value).matches("^ .*$");
+                                // Set the flag if the value started with a space
                                 value = ((String) value).trim(); // Trim the value normally
                                 if (startsWithSpace == true) {
                                     value = " " + value; // Put the space back at the beginning if the flag was set

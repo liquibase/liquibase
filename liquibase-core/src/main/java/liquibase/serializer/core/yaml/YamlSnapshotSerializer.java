@@ -1,6 +1,7 @@
 package liquibase.serializer.core.yaml;
 
 import liquibase.GlobalConfiguration;
+import liquibase.diff.compare.DatabaseObjectCollectionComparator;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SnapshotSerializer;
@@ -10,9 +11,7 @@ import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
-import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
-import liquibase.util.BooleanUtil;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
 import org.yaml.snakeyaml.nodes.Node;
@@ -54,8 +53,8 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
     @Override
     protected Object toMap(final LiquibaseSerializable object) {
         if (object instanceof DatabaseObject) {
-            if (object instanceof Column && (BooleanUtil.isTrue(((Column) object).getDescending()) || BooleanUtil.isTrue(((Column) object).getComputed()))) {
-                //not really a "real" column that has a snapshot to reference, just serialize it
+            if (object instanceof Column && ((Column) object).isForIndex()) {
+                //not really a "real" column that has a snapshot to reference, just serialize the ColumnObject
                 return super.toMap(object);
             } else if (alreadySerializingObject) {
                 String snapshotId = ((DatabaseObject) object).getSnapshotId();
@@ -87,7 +86,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
             SortedMap<String, Object> returnMap = new TreeMap<>();
             for (Map.Entry<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> entry : ((DatabaseObjectCollection) object).toMap().entrySet()) {
                 ArrayList value = new ArrayList(entry.getValue());
-                Collections.sort(value, new DatabaseObjectComparator());
+                Collections.sort(value, new DatabaseObjectCollectionComparator());
                 returnMap.put(entry.getKey().getName(), value);
             }
             return returnMap;
@@ -95,6 +94,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
         return super.toMap(object);
     }
 
+    @Override
     protected LiquibaseRepresenter getLiquibaseRepresenter() {
         return new SnapshotLiquibaseRepresenter();
     }
@@ -106,6 +106,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
 
     public static class SnapshotLiquibaseRepresenter extends LiquibaseRepresenter {
 
+        @Override
         protected void init() {
             multiRepresenters.put(DatabaseFunction.class, new TypeStoringAsStringRepresenter());
             multiRepresenters.put(SequenceNextValueFunction.class, new TypeStoringAsStringRepresenter());

@@ -1,6 +1,5 @@
 package liquibase.command;
 
-import liquibase.Scope;
 import liquibase.exception.CommandExecutionException;
 import liquibase.integration.commandline.Main;
 
@@ -78,11 +77,11 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
             if (positionalArgumentName != null && positionalArgumentName.equalsIgnoreCase(key)) {
                 return;
             }
-
-            String argValue = (commandScope.getArgumentValue(value) != null ? commandScope.getArgumentValue(value).toString() : null);
+            Object argumentValue = commandScope.getArgumentValue(value);
+            String argValue = (argumentValue != null ? argumentValue.toString() : null);
             if (argValue != null) {
                 argsList.add("--" + key);
-                argsList.add(commandScope.getArgumentValue(value).toString());
+                argsList.add(argumentValue.toString());
             }
         });
 
@@ -90,7 +89,8 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
 
         arguments.forEach((key, value) -> {
             if (key.equalsIgnoreCase(positionalArgumentName)) {
-                String argValue = (commandScope.getArgumentValue(value) != null ? commandScope.getArgumentValue(value).toString() : null);
+                Object argumentValue = commandScope.getArgumentValue(value);
+                String argValue = (argumentValue != null ? argumentValue.toString() : null);
                 if (argValue != null) {
                     argsList.add(argValue);
                 }
@@ -100,10 +100,11 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
             if (!finalLegacyCommandArguments.contains(key)) {
                 return;
             }
-            String argValue = (commandScope.getArgumentValue(value) != null ? commandScope.getArgumentValue(value).toString() : null);
+            Object argumentValue = commandScope.getArgumentValue(value);
+            String argValue = (argumentValue != null ? argumentValue.toString() : null);
             if (argValue != null) {
                 argsList.add("--" + key);
-                argsList.add(commandScope.getArgumentValue(value).toString());
+                argsList.add(argumentValue.toString());
             }
         });
         String[] args = new String[argsList.size()];

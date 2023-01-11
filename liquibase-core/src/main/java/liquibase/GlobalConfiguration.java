@@ -31,6 +31,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
     public static final ConfigurationDefinition<Boolean> PRESERVE_SCHEMA_CASE;
     public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
+    public static final ConfigurationDefinition<Boolean> ALWAYS_DROP_INSTEAD_OF_REPLACE;
 
     public static final ConfigurationDefinition<DuplicateFileMode> DUPLICATE_FILE_MODE;
 
@@ -209,6 +210,10 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         SEARCH_PATH = builder.define("searchPath", String.class)
                 .setDescription("Complete list of Location(s) to search for files such as changelog files in. Multiple paths can be specified by separating them with commas.")
+                .build();
+
+        ALWAYS_DROP_INSTEAD_OF_REPLACE = builder.define("alwaysDropInsteadOfReplace", Boolean.class)
+                .setDescription("If true, drop and recreate a view instead of replacing it.")
                 .build();
     }
 

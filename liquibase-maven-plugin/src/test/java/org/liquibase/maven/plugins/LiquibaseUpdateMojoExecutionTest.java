@@ -1,11 +1,5 @@
 package org.liquibase.maven.plugins;
 
-import java.io.File;
-import java.util.List;
-import java.util.Optional;
-
-import liquibase.changelog.ChangeLogParameters;
-
 /**
  * Test class for the Liquibase Update Mojo.
  * <p>

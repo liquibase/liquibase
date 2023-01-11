@@ -74,7 +74,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }
 
-        this.schemas = finalList.toArray(new CatalogAndSchema[finalList.size()]);
+        this.schemas = finalList.toArray(new CatalogAndSchema[0]);
 
 
         return this;

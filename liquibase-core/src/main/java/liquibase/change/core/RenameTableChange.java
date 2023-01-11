@@ -71,7 +71,7 @@ public class RenameTableChange extends AbstractChange {
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getNewTableName()));
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new SqlStatement[0]);
     }
 
     @Override

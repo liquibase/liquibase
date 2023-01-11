@@ -89,7 +89,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
             changes.add(change);
         }
 
-        return changes.toArray(new Change[changes.size()]);
+        return changes.toArray(EMPTY_CHANGE);
     }
 
     protected void handleNullableDifferences(Column column, ObjectDifferences differences, DiffOutputControl control, List<Change> changes, Database referenceDatabase, Database comparisonDatabase) {
@@ -298,9 +298,6 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
         if (!(comparisonDatabase instanceof PostgresDatabase)) {
             return true;
         }
-        if (column.getAutoIncrementInformation() != null && difference.getReferenceValue() instanceof DatabaseFunction) {
-            return false;
-        }
-        return true;
+        return column.getAutoIncrementInformation() == null || !(difference.getReferenceValue() instanceof DatabaseFunction);
     }
 }

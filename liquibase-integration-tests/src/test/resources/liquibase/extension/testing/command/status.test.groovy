@@ -39,11 +39,11 @@ Optional Args:
                 username     : { it.username },
                 password     : { it.password },
                 verbose      : "true",
-                changelogFile: "changelogs/hsqldb/complete/rollback.tag.plus.changelog.xml"
+                changelogFile: "changelogs/h2/complete/rollback.tag.plus.changelog.xml"
         ]
 
         setup {
-            runChangelog "changelogs/hsqldb/complete/rollback.tag.plus.changelog.xml", "init"
+            runChangelog "changelogs/h2/complete/rollback.tag.plus.changelog.xml", "init"
         }
 
         expectedResults = [

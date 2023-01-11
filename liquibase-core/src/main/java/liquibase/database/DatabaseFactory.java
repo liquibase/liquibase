@@ -10,6 +10,8 @@ import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
+import liquibase.util.SystemUtil;
+import liquibase.SingletonObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.Driver;
 import java.util.*;
 
-public class DatabaseFactory {
+public class DatabaseFactory implements SingletonObject {
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseFactory.class);
     private static DatabaseFactory instance;
     private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<>();
@@ -270,6 +272,9 @@ public class DatabaseFactory {
         Driver driverObject;
         try {
             driverObject = (Driver) Class.forName(driverClass, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+        } catch (java.lang.UnsupportedClassVersionError e) {
+            throw new UnexpectedLiquibaseException(String.format("Your database driver %s is not compatible with Java version %s. " +
+                    "You will need to either upgrade your Java version or install a different driver jar file.", driverClass, SystemUtil.getJavaVersion()), e);
         } catch (Exception e) {
             throw new RuntimeException("Cannot find database driver: " + e.getMessage());
         }
@@ -326,7 +331,7 @@ public class DatabaseFactory {
     private static class DatabaseComparator implements Comparator<Database> {
         @Override
         public int compare(Database o1, Database o2) {
-            return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
+            return -1 * Integer.compare(o1.getPriority(), o2.getPriority());
         }
     }
 }

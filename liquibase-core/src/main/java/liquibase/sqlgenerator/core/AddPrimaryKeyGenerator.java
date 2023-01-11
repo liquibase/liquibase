@@ -3,7 +3,6 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.database.core.MockDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -67,7 +66,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
             if (database instanceof MSSQLDatabase) {
                 sql += " ON "+statement.getTablespace();
             } else if ((database instanceof AbstractDb2Database) || (database instanceof SybaseASADatabase)) {
-                ; //not supported
+                //not supported
             } else {
                 sql += " USING INDEX TABLESPACE "+statement.getTablespace();
             }

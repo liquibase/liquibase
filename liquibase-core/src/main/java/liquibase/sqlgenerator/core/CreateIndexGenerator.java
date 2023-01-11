@@ -78,7 +78,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 		    List<String> associatedWith = StringUtil.splitAndTrim(statement.getAssociatedWith(), ",");
 		    if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith
                 .contains(Index.MARK_UNIQUE_CONSTRAINT))) {
-			    return new Sql[0];
+			    return EMPTY_SQL;
 		    }
 	    } else {
 		    // Default filter of index creation:
@@ -86,7 +86,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 		    List<String> associatedWith = StringUtil.splitAndTrim(statement.getAssociatedWith(), ",");
 		    if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith
                 .contains(Index.MARK_UNIQUE_CONSTRAINT) || associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
-			    return new Sql[0];
+			    return EMPTY_SQL;
 		    }
 	    }
 

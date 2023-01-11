@@ -7,7 +7,6 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Locale;
@@ -15,7 +14,7 @@ import java.util.Locale;
 /**
  * Represents a signed integer number using 32 bits of storage.
  */
-@DataTypeInfo(name = "int", aliases = { "integer", "java.sql.Types.INTEGER", "java.lang.Integer", "serial", "int4", "serial4" }, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "int", aliases = {"integer", "java.sql.Types.INTEGER", "java.lang.Integer", "serial", "int4", "serial4"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class IntType extends LiquibaseDataType {
 
     private boolean autoIncrement;
@@ -63,14 +62,25 @@ public class IntType extends LiquibaseDataType {
             return type;
         }
         if ((database instanceof HsqlDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
-            InformixDatabase)) {
+                InformixDatabase) || (database instanceof SybaseDatabase)) {
             return new DatabaseDataType("INT");
         }
-        if (database instanceof SQLiteDatabase) {
+        if ((database instanceof SQLiteDatabase) || (database instanceof SybaseASADatabase)) {
             return new DatabaseDataType("INTEGER");
         }
-        if (database instanceof SybaseASADatabase) {
-            return new DatabaseDataType("INTEGER");
+
+        String rawDefinitionDataType = getRawDefinition().toLowerCase();
+        if (database instanceof H2Database && rawDefinitionDataType.matches("int\\([1-9]?[0-9]\\)")) {
+            int intParameter = Integer.valueOf(getParameters()[0].toString());
+            if(intParameter >= 1 && intParameter <= 3) {
+                return new DatabaseDataType("TINYINT");
+            } else if (intParameter > 3 && intParameter <= 5) {
+                return new DatabaseDataType("SMALLINT");
+            } else if (intParameter > 5 && intParameter <= 10) {
+                return new DatabaseDataType("INTEGER");
+            } else if (intParameter > 10) {
+                return new DatabaseDataType("BIGINT");
+            }
         }
         return super.toDatabaseDataType(database);
     }

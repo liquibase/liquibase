@@ -50,7 +50,7 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
             }
         }
         if (!differences.hasDifferences()) {
-            return new Change[0];
+            return EMPTY_CHANGE;
         }
 
         PrimaryKey pk = (PrimaryKey) changedObject;
@@ -121,6 +121,6 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
             control.setAlreadyHandledChanged(new UniqueConstraint().setRelation(pk.getTable()).setColumns(comparedColumns));
         }
 
-        return returnList.toArray(new Change[returnList.size()]);
+        return returnList.toArray(EMPTY_CHANGE);
     }
 }

@@ -34,7 +34,7 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
         List<String> associatedWith = StringUtil.splitAndTrim(statement.getAssociatedWith(), ",");
         if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains
             (Index.MARK_UNIQUE_CONSTRAINT) || associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
-            return new Sql[0];
+            return EMPTY_SQL;
         }
 
         StringBuilder buffer = new StringBuilder();

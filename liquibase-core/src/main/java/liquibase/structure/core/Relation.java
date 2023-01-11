@@ -2,7 +2,6 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,6 +101,7 @@ public abstract class Relation extends AbstractDatabaseObject {
         return setSchema(new Schema(catalog, schema));
     }
 
+    @Override
     public int compareTo(Object o) {
         Relation that = (Relation) o;
         int returnValue = 0;

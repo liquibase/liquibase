@@ -3,7 +3,6 @@ package liquibase.serializer;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
 
@@ -57,11 +56,7 @@ public class ChangeLogSerializerFactory {
 
     public void register(ChangeLogSerializer changeLogSerializer) {
         for (String extension : changeLogSerializer.getValidFileExtensions()) {
-            List<ChangeLogSerializer> changeLogSerializers = serializers.get(extension);
-            if (changeLogSerializers == null) {
-                changeLogSerializers = new ArrayList<>();
-                serializers.put(extension, changeLogSerializers);
-            }
+            List<ChangeLogSerializer> changeLogSerializers = serializers.computeIfAbsent(extension, k -> new ArrayList<>());
             changeLogSerializers.add(changeLogSerializer);
             Collections.sort(changeLogSerializers, PrioritizedService.COMPARATOR);
         }

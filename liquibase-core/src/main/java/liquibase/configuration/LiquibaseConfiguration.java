@@ -105,21 +105,37 @@ public class LiquibaseConfiguration implements SingletonObject {
         return Collections.unmodifiableSortedSet(this.configurationValueProviders);
     }
 
+    /**
+     * Convenience method for {@link #getCurrentConfiguredValue(ConfigurationValueConverter, ConfigurationValueObfuscator, ConfigurationValueProvider[], String...)}
+     * with no additional value providers.
+     */
+    public <DataType> ConfiguredValue<DataType> getCurrentConfiguredValue(ConfigurationValueConverter<DataType> converter, ConfigurationValueObfuscator<DataType> obfuscator, String... keyAndAliases) {
+        return this.getCurrentConfiguredValue(converter, obfuscator, null, keyAndAliases);
+    }
 
     /**
      * Searches for the given keys in the current providers and applies any applicable modifiers.
      *
      * @param keyAndAliases The first element should be the canonical key name, with later elements being aliases. At least one element must be provided.
+     * @param additionalValueProviders additional {@link ConfigurationValueProvider}s to use with higher priority than the ones registered in {@link LiquibaseConfiguration}. The higher the array index, the higher the priority. Can be null.
      * @return the value for the key, or null if not configured.
      */
-    public <DataType> ConfiguredValue<DataType> getCurrentConfiguredValue(ConfigurationValueConverter<DataType> converter, ConfigurationValueObfuscator<DataType> obfuscator, String... keyAndAliases) {
+    public <DataType> ConfiguredValue<DataType> getCurrentConfiguredValue(ConfigurationValueConverter<DataType> converter,
+                                                                          ConfigurationValueObfuscator<DataType> obfuscator,
+                                                                          ConfigurationValueProvider[] additionalValueProviders,
+                                                                          String... keyAndAliases) {
         if (keyAndAliases == null || keyAndAliases.length == 0) {
             throw new IllegalArgumentException("Must specify at least one key");
         }
 
         ConfiguredValue<DataType> details = new ConfiguredValue<>(keyAndAliases[0], converter, obfuscator);
 
-        for (ConfigurationValueProvider provider : configurationValueProviders) {
+        List<ConfigurationValueProvider> finalValueProviders = new ArrayList<>(configurationValueProviders);
+        if (additionalValueProviders != null) {
+            finalValueProviders.addAll(Arrays.asList(additionalValueProviders));
+        }
+
+        for (ConfigurationValueProvider provider : finalValueProviders) {
             final ProvidedValue providerValue = provider.getProvidedValue(keyAndAliases);
 
             if (providerValue != null) {
@@ -142,20 +158,26 @@ public class LiquibaseConfiguration implements SingletonObject {
                     if (foundFirstValue) {
                         logMessage.append("Overrides ");
                     }
-                    logMessage.append(StringUtil.lowerCaseFirst(providedValue.describe()));
+
+                    //
+                    // Only lower case the first character is
+                    // the first two characters are NOT uppercase.  This allows provider
+                    // strings like 'AWS' to be displayed correctly, i.e. as 'AWS', not 'aWS'
+                    //
+                    String describe = providedValue.describe();
+                    char[] chars = describe.toCharArray();
+                    if (chars.length >= 2 && Character.isUpperCase(chars[0]) && Character.isUpperCase(chars[1])) {
+                        logMessage.append(describe);
+                    } else {
+                        logMessage.append(StringUtil.lowerCaseFirst(describe));
+                    }
                     Object value = providedValue.getValue();
                     if (value != null) {
-                        if (converter != null) {
-                            value = converter.convert(value);
-                        }
+                        String finalValue = String.valueOf(value);
                         if (obfuscator != null) {
-                            try {
-                                value = obfuscator.obfuscate((DataType) value);
-                            } catch (ClassCastException e) {
-                                value = "*****";
-                            }
+                            finalValue = "*****";
                         }
-                        logMessage.append(" of '").append(value).append("'");
+                        logMessage.append(" of '").append(finalValue).append("'");
                     }
                     foundFirstValue = true;
                 }

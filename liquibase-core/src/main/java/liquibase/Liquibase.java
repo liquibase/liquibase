@@ -6,7 +6,9 @@ import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.command.CommandScope;
+import liquibase.command.core.DbUrlConnectionCommandStep;
 import liquibase.command.core.InternalDropAllCommandStep;
+import liquibase.command.core.TagCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -34,7 +36,6 @@ import liquibase.logging.core.CompositeLogService;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.resource.InputStreamList;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
@@ -234,7 +235,6 @@ public class Liquibase implements AutoCloseable {
      */
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
-
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             lockService.waitForLock();
 
@@ -1883,30 +1883,14 @@ public class Liquibase implements AutoCloseable {
 
     /**
      * 'Tags' the database for future rollback
+     *
+     * @deprecated Use {link {@link CommandScope(String)} to tag instead of this method.
      */
     public void tag(String tagString) throws LiquibaseException {
-        runInScope(new Scope.ScopedRunner() {
-            @Override
-            public void run() throws Exception {
-
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                lockService.waitForLock();
-
-                try {
-                    ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
-
-                    checkLiquibaseTables(false, null, new Contexts(),
-                            new LabelExpression());
-                    getDatabase().tag(tagString);
-                } finally {
-                    try {
-                        lockService.releaseLock();
-                    } catch (LockException e) {
-                        LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                    }
-                }
-            }
-        });
+        new CommandScope("tag")
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(TagCommandStep.TAG_ARG, tagString)
+                .execute();
     }
 
     public boolean tagExists(String tagString) throws LiquibaseException {

@@ -151,7 +151,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
         try (
-                Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+                Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())
         )
         {
             CSVReader csvReader = new CSVReader(reader);
@@ -210,7 +210,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 Reader reader = new InputStreamReader(new FileInputStream(oldFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
                 Writer writer = new OutputStreamWriter(new FileOutputStream(newFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
                 CSVReader csvReader = new CSVReader(reader);
-                CSVWriter csvWriter = new CSVWriter(writer);
+                CSVWriter csvWriter = new CSVWriter(writer)
         )
         {
             String[] line;
@@ -238,7 +238,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 Reader reader = new InputStreamReader(new FileInputStream(oldFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
                 Writer writer = new OutputStreamWriter(new FileOutputStream(newFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
                 CSVReader csvReader = new CSVReader(reader);
-                CSVWriter csvWriter = new CSVWriter(writer);
+                CSVWriter csvWriter = new CSVWriter(writer)
         )
         {
             String[] line;
@@ -327,7 +327,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             lastChangeSetSequenceValue = 0;
 
             try (
-                    Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+                    Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())
             )
             {
                 

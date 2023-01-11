@@ -54,7 +54,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     }
 
     /**
-     * Convenience method around {@link #getCurrentConfiguredValue()} to return the value.
+     * Convenience method around {@link #getCurrentConfiguredValue(ConfigurationValueProvider...)} to return the value.
      */
     public DataType getCurrentValue() {
         final Object value = getCurrentConfiguredValue().getProvidedValue().getValue();
@@ -70,7 +70,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     }
 
     /**
-     * Convenience method around {@link #getCurrentConfiguredValue()} to return the obfuscated version of the value.
+     * Convenience method around {@link #getCurrentConfiguredValue(ConfigurationValueProvider...)} to return the obfuscated version of the value.
      *
      * @return the obfuscated value, or the plain-text value if no obfuscator is defined for this definition.
      */
@@ -83,13 +83,23 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
      * Will always return a {@link ConfiguredValue},
      */
     public ConfiguredValue<DataType> getCurrentConfiguredValue() {
+        return getCurrentConfiguredValue(new ConfigurationValueProvider[]{});
+    }
+
+    /**
+     * @return Full details on the current value for this definition.
+     * Will always return a {@link ConfiguredValue},
+     *
+     * @param additionalValueProviders additional {@link ConfigurationValueProvider}s to use with higher priority than the ones registered in {@link LiquibaseConfiguration}. The higher the array index, the higher the priority.
+     */
+    public ConfiguredValue<DataType> getCurrentConfiguredValue(ConfigurationValueProvider... additionalValueProviders) {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
 
         List<String> keyList = new ArrayList<>();
         keyList.add(this.getKey());
         keyList.addAll(this.getAliasKeys());
 
-        ConfiguredValue<?> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(valueConverter, valueObfuscator, keyList.toArray(new String[0]));
+        ConfiguredValue<?> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(valueConverter, valueObfuscator, additionalValueProviders, keyList.toArray(new String[0]));
 
         if (!configurationValue.found()) {
             defaultValue = this.getDefaultValue();

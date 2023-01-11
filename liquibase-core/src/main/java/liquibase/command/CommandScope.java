@@ -10,6 +10,7 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * The primary facade used for executing commands.
@@ -21,10 +22,10 @@ import java.util.*;
  */
 public class CommandScope {
 
+    public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(".*\\.");
     private final CommandDefinition commandDefinition;
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
-    private final CommandScopeValueProvider commandScopeValueProvider = new CommandScopeValueProvider();
 
     /**
      * Config key including the command name. Example `liquibase.command.update`
@@ -98,7 +99,7 @@ public class CommandScope {
      */
     public <T> ConfiguredValue<T> getConfiguredValue(CommandArgumentDefinition<T> argument) {
         ConfigurationDefinition<T> configDef = createConfigurationDefinition(argument, true);
-        ConfiguredValue<T> providedValue = configDef.getCurrentConfiguredValue();
+        ConfiguredValue<T> providedValue = configDef.getCurrentConfiguredValue(new CommandScopeValueProvider());
 
         if (!providedValue.found() || providedValue.wasDefaultValueUsed()) {
             ConfigurationDefinition<T> noCommandConfigDef = createConfigurationDefinition(argument, false);
@@ -108,8 +109,6 @@ public class CommandScope {
                 providedValue = noCommandNameProvidedValue;
             }
         }
-
-        providedValue.override(commandScopeValueProvider.getProvidedValue(configDef.getKey(), argument.getName()));
 
         return providedValue;
     }
@@ -172,6 +171,14 @@ public class CommandScope {
             for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
             }
+
+            // after executing our pipeline, runs cleanup in inverse order
+            for (int i = pipeline.size() -1; i >= 0; i--) {
+                CommandStep command = pipeline.get(i);
+                if (command instanceof CleanUpCommandStep) {
+                    ((CleanUpCommandStep)command).cleanUp(resultsBuilder);
+                }
+            }
         } catch (Exception e) {
             if (e instanceof CommandExecutionException) {
                 throw (CommandExecutionException) e;
@@ -232,6 +239,9 @@ public class CommandScope {
         }
     }
 
+    /**
+     * Adapts the command-scoped arguments into the overall ValueProvider system
+     */
     private class CommandScopeValueProvider extends AbstractMapConfigurationValueProvider {
 
         @Override
@@ -247,6 +257,20 @@ public class CommandScope {
         @Override
         protected String getSourceDescription() {
             return "Command argument";
+        }
+
+        @Override
+        public ProvidedValue getProvidedValue(String... keyAndAliases) {
+            return super.getProvidedValue(keyAndAliases);
+        }
+
+        @Override
+        protected boolean keyMatches(String wantedKey, String storedKey) {
+            if (wantedKey.contains(".")) {
+                return super.keyMatches(NO_PREFIX_PATTERN.matcher(wantedKey).replaceFirst(""), storedKey);
+            } else {
+                return super.keyMatches(wantedKey, storedKey);
+            }
         }
     }
 }

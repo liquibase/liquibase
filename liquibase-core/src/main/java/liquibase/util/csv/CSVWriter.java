@@ -2,13 +2,10 @@ package liquibase.util.csv;
 
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
-import liquibase.util.ISODateFormat;
 
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class CSVWriter implements AutoCloseable, Flushable {
     private final ICSVWriter delegate;
@@ -26,6 +23,7 @@ public class CSVWriter implements AutoCloseable, Flushable {
         delegate.writeNext(nextLine);
     }
 
+    @Override
     public void flush() throws IOException {
         delegate.flush();
     }

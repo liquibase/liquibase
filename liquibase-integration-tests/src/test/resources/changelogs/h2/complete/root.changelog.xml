@@ -374,5 +374,34 @@
             <column name="after_name" type="int" afterColumn="name"/>
         </addColumn>
     </changeSet>
+    <changeSet id="Test_DataType_Table" author="nvoxland">
+        <createTable tableName="Test_DataType">
+            <column name="id" type="int"/>
+            <column name="typeColumn" type="int"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="TestIntType" author="mallod">
+        <modifyDataType tableName="Test_DataType" columnName="typeColumn" newDataType="int(20)"/>
+    </changeSet>
+    <changeSet id="TestBigIntType" author="mallod">
+        <modifyDataType tableName="Test_DataType" columnName="typeColumn" newDataType="bigint(20)"/>
+    </changeSet>
+    <changeSet id="TestSmallIntType" author="mallod">
+        <modifyDataType tableName="Test_DataType" columnName="typeColumn" newDataType="smallint(20)"/>
+    </changeSet>
+    <changeSet id="TestTinyIntType" author="mallod">
+        <modifyDataType tableName="Test_DataType" columnName="typeColumn" newDataType="tinyint(20)"/>
+    </changeSet>
+
+    <!-- changesets with ids 2659 are testing if creating a view camel case with quotes won't break subsequent
+     preConditions snapshots of it -->
+    <changeSet id="2659-Create-MyView-with-quotes" author="flautert" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <createView viewName="MyViewBreakDb" replaceIfExists="true">select 1</createView>
+    </changeSet>
+
+    <changeSet id="2659-Create-MyView-with-quotes-test-must-MARK_RAN" author="flautert" >
+        <preConditions onFail="MARK_RAN"><tableExists tableName="NOT_EXISTENT_TABLE"/></preConditions>
+        <dropTable tableName="NOT_EXISTENT_TABLE_DOESNT_MATTER"/>
+    </changeSet>
 
 </databaseChangeLog>
