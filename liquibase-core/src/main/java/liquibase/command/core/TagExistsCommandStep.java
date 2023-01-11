@@ -21,7 +21,8 @@ public class TagExistsCommandStep  extends AbstractCommandStep {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         TAG_ARG = builder.argument("tag", String.class).required().description("Tag to check").build();
         DATABASE_ARG = builder.databaseArgument().build();
-        LOCK_SERVICE_ARG = builder.argument("LockService", LockService.class).description("Lock Service").build();
+        LOCK_SERVICE_ARG = builder.argument("LockService", LockService.class)
+                .hidden().description("Lock Service").build();
 
         TAG_EXISTS_RESULT = builder.result("tagExistsResult", Boolean.class).build();
     }

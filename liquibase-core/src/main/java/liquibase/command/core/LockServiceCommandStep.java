@@ -21,7 +21,7 @@ public class LockServiceCommandStep extends AbstractCommandStep implements Clean
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         DATABASE_ARG = builder.databaseArgument().build();
-        LOCK_SERVICE_ARG = builder.argument("LockService", LockService.class).description("Lock Service").build();
+        LOCK_SERVICE_ARG = builder.argument("LockService", LockService.class).hidden().description("Lock Service").build();
     }
 
     @Override

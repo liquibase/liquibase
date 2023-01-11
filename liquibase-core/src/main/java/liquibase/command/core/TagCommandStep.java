@@ -19,7 +19,7 @@ public class TagCommandStep extends AbstractCommandStep {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         TAG_ARG = builder.argument("tag", String.class).required().description("Tag to add to the database changelog table").build();
         DATABASE_ARG = builder.databaseArgument().build();
-        LOCK_SERVICE_ARG = builder.argument("LockService", LockService.class).description("Lock Service").build();
+        LOCK_SERVICE_ARG = builder.argument("LockService", LockService.class).hidden().description("Lock Service").build();
     }
 
     @Override
