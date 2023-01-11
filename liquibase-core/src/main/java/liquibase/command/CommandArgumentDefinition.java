@@ -9,7 +9,10 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -27,7 +30,6 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private final String name;
     private SortedSet<String> aliases = new TreeSet<>();
     private final Class<DataType> dataType;
-
     private String description;
     private boolean required;
     private boolean hidden;
@@ -35,6 +37,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     private String defaultValueDescription;
     private ConfigurationValueConverter<DataType> valueConverter;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
+    private CommandArgumentDefinition<?> supersededBy;
 
     protected CommandArgumentDefinition(String name, Class<DataType> type) {
         this.name = name;
@@ -76,6 +79,14 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      */
     public boolean isRequired() {
         return required;
+    }
+
+    public CommandArgumentDefinition<?> getSupersededBy() {
+        return this.supersededBy;
+    }
+
+    public void setSupersededBy(CommandArgumentDefinition<?> supersededBy) {
+        this.supersededBy = supersededBy;
     }
 
     /**
@@ -122,8 +133,9 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
      */
     public void validate(CommandScope commandScope) throws CommandValidationException {
         final DataType currentValue = commandScope.getArgumentValue(this);
-        if (this.isRequired() && currentValue == null) {
-            throw new CommandValidationException(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getCurrentValue().convert(this.getName()), "missing required argument", new MissingRequiredArgumentException(this.getName()));
+        if (this.isRequired() && currentValue == null &&
+           (this.getSupersededBy()  == null || commandScope.getArgumentValue(this.getSupersededBy()) == null)) {
+                throw new CommandValidationException(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getCurrentValue().convert(this.getName()), "missing required argument", new MissingRequiredArgumentException(this.getName()));
         }
     }
 
@@ -182,6 +194,16 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
          */
         public Building<DataType> required() {
             this.newCommandArgument.required = true;
+
+            return this;
+        }
+
+        /**
+         * Specifies a CommandArgument that can replace this one if it is not available.
+         *
+         */
+        public Building<DataType> supersededBy(CommandArgumentDefinition<?> commandArgumentDefinition) {
+            this.newCommandArgument.supersededBy = commandArgumentDefinition;
 
             return this;
         }
