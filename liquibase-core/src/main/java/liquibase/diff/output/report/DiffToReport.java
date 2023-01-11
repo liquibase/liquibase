@@ -169,7 +169,7 @@ public class DiffToReport {
     protected String includeSchemaComparison(String schemaName) {
         String convertedSchemaName = CompareControl.SchemaComparison.convertSchema(schemaName, diffResult.getCompareControl().getSchemaComparisons());
 
-        if ((convertedSchemaName != null) && !convertedSchemaName.equals(schemaName)) {
+        if (!convertedSchemaName.equals(schemaName)) {
             schemaName = schemaName + " -> " + convertedSchemaName;
         }
         return schemaName;

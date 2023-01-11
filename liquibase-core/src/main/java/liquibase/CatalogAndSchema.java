@@ -84,7 +84,7 @@ public class CatalogAndSchema {
         }
 
         if (accordingTo.supportsSchemas()) {
-            if ((workSchemaName != null) && workSchemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
+            if (workSchemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
                 workSchemaName = null;
             }
         } else {

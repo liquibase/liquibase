@@ -71,9 +71,9 @@ public class CatalogComparator extends CommonCatalogSchemaComparator {
                 String finalCatalog1 = thisSchema.getCatalogName();
                 String finalCatalog2 = otherSchema.getCatalogName();
 
-                if ((comparisonCatalog1 != null) && comparisonCatalog1.equalsIgnoreCase(finalCatalog1)) {
+                if (comparisonCatalog1.equalsIgnoreCase(finalCatalog1)) {
                     finalCatalog1 = comparisonCatalog2;
-                } else if ((comparisonCatalog2 != null) && comparisonCatalog2.equalsIgnoreCase(finalCatalog1)) {
+                } else if (comparisonCatalog2.equalsIgnoreCase(finalCatalog1)) {
                     finalCatalog1 = comparisonCatalog1;
                 }
 
@@ -81,9 +81,9 @@ public class CatalogComparator extends CommonCatalogSchemaComparator {
                     return true;
                 }
 
-                if ((comparisonCatalog1 != null) && comparisonCatalog1.equalsIgnoreCase(finalCatalog2)) {
+                if (comparisonCatalog1.equalsIgnoreCase(finalCatalog2)) {
                     finalCatalog2 = comparisonCatalog2;
-                } else if ((comparisonCatalog2 != null) && comparisonCatalog2.equalsIgnoreCase(finalCatalog2)) {
+                } else if (comparisonCatalog2.equalsIgnoreCase(finalCatalog2)) {
                     finalCatalog2 = comparisonCatalog1;
                 }
 

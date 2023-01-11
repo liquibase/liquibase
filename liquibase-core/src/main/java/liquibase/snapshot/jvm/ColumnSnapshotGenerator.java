@@ -287,7 +287,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         Object defaultValue = readDefaultValue(columnMetadataResultSet, column, database);
 
         // TODO Is uppercasing the potential function name always a good idea?
-        // In theory, we could get a quoted function name (inprobable, but not impossible)
+        // In theory, we could get a quoted function name (improbable, but not impossible)
         if ((defaultValue instanceof DatabaseFunction) && ((DatabaseFunction) defaultValue)
                 .getValue().matches("\\w+")) {
             defaultValue = new DatabaseFunction(((DatabaseFunction) defaultValue).getValue().toUpperCase());

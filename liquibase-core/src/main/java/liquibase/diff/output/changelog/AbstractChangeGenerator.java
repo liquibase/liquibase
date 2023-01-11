@@ -20,7 +20,7 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
                     Object value = change.getSerializableFieldValue(field);
                     if ((value instanceof String)) {
                         String newValue = CompareControl.SchemaComparison.convertSchema((String) value, schemaComparisons);
-                        if ((newValue != null) && !newValue.equalsIgnoreCase((String) value)) {
+                        if (!newValue.equalsIgnoreCase((String) value)) {
                             ObjectUtil.setProperty(change, field, newValue);
                         }
                     }
