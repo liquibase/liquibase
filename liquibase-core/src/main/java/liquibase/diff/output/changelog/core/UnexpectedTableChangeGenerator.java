@@ -47,7 +47,7 @@ public class UnexpectedTableChangeGenerator extends AbstractChangeGenerator impl
 
         for (Column column : unexpectedTable.getColumns()) {
             control.setAlreadyHandledUnexpected(column);
-        };
+        }
         control.setAlreadyHandledUnexpected(unexpectedTable.getPrimaryKey());
 
         for (Index index : unexpectedTable.getIndexes()) {
