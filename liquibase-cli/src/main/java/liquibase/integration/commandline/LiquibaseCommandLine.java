@@ -18,6 +18,8 @@ import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcManager;
 import liquibase.resource.*;
 import liquibase.ui.ConsoleUIService;
 import liquibase.ui.UIService;
@@ -25,6 +27,7 @@ import liquibase.util.*;
 import picocli.CommandLine;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -349,7 +352,14 @@ public class LiquibaseCommandLine {
                     }
 
                     enableMonitoring();
-
+                    MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
+                    mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildNumber());
+                    mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"));
+                    mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, InetAddress.getLocalHost().getHostName());
+                    Scope.getCurrentScope().getLog(getClass()).info("Starting command execution.");
+                    mdcManager.remove(MdcKey.LIQUIBASE_VERSION);
+                    mdcManager.remove(MdcKey.LIQUIBASE_SYSTEM_NAME);
+                    mdcManager.remove(MdcKey.LIQUIBASE_SYSTEM_USER);
                     int response = commandLine.execute(finalArgs);
 
                     if (!wasHelpOrVersionRequested()) {

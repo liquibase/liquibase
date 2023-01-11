@@ -302,11 +302,11 @@ public class Liquibase implements AutoCloseable {
                 //
                 hubUpdater.postUpdateHub(updateOperation, bufferLog);
                 Scope.getCurrentScope().getMdcManager().put(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
-                Scope.getCurrentScope().getLog(getClass()).info("Command completed successfully.");
+                Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
                 Scope.getCurrentScope().getMdcManager().remove(MdcKey.DEPLOYMENT_OUTCOME);
             } catch (Throwable e) {
                 Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
-                Scope.getCurrentScope().getLog(getClass()).info("Command encountered an exception.");
+                Scope.getCurrentScope().getLog(getClass()).info("Update command encountered an exception.");
                 Scope.getCurrentScope().getMdcManager().remove(MdcKey.DEPLOYMENT_OUTCOME);
                 if (hubUpdater != null) {
                     hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
