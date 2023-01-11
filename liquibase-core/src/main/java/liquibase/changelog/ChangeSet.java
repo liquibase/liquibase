@@ -700,11 +700,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (runInTransaction) {
                     database.commit();
                 }
-                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(new Date()));
-                log.info("ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime) + "ms");
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
+                Date stopTime = new Date();
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(stopTime));
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, execType.value.toLowerCase());
+                log.info("ChangeSet " + toString(false) + " ran successfully in " + (stopTime.getTime() - startTime) + "ms");
             } else {
                 log.fine("Skipping ChangeSet: " + toString());
             }

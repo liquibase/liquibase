@@ -327,7 +327,7 @@ public class Main {
                             }
                         }
 
-                        Scope.getCurrentScope().getMdcManager().put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersionInfo());
+                        Scope.getCurrentScope().getMdcManager().put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildNumber());
                         Scope.getCurrentScope().getMdcManager().put(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"));
                         Scope.getCurrentScope().getMdcManager().put(MdcKey.LIQUIBASE_SYSTEM_NAME, InetAddress.getLocalHost().getHostName());
 
@@ -406,7 +406,6 @@ public class Main {
 
                         Scope.child(innerScopeObjects, () -> {
                             main.doMigration();
-                            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
                             if (!Main.runningFromNewCli) {
                                 if (COMMANDS.UPDATE.equals(main.command)) {
                                     Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
@@ -418,7 +417,6 @@ public class Main {
                             }
                         });
                     } catch (Throwable e) {
-                        Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
                         String message = e.getMessage();
                         if (e.getCause() != null) {
                             message = e.getCause().getMessage();
