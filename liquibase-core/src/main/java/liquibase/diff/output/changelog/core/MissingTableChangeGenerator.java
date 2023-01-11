@@ -226,10 +226,10 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                 BigInteger incrementBy = autoIncrementInfo.getIncrementBy();
                 String generationType = autoIncrementInfo.getGenerationType();
                 Boolean defaultOnNull = autoIncrementInfo.getDefaultOnNull();
-                if (!startWith.equals(BigInteger.ONE)) {
+                if ((startWith != null) && !startWith.equals(BigInteger.ONE)) {
                     columnConfig.setStartWith(startWith);
                 }
-                if (!incrementBy.equals(BigInteger.ONE)) {
+                if ((incrementBy != null) && !incrementBy.equals(BigInteger.ONE)) {
                     columnConfig.setIncrementBy(incrementBy);
                 }
                 if (StringUtil.isNotEmpty(generationType)) {

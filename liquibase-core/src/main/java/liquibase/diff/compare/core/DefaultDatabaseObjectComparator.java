@@ -98,7 +98,7 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
      * Otherwise, return the original collection.
      */
     protected Object undoCollection(Object potentialCollection, Object otherObject) {
-        if ((potentialCollection instanceof Collection) &&
+        if ((otherObject != null) && (potentialCollection instanceof Collection) &&
                 !(otherObject instanceof Collection)) {
             if ((((Collection) potentialCollection).size() == 1) && ((Collection) potentialCollection).iterator()
                 .next().getClass().equals(otherObject.getClass())) {
