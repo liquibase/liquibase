@@ -607,6 +607,7 @@ public class DiffToChangeLog {
                 "                              ELSE objid::text\n" +
                 "                              END AS REFERENCED_NAME,\n" +
                 "                          substring(pg_identify_object(refclassid, refobjid, 0)::text, E'(\\\\w+?)\\\\.') as referencing_schema_name, "+
+                "                          refobjid,\n" +
                 "                          CASE refclassid\n" +
                 "                              WHEN 'pg_namespace'::regclass THEN (SELECT nspname FROM pg_namespace WHERE oid = refobjid)\n" +
                 "                              WHEN 'pg_class'::regclass THEN rrel.object_name\n" +
@@ -644,7 +645,8 @@ public class DiffToChangeLog {
                         return " REFERENCED_NAME like '" + obj + ".%' OR REFERENCED_NAME NOT LIKE '%.%'";
                     }
                 })+ ") " +
-                " AND referencing_schema_name is not null and referencing_name is not null";
+                " AND referencing_schema_name is not null and referencing_name is not null" +
+                " ORDER BY refobjid";
     }
 
     protected List<Class<? extends DatabaseObject>> getOrderedOutputTypes(Class<? extends ChangeGenerator> generatorType) {

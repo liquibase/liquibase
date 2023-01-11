@@ -9,7 +9,7 @@ public class DependencyUtil {
 
     public static class DependencyGraph<T> {
 
-        private HashMap<T, GraphNode<T>> nodes = new HashMap<T, GraphNode<T>>();
+        private Map<T, GraphNode<T>> nodes = new LinkedHashMap<T, GraphNode<T>>();
         private NodeValueListener<T> listener;
         private List<GraphNode<T>> evaluatedNodes = new ArrayList<GraphNode<T>>();
 
