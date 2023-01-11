@@ -353,7 +353,7 @@ public class LiquibaseCommandLine {
 
                     enableMonitoring();
                     MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
-                    mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildNumber());
+                    mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
                     mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"));
                     mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, InetAddress.getLocalHost().getHostName());
                     Scope.getCurrentScope().getLog(getClass()).info("Starting command execution.");
