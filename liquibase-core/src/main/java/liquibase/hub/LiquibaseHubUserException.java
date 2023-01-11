@@ -2,6 +2,9 @@ package liquibase.hub;
 
 public class LiquibaseHubUserException extends LiquibaseHubException {
 
+
+    private static final long serialVersionUID = 4712210338853061380L;
+
     public LiquibaseHubUserException() {
     }
 
