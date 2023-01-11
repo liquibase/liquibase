@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ExecutorService extends AbstractPluginFactory<Executor>  {
 
-    private final Map<Key, Executor> executors = new ConcurrentHashMap<>();
+    private final Map<String, Executor> executors = new ConcurrentHashMap<>();
 
     private ExecutorService() {
     }
@@ -32,8 +32,8 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
 
     }
 
-    private Key createKey(String executorName, Database database) {
-        return new Key(executorName, database);
+    private String createKey(String executorName, Database database) {
+        return executorName.toLowerCase() + "#" + System.identityHashCode(database);
     }
 
     private Executor getExecutorValue(String executorName, Database database) throws UnexpectedLiquibaseException {
@@ -116,45 +116,5 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
 
     public void reset() {
         executors.clear();
-    }
-
-    private static class Key {
-        private final String executorName;
-        private final Database database;
-
-        Key(String executorName, Database database) {
-            this.executorName = normalizeExecutorName(executorName);
-            this.database = database;
-        }
-
-        private String normalizeExecutorName(String executorName) {
-            return executorName.toLowerCase();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Key key = (Key) o;
-            return Objects.equals(executorName, key.executorName)
-                    && database == key.database; // equality by reference to be consistent with hashCode
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(
-                    executorName,
-                    // this class already relied on identity hash code. It bypasses e.g. AbstractJdbcDatabase's hashCode
-                    System.identityHashCode(database)
-            );
-        }
-
-        @Override
-        public String toString() {
-            return "Key{" +
-                    "executorName='" + executorName + '\'' +
-                    ", database=" + database +
-                    '}';
-        }
     }
 }

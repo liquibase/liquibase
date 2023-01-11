@@ -9,12 +9,10 @@ public class MockCommandStep extends AbstractCommandStep {
 
     public static MockCommandStep logic;
 
-    public static final String[] COMMAND_NAME = {"mock"};
-
     public static final CommandArgumentDefinition<String> VALUE_1_ARG;
 
     static {
-        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
+        CommandBuilder builder = new CommandBuilder(new String[]{"mock"});
 
         VALUE_1_ARG = builder.argument("value1", String.class)
                 .description("Value 1").build();
@@ -29,7 +27,7 @@ public class MockCommandStep extends AbstractCommandStep {
 
     @Override
     public String[][] defineCommandNames() {
-        return new String[][]{COMMAND_NAME};
+        return new String[][]{new String[] {"mock"}};
     }
 
     @Override

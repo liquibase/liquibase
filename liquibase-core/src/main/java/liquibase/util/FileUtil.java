@@ -16,7 +16,7 @@ public class FileUtil {
             return null;
         }
         try (
-            FileInputStream fileInputStream = new FileInputStream(file)
+            FileInputStream fileInputStream = new FileInputStream(file);
         ) {
             
             return StreamUtil.readStreamAsString(fileInputStream);

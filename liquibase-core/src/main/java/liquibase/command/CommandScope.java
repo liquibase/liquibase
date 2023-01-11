@@ -171,14 +171,6 @@ public class CommandScope {
             for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
             }
-
-            // after executing our pipeline, runs cleanup in inverse order
-            for (int i = pipeline.size() -1; i >= 0; i--) {
-                CommandStep command = pipeline.get(i);
-                if (command instanceof CleanUpCommandStep) {
-                    ((CleanUpCommandStep)command).cleanUp(resultsBuilder);
-                }
-            }
         } catch (Exception e) {
             if (e instanceof CommandExecutionException) {
                 throw (CommandExecutionException) e;

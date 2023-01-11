@@ -3,7 +3,6 @@ package liquibase.changelog.filter;
 import liquibase.changelog.ChangeSet;
 
 public class IgnoreChangeSetFilter implements ChangeSetFilter {
-    @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         if (changeSet.isIgnore()) {
             return new ChangeSetFilterResult(false, "Changeset is ignored", this.getClass());

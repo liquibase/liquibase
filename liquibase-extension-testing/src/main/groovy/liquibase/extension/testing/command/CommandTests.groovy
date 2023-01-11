@@ -257,6 +257,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             outputStream = new FileOutputStream(testDef.outputFile)
         }
 
+        commandScope.addArgumentValue("database", database)
         commandScope.setOutput(outputStream)
 
         if (testDef.setup != null) {

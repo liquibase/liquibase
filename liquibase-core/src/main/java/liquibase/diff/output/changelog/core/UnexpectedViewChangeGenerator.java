@@ -49,7 +49,7 @@ public class UnexpectedViewChangeGenerator extends AbstractChangeGenerator imple
 
         for (Column column : view.getColumns()) {
             control.setAlreadyHandledUnexpected(column);
-        }
+        };
 
 
         return new Change[]{change};

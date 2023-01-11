@@ -48,7 +48,6 @@ public class CalculateChecksumCommandStep extends AbstractCliWrapperCommandStep 
     }
 
 
-    @Override
     protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
         return collectArguments(commandScope, null, CHANGESET_IDENTIFIER_ARG.getName());
     }

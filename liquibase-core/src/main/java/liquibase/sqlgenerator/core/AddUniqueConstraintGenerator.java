@@ -83,7 +83,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
                 sql += " ON " + statement.getTablespace();
             } else if ((database instanceof AbstractDb2Database) || (database instanceof SybaseASADatabase) || (database
                 instanceof InformixDatabase)) {
-                //not supported
+                ; //not supported
             } else if (database instanceof OracleDatabase) {
                 /*
                  * In Oracle, you can use only exactly one of these clauses:

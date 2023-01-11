@@ -141,7 +141,6 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.procedureText = procedureText;
     }
 
-    @Override
     @DatabaseChangeProperty(
         exampleValue = "h2, oracle",
         since = "3.1"
@@ -150,7 +149,6 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return dbms;
     }
 
-    @Override
     public void setDbms(final String dbms) {
         this.dbms = dbms;
     }

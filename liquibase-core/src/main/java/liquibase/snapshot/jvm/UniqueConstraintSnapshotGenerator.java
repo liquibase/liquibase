@@ -406,7 +406,11 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 snapshot.setScratchData(cacheKey, columnCache);
                 for (Map<String, ?> row : rows) {
                     String key = getCacheKey(row, database);
-                    List<Map<String, ?>> constraintRows = columnCache.computeIfAbsent(key, k -> new ArrayList<>());
+                    List<Map<String, ?>> constraintRows = columnCache.get(key);
+                    if (constraintRows == null) {
+                        constraintRows = new ArrayList<>();
+                        columnCache.put(key, constraintRows);
+                    }
                     constraintRows.add(row);
                 }
 

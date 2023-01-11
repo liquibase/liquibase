@@ -82,7 +82,7 @@ public class NamespaceDetailsFactory {
     private class SerializerNamespaceDetailsComparator implements Comparator<NamespaceDetails> {
         @Override
         public int compare(NamespaceDetails o1, NamespaceDetails o2) {
-            return Integer.compare(o2.getPriority(), o1.getPriority());
+            return Integer.valueOf(o2.getPriority()).compareTo(o1.getPriority());
         }
     }
 }

@@ -98,7 +98,6 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return "varchar";
     }
 
-    @Override
     public void init() throws DatabaseException {
         if (serviceInitialized) {
             return;
@@ -305,7 +304,6 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     /**
      * Returns the ChangeSets that have been run against the current getDatabase().
      */
-    @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
         if (this.ranChangeSetList == null) {
             Database database = getDatabase();

@@ -1202,7 +1202,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void close() throws DatabaseException {
       Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("jdbc", this);
-      try (final DatabaseConnection connection = getConnection()) {
+      try (final DatabaseConnection connection = getConnection();) {
         if (connection != null && previousAutoCommit != null) {
           connection.setAutoCommit(previousAutoCommit);
         }

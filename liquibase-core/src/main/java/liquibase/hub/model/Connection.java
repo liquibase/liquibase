@@ -15,7 +15,6 @@ public class Connection implements HubModel {
 
     private Project project;
 
-    @Override
     public UUID getId() {
         return id;
     }

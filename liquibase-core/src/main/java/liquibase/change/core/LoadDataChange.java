@@ -121,7 +121,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         return true;
     }
 
-    @Override
     @DatabaseChangeProperty(description = "Name of the table to insert data into",
             requiredForDatabase = ALL, mustEqualExisting = "table")
     public String getTableName() {

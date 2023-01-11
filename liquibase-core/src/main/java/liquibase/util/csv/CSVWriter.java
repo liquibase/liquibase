@@ -23,7 +23,6 @@ public class CSVWriter implements AutoCloseable, Flushable {
         delegate.writeNext(nextLine);
     }
 
-    @Override
     public void flush() throws IOException {
         delegate.flush();
     }

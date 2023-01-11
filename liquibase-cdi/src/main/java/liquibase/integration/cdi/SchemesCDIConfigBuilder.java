@@ -68,7 +68,6 @@ public class SchemesCDIConfigBuilder {
         final InputStream is = SchemesCDIConfigBuilder.class.getResourceAsStream(SCHEMA_NAME);
         try {
             return jvmLocked(id, new Callable<CDILiquibaseConfig>() {
-                @Override
                 public CDILiquibaseConfig call() throws Exception {
                     return createCDILiquibaseConfig(id, is);
                 }
@@ -191,7 +190,7 @@ public class SchemesCDIConfigBuilder {
         FileLock lock = null;
         try (
                 FileOutputStream fileStream = new FileOutputStream(lockPath);
-                FileChannel fileChannel = fileStream.getChannel()
+                FileChannel fileChannel = fileStream.getChannel();
         )
         {
             while (null == lock) {

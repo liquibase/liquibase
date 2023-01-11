@@ -101,7 +101,6 @@ public abstract class Relation extends AbstractDatabaseObject {
         return setSchema(new Schema(catalog, schema));
     }
 
-    @Override
     public int compareTo(Object o) {
         Relation that = (Relation) o;
         int returnValue = 0;

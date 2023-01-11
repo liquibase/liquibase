@@ -312,7 +312,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         T object = chain.snapshot(example, this);
 
         if (object == null) {
-            Set<DatabaseObject> collection = knownNull.computeIfAbsent(example.getClass(), k -> new HashSet<>());
+            Set<DatabaseObject> collection = knownNull.get(example.getClass());
+            if (collection == null) {
+                collection = new HashSet<>();
+                knownNull.put(example.getClass(), collection);
+            }
             collection.add(example);
 
             if (example instanceof Schema) {

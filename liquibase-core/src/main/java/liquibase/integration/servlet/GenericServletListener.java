@@ -178,7 +178,6 @@ abstract class GenericServletListener {
                 machine = machine.trim();
                 if (hostName.equalsIgnoreCase(machine)) {
                     shouldRun = true;
-                    break;
                 }
             }
         } else if (machineExcludes != null) {
@@ -187,7 +186,6 @@ abstract class GenericServletListener {
                 machine = machine.trim();
                 if (hostName.equalsIgnoreCase(machine)) {
                     shouldRun = false;
-                    break;
                 }
             }
         }

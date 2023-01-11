@@ -42,7 +42,7 @@ public class EmptyLineAndCommentSkippingInputStream extends BufferedInputStream 
         if (commentSkipEnabled && (read == this.commentLineStartsWith.toCharArray()[0])
                 && (lastRead == '\n' || lastRead < 0)) {
             while ((((read = super.read())) != '\n') && (read != '\r') && (read > 0)) {
-                //keep looking
+                ;//keep looking
             }
         }
 

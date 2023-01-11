@@ -11,7 +11,6 @@ import liquibase.database.core.*;
 import liquibase.diff.DiffResult;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
-import liquibase.diff.compare.DatabaseObjectCollectionComparator;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -26,17 +25,13 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
-import liquibase.util.DependencyUtil;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
+import liquibase.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -256,7 +251,7 @@ public class DiffToChangeLog {
 
     public List<ChangeSet> generateChangeSets() {
         final ChangeGeneratorFactory changeGeneratorFactory = ChangeGeneratorFactory.getInstance();
-        DatabaseObjectCollectionComparator comparator = new DatabaseObjectCollectionComparator();
+        DatabaseObjectComparator comparator = new DatabaseObjectComparator();
 
         String created = null;
         if (GlobalConfiguration.GENERATE_CHANGESET_CREATED_VALUES.getCurrentValue()) {
@@ -270,9 +265,9 @@ public class DiffToChangeLog {
         // This is to avoid changing the MissingObjectChangeGenerator API and still be able to pass the
         // initial DiffResult Object which can be used to check for the objects available in the database
         // without doing any expensive db calls. Example usage is in MissingUniqueConstraintChangeGenerator#alreadyExists()
-        Database comparisonDatabase = diffResult.getComparisonSnapshot().getDatabase();
-        if (comparisonDatabase instanceof AbstractJdbcDatabase) {
-            ((AbstractJdbcDatabase) comparisonDatabase).set("diffResult", diffResult);
+        Database comparisionDatabase = diffResult.getComparisonSnapshot().getDatabase();
+        if (comparisionDatabase instanceof AbstractJdbcDatabase) {
+            ((AbstractJdbcDatabase) comparisionDatabase).set("diffResult", diffResult);
         }
 
         for (Class<? extends DatabaseObject> type : types) {
@@ -288,7 +283,7 @@ public class DiffToChangeLog {
         types = getOrderedOutputTypes(MissingObjectChangeGenerator.class);
         List<DatabaseObject> missingObjects = new ArrayList<DatabaseObject>();
         for (Class<? extends DatabaseObject> type : types) {
-            for (DatabaseObject object : diffResult.getMissingObjects(type, getDatabaseObjectCollectionComparator())) {
+            for (DatabaseObject object : diffResult.getMissingObjects(type, getDbObjectComparator())) {
                 if (object == null) {
                     continue;
                 }
@@ -320,8 +315,8 @@ public class DiffToChangeLog {
             }
         }
         // remove the diffResult from the database object
-        if (comparisonDatabase instanceof AbstractJdbcDatabase) {
-            ((AbstractJdbcDatabase) comparisonDatabase).set("diffResult", null);
+        if (comparisionDatabase instanceof AbstractJdbcDatabase) {
+            ((AbstractJdbcDatabase) comparisionDatabase).set("diffResult", null);
         }
 
 
@@ -332,8 +327,8 @@ public class DiffToChangeLog {
         return changeSets;
     }
 
-    private DatabaseObjectCollectionComparator getDatabaseObjectCollectionComparator() {
-        return new DatabaseObjectCollectionComparator() {
+    private DatabaseObjectComparator getDbObjectComparator() {
+        return new DatabaseObjectComparator() {
             @Override
             public int compare(DatabaseObject o1, DatabaseObject o2) {
                 if (o1 instanceof Column && o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null && o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) {
@@ -341,15 +336,15 @@ public class DiffToChangeLog {
                     if (i != 0) {
                         return i;
                     }
-                } else if (o1 instanceof StoredDatabaseLogic) {
-                    if (o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null && o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) {
-                        int order = o1.getAttribute(ORDER_ATTRIBUTE, Long.class).compareTo(o2.getAttribute(ORDER_ATTRIBUTE, Long.class));
-                        if (order != 0) {
-                            return order;
-                        }
+                } else if (o1 instanceof StoredDatabaseLogic && o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null
+                        && o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) {
+                    int order = o1.getAttribute(ORDER_ATTRIBUTE, Long.class).compareTo(o2.getAttribute(ORDER_ATTRIBUTE, Long.class));
+                    if (order != 0) {
+                        return order;
                     }
                 }
                 return super.compare(o1, o2);
+
             }
         };
     }

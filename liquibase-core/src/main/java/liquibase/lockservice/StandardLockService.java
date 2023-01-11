@@ -133,8 +133,33 @@ public class StandardLockService implements LockService {
                     database.commit();
                 }
 
-                handleOldChangelogTableFormat(executor);
-                break;
+                if (executor.updatesDatabase() && (database instanceof DerbyDatabase) && ((DerbyDatabase) database)
+                        .supportsBooleanDataType() || database.getClass().isAssignableFrom(DB2Database.class) && ((DB2Database) database)
+                        .supportsBooleanDataType()) {
+                    //check if the changelog table is of an old smallint vs. boolean format
+                    String lockTable = database.escapeTableName(
+                            database.getLiquibaseCatalogName(),
+                            database.getLiquibaseSchemaName(),
+                            database.getDatabaseChangeLogLockTableName()
+                    );
+                    Object obj = executor.queryForObject(
+                            new RawSqlStatement(
+                                    "SELECT MIN(locked) AS test FROM " + lockTable + " FETCH FIRST ROW ONLY"
+                            ), Object.class
+                    );
+                    if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
+                        executor.execute(
+                                new DropTableStatement(
+                                        database.getLiquibaseCatalogName(),
+                                        database.getLiquibaseSchemaName(),
+                                        database.getDatabaseChangeLogLockTableName(),
+                                        false
+                                )
+                        );
+                        executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+                        executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
+                    }
+                }
             } catch (Exception e) {
                 if (i == maxIterations - 1) {
                     throw e;
@@ -150,36 +175,6 @@ public class StandardLockService implements LockService {
                         Scope.getCurrentScope().getLog(getClass()).warning("Lock table retry loop thread sleep interrupted", ex);
                     }
                 }
-            }
-        }
-    }
-
-    private void handleOldChangelogTableFormat(Executor executor) throws DatabaseException {
-        if (executor.updatesDatabase() && (database instanceof DerbyDatabase) && ((DerbyDatabase) database)
-                .supportsBooleanDataType() || database.getClass().isAssignableFrom(DB2Database.class) && ((DB2Database) database)
-                .supportsBooleanDataType()) {
-            //check if the changelog table is of an old smallint vs. boolean format
-            String lockTable = database.escapeTableName(
-                    database.getLiquibaseCatalogName(),
-                    database.getLiquibaseSchemaName(),
-                    database.getDatabaseChangeLogLockTableName()
-            );
-            Object obj = executor.queryForObject(
-                    new RawSqlStatement(
-                            "SELECT MIN(locked) AS test FROM " + lockTable + " FETCH FIRST ROW ONLY"
-                    ), Object.class
-            );
-            if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
-                executor.execute(
-                        new DropTableStatement(
-                                database.getLiquibaseCatalogName(),
-                                database.getLiquibaseSchemaName(),
-                                database.getDatabaseChangeLogLockTableName(),
-                                false
-                        )
-                );
-                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-                executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
             }
         }
     }

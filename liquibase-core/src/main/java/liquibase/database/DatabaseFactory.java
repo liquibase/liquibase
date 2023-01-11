@@ -11,7 +11,6 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 import liquibase.util.SystemUtil;
-import liquibase.SingletonObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.Driver;
 import java.util.*;
 
-public class DatabaseFactory implements SingletonObject {
+public class DatabaseFactory {
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseFactory.class);
     private static DatabaseFactory instance;
     private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<>();
@@ -331,7 +330,7 @@ public class DatabaseFactory implements SingletonObject {
     private static class DatabaseComparator implements Comparator<Database> {
         @Override
         public int compare(Database o1, Database o2) {
-            return -1 * Integer.compare(o1.getPriority(), o2.getPriority());
+            return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
         }
     }
 }

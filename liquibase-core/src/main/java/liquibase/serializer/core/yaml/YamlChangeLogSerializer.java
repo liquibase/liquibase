@@ -11,7 +11,6 @@ import java.util.*;
 
 public class YamlChangeLogSerializer extends YamlSerializer implements ChangeLogSerializer {
 
-    @Override
     protected Comparator<String> getComparator(LiquibaseSerializable object) {
         if (object instanceof ChangeSet) {
             return new ChangeSetComparator();

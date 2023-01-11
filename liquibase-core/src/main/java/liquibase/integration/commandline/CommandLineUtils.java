@@ -66,7 +66,6 @@ public class CommandLineUtils {
     }
 
     @SuppressWarnings("java:S2095")
-    @Deprecated
     public static Database createDatabaseObject(ResourceAccessor resourceAccessor,
                                                 String url,
                                                 String username,

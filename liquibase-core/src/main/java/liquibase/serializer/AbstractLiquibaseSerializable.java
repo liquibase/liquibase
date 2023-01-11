@@ -18,7 +18,6 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
 
     private Set<String> serializableFields;
 
-    @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         for (ParsedNode childNode : parsedNode.getChildren()) {
             if (!shouldAutoLoad(childNode)) {

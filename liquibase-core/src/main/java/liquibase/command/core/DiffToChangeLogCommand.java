@@ -29,12 +29,10 @@ public class DiffToChangeLogCommand extends DiffCommand {
         return this;
     }
 
-    @Override
     public PrintStream getOutputStream() {
         return outputStream;
     }
 
-    @Override
     public DiffToChangeLogCommand setOutputStream(PrintStream outputStream) {
         this.outputStream = outputStream;
         return this;

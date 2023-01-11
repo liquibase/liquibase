@@ -66,7 +66,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
             if (database instanceof MSSQLDatabase) {
                 sql += " ON "+statement.getTablespace();
             } else if ((database instanceof AbstractDb2Database) || (database instanceof SybaseASADatabase)) {
-                //not supported
+                ; //not supported
             } else {
                 sql += " USING INDEX TABLESPACE "+statement.getTablespace();
             }
