@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 @DatabaseChange(
@@ -244,16 +245,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         try {
             if (this.path == null) {
                 String procedureText = this.procedureText;
-                String encoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+                Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
                 if (procedureText != null) {
-                    try {
-                        stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
-                    } catch (UnsupportedEncodingException e) {
-                        throw new AssertionError(encoding +
-                                " is not supported by the JVM, this should not happen according to the JavaDoc of " +
-                                "the Charset class"
-                        );
-                    }
+                    stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
                 }
             }
             else {
