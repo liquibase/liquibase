@@ -38,10 +38,12 @@ public class Table extends Relation {
         return ((fkList == null) ? new ArrayList<>(0) : fkList);
     }
 
+    @Override
     public List<Index> getIndexes() {
         return getAttribute("indexes", List.class);
     }
 
+    @Override
     public List<UniqueConstraint> getUniqueConstraints() {
         return getAttribute("uniqueConstraints", List.class);
     }

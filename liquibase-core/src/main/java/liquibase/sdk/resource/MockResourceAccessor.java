@@ -54,4 +54,8 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     public List<String> describeLocations() {
         return Collections.singletonList("MockResouceAccessor.java");
     }
+
+    public void setContent(String fileName, String content) {
+        this.contentByFileName.put(fileName, content);
+    }
 }
