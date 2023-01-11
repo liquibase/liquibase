@@ -7,6 +7,7 @@ import liquibase.exception.CommandValidationException;
 import liquibase.exception.MissingRequiredArgumentException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -274,7 +275,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
                     Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandName, newCommandArgument);
                 } catch (IllegalArgumentException iae) {
                     Scope.getCurrentScope().getLog(CommandArgumentDefinition.class).warning(
-                            "Unable to register command '" + commandName + "' argument '" + newCommandArgument.getName() + "': " + iae.getMessage());
+                            "Unable to register command '" + StringUtil.join(commandName, " ") + "' argument '" + newCommandArgument.getName() + "': " + iae.getMessage());
                     throw iae;
                 }
             }

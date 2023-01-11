@@ -4,7 +4,9 @@ import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.logging.LogFormat;
+import liquibase.util.StringUtil;
 
+import java.util.Arrays;
 import java.util.logging.Level;
 
 /**
@@ -82,10 +84,23 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 .build();
 
         LOG_FORMAT = builder.define("logFormat", LogFormat.class)
-                .setDescription("Set the format of log output to console or log files\n" +
-                        "[OSS] Defaults to \"TEXT\" logs to the console or output log files\n" +
-                        "[PRO] Can be set to \"JSON\" to enable json-structured log files to the console or output log files")
+                .setDescription("Sets the format of log output to console or log files. " +
+                        "Open Source users default to unstructured \"TEXT\" logs to the console or output log files." +
+                        "Pro users have option to set value as \"JSON\" to enable json-structured log files to the console or output log files.")
                 .setDefaultValue(LogFormat.TEXT)
+                .setValueHandler((logFormat) -> {
+                    if (logFormat == null) {
+                        return null;
+                    }
+
+                    String logFormatString = (String) logFormat;
+
+                    if (Arrays.stream(LogFormat.values()).noneMatch(lf -> lf.toString().equalsIgnoreCase(logFormatString))) {
+                        throw new IllegalArgumentException("WARNING: The log format value '"+logFormatString+"' is not valid. Valid values include: '" + StringUtil.join(LogFormat.values(), "', '", Object::toString) + "'");
+                    }
+
+                    return Enum.valueOf(LogFormat.class, logFormatString.toUpperCase());
+                })
                 .build();
 
    }
