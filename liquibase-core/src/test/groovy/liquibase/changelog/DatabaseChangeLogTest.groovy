@@ -13,7 +13,6 @@ import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.resource.Resource
-import liquibase.resource.ResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.util.FileUtil
@@ -513,8 +512,8 @@ create view sql_view as select * from sql_table;'''
         BufferedLogService bufferLog = new BufferedLogService()
 
         Scope.child([
-                (Scope.Attr.logService.name()): bufferLog,
-                (ChangeLogParserConfiguration.WARN_ON_MISSING_INCLUDE_FILE.getKey()): true,
+                (Scope.Attr.logService.name())                                 : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
         ], new Scope.ScopedRunner() {
             @Override
             void run() throws Exception {

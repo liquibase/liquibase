@@ -7,7 +7,10 @@ import liquibase.logging.Logger;
 import liquibase.util.CollectionUtil;
 import liquibase.util.FileUtil;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.SortedSet;

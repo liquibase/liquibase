@@ -16,7 +16,10 @@ import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 @DatabaseChange(
@@ -222,10 +225,10 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             }
         } catch (IOException e) {
             throw new IOException(
-                    "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +
-                            path +
-                            "> -Unable to read file",
-                    e
+                "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +
+                path +
+                "> -Unable to read file",
+                e
             );
         }
     }

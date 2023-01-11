@@ -774,7 +774,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             PARENT_CHANGE_LOG.set(this);
             try {
                 if(!resourceAccessor.get(fileName).exists()) {
-                    if (ChangeLogParserConfiguration.WARN_ON_MISSING_INCLUDE_FILE.getCurrentValue()) {
+                    if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)) {
                         Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(fileName));
                         return false;
                     } else {

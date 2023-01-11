@@ -1,7 +1,7 @@
 package liquibase.util;
 
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.GlobalConfiguration;
 
 import java.io.*;
 
