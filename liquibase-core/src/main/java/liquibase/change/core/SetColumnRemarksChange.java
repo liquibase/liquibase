@@ -101,8 +101,7 @@ public class SetColumnRemarksChange extends AbstractChange {
         this.ownerType = ownerType;
     }
 
-    @Override
-    public Set<String> getSerializableFields() {
-        return new HashSet<>(Arrays.asList("catalogName", "schemaName", "tableName", "columnName", "remarks", "columnDataType"));
+    public ColumnOwnerType getOwnerType() {
+        return ownerType;
     }
 }
