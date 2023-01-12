@@ -18,6 +18,7 @@ import liquibase.structure.core.Sequence;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -231,7 +232,11 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             } catch (Exception ignore) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Failed to retrieve database version: " + ignore);
             }
-            String pgSequenceQuery = COMMON_PG_SEQUENCE_QUERY.replace("SCHEMA_NAME", schema.getName());
+            String schemaName = schema.getName();
+            if(schemaName == null) {
+                schemaName = database.getDefaultSchemaName();
+            }
+            String pgSequenceQuery = COMMON_PG_SEQUENCE_QUERY.replace("SCHEMA_NAME", schemaName);
             if (version < 10) { // 'pg_sequence' view does not exists yet
                 return "SELECT c.relname AS \"SEQUENCE_NAME\" FROM pg_class c " + pgSequenceQuery;
             } else {
