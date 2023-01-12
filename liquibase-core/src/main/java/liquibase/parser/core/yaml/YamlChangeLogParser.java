@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.Resource;
@@ -15,6 +16,7 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
@@ -103,7 +105,20 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
     private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException, LiquibaseException {
         Properties props = new Properties();
-        Resource resource =  resourceAccessor.get((String) property.get("file"));
+        Boolean relativeToChangelogFile = (Boolean) property.get("relativeToChangelogFile");
+        String file = (String) property.get("file");
+
+        if (relativeToChangelogFile == null) {
+            relativeToChangelogFile = false;
+        }
+
+        if (relativeToChangelogFile) {
+            file = resourceAccessor.get(changeLog.getPhysicalFilePath()).resolveSibling(file).getPath();
+            file = Paths.get(file).normalize().toString()
+                    .replace("\\", "/");
+        }
+
+        Resource resource =  resourceAccessor.get(file);
 
         if (resource == null) {
             log.info("Could not open properties file " + property.get("file"));

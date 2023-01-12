@@ -519,6 +519,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     }
 
                     String file = node.getChildValue(null, "file", String.class);
+                    Boolean relativeToChangelogFile = node.getChildValue(null, "relativeToChangelogFile", Boolean.FALSE);
 
                     if (file == null) {
                         // direct referenced property, no file
@@ -527,6 +528,17 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                         this.changeLogParameters.set(name, value, contextFilter, labels, dbms, global, this);
                     } else {
+                        // get relative path if specified
+                        if (relativeToChangelogFile) {
+                            try {
+                                file = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(file).getPath();
+                                file = Paths.get(file).normalize().toString()
+                                        .replace("\\", "/");
+                            } catch (IOException e) {
+                                throw new UnexpectedLiquibaseException(e);
+                            }
+                        }
+
                         // read properties from the file
                         Properties props = new Properties();
                         Resource resource = resourceAccessor.get(file);
