@@ -955,7 +955,7 @@
             <xsd:attribute name="columnName" type="xsd:string" use="required"/>
             <xsd:attribute name="columnDataType" type="xsd:string"/>
             <xsd:attribute name="remarks" type="xsd:string"/>
-            <xsd:attribute name="ownerType" type="xsd:string"/>
+            <xsd:attribute name="columnParentType" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 

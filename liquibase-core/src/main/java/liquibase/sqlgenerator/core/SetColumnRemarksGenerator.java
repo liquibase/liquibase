@@ -11,10 +11,8 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
-import liquibase.util.ColumnOwnerType;
+import liquibase.util.ColumnParentType;
 import liquibase.util.StringUtil;
-
-import java.util.Optional;
 
 public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRemarksStatement> {
     @Override
@@ -72,7 +70,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
             String qualifiedTableName = String.format("%s.%s", schemaName, statement.getTableName());
             String columnName = statement.getColumnName();
             String targetObject = "TABLE";
-            if (statement.getOwnerType() != null && statement.getOwnerType() == ColumnOwnerType.VIEW) {
+            if (statement.getColumnParentType() != null && statement.getColumnParentType() == ColumnParentType.VIEW) {
                 targetObject = "VIEW";
             }
 
