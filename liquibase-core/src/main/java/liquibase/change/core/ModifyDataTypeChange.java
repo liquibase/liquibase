@@ -22,7 +22,7 @@ public class ModifyDataTypeChange extends AbstractChange {
 
     @Override
     public boolean supports(Database database) {
-        return !(database instanceof Db2zDatabase) && super.supports(database);
+        return super.supports(database);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class ModifyDataTypeChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         ModifyDataTypeStatement modifyDataTypeStatement = new ModifyDataTypeStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getNewDataType());
-        if (database instanceof DB2Database) {
+        if (database instanceof DB2Database || database instanceof Db2zDatabase) {
             return new SqlStatement[] {
                     modifyDataTypeStatement,
                     new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())

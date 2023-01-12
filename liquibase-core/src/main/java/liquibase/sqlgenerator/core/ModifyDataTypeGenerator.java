@@ -17,7 +17,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
 
     @Override
     public boolean supports(ModifyDataTypeStatement statement, Database database) {
-        if (database instanceof SQLiteDatabase || database instanceof Db2zDatabase) {
+        if (database instanceof SQLiteDatabase) {
             return false;
         }
         return super.supports(statement, database);
@@ -45,8 +45,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     }
 
     @Override
-    public Sql[] generateSql(ModifyDataTypeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+    public Sql[] generateSql(ModifyDataTypeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
 
         // add "MODIFY"
         alterTable += " " + getModifyString(database) + " ";
