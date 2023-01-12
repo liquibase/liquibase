@@ -712,6 +712,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
 
         } catch (Exception e) {
+            if (getFailOnError() == null || getFailOnError()) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
+            }
+            log.info(String.format("ChangeSet %s encountered an exception.", toString(false)));
             try {
                 database.rollback();
             } catch (Exception e1) {
