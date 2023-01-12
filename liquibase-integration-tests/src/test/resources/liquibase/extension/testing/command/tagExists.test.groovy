@@ -1,5 +1,6 @@
 package liquibase.extension.testing.command
 
+import liquibase.command.core.TagExistsCommandStep
 import liquibase.exception.CommandValidationException
 
 CommandTests.define {
@@ -33,10 +34,6 @@ Optional Args:
                 username:   { it.username },
                 password:   { it.password },
                 tag: "version_2.0",
-        ]
-
-        expectedResults = [
-                statusCode   : 0
         ]
     }
 
