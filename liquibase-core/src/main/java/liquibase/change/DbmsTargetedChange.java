@@ -10,8 +10,8 @@ public interface DbmsTargetedChange {
     /**
      * @return A comma separated list of dbms' that this change will be run for. Will run for all dbms' if empty or null.
      */
-    public String getDbms();
+    String getDbms();
 
-    public void setDbms(String dbms);
+    void setDbms(String dbms);
 
 }
