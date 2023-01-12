@@ -27,6 +27,8 @@ public class CommandScope {
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
 
+    private final Map<Class<?>, Object> dependencies = new HashMap<>();
+
     /**
      * Config key including the command name. Example `liquibase.command.update`
      */
@@ -120,6 +122,16 @@ public class CommandScope {
     public <T> T getArgumentValue(CommandArgumentDefinition<T> argument) {
         final T value = getConfiguredValue(argument).getValue();
         return argument.getValueConverter().convert(value);
+    }
+
+    public  <T> CommandScope providesDependency(Class<T> clazz, T value) {
+        this.dependencies.put(clazz, value);
+
+        return this;
+    }
+
+    public <T> Object getDependency(Class<T> clazz) {
+        return this.dependencies.get(clazz);
     }
 
     /**
@@ -272,5 +284,6 @@ public class CommandScope {
                 return super.keyMatches(wantedKey, storedKey);
             }
         }
+
     }
 }

@@ -6,6 +6,8 @@ import liquibase.util.StringUtil;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Convenience base class for {@link CommandStep} implementations.
@@ -38,6 +40,16 @@ public abstract class AbstractCommandStep implements CommandStep {
             }
         }
         return false;
+    }
+
+    @Override
+    public List<Class<?>> requiredDependencies() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<Class<?>> providedDependencies() {
+        return Collections.emptyList();
     }
 
     /**

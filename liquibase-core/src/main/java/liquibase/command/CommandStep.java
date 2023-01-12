@@ -2,6 +2,8 @@ package liquibase.command;
 
 import liquibase.exception.CommandValidationException;
 
+import java.util.List;
+
 /**
  * Defines a particular step in a command pipeline.
  * When a command is executed, Liquibase will find all the steps whose {@link #defineCommandNames()} matches the command
@@ -58,4 +60,16 @@ public interface CommandStep {
      * <b>This method should not be called directly. It is called by the overall pipeline logic in the {@link #getOrder(CommandDefinition)} order.</b>
      */
     void run(CommandResultsBuilder resultsBuilder) throws Exception;
+
+    /**
+     * Return a list of configured Classes that this command requires to be passed as a dependency.
+     * @return list with the required classes types
+     */
+    List<Class<?>> requiredDependencies();
+
+    /**
+     * Returns a list of all the dependency Classes that this step provides
+     * @return list with the provided classes types
+     */
+    List<Class<?>> providedDependencies();
 }
