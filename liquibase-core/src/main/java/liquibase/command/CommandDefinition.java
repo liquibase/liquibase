@@ -12,7 +12,10 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     private final String[] name;
     private final String concatName;
 
-    private final LinkedHashSet<CommandStep> pipeline = new LinkedHashSet<>();
+    /**
+     * Stored as a SortedSet even though exposed as a list for easier internal management
+     */
+    private final SortedSet<CommandStep> pipeline;
 
     private final SortedMap<String, CommandArgumentDefinition<?>> arguments = new TreeMap<>();
 
@@ -29,6 +32,20 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     protected CommandDefinition(String[] name) {
         this.name = name;
         this.concatName = StringUtil.join(Arrays.asList(name), " ");
+
+        pipeline = new TreeSet<>((o1, o2) -> {
+            final int order = Integer.compare(o1.getOrder(this), o2.getOrder(this));
+            if (order == 0) {
+                // if o1 requires o2 dependencies it must come after o2
+                for (Class<?> required : o1.requiredDependencies()) {
+                    if (o2.providedDependencies().stream().anyMatch(required::equals)) {
+                        return 1;
+                    }
+                }
+                return -1;
+            }
+            return order;
+        });
     }
 
     /**

@@ -71,7 +71,11 @@ public class CommandFactory implements SingletonObject {
         );
 
         Collection<CommandStep> allCommandStepInstances = findAllInstances();
-        findDependenciesForCommand(pipelineGraph, allCommandStepInstances, this.filterCommandDefinition(allCommandStepInstances, commandName));
+        for (CommandStep step : allCommandStepInstances) {
+            if (step.getOrder(commandDefinition) > 0) {
+                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, step);
+            }
+        }
         pipelineGraph.computeDependencies();
 
         if (pipeline.isEmpty()) {
@@ -85,23 +89,6 @@ public class CommandFactory implements SingletonObject {
                 }
             });
         }
-    }
-
-    public CommandStep filterCommandDefinition(Collection<CommandStep> allCommandStepInstances, String... commandName) {
-        String joinedCommandName = StringUtil.join(commandName, " ");
-
-        for (CommandStep step : allCommandStepInstances) {
-            final String[][] definedCommandNames = step.defineCommandNames();
-            if (definedCommandNames != null) {
-                for (String[] thisCommandName : definedCommandNames) {
-                    if ((thisCommandName != null) && StringUtil.join(thisCommandName, " ")
-                            .equalsIgnoreCase(joinedCommandName)) {
-                        return step;
-                    }
-                }
-            }
-        }
-        throw new IllegalArgumentException("Unknown command '" + joinedCommandName + "'");
     }
 
     private void findDependenciesForCommand(DependencyUtil.DependencyGraph<CommandStep> pipelineGraph, Collection<CommandStep> allCommandStepInstances,
