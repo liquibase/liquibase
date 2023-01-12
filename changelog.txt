@@ -5,14 +5,6 @@ Changes in version Liquibase v4.19.0
 
 * Update release-published.yml by @jnewton03 in https://github.com/liquibase/liquibase/pull/3540
 * when generating changelogs for MySQL, ignore table column order for PKs by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3486
-* Bump mariadb-java-client from 3.0.8 to 3.1.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3471
-* Bump testcontainers-bom from 1.17.5 to 1.17.6 by @dependabot in https://github.com/liquibase/liquibase/pull/3477
-* Bump snowflake-jdbc from 3.13.22 to 3.13.25 by @dependabot in https://github.com/liquibase/liquibase/pull/3475
-* Bump slf4j-jdk14 from 2.0.3 to 2.0.4 by @dependabot in https://github.com/liquibase/liquibase/pull/3485
-* Bump maven-install-plugin from 3.0.1 to 3.1.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3484
-* Bump castlabs/get-package-version-id-action from 2.0 to 2.1 by @dependabot in https://github.com/liquibase/liquibase/pull/3490
-* Bump sqlite-jdbc from 3.39.4.0 to 3.40.0.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3510
-* Bump jaybird from 4.0.6.java8 to 4.0.8.java8 by @dependabot in https://github.com/liquibase/liquibase/pull/3509
 * Simplify assert calls and replaced with simpler and equivalent calls. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3497
 * fix overwriteOutputFile parameter for GenerateChangelog  by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3543
 * Avoid ClassCastException when loading LogService from Scope by @mattbertolini in https://github.com/liquibase/liquibase/pull/3518
@@ -20,7 +12,7 @@ Changes in version Liquibase v4.19.0
 * Delete unused import statement.  by @arturobernalg in https://github.com/liquibase/liquibase/pull/3522
 * Correctly handle indexes with descending columns in snapshot by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3535
 * Added call to modifyChangeSet during execute method to allow the changeSet to be correctly set on the executor by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3511
-* Bump up the max number of code points for JSON/YAML parser by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3552
+* Upgrade up the max number of code points for JSON/YAML parser by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3552
 * Remove unnecessary local variables that add nothing to the comprehensibility of a method. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3373
 * Allow loading gzipped data files by @mike-seger in https://github.com/liquibase/liquibase/pull/3379
 * Use try-with-resources Statement when is possible. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3374
@@ -34,40 +26,48 @@ Changes in version Liquibase v4.19.0
 * #1290: Forbid empty changeSet id and author by @skrivenko in https://github.com/liquibase/liquibase/pull/3397
 * Allow to drop and create a view for a Postgres database if replacing the view would fail by @rozenshteyn in https://github.com/liquibase/liquibase/pull/3399
 * Added support for COMPUTED values inside CSV files for loadData change by @zbynekvavros in https://github.com/liquibase/liquibase/pull/944
-* Fixes imports. by @filipelautert in https://github.com/liquibase/liquibase/pull/3599
 * Additional (optional) tableType attribute on the CreateTableChange by @MartinRied in https://github.com/liquibase/liquibase/pull/3108
 * Include "path" in databasechangelog's description column for all change types with "path" attributes by @MichaelKern-IVV in https://github.com/liquibase/liquibase/pull/3244
 * #1466: Add ignore:true changeset attribute to Formatted SQL changeLogs by @skrivenko in https://github.com/liquibase/liquibase/pull/3377
 * Rename DatabaseObjectComparator class to be DatabaseObjectCollectionComparator for clarity  by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3544
 * Do not lower case the ProvidedValue description if the string is capitalized, i.e. it starts with 2 upper-case characters by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3589
-* Bump mockito-inline from 4.8.1 to 4.10.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3580
-* Bump targetMavenVersion from 3.8.5 to 3.8.6 by @dependabot in https://github.com/liquibase/liquibase/pull/3593
 * Use 'Integer.compare' instead by @arturobernalg in https://github.com/liquibase/liquibase/pull/3528
 * Simplify 'Map' operations. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3527
 * Prevent Executors collision due to hash used as a Map's key part by @Dasiu in https://github.com/liquibase/liquibase/pull/3533
-* Breaks out of LockService.init loop after validations are completed by @filipelautert in https://github.com/liquibase/liquibase/pull/3576
-* Bump junit-jupiter-params from 5.8.1 to 5.9.1 by @dependabot in https://github.com/liquibase/liquibase/pull/3592
-* Bump jaybird from 4.0.6.java8 to 4.0.8.java8 by @dependabot in https://github.com/liquibase/liquibase/pull/3602
-* Bump slf4j-jdk14 from 2.0.4 to 2.0.6 by @dependabot in https://github.com/liquibase/liquibase/pull/3566
-* Bump snowflake-jdbc from 3.13.25 to 3.13.26 by @dependabot in https://github.com/liquibase/liquibase/pull/3579
-* Bump robinraju/release-downloader from 1.6 to 1.7 by @dependabot in https://github.com/liquibase/liquibase/pull/3603
-* Bump ojdbc8 from 21.7.0.0 to 21.8.0.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3551
+* Breaks out of LockService.init loop after validations are completed instead of keep looping for 10 times by @filipelautert in https://github.com/liquibase/liquibase/pull/3576
 * Remove unnecessary semicolon. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3571
 * Missing Override annotations. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3558
 * Adding extension license information by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3614
 * Prevents redundant loop iterations. Early loop exit in 'if' condition. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3547
-* Implement TagCommand by @filipelautert in https://github.com/liquibase/liquibase/pull/3570
-* Bump targetMavenVersion from 3.8.5 to 3.8.7 by @dependabot in https://github.com/liquibase/liquibase/pull/3634
+* Refactor TagCommand by @filipelautert in https://github.com/liquibase/liquibase/pull/3570
 * update release workflow to attach artifact by run_id by @ap-liquibase in https://github.com/liquibase/liquibase/pull/3629
 * implement SingletonObject to solve #2349 by @yairogen in https://github.com/liquibase/liquibase/pull/3624
 * update install4j script to version 10.x by @jnewton03 in https://github.com/liquibase/liquibase/pull/3641
 * Upgrades installer JDK version for next release. by @filipelautert in https://github.com/liquibase/liquibase/pull/3440
-* remove licenses that were moved to individual extensions by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3646
+* Remove licenses that were moved to individual extensions by @StevenMassaro in https://github.com/liquibase/liquibase/pull/3646
 * Postgresql - Fallback to default schema name in SequenceSnapshotGenerator when this is null by @djochim in https://github.com/liquibase/liquibase/pull/3637
-* Bump actions/cache from 3.0.11 to 3.2.3 by @dependabot in https://github.com/liquibase/liquibase/pull/3654
 * include commercial sources and javadoc in reversion by @ap-liquibase in https://github.com/liquibase/liquibase/pull/3671
 * update changelog version - 4.19 by @suryaaki2 in https://github.com/liquibase/liquibase/pull/3676
 * Update changelog xsd 4.19 by @suryaaki2 in https://github.com/liquibase/liquibase/pull/3678
+
+* Upgrade mariadb-java-client from 3.0.8 to 3.1.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3471
+* Upgrade testcontainers-bom from 1.17.5 to 1.17.6 by @dependabot in https://github.com/liquibase/liquibase/pull/3477
+* Upgrade snowflake-jdbc from 3.13.22 to 3.13.25 by @dependabot in https://github.com/liquibase/liquibase/pull/3475
+* Upgrade slf4j-jdk14 from 2.0.3 to 2.0.4 by @dependabot in https://github.com/liquibase/liquibase/pull/3485
+* Upgrade maven-install-plugin from 3.0.1 to 3.1.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3484
+* Upgrade castlabs/get-package-version-id-action from 2.0 to 2.1 by @dependabot in https://github.com/liquibase/liquibase/pull/3490
+* Upgrade sqlite-jdbc from 3.39.4.0 to 3.40.0.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3510
+* Upgrade jaybird from 4.0.6.java8 to 4.0.8.java8 by @dependabot in https://github.com/liquibase/liquibase/pull/3509
+* Upgrade mockito-inline from 4.8.1 to 4.10.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3580
+* Upgrade targetMavenVersion from 3.8.5 to 3.8.6 by @dependabot in https://github.com/liquibase/liquibase/pull/3593
+* Upgrade junit-jupiter-params from 5.8.1 to 5.9.1 by @dependabot in https://github.com/liquibase/liquibase/pull/3592
+* Upgrade jaybird from 4.0.6.java8 to 4.0.8.java8 by @dependabot in https://github.com/liquibase/liquibase/pull/3602
+* Upgrade slf4j-jdk14 from 2.0.4 to 2.0.6 by @dependabot in https://github.com/liquibase/liquibase/pull/3566
+* Upgrade snowflake-jdbc from 3.13.25 to 3.13.26 by @dependabot in https://github.com/liquibase/liquibase/pull/3579
+* Upgrade robinraju/release-downloader from 1.6 to 1.7 by @dependabot in https://github.com/liquibase/liquibase/pull/3603
+* Upgrade ojdbc8 from 21.7.0.0 to 21.8.0.0 by @dependabot in https://github.com/liquibase/liquibase/pull/3551
+* Upgrade targetMavenVersion from 3.8.5 to 3.8.7 by @dependabot in https://github.com/liquibase/liquibase/pull/3634
+* Upgrade actions/cache from 3.0.11 to 3.2.3 by @dependabot in https://github.com/liquibase/liquibase/pull/3654
 
 ## New Contributors
 * @mike-seger made their first contribution in https://github.com/liquibase/liquibase/pull/3379
