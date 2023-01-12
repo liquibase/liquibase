@@ -20,6 +20,7 @@ import org.springframework.core.io.ResourceLoader;
 
 import javax.sql.DataSource;
 import java.io.*;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
@@ -294,8 +295,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         if (rollbackFile != null) {
 
             try (
-                FileOutputStream fileOutputStream = new FileOutputStream(rollbackFile);
-                Writer output = new OutputStreamWriter(fileOutputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()) )
+                    final  OutputStream outputStream = Files.newOutputStream(rollbackFile.toPath());
+                    Writer output = new OutputStreamWriter(outputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()) )
 			{
 
                 if (tag != null) {

@@ -15,7 +15,8 @@ import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.servicelocator.LiquibaseService;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +70,7 @@ public class ConvertCommandStep extends AbstractCommandStep {
             outFile.getParentFile().mkdirs();
         }
         
-        try (FileOutputStream outputStream = new FileOutputStream(outFile)) {
+        try (OutputStream outputStream = Files.newOutputStream(outFile.toPath())) {
             outSerializer.write(changeLog.getChangeSets(), outputStream);
         }
 

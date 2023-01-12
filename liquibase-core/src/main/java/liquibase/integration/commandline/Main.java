@@ -35,6 +35,7 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -736,7 +737,7 @@ public class Main {
         // read from jar and write to the tempJar file
         try (
                 BufferedInputStream inStream = new BufferedInputStream(jar.getInputStream(entry));
-                BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(tempFile))
+                BufferedOutputStream outStream = new BufferedOutputStream(Files.newOutputStream(tempFile.toPath()))
         ) {
             int status;
             while ((status = inStream.read()) != -1) {
@@ -805,9 +806,9 @@ public class Main {
      * @throws IOException                 if the file cannot be opened
      * @throws CommandLineParsingException if an error occurs during parsing
      */
-    private void parseDefaultPropertyFileFromFile(File potentialPropertyFile) throws IOException,
+    private void parseDefaultPropertyFileFromFile(final File potentialPropertyFile) throws IOException,
             CommandLineParsingException {
-        try (FileInputStream stream = new FileInputStream(potentialPropertyFile)) {
+        try (InputStream stream = Files.newInputStream(potentialPropertyFile.toPath())) {
             parsePropertiesFile(stream);
         }
     }
