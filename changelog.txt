@@ -56,7 +56,7 @@ Changes in version Liquibase v4.19.0
 * Missing Override annotations. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3558
 * Adding extension license information by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3614
 * Prevents redundant loop iterations. Early loop exit in 'if' condition. by @arturobernalg in https://github.com/liquibase/liquibase/pull/3547
-* DAT 6635 - Implement TagCommand by @filipelautert in https://github.com/liquibase/liquibase/pull/3570
+* Implement TagCommand by @filipelautert in https://github.com/liquibase/liquibase/pull/3570
 * Bump targetMavenVersion from 3.8.5 to 3.8.7 by @dependabot in https://github.com/liquibase/liquibase/pull/3634
 * update release workflow to attach artifact by run_id by @ap-liquibase in https://github.com/liquibase/liquibase/pull/3629
 * implement SingletonObject to solve #2349 by @yairogen in https://github.com/liquibase/liquibase/pull/3624
