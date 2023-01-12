@@ -124,7 +124,7 @@ public class CommandScope {
         return argument.getValueConverter().convert(value);
     }
 
-    public  <T> CommandScope providesDependency(Class<T> clazz, T value) {
+    public  <T> CommandScope provideDependency(Class<T> clazz, T value) {
         this.dependencies.put(clazz, value);
 
         return this;

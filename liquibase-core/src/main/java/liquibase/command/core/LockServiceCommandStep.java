@@ -36,7 +36,7 @@ public class LockServiceCommandStep extends AbstractCommandStep implements Clean
         Database database = (Database) commandScope.getDependency(Database.class);
         lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
-        commandScope.providesDependency(LockService.class, lockService);
+        commandScope.provideDependency(LockService.class, lockService);
     }
 
     @Override

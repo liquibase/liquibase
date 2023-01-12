@@ -64,7 +64,7 @@ public class DbUrlConnectionCommandStep extends AbstractCommandStep implements C
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        commandScope.providesDependency(Database.class, this.obtainDatabase(commandScope));
+        commandScope.provideDependency(Database.class, this.obtainDatabase(commandScope));
     }
 
     @Override
