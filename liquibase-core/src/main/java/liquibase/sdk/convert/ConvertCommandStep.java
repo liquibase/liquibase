@@ -38,7 +38,6 @@ public class ConvertCommandStep extends AbstractCommandStep {
         return new String[][]{new String[] {"convert"}};
     }
 
-    @Override
     public int getOrder(CommandDefinition commandDefinition) {
         return -1;
     }

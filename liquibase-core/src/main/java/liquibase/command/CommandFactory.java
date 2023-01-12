@@ -71,12 +71,9 @@ public class CommandFactory implements SingletonObject {
         );
 
         Collection<CommandStep> allCommandStepInstances = findAllInstances();
-        for (CommandStep step : allCommandStepInstances) {
-            if (step.getOrder(commandDefinition) > 0) {
-                computeDependencies(pipelineGraph, allCommandStepInstances, step);
-            }
-        }
+        findDependenciesForCommand(pipelineGraph, allCommandStepInstances, this.filterCommandDefinition(allCommandStepInstances, commandName));
         pipelineGraph.computeDependencies();
+
         if (pipeline.isEmpty()) {
             throw new IllegalArgumentException("Unknown command '" + StringUtil.join(commandName, " ") + "'");
         } else {
@@ -90,15 +87,32 @@ public class CommandFactory implements SingletonObject {
         }
     }
 
-    private void computeDependencies(DependencyUtil.DependencyGraph<CommandStep> pipelineGraph, Collection<CommandStep> allCommandStepInstances,
-                                     CommandStep step) {
+    public CommandStep filterCommandDefinition(Collection<CommandStep> allCommandStepInstances, String... commandName) {
+        String joinedCommandName = StringUtil.join(commandName, " ");
+
+        for (CommandStep step : allCommandStepInstances) {
+            final String[][] definedCommandNames = step.defineCommandNames();
+            if (definedCommandNames != null) {
+                for (String[] thisCommandName : definedCommandNames) {
+                    if ((thisCommandName != null) && StringUtil.join(thisCommandName, " ")
+                            .equalsIgnoreCase(joinedCommandName)) {
+                        return step;
+                    }
+                }
+            }
+        }
+        throw new IllegalArgumentException("Unknown command '" + joinedCommandName + "'");
+    }
+
+    private void findDependenciesForCommand(DependencyUtil.DependencyGraph<CommandStep> pipelineGraph, Collection<CommandStep> allCommandStepInstances,
+                                            CommandStep step) {
         if (step.requiredDependencies().isEmpty()) {
             pipelineGraph.add(null, step);
         } else {
             for (Class<?> d : step.requiredDependencies()) {
                 CommandStep provider = whoProvidesClass(d, allCommandStepInstances);
                 pipelineGraph.add(provider, step);
-                computeDependencies(pipelineGraph, allCommandStepInstances, provider);
+                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, provider);
             }
         }
     }
