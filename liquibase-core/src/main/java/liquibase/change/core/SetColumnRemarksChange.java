@@ -31,7 +31,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType, ColumnParentType.valueOf(columnParentType.toUpperCase()))
+                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType, columnParentType)
         };
     }
 

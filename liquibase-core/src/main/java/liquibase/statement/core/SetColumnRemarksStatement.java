@@ -11,7 +11,7 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
     private String columnName;
     private String remarks;
     private String columnDataType;
-    private ColumnParentType columnParentType;
+    private String columnParentType;
 
     public SetColumnRemarksStatement(String catalogName, String schemaName, String tableName, String columnName, String remarks) {
         this(catalogName, schemaName, tableName, columnName, remarks, null);
@@ -37,7 +37,7 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
                                      String columnName,
                                      String remarks,
                                      String columnDataType,
-                                     ColumnParentType columnParentType) {
+                                     String columnParentType) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
@@ -72,6 +72,6 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
     }
 
     public ColumnParentType getColumnParentType() {
-        return columnParentType;
+        return columnParentType != null ? ColumnParentType.valueOf(columnParentType) : null;
     }
 }
