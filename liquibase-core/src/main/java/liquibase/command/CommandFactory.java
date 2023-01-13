@@ -34,21 +34,82 @@ public class CommandFactory implements SingletonObject {
      */
     public CommandDefinition getCommandDefinition(String... commandName) throws IllegalArgumentException{
         CommandDefinition commandDefinition = new CommandDefinition(commandName);
-
-        computePipelineForCommandDefinition(commandDefinition, commandName);
-
-        consolidateCommandArgumentsForCommand(commandDefinition, commandDefinition.getPipeline());
-
-        for (CommandStep step : commandDefinition.getPipeline()) {
-            step.adjustCommandDefinition(commandDefinition);
-        }
+        computePipelineForCommandDefinition(commandDefinition);
+        consolidateCommandArgumentsForCommand(commandDefinition);
+        adjustCommandDefinitionForSteps(commandDefinition);
 
         return commandDefinition;
     }
 
-    private void consolidateCommandArgumentsForCommand(CommandDefinition commandDefinition, List<CommandStep> pipeline) {
+    /**
+     * Compute the pipeline for a given command. Takes into consideration all the dependencies required by the command
+     * and other commands subscribed to it by getOrder.
+     *
+     * @param commandDefinition the CommandDefinition to compute the pipeline
+     */
+    private void computePipelineForCommandDefinition(CommandDefinition commandDefinition) {
+        final Set<CommandStep> pipeline = new LinkedHashSet<>();
+        // graph used to automatically sort the pipeline steps.
+        DependencyUtil.DependencyGraph<CommandStep> pipelineGraph = new DependencyUtil.DependencyGraph<>(
+                p -> { if (p != null) pipeline.add(p); }
+        );
+
+        Collection<CommandStep> allCommandStepInstances = findAllInstances();
+        for (CommandStep step : allCommandStepInstances) {
+            // order > 0 means is means that this CommandStep has been declared as part of this command
+            if (step.getOrder(commandDefinition) > 0) {
+                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, step);
+            }
+        }
+        pipelineGraph.computeDependencies();
+
+        if (pipeline.isEmpty()) {
+            throw new IllegalArgumentException("Unknown command '" + StringUtil.join(commandDefinition.getName(), " ") + "'");
+        } else {
+            pipeline.forEach(p -> {
+                try {
+                    commandDefinition.add(p.getClass().getConstructor().newInstance());
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            });
+        }
+    }
+
+    /**
+     * Given a CommandStep step this method adds to the pipelineGraph all the CommandSteps that are providing the dependencies that it requires.
+     */
+    private void findDependenciesForCommand(DependencyUtil.DependencyGraph<CommandStep> pipelineGraph, Collection<CommandStep> allCommandStepInstances,
+                                            CommandStep step) {
+        if (step.requiredDependencies().isEmpty()) {
+            pipelineGraph.add(null, step);
+        } else {
+            for (Class<?> d : step.requiredDependencies()) {
+                CommandStep provider = whoProvidesClass(d, allCommandStepInstances);
+                pipelineGraph.add(provider, step);
+                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, provider);
+            }
+        }
+    }
+
+    /**
+     * Go through all command steps and find the step that provides the desired class.
+     */
+    private CommandStep whoProvidesClass(Class<?> dependency, Collection<CommandStep> allCommandStepInstances) {
+        return allCommandStepInstances.stream().filter(cs -> cs.providedDependencies().contains(dependency))
+                .reduce((a, b) -> {
+                    throw new IllegalStateException(String.format("More than one CommandStep provides class %s. Steps: %s, %s",
+                            dependency.getName(), a.getClass().getName(), b.getClass().getName()));
+                })
+                .orElseThrow(() -> new IllegalStateException("Unable to find CommandStep provider for class " +  dependency.getName()));
+    }
+
+    /**
+     * Go through all the commandSteps on the pipeline and add their arguments to the commandDefinition arguments list.
+     */
+    private void consolidateCommandArgumentsForCommand(CommandDefinition commandDefinition) {
         final Set<CommandArgumentDefinition<?>> stepArguments = new HashSet<>();
-        for (CommandStep step : pipeline) {
+        for (CommandStep step : commandDefinition.getPipeline()) {
             String[][] names = step.defineCommandNames();
             if (names != null) {
                 for (String[] name : names) {
@@ -64,49 +125,10 @@ public class CommandFactory implements SingletonObject {
         }
     }
 
-    private void computePipelineForCommandDefinition(CommandDefinition commandDefinition, String... commandName) {
-        final Set<CommandStep> pipeline = new LinkedHashSet<>();
-        DependencyUtil.DependencyGraph<CommandStep> pipelineGraph = new DependencyUtil.DependencyGraph<>(
-                p -> { if (p != null) pipeline.add(p); }
-        );
-
-        Collection<CommandStep> allCommandStepInstances = findAllInstances();
-        for (CommandStep step : allCommandStepInstances) {
-            if (step.getOrder(commandDefinition) > 0) {
-                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, step);
-            }
+    private void adjustCommandDefinitionForSteps(CommandDefinition commandDefinition) {
+        for (CommandStep step : commandDefinition.getPipeline()) {
+            step.adjustCommandDefinition(commandDefinition);
         }
-        pipelineGraph.computeDependencies();
-
-        if (pipeline.isEmpty()) {
-            throw new IllegalArgumentException("Unknown command '" + StringUtil.join(commandName, " ") + "'");
-        } else {
-            pipeline.forEach(p -> {
-                try {
-                    commandDefinition.add(p.getClass().getConstructor().newInstance());
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    throw new IllegalArgumentException(e);
-                }
-            });
-        }
-    }
-
-    private void findDependenciesForCommand(DependencyUtil.DependencyGraph<CommandStep> pipelineGraph, Collection<CommandStep> allCommandStepInstances,
-                                            CommandStep step) {
-        if (step.requiredDependencies().isEmpty()) {
-            pipelineGraph.add(null, step);
-        } else {
-            for (Class<?> d : step.requiredDependencies()) {
-                CommandStep provider = whoProvidesClass(d, allCommandStepInstances);
-                pipelineGraph.add(provider, step);
-                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, provider);
-            }
-        }
-    }
-
-    private CommandStep whoProvidesClass(Class<?> d, Collection<CommandStep> allCommandStepInstances) {
-        return allCommandStepInstances.stream().filter(cs -> cs.providedDependencies().contains(d))
-                .findFirst().orElseThrow(() -> new RuntimeException("Unable to find CommandStep provider for class " +  d.getName()));
     }
 
     /**
