@@ -124,12 +124,22 @@ public class CommandScope {
         return argument.getValueConverter().convert(value);
     }
 
+    /**
+     * Assign a value to a given provided dependency. So if a CommandStep provides class X, at
+     * {@link CommandStep#run(CommandResultsBuilder)} method it needs to provide the value for X using this method.
+     * commandScope.provideDependency(LockService.class, lockService);
+     *
+     * Means that this class will LockService.class using object lock
+     */
     public  <T> CommandScope provideDependency(Class<T> clazz, T value) {
         this.dependencies.put(clazz, value);
 
         return this;
     }
 
+    /**
+     * Retrieves the registered dependency object provided by this class identifier
+     */
     public <T> Object getDependency(Class<T> clazz) {
         return this.dependencies.get(clazz);
     }
