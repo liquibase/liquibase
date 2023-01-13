@@ -18,7 +18,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     private String columnName;
     private String remarks;
     private String columnDataType;
-    private ColumnParentType columnParentType;
+    private String columnParentType;
 
     @Override
     public ValidationErrors validate(Database database) {
@@ -31,7 +31,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType, columnParentType)
+                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType, ColumnParentType.valueOf(columnParentType.toUpperCase()))
         };
     }
 
@@ -93,11 +93,11 @@ public class SetColumnRemarksChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public void setColumnParentType(ColumnParentType columnParentType) {
+    public void setColumnParentType(String columnParentType) {
         this.columnParentType = columnParentType;
     }
 
-    public ColumnParentType getColumnParentType() {
+    public String getColumnParentType() {
         return columnParentType;
     }
 }

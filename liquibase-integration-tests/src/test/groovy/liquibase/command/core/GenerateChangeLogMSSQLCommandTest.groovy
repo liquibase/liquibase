@@ -44,21 +44,21 @@ class GenerateChangeLogMSSQLCommandTest extends Specification {
         outputFile.delete()
     }
 
-    def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated xml changelog"() {
+    def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated xml/json/yml changelog"(String fileType) {
         given:
         runUpdate('changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
         when:
-        runGenerateChangelog('output.mssql.xml')
+        runGenerateChangelog("output.mssql.$fileType")
 
         then:
-        def outputFile = new File('output.mssql.xml')
+        def outputFile = new File("output.mssql.$fileType")
         def contents = FileUtil.getContents(outputFile)
-        contents.count("columnParentType=\"VIEW\"") == 2 //Should appear for the two view column comments.
+        contents.count('columnParentType') == 2 //Should appear for the two view column comments.
 
         when:
         runDropAll()
-        runUpdate('output.mssql.xml')
+        runUpdate("output.mssql.$fileType")
 
         then:
         noExceptionThrown()
@@ -66,6 +66,9 @@ class GenerateChangeLogMSSQLCommandTest extends Specification {
         cleanup:
         runDropAll()
         outputFile.delete()
+
+        where:
+        fileType << ['xml', 'json', 'yml']
     }
 
     private void runGenerateChangelog(String outputFile) {
