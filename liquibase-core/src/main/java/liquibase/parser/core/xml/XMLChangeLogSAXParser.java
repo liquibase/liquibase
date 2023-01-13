@@ -17,6 +17,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.InvalidPathException;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
@@ -150,6 +151,13 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             }
 
             throw new ChangeLogParseException("Invalid Migration File: " + reason, e);
+        } catch (InvalidPathException e) {
+            final String message = "ERROR: The file '" + e.getInput() + "' was not found. " +
+                    "The <changelog|snapshot> file property cannot be configured with " +
+                    "a fully qualified path, but must be a relative path on the property, " +
+                    "and any local or remote base of the path set on the '--search-path' property.";
+            Scope.getCurrentScope().getLog(getClass()).severe("ERROR: " + e.getMessage(), e);
+            throw new ChangeLogParseException(message);
         } catch (Exception e) {
             throw new ChangeLogParseException(e);
         }
