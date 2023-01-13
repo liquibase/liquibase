@@ -123,11 +123,6 @@ public class DBDocVisitor implements ChangeSetVisitor {
         HTMLWriter recentChangesWriter = new RecentChangesWriter(rootOutputDir, database);
         HTMLWriter pendingSQLWriter = new PendingSQLWriter(rootOutputDir, database, rootChangeLog);
 
-        copyFile("liquibase/dbdoc/stylesheet.css", rootOutputDir);
-        copyFile("liquibase/dbdoc/index.html", rootOutputDir);
-        copyFile("liquibase/dbdoc/globalnav.html", rootOutputDir);
-        copyFile("liquibase/dbdoc/overview-summary.html", rootOutputDir);
-
         CatalogAndSchema[] computedSchemaList = schemaList;
         if (schemaList == null) {
             computedSchemaList = new CatalogAndSchema[]{database.getDefaultSchema()};
@@ -137,6 +132,11 @@ public class DBDocVisitor implements ChangeSetVisitor {
         if (schemaList != null && schemaList.length != 0 && !(database instanceof FirebirdDatabase)) {
             this.validateRequiredSchemas(snapshot, computedSchemaList);
         }
+
+        copyFile("liquibase/dbdoc/stylesheet.css", rootOutputDir);
+        copyFile("liquibase/dbdoc/index.html", rootOutputDir);
+        copyFile("liquibase/dbdoc/globalnav.html", rootOutputDir);
+        copyFile("liquibase/dbdoc/overview-summary.html", rootOutputDir);
 
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
         SortedSet<Table> tables = new TreeSet<>(snapshot.get(Table.class));
