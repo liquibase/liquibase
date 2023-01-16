@@ -42,7 +42,7 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
                         return 1;
                     }
                 }
-                return -1;
+                return o1.getClass().getName().compareTo(o2.getClass().getName());
             }
             return order;
         });
