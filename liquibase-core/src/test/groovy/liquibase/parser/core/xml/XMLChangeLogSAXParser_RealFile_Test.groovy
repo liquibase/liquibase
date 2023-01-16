@@ -210,9 +210,6 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     @Unroll("#featureName #path")
     def "changeSets with one level of includes parse correctly"() throws Exception {
-        setup:
-        DatabaseChangeLog.includeAllProcessedPaths.clear()
-
         when:
         DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor())
 
@@ -242,9 +239,6 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     @Unroll("#featureName #doubleNestedFileName")
     def "changeSets with two levels of includes parse correctly"() throws Exception {
-        setup:
-        DatabaseChangeLog.includeAllProcessedPaths.clear()
-
         when:
         DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
 

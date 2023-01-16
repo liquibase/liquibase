@@ -238,9 +238,6 @@ create view sql_view as select * from sql_table;'''
     }
 
     def "includeAll files inside modifyChangeSets set runWith"() {
-        setup:
-        DatabaseChangeLog.includeAllProcessedPaths.clear()
-
         when:
         def resourceAccessor = new MockResourceAccessor([
                 "com/example/test1.xml": test1Xml,
@@ -354,9 +351,6 @@ create view sql_view as select * from sql_table;'''
     }
 
     def "includeAll empty relative path"() {
-        setup:
-        DatabaseChangeLog.includeAllProcessedPaths.clear()
-
         when:
         def resourceAccessor = new MockResourceAccessor([
                 "com/example/children/file2.sql": "file 2",
@@ -453,9 +447,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         then:
         SetupException e = thrown()
         assert e.getMessage().startsWith("liquibase.exception.SetupException: Circular reference detected in 'include-all-dir/'. Set liquibase.errorOnCircularIncludeAll if you'd like to ignore this error.")
-
-        cleanup:
-        DatabaseChangeLog.includeAllProcessedPaths.clear()
     }
 
     def "includeAll throws no exception when directory not found and errorIfMissingOrEmpty is false"() {
