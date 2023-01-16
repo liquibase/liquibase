@@ -35,6 +35,11 @@ Optional Args:
                 password:   { it.password },
                 tag: "version_2.0",
         ]
+
+        expectedResults = [
+                tagExistsResult   : false
+        ]
+
     }
 
     run "Run without a tag should throw an exception",  {
