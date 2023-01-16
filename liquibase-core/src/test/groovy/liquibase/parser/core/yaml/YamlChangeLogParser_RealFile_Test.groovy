@@ -221,6 +221,9 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
 
     @Unroll("#featureName #path")
     def "changeSets with one level of includes parse correctly"() throws Exception {
+        setup:
+        DatabaseChangeLog.includeAllProcessedPaths.clear()
+
         when:
         DatabaseChangeLog changeLog = new YamlChangeLogParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor())
 
@@ -250,6 +253,9 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
 
     @Unroll("#featureName #doubleNestedFileName")
     def "changeSets with two levels of includes parse correctly"() throws Exception {
+        setup:
+        DatabaseChangeLog.includeAllProcessedPaths.clear()
+
         when:
         DatabaseChangeLog changeLog = new YamlChangeLogParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
 

@@ -238,6 +238,9 @@ create view sql_view as select * from sql_table;'''
     }
 
     def "includeAll files inside modifyChangeSets set runWith"() {
+        setup:
+        DatabaseChangeLog.includeAllProcessedPaths.clear()
+
         when:
         def resourceAccessor = new MockResourceAccessor([
                 "com/example/test1.xml": test1Xml,
@@ -351,6 +354,9 @@ create view sql_view as select * from sql_table;'''
     }
 
     def "includeAll empty relative path"() {
+        setup:
+        DatabaseChangeLog.includeAllProcessedPaths.clear()
+
         when:
         def resourceAccessor = new MockResourceAccessor([
                 "com/example/children/file2.sql": "file 2",
@@ -418,6 +424,38 @@ create view sql_view as select * from sql_table;'''
         SetupException e = thrown()
         assert e.getMessage().startsWith("Could not find directory or directory was empty for includeAll '")
 
+    }
+
+    def "includeAll throws exception when circular reference is detected"() {
+        when:
+        def changelogText = """<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
+xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" 
+xmlns:pro="http://www.liquibase.org/xml/ns/pro" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext 
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd 
+http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+        <includeAll path="include-all-dir" labels="none" context="none"/>
+
+</databaseChangeLog>
+"""
+
+        def resourceAccessor = new MockResourceAccessor([
+                "include-all.xml": changelogText,
+                "include-all-dir/include-all.xml": changelogText,
+        ])
+        def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
+        changeLogFile.includeAll("include-all-dir", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
+
+        then:
+        SetupException e = thrown()
+        assert e.getMessage().startsWith("liquibase.exception.SetupException: Circular reference detected in 'include-all-dir/'. Set liquibase.errorOnCircularIncludeAll if you'd like to ignore this error.")
+
+        cleanup:
+        DatabaseChangeLog.includeAllProcessedPaths.clear()
     }
 
     def "includeAll throws no exception when directory not found and errorIfMissingOrEmpty is false"() {

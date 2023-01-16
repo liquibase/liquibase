@@ -11,6 +11,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -51,6 +52,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     private List<ChangeSet> changeSets = new ArrayList<>();
+    private static final Set<String> includeAllProcessedPaths = new HashSet<>();
     private ChangeLogParameters changeLogParameters;
 
     private RuntimeEnvironment runtimeEnvironment;
@@ -655,6 +657,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 path = path.replace("\\", "/");
                 if (StringUtil.isNotEmpty(path) && !(path.endsWith("/"))) {
                     path = path + '/';
+                }
+
+                if (ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getCurrentValue()) {
+                    if (rootChangeLog.includeAllProcessedPaths.contains(path)) {
+                        throw new SetupException("Circular reference detected in '" + path + "'. Set " + ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getKey() + " if you'd like to ignore this error.");
+                    } else {
+                        rootChangeLog.includeAllProcessedPaths.add(path);
+                    }
                 }
                 LOG.fine("includeAll for " + pathName);
                 LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
