@@ -23,10 +23,10 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  password (String) The database password
+  password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
-  username (String) The database username
+  username (String) Username to use to connect to the database
     Default: null
 """
 
@@ -40,7 +40,7 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                checksumResult   : "8:b6084e5d5f46b534bbbe18a0d35d34e0"
         ]
     }
 
