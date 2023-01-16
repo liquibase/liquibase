@@ -9,6 +9,11 @@
     </parent>
 
     <artifactId>liquibase-extension-testing</artifactId>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.deploy.skip>false</maven.deploy.skip>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -28,7 +33,6 @@
             <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.testcontainers</groupId>
