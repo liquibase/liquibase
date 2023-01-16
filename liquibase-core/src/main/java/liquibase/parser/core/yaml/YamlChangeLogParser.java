@@ -112,15 +112,15 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             relativeToChangelogFile = false;
         }
 
+        Resource resource;
+
         if (relativeToChangelogFile) {
-            file = resourceAccessor.get(changeLog.getPhysicalFilePath()).resolveSibling(file).getPath();
-            file = Paths.get(file).normalize().toString()
-                    .replace("\\", "/");
+            resource = resourceAccessor.get(changeLog.getPhysicalFilePath()).resolveSibling(file);
+        } else {
+            resource = resourceAccessor.get(file);
         }
 
-        Resource resource =  resourceAccessor.get(file);
-
-        if (resource == null) {
+        if (!resource.exists()) {
             log.info("Could not open properties file " + property.get("file"));
         } else {
             try (InputStream stream = resource.openInputStream()) {
