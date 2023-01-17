@@ -351,7 +351,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                     changeSet =
                        new ChangeSet(changeSetId, changeSetAuthor, runAlways, runOnChange, DatabaseChangeLog.normalizePath(logicalFilePath), context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
-                    changeSet.setStoredFilePath(logicalFilePath);
                     changeSet.setLabels(new Labels(labels));
                     changeSet.setIgnore(Boolean.parseBoolean(ignore));
                     changeSet.setFailOnError(failOnError);
