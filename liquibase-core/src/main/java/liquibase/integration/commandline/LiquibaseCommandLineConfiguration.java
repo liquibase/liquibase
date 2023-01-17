@@ -93,13 +93,19 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                         return null;
                     }
 
-                    String logFormatString = (String) logFormat;
+                    if (logFormat instanceof String) {
+                        String logFormatString = (String) logFormat;
 
-                    if (Arrays.stream(LogFormat.values()).noneMatch(lf -> lf.toString().equalsIgnoreCase(logFormatString))) {
-                        throw new IllegalArgumentException("WARNING: The log format value '"+logFormatString+"' is not valid. Valid values include: '" + StringUtil.join(LogFormat.values(), "', '", Object::toString) + "'");
+                        if (Arrays.stream(LogFormat.values()).noneMatch(lf -> lf.toString().equalsIgnoreCase(logFormatString))) {
+                            throw new IllegalArgumentException("WARNING: The log format value '"+logFormatString+"' is not valid. Valid values include: '" + StringUtil.join(LogFormat.values(), "', '", Object::toString) + "'");
+                        }
+
+                        return Enum.valueOf(LogFormat.class, logFormatString.toUpperCase());
+                    } else if (logFormat instanceof LogFormat) {
+                        return (LogFormat) logFormat;
+                    } else {
+                        return null;
                     }
-
-                    return Enum.valueOf(LogFormat.class, logFormatString.toUpperCase());
                 })
                 .build();
 
