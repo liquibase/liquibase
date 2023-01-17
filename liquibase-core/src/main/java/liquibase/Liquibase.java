@@ -33,6 +33,8 @@ import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
 import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.core.CompositeLogService;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcValue;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
@@ -237,6 +239,8 @@ public class Liquibase implements AutoCloseable {
         runInScope(() -> {
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             lockService.waitForLock();
+            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TARGET_VALUE, database.getConnection().getURL());
+            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TARGET_TYPE, MdcValue.URL_DATABASE_TARGET);
 
             changeLogParameters.setContexts(contexts);
             changeLogParameters.setLabels(labelExpression);
@@ -253,6 +257,8 @@ public class Liquibase implements AutoCloseable {
 
                 ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
                 changelogService.generateDeploymentId();
+
+                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
 
                 changeLog.validate(database, contexts, labelExpression);
 
@@ -295,7 +301,13 @@ public class Liquibase implements AutoCloseable {
                 // Update Hub with the operation information
                 //
                 hubUpdater.postUpdateHub(updateOperation, bufferLog);
+                Scope.getCurrentScope().getMdcManager().put(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
+                Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
+                Scope.getCurrentScope().getMdcManager().remove(MdcKey.DEPLOYMENT_OUTCOME);
             } catch (Throwable e) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
+                Scope.getCurrentScope().getLog(getClass()).info("Update command encountered an exception.");
+                Scope.getCurrentScope().getMdcManager().remove(MdcKey.DEPLOYMENT_OUTCOME);
                 if (hubUpdater != null) {
                     hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
                 }

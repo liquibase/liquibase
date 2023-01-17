@@ -26,6 +26,7 @@ import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.resource.*;
 import liquibase.ui.ConsoleUIService;
 import liquibase.util.*;
@@ -324,6 +325,7 @@ public class Main {
                             }
                         }
 
+
                         LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                         if (licenseService != null) {
                             if (main.liquibaseProLicenseKey == null) {
@@ -393,9 +395,9 @@ public class Main {
                         if (!Main.runningFromNewCli) {
                             innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
                         }
+
                         Scope.child(innerScopeObjects, () -> {
                             main.doMigration();
-
                             if (!Main.runningFromNewCli) {
                                 if (COMMANDS.UPDATE.equals(main.command)) {
                                     Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
@@ -1831,7 +1833,9 @@ public class Main {
             }
 
             try {
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, command);
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
+                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMANDS.UPDATE);
                     try {
                         liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                     } catch (LiquibaseException updateException) {

@@ -11,6 +11,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
 import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
@@ -425,6 +426,7 @@ public class JdbcExecutor extends AbstractExecutor {
                         statement = statement.replaceFirst("[\\s\\r\\n]*[^*]/[\\s\\r\\n]*$", "");
                     }
                 }
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, statement);
 
                 for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
                     listener.writeSqlWillRun(String.format("%s", statement));

@@ -16,6 +16,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.logging.Logger;
+import liquibase.logging.mdc.MdcKey;
 import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -27,6 +28,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
@@ -569,6 +571,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         long startTime = new Date().getTime();
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, new ISODateFormat().format(new Date()));
 
         ExecType execType = null;
 
@@ -697,15 +700,22 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (runInTransaction) {
                     database.commit();
                 }
-                log.info("ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime + "ms"));
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
+                Date stopTime = new Date();
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(stopTime));
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, execType.value.toLowerCase());
+                log.info("ChangeSet " + toString(false) + " ran successfully in " + (stopTime.getTime() - startTime) + "ms");
             } else {
                 log.fine("Skipping ChangeSet: " + toString());
             }
 
         } catch (Exception e) {
+            if (getFailOnError() == null || getFailOnError()) {
+                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
+            }
+            log.info(String.format("ChangeSet %s encountered an exception.", toString(false)));
             try {
                 database.rollback();
             } catch (Exception e1) {
