@@ -7,11 +7,7 @@ import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
-import liquibase.util.ColumnOwnerType;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import liquibase.util.ColumnParentType;
 
 @DatabaseChange(name = "setColumnRemarks", description = "Set remarks on a column", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class SetColumnRemarksChange extends AbstractChange {
@@ -22,7 +18,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     private String columnName;
     private String remarks;
     private String columnDataType;
-    private ColumnOwnerType ownerType;
+    private String columnParentType;
 
     @Override
     public ValidationErrors validate(Database database) {
@@ -35,7 +31,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType, ownerType)
+                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType, columnParentType)
         };
     }
 
@@ -97,12 +93,11 @@ public class SetColumnRemarksChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public void setOwnerType(ColumnOwnerType ownerType) {
-        this.ownerType = ownerType;
+    public void setColumnParentType(String columnParentType) {
+        this.columnParentType = columnParentType;
     }
 
-    @Override
-    public Set<String> getSerializableFields() {
-        return new HashSet<>(Arrays.asList("catalogName", "schemaName", "tableName", "columnName", "remarks", "columnDataType"));
+    public String getColumnParentType() {
+        return columnParentType;
     }
 }

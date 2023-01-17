@@ -20,7 +20,7 @@ class GenerateChangeLogMSSQLCommandTest extends Specification {
         runUpdate('changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
         when:
-        runGenerateChangelog()
+        runGenerateChangelog('output.mssql.sql')
 
         then:
         def outputFile = new File('output.mssql.sql')
@@ -44,13 +44,40 @@ class GenerateChangeLogMSSQLCommandTest extends Specification {
         outputFile.delete()
     }
 
-    private void runGenerateChangelog() {
+    def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated xml/json/yml changelog"(String fileType) {
+        given:
+        runUpdate('changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
+
+        when:
+        runGenerateChangelog("output.mssql.$fileType")
+
+        then:
+        def outputFile = new File("output.mssql.$fileType")
+        def contents = FileUtil.getContents(outputFile)
+        contents.count('columnParentType') == 2 //Should appear for the two view column comments.
+
+        when:
+        runDropAll()
+        runUpdate("output.mssql.$fileType")
+
+        then:
+        noExceptionThrown()
+
+        cleanup:
+        runDropAll()
+        outputFile.delete()
+
+        where:
+        fileType << ['xml', 'json', 'yml']
+    }
+
+    private void runGenerateChangelog(String outputFile) {
         GenerateChangelogCommandStep step = new GenerateChangelogCommandStep()
         CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(GenerateChangelogCommandStep.URL_ARG, mssql.getConnectionUrl())
         commandScope.addArgumentValue(GenerateChangelogCommandStep.USERNAME_ARG, mssql.getUsername())
         commandScope.addArgumentValue(GenerateChangelogCommandStep.PASSWORD_ARG, mssql.getPassword())
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, 'output.mssql.sql')
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
         OutputStream outputStream = new ByteArrayOutputStream()
         CommandResultsBuilder commandResultsBuilder = new CommandResultsBuilder(commandScope, outputStream)
         step.run(commandResultsBuilder)
