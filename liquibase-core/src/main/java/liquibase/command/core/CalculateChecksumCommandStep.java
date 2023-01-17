@@ -60,7 +60,7 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         List<String> parts = validateAndExtractParts(changeSetIdentifier, changeLogFile);
         Scope.getCurrentScope().getLog(getClass()).info(String.format("Calculating checksum for changeset %s", changeSetIdentifier));
 
-        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor(); // this.getResourceAccessor()
+        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(
                         changeLogFile, resourceAccessor).parse(changeLogFile, new ChangeLogParameters(database), resourceAccessor);
 

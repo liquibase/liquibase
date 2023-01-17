@@ -52,7 +52,10 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.Writer;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Supplier;
@@ -2207,7 +2210,6 @@ public class Liquibase implements AutoCloseable {
                 .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile)
                 .execute();
         return commandResults.getResult(CalculateChecksumCommandStep.CHECKSUM_RESULT);
-
     }
 
     /**
@@ -2217,7 +2219,6 @@ public class Liquibase implements AutoCloseable {
      */
     public CheckSum calculateCheckSum(final String filename, final String id, final String author)
             throws LiquibaseException {
-        LOG.info(String.format("Calculating checksum for changeset %s::%s::%s", filename, id, author));
         return this.calculateCheckSum(String.format("%s::%s::%s", filename, id, author));
     }
 
