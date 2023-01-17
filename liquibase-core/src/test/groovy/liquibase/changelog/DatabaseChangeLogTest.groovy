@@ -474,19 +474,15 @@ create view sql_view as select * from sql_table;'''
 
     def "properties values are correctly loaded and stored when properties file is relative to changelog"() {
         when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/root.xml": test1Xml])
         def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
         rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
 
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]]),
-                resourceAccessor)
-
-        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChildren([property: [file: "file.properties", relativeToChangelogFile: "true"]]), propertiesResourceAccessor)
-
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([property: [file: "file.properties", relativeToChangelogFile: "true"]]),
+                propertiesResourceAccessor)
 
         then:
         rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog)
@@ -495,18 +491,15 @@ create view sql_view as select * from sql_table;'''
 
     def "properties values are not loaded and stored when file it's not relative to changelog"() {
         when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/root.xml": test1Xml])
         def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
         rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
 
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]]),
-                resourceAccessor)
-
-        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChildren([property: [file: "file.properties"]]), propertiesResourceAccessor)
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([property: [file: "file.properties"]]),
+                propertiesResourceAccessor)
 
         then:
         rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog) == false
