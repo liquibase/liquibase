@@ -195,7 +195,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
                 this.getAttribute(name, List.class).add(child.getValue());
             } else {
                 Object childValue = child.getValue();
-                if ((childValue != null) && (childValue instanceof String)) {
+                if ((childValue instanceof String)) {
                     Matcher matcher = Pattern.compile("(.*)!\\{(.*)\\}").matcher((String) childValue);
                     if (matcher.matches()) {
                         String stringValue = matcher.group(1);
