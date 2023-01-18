@@ -426,6 +426,35 @@ create view sql_view as select * from sql_table;'''
 
     }
 
+    def "includeAll throws exception when circular reference is detected"() {
+        when:
+        def changelogText = """<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
+xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" 
+xmlns:pro="http://www.liquibase.org/xml/ns/pro" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext 
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd 
+http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+        <includeAll path="include-all-dir" labels="none" context="none"/>
+
+</databaseChangeLog>
+"""
+
+        def resourceAccessor = new MockResourceAccessor([
+                "include-all.xml": changelogText,
+                "include-all-dir/include-all.xml": changelogText,
+        ])
+        def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
+        changeLogFile.includeAll("include-all-dir", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
+
+        then:
+        SetupException e = thrown()
+        assert e.getMessage().startsWith("liquibase.exception.SetupException: Circular reference detected in 'include-all-dir/'. Set liquibase.errorOnCircularIncludeAll if you'd like to ignore this error.")
+    }
+
     def "includeAll throws no exception when directory not found and errorIfMissingOrEmpty is false"() {
         when:
         def resourceAccessor = new MockResourceAccessor([

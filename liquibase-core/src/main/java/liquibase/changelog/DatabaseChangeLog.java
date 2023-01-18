@@ -45,6 +45,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final Pattern SLASH_DOT_SLASH_PATTERN = Pattern.compile("/\\./");
     private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
     private static final Pattern DOT_SLASH_PATTERN = Pattern.compile("^\\.?/");
+    private static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
 
     private PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
     private String physicalFilePath;
@@ -644,6 +645,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             List<Resource> unsortedResources = null;
+            Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());
             try {
                 String path;
                 if (relativeTo == null) {
@@ -658,6 +660,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 if (StringUtil.isNotEmpty(path) && !(path.endsWith("/"))) {
                     path = path + '/';
                 }
+
+                if (ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getCurrentValue()) {
+                    if (seenChangelogPaths.contains(path)) {
+                        throw new SetupException("Circular reference detected in '" + path + "'. Set " + ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getKey() + " if you'd like to ignore this error.");
+                    }
+                }
+                seenChangelogPaths.add(path);
                 LOG.fine("includeAll for " + pathName);
                 LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
 
@@ -681,11 +690,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         "Could not find directory or directory was empty for includeAll '" + pathName + "'");
             }
 
-            for (Resource resource : resources) {
-                Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
-                include(resource.getPath(), false, resourceAccessor, includeContextFilter,
-                        labels, ignore, OnUnknownFileFormat.WARN, modifyChangeSets);
-            }
+            Scope.child(Collections.singletonMap(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, seenChangelogPaths), () -> {
+                for (Resource resource : resources) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
+                    include(resource.getPath(), false, resourceAccessor, includeContextFilter,
+                            labels, ignore, OnUnknownFileFormat.WARN, modifyChangeSets);
+                }
+            });
         } catch (Exception e) {
             throw new SetupException(e);
         }
