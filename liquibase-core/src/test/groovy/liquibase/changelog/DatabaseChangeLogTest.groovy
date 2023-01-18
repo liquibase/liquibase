@@ -502,6 +502,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
 
         then:
+        ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getCurrentValue() == ChangeLogParserConfiguration.MissingIncludeConfiguration.FAIL
         def e = thrown(SetupException)
         e.message.startsWith("The file com/example/invalid.xml was not found in")
     }
