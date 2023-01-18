@@ -1,11 +1,12 @@
-package liquibase.structure;
+package liquibase.diff.compare;
 
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
 import java.util.Comparator;
 
-public class DatabaseObjectComparator implements Comparator<DatabaseObject> {
+public class DatabaseObjectCollectionComparator implements Comparator<DatabaseObject> {
 
     @Override
     public int compare(DatabaseObject o1, DatabaseObject o2) {
@@ -17,7 +18,6 @@ public class DatabaseObjectComparator implements Comparator<DatabaseObject> {
             if (i != 0) {
                 return i;
             }
-
         }
 
         String name1 = StringUtil.trimToEmpty(o1.getName());

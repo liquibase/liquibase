@@ -176,9 +176,16 @@ public interface Database extends PrioritizedService, AutoCloseable {
 
     /**
      * Tags the database changelog with the given string.
+     *
+     * @deprecated Use {@link liquibase.changelog.ChangeLogHistoryService#tag(String)} instead
      */
+    @Deprecated
     void tag(String tagString) throws DatabaseException;
 
+    /**
+     * @deprecated Use {@link liquibase.changelog.ChangeLogHistoryService#tagExists(String)} instead
+     */
+    @Deprecated
     boolean doesTagExist(String tag) throws DatabaseException;
 
     boolean isSystemObject(DatabaseObject example);
