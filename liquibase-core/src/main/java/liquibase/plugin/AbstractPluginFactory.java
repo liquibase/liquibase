@@ -74,7 +74,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
     }
 
 
-    public void register(T plugin) {
+    public synchronized void register(T plugin) {
         this.findAllInstances();
         this.allInstances.add(plugin);
     }
@@ -95,7 +95,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
         return this.allInstances;
     }
 
-    protected void removeInstance(T instance) {
+    protected synchronized void removeInstance(T instance) {
         if (this.allInstances == null) {
             return;
         }

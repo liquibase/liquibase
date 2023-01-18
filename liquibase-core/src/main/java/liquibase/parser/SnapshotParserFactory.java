@@ -5,18 +5,17 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownFormatException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.PrioritizedService;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SnapshotParserFactory {
 
     private static SnapshotParserFactory instance;
 
-    private List<SnapshotParser> parsers;
-    private Comparator<SnapshotParser> snapshotParserComparator;
+    private final List<SnapshotParser> parsers = new CopyOnWriteArrayList<>();
 
 
     public static synchronized void reset() {
@@ -38,14 +37,6 @@ public class SnapshotParserFactory {
     }
 
     private SnapshotParserFactory() {
-        snapshotParserComparator = new Comparator<SnapshotParser>() {
-            @Override
-            public int compare(SnapshotParser o1, SnapshotParser o2) {
-                return Integer.compare(o2.getPriority(), o1.getPriority());
-            }
-        };
-
-        parsers = new ArrayList<>();
         try {
             for (SnapshotParser parser : Scope.getCurrentScope().getServiceLocator().findInstances(SnapshotParser.class)) {
                     register(parser);
@@ -57,7 +48,7 @@ public class SnapshotParserFactory {
     }
 
     public List<SnapshotParser> getParsers() {
-        return parsers;
+        return Collections.unmodifiableList(parsers);
     }
 
     public SnapshotParser getParser(String fileNameOrExtension, ResourceAccessor resourceAccessor) throws LiquibaseException {
@@ -72,7 +63,7 @@ public class SnapshotParserFactory {
 
     public void register(SnapshotParser snapshotParser) {
         parsers.add(snapshotParser);
-        Collections.sort(parsers, snapshotParserComparator);
+        parsers.sort(PrioritizedService.COMPARATOR);
     }
 
     public void unregister(SnapshotParser snapshotParser) {

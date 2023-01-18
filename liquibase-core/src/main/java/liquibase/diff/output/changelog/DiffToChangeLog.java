@@ -39,6 +39,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DiffToChangeLog {
 
@@ -60,7 +61,7 @@ public class DiffToChangeLog {
     private DiffOutputControl diffOutputControl;
     private boolean tryDbaDependencies = true;
 
-    private static Set<Class> loggedOrderFor = new HashSet<>();
+    private static final Map<Class<?>, Boolean> loggedOrderFor = new ConcurrentHashMap<>();
 
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
@@ -756,13 +757,13 @@ public class DiffToChangeLog {
             graph.addType(type);
         }
         List<Class<? extends DatabaseObject>> types = graph.sort(comparisonDatabase, generatorType);
-        if (!loggedOrderFor.contains(generatorType)) {
-            String log = generatorType.getSimpleName() + " type order: ";
+        if (loggedOrderFor.put(generatorType, Boolean.TRUE) == null) {
+            StringBuilder log = new StringBuilder(generatorType.getSimpleName());
+            log.append(" type order: ");
             for (Class<? extends DatabaseObject> type : types) {
-                log += "    " + type.getName();
+                log.append("    ").append(type.getName());
             }
-            Scope.getCurrentScope().getLog(getClass()).fine(log);
-            loggedOrderFor.add(generatorType);
+            Scope.getCurrentScope().getLog(getClass()).fine(log.toString());
         }
 
         return types;

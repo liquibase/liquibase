@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Various methods that make it easier to read and write object properties using the propertyName, instead of having
@@ -24,11 +25,11 @@ import java.util.*;
 public class ObjectUtil {
 
     private static final List<BeanIntrospector> introspectors = new ArrayList<>(Arrays.asList(new DefaultBeanIntrospector(), new FluentPropertyBeanIntrospector()));
-    
+
     /**
      * Cache for the methods of classes that we have been queried about so far.
      */
-    private static Map<Class<?>, Method[]> methodCache = new HashMap<>();
+    private static final Map<Class<?>, Method[]> methodCache = new ConcurrentHashMap<>();
 
     /**
      * For a given object, try to find the appropriate reader method and return the value, if set
@@ -242,7 +243,7 @@ public class ObjectUtil {
      * @return a list of methods belonging to the class of the object
      */
     private static Method[] getMethods(Object object) {
-        return methodCache.computeIfAbsent(object.getClass(), k -> object.getClass().getMethods());
+        return methodCache.computeIfAbsent(object.getClass(), Class::getMethods);
     }
 
       /**

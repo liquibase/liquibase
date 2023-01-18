@@ -33,30 +33,32 @@ public class PreconditionFactoryTest {
 
     @Test
     public void register() {
-        PreconditionFactory.getInstance().getPreconditions().clear();
+        PreconditionFactory factory = PreconditionFactory.getInstance();
 
-        assertEquals(0, PreconditionFactory.getInstance().getPreconditions().size());
+        PreconditionFactory.reset();
 
-        PreconditionFactory.getInstance().register(new MockPrecondition());
+        int builtIn = factory.getPreconditions().size();
 
-        assertEquals(1, PreconditionFactory.getInstance().getPreconditions().size());
+        factory.register(new MockPrecondition());
+
+        assertEquals(builtIn + 1, factory.getPreconditions().size());
     }
 
     @Test
     public void unregister_instance() {
         PreconditionFactory factory = PreconditionFactory.getInstance();
 
-        factory.getPreconditions().clear();
+        PreconditionFactory.reset();
 
-        assertEquals(0, factory.getPreconditions().size());
+        int builtIn = factory.getPreconditions().size();
 
         factory.register(new OrPrecondition());
         factory.register(new AndPrecondition());
 
-        assertEquals(2, factory.getPreconditions().size());
+        assertEquals(builtIn, factory.getPreconditions().size());
 
         factory.unregister("and");
-        assertEquals(1, factory.getPreconditions().size());
+        assertEquals(builtIn - 1, factory.getPreconditions().size());
     }
 
     @Test

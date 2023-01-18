@@ -7,12 +7,13 @@ import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.resource.ResourceAccessor;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ChangeLogParserFactory {
 
     private static ChangeLogParserFactory instance;
 
-    private List<ChangeLogParser> parsers = new ArrayList<>();
+    private final List<ChangeLogParser> parsers = new CopyOnWriteArrayList<>();
 
     public static synchronized void reset() {
         instance = new ChangeLogParserFactory();

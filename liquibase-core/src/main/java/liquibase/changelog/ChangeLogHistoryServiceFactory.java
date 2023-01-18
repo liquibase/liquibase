@@ -6,12 +6,13 @@ import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class ChangeLogHistoryServiceFactory {
 
     private static ChangeLogHistoryServiceFactory instance;
 
-    private final List<ChangeLogHistoryService> registry = new ArrayList<>();
+    private final Deque<ChangeLogHistoryService> registry = new ConcurrentLinkedDeque<>();
 
     private final Map<Database, ChangeLogHistoryService> services = new ConcurrentHashMap<>();
 
@@ -46,7 +47,7 @@ public class ChangeLogHistoryServiceFactory {
     }
 
     public void register(ChangeLogHistoryService changeLogHistoryService) {
-        registry.add(0, changeLogHistoryService);
+        registry.addFirst(changeLogHistoryService);
     }
 
     public ChangeLogHistoryService getChangeLogService(Database database) {
@@ -56,23 +57,20 @@ public class ChangeLogHistoryServiceFactory {
             SortedSet<ChangeLogHistoryService> foundServices = new TreeSet<>(new Comparator<ChangeLogHistoryService>() {
                 @Override
                 public int compare(ChangeLogHistoryService o1, ChangeLogHistoryService o2) {
-                    return -1 * Integer.compare(o1.getPriority(), o2.getPriority());
+                    return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
                 }
             });
 
-            for (ChangeLogHistoryService service : registry) {
-                if (service.supports(database)) {
-                    foundServices.add(service);
-                }
-            }
-
-            if (foundServices.isEmpty()) {
-                throw new UnexpectedLiquibaseException("Cannot find ChangeLogHistoryService for " +
-                    database.getShortName());
-            }
+    private ChangeLogHistoryService selectFor(Database database) {
+            ChangeLogHistoryService exampleService = registry
+                    .stream()
+                    .filter(s -> s.supports(database))
+                    .max(Comparator.comparing(ChangeLogHistoryService::getPriority))
+                    .orElseThrow(() -> new UnexpectedLiquibaseException(
+                            "Cannot find ChangeLogHistoryService for " + database.getShortName()
+                    ));
 
             try {
-                ChangeLogHistoryService exampleService = foundServices.iterator().next();
                 Class<? extends ChangeLogHistoryService> aClass = exampleService.getClass();
                 ChangeLogHistoryService service;
                 try {
@@ -84,11 +82,14 @@ public class ChangeLogHistoryServiceFactory {
                     service = exampleService;
                 }
 
-                services.put(database, service);
                 return service;
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException(e);
             }
+    }
+
+    public ChangeLogHistoryService getChangeLogService(Database database) {
+        return services.computeIfAbsent(database, this::selectFor);
     }
 
     public void resetAll() {

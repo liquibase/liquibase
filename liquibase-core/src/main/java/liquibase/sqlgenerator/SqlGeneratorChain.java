@@ -6,15 +6,15 @@ import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.SortedSet;
 
 import static liquibase.sqlgenerator.SqlGenerator.EMPTY_SQL;
 
 public class SqlGeneratorChain<T extends SqlStatement> {
     private Iterator<SqlGenerator<T>> sqlGenerators;
 
-    public SqlGeneratorChain(SortedSet<SqlGenerator<T>> sqlGenerators) {
+    public SqlGeneratorChain(Collection<SqlGenerator<T>> sqlGenerators) {
         if (sqlGenerators != null) {
             this.sqlGenerators = sqlGenerators.iterator();
         }
