@@ -6,11 +6,16 @@ import liquibase.util.StringUtil;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.ResourceBundle;
+
+import static java.util.ResourceBundle.getBundle;
 
 /**
  * Convenience base class for {@link CommandStep} implementations.
  */
 public abstract class AbstractCommandStep implements CommandStep {
+
+    protected static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     @Override
     public List<Class<?>> requiredDependencies() {

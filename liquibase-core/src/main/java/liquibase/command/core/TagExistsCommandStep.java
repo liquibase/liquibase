@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.command.*;
@@ -36,7 +37,16 @@ public class TagExistsCommandStep  extends AbstractCommandStep {
         ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
         changeLogService.init();
         LockServiceFactory.getInstance().getLockService(database).init();
-        resultsBuilder.addResult(TAG_EXISTS_RESULT, changeLogService.tagExists(commandScope.getArgumentValue(TagCommandStep.TAG_ARG)));
+
+        String tag = commandScope.getArgumentValue(TagCommandStep.TAG_ARG);
+        sendResults(changeLogService.tagExists(tag), database, tag, resultsBuilder);
+    }
+
+    private void sendResults(boolean exists, Database database, String tag, CommandResultsBuilder resultsBuilder) {
+        resultsBuilder.addResult(TAG_EXISTS_RESULT, exists);
+        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString(exists ? "tag.exists" : "tag.does.not.exist"),
+                tag, database.getConnection().getConnectionUserName() + "@" + database.getConnection().getURL())
+        );
     }
 
     @Override
