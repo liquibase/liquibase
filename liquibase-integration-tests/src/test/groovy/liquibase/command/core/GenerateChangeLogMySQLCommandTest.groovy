@@ -11,7 +11,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 @LiquibaseIntegrationTest
-class GenerateChangeLogCommandTest extends Specification {
+class GenerateChangeLogMySQLCommandTest extends Specification {
 
     @Shared
     private DatabaseTestSystem mysql = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mysql")

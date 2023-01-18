@@ -310,7 +310,7 @@ public class ResultSetCache {
                     @Override
                     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                         Object value = super.getColumnValue(rs, index);
-                        if ((value != null) && (value instanceof String)) {
+                        if ((value instanceof String)) {
 
                             // Don't trim for informix database,
                             // We need to discern the space in front of an index name,
