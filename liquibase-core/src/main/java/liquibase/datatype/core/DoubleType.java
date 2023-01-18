@@ -44,7 +44,7 @@ public class DoubleType  extends LiquibaseDataType {
         }
 
         if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("FLOAT", 24);
+            return new DatabaseDataType("DOUBLE PRECISION");
         }
         if (database instanceof PostgresDatabase) {
             return new DatabaseDataType("DOUBLE PRECISION");
