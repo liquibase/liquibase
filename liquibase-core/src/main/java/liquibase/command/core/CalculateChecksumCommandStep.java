@@ -69,7 +69,12 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         if (changeSet == null) {
             throw new LiquibaseException(new IllegalArgumentException("No such changeSet: " + changeSetIdentifier));
         }
-        resultsBuilder.addResult(CHECKSUM_RESULT, changeSet.generateCheckSum());
+        sendMessages(resultsBuilder, changeSet.generateCheckSum());
+    }
+
+    private static void sendMessages(CommandResultsBuilder resultsBuilder, CheckSum checkSum) {
+        resultsBuilder.addResult(CHECKSUM_RESULT, checkSum);
+        Scope.getCurrentScope().getUI().sendMessage(checkSum.toString());
     }
 
     private List<String> validateAndExtractParts(String changeSetIdentifier, String changeLogFile) throws LiquibaseException {
