@@ -50,42 +50,31 @@ public class ChangeLogHistoryServiceFactory {
         registry.addFirst(changeLogHistoryService);
     }
 
-    public ChangeLogHistoryService getChangeLogService(Database database) {
-            if (services.containsKey(database)) {
-                return services.get(database);
-            }
-            SortedSet<ChangeLogHistoryService> foundServices = new TreeSet<>(new Comparator<ChangeLogHistoryService>() {
-                @Override
-                public int compare(ChangeLogHistoryService o1, ChangeLogHistoryService o2) {
-                    return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
-                }
-            });
-
     private ChangeLogHistoryService selectFor(Database database) {
-            ChangeLogHistoryService exampleService = registry
-                    .stream()
-                    .filter(s -> s.supports(database))
-                    .max(Comparator.comparing(ChangeLogHistoryService::getPriority))
-                    .orElseThrow(() -> new UnexpectedLiquibaseException(
-                            "Cannot find ChangeLogHistoryService for " + database.getShortName()
-                    ));
+        ChangeLogHistoryService exampleService = registry
+                .stream()
+                .filter(s -> s.supports(database))
+                .max(Comparator.comparing(ChangeLogHistoryService::getPriority))
+                .orElseThrow(() -> new UnexpectedLiquibaseException(
+                        "Cannot find ChangeLogHistoryService for " + database.getShortName()
+                ));
 
+        try {
+            Class<? extends ChangeLogHistoryService> aClass = exampleService.getClass();
+            ChangeLogHistoryService service;
             try {
-                Class<? extends ChangeLogHistoryService> aClass = exampleService.getClass();
-                ChangeLogHistoryService service;
-                try {
-                    aClass.getConstructor();
-                    service = aClass.getConstructor().newInstance();
-                    service.setDatabase(database);
-                } catch (NoSuchMethodException e) {
-                    // must have been manually added to the registry and so already configured.
-                    service = exampleService;
-                }
-
-                return service;
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException(e);
+                aClass.getConstructor();
+                service = aClass.getConstructor().newInstance();
+                service.setDatabase(database);
+            } catch (NoSuchMethodException e) {
+                // must have been manually added to the registry and so already configured.
+                service = exampleService;
             }
+
+            return service;
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
     public ChangeLogHistoryService getChangeLogService(Database database) {
@@ -101,4 +90,3 @@ public class ChangeLogHistoryServiceFactory {
         }
     }
 }
-
