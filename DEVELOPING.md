@@ -2,7 +2,7 @@
 
 ## Overview
 
-Liquibase is implemented in Java, and uses Maven as it's build system. 
+Liquibase is implemented in Java, and uses Maven as its build system. 
 
 The code structure follows the standard Maven directory structure divided into modules, with `liquibase-core` being the most central module.
 
@@ -36,9 +36,9 @@ private DatabaseTestSystem mysql =
     (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mysql")
 ```
 
-When TestSystems need to be started, Liquibase generally relies on Docker instances. For time when docker images are not available or are unneeded, they can also connect to an external database via a `url` setting. 
+When TestSystems need to be started, Liquibase generally relies on Docker instances. When docker images are not available or are unneeded, they can also connect to an external database via a `url` setting. 
 
-When using docker instances, if we want to add support for a new database we want to test against, we need to create a new test class for which we will need to extend from `DatabaseTestSystem` and override
+When using docker instances, if we want to add support for a new database we want to test against, we need to create a new test class extended from `DatabaseTestSystem` and override
 `createContainerWrapper()` method, as displayed below:
 ```java
 public class FirebirdTestSystem  extends DatabaseTestSystem {
@@ -71,10 +71,9 @@ Additionally, we need to add the test dependency for the DB we are adding suppor
 
 #### Controlling which systems are tested against
 
-Even though systems are able to be automatically brought up, tests against databases are slow. Therefore, exactly which test systems should be tested against is controllable by you.
-By default, Liquibase will only test against in-memory databases (h2, hsqldb, sqlite) because they are fast. Any tests which ask for other systems will automatically be marked as "ignored".
+The test framework is designed to automatically launch database instances of any type. However, database tests can be slow, so Liquibase defaults to testing in-memory databases (h2, hsqldb, sqlite). Any tests requiring other database platforms will be automatically marked as "ignored".
 
-To change which tests run and which are ignored, set the `liquibase.sdk.testSystem.test` attribute to be a comma-separated list. This can be most easily set in your liquibase.sdk.local.yml file (see below).
+The `liquibase.sdk.testSystem.test` attribute to be a comma-separated list specified in the `liquibase.sdk.local.yml` file (see below).
 
 The `liquibase.sdk.testSystem.test` setting can also specify specific settings for the test systems you wish to test against. 
 For example, if you have `liquibase.sdk.testSystem.test=h2?version=1.4.200,mysql`, when your tests call `getTestSystem("h2")` it will get an h2 version 1.4.200 system. You can also specify profiles (see below) as well, like `liquibase.sdk.testSystem.test=mssql:case-sensitive,mysql`    
@@ -89,9 +88,10 @@ To shut down the instances started this way, run `liquibase sdk system down --na
 
 #### Local configuration
 
-The liquibase.sdk.yaml file contains the default configuration, but there are times you may want to change the default behavior. 
-By creating a `liquibase.sdk.local.yml` file in the [same directory](liquibase-extension-testing/src/main/resources) as the liquibase.sdk.yaml file, you can add just the settings you want to override.
-NOTE: gitignore is set to not allow the file to be committed because it's designed to be specific to you.
+The `liquibase.sdk.yaml` file contains the default configuration, but there are times you may want to change the default behavior. 
+By creating a `liquibase.sdk.local.yml` file in the [same directory](liquibase-extension-testing/src/main/resources) as the `liquibase.sdk.yaml` file, you can add just the settings you want to override.
+
+NOTE: The `liquibase.sdk.local.yml` is specific to your development environment and gitignore is configured to disallow the file from being committed.
 
 Below there is an example of a default configuration which is going to be used across the different profiles, unless any of them overrides any given property:
 ```yaml
@@ -113,7 +113,7 @@ will run tests against mysql, h2, and mssql. It also specifies that you accept t
 
 ##### Test System Profiles
 
-In both the standard liquibase.sdk.yaml and liquibase.sdk.local.yaml files, "profiles" can be defined which override specific settings from the default configuration.
+In both the standard `liquibase.sdk.yaml` and `liquibase.sdk.local.yaml` files, "profiles" can be defined which override specific settings from the default configuration.
 For example, the h2 configuration defines a "1.x" and a "2.x" profile:
 
 ```yaml
@@ -125,5 +125,5 @@ For example, the h2 configuration defines a "1.x" and a "2.x" profile:
       "2.x":
         version: 2.0.206
 ```
-which makes it easier for users who just care about the top-level version. 
 
+The advantage of profiles is to allow users to specify the exact version of h2 relevant for their testing.
