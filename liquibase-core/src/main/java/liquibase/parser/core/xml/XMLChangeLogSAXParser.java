@@ -17,6 +17,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.InvalidPathException;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 

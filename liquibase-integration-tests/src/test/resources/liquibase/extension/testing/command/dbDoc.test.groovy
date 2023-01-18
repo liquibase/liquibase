@@ -25,6 +25,8 @@ Optional Args:
   password (String) The database password
     Default: null
     OBFUSCATED
+  schemas (String) Database schemas to include objects from in reporting
+    Default: null
   username (String) The database username
     Default: null
 """

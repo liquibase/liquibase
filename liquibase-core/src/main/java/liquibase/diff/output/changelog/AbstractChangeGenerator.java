@@ -18,7 +18,7 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
             for (String field : change.getSerializableFields()) {
                 if (field.toLowerCase().contains("schemaname") || field.toLowerCase().contains("catalogname")) {
                     Object value = change.getSerializableFieldValue(field);
-                    if ((value != null) && (value instanceof String)) {
+                    if ((value instanceof String)) {
                         String newValue = CompareControl.SchemaComparison.convertSchema((String) value, schemaComparisons);
                         if ((newValue != null) && !newValue.equalsIgnoreCase((String) value)) {
                             ObjectUtil.setProperty(change, field, newValue);
@@ -39,7 +39,7 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
             for (String field : change.getSerializableFields()) {
                 if (field.toLowerCase().contains("schemaname") || field.toLowerCase().contains("catalogname")) {
                     Object value = change.getSerializableFieldValue(field);
-                    if ((schemaComparisons != null) && (value != null) && (value instanceof String)) {
+                    if ((schemaComparisons != null) && (value instanceof String)) {
                         for (CompareControl.SchemaComparison comparison : schemaComparisons) {
                             if (!respectSchemaAndCatalogCase) {
                                 setPropertyIgnoreSchemaAndCatalogCase(change, field, (String)value, comparison);
