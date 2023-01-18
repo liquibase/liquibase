@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.command.*;
@@ -35,6 +36,17 @@ public class TagCommandStep extends AbstractCommandStep {
         changeLogService.init();
         LockServiceFactory.getInstance().getLockService(database).init();
         changeLogService.tag(commandScope.getArgumentValue(TagCommandStep.TAG_ARG));
+
+        sendResults(database);
+    }
+
+    private void sendResults(Database database) {
+        Scope.getCurrentScope().getUI().sendMessage(String.format(
+                        coreBundle.getString("successfully.tagged"), database
+                                .getConnection().getConnectionUserName() + "@" +
+                                database.getConnection().getURL()
+                )
+        );
     }
 
     @Override
