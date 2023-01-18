@@ -1,4 +1,4 @@
-name: BigQuery Cloud Integration Testing
+name: Liquibase Test Harness for BigQuery
 on:
   pull_request:
     branches:
