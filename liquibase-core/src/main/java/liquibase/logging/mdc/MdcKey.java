@@ -7,8 +7,8 @@ public class MdcKey {
     public static final String CHANGESET_FILEPATH = "changesetFilepath";
     public static final String CHANGESET_OUTCOME = "changesetOutcome";
     public static final String OPERATION_TYPE = "liquibaseOperation";
-    public static final String OPERATION_TARGET_TYPE = "liquibaseTargetType";
-    public static final String OPERATION_TARGET_VALUE = "liquibaseTarget";
+    public static final String LIQUIBASE_TARGET_URL = "liquibaseTargetUrl";
+    public static final String LIQUIBASE_REF_URL = "liquibaseRefUrl";
     public static final String CHANGESET_OPERATION_START_TIME = "changesetOperationStart";
     public static final String CHANGESET_OPERATION_STOP_TIME = "changesetOperationStop";
     public static final String CHANGESET_SQL = "changesetSql";
