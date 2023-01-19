@@ -557,7 +557,7 @@ public class StringClauses {
         private ListIterator<String> keyIterator;
 
         public ClauseIterator(LinkedHashMap<String, Object> clauses) {
-            this.keyIterator = new ArrayList<String>(clauses.keySet()).listIterator();
+            this.keyIterator = new ArrayList<>(clauses.keySet()).listIterator();
             this.clauses = clauses;
         }
 

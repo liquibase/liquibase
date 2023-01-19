@@ -77,7 +77,7 @@ public class ResultSetCache {
                         cache = cacheBySchema.computeIfAbsent(rowSchema, k -> new HashMap<String, List<CachedRow>>());
                     }
                     if (!cache.containsKey(rowKey)) {
-                        cache.put(rowKey, new ArrayList<CachedRow>());
+                        cache.put(rowKey, new ArrayList<>());
                     }
                     cache.get(rowKey).add(row);
                 }

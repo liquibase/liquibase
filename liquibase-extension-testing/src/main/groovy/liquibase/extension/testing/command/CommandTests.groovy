@@ -662,7 +662,11 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
             catch (Exception e) {
                 String message = "Error loading tests in ${path}: ${e.message}"
-                throw new RuntimeException("${message}.\nIf running CommandTests directly, make sure you are choosing the classpath of the module you want to test")
+                throw new RuntimeException("${message}.\n\n!!------------- TEST EXECUTION FAILURE -------------!!\n" +
+                        "\nIf you are running CommandTests directly through your IDE, make sure you are including the module with your 'test.groovy' files in your classpath.\n" +
+                        "\nNOTE: For example, if you are running these tests in liquibase-core, use the liquibase-integration-tests module as the classpath in your run configuration.\n" +
+                        "\n!!--------------------------------------------------!!")
+
             }
         }
 
