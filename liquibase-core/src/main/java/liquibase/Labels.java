@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class Labels {
 
-    private Set<String> labels = new LinkedHashSet<>();
+    private final Set<String> labels = new LinkedHashSet<>();
 
     public Labels() {
     }

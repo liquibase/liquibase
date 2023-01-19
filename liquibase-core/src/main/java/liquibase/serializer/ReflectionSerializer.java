@@ -9,13 +9,13 @@ import java.util.*;
 
 public class ReflectionSerializer {
 
-    private static ReflectionSerializer instance = new ReflectionSerializer();
+    private static final ReflectionSerializer instance = new ReflectionSerializer();
 
     public static ReflectionSerializer getInstance() {
         return instance;
     }
 
-    private Map<Class, Map<String, Field>> reflectionCache = new HashMap<>();
+    private final Map<Class, Map<String, Field>> reflectionCache = new HashMap<>();
 
     private ReflectionSerializer() {
 

@@ -9,7 +9,7 @@ import java.util.UUID;
 public class OperationChange implements HubModel {
     private Project project;
     private Operation operation;
-    private List<ChangeSet> changeSets = new ArrayList<>();
+    private final List<ChangeSet> changeSets = new ArrayList<>();
 
     @Override
     public UUID getId() {

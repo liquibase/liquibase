@@ -62,7 +62,7 @@ public class Scope {
     private static ScopeManager scopeManager;
 
     private Scope parent;
-    private SmartMap values = new SmartMap();
+    private final SmartMap values = new SmartMap();
     private String scopeId;
 
     private LiquibaseListener listener;

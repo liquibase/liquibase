@@ -81,7 +81,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
     }
 
     public static class DeploymentHistory {
-        private List<DeploymentDetails> deployments = new ArrayList<>();
+        private final List<DeploymentDetails> deployments = new ArrayList<>();
 
         public List<DeploymentDetails> getDeployments() {
             return deployments;

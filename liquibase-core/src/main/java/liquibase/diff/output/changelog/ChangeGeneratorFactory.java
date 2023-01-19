@@ -13,7 +13,7 @@ import java.util.*;
 public class ChangeGeneratorFactory {
     private static ChangeGeneratorFactory instance;
 
-    private List<ChangeGenerator> generators = new ArrayList<>();
+    private final List<ChangeGenerator> generators = new ArrayList<>();
 
     private ChangeGeneratorFactory() {
         try {

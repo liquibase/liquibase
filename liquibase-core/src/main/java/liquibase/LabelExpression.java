@@ -18,7 +18,7 @@ import java.util.*;
  */
 public class LabelExpression {
 
-    private HashSet<String> labels = new LinkedHashSet<>();
+    private final HashSet<String> labels = new LinkedHashSet<>();
     private String originalString;
 
     public LabelExpression() {

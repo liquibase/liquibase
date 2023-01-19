@@ -3,12 +3,12 @@ package liquibase.statement.core;
 import liquibase.statement.AbstractSqlStatement;
 
 public class SetNullableStatement extends AbstractSqlStatement {
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String columnName;
-    private String columnDataType;
-    private boolean nullable;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
+    private final String columnName;
+    private final String columnDataType;
+    private final boolean nullable;
     private String constraintName;
     private boolean validate = true;
 

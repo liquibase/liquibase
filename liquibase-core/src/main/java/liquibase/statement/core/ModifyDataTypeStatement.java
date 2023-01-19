@@ -3,7 +3,7 @@ package liquibase.statement.core;
 import liquibase.statement.AbstractSqlStatement;
 
 public class ModifyDataTypeStatement extends AbstractSqlStatement {
-    private String catalogName;
+    private final String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;

@@ -38,15 +38,15 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     protected static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private List<? extends ColumnConfig> columns;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
+    private final List<? extends ColumnConfig> columns;
     private ChangeSet changeSet;
 
-    private Set<Closeable> closeables;
+    private final Set<Closeable> closeables;
 
-    private ResourceAccessor resourceAccessor;
+    private final ResourceAccessor resourceAccessor;
 
     //Some databases do extra work on creating prepared statements, so constantly creating new prepared statements is expensive
     //When running through a CSV file, the SQL will be the same within the same file so just storing the last seen prepared statement is all we need
@@ -59,7 +59,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     //Cache the executeWithFlags method to avoid reflection overhead
     private static Method executeWithFlagsMethod;
 
-    private Map<String, Object> snapshotScratchPad = new HashMap<>();
+    private final Map<String, Object> snapshotScratchPad = new HashMap<>();
 
     protected ExecutablePreparedStatementBase(Database database, String catalogName, String schemaName, String
             tableName, List<? extends ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {

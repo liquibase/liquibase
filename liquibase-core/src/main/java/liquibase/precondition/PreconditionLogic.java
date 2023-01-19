@@ -14,7 +14,7 @@ import java.util.List;
  * Marker interface for precondition logic tags (and,or, not)
  */
 public abstract class PreconditionLogic extends AbstractPrecondition {
-    private List<Precondition> nestedPreconditions = new ArrayList<>();
+    private final List<Precondition> nestedPreconditions = new ArrayList<>();
 
     public List<Precondition> getNestedPreconditions() {
         return this.nestedPreconditions;

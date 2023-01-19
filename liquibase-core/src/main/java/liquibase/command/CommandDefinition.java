@@ -26,8 +26,8 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     private String footer;
     private String groupFooter;
 
-    private Map<String, String> groupLongDescription = new HashMap<>();
-    private Map<String, String> groupShortDescription = new HashMap<>();
+    private final Map<String, String> groupLongDescription = new HashMap<>();
+    private final Map<String, String> groupShortDescription = new HashMap<>();
 
     protected CommandDefinition(String[] name) {
         this.name = name;

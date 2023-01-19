@@ -16,17 +16,17 @@ import java.util.*;
 
 public class DiffResult {
 
-    private DatabaseSnapshot referenceSnapshot;
-    private DatabaseSnapshot comparisonSnapshot;
+    private final DatabaseSnapshot referenceSnapshot;
+    private final DatabaseSnapshot comparisonSnapshot;
 
-    private CompareControl compareControl;
+    private final CompareControl compareControl;
 
     private StringDiff productNameDiff;
     private StringDiff productVersionDiff;
 
-    private Set<DatabaseObject> missingObjects = new HashSet<>();
-    private Set<DatabaseObject> unexpectedObjects = new HashSet<>();
-    private Map<DatabaseObject, ObjectDifferences> changedObjects = new HashMap<>();
+    private final Set<DatabaseObject> missingObjects = new HashSet<>();
+    private final Set<DatabaseObject> unexpectedObjects = new HashSet<>();
+    private final Map<DatabaseObject, ObjectDifferences> changedObjects = new HashMap<>();
 
 
     public DiffResult(DatabaseSnapshot referenceDatabaseSnapshot, DatabaseSnapshot comparisonDatabaseSnapshot, CompareControl compareControl) {

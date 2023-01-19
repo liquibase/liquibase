@@ -26,9 +26,9 @@ import java.util.*;
  * </ul>
  */
 public class ParsedNode {
-    private String namespace;
-    private String name;
-    private List<ParsedNode> children = new ArrayList<>();
+    private final String namespace;
+    private final String name;
+    private final List<ParsedNode> children = new ArrayList<>();
     private Object value;
 
     public ParsedNode(String namespace, String name) {

@@ -10,7 +10,7 @@ public class FindForeignKeyConstraintsStatement extends AbstractSqlStatement {
     public static final String RESULT_COLUMN_FOREIGN_COLUMN_NAME    = "REFERENCED_COLUMN_NAME";
     public static final String RESULT_COLUMN_CONSTRAINT_NAME        = "CONSTRAINT_NAME";
 
-    private String baseTableCatalogName;
+    private final String baseTableCatalogName;
     private String baseTableSchemaName;
     private String baseTableName;
 

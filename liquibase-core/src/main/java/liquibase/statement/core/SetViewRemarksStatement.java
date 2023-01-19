@@ -3,10 +3,10 @@ package liquibase.statement.core;
 import liquibase.statement.AbstractSqlStatement;
 
 public class SetViewRemarksStatement extends AbstractSqlStatement {
-    private String catalogName;
-    private String schemaName;
-    private String viewName;
-    private String remarks;
+    private final String catalogName;
+    private final String schemaName;
+    private final String viewName;
+    private final String remarks;
 
     public SetViewRemarksStatement(String catalogName, String schemaName, String viewName, String remarks) {
         this.catalogName = catalogName;

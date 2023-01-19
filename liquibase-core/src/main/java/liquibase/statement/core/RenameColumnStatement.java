@@ -4,7 +4,7 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class RenameColumnStatement extends AbstractSqlStatement {
 
-    private String catalogName;
+    private final String catalogName;
     private String schemaName;
     private String tableName;
     private String oldColumnName;

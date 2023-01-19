@@ -31,21 +31,21 @@ public class ChangeParameterMetaData {
     public static final String ALL = "all";
     public static final String NONE = "none";
 
-    private Change change;
-    private String parameterName;
-    private String description;
-    private Map<String, Object> exampleValues;
-    private String displayName;
+    private final Change change;
+    private final String parameterName;
+    private final String description;
+    private final Map<String, Object> exampleValues;
+    private final String displayName;
     private String dataType;
     private Class dataTypeClass;
     private Type[] dataTypeClassParameters = new Type[0];
-    private String since;
+    private final String since;
     private Set<String> requiredForDatabase;
     private Set<String> supportedDatabases;
-    private String mustEqualExisting;
-    private LiquibaseSerializable.SerializationType serializationType;
-    private String[] requiredForDatabaseArg;
-    private String[] supportedDatabasesArg;
+    private final String mustEqualExisting;
+    private final LiquibaseSerializable.SerializationType serializationType;
+    private final String[] requiredForDatabaseArg;
+    private final String[] supportedDatabasesArg;
     private Optional<Method> readMethodRef = Optional.empty();
     private Optional<Method> writeMethodRef = Optional.empty();
 

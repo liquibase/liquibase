@@ -27,7 +27,7 @@ import java.util.*;
 public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     public static final String PRODUCT_NAME = "SQLite";
-    private Set<String> systemTables = new HashSet<>();
+    private final Set<String> systemTables = new HashSet<>();
 
     {
         systemTables.add("sqlite_sequence");

@@ -7,9 +7,9 @@ import java.util.*;
 
 public class UnparsedSql implements Sql {
 
-    private String sql;
-    private String endDelimiter;
-    private Set<DatabaseObject> affectedDatabaseObjects = new HashSet<>();
+    private final String sql;
+    private final String endDelimiter;
+    private final Set<DatabaseObject> affectedDatabaseObjects = new HashSet<>();
 
 
     public UnparsedSql(String sql, DatabaseObject... affectedDatabaseObjects) {

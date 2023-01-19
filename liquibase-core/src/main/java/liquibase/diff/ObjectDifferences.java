@@ -11,8 +11,8 @@ import java.util.*;
 
 public class ObjectDifferences {
 
-    private CompareControl compareControl;
-    private HashMap<String, Difference> differences = new HashMap<>();
+    private final CompareControl compareControl;
+    private final HashMap<String, Difference> differences = new HashMap<>();
 
     public ObjectDifferences(CompareControl compareControl) {
         this.compareControl = compareControl;
@@ -108,7 +108,7 @@ public class ObjectDifferences {
     public static class StandardCompareFunction implements CompareFunction {
 
         private final CompareControl.SchemaComparison[] schemaComparisons;
-        private Database accordingTo;
+        private final Database accordingTo;
 
         public StandardCompareFunction(CompareControl.SchemaComparison[] schemaComparisons, Database accordingTo) {
             this.schemaComparisons = schemaComparisons;
@@ -144,7 +144,7 @@ public class ObjectDifferences {
 
     public static class ToStringCompareFunction implements CompareFunction {
 
-        private boolean caseSensitive;
+        private final boolean caseSensitive;
 
         public ToStringCompareFunction(boolean caseSensitive) {
             this.caseSensitive = caseSensitive;
@@ -171,7 +171,7 @@ public class ObjectDifferences {
     public static class DatabaseObjectNameCompareFunction implements CompareFunction {
 
         private final Database accordingTo;
-        private Class<? extends DatabaseObject> type;
+        private final Class<? extends DatabaseObject> type;
 
         public DatabaseObjectNameCompareFunction(Class<? extends DatabaseObject> type, Database accordingTo) {
             this.type = type;
@@ -275,7 +275,7 @@ public class ObjectDifferences {
 
     public static class OrderedCollectionCompareFunction implements CompareFunction {
 
-        private StandardCompareFunction compareFunction;
+        private final StandardCompareFunction compareFunction;
 
         public OrderedCollectionCompareFunction(StandardCompareFunction compareFunction) {
             this.compareFunction = compareFunction;
@@ -321,7 +321,7 @@ public class ObjectDifferences {
 
     public static class UnOrderedCollectionCompareFunction implements CompareFunction {
 
-        private StandardCompareFunction compareFunction;
+        private final StandardCompareFunction compareFunction;
 
         public UnOrderedCollectionCompareFunction(StandardCompareFunction compareFunction) {
             this.compareFunction = compareFunction;

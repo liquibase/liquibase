@@ -14,8 +14,8 @@ import java.util.*;
 
 public class DatabaseObjectCollection implements LiquibaseSerializable {
 
-    private Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> cache = new LinkedHashMap<>();
-    private Database database;
+    private final Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> cache = new LinkedHashMap<>();
+    private final Database database;
 
     public DatabaseObjectCollection(Database database) {
         this.database = database;

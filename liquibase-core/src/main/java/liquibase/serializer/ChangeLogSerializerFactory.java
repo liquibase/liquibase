@@ -9,7 +9,7 @@ import java.util.*;
 public class ChangeLogSerializerFactory {
     private static ChangeLogSerializerFactory instance;
 
-    private Map<String, List<ChangeLogSerializer>> serializers = new HashMap<>();
+    private final Map<String, List<ChangeLogSerializer>> serializers = new HashMap<>();
 
     public static synchronized void reset() {
         instance = new ChangeLogSerializerFactory();

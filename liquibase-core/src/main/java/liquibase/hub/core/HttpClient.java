@@ -35,7 +35,7 @@ import java.util.Map;
 
 class HttpClient {
 
-    private Yaml yaml;
+    private final Yaml yaml;
 
     protected HttpClient() {
         DumperOptions dumperOptions = new DumperOptions();

@@ -14,7 +14,7 @@ import java.util.List;
 public class PreconditionFailedException extends Exception {
 
     private static final long serialVersionUID = 1L;
-    private List<FailedPrecondition> failedPreconditions;
+    private final List<FailedPrecondition> failedPreconditions;
 
     public PreconditionFailedException(String message, DatabaseChangeLog changeLog, Precondition precondition) {
         this(new FailedPrecondition(message, changeLog, precondition));

@@ -22,7 +22,7 @@ import java.nio.file.InvalidPathException;
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     public static final String LIQUIBASE_SCHEMA_VERSION;
-    private SAXParserFactory saxParserFactory;
+    private final SAXParserFactory saxParserFactory;
 
     static {
         LIQUIBASE_SCHEMA_VERSION = computeSchemaVersion(LiquibaseUtil.getBuildVersion());

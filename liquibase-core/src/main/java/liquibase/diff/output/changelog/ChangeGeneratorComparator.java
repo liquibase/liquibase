@@ -7,8 +7,8 @@ import java.util.Comparator;
 
 public class ChangeGeneratorComparator implements Comparator<ChangeGenerator> {
 
-    private Class<? extends DatabaseObject> objectType;
-    private Database database;
+    private final Class<? extends DatabaseObject> objectType;
+    private final Database database;
 
     public ChangeGeneratorComparator(Class<? extends DatabaseObject> objectType, Database database) {
         this.objectType = objectType;

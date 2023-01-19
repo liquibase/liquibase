@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  */
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
-    private Map<String, Object> attributes = new HashMap<>();
+    private final Map<String, Object> attributes = new HashMap<>();
 
     private String snapshotId;
 

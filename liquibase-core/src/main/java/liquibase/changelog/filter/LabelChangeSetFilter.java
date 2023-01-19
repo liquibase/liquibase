@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class LabelChangeSetFilter implements ChangeSetFilter {
-    private LabelExpression labelExpression;
+    private final LabelExpression labelExpression;
 
     public LabelChangeSetFilter() {
         this(new LabelExpression());

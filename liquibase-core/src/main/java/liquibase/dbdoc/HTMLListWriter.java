@@ -11,10 +11,10 @@ import java.io.*;
 import java.util.SortedSet;
 
 public class HTMLListWriter {
-    private Resource outputDir;
-    private String directory;
-    private String filename;
-    private String title;
+    private final Resource outputDir;
+    private final String directory;
+    private final String filename;
+    private final String title;
 
     public HTMLListWriter(String title, String filename, String subdir, Resource outputDir) {
         this.title = title;

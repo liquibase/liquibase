@@ -7,12 +7,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DeleteStatement extends AbstractSqlStatement {
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
+    private final String catalogName;
+    private final String schemaName;
+    private final String tableName;
     private String where;
-    private List<Object> whereParameters = new ArrayList<>();
-    private List<String> whereColumnNames = new ArrayList<>();
+    private final List<Object> whereParameters = new ArrayList<>();
+    private final List<String> whereColumnNames = new ArrayList<>();
 
     public DeleteStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName  = catalogName;

@@ -28,8 +28,8 @@ public class SqlGeneratorFactory {
     //caches for expensive reflection based calls that slow down Liquibase initialization: CORE-1207
     private final Map<Class<?>, Type[]> genericInterfacesCache = new HashMap<>();
     private final Map<Class<?>, Type> genericSuperClassCache = new HashMap<>();
-    private List<SqlGenerator> generators = new ArrayList<>();
-    private Map<String, SortedSet<SqlGenerator>> generatorsByKey = new HashMap<>();
+    private final List<SqlGenerator> generators = new ArrayList<>();
+    private final Map<String, SortedSet<SqlGenerator>> generatorsByKey = new HashMap<>();
 
     private SqlGeneratorFactory() {
         try {

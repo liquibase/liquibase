@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class ChangeLogSyncVisitor implements ChangeSetVisitor {
 
-    private Database database;
+    private final Database database;
     private ChangeLogSyncListener listener;
 
     public ChangeLogSyncVisitor(Database database) {

@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
-    private Set<DiffStatusListener> statusListeners = new HashSet<>();
+    private final Set<DiffStatusListener> statusListeners = new HashSet<>();
 
-    private Class<? extends DatabaseObject> defaultFor;
+    private final Class<? extends DatabaseObject> defaultFor;
     private Class<? extends DatabaseObject>[] addsTo;
 
     protected JdbcSnapshotGenerator(Class<? extends DatabaseObject> defaultFor) {

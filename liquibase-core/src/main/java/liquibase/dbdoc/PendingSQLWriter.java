@@ -20,7 +20,7 @@ import java.util.List;
 
 public class PendingSQLWriter extends HTMLWriter {
 
-    private DatabaseChangeLog databaseChangeLog;
+    private final DatabaseChangeLog databaseChangeLog;
 
     public PendingSQLWriter(Resource rootOutputDir, Database database, DatabaseChangeLog databaseChangeLog) {
         super(rootOutputDir.resolve("pending"), database);

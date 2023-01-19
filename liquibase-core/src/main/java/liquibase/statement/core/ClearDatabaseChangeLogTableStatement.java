@@ -4,8 +4,8 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class ClearDatabaseChangeLogTableStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
+    private final String catalogName;
+    private final String schemaName;
 
     public ClearDatabaseChangeLogTableStatement(String catalogName, String schemaName) {
         super();

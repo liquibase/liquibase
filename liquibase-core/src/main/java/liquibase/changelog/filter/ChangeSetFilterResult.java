@@ -7,8 +7,8 @@ package liquibase.changelog.filter;
  */
 public class ChangeSetFilterResult {
 
-    private boolean accepted;
-    private String message;
+    private final boolean accepted;
+    private final String message;
     private final Class<? extends ChangeSetFilter> filter;
 
     public ChangeSetFilterResult(boolean accepted, String message, Class<? extends ChangeSetFilter> filter) {

@@ -14,9 +14,9 @@ public class LockServiceFactory {
 
     private static LockServiceFactory instance;
 
-	  private List<LockService> registry = new ArrayList<>();
+	  private final List<LockService> registry = new ArrayList<>();
 
-	  private Map<Database, LockService> openLockServices = new ConcurrentHashMap<>();
+	  private final Map<Database, LockService> openLockServices = new ConcurrentHashMap<>();
 
 	  public static synchronized LockServiceFactory getInstance() {
         if (instance == null) {

@@ -11,9 +11,9 @@ import java.util.Objects;
  */
 public class CommandResultDefinition<DataType> implements Comparable<CommandResultDefinition<?>> {
 
-    private String name;
+    private final String name;
     private String description;
-    private Class<DataType> dataType;
+    private final Class<DataType> dataType;
     private DataType defaultValue;
 
     protected CommandResultDefinition(String name, Class<DataType> type) {

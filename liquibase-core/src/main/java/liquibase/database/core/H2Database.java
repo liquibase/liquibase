@@ -29,10 +29,10 @@ import java.util.regex.Pattern;
 
 public class H2Database extends AbstractJdbcDatabase {
 
-    private static String START_CONCAT = "CONCAT(";
-    private static String END_CONCAT = ")";
-    private static String SEP_CONCAT = ", ";
-    private static List keywords = Arrays.asList(
+    private static final String START_CONCAT = "CONCAT(";
+    private static final String END_CONCAT = ")";
+    private static final String SEP_CONCAT = ", ";
+    private static final List keywords = Arrays.asList(
             "ALL",
             "AND",
             "ANY",

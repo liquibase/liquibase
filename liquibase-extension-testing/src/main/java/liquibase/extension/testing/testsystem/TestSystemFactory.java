@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class TestSystemFactory extends AbstractPluginFactory<TestSystem> {
 
-    private Map<TestSystem.Definition, TestSystem> systems = new HashMap<>();
+    private final Map<TestSystem.Definition, TestSystem> systems = new HashMap<>();
 
     @Override
     protected Class<TestSystem> getPluginClass() {

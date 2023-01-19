@@ -4,9 +4,9 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class DropProcedureStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String procedureName;
+    private final String catalogName;
+    private final String schemaName;
+    private final String procedureName;
 
     public DropProcedureStatement(String catalogName, String schemaName, String procedureName) {
         this.catalogName = catalogName;
