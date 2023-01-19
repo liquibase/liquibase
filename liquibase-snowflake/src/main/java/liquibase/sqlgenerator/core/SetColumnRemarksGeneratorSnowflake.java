@@ -28,7 +28,7 @@ public class SetColumnRemarksGeneratorSnowflake extends SetColumnRemarksGenerato
                 // Check if we're trying to set the column remarks on a view, and if so, note that this is not supported.
                 try {
                     List<Map<String, ?>> viewList = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(
-                            new RawSqlStatement("SHOW VIEWS LIKE '" + statement.getTableName() + "'"));
+                            new RawSqlStatement(String.format("SHOW VIEWS LIKE '%s'", statement.getTableName())));
                     return viewList.isEmpty();
                 } catch (DatabaseException e) {
                     Scope.getCurrentScope().getLog(getClass()).severe("Failed to query Snowflake to determine if object is a table or view.", e);
