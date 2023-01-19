@@ -503,7 +503,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     /**
      * Create inverse changes that can roll back this change. This method is intended
-     * to be overriden by Change implementations that have a logical inverse operation. Default implementation
+     * to be overridden by Change implementations that have a logical inverse operation. Default implementation
      * returns null.
      * <p/>
      * If {@link #generateRollbackStatements(liquibase.database.Database)} is overridden, this method may not be called.

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Read up to 4 bytes to determine the BOM. Extra bytes, of if no BOM is
@@ -39,17 +40,17 @@ public class BomAwareInputStream extends PushbackInputStream {
         n = this.read(bom, 0, bom.length);
 
         if ((bom[0] == _0xEF) && (bom[1] == _0xBB) && (bom[2] == _0xBF)) {
-            detectedCharset = Charset.forName("UTF-8");
+            detectedCharset = StandardCharsets.UTF_8;
             unread = n - 3;
         } else if ((bom[0] == _0xFE) && (bom[1] == _0xFF)) {
-            detectedCharset = Charset.forName("UTF-16BE");
+            detectedCharset = StandardCharsets.UTF_16BE;
             unread = n - 2;
         } else if ((bom[0] == _0xFF) && (bom[1] == _0xFE)) {
             if ((n == 4) && (bom[2] == _0x00) && (bom[3] == _0x00)) {
                 detectedCharset = Charset.forName("UTF-32LE");
                 unread = n - 4;
             } else {
-                detectedCharset = Charset.forName("UTF-16LE");
+                detectedCharset = StandardCharsets.UTF_16LE;
                 unread = n - 2;
             }
         } else if ((bom[0] == _0x00) && (bom[1] == _0x00) && (bom[2] == _0xFE) && (bom[3] == _0xFF)) {
