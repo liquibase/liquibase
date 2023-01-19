@@ -47,7 +47,7 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
         return new String[]{
                 "CREATE LOGIN [" + getUsername() + "] with password=N'" + getPassword() + "', CHECK_EXPIRATION=OFF",
 
-                "CREATE DATABASE " + getCatalog() + (collation == null ? "" : "COLLATE " + collation ),
+                "CREATE DATABASE " + getCatalog() + (collation == null ? "" : " COLLATE " + collation ),
                 "EXEC lbcat..sp_addsrvrolemember @loginame = N'" + getUsername() + "', @rolename = N'sysadmin'",
 
                 "CREATE DATABASE " + getAltCatalog(),
