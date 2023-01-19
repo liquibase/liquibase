@@ -232,7 +232,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     /**
      * Convenience method to check if the object types should consider catalog name
-     * also during comparision (equals(), hashcode() and compareTo())
+     * also during comparison (equals(), hashcode() and compareTo())
      *
      * @return
      */
