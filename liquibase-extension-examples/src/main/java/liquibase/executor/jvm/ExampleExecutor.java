@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  *
- * This is an example of a custom <a href="#{@link}">{@link Executor}</a> implemention which can be specified
+ * This is an example of a custom <a href="#{@link}">{@link Executor}</a> implementation which can be specified
  * in a changelog with the "runWith" attribute
  *
  */

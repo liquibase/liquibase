@@ -9,7 +9,7 @@ import java.util.*;
  */
 public class SmartMap implements Map<String, Object> {
 
-    private SortedMap<String, Object> values = new TreeMap<String, Object>();
+    private SortedMap<String, Object> values = new TreeMap<>();
 
     @Override
     public int size() {

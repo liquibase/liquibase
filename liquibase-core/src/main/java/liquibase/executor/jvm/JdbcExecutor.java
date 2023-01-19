@@ -123,7 +123,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void execute(final SqlStatement sql) throws DatabaseException {
-        execute(sql, new ArrayList<SqlVisitor>());
+        execute(sql, new ArrayList<>());
     }
 
     @Override
@@ -175,7 +175,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws DatabaseException {
-        return query(sql, rse, new ArrayList<SqlVisitor>());
+        return query(sql, rse, new ArrayList<>());
     }
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
@@ -184,7 +184,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
             String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
 
-            try (PreparedStatement pstmt = factory.create(finalSql);) {
+            try (PreparedStatement pstmt = factory.create(finalSql)) {
                 final List<?> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
                 for (int i = 0; i < parameters.size(); i++) {
                     pstmt.setObject(i, parameters.get(0));

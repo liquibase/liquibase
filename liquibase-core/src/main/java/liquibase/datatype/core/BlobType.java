@@ -72,7 +72,7 @@ public class BlobType extends LiquibaseDataType {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("blob") || "java.sql.Types.BLOB".equals(originalDefinition)) {
                 return new DatabaseDataType("BLOB");
             } else if (originalDefinition.toLowerCase(Locale.US).startsWith("varbinary") || "java.sql.Types.VARBINARY".equals
-                (originalDefinition)) {
+                    (originalDefinition)) {
                 return new DatabaseDataType("VARBINARY", getParameters());
             } else if (originalDefinition.toLowerCase(Locale.US).startsWith("tinyblob")) {
                 return new DatabaseDataType("TINYBLOB");
@@ -119,6 +119,16 @@ public class BlobType extends LiquibaseDataType {
 
         if (database instanceof FirebirdDatabase) {
             return new DatabaseDataType("BLOB");
+        }
+
+        if ((database instanceof DB2Database) || (database instanceof Db2zDatabase)) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("varbinary") || originalDefinition.startsWith("java.sql.Types.VARBINARY")) {
+                return new DatabaseDataType("VARBINARY", getParameters());
+            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("binary")) {
+                return new DatabaseDataType("BINARY", getParameters());
+            } else {
+                return new DatabaseDataType("BLOB");
+            }
         }
 
         return super.toDatabaseDataType(database);

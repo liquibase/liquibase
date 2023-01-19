@@ -2,45 +2,29 @@ package liquibase.serializer.core.string
 
 import liquibase.Scope
 import liquibase.changelog.ChangeSet
-import liquibase.test.JUnitResourceAccessor
+import liquibase.util.ColumnParentType
 import spock.lang.Specification
-import spock.lang.Unroll;
+import spock.lang.Unroll
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.fail
 
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.lang.reflect.Type
 
-import liquibase.change.*;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*
 import liquibase.change.core.*;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.CustomSqlChange;
 import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.logging.Logger;
-import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.logging.Logger
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.DatabaseFunction;
 
 import liquibase.statement.SequenceCurrentValueFunction;
-import liquibase.statement.SequenceNextValueFunction;
-import org.junit.Test;
+import liquibase.statement.SequenceNextValueFunction
 
 public class StringChangeLogSerializerTest extends Specification {
 

@@ -23,6 +23,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+
 /**
  * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is
  * purely for convenience but recommended.
@@ -496,12 +498,12 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             throw new RollbackImpossibleException(e);
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(EMPTY_SQL_STATEMENT);
     }
 
     /**
      * Create inverse changes that can roll back this change. This method is intended
-     * to be overriden by Change implementations that have a logical inverse operation. Default implementation
+     * to be overridden by Change implementations that have a logical inverse operation. Default implementation
      * returns null.
      * <p/>
      * If {@link #generateRollbackStatements(liquibase.database.Database)} is overridden, this method may not be called.
@@ -778,9 +780,10 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         SortedSet<String> names = new TreeSet<>();
         for (Map.Entry<String, ChangeParameterMetaData> entry : metaData.getParameters().entrySet()) {
             String lowerCaseKey = entry.getKey().toLowerCase();
-            if (lowerCaseKey.endsWith("name")
-                && !lowerCaseKey.contains("schema")
-                && !lowerCaseKey.contains("catalog")) {
+            if ((lowerCaseKey.endsWith("name")
+                        && !lowerCaseKey.contains("schema")
+                        && !lowerCaseKey.contains("catalog"))
+                    || lowerCaseKey.equals("path")) {
                 Object currentValue = entry.getValue().getCurrentValue(this);
                 if (currentValue != null) {
                     names.add(entry.getKey()+"="+ currentValue);

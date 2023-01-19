@@ -128,6 +128,12 @@ public class ValidationErrors {
         return this;
     }
 
+
+    public ValidationErrors addError(String message, ChangeSet changeSet) {
+        this.errorMessages.add(message + ", " + changeSet);
+        return this;
+    }
+
     public List<String> getErrorMessages() {
         return errorMessages;
     }
@@ -151,7 +157,7 @@ public class ValidationErrors {
 
     public void addAll(ValidationErrors validationErrors, ChangeSet changeSet) {
         for (String message : validationErrors.getErrorMessages()) {
-            this.errorMessages.add(message + ", " + changeSet);
+            this.addError(message, changeSet);
         }
         for (String message : validationErrors.getWarningMessages()) {
             this.warningMessages.add(message + ", " + changeSet);
@@ -173,7 +179,7 @@ public class ValidationErrors {
 
     @Override
     public boolean equals(Object obj) {
-        if ((obj == null) || !(obj instanceof ValidationErrors)) {
+        if (!(obj instanceof ValidationErrors)) {
             return false;
         }
         return this.toString().equals(obj.toString());

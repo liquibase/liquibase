@@ -27,6 +27,7 @@ public class MockResource extends AbstractResource {
         return new MockResource(resolvePath(other), "Resource relative to " + getPath());
     }
 
+    @Override
     public Resource resolveSibling(String other) {
         return new MockResource(resolveSiblingPath(other), "Sibling resource to " + getPath());
     }

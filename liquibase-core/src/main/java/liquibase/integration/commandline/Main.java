@@ -134,6 +134,7 @@ public class Main {
     protected String delimiter;
     protected String rollbackScript;
     protected Boolean rollbackOnError = false;
+    protected List<CatalogAndSchema> schemaList = new ArrayList<>();
 
     private static int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
             204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
@@ -836,7 +837,7 @@ public class Main {
             fixedArgs.add(arg);
         }
 
-        return fixedArgs.toArray(new String[fixedArgs.size()]);
+        return fixedArgs.toArray(new String[0]);
     }
 
     /**
@@ -1239,12 +1240,10 @@ public class Main {
         // Check the licensing keys to see if they are being set from properties
         //
         if (liquibaseProLicenseKey == null) {
-            String key = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.licenseKey").getValue();
-            liquibaseProLicenseKey = key;
+            liquibaseProLicenseKey = (String) Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getCurrentConfiguredValue(null, null, "liquibase.licenseKey").getValue();
         }
         if (liquibaseHubApiKey == null) {
-            String key = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
-            liquibaseHubApiKey = key;
+            liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
         }
 
         //
@@ -1427,7 +1426,7 @@ public class Main {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
                 @Override
                 public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread()
+                    return new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
                             .getContextClassLoader());
                 }
             });
@@ -1436,7 +1435,7 @@ public class Main {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
                 @Override
                 public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[urls.size()]), null);
+                    return new URLClassLoader(urls.toArray(new URL[0]), null);
                 }
             });
         }
@@ -1824,7 +1823,20 @@ public class Main {
                 if (changeLogFile == null) {
                     throw new CommandLineParsingException(coreBundle.getString("dbdoc.requires.changelog.parameter"));
                 }
-                liquibase.generateDocumentation(commandParams.iterator().next(), contexts);
+
+                if (schemas != null) {
+                    for (String schema : schemas.split(",")) {
+                        schemaList.add(new CatalogAndSchema(null, schema).customize(database));
+                    }
+
+                    CatalogAndSchema[] schemaArr = schemaList.stream().toArray(CatalogAndSchema[]::new);
+
+                    liquibase.generateDocumentation(commandParams.iterator().next(), contexts, schemaArr);
+                }
+                else {
+                    liquibase.generateDocumentation(commandParams.iterator().next(), contexts);
+                }
+
                 return;
             }
 

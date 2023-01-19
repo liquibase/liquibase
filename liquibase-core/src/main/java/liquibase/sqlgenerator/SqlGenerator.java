@@ -11,7 +11,7 @@ import liquibase.statement.SqlStatement;
  * SqlGenerator implementations take a database-independent SqlStatement interface and create a
  * database-specific Sql object.
  * SqlGenerators are registered with the SqlGeneratorFactory, which is used to determine the correct generator to
- * use for a given statment/database combination.
+ * use for a given statement/database combination.
  * <p>
  * The SqlGenerator implementations are responsible for determining whether the data contained in the SqlStatement
  * method is valid using the validate method.
@@ -19,7 +19,7 @@ import liquibase.statement.SqlStatement;
  * <b>Naming Conventions:</b><br>
  * Default SqlGenerators for a particular SqlStatement use the same name as the SqlStatement class, replacing
  * "Statement" with "Generator" (e.g.: CreateTableStatement -> CreateTableGenerator).
- * Database-specific or alternate SqlGenerators append a descrition of what makes them different appended
+ * Database-specific or alternate SqlGenerators append a description of what makes them different appended
  * (e.g. CreateTableStatement -> CreateTableGeneratorOracle)
  * <p>
  * <b>NOTE:</b> There is only one instance of each SqlGenerator implementation created, and they must be thread safe.
@@ -47,6 +47,11 @@ import liquibase.statement.SqlStatement;
 public interface SqlGenerator<T extends SqlStatement> extends PrioritizedService {
     int PRIORITY_DEFAULT = 1;
     int PRIORITY_DATABASE = 5;
+
+    /**
+     * Represent an empty array of {@link Sql}.
+     */
+    Sql[] EMPTY_SQL = {};
 
     /**
      * Of all the SqlGenerators that "support" a given SqlStatement/Database, SqlGeneratorFactory will return the one

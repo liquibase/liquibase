@@ -1,6 +1,7 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.util.ColumnParentType;
 
 public class SetColumnRemarksStatement extends AbstractSqlStatement {
 
@@ -10,10 +11,10 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
     private String columnName;
     private String remarks;
     private String columnDataType;
+    private String columnParentType;
 
     public SetColumnRemarksStatement(String catalogName, String schemaName, String tableName, String columnName, String remarks) {
         this(catalogName, schemaName, tableName, columnName, remarks, null);
-
     }
 
     public SetColumnRemarksStatement(String catalogName,
@@ -28,6 +29,22 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
         this.columnName = columnName;
         this.remarks = remarks;
         this.columnDataType = columnDataType;
+    }
+
+    public SetColumnRemarksStatement(String catalogName,
+                                     String schemaName,
+                                     String tableName,
+                                     String columnName,
+                                     String remarks,
+                                     String columnDataType,
+                                     String columnParentType) {
+        this.catalogName = catalogName;
+        this.schemaName = schemaName;
+        this.tableName = tableName;
+        this.columnName = columnName;
+        this.remarks = remarks;
+        this.columnDataType = columnDataType;
+        this.columnParentType = columnParentType;
     }
 
     public String getColumnDataType() {
@@ -52,5 +69,9 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
 
     public String getRemarks() {
         return remarks;
+    }
+
+    public ColumnParentType getColumnParentType() {
+        return columnParentType != null ? ColumnParentType.valueOf(columnParentType) : null;
     }
 }

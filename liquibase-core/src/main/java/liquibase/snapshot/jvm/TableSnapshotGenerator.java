@@ -98,9 +98,9 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             table.setAttribute("temporary", "GLOBAL");
 
             String duration = tableMetadataResultSet.getString("DURATION");
-            if ((duration != null) && "SYS$TRANSACTION".equals(duration)) {
+            if ("SYS$TRANSACTION".equals(duration)) {
                 table.setAttribute("duration", "ON COMMIT DELETE ROWS");
-            } else if ((duration != null) && "SYS$SESSION".equals(duration)) {
+            } else if ("SYS$SESSION".equals(duration)) {
                 table.setAttribute("duration", "ON COMMIT PRESERVE ROWS");
             }
         }

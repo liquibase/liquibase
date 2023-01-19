@@ -250,7 +250,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     /**
      * Sets the string value this column should be set to.
      * If you are trying to set a value type other than a string, use the more specific functions like {@link #setValueNumeric(Number)}.
-     * This method does no processing of the string. Any trimming is expected to be done beforehand. It does not conver the string "null" to null
+     * This method does no processing of the string. Any trimming is expected to be done beforehand. It does not convert the string "null" to null
      * so that you can set the string "null" as a value if you are feeling particularly crazy.
      */
     public ColumnConfig setValue(String value) {
@@ -889,7 +889,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         private final Number delegate;
         private final String value;
 
-        private ValueNumeric(final String value, final Number numeric) {
+        public ValueNumeric(final String value, final Number numeric) {
             this.delegate = numeric;
             this.value = value;
         }

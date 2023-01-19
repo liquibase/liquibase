@@ -11,7 +11,7 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     private SortedMap<String, String> contentByFileName;
 
     public MockResourceAccessor() {
-        this(new HashMap<String, String>());
+        this(new HashMap<>());
     }
 
     public MockResourceAccessor(Map<String, String> contentByFileName) {
@@ -53,5 +53,9 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
     @Override
     public List<String> describeLocations() {
         return Collections.singletonList("MockResouceAccessor.java");
+    }
+
+    public void setContent(String fileName, String content) {
+        this.contentByFileName.put(fileName, content);
     }
 }
