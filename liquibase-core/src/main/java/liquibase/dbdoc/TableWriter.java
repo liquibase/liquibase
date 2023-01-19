@@ -1,7 +1,11 @@
 package liquibase.dbdoc;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DatabaseHistoryException;
+import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.structure.core.*;
 
@@ -29,6 +33,12 @@ public class TableWriter extends HTMLWriter {
         writeColumns(fileWriter, table, database);
         writeTableIndexes(fileWriter, table, database);
         writeTableForeignKeys(fileWriter, table, database);
+    }
+
+    public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog, String schema) throws DatabaseHistoryException, IOException, DatabaseException {
+        super.outputDir = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class).getResource(super.baseOutputDir.getPath() + System.getProperty("file.separator") + schema);
+        super.writeHTML(object, ranChanges, changesToRun, changeLog);
+
     }
 
     private void writeColumns(Writer fileWriter, Table table, Database database) throws IOException {

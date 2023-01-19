@@ -13,6 +13,7 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<MissingPropertyMode> MISSING_PROPERTY_MODE;
 
     public static final ConfigurationDefinition<ChangelogParseMode> CHANGELOG_PARSE_MODE;
+    public static final ConfigurationDefinition<Boolean> ERROR_ON_CIRCULAR_INCLUDE_ALL;
 
 
     static {
@@ -38,6 +39,11 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
         CHANGELOG_PARSE_MODE = builder.define("changelogParseMode", ChangelogParseMode.class)
                 .setDescription("Configures how to handle unknown fields in changelog files. Possible values: STRICT which causes parsing to fail, and LAX which continues with the parsing.")
                 .setDefaultValue(ChangelogParseMode.STRICT)
+                .build();
+
+        ERROR_ON_CIRCULAR_INCLUDE_ALL = builder.define("errorOnCircularIncludeAll", Boolean.class)
+                .setDescription("Throw an error if Liquibase detects that an includeAll will cause a circular reference (and thus a changelog parse error).")
+                .setDefaultValue(true)
                 .build();
 
     }

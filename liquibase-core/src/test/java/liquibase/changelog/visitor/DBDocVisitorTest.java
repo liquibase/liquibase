@@ -66,7 +66,7 @@ public class DBDocVisitorTest {
         when(mockSnapshot.get(Column.class)).thenReturn(columns);
 
         SnapshotGeneratorFactory mockSnapshotGeneratorFactory = mock(SnapshotGeneratorFactory.class);
-        when(mockSnapshotGeneratorFactory.createSnapshot(any(CatalogAndSchema.class), any(Database.class), any(SnapshotControl.class))).thenReturn(mockSnapshot);
+        when(mockSnapshotGeneratorFactory.createSnapshot(any(CatalogAndSchema[].class), any(Database.class), any(SnapshotControl.class))).thenReturn(mockSnapshot);
 
         Path tempOutputDirPath = temporaryFolder.newFolder().toPath();
         PathResource rootOutputDir = new PathResource(tempOutputDirPath.toString(), tempOutputDirPath);

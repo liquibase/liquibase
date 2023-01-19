@@ -6,7 +6,9 @@ import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.command.CommandScope;
+import liquibase.command.core.DbUrlConnectionCommandStep;
 import liquibase.command.core.InternalDropAllCommandStep;
+import liquibase.command.core.TagCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -1881,30 +1883,14 @@ public class Liquibase implements AutoCloseable {
 
     /**
      * 'Tags' the database for future rollback
+     *
+     * @deprecated Use {link {@link CommandScope(String)} to tag instead of this method.
      */
     public void tag(String tagString) throws LiquibaseException {
-        runInScope(new Scope.ScopedRunner() {
-            @Override
-            public void run() throws Exception {
-
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-                lockService.waitForLock();
-
-                try {
-                    ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
-
-                    checkLiquibaseTables(false, null, new Contexts(),
-                            new LabelExpression());
-                    getDatabase().tag(tagString);
-                } finally {
-                    try {
-                        lockService.releaseLock();
-                    } catch (LockException e) {
-                        LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                    }
-                }
-            }
-        });
+        new CommandScope("tag")
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(TagCommandStep.TAG_ARG, tagString)
+                .execute();
     }
 
     public boolean tagExists(String tagString) throws LiquibaseException {
@@ -2261,15 +2247,19 @@ public class Liquibase implements AutoCloseable {
 
     public void generateDocumentation(String outputDirectory) throws LiquibaseException {
         // call without context
-        generateDocumentation(outputDirectory, new Contexts(), new LabelExpression());
+        generateDocumentation(outputDirectory, new Contexts(), new LabelExpression(), new CatalogAndSchema(null, null));
     }
 
     public void generateDocumentation(String outputDirectory, String contexts) throws LiquibaseException {
-        generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression());
+        generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression(), new CatalogAndSchema(null, null));
+    }
+
+    public void generateDocumentation(String outputDirectory, String contexts, CatalogAndSchema... schemaList) throws LiquibaseException {
+        generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression(), schemaList);
     }
 
     public void generateDocumentation(String outputDirectory, Contexts contexts,
-                                      LabelExpression labelExpression) throws LiquibaseException {
+                                      LabelExpression labelExpression, CatalogAndSchema... schemaList) throws LiquibaseException {
         runInScope(new Scope.ScopedRunner() {
             @Override
             public void run() throws Exception {
@@ -2294,7 +2284,7 @@ public class Liquibase implements AutoCloseable {
 
                     final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                     Resource resource = pathHandlerFactory.getResource(outputDirectory);
-                    visitor.writeHTML(resource, resourceAccessor);
+                    visitor.writeHTML(resource, resourceAccessor, schemaList);
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 } finally {
