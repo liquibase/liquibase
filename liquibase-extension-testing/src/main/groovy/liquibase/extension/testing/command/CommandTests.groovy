@@ -401,7 +401,14 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     assert !testDef.expectFileToNotExist.exists(): "File '${testDef.expectFileToNotExist.getAbsolutePath()}' should not exist"
                 }
                 if (testDef.expectations != null) {
-                    testDef.expectations.call()
+                    Scope.child([
+                            "database": database,
+                    ], new Scope.ScopedRunner() {
+                        @Override
+                        void run() throws Exception {
+                            testDef.expectations.call()
+                        }
+                    })
                 }
             } finally {
                 if (testDef.setup != null) {
