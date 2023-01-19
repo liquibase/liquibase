@@ -1431,21 +1431,11 @@ public class Main {
             }
         }
         if (includeSystemClasspath) {
-            classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
-                @Override
-                public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
-                            .getContextClassLoader());
-                }
-            });
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
+                    .getContextClassLoader()));
 
         } else {
-            classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
-                @Override
-                public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[0]), null);
-                }
-            });
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), null));
         }
 
         Thread.currentThread().setContextClassLoader(classLoader);
@@ -1832,9 +1822,7 @@ public class Main {
                     try {
                         Map<String, Object> updateScopedObjects = new HashMap<>();
                         updateScopedObjects.put("showSummary", showSummary);
-                        Scope.child(updateScopedObjects, () -> {
-                            liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
-                        });
+                        Scope.child(updateScopedObjects, () -> liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter())));
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
@@ -1869,10 +1857,8 @@ public class Main {
                     try {
                         Map<String, Object> updateScopedObjects = new HashMap<>();
                         updateScopedObjects.put("showSummary", showSummary);
-                        Scope.child(updateScopedObjects, () -> {
-                            liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
-                                    LabelExpression(getLabelFilter()));
-                        });
+                        Scope.child(updateScopedObjects, () -> liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
+                                LabelExpression(getLabelFilter())));
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
@@ -1887,9 +1873,7 @@ public class Main {
                     try {
                         Map<String, Object> updateScopedObjects = new HashMap<>();
                         updateScopedObjects.put("showSummary", showSummary);
-                        Scope.child(updateScopedObjects, () -> {
-                            liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter()));
-                        });
+                        Scope.child(updateScopedObjects, () -> liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(getLabelFilter())));
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }

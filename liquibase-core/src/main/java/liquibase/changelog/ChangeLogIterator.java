@@ -71,66 +71,61 @@ public class ChangeLogIterator {
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
         databaseChangeLog.setRuntimeEnvironment(env);
         try {
-            Scope.child(Scope.Attr.databaseChangeLog, databaseChangeLog, new Scope.ScopedRunner() {
-                @Override
-                public void run() throws Exception {
+            Scope.child(Scope.Attr.databaseChangeLog, databaseChangeLog, () -> {
 
-                    List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
-                    if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
-                        Collections.reverse(changeSetList);
-                    }
-                    for (ChangeSet changeSet : changeSetList) {
-                        boolean shouldVisit = true;
-                        Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<>();
-                        Set<ChangeSetFilterResult> reasonsDenied = new HashSet<>();
-                        if (changeSetFilters != null) {
-                            for (ChangeSetFilter filter : changeSetFilters) {
-                                ChangeSetFilterResult acceptsResult = filter.accepts(changeSet);
-                                if (acceptsResult.isAccepted()) {
-                                    reasonsAccepted.add(acceptsResult);
-                                } else {
-                                    shouldVisit = false;
-                                    reasonsDenied.add(acceptsResult);
-                                    if (! collectAllReasons) {
-                                        break;
-                                    }
+                List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
+                if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
+                    Collections.reverse(changeSetList);
+                }
+                for (ChangeSet changeSet : changeSetList) {
+                    boolean shouldVisit = true;
+                    Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<>();
+                    Set<ChangeSetFilterResult> reasonsDenied = new HashSet<>();
+                    if (changeSetFilters != null) {
+                        for (ChangeSetFilter filter : changeSetFilters) {
+                            ChangeSetFilterResult acceptsResult = filter.accepts(changeSet);
+                            if (acceptsResult.isAccepted()) {
+                                reasonsAccepted.add(acceptsResult);
+                            } else {
+                                shouldVisit = false;
+                                reasonsDenied.add(acceptsResult);
+                                if (! collectAllReasons) {
+                                    break;
                                 }
                             }
                         }
-
-                        boolean finalShouldVisit = shouldVisit;
-                        BufferedLogService bufferLog = new BufferedLogService();
-                        CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-                        Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
-                            if (finalShouldVisit && !alreadySaw(changeSet)) {
-                                //
-                                // Go validate any changesets with an Executor if
-                                // we are using a ValidatingVisitor
-                                //
-                                if (visitor instanceof ValidatingVisitor) {
-                                    validateChangeSetExecutor(changeSet, env);
-                                }
-
-                                //
-                                // Execute the visit call in its own scope with a new
-                                // CompositeLogService and BufferLogService in order
-                                // to capture the logging for just this changeset.  The
-                                // log is sent to Hub if available
-                                //
-                                Map<String, Object> values = new HashMap<>();
-                                values.put(Scope.Attr.logService.name(), compositeLogService);
-                                values.put(BufferedLogService.class.getName(), bufferLog);
-                                Scope.child(values, () -> {
-                                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
-                                });
-                                markSeen(changeSet);
-                            } else {
-                                if (visitor instanceof SkippedChangeSetVisitor) {
-                                    ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
-                                }
-                            }
-                        });
                     }
+
+                    boolean finalShouldVisit = shouldVisit;
+                    BufferedLogService bufferLog = new BufferedLogService();
+                    CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
+                    Scope.child(Scope.Attr.changeSet.name(), changeSet, () -> {
+                        if (finalShouldVisit && !alreadySaw(changeSet)) {
+                            //
+                            // Go validate any changesets with an Executor if
+                            // we are using a ValidatingVisitor
+                            //
+                            if (visitor instanceof ValidatingVisitor) {
+                                validateChangeSetExecutor(changeSet, env);
+                            }
+
+                            //
+                            // Execute the visit call in its own scope with a new
+                            // CompositeLogService and BufferLogService in order
+                            // to capture the logging for just this changeset.  The
+                            // log is sent to Hub if available
+                            //
+                            Map<String, Object> values = new HashMap<>();
+                            values.put(Scope.Attr.logService.name(), compositeLogService);
+                            values.put(BufferedLogService.class.getName(), bufferLog);
+                            Scope.child(values, () -> visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted));
+                            markSeen(changeSet);
+                        } else {
+                            if (visitor instanceof SkippedChangeSetVisitor) {
+                                ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
+                            }
+                        }
+                    });
                 }
             });
         } catch (Exception e) {

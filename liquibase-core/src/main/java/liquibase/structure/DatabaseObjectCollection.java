@@ -95,15 +95,12 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
 
         String[] hashes = DatabaseObjectComparatorFactory.getInstance().hash(example, null, database);
 
-        SortedSet<Set<DatabaseObject>> objectSets = new TreeSet<>(new Comparator<Set<DatabaseObject>>() {
-            @Override
-            public int compare(Set<DatabaseObject> o1, Set<DatabaseObject> o2) {
-                int sizeComparison = Integer.valueOf(o1.size()).compareTo(o2.size());
-                if (sizeComparison == 0) {
-                    return o1.toString().compareTo(o2.toString());
-                }
-                return sizeComparison;
+        SortedSet<Set<DatabaseObject>> objectSets = new TreeSet<>((o1, o2) -> {
+            int sizeComparison = Integer.compare(o1.size(), o2.size());
+            if (sizeComparison == 0) {
+                return o1.toString().compareTo(o2.toString());
             }
+            return sizeComparison;
         });
 
         for (String hash : hashes) {

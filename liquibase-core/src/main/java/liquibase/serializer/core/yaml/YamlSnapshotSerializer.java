@@ -86,7 +86,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
             SortedMap<String, Object> returnMap = new TreeMap<>();
             for (Map.Entry<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> entry : ((DatabaseObjectCollection) object).toMap().entrySet()) {
                 ArrayList value = new ArrayList(entry.getValue());
-                Collections.sort(value, new DatabaseObjectCollectionComparator());
+                value.sort(new DatabaseObjectCollectionComparator());
                 returnMap.put(entry.getKey().getName(), value);
             }
             return returnMap;

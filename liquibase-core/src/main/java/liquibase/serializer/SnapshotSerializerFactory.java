@@ -58,7 +58,7 @@ public class SnapshotSerializerFactory {
         for (String extension : snapshotSerializer.getValidFileExtensions()) {
             List<SnapshotSerializer> snapshotSerializers = serializers.computeIfAbsent(extension, k -> new ArrayList<>());
             snapshotSerializers.add(snapshotSerializer);
-            Collections.sort(snapshotSerializers, PrioritizedService.COMPARATOR);
+            snapshotSerializers.sort(PrioritizedService.COMPARATOR);
         }
     }
 
@@ -66,12 +66,7 @@ public class SnapshotSerializerFactory {
         for (Iterator<Map.Entry<String, List<SnapshotSerializer>>> entryIterator = serializers.entrySet().iterator(); entryIterator.hasNext();) {
             Map.Entry<String, List<SnapshotSerializer>> entry = entryIterator.next();
             List<SnapshotSerializer> snapshotSerializers = entry.getValue();
-            for (Iterator<SnapshotSerializer> iterator = snapshotSerializers.iterator(); iterator.hasNext();) {
-                SnapshotSerializer value = iterator.next();
-                if (value.equals(snapshotSerializer)) {
-                    iterator.remove();
-                }
-            }
+            snapshotSerializers.removeIf(value -> value.equals(snapshotSerializer));
             if (snapshotSerializers.isEmpty()) {
                 entryIterator.remove();
             }

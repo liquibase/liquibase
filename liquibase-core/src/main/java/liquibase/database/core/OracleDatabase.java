@@ -525,9 +525,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 "USLOG$",
                 "SYS_FBA"));
 
-        for (int i = 0;i<clauses.size(); i++) {
-            clauses.set(i, tableNameColumn+" NOT LIKE '"+clauses.get(i)+"%'");
-            }
+        clauses.replaceAll(s -> tableNameColumn + " NOT LIKE '" + s + "%'");
         return "("+ StringUtil.join(clauses, " AND ") + ")";
     }
 
