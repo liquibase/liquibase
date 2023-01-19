@@ -15,9 +15,7 @@ public abstract class RanChangeSetFilter implements ChangeSetFilter {
 
     public RanChangeSet getRanChangeSet(ChangeSet changeSet) {
         for (RanChangeSet ranChangeSet : ranChangeSets) {
-            if (ranChangeSet.getId().equalsIgnoreCase(changeSet.getId())
-                    && ranChangeSet.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
-                    && DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()).equalsIgnoreCase(DatabaseChangeLog.normalizePath(changeSet.getFilePath()))) {
+            if (ranChangeSet.isSameAs(changeSet)) {
                 return ranChangeSet;
             }
         }
