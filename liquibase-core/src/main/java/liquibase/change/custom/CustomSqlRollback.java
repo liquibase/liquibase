@@ -20,6 +20,6 @@ public interface CustomSqlRollback {
      * @throws liquibase.exception.CustomChangeException if an exception occurs while processing this rollback
      * @throws liquibase.exception.RollbackImpossibleException if rollback is not supported for this change
      */
-    public SqlStatement[] generateRollbackStatements(Database database) throws CustomChangeException, RollbackImpossibleException;
+    SqlStatement[] generateRollbackStatements(Database database) throws CustomChangeException, RollbackImpossibleException;
 
 }

@@ -608,7 +608,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.update(this.contexts);
 
         liquibase.tag("Test Tag");
-        liquibase.tagExists("Test Tag");
+        assertTrue(liquibase.tagExists("Test Tag"));
     }
 
     @Test
