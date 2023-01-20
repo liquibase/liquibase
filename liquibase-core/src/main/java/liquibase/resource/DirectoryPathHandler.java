@@ -11,6 +11,7 @@ public class DirectoryPathHandler extends AbstractPathHandler {
     /**
      * Returns {@link #PRIORITY_DEFAULT} for all paths except for ones that are for a non-"file:" protocol.
      */
+    @Override
     public int getPriority(String root) {
         if (root == null) {
             return PRIORITY_NOT_APPLICABLE;
@@ -27,6 +28,7 @@ public class DirectoryPathHandler extends AbstractPathHandler {
         }
     }
 
+    @Override
     public ResourceAccessor getResourceAccessor(String root) throws FileNotFoundException {
         root = root
                 .replace("file:", "")

@@ -249,7 +249,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	}
 
 	/**
-	 * If testRollbackOnUpdate is set to true a rollback will be tested at tupdate time.
+	 * If testRollbackOnUpdate is set to true a rollback will be tested at update time.
 	 * For doing so when the update is performed
 	 * @param testRollbackOnUpdate
      */

@@ -91,7 +91,7 @@ public class SnapshotGeneratorFactory {
      * Checks if a specific object is present in a database
      * @param example The DatabaseObject to check for existence
      * @param database The DBMS in which the object might exist
-     * @return true if object existence can be confirmed, false otherweise
+     * @return true if object existence can be confirmed, false otherwise
      * @throws DatabaseException If a problem occurs in the DBMS-specific code
      * @throws InvalidExampleException If the object cannot be checked properly, e.g. if the object name is ambiguous
      */

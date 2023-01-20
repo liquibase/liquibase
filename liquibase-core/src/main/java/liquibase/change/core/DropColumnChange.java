@@ -211,6 +211,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
                 for (Column column : index.getColumns()) {
                     if (removedColumnNames.contains(column.getName())) {
                         indexContainsColumn = true;
+                        break;
                     }
                 }
                 return !indexContainsColumn;

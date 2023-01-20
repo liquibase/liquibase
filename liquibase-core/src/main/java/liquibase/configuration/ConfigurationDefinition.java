@@ -123,7 +123,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         try {
             final DataType finalValue = valueConverter.convert(originalValue);
             if (originalValue != finalValue) {
-                configurationValue.override(new ConvertedValueProvider<DataType>(finalValue, providedValue).getProvidedValue(key));
+                configurationValue.override(new ConvertedValueProvider<>(finalValue, providedValue).getProvidedValue(key));
             }
 
             return (ConfiguredValue<DataType>) configurationValue;

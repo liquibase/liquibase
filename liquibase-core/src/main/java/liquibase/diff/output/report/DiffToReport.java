@@ -6,9 +6,9 @@ import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.StringDiff;
 import liquibase.diff.compare.CompareControl;
+import liquibase.diff.compare.DatabaseObjectCollectionComparator;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
@@ -28,7 +28,7 @@ public class DiffToReport {
     }
 
     public void print() throws DatabaseException {
-        final DatabaseObjectComparator comparator = new DatabaseObjectComparator();
+        final DatabaseObjectCollectionComparator comparator = new DatabaseObjectCollectionComparator();
         out.println("Reference Database: " + diffResult.getReferenceSnapshot().getDatabase());
         out.println("Comparison Database: " + diffResult.getComparisonSnapshot().getDatabase());
 

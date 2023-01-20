@@ -5,6 +5,7 @@ liquibase.command.core.ChangelogSyncToTagCommandStep
 liquibase.command.core.ChangelogSyncToTagSqlCommandStep
 liquibase.command.core.ClearChecksumsCommandStep
 liquibase.command.core.DbDocCommandStep
+liquibase.command.core.DbUrlConnectionCommandStep
 liquibase.command.core.DeactivateChangelogCommandStep
 liquibase.command.core.DiffChangelogCommandStep
 liquibase.command.core.DiffCommandStep
@@ -24,6 +25,7 @@ liquibase.command.core.InternalHistoryCommandStep
 liquibase.command.core.InternalSnapshotCommandStep
 liquibase.command.core.InternalSyncHubCommandStep
 liquibase.command.core.ListLocksCommandStep
+liquibase.command.core.LockServiceCommandStep
 liquibase.command.core.MarkNextChangesetRanCommandStep
 liquibase.command.core.MarkNextChangesetRanSqlCommandStep
 liquibase.command.core.RegisterChangelogCommandStep

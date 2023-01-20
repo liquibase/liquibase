@@ -11,6 +11,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -20,6 +21,7 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
@@ -43,6 +45,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final Pattern SLASH_DOT_SLASH_PATTERN = Pattern.compile("/\\./");
     private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
     private static final Pattern DOT_SLASH_PATTERN = Pattern.compile("^\\.?/");
+    private static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
 
     private PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
     private String physicalFilePath;
@@ -383,7 +386,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
         try {
             Object value = parsedNode.getValue();
-            if ((value != null) && (value instanceof String)) {
+            if ((value instanceof String)) {
                 parsedNode.setValue(changeLogParameters.expandExpressions(parsedNode.getValue(String.class), this));
             }
 
@@ -655,6 +658,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             searchOptions.setMaxDepth(maxDepth);
 
             List<Resource> unsortedResources = null;
+            Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());
             try {
                 String path;
                 if (relativeTo == null) {
@@ -669,6 +673,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 if (StringUtil.isNotEmpty(path) && !(path.endsWith("/"))) {
                     path = path + '/';
                 }
+
+                if (ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getCurrentValue()) {
+                    if (seenChangelogPaths.contains(path)) {
+                        throw new SetupException("Circular reference detected in '" + path + "'. Set " + ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getKey() + " if you'd like to ignore this error.");
+                    }
+                }
+                seenChangelogPaths.add(path);
                 LOG.fine("includeAll for " + pathName);
                 LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
 
@@ -692,11 +703,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         "Could not find directory or directory was empty for includeAll '" + pathName + "'");
             }
 
-            for (Resource resource : resources) {
-                Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
-                include(resource.getPath(), false, resourceAccessor, includeContextFilter,
-                        labels, ignore, OnUnknownFileFormat.WARN, modifyChangeSets);
-            }
+            Scope.child(Collections.singletonMap(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, seenChangelogPaths), () -> {
+                for (Resource resource : resources) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
+                    include(resource.getPath(), false, resourceAccessor, includeContextFilter,
+                            labels, ignore, OnUnknownFileFormat.WARN, modifyChangeSets);
+                }
+            });
         } catch (Exception e) {
             throw new SetupException(e);
         }
@@ -784,6 +797,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
             PARENT_CHANGE_LOG.set(this);
             try {
+                if(!resourceAccessor.get(fileName).exists()) {
+                    if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)) {
+                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(fileName));
+                        return false;
+                    } else {
+                        throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(fileName));
+                    }
+                }
                 ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
                 changeLog = parser.parse(fileName, changeLogParameters, resourceAccessor);
                 changeLog.setIncludeContextFilter(includeContextFilter);
@@ -811,6 +832,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 );
             }
             return false;
+        }
+        catch (IOException e) {
+            throw new LiquibaseException(e.getMessage(), e);
         }
         PreconditionContainer preconditions = changeLog.getPreconditions();
         if (preconditions != null) {

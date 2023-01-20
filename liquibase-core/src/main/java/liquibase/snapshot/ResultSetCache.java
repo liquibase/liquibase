@@ -31,11 +31,7 @@ public class ResultSetCache {
 
             String schemaKey = resultSetExtractor.wantedKeyParameters().createSchemaKey(resultSetExtractor.database);
 
-            Map<String, List<CachedRow>> cache = cacheBySchema.get(schemaKey);
-            if (cache == null) {
-                cache = new HashMap<>();
-                cacheBySchema.put(schemaKey, cache);
-            }
+            Map<String, List<CachedRow>> cache = cacheBySchema.computeIfAbsent(schemaKey, k -> new HashMap<>());
 
             if (cache.containsKey(wantedKey)) {
                 return cache.get(wantedKey);
@@ -78,14 +74,10 @@ public class ResultSetCache {
                         String rowSchema = CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
                                 equals(resultSetExtractor.database.getSchemaAndCatalogCase())?resultSetExtractor.getSchemaKey(row):
                                 resultSetExtractor.getSchemaKey(row).toLowerCase();
-                        cache = cacheBySchema.get(rowSchema);
-                        if (cache == null) {
-                            cache = new HashMap<String, List<CachedRow>>();
-                            cacheBySchema.put(rowSchema, cache);
-                        }
+                        cache = cacheBySchema.computeIfAbsent(rowSchema, k -> new HashMap<String, List<CachedRow>>());
                     }
                     if (!cache.containsKey(rowKey)) {
-                        cache.put(rowKey, new ArrayList<CachedRow>());
+                        cache.put(rowKey, new ArrayList<>());
                     }
                     cache.get(rowKey).add(row);
                 }
@@ -318,7 +310,7 @@ public class ResultSetCache {
                     @Override
                     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                         Object value = super.getColumnValue(rs, index);
-                        if ((value != null) && (value instanceof String)) {
+                        if ((value instanceof String)) {
 
                             // Don't trim for informix database,
                             // We need to discern the space in front of an index name,

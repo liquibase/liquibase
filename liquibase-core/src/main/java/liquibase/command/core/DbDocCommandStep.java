@@ -18,6 +18,8 @@ public class DbDocCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
 
+    public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
+
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
@@ -40,6 +42,9 @@ public class DbDocCommandStep extends AbstractCliWrapperCommandStep {
                 .build();
         OUTPUT_DIRECTORY_ARG = builder.argument("outputDirectory", String.class).required()
                 .description("The directory where the documentation is generated").build();
+
+        SCHEMAS_ARG = builder.argument("schemas", String.class)
+                .description("Database schemas to include objects from in reporting").build();
     }
 
     @Override

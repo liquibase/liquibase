@@ -5,7 +5,7 @@ import liquibase.structure.DatabaseObject;
 import java.util.Collection;
 
 public interface Sql {
-    public String toSql();
+    String toSql();
 
     String getEndDelimiter();
 
