@@ -35,6 +35,21 @@ class XMLChangeLogSAXParserTest extends Specification {
 </databaseChangeLog>
 """
 
+    def INVALID_XML = """
+<!DOCTYPE databaseChangeLog [
+        <!ENTITY insecure SYSTEM "file:///invalid.txt">
+        ]>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.19.xsd">
+
+    <iDontKnowWhatImDoing />
+
+</databaseChangeLog>
+"""
+
     def testIgnoreDuplicateChangeSets() throws ChangeLogParseException, Exception {
         when:
         def xmlParser = new XMLChangeLogSAXParser()
@@ -95,6 +110,36 @@ class XMLChangeLogSAXParserTest extends Specification {
         then:
         def e = thrown(ChangeLogParseException)
         e.message.contains("Error Reading Changelog File: " + File.separator + "invalid.txt")
+    }
+
+    def "by default do not validate XML file based on XSD files"() {
+        given:
+        def file = "com/example/invalid.xml"
+
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/invalid.xml": INVALID_XML])
+        def d = new XMLChangeLogSAXParser().parse(file, new ChangeLogParameters(), resourceAccessor)
+
+        then:
+        d.physicalFilePath == file
+        d.getChangeSets().isEmpty()
+
+    }
+
+
+    def "enabling validation flag will validate the XML file based on XSD"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/invalid.xml": INVALID_XML])
+
+        Scope.child(GlobalConfiguration.VALIDATE_XML_CHANGELOG_FILES.key, "true", { ->
+            new XMLChangeLogSAXParser().parse("com/example/invalid.xml", new ChangeLogParameters(), resourceAccessor)
+        })
+
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.message.contains("Error parsing line")
+        e.message.contains("iDontKnowWhatImDoing")
     }
 
     def "getSchemaVersion"() {

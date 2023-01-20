@@ -17,7 +17,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.InvalidPathException;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
@@ -32,7 +31,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     public XMLChangeLogSAXParser() {
         saxParserFactory = SAXParserFactory.newInstance();
-        saxParserFactory.setValidating(true);
+        saxParserFactory.setValidating(GlobalConfiguration.VALIDATE_XML_CHANGELOG_FILES.getCurrentValue());
         saxParserFactory.setNamespaceAware(true);
         if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
             try {
@@ -41,6 +40,14 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                 Scope.getCurrentScope().getLog(getClass()).fine("Cannot enable FEATURE_SECURE_PROCESSING: " + e.getMessage(), e);
             }
         }
+    }
+
+    /**
+     * Defines if the parser should validate the XMl file using the provided XSDs.
+     * this method overrides the value set by {@link GlobalConfiguration.VALIDATE_XML_CHANGELOG_FILES}
+     */
+    public void setValidating(boolean validate) {
+        this.saxParserFactory.setValidating(validate);
     }
 
     @Override

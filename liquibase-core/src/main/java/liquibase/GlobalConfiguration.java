@@ -32,8 +32,9 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> PRESERVE_SCHEMA_CASE;
     public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
     public static final ConfigurationDefinition<Boolean> ALWAYS_DROP_INSTEAD_OF_REPLACE;
-
     public static final ConfigurationDefinition<DuplicateFileMode> DUPLICATE_FILE_MODE;
+
+    public static final ConfigurationDefinition<Boolean> VALIDATE_XML_CHANGELOG_FILES;
 
     /**
      * @deprecated No longer used
@@ -214,6 +215,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         ALWAYS_DROP_INSTEAD_OF_REPLACE = builder.define("alwaysDropInsteadOfReplace", Boolean.class)
                 .setDescription("If true, drop and recreate a view instead of replacing it.")
+                .build();
+
+        VALIDATE_XML_CHANGELOG_FILES = builder.define("validateXmlChangelogFiles", Boolean.class)
+                .setDescription("Will perform xsd validation of XML changelog files. Defaults to false.")
+                .setDefaultValue(false)
                 .build();
     }
 
