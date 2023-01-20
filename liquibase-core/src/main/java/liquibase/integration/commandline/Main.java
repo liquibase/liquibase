@@ -1679,29 +1679,10 @@ public class Main {
                 return;
             } else if (COMMANDS.TAG.equalsIgnoreCase(command)) {
                 liquibase.tag(getCommandArgument());
-                Scope.getCurrentScope().getUI().sendMessage(String.format(
-                                coreBundle.getString("successfully.tagged"), liquibase.getDatabase()
-                                        .getConnection().getConnectionUserName() + "@" +
-                                        liquibase.getDatabase().getConnection().getURL()
-                        )
-                );
                 return;
             } else if (COMMANDS.TAG_EXISTS.equalsIgnoreCase(command)) {
                 String tag = commandParams.iterator().next();
-                boolean exists = liquibase.tagExists(tag);
-                if (exists) {
-                    Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("tag.exists"), tag,
-                                    liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
-                                            liquibase.getDatabase().getConnection().getURL()
-                            )
-                    );
-                } else {
-                    Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("tag.does.not.exist"), tag,
-                                    liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
-                                            liquibase.getDatabase().getConnection().getURL()
-                            )
-                    );
-                }
+                liquibase.tagExists(tag);
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
@@ -1812,9 +1793,7 @@ public class Main {
                 liquibase.clearCheckSums();
                 return;
             } else if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
-                CheckSum checkSum = null;
-                checkSum = liquibase.calculateCheckSum(commandParams.iterator().next());
-                Scope.getCurrentScope().getUI().sendMessage(checkSum.toString());
+                liquibase.calculateCheckSum(commandParams.iterator().next());
                 return;
             } else if (COMMANDS.DB_DOC.equalsIgnoreCase(command)) {
                 if (commandParams.isEmpty()) {
