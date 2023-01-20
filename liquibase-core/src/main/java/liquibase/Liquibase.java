@@ -5,10 +5,12 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
+import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.DbUrlConnectionCommandStep;
 import liquibase.command.core.InternalDropAllCommandStep;
 import liquibase.command.core.TagCommandStep;
+import liquibase.command.core.TagExistsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -1894,20 +1896,11 @@ public class Liquibase implements AutoCloseable {
     }
 
     public boolean tagExists(String tagString) throws LiquibaseException {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-        lockService.waitForLock();
-
-        try {
-            checkLiquibaseTables(false, null, new Contexts(),
-                    new LabelExpression());
-            return getDatabase().doesTagExist(tagString);
-        } finally {
-            try {
-                lockService.releaseLock();
-            } catch (LockException e) {
-                LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-            }
-        }
+        CommandResults commandResults = new CommandScope("tagExists")
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(TagExistsCommandStep.TAG_ARG, tagString)
+                .execute();
+        return commandResults.getResult(TagExistsCommandStep.TAG_EXISTS_RESULT);
     }
 
     public void updateTestingRollback(String contexts) throws LiquibaseException {
