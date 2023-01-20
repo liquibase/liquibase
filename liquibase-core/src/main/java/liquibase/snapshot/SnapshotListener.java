@@ -13,7 +13,7 @@ public interface SnapshotListener {
      * @param example Example of object to be created
      * @param database Database to be read from
      */
-    public void willSnapshot(DatabaseObject example, Database database);
+    void willSnapshot(DatabaseObject example, Database database);
 
     /**
      * Called after an object is fully loaded from the database. Dependent objects may have their willSnapshot and finishSnapshot methods called before this method is called for a given example.
