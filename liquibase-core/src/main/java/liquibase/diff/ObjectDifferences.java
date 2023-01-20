@@ -82,8 +82,8 @@ public class ObjectDifferences {
      * Otherwise, return the original collection.
      */
     protected Object undoCollection(Object potentialCollection, Object otherObject) {
-        if ((potentialCollection != null) && (otherObject != null) && (potentialCollection instanceof Collection) &&
-            !(otherObject instanceof Collection)) {
+        if ((otherObject != null) && (potentialCollection instanceof Collection) &&
+                !(otherObject instanceof Collection)) {
             if ((((Collection) potentialCollection).size() == 1) && ((Collection) potentialCollection).iterator()
                 .next().getClass().equals(otherObject.getClass())) {
                 potentialCollection = ((Collection) potentialCollection).iterator().next();
@@ -339,11 +339,6 @@ public class ObjectDifferences {
             if (!(referenceValue instanceof Collection) || (!(compareToValue instanceof Collection))) {
                 return false;
             }
-
-            if (((Collection) referenceValue).size() != ((Collection) compareToValue).size()) {
-                return false;
-            }
-
 
             if (((Collection) referenceValue).size() != ((Collection) compareToValue).size()) {
                 return false;

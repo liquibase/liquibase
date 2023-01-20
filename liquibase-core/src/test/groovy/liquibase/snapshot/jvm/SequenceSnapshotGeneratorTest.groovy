@@ -2,6 +2,7 @@ package liquibase.snapshot.jvm
 
 import liquibase.database.Database
 import liquibase.database.core.OracleDatabase
+import liquibase.database.core.PostgresDatabase
 import liquibase.structure.core.Schema
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -9,6 +10,7 @@ import spock.lang.Unroll
 class SequenceSnapshotGeneratorTest extends Specification {
 
     private final static DEFAULT_CATALOG_NAME = "DEFAULT_CATALOG_NAME"
+    private final static DEFAULT_SCHEMA_NAME = "public"
 
     @Unroll
     def "When catalog on changeset is #changesetCatalog, the SEQUENCE_OWNER will be #expectedSequenceOwner"() {
@@ -33,4 +35,28 @@ class SequenceSnapshotGeneratorTest extends Specification {
         ""               | DEFAULT_CATALOG_NAME
         null             | DEFAULT_CATALOG_NAME
     }
+
+    @Unroll
+    def "When schema is '#schemaName', the return SQL schema name will be '#expectedSchemaName'"() {
+        given:
+        SequenceSnapshotGenerator sequenceSnapshotGenerator = new SequenceSnapshotGenerator()
+        Database database = Mock(PostgresDatabase)
+        database.getDefaultSchemaName() >> DEFAULT_SCHEMA_NAME
+
+        when:
+        Schema schema = Mock(Schema)
+        schema.getName() >> schemaName
+
+        then:
+        String sql = sequenceSnapshotGenerator.getSelectSequenceSql(schema, database)
+        sql.indexOf(expectedSchemaName) != -1
+
+        where:
+        schemaName | expectedSchemaName
+        "mySchema"            | "mySchema"
+        DEFAULT_SCHEMA_NAME   | DEFAULT_SCHEMA_NAME
+        null                  | DEFAULT_SCHEMA_NAME
+    }
+
+
 }

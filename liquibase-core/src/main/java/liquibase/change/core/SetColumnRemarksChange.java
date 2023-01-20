@@ -7,8 +7,9 @@ import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
+import liquibase.util.ColumnParentType;
 
-@DatabaseChange(name="setColumnRemarks", description = "Set remarks on a column", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name = "setColumnRemarks", description = "Set remarks on a column", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class SetColumnRemarksChange extends AbstractChange {
 
     private String catalogName;
@@ -17,6 +18,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     private String columnName;
     private String remarks;
     private String columnDataType;
+    private String columnParentType;
 
     @Override
     public ValidationErrors validate(Database database) {
@@ -28,8 +30,8 @@ public class SetColumnRemarksChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[] {
-                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType)
+        return new SqlStatement[]{
+                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType, columnParentType)
         };
     }
 
@@ -75,7 +77,7 @@ public class SetColumnRemarksChange extends AbstractChange {
 
     @Override
     public String getConfirmationMessage() {
-        return "Remarks set on " + tableName+"."+columnName;
+        return "Remarks set on " + tableName + "." + columnName;
     }
 
     @Override
@@ -89,5 +91,13 @@ public class SetColumnRemarksChange extends AbstractChange {
 
     public void setColumnDataType(String columnDataType) {
         this.columnDataType = columnDataType;
+    }
+
+    public void setColumnParentType(String columnParentType) {
+        this.columnParentType = columnParentType;
+    }
+
+    public String getColumnParentType() {
+        return columnParentType;
     }
 }
