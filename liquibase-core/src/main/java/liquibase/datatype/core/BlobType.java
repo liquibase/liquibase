@@ -19,11 +19,12 @@ public class BlobType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
 
+        final boolean varbinary = originalDefinition.toLowerCase(Locale.US).startsWith("varbinary") || originalDefinition.startsWith("java.sql.Types.VARBINARY");
         if ((database instanceof H2Database) || (database instanceof HsqlDatabase)) {
             if (originalDefinition.toLowerCase(Locale.US).contains("large object")) {
                 return new DatabaseDataType("BINARY LARGE OBJECT");
             }
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("varbinary") || originalDefinition.startsWith("java.sql.Types.VARBINARY")) {
+            if (varbinary) {
                 return new DatabaseDataType("VARBINARY", getParameters());
             } else if (originalDefinition.toLowerCase(Locale.US).startsWith("longvarbinary") || originalDefinition.startsWith("java.sql.Types.LONGVARBINARY")) {
                 return new DatabaseDataType("LONGVARBINARY", getParameters());
@@ -68,8 +69,9 @@ public class BlobType extends LiquibaseDataType {
             }
         }
 
+        final boolean blob = originalDefinition.toLowerCase(Locale.US).startsWith("blob") || "java.sql.Types.BLOB".equals(originalDefinition);
         if (database instanceof MySQLDatabase) {
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("blob") || "java.sql.Types.BLOB".equals(originalDefinition)) {
+            if (blob) {
                 return new DatabaseDataType("BLOB");
             } else if (originalDefinition.toLowerCase(Locale.US).startsWith("varbinary") || "java.sql.Types.VARBINARY".equals
                     (originalDefinition)) {
@@ -86,7 +88,7 @@ public class BlobType extends LiquibaseDataType {
         }
 
         if (database instanceof PostgresDatabase) {
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("blob") || "java.sql.Types.BLOB".equals(originalDefinition)) {
+            if (blob) {
                 // There are two ways of handling byte arrays ("BLOBs") in pgsql. For consistency with Hibernate ORM
                 // (see upstream bug https://liquibase.jira.com/browse/CORE-1863) we choose the oid variant.
                 // For a more thorough discussion of the two alternatives, see:
@@ -122,7 +124,7 @@ public class BlobType extends LiquibaseDataType {
         }
 
         if ((database instanceof DB2Database) || (database instanceof Db2zDatabase)) {
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("varbinary") || originalDefinition.startsWith("java.sql.Types.VARBINARY")) {
+            if (varbinary) {
                 return new DatabaseDataType("VARBINARY", getParameters());
             } else if (originalDefinition.toLowerCase(Locale.US).startsWith("binary")) {
                 return new DatabaseDataType("BINARY", getParameters());
