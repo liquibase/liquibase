@@ -135,6 +135,7 @@ public class Main {
     protected String rollbackScript;
     protected Boolean rollbackOnError = false;
     protected List<CatalogAndSchema> schemaList = new ArrayList<>();
+    protected String format;
 
     private static int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
             204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
