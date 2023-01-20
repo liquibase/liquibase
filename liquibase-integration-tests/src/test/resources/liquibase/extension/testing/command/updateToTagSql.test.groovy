@@ -9,7 +9,7 @@ Short Description: Generate the SQL to deploy changes up to the tag
 Long Description: NOT SET
 Required Args:
   changelogFile (String) The root changelog
-  tag (String) The tag to genenerate SQL up to
+  tag (String) The tag to generate SQL up to
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:

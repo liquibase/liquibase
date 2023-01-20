@@ -22,8 +22,8 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private Map<String, String> columnRemarks = new HashMap<>();
 
     private PrimaryKeyConstraint primaryKeyConstraint;
-    private Map<String, NotNullConstraint> notNullConstraints = new HashMap<String, NotNullConstraint>();
-    private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<ForeignKeyConstraint>();
+    private Map<String, NotNullConstraint> notNullConstraints = new HashMap<>();
+    private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<>();
 
     /* NOT NULL constraints in RDBMSs are curious beasts. In some RDBMS, they do not exist as constraints at all, i.e.
        they are merely a property of the column. In others, like Oracle DB, they can exist in both forms, and to be
@@ -135,7 +135,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         pkConstraint.setDeferrable(deferrable);
         pkConstraint.setInitiallyDeferred(initiallyDeferred);
 
-        List<ColumnConstraint> allConstraints = new ArrayList<ColumnConstraint>(Arrays.asList(constraints));
+        List<ColumnConstraint> allConstraints = new ArrayList<>(Arrays.asList(constraints));
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 

@@ -58,7 +58,7 @@ public class OfflineConnection implements DatabaseConnection {
         this.databaseShortName = matcher.group(1).toLowerCase();
         String params = StringUtil.trimToNull(matcher.group(2));
         try {
-            Map<String, String> params1 = new HashMap<String, String>();
+            Map<String, String> params1 = new HashMap<>();
             if (params != null) {
                 String[] keyValues = params.split("&");
                 for (String param : keyValues) {

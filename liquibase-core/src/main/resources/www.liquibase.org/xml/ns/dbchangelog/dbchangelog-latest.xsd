@@ -947,6 +947,13 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:simpleType name="columnParentTypeEnum">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="TABLE"/>
+            <xsd:enumeration value="VIEW"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
     <xsd:element name="setColumnRemarks">
         <xsd:complexType>
             <xsd:attribute name="catalogName" type="xsd:string"/>
@@ -955,6 +962,7 @@
             <xsd:attribute name="columnName" type="xsd:string" use="required"/>
             <xsd:attribute name="columnDataType" type="xsd:string"/>
             <xsd:attribute name="remarks" type="xsd:string"/>
+            <xsd:attribute name="columnParentType" type="columnParentTypeEnum"/>
         </xsd:complexType>
     </xsd:element>
 
