@@ -7,10 +7,7 @@ import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
-import liquibase.command.core.DbUrlConnectionCommandStep;
-import liquibase.command.core.InternalDropAllCommandStep;
-import liquibase.command.core.TagCommandStep;
-import liquibase.command.core.TagExistsCommandStep;
+import liquibase.command.core.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -55,7 +52,10 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.Writer;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.function.Supplier;
@@ -69,10 +69,6 @@ import static java.util.ResourceBundle.getBundle;
 public class Liquibase implements AutoCloseable {
 
     private static final Logger LOG = Scope.getCurrentScope().getLog(Liquibase.class);
-    protected static final int CHANGESET_ID_NUM_PARTS = 3;
-    protected static final int CHANGESET_ID_AUTHOR_PART = 2;
-    protected static final int CHANGESET_ID_CHANGESET_PART = 1;
-    protected static final int CHANGESET_ID_CHANGELOG_PART = 0;
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     public static final String MSG_COULD_NOT_RELEASE_LOCK = coreBundle.getString("could.not.release.lock");
 
@@ -2202,40 +2198,28 @@ public class Liquibase implements AutoCloseable {
         });
     }
 
+    /**
+     * Calculate the checksum for a given identifier
+     *
+     * @deprecated Use {link {@link CommandScope(String)}.
+     */
     public final CheckSum calculateCheckSum(final String changeSetIdentifier) throws LiquibaseException {
-        if (changeSetIdentifier == null) {
-            throw new LiquibaseException(new IllegalArgumentException("changeSetIdentifier"));
-        }
-        final List<String> parts = StringUtil.splitAndTrim(changeSetIdentifier, "::");
-        if ((parts == null) || (parts.size() < CHANGESET_ID_NUM_PARTS)) {
-            throw new LiquibaseException(
-                    new IllegalArgumentException("Invalid changeSet identifier: " + changeSetIdentifier)
-            );
-        }
-        return this.calculateCheckSum(parts.get(CHANGESET_ID_CHANGELOG_PART),
-                parts.get(CHANGESET_ID_CHANGESET_PART), parts.get(CHANGESET_ID_AUTHOR_PART));
+        CommandResults commandResults = new CommandScope("calculateChecksum")
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG, changeSetIdentifier)
+                .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile)
+                .execute();
+        return commandResults.getResult(CalculateChecksumCommandStep.CHECKSUM_RESULT);
     }
 
+    /**
+     * Calculates the checksum for the values that form a given identifier
+     *
+     * @deprecated Use {link {@link CommandScope(String)}.
+     */
     public CheckSum calculateCheckSum(final String filename, final String id, final String author)
             throws LiquibaseException {
-        LOG.info(String.format("Calculating checksum for changeset %s::%s::%s", filename, id, author));
-        final ChangeLogParameters clParameters = this.getChangeLogParameters();
-        final ResourceAccessor resourceAccessor = this.getResourceAccessor();
-        final DatabaseChangeLog changeLog =
-                ChangeLogParserFactory.getInstance().getParser(
-                        this.changeLogFile, resourceAccessor
-                ).parse(this.changeLogFile, clParameters, resourceAccessor);
-
-        // TODO: validate?
-
-        final ChangeSet changeSet = changeLog.getChangeSet(filename, author, id);
-        if (changeSet == null) {
-            throw new LiquibaseException(
-                    new IllegalArgumentException("No such changeSet: " + filename + "::" + id + "::" + author)
-            );
-        }
-
-        return changeSet.generateCheckSum();
+        return this.calculateCheckSum(String.format("%s::%s::%s", filename, id, author));
     }
 
     public void generateDocumentation(String outputDirectory) throws LiquibaseException {
