@@ -19,13 +19,13 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
         boolean seenTag = false;
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (seenTag && !tag.equalsIgnoreCase(ranChangeSet.getTag())) {
-                changeLogsAfterTag.add(changeLogToString(ranChangeSet.getId(), ranChangeSet.getAuthor(), ranChangeSet.getChangeLog()));
+                changeLogsAfterTag.add(ranChangeSet.toString());
             }
 
             if (!seenTag && tag.equalsIgnoreCase(ranChangeSet.getTag())) {
                 seenTag = true;
                 if ("tagDatabase".equals(StringUtil.trimToEmpty(ranChangeSet.getDescription()))) { //changeSet is just tagging the database. Also remove it.
-                    changeLogsAfterTag.add(changeLogToString(ranChangeSet.getId(), ranChangeSet.getAuthor(), ranChangeSet.getChangeLog()));
+                    changeLogsAfterTag.add(ranChangeSet.toString());
                 }
             }
         }
@@ -35,13 +35,9 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
         }
     }
 
-    private String changeLogToString(String id, String author, String changeLog) {
-        return id+":"+author+":"+changeLog;
-    }
-
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
-        if (changeLogsAfterTag.contains(changeLogToString(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath()))) {
+        if (changeLogsAfterTag.contains(changeSet.toString())) {
             return new ChangeSetFilterResult(true, "Changeset is before tag '"+tag+"'", this.getClass());
         } else {
             return new ChangeSetFilterResult(false, "Changeset after tag '"+tag+"'", this.getClass());

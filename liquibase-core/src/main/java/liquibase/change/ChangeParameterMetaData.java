@@ -240,7 +240,7 @@ public class ChangeParameterMetaData {
     /**
      * Return the database types for which this parameter is required. The strings returned correspond to the values
      * returned by {@link liquibase.database.Database#getShortName()}.
-     * If the parameter is required for all datatabases, this will return the string "all" as an element.
+     * If the parameter is required for all databases, this will return the string "all" as an element.
      * If the parameter is required for no databases, this will return an empty set. Passing the string "none" to the
      * constructor also results in an empty set.
      * This method will never return a null value
