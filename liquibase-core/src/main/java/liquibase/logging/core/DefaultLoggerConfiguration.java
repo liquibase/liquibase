@@ -5,6 +5,8 @@ import liquibase.configuration.AutoloadedConfigurations;
 
 /**
  * Configuration container for {@link liquibase.logging.LogService} properties
+ * @deprecated not in use anywhere in Liquibase code and has been superseded by log-level and its associated command
+ * line parameters
  */
 @Deprecated
 public class DefaultLoggerConfiguration implements AutoloadedConfigurations {
