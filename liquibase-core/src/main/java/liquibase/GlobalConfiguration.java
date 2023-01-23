@@ -116,7 +116,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         OUTPUT_FILE_ENCODING = builder.define("outputFileEncoding", String.class)
                 .setDescription("Encoding to use when writing files")
-                .setDefaultValue("UTF-8")
+                .setDefaultValue(StandardCharsets.UTF_8.name())
                 .setCommonlyUsed(true)
                 .build();
 
