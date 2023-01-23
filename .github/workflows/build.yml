@@ -242,6 +242,7 @@ jobs:
           - h2
           #          - h2:1.4
           - hsqldb
+          - db2
           - mariadb
           - mssql
           - mysql
@@ -249,7 +250,6 @@ jobs:
           - postgresql
           - sqlite
           - firebird
-          - db2
     needs: build
     timeout-minutes: 30
     steps:
