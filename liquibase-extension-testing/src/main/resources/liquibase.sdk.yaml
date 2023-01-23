@@ -45,7 +45,7 @@ liquibase:
 
       mariadb:
         imageName: mariadb
-        version: 10.9
+        version: latest
         setup:
           username: root
 

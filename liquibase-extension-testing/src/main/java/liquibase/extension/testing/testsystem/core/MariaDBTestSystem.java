@@ -23,9 +23,7 @@ public class MariaDBTestSystem extends DatabaseTestSystem {
                 new MariaDBContainer(DockerImageName.parse(getImageName()).withTag(getVersion()))
                         .withUsername(getUsername())
                         .withPassword(getPassword())
-                        .withDatabaseName(getCatalog())
-                        .withUrlParam("useSSL", "false")
-                        .withUrlParam("allowPublicKeyRetrieval", "true"),
+                        .withDatabaseName(getCatalog()),
                 this
         );
     }
