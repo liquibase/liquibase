@@ -47,6 +47,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
     def "namespace configured correctly"() {
         expect:
         assert new XMLChangeLogSAXParser().saxParserFactory.isNamespaceAware()
+        assert new XMLChangeLogSAXParser().saxParserFactory.isValidating()
     }
 
     def "supports method identifies xml files correctly"() {
@@ -287,14 +288,12 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        assert e.message.contains("Unknown change type 'unknownTag'")
+        assert e.message.contains("unknownTag")
     }
 
     def "ChangeLogParseException is thrown if validation is enabled and changelog has invalid tags"() throws Exception {
         when:
-        Scope.child(GlobalConfiguration.VALIDATE_XML_CHANGELOG_FILES.key, "true", { ->
-            new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/malformedChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor())
-        })
+        new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/malformedChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         def e = thrown(ChangeLogParseException)

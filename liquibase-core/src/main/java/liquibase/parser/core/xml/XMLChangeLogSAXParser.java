@@ -42,14 +42,6 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         }
     }
 
-    /**
-     * Defines if the parser should validate the XMl file using the provided XSDs.
-     * this method overrides the value set by {@link GlobalConfiguration.VALIDATE_XML_CHANGELOG_FILES}
-     */
-    public void setValidating(boolean validate) {
-        this.saxParserFactory.setValidating(validate);
-    }
-
     @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;

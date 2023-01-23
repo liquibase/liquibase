@@ -112,34 +112,36 @@ class XMLChangeLogSAXParserTest extends Specification {
         e.message.contains("Error Reading Changelog File: " + File.separator + "invalid.txt")
     }
 
-    def "by default do not validate XML file based on XSD files"() {
+    def "by default validate XML file based on XSD files"() {
         given:
         def file = "com/example/invalid.xml"
 
         when:
         def resourceAccessor = new MockResourceAccessor(["com/example/invalid.xml": INVALID_XML])
-        def d = new XMLChangeLogSAXParser().parse(file, new ChangeLogParameters(), resourceAccessor)
-
-        then:
-        d.physicalFilePath == file
-        d.getChangeSets().isEmpty()
-
-    }
-
-
-    def "enabling validation flag will validate the XML file based on XSD"() {
-        when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/invalid.xml": INVALID_XML])
-
-        Scope.child(GlobalConfiguration.VALIDATE_XML_CHANGELOG_FILES.key, "true", { ->
-            new XMLChangeLogSAXParser().parse("com/example/invalid.xml", new ChangeLogParameters(), resourceAccessor)
-        })
-
+        new XMLChangeLogSAXParser().parse(file, new ChangeLogParameters(), resourceAccessor)
 
         then:
         def e = thrown(ChangeLogParseException)
         e.message.contains("Error parsing line")
         e.message.contains("iDontKnowWhatImDoing")
+
+    }
+
+
+    def "setting validation flag to false will cause the XML to not be validated"() {
+        given:
+        def file = "com/example/invalid.xml"
+
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/invalid.xml": INVALID_XML])
+
+        then:
+        Scope.child(GlobalConfiguration.VALIDATE_XML_CHANGELOG_FILES.key, "false", { ->
+            def d = new XMLChangeLogSAXParser().parse(file, new ChangeLogParameters(), resourceAccessor)
+            assert d.physicalFilePath == file
+            assert d.getChangeSets().isEmpty()
+        })
+
     }
 
     def "getSchemaVersion"() {

@@ -218,8 +218,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         VALIDATE_XML_CHANGELOG_FILES = builder.define("validateXmlChangelogFiles", Boolean.class)
-                .setDescription("Will perform xsd validation of XML changelog files. Defaults to false.")
-                .setDefaultValue(false)
+                .setDescription("Will perform xsd validation of XML changelog files. Defaults to true.")
+                .setDefaultValue(true)
                 .build();
     }
 
