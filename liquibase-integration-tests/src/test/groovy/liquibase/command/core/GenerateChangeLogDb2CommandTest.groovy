@@ -6,19 +6,21 @@ import liquibase.command.CommandScope
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.util.FileUtil
 import spock.lang.Shared
 import spock.lang.Specification
 
 @LiquibaseIntegrationTest
-class UpdateSqlDb2Test extends Specification {
+class GenerateChangeLogDb2CommandTest extends Specification {
     @Shared
     private DatabaseTestSystem db2 = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("db2")
 
-    def "Should generate view comments with updateSql"() {
+    def "Should generate view comments and be able to use the generated sql changelog"() {
+        given:
+        runUpdate('changelogs/db2/issues/view.comments.sql')
+
         when:
-        runUpdateSql('changelogs/db2/issues/view.comments.xml')
+        runGenerateChangelog('output.db2.sql')
 
         then:
         def outputFile = new File('output.db2.sql')
@@ -26,7 +28,8 @@ class UpdateSqlDb2Test extends Specification {
         contents.contains("COMMENT ON TABLE SOME_VIEW IS 'THIS IS A COMMENT ON SOME_VIEW VIEW. THIS VIEW COMMENT SHOULD BE CAPTURED BY GenerateChangeLog.'")
 
         when:
-        runUpdate('output.db2.sql')
+        runDropAll()
+        runUpdate('output.mssql.sql')
 
         then:
         noExceptionThrown()
@@ -36,13 +39,13 @@ class UpdateSqlDb2Test extends Specification {
         outputFile.delete()
     }
 
-    private void runUpdateSql(String outputFile) {
-        UpdateSqlCommandStep step = new UpdateSqlCommandStep()
-        CommandScope commandScope = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(UpdateSqlCommandStep.URL_ARG, db2.getConnectionUrl())
-        commandScope.addArgumentValue(UpdateSqlCommandStep.USERNAME_ARG, db2.getUsername())
-        commandScope.addArgumentValue(UpdateSqlCommandStep.PASSWORD_ARG, db2.getPassword())
-        commandScope.addArgumentValue(LiquibaseCommandLineConfiguration.OUTPUT_FILE.getKey(), outputFile)
+    private void runGenerateChangelog(String outputFile) {
+        GenerateChangelogCommandStep step = new GenerateChangelogCommandStep()
+        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.URL_ARG, db2.getConnectionUrl())
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.USERNAME_ARG, db2.getUsername())
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.PASSWORD_ARG, db2.getPassword())
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
         OutputStream outputStream = new ByteArrayOutputStream()
         CommandResultsBuilder commandResultsBuilder = new CommandResultsBuilder(commandScope, outputStream)
         step.run(commandResultsBuilder)
