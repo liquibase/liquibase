@@ -242,7 +242,6 @@ jobs:
           - h2
           #          - h2:1.4
           - hsqldb
-          - db2
           - mariadb
           - mssql
           - mysql

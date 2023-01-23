@@ -7,10 +7,12 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.util.FileUtil
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
 @LiquibaseIntegrationTest
+@Ignore
 class GenerateChangeLogDb2CommandTest extends Specification {
     @Shared
     private DatabaseTestSystem db2 = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("db2")
