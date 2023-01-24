@@ -1,7 +1,5 @@
 name: Bug report or Feature request
-title: ''
 labels: Status:Discovery
-assignees: ''
 
 description: Create a report to help us improve
 body:
@@ -16,7 +14,7 @@ body:
     id: confirm-search
     attributes:
       label: Search first
-      description: Please search [existing issues](https://github.com/liquibase/liquibase/issues) and the [Logseq Forum](https://forum.liquibase.com/) before reporting.
+      description: Please search [existing issues](https://github.com/liquibase/liquibase/issues) and the [Liquibase Forum](https://forum.liquibase.com/) before reporting.
       options:
         - label: I searched and no similar issues were found
           required: true
@@ -87,10 +85,10 @@ body:
       placeholder: CLI, maven, gradle, spring boot, servlet, etc.
 
   - type: input
-    id: integration
+    id: extensions
     attributes:
-      label: Liquibase Integration
-      placeholder: CLI, maven, gradle, spring boot, servlet, etc.
+      label: Liquibase Extensions
+      placeholder: liquibase-redshift, etc.
 
   - type: input
     id: platform
