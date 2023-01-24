@@ -1,50 +1,27 @@
 package liquibase.command.core;
 
+import liquibase.change.CheckSum;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueObfuscator;
-import liquibase.exception.CommandExecutionException;
+import liquibase.command.providers.ReferenceDatabase;
+import liquibase.database.Database;
+import liquibase.diff.DiffGeneratorFactory;
+import liquibase.diff.DiffResult;
 
 import java.util.Arrays;
+import java.util.List;
 
-public class DiffCommandStep extends AbstractCliWrapperCommandStep {
+public class DiffCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"diff"};
-
-    public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
-    public static final CommandArgumentDefinition<String> REFERENCE_PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
-    public static final CommandArgumentDefinition<String> USERNAME_ARG;
-    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> DIFF_TYPES_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
+
+    public static final CommandResultDefinition<CheckSum> DIFF_RESULT;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required()
-                .description("The JDBC reference database connection URL").build();
-        REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class)
-                .description("The reference database username").build();
-        REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class)
-                .description("The reference database password")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
-                .build();
-        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
-                .description("The JDBC target database connection URL").build();
-        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
-                .description("The target database username").build();
-        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
-                .description("The target database password")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
-                .build();
-        DRIVER_ARG = builder.argument("driver", String.class)
-                .description("The JDBC driver class").build();
-        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
-                .description("The JDBC driver properties file").build();
         EXCLUDE_OBJECTS_ARG = builder.argument("excludeObjects", String.class)
                 .description("Objects to exclude from diff").build();
         INCLUDE_OBJECTS_ARG = builder.argument("includeObjects", String.class)
@@ -54,6 +31,13 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
         DIFF_TYPES_ARG = builder.argument("diffTypes", String.class)
                 .description("Types of objects to compare").build();
 
+
+        DIFF_RESULT = builder.result("diffResult", CheckSum.class).description("Databases diff result").build();
+    }
+
+    @Override
+    public List<Class<?>> requiredDependencies() {
+        return Arrays.asList(Database.class, ReferenceDatabase.class);
     }
 
     @Override
@@ -62,9 +46,22 @@ public class DiffCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return collectArguments(commandScope, Arrays.asList("format", EXCLUDE_OBJECTS_ARG.getName(), INCLUDE_OBJECTS_ARG.getName()), null);
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+        Database targetDatabase = (Database) commandScope.getDependency(Database.class);
+        Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
+        sendResults(DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, compareControl));
     }
+
+    private void sendResults(DiffResult result) {
+
+
+    }
+
+//    @Override
+//    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
+//        return collectArguments(commandScope, Arrays.asList("format", EXCLUDE_OBJECTS_ARG.getName(), INCLUDE_OBJECTS_ARG.getName()), null);
+//    }
 
 
     @Override
