@@ -9,10 +9,6 @@ jobs:
   delete-package:
     name: Delete Github Packages for Master/Main
     runs-on: ubuntu-20.04
-    matrix:
-      package:
-        - org.liquibase.liquibase-core
-        - org.liquibase.liquibase-extension-testing
     steps:
 
     - uses: actions/delete-package-versions@v4
@@ -20,7 +16,7 @@ jobs:
         # Name of the package.
         # Defaults to an empty string.
         # Required if `package-version-ids` input is not given.
-        package-name: ${{ matrix.package }}
+        package-name: org.liquibase.liquibase-core
 
         # The number of latest versions to keep.
         # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
