@@ -28,7 +28,7 @@ public class SnowflakeJdbcExecutor extends JdbcExecutor {
         } catch (DatabaseException e) {
             if (sql instanceof SetColumnRemarksStatement) {
                 if (e.getMessage().contains("Object found is of type 'VIEW', not specified type 'TABLE'")) {
-                    throw new DatabaseException("Snowflake does not support setting column comments on views, only tables.", e);
+                    throw new DatabaseException("setColumnRemarks change type isn't supported on Snowflake for a 'view'", e);
                 }
             }
         }
