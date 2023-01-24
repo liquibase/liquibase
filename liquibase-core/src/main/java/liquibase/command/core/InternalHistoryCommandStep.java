@@ -34,7 +34,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
                 .build();
         FORMAT_ARG = builder.argument("format", HistoryFormat.class)
                 .required()
-                .defaultValue(HistoryFormat.LEGACY, "History output format")
+                .defaultValue(HistoryFormat.TEXT, "History output format")
                 .build();
 
         DEPLOYMENTS_RESULT = builder.result("deployments", DeploymentHistory.class).build();
@@ -112,7 +112,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
             switch (scope.getArgumentValue(FORMAT_ARG)) {
                 case TABULAR:
                     return new TabularDeploymentDetails(scope);
-                case LEGACY:
+                case TEXT:
                 default:
                     return new LegacyDeploymentDetails(scope);
             }
