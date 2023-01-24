@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface LiquibaseService {
-    public boolean skip() default false;
+    boolean skip() default false;
 }

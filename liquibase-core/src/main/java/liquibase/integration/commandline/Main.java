@@ -1793,9 +1793,7 @@ public class Main {
                 liquibase.clearCheckSums();
                 return;
             } else if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
-                CheckSum checkSum = null;
-                checkSum = liquibase.calculateCheckSum(commandParams.iterator().next());
-                Scope.getCurrentScope().getUI().sendMessage(checkSum.toString());
+                liquibase.calculateCheckSum(commandParams.iterator().next());
                 return;
             } else if (COMMANDS.DB_DOC.equalsIgnoreCase(command)) {
                 if (commandParams.isEmpty()) {
