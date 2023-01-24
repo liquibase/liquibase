@@ -77,7 +77,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         HALT("HALT"),
         MARK_RAN("MARK_RAN");
 
-        String key;
+        final String key;
 
         ValidationFailOption(String key) {
             this.key = key;

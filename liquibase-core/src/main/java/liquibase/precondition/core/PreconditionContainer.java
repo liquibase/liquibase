@@ -29,7 +29,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         MARK_RAN("MARK_RAN"),
         WARN("WARN");
 
-        String key;
+        final String key;
 
         FailOption(String key) {
             this.key = key;
@@ -47,7 +47,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         MARK_RAN("MARK_RAN"),
         WARN("WARN");
 
-        String key;
+        final String key;
 
         ErrorOption(String key) {
             this.key = key;
@@ -65,7 +65,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         TEST("TEST"),
         FAIL("FAIL");
 
-        String key;
+        final String key;
 
         OnSqlOutputOption(String key) {
             this.key = key;
