@@ -40,7 +40,7 @@ public class HistoryCommandStep extends AbstractCliWrapperCommandStep {
                 .description("The root changelog").build();
         FORMAT_ARG = builder.argument("format", HistoryFormat.class)
                 .required()
-                .defaultValue(HistoryFormat.TEXT, "History output format")
+                .defaultValue(HistoryFormat.TABULAR, "History output format")
                 .build();
     }
 
