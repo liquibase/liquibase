@@ -34,7 +34,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
                 .build();
         FORMAT_ARG = builder.argument("format", HistoryFormat.class)
                 .required()
-                .defaultValue(HistoryFormat.LEGACY, "History output format")
+                .defaultValue(HistoryFormat.TABULAR, "History output format")
                 .build();
 
         DEPLOYMENTS_RESULT = builder.result("deployments", DeploymentHistory.class).build();
@@ -112,7 +112,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
             switch (scope.getArgumentValue(FORMAT_ARG)) {
                 case TABULAR:
                     return new TabularDeploymentDetails(scope);
-                case LEGACY:
+                case TEXT:
                 default:
                     return new LegacyDeploymentDetails(scope);
             }
@@ -180,8 +180,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
                 "Update date",
                 "Change log path",
                 "Change set author",
-                "Change set ID",
-                "Checksum");
+                "Change set ID");
 
         private final List<RanChangeSet> changeSets;
         private final CommandScope commandScope;
@@ -206,8 +205,7 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
                                     dateFormat.format(changeSet.getDateExecuted()),
                                     changeSet.getChangeLog(),
                                     changeSet.getAuthor(),
-                                    changeSet.getId(),
-                                    changeSet.getLastCheckSum().toString()
+                                    changeSet.getId()
                             )
                     )
                     .collect(Collectors.toList());

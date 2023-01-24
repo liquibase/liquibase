@@ -154,7 +154,8 @@ public class TableOutput {
                 }
             } while (isMultiLine);
             if (!endLineAdded) {
-                finalTableList.add(new String[]{""});
+                String[] emptyCells = Collections.nCopies(row.length, "").toArray(new String[row.length]);
+                finalTableList.add(emptyCells);
             }
         }
         String[][] finalTable = new String[finalTableList.size()][finalTableList.get(0).length];
