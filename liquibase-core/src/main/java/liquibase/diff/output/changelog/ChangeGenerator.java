@@ -12,10 +12,10 @@ public interface ChangeGenerator {
      */
     Change[] EMPTY_CHANGE = {};
 
-    final int PRIORITY_NONE = -1;
-    final int PRIORITY_DEFAULT = 1;
-    final int PRIORITY_DATABASE = 5;
-    final int PRIORITY_ADDITIONAL = 50;
+    int PRIORITY_NONE = -1;
+    int PRIORITY_DEFAULT = 1;
+    int PRIORITY_DATABASE = 5;
+    int PRIORITY_ADDITIONAL = 50;
 
     int getPriority(Class<? extends DatabaseObject> objectType, Database database);
 

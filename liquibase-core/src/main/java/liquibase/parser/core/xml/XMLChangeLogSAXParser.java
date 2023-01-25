@@ -71,7 +71,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     @Override
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        try  {
+        try {
             Resource resource = resourceAccessor.get(physicalChangeLogLocation);
             SAXParser parser = saxParserFactory.newSAXParser();
             if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
@@ -160,7 +160,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
      * Try to set the parser property "schemaLanguage", but do not mind if the parser does not understand it.
      *
      * @param parser the parser to configure
-     * @todo If we do not mind, why do we set it in the first place? Need to resarch in git...
+     * @todo If we do not mind, why do we set it in the first place? Need to research in git...
      */
     private void trySetSchemaLanguageProperty(SAXParser parser) {
         try {

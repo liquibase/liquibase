@@ -11,8 +11,9 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> SUPPORT_PROPERTY_ESCAPING;
     public static final ConfigurationDefinition<Boolean> USE_PROCEDURE_SCHEMA;
     public static final ConfigurationDefinition<MissingPropertyMode> MISSING_PROPERTY_MODE;
-
     public static final ConfigurationDefinition<ChangelogParseMode> CHANGELOG_PARSE_MODE;
+    public static final ConfigurationDefinition<MissingIncludeConfiguration> ON_MISSING_INCLUDE_FILE;
+    public static final ConfigurationDefinition<Boolean> ERROR_ON_CIRCULAR_INCLUDE_ALL;
 
 
     static {
@@ -40,6 +41,15 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(ChangelogParseMode.STRICT)
                 .build();
 
+        ERROR_ON_CIRCULAR_INCLUDE_ALL = builder.define("errorOnCircularIncludeAll", Boolean.class)
+                .setDescription("Throw an error if Liquibase detects that an includeAll will cause a circular reference (and thus a changelog parse error).")
+                .setDefaultValue(true)
+                .build();
+
+        ON_MISSING_INCLUDE_FILE = builder.define("onMissingInclude", MissingIncludeConfiguration.class)
+                .setDescription("If set to WARN, then liquibase will not throw exception on missing changelog file, instead will show a warning message.")
+                .setDefaultValue(MissingIncludeConfiguration.FAIL)
+                .build();
     }
 
     public enum MissingPropertyMode {
@@ -51,5 +61,10 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
     public enum ChangelogParseMode {
         STRICT,
         LAX,
+    }
+
+    public enum MissingIncludeConfiguration {
+        WARN,
+        FAIL
     }
 }

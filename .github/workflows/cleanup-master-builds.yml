@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
 
-    - uses: actions/delete-package-versions@v3
+    - uses: actions/delete-package-versions@v4
       with:
         # Name of the package.
         # Defaults to an empty string.
