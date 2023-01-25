@@ -27,7 +27,7 @@ public class SchemaSnapshotGeneratorSnowflake extends SchemaSnapshotGenerator {
         List<String> returnList = new ArrayList<>();
 
         try (ResultSet schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas(database
-                .getDefaultCatalogName(), database.getDefaultSchemaName())) {
+                .getDefaultCatalogName(), null)) {
             while (schemas.next()) {
                 returnList.add(JdbcUtil.getValueForColumn(schemas, "TABLE_SCHEM", database));
             }
