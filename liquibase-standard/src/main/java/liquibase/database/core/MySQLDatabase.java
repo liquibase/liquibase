@@ -12,7 +12,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.StoredProcedure;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
@@ -670,7 +670,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportIfNotExists() {
-        return true;
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(StoredProcedure.class);
     }
 }

@@ -7,6 +7,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.StoredProcedure;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
 
@@ -123,7 +124,7 @@ public class Ingres9Database extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportIfNotExists() {
-        return true;
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(StoredProcedure.class);
     }
 }

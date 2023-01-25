@@ -15,6 +15,8 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.StoredProcedure;
 import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtil;
 
@@ -583,7 +585,7 @@ public class H2Database extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportIfNotExists() {
-        return true;
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(StoredProcedure.class);
     }
 }
