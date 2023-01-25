@@ -19,7 +19,7 @@ public interface CustomChange {
      *
      * @return a {@link String} containing the message after the change is executed
      */
-    public String getConfirmationMessage();
+    String getConfirmationMessage();
 
     /**
      * This method will be called after the no arg constructor and all of the
@@ -28,18 +28,18 @@ public interface CustomChange {
      * the settings provided.
      *
      */
-    public void setUp() throws SetupException;
+    void setUp() throws SetupException;
 
     /**
      * Sets the fileOpener that should be used for any file loading and resource
      * finding for files that are provided by the user.
      */
-    public void setFileOpener(ResourceAccessor resourceAccessor);
+    void setFileOpener(ResourceAccessor resourceAccessor);
 
     /**
      * Tests that the change is configured correctly before attempting to execute it.
      * @param database The database the change will be ran against
      */
-    public ValidationErrors validate(Database database);
+    ValidationErrors validate(Database database);
 
 }

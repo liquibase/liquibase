@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public interface ChangeSetVisitor {
 
-    public enum Direction {
+    enum Direction {
         FORWARD,
         REVERSE
     }

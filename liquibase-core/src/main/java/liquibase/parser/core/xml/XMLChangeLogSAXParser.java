@@ -70,7 +70,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     @Override
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        try  {
+        try {
             Resource resource = resourceAccessor.get(physicalChangeLogLocation);
             SAXParser parser = saxParserFactory.newSAXParser();
             if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
