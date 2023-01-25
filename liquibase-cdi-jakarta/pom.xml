@@ -10,7 +10,7 @@
 
     <description>Configures Liquibase for use in a CDI 3.0+ environment</description>
 
-    <artifactId>liquibase-jakarta-cdi</artifactId>
+    <artifactId>liquibase-cdi-jakarta</artifactId>
 
     <dependencies>
         <dependency>
