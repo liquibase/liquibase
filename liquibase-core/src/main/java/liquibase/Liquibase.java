@@ -34,6 +34,7 @@ import liquibase.logging.Logger;
 import liquibase.logging.core.BufferedLogService;
 import liquibase.logging.core.CompositeLogService;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
@@ -300,13 +301,13 @@ public class Liquibase implements AutoCloseable {
                 // Update Hub with the operation information
                 //
                 hubUpdater.postUpdateHub(updateOperation, bufferLog);
-                Scope.getCurrentScope().getMdcManager().put(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
-                Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
-                Scope.getCurrentScope().getMdcManager().remove(MdcKey.DEPLOYMENT_OUTCOME);
+                try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Update command completed successfully.");
+                }
             } catch (Throwable e) {
-                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED);
-                Scope.getCurrentScope().getLog(getClass()).info("Update command encountered an exception.");
-                Scope.getCurrentScope().getMdcManager().remove(MdcKey.DEPLOYMENT_OUTCOME);
+                try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, MdcValue.COMMAND_FAILED)) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Update command encountered an exception.");
+                }
                 if (hubUpdater != null) {
                     hubUpdater.postUpdateHubExceptionHandling(updateOperation, bufferLog, e.getMessage());
                 }
