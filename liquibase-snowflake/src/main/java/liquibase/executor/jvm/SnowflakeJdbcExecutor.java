@@ -9,6 +9,8 @@ import liquibase.statement.core.SetColumnRemarksStatement;
 
 import java.util.List;
 
+import static liquibase.sqlgenerator.core.SetColumnRemarksGeneratorSnowflake.SET_COLUMN_REMARKS_NOT_SUPPORTED_ON_VIEW_MSG;
+
 public class SnowflakeJdbcExecutor extends JdbcExecutor {
 
     @Override
@@ -28,7 +30,7 @@ public class SnowflakeJdbcExecutor extends JdbcExecutor {
         } catch (DatabaseException e) {
             if (sql instanceof SetColumnRemarksStatement) {
                 if (e.getMessage().contains("Object found is of type 'VIEW', not specified type 'TABLE'")) {
-                    throw new DatabaseException("setColumnRemarks change type isn't supported on Snowflake for a 'view'", e);
+                    throw new DatabaseException(SET_COLUMN_REMARKS_NOT_SUPPORTED_ON_VIEW_MSG, e);
                 }
             }
         }
