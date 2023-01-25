@@ -239,8 +239,7 @@ public class Liquibase implements AutoCloseable {
         runInScope(() -> {
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             lockService.waitForLock();
-            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TARGET_VALUE, database.getConnection().getURL());
-            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TARGET_TYPE, MdcValue.URL_DATABASE_TARGET);
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
 
             changeLogParameters.setContexts(contexts);
             changeLogParameters.setLabels(labelExpression);
