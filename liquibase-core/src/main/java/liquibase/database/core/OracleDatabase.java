@@ -36,9 +36,12 @@ import static java.util.ResourceBundle.getBundle;
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
-	public static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
-    private static final Pattern VERSION_PATTERN = Pattern.compile("(\\d+)\\.(\\d+)\\..*");
+    private static final String PROXY_USER_REGEX = ".*(?:thin|oci)\\:(.+)/@.*";
+	public static final Pattern PROXY_USER_PATTERN = Pattern.compile(PROXY_USER_REGEX);
+
+    private static final String VERSION_REGEX = "(\\d+)\\.(\\d+)\\..*";
+    private static final Pattern VERSION_PATTERN = Pattern.compile(VERSION_REGEX);
 
     public static final String PRODUCT_NAME = "oracle";
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -80,7 +83,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     private void tryProxySession(final String url, final Connection con) {
-        Matcher m = PROXY_USER.matcher(url);
+        Matcher m = PROXY_USER_PATTERN.matcher(url);
         if (m.matches()) {
             Properties props = new Properties();
             props.put("PROXY_USER_NAME", m.group(1));

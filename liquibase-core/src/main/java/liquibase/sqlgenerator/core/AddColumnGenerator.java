@@ -30,7 +30,8 @@ import java.util.regex.Pattern;
 
 public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement> {
 
-    public static final Pattern REFERENCE_PATTERN = Pattern.compile("([\\w\\._]+)\\(([\\w_]+)\\)");
+    private static final String REFERENCE_REGEX = "([\\w\\._]+)\\(([\\w_]+)\\)";
+    public static final Pattern REFERENCE_PATTERN = Pattern.compile(REFERENCE_REGEX);
 
     @Override
     public ValidationErrors validate(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {

@@ -25,7 +25,8 @@ import static java.util.Locale.US;
 
 public abstract class SqlUtil {
 
-    public static final Pattern NAME_PATTERN = Pattern.compile(":name|\\?|:value");
+    private static final String NAME_REGEX = ":name|\\?|:value";
+    public static final Pattern NAME_PATTERN = Pattern.compile(NAME_REGEX);
 
     public static boolean isNumeric(int dataType) {
         switch (dataType) {

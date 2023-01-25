@@ -20,7 +20,8 @@ import java.util.regex.Pattern;
 public class TimeType extends LiquibaseDataType {
 
     protected static final int MSSQL_TYPE_TIME_DEFAULT_PRECISION = 7;
-    public static final Pattern PATTERN = Pattern.compile("(\\(\\d+\\))");
+    private static final String PARENTHESIS_REGEX = "(\\(\\d+\\))";
+    public static final Pattern PARENTHESIS_PATTERN = Pattern.compile(PARENTHESIS_REGEX);
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -64,7 +65,7 @@ public class TimeType extends LiquibaseDataType {
 
             final Object[] parameters = getParameters();
             if (parameters == null || parameters.length == 0) {
-                final Matcher precisionMatcher = PATTERN.matcher(rawDefinition);
+                final Matcher precisionMatcher = PARENTHESIS_PATTERN.matcher(rawDefinition);
                 if (precisionMatcher.find()) {
                     datatype = new DatabaseDataType(datatype.getType() + precisionMatcher.group(1));
                 }
