@@ -51,6 +51,39 @@ Optional Args:
         ]
     }
 
+    run "Mismatched DBMS causes not deployed summary message", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                tag          : "version_2.0",
+                changelogFile: "changelogs/h2/complete/mismatchedDbms.changelog.xml"
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+
+        expectedUI = [
+"""
+UPDATE SUMMARY
+Run:                          2
+Previously run:               0
+DBMS mismatch:                1
+Not in filter:                0
+-------------------------------
+Total change sets:            3
+
++--------------------------------------------------------------+--------------------------------+
+| Changeset Info                                               | Reason Skipped                 |
++--------------------------------------------------------------+--------------------------------+
+|                                                              | mismatched DBMS value of 'foo' |
+| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |
+| land                                                         |                                |
++--------------------------------------------------------------+--------------------------------+
+"""
+        ]
+    }
     run "Run without a tag throws an exception", {
         arguments = [
                 url          : "",

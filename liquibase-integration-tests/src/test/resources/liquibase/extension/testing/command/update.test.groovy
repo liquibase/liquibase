@@ -54,6 +54,40 @@ Optional Args:
                 "txt": [Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE),
                         Pattern.compile(".*liquibase.structure.core.Table:.*ADDRESS.*columns:.*city.*", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)]
         ]
+
+    }
+
+    run "Mismatched DBMS causes not deployed summary message", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/mismatchedDbms.changelog.xml"
+        ]
+
+        expectedResults = [
+                statusCode   : 0
+        ]
+
+        expectedUI = [
+"""
+UPDATE SUMMARY
+Run:                          2
+Previously run:               0
+DBMS mismatch:                1
+Not in filter:                0
+-------------------------------
+Total change sets:            3
+
++--------------------------------------------------------------+--------------------------------+
+| Changeset Info                                               | Reason Skipped                 |
++--------------------------------------------------------------+--------------------------------+
+|                                                              | mismatched DBMS value of 'foo' |
+| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |
+| land                                                         |                                |
++--------------------------------------------------------------+--------------------------------+
+"""
+        ]
     }
 
     run "Run without a URL throws an exception", {
