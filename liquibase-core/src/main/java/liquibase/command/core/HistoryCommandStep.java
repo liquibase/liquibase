@@ -39,8 +39,8 @@ public class HistoryCommandStep extends AbstractCliWrapperCommandStep {
         CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
                 .description("The root changelog").build();
         FORMAT_ARG = builder.argument("format", HistoryFormat.class)
-                .required()
-                .defaultValue(HistoryFormat.TABULAR, "History output format")
+                .description("History output format")
+                .defaultValue(HistoryFormat.TABULAR)
                 .build();
     }
 

@@ -33,8 +33,8 @@ public class InternalHistoryCommandStep extends AbstractCommandStep {
                 .defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT), "Platform specific 'short' format")
                 .build();
         FORMAT_ARG = builder.argument("format", HistoryFormat.class)
-                .required()
-                .defaultValue(HistoryFormat.TABULAR, "History output format")
+                .description("History output format")
+                .defaultValue(HistoryFormat.TABULAR)
                 .build();
 
         DEPLOYMENTS_RESULT = builder.result("deployments", DeploymentHistory.class).build();
