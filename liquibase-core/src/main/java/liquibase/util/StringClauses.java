@@ -501,7 +501,7 @@ public class StringClauses {
             return true;
         }
         for (Object clause : clauses.values()) {
-            if ((clause != null) && !"".equals(clause.toString().trim())) {
+            if (!"".equals(clause.toString().trim())) {
                 return false;
             }
         }
