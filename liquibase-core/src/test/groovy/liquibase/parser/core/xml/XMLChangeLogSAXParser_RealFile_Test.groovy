@@ -284,7 +284,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     def "ChangeLogParseException is thrown if the changeset has invalid tags"() throws Exception {
         when:
-        def d = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/malformedChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor())
+        new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/malformedChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
         def e = thrown(ChangeLogParseException)
