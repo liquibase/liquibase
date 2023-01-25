@@ -6,6 +6,8 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.StoredProcedure;
 import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
@@ -133,7 +135,7 @@ public class CockroachDatabase extends PostgresDatabase {
     }
 
     @Override
-    public boolean supportIfNotExists() {
-        return true;
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(StoredProcedure.class);
     }
 }

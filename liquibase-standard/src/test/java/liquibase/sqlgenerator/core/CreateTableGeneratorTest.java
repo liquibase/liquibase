@@ -6,6 +6,7 @@ import liquibase.database.MockDatabaseConnection;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.*;
+import liquibase.structure.core.StoredProcedure;
 import org.junit.Test;
 
 import liquibase.change.ColumnConfig;
@@ -1245,7 +1246,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     @Test
     public void testWithCreateIfNotExistsInH2Database() {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            if (database.supportIfNotExists()) {
+            if (database.supportsCreateIfNotExists(StoredProcedure.class)) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
                 statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("java.sql.Types.TIMESTAMP", database), new ColumnConfig().setDefaultValue("null").getDefaultValueObject());
                 if (shouldBeImplementation(database)) {

@@ -1,7 +1,5 @@
 package liquibase.database.core;
 
-import static liquibase.util.BooleanUtil.isTrue;
-
 import liquibase.CatalogAndSchema;
 import liquibase.CatalogAndSchema.CatalogAndSchemaCase;
 import liquibase.GlobalConfiguration;
@@ -16,8 +14,7 @@ import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Schema;
+import liquibase.structure.core.StoredProcedure;
 import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtil;
 
@@ -37,6 +34,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static liquibase.util.BooleanUtil.isTrue;
 
 public class H2Database extends AbstractJdbcDatabase {
 
@@ -584,7 +583,7 @@ public class H2Database extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportIfNotExists() {
-        return true;
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(StoredProcedure.class);
     }
 }

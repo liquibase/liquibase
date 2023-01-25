@@ -14,6 +14,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
+import liquibase.structure.core.StoredProcedure;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
@@ -413,7 +414,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportIfNotExists() {
-        return true;
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(StoredProcedure.class);
     }
 }

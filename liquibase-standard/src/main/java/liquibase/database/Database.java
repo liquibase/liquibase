@@ -485,6 +485,6 @@ public interface Database extends PrioritizedService, AutoCloseable {
         // Do nothing by default
     }
 
-    boolean supportIfNotExists();
+    boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type);
 }
 

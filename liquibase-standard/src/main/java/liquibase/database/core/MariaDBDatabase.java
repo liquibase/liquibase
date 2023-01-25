@@ -3,6 +3,8 @@ package liquibase.database.core;
 import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.StoredProcedure;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
@@ -115,7 +117,7 @@ public class MariaDBDatabase extends MySQLDatabase {
     }
 
     @Override
-    public boolean supportIfNotExists() {
-        return true;
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(StoredProcedure.class);
     }
 }
