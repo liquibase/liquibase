@@ -1493,7 +1493,36 @@ public class Main {
             }
         }
 
-        try {
+        if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
+            if (commandParams.contains("--help")) {
+                outputStream.println("liquibase diff" +
+                        "\n" +
+                        "          Outputs a description of differences.  If you have a Liquibase Pro key, you can output the differences as JSON using the --format=JSON option\n");
+                System.exit(0);
+            }
+            if (isFormattedDiff()) {
+                CommandScope liquibaseCommand = new CommandScope("internalFormattedDiff");
+
+                CommandScope diffCommand = CommandLineUtils.createDiffCommand(
+                        createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
+                        database,
+                        StringUtil.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
+
+                liquibaseCommand.addArgumentValue("format", getCommandParam(OPTIONS.FORMAT, "JSON").toUpperCase());
+                liquibaseCommand.addArgumentValue("diffCommand", diffCommand);
+                liquibaseCommand.setOutput(getOutputStream());
+
+                liquibaseCommand.execute();
+            } else {
+                CommandLineUtils.doDiff(
+                        createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
+                        database,
+                        StringUtil.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
+            }
+            return;
+        }
+
+            try {
             if ((excludeObjects != null) && (includeObjects != null)) {
                 throw new UnexpectedLiquibaseException(
                         String.format(coreBundle.getString("cannot.specify.both"),
@@ -1505,7 +1534,6 @@ public class Main {
                 DeprecatedConfigurationValueProvider.setData(GlobalConfiguration.SHOULD_SNAPSHOT_DATA, true);
             }
 
-            ObjectChangeFilter objectChangeFilter = null;
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(
                     schemas,
                     referenceSchemas,
@@ -1515,58 +1543,23 @@ public class Main {
                     database);
 
             CompareControl.SchemaComparison[] finalSchemaComparisons = computedSchemas.finalSchemaComparisons;
-            DiffOutputControl diffOutputControl = new DiffOutputControl(
-                    includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
 
+            ObjectChangeFilter objectChangeFilter = null;
             if (excludeObjects != null) {
                 objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE,
                         excludeObjects);
-                diffOutputControl.setObjectChangeFilter(objectChangeFilter);
             }
 
             if (includeObjects != null) {
                 objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE,
                         includeObjects);
-                diffOutputControl.setObjectChangeFilter(objectChangeFilter);
             }
 
-            for (CompareControl.SchemaComparison schema : finalSchemaComparisons) {
-                diffOutputControl.addIncludedSchema(schema.getReferenceSchema());
-                diffOutputControl.addIncludedSchema(schema.getComparisonSchema());
-            }
-
-            if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
-                if (commandParams.contains("--help")) {
-                    outputStream.println("liquibase diff" +
-                            "\n" +
-                            "          Outputs a description of differences.  If you have a Liquibase Pro key, you can output the differences as JSON using the --format=JSON option\n");
-                    System.exit(0);
-                }
-                if (isFormattedDiff()) {
-                    CommandScope liquibaseCommand = new CommandScope("internalFormattedDiff");
-
-                    CommandScope diffCommand = CommandLineUtils.createDiffCommand(
-                            createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                            database,
-                            StringUtil.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
-
-                    liquibaseCommand.addArgumentValue("format", getCommandParam(OPTIONS.FORMAT, "JSON").toUpperCase());
-                    liquibaseCommand.addArgumentValue("diffCommand", diffCommand);
-                    liquibaseCommand.setOutput(getOutputStream());
-
-                    liquibaseCommand.execute();
-                } else {
-                    CommandLineUtils.doDiff(
-                            createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                            database,
-                            StringUtil.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
-                }
-                return;
-            } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
+            if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile,
                         createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
                         database,
-                        diffOutputControl, objectChangeFilter, StringUtil.trimToNull(diffTypes), finalSchemaComparisons
+                        getDiffOutputControl(finalSchemaComparisons, objectChangeFilter), objectChangeFilter, StringUtil.trimToNull(diffTypes), finalSchemaComparisons
                 );
                 return;
             } else if (COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
@@ -1587,7 +1580,7 @@ public class Main {
                 CommandLineUtils.doGenerateChangeLog(currentChangeLogFile, database, finalTargetSchemas,
                         StringUtil.trimToNull(diffTypes), StringUtil.trimToNull(changeSetAuthor),
                         StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataOutputDirectory),
-                        diffOutputControl, overwriteOutputFileBool);
+                        getDiffOutputControl(finalSchemaComparisons, objectChangeFilter), overwriteOutputFileBool);
                 return;
             } else if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {
                 CommandScope snapshotCommand = new CommandScope("internalSnapshot");
@@ -1984,6 +1977,21 @@ public class Main {
                     coreBundle.getString("problem.closing.connection"), e);
             }
         }
+    }
+
+    private DiffOutputControl getDiffOutputControl(CompareControl.SchemaComparison[] finalSchemaComparisons, ObjectChangeFilter objectChangeFilter) {
+        DiffOutputControl diffOutputControl = new DiffOutputControl(
+                includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
+        for (CompareControl.SchemaComparison schema : finalSchemaComparisons) {
+            diffOutputControl.addIncludedSchema(schema.getReferenceSchema());
+            diffOutputControl.addIncludedSchema(schema.getComparisonSchema());
+        }
+
+        if (objectChangeFilter != null) {
+            diffOutputControl.setObjectChangeFilter(objectChangeFilter);
+        }
+
+        return diffOutputControl;
     }
 
     private String getLabelFilter() {

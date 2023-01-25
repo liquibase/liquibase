@@ -29,22 +29,22 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        REFERENCE_DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
+        REFERENCE_DEFAULT_SCHEMA_NAME_ARG = builder.argument("referenceDefaultSchemaName", String.class)
                 .description("The default schema name to use for the reference database connection").build();
-        REFERENCE_DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
+        REFERENCE_DEFAULT_CATALOG_NAME_ARG = builder.argument("referenceDefaultCatalogName", String.class)
                 .description("The default catalog name to use for the reference database connection").build();
-        REFERENCE_DRIVER_ARG = builder.argument("driver", String.class)
+        REFERENCE_DRIVER_ARG = builder.argument("referenceDriver", String.class)
                 .description("The JDBC driver class for the reference database").build();
-        REFERENCE_DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
+        REFERENCE_DRIVER_PROPERTIES_FILE_ARG = builder.argument("referenceDriverPropertiesFile", String.class)
                 .description("The JDBC driver properties file for the reference database").build();
-        REFERENCE_USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
+        REFERENCE_USERNAME_ARG = builder.argument("referenceUsername", String.class)
                 .description("The reference database username").build();
-        REFERENCE_PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
+        REFERENCE_PASSWORD_ARG = builder.argument("referencePassword", String.class)
                 .description("The reference database password")
                 .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
                 .build();
-        REFERENCE_DATABASE_ARG = builder.argument("database", Database.class).hidden().build();
-        REFERENCE_URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required().supersededBy(REFERENCE_DATABASE_ARG)
+        REFERENCE_DATABASE_ARG = builder.argument("referenceDatabase", Database.class).hidden().build();
+        REFERENCE_URL_ARG = builder.argument("referenceUrl", String.class).required().supersededBy(REFERENCE_DATABASE_ARG)
                 .description("The JDBC reference database connection URL").build();
         REFERENCE_DATABASE_ARG.setSupersededBy(REFERENCE_URL_ARG);
     }
