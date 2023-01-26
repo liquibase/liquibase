@@ -34,7 +34,8 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     private ConfigurationValueConverter<DataType> valueConverter;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
 
-    private static final Pattern ALLOWED_KEY_PATTERN = Pattern.compile("[a-zA-Z0-9._]+");
+    private static final String ALLOWED_KEY_REGEX = "[a-zA-Z0-9._]+";
+    private static final Pattern ALLOWED_KEY_PATTERN = Pattern.compile(ALLOWED_KEY_REGEX);
 
     private boolean loggedUsingDefault = false;
 
