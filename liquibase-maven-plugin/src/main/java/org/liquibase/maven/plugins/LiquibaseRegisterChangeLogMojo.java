@@ -82,7 +82,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
      */
     @Override
     protected ResourceAccessor getResourceAccessor(ClassLoader cl) throws IOException {
-        List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
+        List<ResourceAccessor> resourceAccessors = new ArrayList<>();
         File baseDir = project.getBasedir();
         File sourceDir = new File(baseDir, "src/main/resources");
         if (sourceDir.exists()) {
