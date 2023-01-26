@@ -5,6 +5,8 @@ import liquibase.configuration.ConfigurationDefinition;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Configuration container for global properties.
@@ -32,7 +34,6 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> PRESERVE_SCHEMA_CASE;
     public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
     public static final ConfigurationDefinition<Boolean> ALWAYS_DROP_INSTEAD_OF_REPLACE;
-    public static final ConfigurationDefinition<Boolean> SHOW_UPDATE_SUMMARY;
 
     public static final ConfigurationDefinition<DuplicateFileMode> DUPLICATE_FILE_MODE;
 
@@ -215,11 +216,6 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         ALWAYS_DROP_INSTEAD_OF_REPLACE = builder.define("alwaysDropInsteadOfReplace", Boolean.class)
                 .setDescription("If true, drop and recreate a view instead of replacing it.")
-                .build();
-
-        SHOW_UPDATE_SUMMARY = builder.define("showUpdateSummary", Boolean.class)
-                .setDescription("If true, show a summary report after an update operation.")
-                .setDefaultValue(true)
                 .build();
     }
 

@@ -8,6 +8,7 @@ import liquibase.changelog.visitor.*;
 import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -333,7 +334,9 @@ public class Liquibase implements AutoCloseable {
         //
         // Check the global flag to turn the summary off
         //
-        if (Boolean.FALSE.equals( GlobalConfiguration.SHOW_UPDATE_SUMMARY.getCurrentValue())) {
+        String showSummaryString = Scope.getCurrentScope().get("showSummary", String.class);
+        UpdateSummaryEnum showSummary = showSummaryString != null ? UpdateSummaryEnum.valueOf(showSummaryString) : UpdateSummaryEnum.OFF;
+        if (showSummary == UpdateSummaryEnum.OFF) {
             return;
         }
 
@@ -362,8 +365,17 @@ public class Liquibase implements AutoCloseable {
                                                     result.getFilter() != CountChangeSetFilter.class))
                       .collect(Collectors.toList());
 
+        //
+        // Only show the summary
+        //
         showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied);
+        if (showSummary == UpdateSummaryEnum.SUMMARY) {
+            return;
+        }
 
+        //
+        // Show the details too
+        //
         showDetailTable(skippedChangeSets, filterDenied);
     }
 

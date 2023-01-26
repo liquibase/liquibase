@@ -32,6 +32,8 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  showSummary (UpdateSummaryEnum) Type of update summary to show.  Values can be 'off', 'summary', or 'verbose'.
+    Default: SUMMARY
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -57,6 +59,7 @@ Optional Args:
                 username:   { it.username },
                 password:   { it.password },
                 tag          : "version_2.0",
+                showSummary  : "verbose",
                 changelogFile: "changelogs/h2/complete/mismatchedDbms.changelog.xml"
         ]
 
@@ -107,6 +110,18 @@ Total change sets:            3
                 changelogFile: "changelogs/h2/complete/simple.tag.changelog.xml",
         ]
         expectedException = CommandValidationException.class
+    }
+
+    run "Run with a bad show summary option throws an exception", {
+        arguments = [
+                url                    : { it.url },
+                username               : { it.username },
+                password               : { it.password },
+                changelogFile          : 'changelogs/h2/complete/simple.changelog.xml',
+                showSummary: "foo",
+                tag          : "version_2.0"
+        ]
+        expectedException = IllegalArgumentException.class
     }
 
     run "Run without any arguments throws an exception", {
