@@ -89,7 +89,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.minValue = minValue;
     }
 
-    @DatabaseChangeProperty(description = "Does the sequence need to be guaranteed to be genererated inm the order of request?")
+    @DatabaseChangeProperty(description = "Is the sequence generated in the requested order?")
     public Boolean isOrdered() {
         return ordered;
     }

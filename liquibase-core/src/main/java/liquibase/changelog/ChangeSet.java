@@ -191,7 +191,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private String comments;
 
     /**
-     * ChangeSet level precondtions defined for this changeSet
+     * ChangeSet level preconditions defined for this changeSet
      */
     private PreconditionContainer preconditions;
 
@@ -877,7 +877,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     /**
-     * Returns an unmodifiable list of changes.  To add one, use the addRefactoing method.
+     * Returns an unmodifiable list of changes.  To add one, use the addRefactoring method.
      */
     public List<Change> getChanges() {
         return Collections.unmodifiableList(changes);

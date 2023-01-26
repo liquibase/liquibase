@@ -8,7 +8,7 @@ public class DatabaseIncapableOfOperation extends RuntimeException {
     private String reason;
 
     public DatabaseIncapableOfOperation(String operation, String reason, Database database) {
-        super(operation + " is not supported on " + database.getShortName() + ": " + reason);
+        super(operation + " is not supported on " + database.getDisplayName() + ": " + reason);
         this.reason = reason;
     }
 
