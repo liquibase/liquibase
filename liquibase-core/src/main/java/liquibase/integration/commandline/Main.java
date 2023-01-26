@@ -1457,6 +1457,7 @@ public class Main {
      * @throws Exception
      */
     protected void doMigration() throws Exception {
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, command);
         if (COMMANDS.HELP.equalsIgnoreCase(command)) {
             printHelp(System.err);
             return;
@@ -1833,7 +1834,6 @@ public class Main {
             }
 
             try {
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, command);
                 if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
                     Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMANDS.UPDATE);
                     try {
@@ -1900,6 +1900,7 @@ public class Main {
                 } else if (COMMANDS.UPDATE_SQL.equalsIgnoreCase(command)) {
                     liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.ROLLBACK.equalsIgnoreCase(command)) {
+                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_TYPE, COMMANDS.ROLLBACK);
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(
                                 String.format(coreBundle.getString("command.requires.tag"), COMMANDS.ROLLBACK));
