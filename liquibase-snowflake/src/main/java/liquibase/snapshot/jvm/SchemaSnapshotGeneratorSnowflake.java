@@ -15,11 +15,11 @@ import java.util.List;
 public class SchemaSnapshotGeneratorSnowflake extends SchemaSnapshotGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        int priority = super.getPriority(objectType, database);
         if (database instanceof SnowflakeDatabase) {
-            priority += PRIORITY_DATABASE;
+            return super.getPriority(objectType, database) + PRIORITY_DATABASE;
+        } else {
+            return PRIORITY_NONE;
         }
-        return priority;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class SchemaSnapshotGeneratorSnowflake extends SchemaSnapshotGenerator {
         List<String> returnList = new ArrayList<>();
 
         try (ResultSet schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas(database
-                .getDefaultCatalogName(), database.getDefaultSchemaName())) {
+                .getDefaultCatalogName(), null)) {
             while (schemas.next()) {
                 returnList.add(JdbcUtil.getValueForColumn(schemas, "TABLE_SCHEM", database));
             }

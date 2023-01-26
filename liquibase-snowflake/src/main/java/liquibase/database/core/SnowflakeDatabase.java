@@ -37,6 +37,11 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public String getDisplayName() {
+        return "Snowflake";
+    }
+
+    @Override
     protected String getDefaultDatabaseProductName() {
         return PRODUCT_NAME;
     }
