@@ -52,8 +52,9 @@ class InternalHistoryCommandStepTest extends Specification {
         historyCommand.run(builder)
 
         then:
+        def lineSeparator = System.getProperty("line.separator");
         def output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8)
-        output.trim() == """
+        output.trim().replace(lineSeparator,"") == """
 Liquibase History for jdbc:some://url
 
 +-----------------+-------------+-----------------+-------------------+---------------+
@@ -70,7 +71,7 @@ Liquibase History for jdbc:some://url
 | deployment-id-2 | 2023        | some/change/log | me                | yet/another/id |
 +-----------------+-------------+-----------------+-------------------+----------------+
 
-""".trim()
+""".trim().replace(lineSeparator,"")
 
         where:
         format    | _
@@ -91,8 +92,9 @@ Liquibase History for jdbc:some://url
         historyCommand.run(builder)
 
         then:
+        def lineSeparator = System.getProperty("line.separator");
         def output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8)
-        output.trim() == """
+        output.trim().replace(lineSeparator,"") == """
 Liquibase History for jdbc:some://url
 
 - Database updated at 2022. Applied 2 changeset(s) in 0.0s, DeploymentId: deployment-id-1
@@ -101,7 +103,7 @@ Liquibase History for jdbc:some://url
 
 - Database updated at 2023. Applied 1 changeset(s), DeploymentId: deployment-id-2
   some/change/log::yet/another/id::me
-""".trim()
+""".trim().replace(lineSeparator, "")
     }
 
     private Database databaseAt(String url) {
