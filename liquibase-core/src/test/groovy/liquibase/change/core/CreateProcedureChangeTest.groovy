@@ -170,7 +170,7 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         procedureCheckSumWithoutEncoding == procedureCheckSumWithEncoding
     }
 
-    def procedureTextUpdatedIsNotConsideredOnCheckSumGeneration() {
+    def procedureTextUpdatedWithWhitespacesAddedShouldNotComputeANewCheckSum() {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
