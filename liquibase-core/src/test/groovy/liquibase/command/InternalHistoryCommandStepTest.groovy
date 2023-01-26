@@ -8,6 +8,7 @@ import liquibase.changelog.RanChangeSet
 import liquibase.command.core.InternalHistoryCommandStep
 import liquibase.database.Database
 import liquibase.database.DatabaseConnection
+import liquibase.util.StringUtil
 import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
@@ -52,9 +53,8 @@ class InternalHistoryCommandStepTest extends Specification {
         historyCommand.run(builder)
 
         then:
-        def lineSeparator = System.getProperty("line.separator");
         def output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8)
-        output.trim().replace(lineSeparator,"") == """
+        StringUtil.standardizeLineEndings(output.trim()) == StringUtil.standardizeLineEndings("""
 Liquibase History for jdbc:some://url
 
 +-----------------+-------------+-----------------+-------------------+---------------+
@@ -71,7 +71,7 @@ Liquibase History for jdbc:some://url
 | deployment-id-2 | 2023        | some/change/log | me                | yet/another/id |
 +-----------------+-------------+-----------------+-------------------+----------------+
 
-""".trim().replace(lineSeparator,"")
+""".trim())
 
         where:
         format    | _
@@ -92,9 +92,8 @@ Liquibase History for jdbc:some://url
         historyCommand.run(builder)
 
         then:
-        def lineSeparator = System.getProperty("line.separator");
         def output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8)
-        output.trim().replace(lineSeparator,"") == """
+        StringUtil.standardizeLineEndings(output.trim()) == StringUtil.standardizeLineEndings("""
 Liquibase History for jdbc:some://url
 
 - Database updated at 2022. Applied 2 changeset(s) in 0.0s, DeploymentId: deployment-id-1
@@ -103,7 +102,7 @@ Liquibase History for jdbc:some://url
 
 - Database updated at 2023. Applied 1 changeset(s), DeploymentId: deployment-id-2
   some/change/log::yet/another/id::me
-""".trim().replace(lineSeparator, "")
+""".trim())
     }
 
     private Database databaseAt(String url) {
