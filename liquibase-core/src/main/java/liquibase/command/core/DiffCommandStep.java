@@ -1,56 +1,55 @@
 package liquibase.command.core;
 
-import liquibase.change.CheckSum;
+import liquibase.CatalogAndSchema;
 import liquibase.command.*;
-import liquibase.command.providers.ReferenceDatabase;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
+import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.ObjectChangeFilter;
-import liquibase.diff.output.StandardObjectChangeFilter;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.diff.output.report.DiffToReport;
+import liquibase.exception.DatabaseException;
+import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.DatabaseObjectFactory;
+import liquibase.util.StringUtil;
 
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class DiffCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"diff"};
-    public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
-    public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
-    public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
-    public static final CommandArgumentDefinition<String> DIFF_TYPES_ARG;
 
-    public static final CommandArgumentDefinition<String> REFERENCE_SCHEMAS_ARG;
-    public static final CommandArgumentDefinition<String> OUTPUT_SCHEMAS_ARG;
-
-    public static final CommandResultDefinition<CheckSum> DIFF_RESULT;
+    public static final CommandArgumentDefinition<Database> REFERENCE_DATABASE_ARG;
+    public static final CommandArgumentDefinition<Database> TARGET_DATABASE_ARG;
+    public static final CommandArgumentDefinition<Class[]> SNAPSHOT_TYPES_ARG;
+    public static final CommandArgumentDefinition<SnapshotListener> SNAPSHOT_LISTENER_ARG;
+    public static final CommandArgumentDefinition<SnapshotControl> REFERENCE_SNAPSHOT_CONTROL_ARG;
+    public static final CommandArgumentDefinition<SnapshotControl> TARGET_SNAPSHOT_CONTROL_ARG;
+    public static final CommandArgumentDefinition<ObjectChangeFilter> OBJECT_CHANGE_FILTER_ARG;
+    public static final CommandArgumentDefinition<CompareControl> COMPARE_CONTROL_ARG;
+    public static final CommandArgumentDefinition<Boolean> PRINT_RESULT;
 
     static {
-        CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        EXCLUDE_OBJECTS_ARG = builder.argument("excludeObjects", String.class)
-                .description("Objects to exclude from diff").build();
-        INCLUDE_OBJECTS_ARG = builder.argument("includeObjects", String.class)
-                .description("Objects to include in diff").build();
-        SCHEMAS_ARG = builder.argument("schemas", String.class)
-                .description("Schemas to include in diff").build();
-        DIFF_TYPES_ARG = builder.argument("diffTypes", String.class)
-                .description("Types of objects to compare").build();
-
-        REFERENCE_SCHEMAS_ARG = builder.argument("referenceSchemas", String.class).hidden() //FIXME keep hidden?
-                .description("Schemas names on reference database to use in diff. This is a CSV list.").build();
-        OUTPUT_SCHEMAS_ARG = builder.argument("outputSchemas", String.class).hidden() //FIXME keep hidden?
-                .description("Output schemas names. This is a CSV list.").build();
-
-
-
-        DIFF_RESULT = builder.result("diffResult", CheckSum.class).description("Databases diff result").build();
+        final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
+        REFERENCE_DATABASE_ARG = builder.argument("referenceDatabase", Database.class).required().build();
+        TARGET_DATABASE_ARG = builder.argument("targetDatabase", Database.class).required().build();
+        SNAPSHOT_TYPES_ARG = builder.argument("snapshotTypes", Class[].class).required().build();
+        SNAPSHOT_LISTENER_ARG = builder.argument("snapshotListener", SnapshotListener.class).build();
+        REFERENCE_SNAPSHOT_CONTROL_ARG = builder.argument("referenceSnapshotControl", SnapshotControl.class).build();
+        TARGET_SNAPSHOT_CONTROL_ARG = builder.argument("targetSnapshotControl", SnapshotControl.class).build();
+        OBJECT_CHANGE_FILTER_ARG = builder.argument("objectChangeFilter", ObjectChangeFilter.class).build();
+        COMPARE_CONTROL_ARG = builder.argument("compareControl", CompareControl.class).required().build();
+        PRINT_RESULT = builder.argument("printResult", Boolean.class).defaultValue(true).build();
     }
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(Database.class, ReferenceDatabase.class);
+        return Arrays.asList(PreCompareCommandStep.class);
     }
 
     @Override
@@ -59,75 +58,145 @@ public class DiffCommandStep extends AbstractCommandStep {
     }
 
     @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
-        Database targetDatabase = (Database) commandScope.getDependency(Database.class);
-        Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
-
-        ObjectChangeFilter objectChangeFilter = this.getObjectChangeFilter(commandScope);
-        CompareControl compareControl = this.getcompareControl(commandScope, targetDatabase);
-        Class<? extends DatabaseObject>[] snapshotTypes = InternalDiffCommandStep.parseSnapshotTypes(commandScope.getArgumentValue(DIFF_TYPES_ARG));
-
-        commandScope
-                .addArgumentValue(InternalDiffCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
-                .addArgumentValue(InternalDiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
-                .addArgumentValue(InternalDiffCommandStep.COMPARE_CONTROL_ARG, compareControl)
-                .addArgumentValue(InternalDiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
-                .addArgumentValue(InternalDiffCommandStep.SNAPSHOT_TYPES_ARG, snapshotTypes);
-
-        //FIXME now how to run internal diff command step?
+    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
+        super.adjustCommandDefinition(commandDefinition);
+        commandDefinition.setInternal(true);
     }
 
-    private ObjectChangeFilter getObjectChangeFilter(CommandScope commandScope) {
-        String excludeObjects = commandScope.getArgumentValue(EXCLUDE_OBJECTS_ARG);
-        String includeObjects = commandScope.getArgumentValue(INCLUDE_OBJECTS_ARG);
-
-        if ((excludeObjects != null) && (includeObjects != null)) {
-            throw new UnexpectedLiquibaseException(
-                    String.format(coreBundle.getString("cannot.specify.both"),
-                            EXCLUDE_OBJECTS_ARG.getName(), INCLUDE_OBJECTS_ARG.getName()));
+    public static Class<? extends DatabaseObject>[] parseSnapshotTypes(String... snapshotTypes) {
+        if ((snapshotTypes == null) || (snapshotTypes.length == 0) || (snapshotTypes[0] == null)) {
+            return new Class[0];
         }
 
-        ObjectChangeFilter objectChangeFilter = null;
-        if (excludeObjects != null) {
-            objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE,
-                    excludeObjects);
-        }
-        if (includeObjects != null) {
-            objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE,
-                    includeObjects);
+        Set<Class<? extends DatabaseObject>> types = DatabaseObjectFactory.getInstance().parseTypes(StringUtil.join(snapshotTypes, ","));
+
+        Class<? extends DatabaseObject>[] returnTypes = new Class[types.size()];
+        int i = 0;
+        for (Class<? extends DatabaseObject> type : types) {
+            returnTypes[i++] = type;
         }
 
-        return objectChangeFilter;
+        return returnTypes;
     }
-
-    private CompareControl getcompareControl(CommandScope commandScope, Database database) {
-        CompareControl.SchemaComparison[] finalSchemaComparisons = CompareControl.computeSchemas(
-                commandScope.getArgumentValue(SCHEMAS_ARG),
-                commandScope.getArgumentValue(REFERENCE_SCHEMAS_ARG),
-                commandScope.getArgumentValue(OUTPUT_SCHEMAS_ARG),
-                commandScope.getArgumentValue(DbUrlConnectionCommandStep.DEFAULT_CATALOG_NAME_ARG),
-                commandScope.getArgumentValue(DbUrlConnectionCommandStep.DEFAULT_SCHEMA_NAME_ARG),
-                commandScope.getArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DEFAULT_CATALOG_NAME_ARG),
-                commandScope.getArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DEFAULT_SCHEMA_NAME_ARG),
-                database).finalSchemaComparisons;
-
-        return new CompareControl(finalSchemaComparisons, commandScope.getArgumentValue(DIFF_TYPES_ARG));
-    }
-
-    private void sendResults(DiffResult result) {
-
-
-    }
-
-//    @Override
-//    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-//        return collectArguments(commandScope, Arrays.asList("format", EXCLUDE_OBJECTS_ARG.getName(), INCLUDE_OBJECTS_ARG.getName()), null);
-//    }
 
 
     @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        commandDefinition.setShortDescription("Compare two databases");
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
+        InternalSnapshotCommandStep.logUnsupportedDatabase(commandScope.getArgumentValue(REFERENCE_DATABASE_ARG), this.getClass());
+
+        DiffResult diffResult = createDiffResult(commandScope);
+
+        resultsBuilder.addResult("diffResult", diffResult);
+        Boolean printResult = commandScope.getArgumentValue(PRINT_RESULT);
+        if (printResult == null || ! printResult) {
+            return;
+        }
+
+        final PrintStream printStream = new PrintStream(resultsBuilder.getOutputStream());
+        new DiffToReport(diffResult, printStream).print();
+        printStream.flush();
+
+        resultsBuilder.addResult("statusCode", 0);
     }
+
+    public DiffResult createDiffResult(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
+        DatabaseSnapshot referenceSnapshot = createReferenceSnapshot(commandScope);
+        DatabaseSnapshot targetSnapshot = createTargetSnapshot(commandScope);
+
+        final CompareControl compareControl = commandScope.getArgumentValue(COMPARE_CONTROL_ARG);
+        referenceSnapshot.setSchemaComparisons(compareControl.getSchemaComparisons());
+        if (targetSnapshot != null) {
+            targetSnapshot.setSchemaComparisons(compareControl.getSchemaComparisons());
+        }
+
+        return DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
+    }
+
+    protected DatabaseSnapshot createTargetSnapshot(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
+        CatalogAndSchema[] schemas;
+        CompareControl compareControl = commandScope.getArgumentValue(COMPARE_CONTROL_ARG);
+        Database targetDatabase = commandScope.getArgumentValue(TARGET_DATABASE_ARG);
+        SnapshotControl snapshotControl = commandScope.getArgumentValue(TARGET_SNAPSHOT_CONTROL_ARG);
+        Class<? extends DatabaseObject>[] snapshotTypes = commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG);
+        SnapshotListener snapshotListener = commandScope.getArgumentValue(SNAPSHOT_LISTENER_ARG);
+
+        if ((compareControl == null) || (compareControl.getSchemaComparisons() == null)) {
+            schemas = new CatalogAndSchema[]{targetDatabase.getDefaultSchema()};
+        } else {
+            schemas = new CatalogAndSchema[compareControl.getSchemaComparisons().length];
+
+            int i = 0;
+            for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
+                CatalogAndSchema schema;
+                if (targetDatabase.supportsSchemas()) {
+                    schema = new CatalogAndSchema(targetDatabase.getDefaultCatalogName(), comparison.getComparisonSchema().getSchemaName());
+                } else {
+                    schema = new CatalogAndSchema(comparison.getComparisonSchema().getSchemaName(), comparison.getComparisonSchema().getSchemaName());
+                }
+
+                schemas[i++] = schema;
+            }
+        }
+
+        if (snapshotControl == null) {
+            snapshotControl = new SnapshotControl(targetDatabase, snapshotTypes);
+        }
+        if (snapshotListener != null) {
+            snapshotControl.setSnapshotListener(snapshotListener);
+        }
+        ObjectQuotingStrategy originalStrategy = targetDatabase.getObjectQuotingStrategy();
+        try {
+            targetDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+            return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, targetDatabase, snapshotControl);
+        } finally {
+            targetDatabase.setObjectQuotingStrategy(originalStrategy);
+        }
+    }
+
+    protected DatabaseSnapshot createReferenceSnapshot(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
+        CatalogAndSchema[] schemas;
+        CompareControl compareControl = commandScope.getArgumentValue(COMPARE_CONTROL_ARG);
+        Database targetDatabase = commandScope.getArgumentValue(TARGET_DATABASE_ARG);
+        Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
+        SnapshotControl snapshotControl = commandScope.getArgumentValue(REFERENCE_SNAPSHOT_CONTROL_ARG);
+        Class<? extends DatabaseObject>[] snapshotTypes = commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG);
+        ObjectChangeFilter objectChangeFilter = commandScope.getArgumentValue(OBJECT_CHANGE_FILTER_ARG);
+        SnapshotListener snapshotListener = commandScope.getArgumentValue(SNAPSHOT_LISTENER_ARG);
+
+        if ((compareControl == null) || (compareControl.getSchemaComparisons() == null)) {
+            schemas = new CatalogAndSchema[]{targetDatabase.getDefaultSchema()};
+        } else {
+            schemas = new CatalogAndSchema[compareControl.getSchemaComparisons().length];
+
+            int i = 0;
+            for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
+                CatalogAndSchema schema;
+                if (referenceDatabase.supportsSchemas()) {
+                    schema = new CatalogAndSchema(referenceDatabase.getDefaultCatalogName(), comparison.getReferenceSchema().getSchemaName());
+                } else {
+                    schema = new CatalogAndSchema(comparison.getReferenceSchema().getSchemaName(), comparison.getReferenceSchema().getSchemaName());
+                }
+                schemas[i++] = schema;
+            }
+        }
+
+        if (snapshotControl == null) {
+            snapshotControl = new SnapshotControl(referenceDatabase, objectChangeFilter, snapshotTypes);
+        }
+        if (snapshotListener != null) {
+            snapshotControl.setSnapshotListener(snapshotListener);
+        }
+
+        ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
+        try {
+            referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+            return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, referenceDatabase, snapshotControl);
+        } finally {
+            referenceDatabase.setObjectQuotingStrategy(originalStrategy);
+        }
+    }
+
 }
+

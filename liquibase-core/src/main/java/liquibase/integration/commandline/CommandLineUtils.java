@@ -4,7 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandScope;
-import liquibase.command.core.InternalDiffCommandStep;
+import liquibase.command.core.DiffCommandStep;
 import liquibase.command.core.InternalDiffChangelogCommandStep;
 import liquibase.command.core.InternalGenerateChangelogCommandStep;
 import liquibase.configuration.ConfiguredValue;
@@ -161,11 +161,11 @@ public class CommandLineUtils {
         CommandScope diffCommand = new CommandScope("internalDiff");
 
         diffCommand
-                .addArgumentValue(InternalDiffCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
-                .addArgumentValue(InternalDiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
-                .addArgumentValue(InternalDiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
-                .addArgumentValue(InternalDiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
-                .addArgumentValue(InternalDiffCommandStep.SNAPSHOT_TYPES_ARG, InternalDiffCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(DiffCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+                .addArgumentValue(DiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
+                .addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
+                .addArgumentValue(DiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
+                .addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
         ;
 
         diffCommand.setOutput(output);

@@ -7,7 +7,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
 import liquibase.command.core.GenerateChangelogCommandStep
-import liquibase.command.core.InternalDiffCommandStep
+import liquibase.command.core.DiffCommandStep
 import liquibase.command.core.SnapshotCommandStep
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
@@ -88,10 +88,10 @@ class IndexWithDescendingColumnSnapshotTest extends Specification {
         final Database targetDatabase =
            DatabaseFactory.instance.openDatabase(offlineUrl, null, null, null, resourceAccessor)
         final CommandScope diffScope = new CommandScope("internalDiff")
-        diffScope.addArgumentValue(InternalDiffCommandStep.REFERENCE_DATABASE_ARG.getName(), db)
-        diffScope.addArgumentValue(InternalDiffCommandStep.TARGET_DATABASE_ARG.getName(), targetDatabase)
-        diffScope.addArgumentValue(InternalDiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl())
-        diffScope.addArgumentValue(InternalDiffCommandStep.SNAPSHOT_TYPES_ARG.getName(), new Class[0])
+        diffScope.addArgumentValue(DiffCommandStep.REFERENCE_DATABASE_ARG.getName(), db)
+        diffScope.addArgumentValue(DiffCommandStep.TARGET_DATABASE_ARG.getName(), targetDatabase)
+        diffScope.addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl())
+        diffScope.addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG.getName(), new Class[0])
         def diffResults = diffScope.execute()
 
         then:

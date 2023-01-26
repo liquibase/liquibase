@@ -8,7 +8,7 @@ liquibase.command.core.DbDocCommandStep
 liquibase.command.core.DbUrlConnectionCommandStep
 liquibase.command.core.DeactivateChangelogCommandStep
 liquibase.command.core.DiffChangelogCommandStep
-liquibase.command.core.DiffCommandStep
+liquibase.command.core.PreCompareCommandStep
 liquibase.command.core.DropAllCommandStep
 liquibase.command.core.ExecuteSqlCommandStep
 liquibase.command.core.FutureRollbackCountSqlCommandStep
@@ -17,7 +17,7 @@ liquibase.command.core.FutureRollbackSqlCommandStep
 liquibase.command.core.GenerateChangelogCommandStep
 liquibase.command.core.HistoryCommandStep
 liquibase.command.core.InternalDiffChangelogCommandStep
-liquibase.command.core.InternalDiffCommandStep
+liquibase.command.core.DiffCommandStep
 liquibase.command.core.InternalDropAllCommandStep
 liquibase.command.core.InternalExecuteSqlCommandStep
 liquibase.command.core.InternalGenerateChangelogCommandStep

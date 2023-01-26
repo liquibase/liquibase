@@ -11,7 +11,7 @@ import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 
-public class InternalDiffChangelogCommandStep extends InternalDiffCommandStep {
+public class InternalDiffChangelogCommandStep extends DiffCommandStep {
 
     public static final String[] COMMAND_NAME = {"internalDiffChangelog"};
 
