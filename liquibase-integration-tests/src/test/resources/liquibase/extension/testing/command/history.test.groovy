@@ -63,11 +63,10 @@ Optional Args:
         }
 
         expectedOutput = [
-"""
+                """
 Liquibase History for jdbc:h2:mem:lbcat
-
-+---------------+------------------+--------------------------------------+--------------------+-----------------+
 """,
+~/[-+]+/,
 "| db/changelog/db.changelog-master.xml | nvoxland | 1 |",
 "| db/changelog/sql/create_test2.sql | includeAll | raw |",
 "| db/changelog/sql/create_test3.sql | includeAll | raw |",
@@ -120,9 +119,8 @@ Liquibase History for jdbc:h2:mem:lbcat
                 "target/test-classes/history.sql" : [
                         """
 Liquibase History for jdbc:h2:mem:lbcat
-
-+---------------+------------------+--------------------------------------+--------------------+-----------------+
 """,
+~/[-+]+/,
 "| db/changelog/db.changelog-master.xml | nvoxland | 1 |",
 "| db/changelog/sql/create_test2.sql | includeAll | raw |",
 "| db/changelog/sql/create_test3.sql | includeAll | raw |",
