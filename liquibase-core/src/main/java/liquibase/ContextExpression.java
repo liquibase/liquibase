@@ -64,7 +64,7 @@ public class ContextExpression {
         if (originalString != null) {
             return originalString;
         }
-        return "(" + StringUtil.join(new TreeSet<String>(this.contexts), "), (") + ")";
+        return "(" + StringUtil.join(new TreeSet<>(this.contexts), "), (") + ")";
     }
 
     /**

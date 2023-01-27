@@ -237,7 +237,7 @@ public class Scope {
      * Creates a new scope that is a child of this scope.
      */
     public static void child(String newValueKey, Object newValue, ScopedRunner runner) throws Exception {
-        Map<String, Object> scopeValues = new HashMap<String, Object>();
+        Map<String, Object> scopeValues = new HashMap<>();
         scopeValues.put(newValueKey, newValue);
 
         child(scopeValues, runner);

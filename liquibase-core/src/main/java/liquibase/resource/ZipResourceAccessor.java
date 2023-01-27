@@ -68,4 +68,9 @@ public class ZipResourceAccessor extends AbstractPathResourceAccessor {
     public List<String> describeLocations() {
         return Collections.singletonList(fileSystem.toString());
     }
+
+    @Override
+    public String toString() {
+        return getClass().getName() + " (" + getRootPath() + ") (" + fileSystem.toString() + ")";
+    }
 }
