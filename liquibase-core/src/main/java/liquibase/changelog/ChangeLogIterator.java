@@ -110,9 +110,7 @@ public class ChangeLogIterator {
                                 Map<String, Object> values = new HashMap<>();
                                 values.put(Scope.Attr.logService.name(), compositeLogService);
                                 values.put(BufferedLogService.class.getName(), bufferLog);
-                                Scope.child(values, () -> {
-                                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
-                                });
+                                Scope.child(values, () -> visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted));
                                 markSeen(changeSet);
                             } else {
                                 if (visitor instanceof SkippedChangeSetVisitor) {

@@ -778,9 +778,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         //
                         Map<String, Object> innerScopeValues = new HashMap<>();
                         innerScopeValues.put(key, preserveSchemaCase);
-                        Scope.child(innerScopeValues, () -> {
-                            performLiquibaseTask(liquibase);
-                        });
+                        Scope.child(innerScopeValues, () -> performLiquibaseTask(liquibase));
                     } catch (LiquibaseException e) {
                         cleanup(database);
                         throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);

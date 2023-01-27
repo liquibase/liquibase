@@ -99,9 +99,7 @@ public class StartH2CommandStep extends AbstractCommandStep {
                     "  Integration Web URL: " + intUrl + System.lineSeparator());
 
 
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                Scope.getCurrentScope().getUI().sendMessage("Shutting down H2 database...");
-            }));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> Scope.getCurrentScope().getUI().sendMessage("Shutting down H2 database...")));
 
             Thread.sleep(Long.MAX_VALUE);
         } catch (InterruptedException e) {
