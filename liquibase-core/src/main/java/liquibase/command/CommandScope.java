@@ -27,6 +27,8 @@ public class CommandScope {
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
 
+    private final Map<Class<?>, Object> dependencies = new HashMap<>();
+
     /**
      * Config key including the command name. Example `liquibase.command.update`
      */
@@ -120,6 +122,26 @@ public class CommandScope {
     public <T> T getArgumentValue(CommandArgumentDefinition<T> argument) {
         final T value = getConfiguredValue(argument).getValue();
         return argument.getValueConverter().convert(value);
+    }
+
+    /**
+     * Assign a value to a given provided dependency. So if a CommandStep provides class X, at
+     * {@link CommandStep#run(CommandResultsBuilder)} method it needs to provide the value for X using this method.
+     * commandScope.provideDependency(LockService.class, lockService);
+     *
+     * Means that this class will LockService.class using object lock
+     */
+    public  <T> CommandScope provideDependency(Class<T> clazz, T value) {
+        this.dependencies.put(clazz, value);
+
+        return this;
+    }
+
+    /**
+     * Retrieves the registered dependency object provided by this class identifier
+     */
+    public <T> Object getDependency(Class<T> clazz) {
+        return this.dependencies.get(clazz);
     }
 
     /**
@@ -272,5 +294,6 @@ public class CommandScope {
                 return super.keyMatches(wantedKey, storedKey);
             }
         }
+
     }
 }

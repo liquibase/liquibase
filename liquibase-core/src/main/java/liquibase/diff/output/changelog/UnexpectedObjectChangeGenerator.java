@@ -7,5 +7,5 @@ import liquibase.structure.DatabaseObject;
 
 public interface UnexpectedObjectChangeGenerator extends ChangeGenerator {
 
-    public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain);
+    Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain);
 }

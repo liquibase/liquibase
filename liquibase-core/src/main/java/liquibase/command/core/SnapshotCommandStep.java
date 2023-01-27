@@ -15,10 +15,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class SnapshotCommandStep extends AbstractCommandStep {
 
@@ -26,7 +23,6 @@ public class SnapshotCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> SNAPSHOT_FORMAT_ARG;
-    public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<SnapshotControl> SNAPSHOT_CONTROL_ARG;
 
     static {
@@ -35,10 +31,14 @@ public class SnapshotCommandStep extends AbstractCommandStep {
         SNAPSHOT_FORMAT_ARG = builder.argument("snapshotFormat", String.class)
                 .description("Output format to use (JSON, YAML, or TXT)").build();
         SNAPSHOT_CONTROL_ARG = builder.argument("snapshotControl", SnapshotControl.class).hidden().build();
-        DATABASE_ARG = builder.databaseArgument().build();
     }
 
     private Map<String, Object> snapshotMetadata;
+
+    @Override
+    public List<Class<?>> requiredDependencies() {
+        return Arrays.asList(Database.class);
+    }
 
     @Override
     public String[][] defineCommandNames() {
@@ -75,7 +75,8 @@ public class SnapshotCommandStep extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        Database database = commandScope.getArgumentValue(DATABASE_ARG);
+
+        Database database = (Database) commandScope.getDependency(Database.class);
 
         CatalogAndSchema[] schemas = parseSchemas(database, commandScope.getArgumentValue(SCHEMAS_ARG));
 

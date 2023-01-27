@@ -119,7 +119,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.23.1</version>
+            <version>3.24.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -201,7 +201,7 @@
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.1.0</version>
+            <version>3.1.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -235,7 +235,7 @@
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird</artifactId>
-            <version>4.0.8.java8</version>
+            <version>5.0.0.java8</version>
             <scope>test</scope>
         </dependency>
 
