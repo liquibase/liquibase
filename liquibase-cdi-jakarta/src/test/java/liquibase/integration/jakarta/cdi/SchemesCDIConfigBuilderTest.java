@@ -91,7 +91,6 @@ public class SchemesCDIConfigBuilderTest {
     public void setUp() {
         COUNTER = new AtomicLong(0L);
 
-//        bm = mock(BeanManager.class);
         treeBuilder = new SchemesTreeBuilder();
         schemesCDIConfigBuilder = new SchemesCDIConfigBuilder(bm, treeBuilder);
     }
