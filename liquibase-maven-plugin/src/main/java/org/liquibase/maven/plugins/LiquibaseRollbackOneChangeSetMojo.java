@@ -118,7 +118,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
 
     private Map<String, Object> getCommandArgsObjectMap(Liquibase liquibase) throws LiquibaseException {
         Database database = liquibase.getDatabase();
-        Map<String, Object> argsMap = new HashMap<String, Object>();
+        Map<String, Object> argsMap = new HashMap<>();
         argsMap.put("changeSetId", this.changeSetId);
         argsMap.put("changeSetAuthor", this.changeSetAuthor);
         argsMap.put("changeSetPath", this.changeSetPath);

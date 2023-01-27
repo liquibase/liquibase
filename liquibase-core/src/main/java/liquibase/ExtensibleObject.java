@@ -24,7 +24,7 @@ public interface ExtensibleObject extends Cloneable {
     ObjectMetaData getObjectMetaData();
 
     /**
-     * Returnsn true if the given attribute is set and not null.
+     * Returns true if the given attribute is set and not null.
      */
     boolean has(String attribute);
 

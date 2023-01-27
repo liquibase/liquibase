@@ -3,6 +3,8 @@ package liquibase.dbdoc;
 import liquibase.GlobalConfiguration;
 import liquibase.resource.OpenOptions;
 import liquibase.resource.Resource;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
 import java.io.*;
@@ -30,10 +32,28 @@ public class HTMLListWriter {
             fileWriter.append(title);
             fileWriter.append("</B></FONT>\n" + "<BR>\n" + "<TABLE BORDER=\"0\" WIDTH=\"100%\" SUMMARY=\"\">" + "<TR>\n" + "<TD NOWRAP><FONT CLASS=\"FrameItemFont\">");
 
+            String currentSchema = null;
+            if (objects.size() > 0 && objects.first().getClass() == Table.class) {
+                currentSchema = ((Table )objects.first()).getAttribute("schema", new Schema()).toString();
+                fileWriter.append("<div class='schema-name'>" + currentSchema + "</i></b></div>");
+            }
+
 
             for (Object object : objects) {
-                fileWriter.append("<A HREF=\"");
-                fileWriter.append(directory);
+                if (object.getClass() == Table.class) {
+                    String tableSchema = ((Table) object).getAttribute("schema", new Schema()).toString();
+                    if (!tableSchema.equals(currentSchema)) {
+                        currentSchema = tableSchema;
+                        fileWriter.append("<p>");
+                        fileWriter.append("<b><i>" + currentSchema + "</i></b><br>");
+                    }
+                    fileWriter.append("<A HREF=\"");
+                    fileWriter.append(directory + System.getProperty("file.separator") + tableSchema);
+                }
+                else {
+                    fileWriter.append("<A HREF=\"");
+                    fileWriter.append(directory);
+                }
                 fileWriter.append("/");
                 fileWriter.append(DBDocUtil.toFileName(object.toString().endsWith(".xml") ? object.toString() : object.toString().toLowerCase()));
                 fileWriter.append(getTargetExtension());

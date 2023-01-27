@@ -7,5 +7,5 @@ import liquibase.structure.DatabaseObject;
 
 public interface MissingObjectChangeGenerator extends ChangeGenerator {
 
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain);
+    Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain);
 }

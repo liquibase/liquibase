@@ -155,7 +155,7 @@ public class CompareControl {
 
     public CompareControl addSuppressedField(Class<? extends DatabaseObject> type, String field) {
         if (!suppressedFields.containsKey(type)) {
-            suppressedFields.put(type, new HashSet<String>());
+            suppressedFields.put(type, new HashSet<>());
         }
         suppressedFields.get(type).add(field);
 
@@ -181,7 +181,7 @@ public class CompareControl {
             } else if (databaseRole.equals(DatabaseRole.REFERENCE)) {
                 schemas[i] = schemaComparisons[i].getReferenceSchema();
             } else {
-                throw new UnexpectedLiquibaseException("Unknkown diff type: " + databaseRole);
+                throw new UnexpectedLiquibaseException("Unknown diff type: " + databaseRole);
             }
         }
         return schemas;

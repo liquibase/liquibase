@@ -501,7 +501,7 @@ public class StringClauses {
             return true;
         }
         for (Object clause : clauses.values()) {
-            if ((clause != null) && !"".equals(clause.toString().trim())) {
+            if (!"".equals(clause.toString().trim())) {
                 return false;
             }
         }
@@ -557,7 +557,7 @@ public class StringClauses {
         private ListIterator<String> keyIterator;
 
         public ClauseIterator(LinkedHashMap<String, Object> clauses) {
-            this.keyIterator = new ArrayList<String>(clauses.keySet()).listIterator();
+            this.keyIterator = new ArrayList<>(clauses.keySet()).listIterator();
             this.clauses = clauses;
         }
 
