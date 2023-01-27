@@ -76,6 +76,7 @@ Liquibase History for jdbc:some://url
         where:
         format    | _
         "TABULAR" | _
+        "TabuLAr" | _
         null      | _
     }
 
@@ -84,7 +85,7 @@ Liquibase History for jdbc:some://url
         def command = new CommandScope("history")
                 .addArgumentValue("database", database)
                 .addArgumentValue("dateFormat", new SimpleDateFormat("yyyy"))
-                .addArgumentValue("format", "TEXT")
+                .addArgumentValue("format", "text")
 
         def builder = new CommandResultsBuilder(command, outputStream)
 
