@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class for controling "or" logic in preconditions.
+ * Class for controlling "or" logic in preconditions.
  */
 public class OrPrecondition extends PreconditionLogic {
 
