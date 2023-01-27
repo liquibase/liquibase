@@ -181,8 +181,9 @@ public class ChangeLogIterator {
     protected String createKey(ChangeSet changeSet) {
         Labels labels = changeSet.getLabels();
         ContextExpression contexts = changeSet.getContextFilter();
+        changeSet.getRunOrder();
 
-        return changeSet.toString(false)
+        return changeSet.toString(true)
                 + ":" + (labels == null ? null : labels.toString())
                 + ":" + (contexts == null ? null : contexts.toString())
                 + ":" + StringUtil.join(changeSet.getDbmsSet(), ",");
