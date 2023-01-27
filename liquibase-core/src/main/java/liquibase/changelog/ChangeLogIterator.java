@@ -182,7 +182,7 @@ public class ChangeLogIterator {
         Labels labels = changeSet.getLabels();
         ContextExpression contexts = changeSet.getContextFilter();
 
-        return changeSet.toString(true)
+        return changeSet.toString(false)
                 + ":" + (labels == null ? null : labels.toString())
                 + ":" + (contexts == null ? null : contexts.toString())
                 + ":" + StringUtil.join(changeSet.getDbmsSet(), ",");
