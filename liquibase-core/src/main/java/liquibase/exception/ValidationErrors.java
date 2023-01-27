@@ -64,7 +64,7 @@ public class ValidationErrors {
     }
 
     /**
-     * Checks that the the given value is set.
+     * Checks that the given value is set.
      * @param allowEmptyValue  If true, empty string and empty arrays are allowed. If false, they are not.
      */
     public ValidationErrors checkRequiredField(String requiredFieldName, Object value, String postfix, boolean allowEmptyValue) {
