@@ -202,9 +202,6 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         if ((parameters != null) && !parameters.isEmpty() && (maxParameters > 0)) {
             returnString.append("(");
             for (Object param : parameters) {
-                if (returnString == null) {
-                    returnString.append("NULL,");
-                }
                 returnString.append(param.toString()).append(",");
             }
             returnString = new StringBuilder(returnString.toString().replaceFirst(",$", ""));
