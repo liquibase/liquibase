@@ -27,6 +27,8 @@ public class CommandScope {
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
 
+    private final Map<Class<?>, Object> dependencies = new HashMap<>();
+
     /**
      * Config key including the command name. Example `liquibase.command.update`
      */
@@ -123,6 +125,26 @@ public class CommandScope {
     }
 
     /**
+     * Assign a value to a given provided dependency. So if a CommandStep provides class X, at
+     * {@link CommandStep#run(CommandResultsBuilder)} method it needs to provide the value for X using this method.
+     * commandScope.provideDependency(LockService.class, lockService);
+     *
+     * Means that this class will LockService.class using object lock
+     */
+    public  <T> CommandScope provideDependency(Class<T> clazz, T value) {
+        this.dependencies.put(clazz, value);
+
+        return this;
+    }
+
+    /**
+     * Retrieves the registered dependency object provided by this class identifier
+     */
+    public <T> Object getDependency(Class<T> clazz) {
+        return this.dependencies.get(clazz);
+    }
+
+    /**
      * Sets the output stream for this command.
      * The command output sent to this stream should not include status/progress type output, only the actual output itself.
      * Think "what would be piped out", not "what the user is told about what is happening".
@@ -170,6 +192,14 @@ public class CommandScope {
         try {
             for (CommandStep command : pipeline) {
                 command.run(resultsBuilder);
+            }
+
+            // after executing our pipeline, runs cleanup in inverse order
+            for (int i = pipeline.size() -1; i >= 0; i--) {
+                CommandStep command = pipeline.get(i);
+                if (command instanceof CleanUpCommandStep) {
+                    ((CleanUpCommandStep)command).cleanUp(resultsBuilder);
+                }
             }
         } catch (Exception e) {
             if (e instanceof CommandExecutionException) {
@@ -264,5 +294,6 @@ public class CommandScope {
                 return super.keyMatches(wantedKey, storedKey);
             }
         }
+
     }
 }

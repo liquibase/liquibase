@@ -2,9 +2,12 @@ package liquibase.changelog
 
 import liquibase.ContextExpression
 import liquibase.Labels
+import liquibase.Scope
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.exception.SetupException
+import liquibase.logging.core.BufferedLogService
+import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
@@ -12,9 +15,12 @@ import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.resource.Resource
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
+import liquibase.util.FileUtil
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import java.util.logging.Level
 
 class DatabaseChangeLogTest extends Specification {
 
@@ -420,6 +426,35 @@ create view sql_view as select * from sql_table;'''
 
     }
 
+    def "includeAll throws exception when circular reference is detected"() {
+        when:
+        def changelogText = """<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
+xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" 
+xmlns:pro="http://www.liquibase.org/xml/ns/pro" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext 
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd 
+http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+        <includeAll path="include-all-dir" labels="none" context="none"/>
+
+</databaseChangeLog>
+"""
+
+        def resourceAccessor = new MockResourceAccessor([
+                "include-all.xml": changelogText,
+                "include-all-dir/include-all.xml": changelogText,
+        ])
+        def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
+        changeLogFile.includeAll("include-all-dir", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false)
+
+        then:
+        SetupException e = thrown()
+        assert e.getMessage().startsWith("liquibase.exception.SetupException: Circular reference detected in 'include-all-dir/'. Set liquibase.errorOnCircularIncludeAll if you'd like to ignore this error.")
+    }
+
     def "includeAll throws no exception when directory not found and errorIfMissingOrEmpty is false"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
@@ -437,7 +472,7 @@ create view sql_view as select * from sql_table;'''
 
     def "include fails if no parser supports the file"() {
         when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml])
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.invalid": test1Xml])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
 
@@ -467,6 +502,7 @@ create view sql_view as select * from sql_table;'''
 
 
         then:
+        ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getCurrentValue() == ChangeLogParserConfiguration.MissingIncludeConfiguration.FAIL
         def e = thrown(SetupException)
         e.message.startsWith("The file com/example/invalid.xml was not found in")
     }
@@ -492,6 +528,32 @@ create view sql_view as select * from sql_table;'''
         "c:\\path\\to\\changelog.xml"         | "path/to/changelog.xml"
         "c:/path/to/changelog.xml"            | "path/to/changelog.xml"
         "D:\\a\\liquibase\\DBDocTaskTest.xml" | "a/liquibase/DBDocTaskTest.xml"
+    }
+
+    def "warning message is logged when changelog include fails because file does not exist"() {
+        when:
+        def rootChangeLogPath = "com/example/root.xml"
+        def includedChangeLogPath = "com/example/test1.xml"
+        def resourceAccessor = new MockResourceAccessor([(rootChangeLogPath): test1Xml])
+
+        def rootChangeLog = new DatabaseChangeLog(rootChangeLogPath)
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog"), resourceAccessor)
+
+        BufferedLogService bufferLog = new BufferedLogService()
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                 : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_FILE.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                    rootChangeLog
+                            .include(includedChangeLogPath, false, resourceAccessor, null, null, false, null, null);
+            }
+        })
+
+        then:
+        bufferLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage(includedChangeLogPath));
     }
 
 }

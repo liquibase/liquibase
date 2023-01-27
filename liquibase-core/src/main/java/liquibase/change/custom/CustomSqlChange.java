@@ -22,6 +22,6 @@ public interface CustomSqlChange extends CustomChange {
      * @return an array of {@link SqlStatement}s with the statements
      * @throws liquibase.exception.CustomChangeException if an exception occurs while processing this change
      */
-    public SqlStatement[] generateStatements(Database database) throws CustomChangeException;
+    SqlStatement[] generateStatements(Database database) throws CustomChangeException;
 
 }

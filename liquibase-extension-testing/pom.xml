@@ -9,6 +9,22 @@
     </parent>
 
     <artifactId>liquibase-extension-testing</artifactId>
+    <packaging>jar</packaging>
+
+    <profiles>
+        <profile>
+            <id>github-package</id>
+            <activation>
+                <property>
+                    <name>env.TARGET_ARTIFACT_REPOSITORY</name>
+                    <value>github</value> <!-- This is case-sensitive! -->
+                </property>
+            </activation>
+            <properties>
+                <maven.deploy.skip>false</maven.deploy.skip>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>
@@ -28,7 +44,6 @@
             <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -61,7 +76,7 @@
         <dependency>
             <groupId>org.firebirdsql</groupId>
             <artifactId>firebird-testcontainers-java</artifactId>
-            <version>1.2.0</version>
+            <version>1.3.0</version>
         </dependency>
 
         <dependency>
