@@ -27,3 +27,9 @@ h1 { font-size: 145% }
 .NavBarCell2    { font-family: Arial, Helvetica, sans-serif; background-color:#FFFFFF;}
 .NavBarCell3    { font-family: Arial, Helvetica, sans-serif; background-color:#FFFFFF;}
 
+.schema-name {
+    font-weight: bold;
+    font-style: italic;
+    padding-bottom: 10px;
+    padding-top: 10px;
+}

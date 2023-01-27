@@ -3,8 +3,8 @@ package liquibase.precondition;
 import liquibase.precondition.core.PreconditionContainer;
 
 public interface Conditional {
-    public PreconditionContainer getPreconditions();
+    PreconditionContainer getPreconditions();
 
-    public void setPreconditions(PreconditionContainer precond);
+    void setPreconditions(PreconditionContainer precond);
 
 }

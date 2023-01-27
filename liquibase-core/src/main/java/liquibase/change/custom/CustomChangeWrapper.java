@@ -214,7 +214,7 @@ public class CustomChangeWrapper extends AbstractChange {
 
     /**
      * Returns true if the customChange supports rolling back.
-     * {@link #generateRollbackStatements} may still trow a {@link RollbackImpossibleException} when it is actually exectued, even if this method returns true.
+     * {@link #generateRollbackStatements} may still throw a {@link RollbackImpossibleException} when it is actually executed, even if this method returns true.
      * Currently only checks if the customChange implements {@link CustomSqlRollback}
      */
     @Override

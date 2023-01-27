@@ -15,6 +15,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.logging.mdc.MdcKey;
 
+import java.util.Objects;
 import java.util.Set;
 
 public class UpdateVisitor implements ChangeSetVisitor {
@@ -52,7 +53,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         Scope.getCurrentScope().getLog(getClass()).fine("Running Changeset: " + changeSet);
         fireWillRun(changeSet, databaseChangeLog, database, runStatus);
-        ExecType execType = null;
+        ExecType execType;
         ObjectQuotingStrategy previousStr = this.database.getObjectQuotingStrategy();
         try {
             execType = changeSet.execute(databaseChangeLog, execListener, this.database);
@@ -60,7 +61,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
             fireRunFailed(changeSet, databaseChangeLog, database, e);
             throw e;
         }
-        if (!runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
+        if (!Objects.equals(runStatus, ChangeSet.RunStatus.NOT_RAN)) {
             execType = ChangeSet.ExecType.RERAN;
         }
         fireRan(changeSet, databaseChangeLog, database, execType);
