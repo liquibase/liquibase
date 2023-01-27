@@ -218,7 +218,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         VALIDATE_XML_CHANGELOG_FILES = builder.define("validateXmlChangelogFiles", Boolean.class)
-                .setDescription("Will perform xsd validation of XML changelog files. Defaults to true.")
+                .setDescription("Will perform xsd validation of XML changelog files. When many XML changelog files are included this validation may impact Liquibase performance. Defaults to true.")
                 .setDefaultValue(true)
                 .build();
     }
