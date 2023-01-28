@@ -125,10 +125,9 @@ public class Main {
     protected String schemas;
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
-    private boolean liquibaseProLicenseValid = false;
+
     protected String liquibaseHubApiKey;
     protected String liquibaseHubUrl;
-    private Boolean managingLogConfig = null;
     private boolean outputsLogMessages = false;
     protected String sqlFile;
     protected String delimiter;
@@ -338,17 +337,9 @@ public class Main {
                                 if (!Main.runningFromNewCli) {
                                     Scope.getCurrentScope().getUI().sendMessage(allMessages);
                                 }
-                            } else {
-                                main.liquibaseProLicenseValid = true;
                             }
                         }
 
-                        //
-                        // Check to see if we have an expired license
-                        //
-                        if (licenseService.daysTilExpiration() < 0) {
-                            main.liquibaseProLicenseValid = false;
-                        }
                         if (!Main.runningFromNewCli) {
                             Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                         }
@@ -2249,7 +2240,6 @@ public class Main {
         private static final String ROLLBACK_ONE_UPDATE_SQL = "rollbackOneUpdateSQL";
         private static final String REGISTER_CHANGELOG = "registerChangeLog";
         private static final String DEACTIVATE_CHANGELOG = "deactivateChangeLog";
-        private static final String FORMATTED_DIFF = "formattedDiff";
         private static final String ROLLBACK = "rollback";
         private static final String ROLLBACK_COUNT = "rollbackCount";
         private static final String ROLLBACK_COUNT_SQL = "rollbackCountSQL";
@@ -2285,7 +2275,6 @@ public class Main {
         private static final String CHANGE_SET_AUTHOR = "changeSetAuthor";
         private static final String CHANGE_SET_PATH = "changeSetPath";
         private static final String DEPLOYMENT_ID = "deploymentId";
-        private static final String OUTPUT_FILE = "outputFile";
         private static final String FORCE = "force";
         private static final String FORMAT = "format";
         private static final String ROLLBACK_SCRIPT = "rollbackScript";
@@ -2294,7 +2283,6 @@ public class Main {
         private static final String INCLUDE_OBJECTS = "includeObjects";
         private static final String INCLUDE_SCHEMA = "includeSchema";
         private static final String INCLUDE_TABLESPACE = "includeTablespace";
-        private static final String DEACTIVATE = "deactivate";
         private static final String OUTPUT_SCHEMAS_AS = "outputSchemasAs";
         private static final String REFERENCE_DEFAULT_CATALOG_NAME = "referenceDefaultCatalogName";
         private static final String REFERENCE_DEFAULT_SCHEMA_NAME = "referenceDefaultSchemaName";
@@ -2310,7 +2298,5 @@ public class Main {
         private static final String HELP = "help";
         private static final String VERSION = "version";
         private static final String SNAPSHOT_FORMAT = "snapshotFormat";
-        private static final String LOG_FILE = "logFile";
-        private static final String LOG_LEVEL = "logLevel";
     }
 }

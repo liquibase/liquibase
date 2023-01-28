@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class StandardHubService implements HubService {
-    private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+
     private Boolean available;
     private UUID organizationId;
     private String organizationName;

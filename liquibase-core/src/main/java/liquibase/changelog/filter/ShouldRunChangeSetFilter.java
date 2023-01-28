@@ -13,10 +13,8 @@ import java.util.Map;
 public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
     private final Map<String, RanChangeSet> ranChangeSets;
-    private final boolean ignoreClasspathPrefix;
 
     public ShouldRunChangeSetFilter(Database database, boolean ignoreClasspathPrefix) throws DatabaseException {
-        this.ignoreClasspathPrefix = ignoreClasspathPrefix;
         this.ranChangeSets = new HashMap<>();
 
         //ensure we have only the latest version of each ranChangeset in case multiple versions ended up in the databasechangelog table

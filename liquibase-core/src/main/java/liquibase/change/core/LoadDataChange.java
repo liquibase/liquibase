@@ -264,8 +264,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        boolean databaseSupportsBatchUpdates = supportsBatchUpdates(database);
-
         try (CSVReader reader = getCSVReader()) {
 
             if (reader == null) {

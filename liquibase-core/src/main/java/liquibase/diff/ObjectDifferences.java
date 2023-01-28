@@ -239,13 +239,6 @@ public class ObjectDifferences {
 
     public static class DataTypeCompareFunction implements CompareFunction {
 
-        private final Database accordingTo;
-
-        public DataTypeCompareFunction(Database accordingTo) {
-            this.accordingTo = accordingTo;
-
-        }
-
         @Override
         public boolean areEqual(Object referenceValue, Object compareToValue) {
             if ((referenceValue == null) && (compareToValue == null)) {

@@ -20,7 +20,6 @@ public class LiquibaseDeactivateChangeLogMojo extends AbstractLiquibaseChangeLog
     protected void performLiquibaseTask(Liquibase liquibase)
         throws LiquibaseException {
         super.performLiquibaseTask(liquibase);
-        Database database = liquibase.getDatabase();
 
         CommandScope liquibaseCommand = new CommandScope("deactivateChangeLog");
         liquibaseCommand

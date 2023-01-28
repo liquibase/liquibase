@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
 
     private static Pattern fileNamePatter = Pattern.compile(".*\\.(\\w+)\\.sql");
-    private static Logger logger = Scope.getCurrentScope().getLog(FormattedSqlChangeLogSerializer.class);
 
 
     @Override
