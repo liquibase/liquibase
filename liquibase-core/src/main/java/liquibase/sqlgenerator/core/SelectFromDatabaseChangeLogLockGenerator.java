@@ -27,7 +27,6 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
    		liquibaseSchema = database.getLiquibaseSchemaName();
 		
 		ColumnConfig[] columns = statement.getColumnsToSelect();
-		int numberOfColumns = columns.length;
         // use LEGACY quoting since we're dealing with system objects
         ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);

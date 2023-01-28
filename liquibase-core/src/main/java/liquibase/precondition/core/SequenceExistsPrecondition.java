@@ -53,7 +53,7 @@ public class SequenceExistsPrecondition extends AbstractPrecondition {
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
-        DatabaseSnapshot snapshot;
+
         Schema schema = new Schema(getCatalogName(), getSchemaName());
         try {
             if (!SnapshotGeneratorFactory.getInstance().has(new Sequence().setName(getSequenceName()).setSchema(schema), database)) {

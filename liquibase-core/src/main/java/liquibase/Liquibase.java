@@ -1621,11 +1621,7 @@ public class Liquibase implements AutoCloseable {
 
         runInScope(() -> {
 
-            LoggingExecutor outputTemplate = new LoggingExecutor(
-                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(database), output, database
-            );
-
-                /* We have no other choice than to save the current Executer here. */
+            /* We have no other choice than to save the current Executer here. */
                 @SuppressWarnings("squid:S1941")
                 Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 

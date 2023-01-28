@@ -3,7 +3,6 @@ package org.liquibase.maven.plugins;
 import liquibase.Liquibase;
 import liquibase.command.CommandScope;
 import liquibase.command.core.DeactivateChangelogCommandStep;
-import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 
 /**
@@ -20,7 +19,6 @@ public class LiquibaseDeactivateChangeLogMojo extends AbstractLiquibaseChangeLog
     protected void performLiquibaseTask(Liquibase liquibase)
         throws LiquibaseException {
         super.performLiquibaseTask(liquibase);
-        Database database = liquibase.getDatabase();
 
         CommandScope liquibaseCommand = new CommandScope("deactivateChangeLog");
         liquibaseCommand

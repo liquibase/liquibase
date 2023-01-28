@@ -60,7 +60,6 @@ public class ChangeLogIterator {
     }
 
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
-        Logger log = Scope.getCurrentScope().getLog(getClass());
         databaseChangeLog.setRuntimeEnvironment(env);
         try {
             Scope.child(Scope.Attr.databaseChangeLog, databaseChangeLog, new Scope.ScopedRunner() {

@@ -104,8 +104,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         commandScope.addArgumentValue(InternalDropAllCommandStep.DATABASE_ARG, this.database);
         commandScope.addArgumentValue(InternalDropAllCommandStep.HUB_CONNECTION_ID_ARG, this.hubConnectionId);
         commandScope.addArgumentValue(InternalDropAllCommandStep.SCHEMAS_ARG, this.schemas);
-
-        final CommandResults results = commandScope.execute();
+        commandScope.execute();
 
         return new CommandResult("All objects dropped from " + database.getConnection().getConnectionUserName() + "@" + database.getConnection().getURL());
     }
