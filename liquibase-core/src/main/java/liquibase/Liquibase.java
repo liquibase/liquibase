@@ -243,7 +243,7 @@ public class Liquibase implements AutoCloseable {
 
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             lockService.waitForLock();
-            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL(), false);
 
             changeLogParameters.setContexts(contexts);
             changeLogParameters.setLabels(labelExpression);
@@ -261,7 +261,7 @@ public class Liquibase implements AutoCloseable {
                 ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
                 changelogService.generateDeploymentId();
 
-                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
+                Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId(), false);
 
                 changeLog.validate(database, contexts, labelExpression);
 
@@ -1217,14 +1217,14 @@ public class Liquibase implements AutoCloseable {
             public void run() throws Exception {
                 Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_TAG, tagToRollBackTo);
                 Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_SCRIPT, rollbackScript);
-                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL());
+                Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, database.getConnection().getURL(), false);
 
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
 
                 ChangeLogHistoryService changelogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
                 if (changelogService instanceof AbstractChangeLogHistoryService) {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, ((AbstractChangeLogHistoryService) changelogService).getLastDeploymentId());
+                    Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, ((AbstractChangeLogHistoryService) changelogService).getLastDeploymentId(), false);
                 }
 
                 Operation rollbackOperation = null;
