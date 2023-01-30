@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -20,7 +21,7 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
 
     @Override
     public boolean supports(ReorganizeTableStatement statement, Database database) {
-        return database instanceof DB2Database;
+        return database instanceof DB2Database || database instanceof Db2zDatabase;
     }
 
     @Override
