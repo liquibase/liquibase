@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnectionCommandStep implements CleanUpCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"dbUrlConnectionCommandStep"};
+    protected static final String[] COMMAND_NAME = {"referenceDbUrlConnectionCommandStep"};
 
     public static final CommandArgumentDefinition<Database> REFERENCE_DATABASE_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
