@@ -5,13 +5,12 @@ import liquibase.command.providers.ReferenceDatabase;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.integration.commandline.Main;
 
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Internal command step to be used on CommandStep pipeline to manage the database connection.
+ * Internal command step to be used on pipeline to manage the database connection  to the reference database.
  */
 public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnectionCommandStep implements CleanUpCommandStep {
 
@@ -57,7 +56,7 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        commandScope.provideDependency(Database.class, this.obtainDatabase(commandScope));
+        commandScope.provideDependency(ReferenceDatabase.class, this.obtainDatabase(commandScope));
     }
 
     /**

@@ -1,7 +1,9 @@
 package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.command.*;
+import liquibase.command.providers.ReferenceDatabase;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffGeneratorFactory;
@@ -22,7 +24,7 @@ import java.util.Set;
 
 public class DiffCommandStep extends AbstractCommandStep {
 
-    public static final String[] COMMAND_NAME = {"diff"};
+    protected static final String[] COMMAND_NAME = {"diff"};
 
     public static final CommandArgumentDefinition<Database> REFERENCE_DATABASE_ARG;
     public static final CommandArgumentDefinition<Database> TARGET_DATABASE_ARG;
@@ -34,17 +36,21 @@ public class DiffCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<CompareControl> COMPARE_CONTROL_ARG;
     public static final CommandArgumentDefinition<Boolean> PRINT_RESULT;
 
+    public static final CommandResultDefinition<DiffResult> DIFF_RESULT;
+
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        REFERENCE_DATABASE_ARG = builder.argument("referenceDatabase", Database.class).required().build();
-        TARGET_DATABASE_ARG = builder.argument("targetDatabase", Database.class).required().build();
-        SNAPSHOT_TYPES_ARG = builder.argument("snapshotTypes", Class[].class).required().build();
-        SNAPSHOT_LISTENER_ARG = builder.argument("snapshotListener", SnapshotListener.class).build();
-        REFERENCE_SNAPSHOT_CONTROL_ARG = builder.argument("referenceSnapshotControl", SnapshotControl.class).build();
-        TARGET_SNAPSHOT_CONTROL_ARG = builder.argument("targetSnapshotControl", SnapshotControl.class).build();
-        OBJECT_CHANGE_FILTER_ARG = builder.argument("objectChangeFilter", ObjectChangeFilter.class).build();
-        COMPARE_CONTROL_ARG = builder.argument("compareControl", CompareControl.class).required().build();
-        PRINT_RESULT = builder.argument("printResult", Boolean.class).defaultValue(true).build();
+        REFERENCE_DATABASE_ARG = builder.argument("referenceDatabase", Database.class).hidden().build();
+        TARGET_DATABASE_ARG = builder.argument("targetDatabase", Database.class).hidden().build();
+        SNAPSHOT_TYPES_ARG = builder.argument("snapshotTypes", Class[].class).hidden().build();
+        SNAPSHOT_LISTENER_ARG = builder.argument("snapshotListener", SnapshotListener.class).hidden().build();
+        REFERENCE_SNAPSHOT_CONTROL_ARG = builder.argument("referenceSnapshotControl", SnapshotControl.class).hidden().build();
+        TARGET_SNAPSHOT_CONTROL_ARG = builder.argument("targetSnapshotControl", SnapshotControl.class).hidden().build();
+        OBJECT_CHANGE_FILTER_ARG = builder.argument("objectChangeFilter", ObjectChangeFilter.class).hidden().build();
+        COMPARE_CONTROL_ARG = builder.argument("compareControl", CompareControl.class).hidden().build();
+
+        PRINT_RESULT = builder.argument("printResult", Boolean.class).defaultValue(true).hidden().build();
+        DIFF_RESULT = builder.result("diffResult", DiffResult.class).description("Databases diff result").build();
     }
 
     @Override
@@ -59,8 +65,7 @@ public class DiffCommandStep extends AbstractCommandStep {
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        super.adjustCommandDefinition(commandDefinition);
-        commandDefinition.setInternal(true);
+        commandDefinition.setShortDescription("Outputs a description of differences.  If you have a Liquibase Pro key, you can output the differences as JSON using the --format=JSON option");
     }
 
     public static Class<? extends DatabaseObject>[] parseSnapshotTypes(String... snapshotTypes) {
@@ -79,26 +84,24 @@ public class DiffCommandStep extends AbstractCommandStep {
         return returnTypes;
     }
 
-
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-
         InternalSnapshotCommandStep.logUnsupportedDatabase(commandScope.getArgumentValue(REFERENCE_DATABASE_ARG), this.getClass());
 
         DiffResult diffResult = createDiffResult(commandScope);
+        resultsBuilder.addResult(DIFF_RESULT.getName(), diffResult);
 
-        resultsBuilder.addResult("diffResult", diffResult);
+
         Boolean printResult = commandScope.getArgumentValue(PRINT_RESULT);
-        if (printResult == null || ! printResult) {
-            return;
+        if (printResult != null && printResult) {
+            Scope.getCurrentScope().getUI().sendMessage("");
+            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("diff.results"));
+
+            final PrintStream printStream = new PrintStream(resultsBuilder.getOutputStream());
+            new DiffToReport(diffResult, printStream).print();
+            printStream.flush();
         }
-
-        final PrintStream printStream = new PrintStream(resultsBuilder.getOutputStream());
-        new DiffToReport(diffResult, printStream).print();
-        printStream.flush();
-
-        resultsBuilder.addResult("statusCode", 0);
     }
 
     public DiffResult createDiffResult(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
@@ -116,8 +119,9 @@ public class DiffCommandStep extends AbstractCommandStep {
 
     protected DatabaseSnapshot createTargetSnapshot(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
         CatalogAndSchema[] schemas;
+        Database targetDatabase = (Database) commandScope.getDependency(Database.class);
+
         CompareControl compareControl = commandScope.getArgumentValue(COMPARE_CONTROL_ARG);
-        Database targetDatabase = commandScope.getArgumentValue(TARGET_DATABASE_ARG);
         SnapshotControl snapshotControl = commandScope.getArgumentValue(TARGET_SNAPSHOT_CONTROL_ARG);
         Class<? extends DatabaseObject>[] snapshotTypes = commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG);
         SnapshotListener snapshotListener = commandScope.getArgumentValue(SNAPSHOT_LISTENER_ARG);
@@ -157,9 +161,10 @@ public class DiffCommandStep extends AbstractCommandStep {
 
     protected DatabaseSnapshot createReferenceSnapshot(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
         CatalogAndSchema[] schemas;
+        Database targetDatabase = (Database) commandScope.getDependency(Database.class);
+        Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
+
         CompareControl compareControl = commandScope.getArgumentValue(COMPARE_CONTROL_ARG);
-        Database targetDatabase = commandScope.getArgumentValue(TARGET_DATABASE_ARG);
-        Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
         SnapshotControl snapshotControl = commandScope.getArgumentValue(REFERENCE_SNAPSHOT_CONTROL_ARG);
         Class<? extends DatabaseObject>[] snapshotTypes = commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG);
         ObjectChangeFilter objectChangeFilter = commandScope.getArgumentValue(OBJECT_CHANGE_FILTER_ARG);

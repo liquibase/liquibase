@@ -1,7 +1,6 @@
 package liquibase.integration.commandline;
 
 import liquibase.*;
-import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
@@ -20,7 +19,10 @@ import liquibase.exception.*;
 import liquibase.hub.HubConfiguration;
 import liquibase.hub.HubServiceFactory;
 import liquibase.integration.IntegrationDetails;
-import liquibase.license.*;
+import liquibase.license.LicenseInstallResult;
+import liquibase.license.LicenseService;
+import liquibase.license.LicenseServiceFactory;
+import liquibase.license.Location;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
@@ -28,7 +30,10 @@ import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
 import liquibase.resource.*;
 import liquibase.ui.ConsoleUIService;
-import liquibase.util.*;
+import liquibase.util.ISODateFormat;
+import liquibase.util.LiquibaseUtil;
+import liquibase.util.StringUtil;
+import liquibase.util.SystemUtil;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -1468,15 +1473,14 @@ public class Main {
         }
         LOG.fine("Liquibase Hub Mode:     " + HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
 
-        final ResourceAccessor fileOpener;
-        if (Main.runningFromNewCli) {
-            fileOpener = Scope.getCurrentScope().getResourceAccessor();
-        } else {
-            fileOpener = new CompositeResourceAccessor(
-                    new DirectoryResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
-                    new ClassLoaderResourceAccessor(classLoader)
-            );
+        final ResourceAccessor fileOpener = this.getFileOpenerResourceAccessor();
+
+        if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
+            this.runUsingCommandFramework();
+            return;
         }
+
+        // TODO START: REMOVE WHEN MIGRATING TO COMMAND FRAMEWORK
 
         Database database = null;
         if (dbConnectionNeeded(command) && this.url != null) {
@@ -1493,36 +1497,7 @@ public class Main {
             }
         }
 
-        if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
-            if (commandParams.contains("--help")) {
-                outputStream.println("liquibase diff" +
-                        "\n" +
-                        "          Outputs a description of differences.  If you have a Liquibase Pro key, you can output the differences as JSON using the --format=JSON option\n");
-                System.exit(0);
-            }
-            if (isFormattedDiff()) {
-                CommandScope liquibaseCommand = new CommandScope("internalFormattedDiff");
-
-                CommandScope diffCommand = CommandLineUtils.createDiffCommand(
-                        createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                        database,
-                        StringUtil.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
-
-                liquibaseCommand.addArgumentValue("format", getCommandParam(OPTIONS.FORMAT, "JSON").toUpperCase());
-                liquibaseCommand.addArgumentValue("diffCommand", diffCommand);
-                liquibaseCommand.setOutput(getOutputStream());
-
-                liquibaseCommand.execute();
-            } else {
-                CommandLineUtils.doDiff(
-                        createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                        database,
-                        StringUtil.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
-            }
-            return;
-        }
-
-            try {
+        try {
             if ((excludeObjects != null) && (includeObjects != null)) {
                 throw new UnexpectedLiquibaseException(
                         String.format(coreBundle.getString("cannot.specify.both"),
@@ -1582,6 +1557,9 @@ public class Main {
                         StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataOutputDirectory),
                         getDiffOutputControl(finalSchemaComparisons, objectChangeFilter), overwriteOutputFileBool);
                 return;
+
+                // TODO END: REMOVE WHEN MIGRATING TO COMMAND FRAMEWORK
+
             } else if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {
                 CommandScope snapshotCommand = new CommandScope("internalSnapshot");
                 snapshotCommand
@@ -1977,6 +1955,102 @@ public class Main {
                     coreBundle.getString("problem.closing.connection"), e);
             }
         }
+    }
+
+    private void runUsingCommandFramework() throws CommandLineParsingException, CommandExecutionException, IOException, DatabaseException {
+        if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
+            runDiffCommandStep();
+        }
+    }
+
+    private void runDiffCommandStep() throws CommandLineParsingException, CommandExecutionException, IOException {
+        CommandScope diffCommand = new CommandScope("diff")
+            .addArgumentValue(OPTIONS.FORMAT, getCommandParam(OPTIONS.FORMAT, "JSON").toUpperCase())
+            .setOutput(getOutputStream())
+            .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile);
+
+        this.setPreCommandStepsArgumentsToCommand(diffCommand);
+        this.setDatabaseArgumentsToCommand(diffCommand);
+        this.setReferenceDatabaseArgumentsToCommand(diffCommand);
+
+        diffCommand.execute();
+    }
+
+    private void setDatabaseArgumentsToCommand(CommandScope command) {
+        command.addArgumentValue(DbUrlConnectionCommandStep.DEFAULT_SCHEMA_NAME_ARG, defaultSchemaName)
+                .addArgumentValue(DbUrlConnectionCommandStep.DEFAULT_CATALOG_NAME_ARG, defaultCatalogName)
+                .addArgumentValue(DbUrlConnectionCommandStep.DRIVER_ARG, driver)
+                .addArgumentValue(DbUrlConnectionCommandStep.DRIVER_PROPERTIES_FILE_ARG, driverPropertiesFile)
+                .addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, username)
+                .addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, password)
+                .addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, url);
+    }
+
+    private void setPreCommandStepsArgumentsToCommand(CommandScope command) {
+        command.addArgumentValue(PreCompareCommandStep.EXCLUDE_OBJECTS_ARG, excludeObjects)
+                .addArgumentValue(PreCompareCommandStep.INCLUDE_OBJECTS_ARG, includeObjects)
+                .addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, diffTypes)
+                .addArgumentValue(PreCompareCommandStep.SCHEMAS_ARG, schemas)
+                .addArgumentValue(PreCompareCommandStep.OUTPUT_SCHEMAS_ARG, outputSchemasAs)
+                .addArgumentValue(PreCompareCommandStep.REFERENCE_SCHEMAS_ARG, referenceSchemas);
+    }
+
+    private void setReferenceDatabaseArgumentsToCommand(CommandScope command) throws CommandLineParsingException {
+        String refDriver = referenceDriver;
+        String refUrl = referenceUrl;
+        String refUsername = referenceUsername;
+        String refPassword = referencePassword;
+        String refSchemaName = this.referenceDefaultSchemaName;
+        String refCatalogName = this.referenceDefaultCatalogName;
+
+        for (String param : commandParams) {
+            String[] splitArg = splitArg(param);
+
+            String attributeName = splitArg[0];
+            String value = splitArg[1];
+            if (OPTIONS.REFERENCE_DRIVER.equalsIgnoreCase(attributeName)) {
+                refDriver = value;
+            } else if (OPTIONS.REFERENCE_URL.equalsIgnoreCase(attributeName)) {
+                refUrl = value;
+            } else if (OPTIONS.REFERENCE_USERNAME.equalsIgnoreCase(attributeName)) {
+                refUsername = value;
+            } else if (OPTIONS.REFERENCE_PASSWORD.equalsIgnoreCase(attributeName)) {
+                refPassword = value;
+            } else if (OPTIONS.REFERENCE_DEFAULT_CATALOG_NAME.equalsIgnoreCase(attributeName)) {
+                refCatalogName = value;
+            } else if (OPTIONS.REFERENCE_DEFAULT_SCHEMA_NAME.equalsIgnoreCase(attributeName)) {
+                refSchemaName = value;
+            }
+//            } else if (OPTIONS.DATA_OUTPUT_DIRECTORY.equalsIgnoreCase(attributeName)) {
+//                dataOutputDirectory = value;
+//            }
+        }
+
+        if (refUrl == null) {
+            throw new CommandLineParsingException(
+                    String.format(coreBundle.getString("option.required"), "--referenceUrl"));
+        }
+
+        command.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DEFAULT_SCHEMA_NAME_ARG, refSchemaName)
+                .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_URL_ARG, refUrl)
+                .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DEFAULT_CATALOG_NAME_ARG, refCatalogName)
+                .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DRIVER_ARG, refDriver)
+                .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DRIVER_PROPERTIES_FILE_ARG, null)
+                .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_USERNAME_ARG, refUsername)
+                .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_PASSWORD_ARG, refPassword);
+    }
+
+    private ResourceAccessor getFileOpenerResourceAccessor() throws FileNotFoundException {
+        ResourceAccessor fileOpener;
+        if (Main.runningFromNewCli) {
+            fileOpener = Scope.getCurrentScope().getResourceAccessor();
+        } else {
+            fileOpener = new CompositeResourceAccessor(
+                    new DirectoryResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
+                    new ClassLoaderResourceAccessor(classLoader)
+            );
+        }
+        return fileOpener;
     }
 
     private DiffOutputControl getDiffOutputControl(CompareControl.SchemaComparison[] finalSchemaComparisons, ObjectChangeFilter objectChangeFilter) {

@@ -1,10 +1,8 @@
 package liquibase.command.core;
 
-import liquibase.change.CheckSum;
 import liquibase.command.*;
 import liquibase.command.providers.ReferenceDatabase;
 import liquibase.database.Database;
-import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
@@ -16,7 +14,7 @@ import java.util.List;
 
 public class PreCompareCommandStep extends AbstractCommandStep {
 
-    public static final String[] COMMAND_NAME = {"preComparecommandStep"};
+    protected static final String[] COMMAND_NAME = {"preCompareCommandStep"};
     public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
@@ -24,8 +22,6 @@ public class PreCompareCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<String> REFERENCE_SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> OUTPUT_SCHEMAS_ARG;
-
-    public static final CommandResultDefinition<CheckSum> DIFF_RESULT;
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -38,12 +34,10 @@ public class PreCompareCommandStep extends AbstractCommandStep {
         DIFF_TYPES_ARG = builder.argument("diffTypes", String.class)
                 .description("Types of objects to compare").build();
 
-        REFERENCE_SCHEMAS_ARG = builder.argument("referenceSchemas", String.class).hidden() //FIXME keep hidden?
+        REFERENCE_SCHEMAS_ARG = builder.argument("referenceSchemas", String.class)
                 .description("Schemas names on reference database to use in diff. This is a CSV list.").build();
-        OUTPUT_SCHEMAS_ARG = builder.argument("outputSchemas", String.class).hidden() //FIXME keep hidden?
+        OUTPUT_SCHEMAS_ARG = builder.argument("outputSchemas", String.class)
                 .description("Output schemas names. This is a CSV list.").build();
-
-        DIFF_RESULT = builder.result("diffResult", CheckSum.class).description("Databases diff result").build();
     }
 
     @Override
@@ -65,20 +59,14 @@ public class PreCompareCommandStep extends AbstractCommandStep {
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database targetDatabase = (Database) commandScope.getDependency(Database.class);
-        Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
-
         ObjectChangeFilter objectChangeFilter = this.getObjectChangeFilter(commandScope);
         CompareControl compareControl = this.getcompareControl(commandScope, targetDatabase);
         Class<? extends DatabaseObject>[] snapshotTypes = DiffCommandStep.parseSnapshotTypes(commandScope.getArgumentValue(DIFF_TYPES_ARG));
 
         commandScope
-                .addArgumentValue(DiffCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
-                .addArgumentValue(DiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
                 .addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, compareControl)
                 .addArgumentValue(DiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
                 .addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, snapshotTypes);
-
-        //FIXME now how to run internal diff command step?
     }
 
     private ObjectChangeFilter getObjectChangeFilter(CommandScope commandScope) {
@@ -118,19 +106,10 @@ public class PreCompareCommandStep extends AbstractCommandStep {
         return new CompareControl(finalSchemaComparisons, commandScope.getArgumentValue(DIFF_TYPES_ARG));
     }
 
-    private void sendResults(DiffResult result) {
-
-
-    }
-
-//    @Override
-//    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-//        return collectArguments(commandScope, Arrays.asList("format", EXCLUDE_OBJECTS_ARG.getName(), INCLUDE_OBJECTS_ARG.getName()), null);
-//    }
-
-
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        commandDefinition.setShortDescription("Compare two databases");
+        if (commandDefinition.getPipeline().size() == 1) {
+            commandDefinition.setInternal(true);
+        }
     }
 }
