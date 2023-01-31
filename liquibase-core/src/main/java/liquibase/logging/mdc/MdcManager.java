@@ -11,10 +11,15 @@ public interface MdcManager extends Plugin {
     /**
      * Puts a context value (the <code>value</code> parameter) as identified with the <code>key</code> parameter into
      * the MDC. The caller is responsible for cleaning up this entry at an appropriate time.
-     * do so.
      */
     @Beta
-    MdcObject put(String key, Object value);
+    MdcObject put(String key, String value);
+
+    /**
+     * Puts a context value (the <code>values</code> parameter) as identified with the <code>key</code> parameter into
+     * the MDC. The caller is responsible for cleaning up this entry at an appropriate time.
+     */
+    MdcObject put(String key, Map<String, String> values);
 
     /**
      * Removes the context value identified by the <code>key</code> parameter.

@@ -10,8 +10,13 @@ import java.util.Map;
  */
 public class NoOpMdcManager implements MdcManager {
     @Override
-    public MdcObject put(String key, Object value) {
+    public MdcObject put(String key, String value) {
         return new MdcObject(key, value);
+    }
+
+    @Override
+    public MdcObject put(String key, Map<String, String> values) {
+        return new MdcObject(key, values);
     }
 
     @Override

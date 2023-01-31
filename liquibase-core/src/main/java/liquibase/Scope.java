@@ -399,7 +399,7 @@ public class Scope {
      * Add a key value pair to the MDC using the MDC manager. This key value pair will be automatically removed from the
      * MDC when this scope exits.
      */
-    public MdcObject addMdcValue(String key, Object value) {
+    public MdcObject addMdcValue(String key, String value) {
         return addMdcValue(key, value, true);
     }
 
@@ -409,7 +409,36 @@ public class Scope {
      *                             scope exits. If there is not a demonstrable reason for setting this parameter to false
      *                             then it should be set to true.
      */
-    public MdcObject addMdcValue(String key, Object value, boolean removeWhenScopeExits) {
+    public MdcObject addMdcValue(String key, String value, boolean removeWhenScopeExits) {
+        MdcObject mdcObject = getMdcManager().put(key, value);
+        if (removeWhenScopeExits) {
+            Scope currentScope = getCurrentScope();
+            String scopeId = currentScope.scopeId;
+            if (addedMdcEntries.containsKey(scopeId)) {
+                addedMdcEntries.get(scopeId).add(mdcObject);
+            } else {
+                addedMdcEntries.put(scopeId, new ArrayList<>(Collections.singletonList(mdcObject)));
+            }
+        }
+
+        return mdcObject;
+    }
+
+    /**
+     * Add a key value pair to the MDC using the MDC manager. This key value pair will be automatically removed from the
+     * MDC when this scope exits.
+     */
+    public MdcObject addMdcValue(String key, Map<String, String> value) {
+        return addMdcValue(key, value, true);
+    }
+
+    /**
+     * Add a key value pair to the MDC using the MDC manager.
+     * @param removeWhenScopeExits if true, this key value pair will be automatically removed from the MDC when this
+     *                             scope exits. If there is not a demonstrable reason for setting this parameter to false
+     *                             then it should be set to true.
+     */
+    public MdcObject addMdcValue(String key, Map<String, String> value, boolean removeWhenScopeExits) {
         MdcObject mdcObject = getMdcManager().put(key, value);
         if (removeWhenScopeExits) {
             Scope currentScope = getCurrentScope();

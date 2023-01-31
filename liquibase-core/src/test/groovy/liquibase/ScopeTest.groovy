@@ -129,9 +129,15 @@ class ScopeTest extends Specification {
         private Map<String, Object> values = new ConcurrentHashMap<>()
 
         @Override
-        MdcObject put(String key, Object value) {
+        MdcObject put(String key, String value) {
             values.put(key, value)
             return new MdcObject(key, value)
+        }
+
+        @Override
+        MdcObject put(String key, Map<String, String> values) {
+            this.values.put(key, values)
+            return new MdcObject(key, values)
         }
 
         @Override
