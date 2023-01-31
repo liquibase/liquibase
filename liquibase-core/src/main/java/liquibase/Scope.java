@@ -411,6 +411,12 @@ public class Scope {
      */
     public MdcObject addMdcValue(String key, String value, boolean removeWhenScopeExits) {
         MdcObject mdcObject = getMdcManager().put(key, value);
+        removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
+
+        return mdcObject;
+    }
+
+    private void removeMdcObjectWhenScopeExits(boolean removeWhenScopeExits, MdcObject mdcObject) {
         if (removeWhenScopeExits) {
             Scope currentScope = getCurrentScope();
             String scopeId = currentScope.scopeId;
@@ -420,8 +426,6 @@ public class Scope {
                 addedMdcEntries.put(scopeId, new ArrayList<>(Collections.singletonList(mdcObject)));
             }
         }
-
-        return mdcObject;
     }
 
     /**
@@ -440,15 +444,7 @@ public class Scope {
      */
     public MdcObject addMdcValue(String key, Map<String, String> value, boolean removeWhenScopeExits) {
         MdcObject mdcObject = getMdcManager().put(key, value);
-        if (removeWhenScopeExits) {
-            Scope currentScope = getCurrentScope();
-            String scopeId = currentScope.scopeId;
-            if (addedMdcEntries.containsKey(scopeId)) {
-                addedMdcEntries.get(scopeId).add(mdcObject);
-            } else {
-                addedMdcEntries.put(scopeId, new ArrayList<>(Collections.singletonList(mdcObject)));
-            }
-        }
+        removeMdcObjectWhenScopeExits(removeWhenScopeExits, mdcObject);
 
         return mdcObject;
     }
