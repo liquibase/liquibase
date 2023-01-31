@@ -32,7 +32,7 @@ public class DiffCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<SnapshotControl> TARGET_SNAPSHOT_CONTROL_ARG;
     public static final CommandArgumentDefinition<ObjectChangeFilter> OBJECT_CHANGE_FILTER_ARG;
     public static final CommandArgumentDefinition<CompareControl> COMPARE_CONTROL_ARG;
-    public static final CommandArgumentDefinition<Boolean> PRINT_RESULT;
+    public static final CommandArgumentDefinition<String> FORMAT_ARG;
     public static final CommandResultDefinition<DiffResult> DIFF_RESULT;
 
     static {
@@ -43,8 +43,8 @@ public class DiffCommandStep extends AbstractCommandStep {
         TARGET_SNAPSHOT_CONTROL_ARG = builder.argument("targetSnapshotControl", SnapshotControl.class).hidden().build();
         OBJECT_CHANGE_FILTER_ARG = builder.argument("objectChangeFilter", ObjectChangeFilter.class).hidden().build();
         COMPARE_CONTROL_ARG = builder.argument("compareControl", CompareControl.class).hidden().build();
+        FORMAT_ARG = builder.argument("format", String.class).description("Output format. Default: TXT").hidden().build();
 
-        PRINT_RESULT = builder.argument("printResult", Boolean.class).defaultValue(true).hidden().build();
         DIFF_RESULT = builder.result("diffResult", DiffResult.class).description("Databases diff result").build();
     }
 
@@ -87,8 +87,8 @@ public class DiffCommandStep extends AbstractCommandStep {
         DiffResult diffResult = createDiffResult(commandScope);
         resultsBuilder.addResult(DIFF_RESULT.getName(), diffResult);
 
-        Boolean printResult = commandScope.getArgumentValue(PRINT_RESULT);
-        if (printResult != null && printResult) {
+        String printResult = commandScope.getArgumentValue(FORMAT_ARG);
+        if (printResult == null || printResult.equalsIgnoreCase("TXT")) {
             Scope.getCurrentScope().getUI().sendMessage("");
             Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("diff.results"));
 
