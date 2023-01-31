@@ -1965,9 +1965,8 @@ public class Main {
 
     private void runDiffCommandStep() throws CommandLineParsingException, CommandExecutionException, IOException {
         CommandScope diffCommand = new CommandScope("diff")
-            .addArgumentValue(OPTIONS.FORMAT, getCommandParam(OPTIONS.FORMAT, "JSON").toUpperCase())
-            .setOutput(getOutputStream())
-            .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile);
+            .addArgumentValue(DiffCommandStep.PRINT_RESULT, !getCommandParam(OPTIONS.FORMAT, "TXT").equals("JSON"))
+            .setOutput(getOutputStream());
 
         this.setPreCommandStepsArgumentsToCommand(diffCommand);
         this.setDatabaseArgumentsToCommand(diffCommand);

@@ -87,7 +87,6 @@ public class DiffCommandStep extends AbstractCommandStep {
         DiffResult diffResult = createDiffResult(commandScope);
         resultsBuilder.addResult(DIFF_RESULT.getName(), diffResult);
 
-
         Boolean printResult = commandScope.getArgumentValue(PRINT_RESULT);
         if (printResult != null && printResult) {
             Scope.getCurrentScope().getUI().sendMessage("");
