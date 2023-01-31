@@ -159,8 +159,8 @@ public class CommandLineUtils {
         CommandScope diffCommand = new CommandScope("internalDiff");
 
         diffCommand
-                .addArgumentValue(DiffCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
-                .addArgumentValue(DiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
+                .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
                 .addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
                 .addArgumentValue(DiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
                 .addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))

@@ -101,7 +101,8 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
 
     @Override
     protected DatabaseSnapshot createTargetSnapshot(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
-        SnapshotControl snapshotControl = new SnapshotControl(commandScope.getArgumentValue(REFERENCE_DATABASE_ARG), commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG));
+        Database database = (Database) commandScope.getDependency(Database.class);
+        SnapshotControl snapshotControl = new SnapshotControl(database, commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG));
         return SnapshotGeneratorFactory.getInstance().createSnapshot(commandScope.getArgumentValue(COMPARE_CONTROL_ARG).getSchemas(CompareControl.DatabaseRole.REFERENCE), null, snapshotControl);
     }
 }

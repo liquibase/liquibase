@@ -39,8 +39,8 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
         InternalSnapshotCommandStep.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());
 
         final CommandScope commandScope = new CommandScope("generateChangeLogInternal");
-        commandScope.addArgumentValue(InternalGenerateChangelogCommandStep.REFERENCE_DATABASE_ARG, getReferenceDatabase());
-        commandScope.addArgumentValue(InternalGenerateChangelogCommandStep.TARGET_DATABASE_ARG, getTargetDatabase());
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, getReferenceDatabase());
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getTargetDatabase());
         commandScope.addArgumentValue(InternalGenerateChangelogCommandStep.SNAPSHOT_TYPES_ARG, getSnapshotTypes());
         commandScope.addArgumentValue(InternalGenerateChangelogCommandStep.SNAPSHOT_LISTENER_ARG, getSnapshotListener());
         commandScope.addArgumentValue(InternalGenerateChangelogCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, getReferenceSnapshotControl());

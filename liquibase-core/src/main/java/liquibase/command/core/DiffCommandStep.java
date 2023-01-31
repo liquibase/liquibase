@@ -26,8 +26,6 @@ public class DiffCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"diff"};
 
-    public static final CommandArgumentDefinition<Database> REFERENCE_DATABASE_ARG;
-    public static final CommandArgumentDefinition<Database> TARGET_DATABASE_ARG;
     public static final CommandArgumentDefinition<Class[]> SNAPSHOT_TYPES_ARG;
     public static final CommandArgumentDefinition<SnapshotListener> SNAPSHOT_LISTENER_ARG;
     public static final CommandArgumentDefinition<SnapshotControl> REFERENCE_SNAPSHOT_CONTROL_ARG;
@@ -35,13 +33,10 @@ public class DiffCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<ObjectChangeFilter> OBJECT_CHANGE_FILTER_ARG;
     public static final CommandArgumentDefinition<CompareControl> COMPARE_CONTROL_ARG;
     public static final CommandArgumentDefinition<Boolean> PRINT_RESULT;
-
     public static final CommandResultDefinition<DiffResult> DIFF_RESULT;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        REFERENCE_DATABASE_ARG = builder.argument("referenceDatabase", Database.class).hidden().build();
-        TARGET_DATABASE_ARG = builder.argument("targetDatabase", Database.class).hidden().build();
         SNAPSHOT_TYPES_ARG = builder.argument("snapshotTypes", Class[].class).hidden().build();
         SNAPSHOT_LISTENER_ARG = builder.argument("snapshotListener", SnapshotListener.class).hidden().build();
         REFERENCE_SNAPSHOT_CONTROL_ARG = builder.argument("referenceSnapshotControl", SnapshotControl.class).hidden().build();
@@ -87,7 +82,7 @@ public class DiffCommandStep extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        InternalSnapshotCommandStep.logUnsupportedDatabase(commandScope.getArgumentValue(REFERENCE_DATABASE_ARG), this.getClass());
+        InternalSnapshotCommandStep.logUnsupportedDatabase((Database) commandScope.getDependency(Database.class), this.getClass());
 
         DiffResult diffResult = createDiffResult(commandScope);
         resultsBuilder.addResult(DIFF_RESULT.getName(), diffResult);

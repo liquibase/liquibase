@@ -140,8 +140,8 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
     @Override
     public CommandResult run() throws Exception {
         final CommandScope commandScope = new CommandScope("diffInternal");
-        commandScope.addArgumentValue(DiffCommandStep.REFERENCE_DATABASE_ARG, this.referenceDatabase);
-        commandScope.addArgumentValue(DiffCommandStep.TARGET_DATABASE_ARG, this.targetDatabase);
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, this.referenceDatabase);
+        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, this.targetDatabase);
         commandScope.addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, this.snapshotTypes);
         commandScope.addArgumentValue(DiffCommandStep.SNAPSHOT_LISTENER_ARG, this.snapshotListener);
         commandScope.addArgumentValue(DiffCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, this.referenceSnapshotControl);
