@@ -9,6 +9,7 @@ import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
 public class MSSQLTestSystem extends DatabaseTestSystem {
+    private String collation;
 
     public MSSQLTestSystem() {
         super("mssql");
@@ -46,7 +47,7 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
         return new String[]{
                 "CREATE LOGIN [" + getUsername() + "] with password=N'" + getPassword() + "', CHECK_EXPIRATION=OFF",
 
-                "CREATE DATABASE " + getCatalog(),
+                "CREATE DATABASE " + getCatalog() + (collation == null ? "" : " COLLATE " + collation ),
                 "EXEC lbcat..sp_addsrvrolemember @loginame = N'" + getUsername() + "', @rolename = N'sysadmin'",
 
                 "CREATE DATABASE " + getAltCatalog(),
@@ -63,5 +64,13 @@ public class MSSQLTestSystem extends DatabaseTestSystem {
                 "ALTER DATABASE [" + getAltCatalog() + "] ADD FILE ( NAME = N'" + getAltTablespace() + "', FILENAME = N'/tmp/" + getAltTablespace() + ".ndf' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [" + getAltTablespace() + "]",
                 "CREATE SCHEMA [" + getAltSchema() + "] AUTHORIZATION [dbo]"
         };
+    }
+
+    public String getCollation() {
+        return collation;
+    }
+
+    public void setCollation(String collation) {
+        this.collation = collation;
     }
 }
