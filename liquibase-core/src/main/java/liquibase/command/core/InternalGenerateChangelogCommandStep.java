@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.command.*;
+import liquibase.command.providers.ReferenceDatabase;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
@@ -61,7 +62,7 @@ public class InternalGenerateChangelogCommandStep extends InternalDiffChangelogC
             Scope.getCurrentScope().getLog(getClass()).info("\n" + INFO_MESSAGE + "\n");
         }
 
-        final Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
+        final Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
         referenceDatabase.setOutputDefaultSchema(commandScope.getArgumentValue(DIFF_OUTPUT_CONTROL_ARG).getIncludeSchema());
 
         InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());

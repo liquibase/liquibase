@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.command.*;
+import liquibase.command.providers.ReferenceDatabase;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
@@ -41,7 +42,7 @@ public class InternalDiffChangelogCommandStep extends DiffCommandStep {
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
 
-        Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
+        Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
         referenceDatabase.setOutputDefaultSchema(commandScope.getArgumentValue(DIFF_OUTPUT_CONTROL_ARG).getIncludeSchema());
 
         String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
